@@ -1,0 +1,23 @@
+{{- template "header" }}
+# SIGs
+
+Most community activities are organized as special interest groups (sigs) and community meetings.
+Sigs follow these guidelines, although each of these groups may operate differently, depending on their needs and workflow.
+Each group's material is in its subdirectory in this project.
+
+
+### Master SIG List
+
+| Name | Label | Chairs | Contact | Meetings |
+|------|-------|--------|---------|----------|
+{{- range .Sigs}}
+|[{{.Name}}]({{.Dir}}/README.md)|{{.Label}}|{{range .Leadership.Chairs}}* [{{.Name}}](https://github.com/{{.GitHub}}){{if .Company}}, {{.Company}}{{end}}<br>{{end}}|* [Slack](https://paddlepaddle.slack.com/messages/{{.Contact.Slack}})<br>* [Mailing List]({{.Contact.MailingList}})|{{- range .Meetings -}}
+  * {{.Description}}: [{{.Day}}s at {{.Time}} {{.TZ}} ({{.Frequency}})]({{.URL}})<br>
+{{- end -}}
+{{- range .Subprojects -}}
+  {{ $name := .Name }}
+  {{- range .Meetings -}}
+    * ({{ $name }}) {{.Description}}: [{{.Day}}s at {{.Time}} {{.TZ}} ({{.Frequency}})]({{.URL}})<br>
+  {{- end -}}
+{{- end -}}
+{{- end }}
