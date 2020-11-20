@@ -6,7 +6,7 @@ Welcome to the PaddlePaddle community contribution guide. We are very pleased to
 
 We have complete documentation on how to start contributing here:
 
--[kubernetes contributor guide]() - Key contributor documentation
+-[PaddlePaddle contributor guide]() - Key contributor documentation
 
 ## Mentoring Program
 
