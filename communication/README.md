@@ -1,6 +1,6 @@
 # Communication
 
-All the communication in PaddlePaddle community should follow [code of conduct]().
+All the communication in PaddlePaddle community should follow [code of conduct](/CODE_OF_CONDUCT.md).
 
 ## Community Groups
 
@@ -17,7 +17,7 @@ Followings are the ways to communicate with community groups:
 
 ### Slack
 
-PaddlePaddle developers spread across slack channels, you can find specific slack channel on [sig-list]().
+PaddlePaddle developers spread across slack channels, you can find specific slack channel on [sig-list](/sigs.yaml).
 
 ### Mailing Lists
 
@@ -25,7 +25,7 @@ PaddlePaddle SIGs provide mailing list for developers to subscribe.
 
 ### Calendar & Meetings
 
-PaddlePaddle use zoom/baidu meeting/tencent meeting for community meeting, you can find specific meeting calendar on [sig-list]().
+PaddlePaddle use zoom/baidu meeting/tencent meeting for community meeting, you can find specific meeting calendar on [sig-list](/sigs.yaml).
 
 
 ## Social Media & Blogs
@@ -42,7 +42,7 @@ PaddlePaddle use zoom/baidu meeting/tencent meeting for community meeting, you c
 
 ### Issues & Troubleshooting
 
-For questions about installing, running, or troubleshooting PaddlePaddle, start with the [troubleshooting guide](). If that doesn't solve your problem, file an issue.
+For questions about installing, running, or troubleshooting PaddlePaddle, please file an issue.
 
 ### Conferences, Meetups, Summits, and Face to Face Meetings
 

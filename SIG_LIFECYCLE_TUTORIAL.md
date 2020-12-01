@@ -1,21 +1,21 @@
 # Abstract
 
-This document covers all information about the creation and retirement ("lifecycle") of special interests groups or user groups in PaddlePaddle project. General project governance information can be found in [governance.md]().
+This document covers all information about the creation and retirement ("lifecycle") of special interests groups or user groups in PaddlePaddle project. General project governance information can be found in [governance.md](/GOVERNANCE.md).
 
 
 ## Creation
 
 ### Prerequisite for Creating SIG
 
-- Read [governance.md]().
-- Ensure that all chair and leadership roles of SIG are [PaddlePaddle org members]().
+- Read [governance.md](/GOVERNANCE.md).
+- Ensure that all chair and leadership roles of SIG are PaddlePaddle org members.
 - Email to TOC to determine the scope of the SIG and obtain approval.
 - Check out the list below for the processes and techniques you need to do in this process. It's better to collect this information in advance so that you can start the process smoothly.
-- Propose in accordance with the [sig charter procedure]() and approved by the Charter.
+- Propose in accordance with the sig charter procedure and approved by the Charter.
 
 ### GitHub Related Process
 
-- Add related rows in [sigs.yaml]() and use the auto generator, this will create the readme file and owners for the new directory in PaddlePaddle community.
+- Add related rows in [sigs.yaml](/sigs.yaml) and use the auto generator, this will create the readme file and owners for the new directory in PaddlePaddle community.
 
 - You need to have:
 
