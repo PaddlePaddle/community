@@ -1,6 +1,6 @@
 #TBA
-sigs:
-  - dir: sig-detection
+ppsigs:
+  - dir: ppsig-detection
     name: Paddle Detection
     mission_statement: >
       
@@ -33,7 +33,7 @@ sigs:
         owners:
           - 
           - 
-  - dir: sig-gan
+  - dir: ppsig-gan
       name: PaddleGAN
       mission_statement: >
         
@@ -66,7 +66,7 @@ sigs:
           owners:
             - 
             - 
-  - dir: sig-hub
+  - dir: ppsig-hub
       name: Paddle Hub
       mission_statement: >
         
@@ -99,7 +99,7 @@ sigs:
           owners:
             - 
             - 
-  - dir: sig-lite
+  - dir: ppsig-lite
       name: Paddle Lite
       mission_statement: >
         
@@ -132,7 +132,7 @@ sigs:
           owners:
             - 
             - 
-  - dir: sig-notebook
+  - dir: ppsig-notebook
       name: Paddle Notebook
       mission_statement: >
         
@@ -165,7 +165,7 @@ sigs:
           owners:
             - 
             - 
-  - dir: sig-ocr
+  - dir: ppsig-ocr
       name: Paddle OCR
       mission_statement: >
         
@@ -198,7 +198,7 @@ sigs:
           owners:
             - 
             - 
-  - dir: sig-serving
+  - dir: ppsig-serving
     name: Serving
     mission_statement: >
       
@@ -224,28 +224,28 @@ sigs:
       slack: 
       mailing_list: 
       teams:
-        - name: sig-serving-benchmark
+        - name: ppsig-serving-benchmark
           description: 
-        - name: sig-serving-dashboard
+        - name: ppsig-serving-dashboard
           description: 
-        - name: sig-serving-documentation
+        - name: ppsig-serving-documentation
           description: 
-        - name: sig-serving-models
+        - name: ppsig-serving-models
           description: 
     subprojects:
-      - name: sig-serving-benchmark
+      - name: ppsig-serving-benchmark
         owners:
           - 
           - 
-      - name: sig-serving-dashboard
+      - name: ppsig-serving-dashboard
         owners:
           - 
           - 
-      - name: sig-serving-documentation
+      - name: ppsig-serving-documentation
         owners:
           - 
           - 
-      - name: sig-serving-models
+      - name: ppsig-serving-models
         owners:
           - 
           - 

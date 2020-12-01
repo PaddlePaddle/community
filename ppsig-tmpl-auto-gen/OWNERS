@@ -2,4 +2,4 @@ approvers:
   - xxx
   - xxx
 labels:
-  - sig/xxx
+  - ppsig/xxx
