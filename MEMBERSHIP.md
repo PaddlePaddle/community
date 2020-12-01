@@ -1,10 +1,10 @@
 # Membership
 
-## SIG Membership
+## PaddlePaddle SIG Membership
 
-This document outlines the responsibilities of the contributor role in the organization. The project is subdivided into sub projects according to sig. Most roles are bound to these subprojects.
+This document outlines the responsibilities of the contributor role in the organization. The project is subdivided into sub projects according to PPSIG. Most roles are bound to these subprojects.
 
-Here we provide some baseline of roles' responsibilities and requirements, it varies from sig to sig.
+Here we provide some baseline of roles' responsibilities and requirements, it varies from PPSIG to PPSIG.
 
 | Roles | Responsibilities | Requirements |
 | -----| ---------------- | ------------ |
@@ -15,7 +15,7 @@ Here we provide some baseline of roles' responsibilities and requirements, it va
 
 ### Member
 
-Members are continuous and active contributors to the community. They can assign problems and PR to them, participate in sig through GitHub team, and automatically run pre commit tests for their pr. It is hoped that members will continue to make positive contributions to the community.
+Members are continuous and active contributors to the community. They can assign problems and PR to them, participate in PPSIG through GitHub team, and automatically run pre commit tests for their pr. It is hoped that members will continue to make positive contributions to the community.
 
 ### Reviewer
 
@@ -27,7 +27,7 @@ Code reviewers are able to review and approve code contributions. Code review fo
 
 ### Subproject Owner
 
-Note: This is a high-level, high-level description of roles. The responsibilities of the subproject owner role and the details of the related processes must be defined for a single sig or subproject.
+Note: This is a high-level, high-level description of roles. The responsibilities of the subproject owner role and the details of the related processes must be defined for a single PPSIG or subproject.
 The sub project owner is the technical license for the sub project of the PaddlePaddle project. They must show good judgment and responsibility for the health of the subprojects. The subproject owner must set the technical direction and make or approve design decisions for the subproject, either directly or by delegating these responsibilities.
 
 ## Org Membership

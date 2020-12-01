@@ -4,7 +4,7 @@ All the communication in PaddlePaddle community should follow [code of conduct](
 
 ## Community Groups
 
-Communication channels may include mailing lists, slack channels, zoom meetings, meeting agenda/notes, and can be found on their READMEs and on the community groups/SIGs page.
+Communication channels may include mailing lists, slack channels, zoom meetings, meeting agenda/notes, and can be found on their READMEs and on the community groups/PPSIGs page.
 
 Followings are the ways to communicate with community groups:
 
@@ -12,12 +12,11 @@ Followings are the ways to communicate with community groups:
 * Weekly/Bi-weekly community meeting over zoom/baidu meeting/tencent meeting.
 * Intro sessions at online/offline conference or recordings on Bilibili PaddlePaddle channel.
 
-
 ## Discussions
 
 ### Slack
 
-PaddlePaddle developers spread across slack channels, you can find specific slack channel on [sig-list](/sigs.yaml).
+PaddlePaddle developers spread across slack channels, you can find specific slack channel on [ppsig-list](/ppsigs.yaml).
 
 ### Mailing Lists
 
@@ -25,7 +24,7 @@ PaddlePaddle SIGs provide mailing list for developers to subscribe.
 
 ### Calendar & Meetings
 
-PaddlePaddle use zoom/baidu meeting/tencent meeting for community meeting, you can find specific meeting calendar on [sig-list](/sigs.yaml).
+PaddlePaddle use zoom/baidu meeting/tencent meeting for community meeting, you can find specific meeting calendar on [ppsig-list](/ppsigs.yaml).
 
 
 ## Social Media & Blogs
