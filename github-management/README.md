@@ -23,8 +23,8 @@ Create a broader base than the existing PaddlePaddle projects so that the new pr
 
 The following organizations are currently known to be part of PaddlePaddle
 
-### Active Org
+### Active Org (TBA)
 
 | Name | Description |
 | :--: | :---------: |
-| [PaddlePaddle]() | Core |
+| PaddlePaddle | Core |

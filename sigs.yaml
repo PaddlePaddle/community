@@ -1,250 +1,251 @@
+#TBA
 sigs:
   - dir: sig-detection
     name: Paddle Detection
     mission_statement: >
-      xxx
+      
 
     charter_link: charter.md
     label: detection
     leadership:
       chairs:
-        - github: xxx
-          name: xxx
+        - github: 
+          name: 
       tech_leads:
-        - github: xxx
-          name: xxx
+        - github: 
+          name: 
     meetings:
       - description: Paddle Detection Weekly Meeting
-        day: xxx
-        time: xxx
-        frequency: xxx
-        url: xxx
-        archive_url: xxx
-        recordings_url: xxx
+        day: 
+        time: 
+        frequency: 
+        url: 
+        archive_url: 
+        recordings_url: 
     contact:
-      slack: xxx
-      mailing_list: xxx
+      slack: 
+      mailing_list: 
       teams:
-        - name: xxx
-          description: xxx
+        - name: 
+          description: 
     subprojects:
-      - name: xxx
+      - name: 
         owners:
-          - xxx
-          - xxx
+          - 
+          - 
   - dir: sig-gan
       name: PaddleGAN
       mission_statement: >
-        xxx
+        
 
       charter_link: charter.md
       label: gan
       leadership:
         chairs:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
         tech_leads:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
       meetings:
         - description: Paddle Gan Weekly Meeting
-          day: xxx
-          time: xxx
-          frequency: xxx
-          url: xxx
-          archive_url: xxx
-          recordings_url: xxx
+          day: 
+          time: 
+          frequency: 
+          url: 
+          archive_url: 
+          recordings_url: 
       contact:
-        slack: xxx
-        mailing_list: xxx
+        slack: 
+        mailing_list: 
         teams:
-          - name: xxx
-            description: xxx
+          - name: 
+            description: 
       subprojects:
-        - name: xxx
+        - name: 
           owners:
-            - xxx
-            - xxx
+            - 
+            - 
   - dir: sig-hub
       name: Paddle Hub
       mission_statement: >
-        xxx
+        
 
       charter_link: charter.md
       label: hub
       leadership:
         chairs:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
         tech_leads:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
       meetings:
         - description: PaddleHub Weekly Meeting
-          day: xxx
-          time: xxx
-          frequency: xxx
-          url: xxx
-          archive_url: xxx
-          recordings_url: xxx
+          day: 
+          time: 
+          frequency: 
+          url: 
+          archive_url: 
+          recordings_url: 
       contact:
-        slack: xxx
-        mailing_list: xxx
+        slack: 
+        mailing_list: 
         teams:
-          - name: xxx
-            description: xxx
+          - name: 
+            description: 
       subprojects:
-        - name: xxx
+        - name: 
           owners:
-            - xxx
-            - xxx
+            - 
+            - 
   - dir: sig-lite
       name: Paddle Lite
       mission_statement: >
-        xxx
+        
 
       charter_link: charter.md
       label: lite
       leadership:
         chairs:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
         tech_leads:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
       meetings:
         - description: Lite Weekly Meeting
-          day: xxx
-          time: xxx
-          frequency: xxx
-          url: xxx
-          archive_url: xxx
-          recordings_url: xxx
+          day: 
+          time: 
+          frequency: 
+          url: 
+          archive_url: 
+          recordings_url: 
       contact:
-        slack: xxx
-        mailing_list: xxx
+        slack: 
+        mailing_list: 
         teams:
-          - name: xxx
-            description: xxx
+          - name: 
+            description: 
       subprojects:
-        - name: xxx
+        - name: 
           owners:
-            - xxx
-            - xxx
+            - 
+            - 
   - dir: sig-notebook
       name: Paddle Notebook
       mission_statement: >
-        xxx
+        
 
       charter_link: charter.md
       label: notebook
       leadership:
         chairs:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
         tech_leads:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
       meetings:
         - description: Notebook Weekly Meeting
-          day: xxx
-          time: xxx
-          frequency: xxx
-          url: xxx
-          archive_url: xxx
-          recordings_url: xxx
+          day: 
+          time: 
+          frequency: 
+          url: 
+          archive_url: 
+          recordings_url: 
       contact:
-        slack: xxx
-        mailing_list: xxx
+        slack: 
+        mailing_list: 
         teams:
-          - name: xxx
-            description: xxx
+          - name: 
+            description: 
       subprojects:
-        - name: xxx
+        - name: 
           owners:
-            - xxx
-            - xxx
+            - 
+            - 
   - dir: sig-ocr
       name: Paddle OCR
       mission_statement: >
-        xxx
+        
 
       charter_link: charter.md
       label: ocr
       leadership:
         chairs:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
         tech_leads:
-          - github: xxx
-            name: xxx
+          - github: 
+            name: 
       meetings:
         - description: PaddleOCR Weekly Meeting
-          day: xxx
-          time: xxx
-          frequency: xxx
-          url: xxx
-          archive_url: xxx
-          recordings_url: xxx
+          day: 
+          time: 
+          frequency: 
+          url: 
+          archive_url: 
+          recordings_url: 
       contact:
-        slack: xxx
-        mailing_list: xxx
+        slack: 
+        mailing_list: 
         teams:
-          - name: xxx
-            description: xxx
+          - name: 
+            description: 
       subprojects:
-        - name: xxx
+        - name: 
           owners:
-            - xxx
-            - xxx
+            - 
+            - 
   - dir: sig-serving
     name: Serving
     mission_statement: >
-      xxx
+      
 
     charter_link: charter.md
     label: serving
     leadership:
       chairs:
-        - github: xxx
-          name: xxx
+        - github: 
+          name: 
       tech_leads:
-        - github: xxx
-          name: xxx
+        - github: 
+          name: 
     meetings:
       - description: Serving Weekly Meeting
-        day: xxx
-        time: xxx
-        frequency: xxx
-        url: xxx
-        archive_url: xxx
-        recordings_url: xxx
+        day: 
+        time: 
+        frequency: 
+        url: 
+        archive_url: 
+        recordings_url: 
     contact:
-      slack: xxx
-      mailing_list: xxx
+      slack: 
+      mailing_list: 
       teams:
         - name: sig-serving-benchmark
-          description: xxx
+          description: 
         - name: sig-serving-dashboard
-          description: xxx
+          description: 
         - name: sig-serving-documentation
-          description: xxx
+          description: 
         - name: sig-serving-models
-          description: xxx
+          description: 
     subprojects:
       - name: sig-serving-benchmark
         owners:
-          - xxx
-          - xxx
+          - 
+          - 
       - name: sig-serving-dashboard
         owners:
-          - xxx
-          - xxx
+          - 
+          - 
       - name: sig-serving-documentation
         owners:
-          - xxx
-          - xxx
+          - 
+          - 
       - name: sig-serving-models
         owners:
-          - xxx
-          - xxx
+          - 
+          - 
