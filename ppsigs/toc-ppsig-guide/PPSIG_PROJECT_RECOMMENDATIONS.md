@@ -17,6 +17,3 @@ Here are some recommended practices to increase PaddlePaddle SIG project's visib
 * Add the OWNERS file to define the person or team responsible for the code in the repository.
 
 * Add a CODE_OF_CONDUCT file, which sets the basic rules of behavior related to participants and helps to create a friendly environment. Although not every project has a CODE_OF_CONDUCT file, but its presence indicates that this is a popular project and defines criteria for interaction with the project community.
-
-
-

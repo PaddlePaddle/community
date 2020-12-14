@@ -10,8 +10,8 @@ All ppsigs must define a charter to define the scope and governance of the ppsig
 1. Copy [template](/PPSIG_CHARTER_TEMPLATE.md)
 2. Read suggestions and requirements so that you have the context of the template
 3. Fill in the template of your ppsig
-4. Use personal updates that assume roles defined in the template [ppsigs.yaml](/ppsigs.yaml)
-5. In [ppsigs.yaml](/ppsigs.yaml) add the subprojects owned by your ppsig
+4. Use personal updates that assume roles defined in the template [ppsigs.yaml](/ppsigs/ppsigs.yaml)
+5. In [ppsigs.yaml](/ppsigs/ppsigs.yaml) add the subprojects owned by your ppsig
 6. Use your charter.md and ppsigs.yaml to communicate in your sig and get feedback as needed.
 
 ## PPSIG charter approval process

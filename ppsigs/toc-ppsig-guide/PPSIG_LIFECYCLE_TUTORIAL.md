@@ -14,7 +14,7 @@ This document covers all information about the creation and retirement ("lifecyc
 
 ### GitHub Related Process
 
-- Add related rows in [ppsigs.yaml](/ppsigs.yaml) and use the auto generator, this will create the readme file and owners for the new directory in PaddlePaddle community.
+- Add related rows in [ppsigs.yaml](/ppsigs/ppsigs.yaml) and use the auto generator, this will create the readme file and owners for the new directory in PaddlePaddle community.
 
 - You need to have:
 

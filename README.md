@@ -22,7 +22,7 @@ For more details about these groups, see the [complete governance document](/GOV
 
 A PPSIG can have its own contribution policy, which is described in the "readme" or "contributing" file in the PPSIG folder of this repository, as well as their own mailing lists, idle channels, etc.
 
-If you want to edit details about a PPSIG, such as its weekly meeting time or prospects, please follow [the instructions](/ppsig-tmpl-auto-gen/README.md) to specify how to automatically generate our documents.
+If you want to edit details about a PPSIG, such as its weekly meeting time or prospects, please follow [the instructions](/ppsigs/ppsig-tmpl-auto-gen/README.md) to specify how to automatically generate our documents.
 
 ## Members
 
@@ -30,6 +30,6 @@ We encourage all contributors to become members. Our goal is to build an active,
 
 ## Contribution
 
-The first step to make a contribution is to select a PPSIG from [PaddlePaddle SIG List](/ppsigs.yaml). Start attending PPSIG meetings, join PPSIG channels and subscribe to mailing lists. PPSIGs often offer a series of "need help" issues that can help new contributors to participate.
+The first step to make a contribution is to select a PPSIG from [PaddlePaddle SIG List](/ppsigs/ppsigs.yaml). Start attending PPSIG meetings, join PPSIG channels and subscribe to mailing lists. PPSIGs often offer a series of "need help" issues that can help new contributors to participate.
 
 [PaddlePaddle contribution guideline](/contributors/README.md) provides detailed instructions on how to make your ideas and bug fixes visible and accepted.
