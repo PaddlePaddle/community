@@ -16,7 +16,7 @@ Followings are the ways to communicate with community groups:
 
 ### Slack
 
-PaddlePaddle developers spread across slack channels, you can find specific slack channel on [ppsig-list](/ppsigs.yaml).
+PaddlePaddle developers spread across slack channels, you can find specific slack channel on [ppsig-list](/ppsigs/ppsigs.yaml).
 
 ### Mailing Lists
 
@@ -24,7 +24,7 @@ PaddlePaddle SIGs provide mailing list for developers to subscribe.
 
 ### Calendar & Meetings
 
-PaddlePaddle use zoom/baidu meeting/tencent meeting for community meeting, you can find specific meeting calendar on [ppsig-list](/ppsigs.yaml).
+PaddlePaddle use zoom/baidu meeting/tencent meeting for community meeting, you can find specific meeting calendar on [ppsig-list](/ppsigs/ppsigs.yaml).
 
 
 ## Social Media & Blogs

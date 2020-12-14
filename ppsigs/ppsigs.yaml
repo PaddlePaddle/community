@@ -1,4 +1,4 @@
-#TBA
+#To Be Fulfilled
 ppsigs:
   - dir: ppsig-detection
     name: Paddle Detection
@@ -24,11 +24,13 @@ ppsigs:
         recordings_url: 
     contact:
       slack: 
-      mailing_list: 
+      mailing_list:
+      wechat_group:
+      qq_group:
       teams:
         - name: 
           description: 
-    subprojects:
+    ppsubsigs:
       - name: 
         owners:
           - 
@@ -57,11 +59,13 @@ ppsigs:
           recordings_url: 
       contact:
         slack: 
-        mailing_list: 
+        mailing_list:
+        wechat_group:
+        qq_group:
         teams:
           - name: 
             description: 
-      subprojects:
+      ppsubsigs:
         - name: 
           owners:
             - 
@@ -90,11 +94,13 @@ ppsigs:
           recordings_url: 
       contact:
         slack: 
-        mailing_list: 
+        mailing_list:
+        wechat_group:
+        qq_group:
         teams:
           - name: 
             description: 
-      subprojects:
+      ppsubsigs:
         - name: 
           owners:
             - 
@@ -123,11 +129,13 @@ ppsigs:
           recordings_url: 
       contact:
         slack: 
-        mailing_list: 
+        mailing_list:
+        wechat_group:
+        qq_group:
         teams:
           - name: 
             description: 
-      subprojects:
+      ppsubsigs:
         - name: 
           owners:
             - 
@@ -156,11 +164,13 @@ ppsigs:
           recordings_url: 
       contact:
         slack: 
-        mailing_list: 
+        mailing_list:
+        wechat_group:
+        qq_group:
         teams:
           - name: 
             description: 
-      subprojects:
+      ppsubsigs:
         - name: 
           owners:
             - 
@@ -189,11 +199,13 @@ ppsigs:
           recordings_url: 
       contact:
         slack: 
-        mailing_list: 
+        mailing_list:
+        wechat_group:
+        qq_group:
         teams:
           - name: 
             description: 
-      subprojects:
+      ppsubsigs:
         - name: 
           owners:
             - 
@@ -201,28 +213,30 @@ ppsigs:
   - dir: ppsig-serving
     name: Serving
     mission_statement: >
-      
+      When you have trained a deep neural net with PaddlePaddle, you are also capable to deploy the model online easily.
 
     charter_link: charter.md
     label: serving
     leadership:
       chairs:
-        - github: 
-          name: 
+        - github: guru4elephant
+          name: Daxiang Dong
       tech_leads:
-        - github: 
-          name: 
+        - github: teslazhao
+          name: Li Zhao
     meetings:
       - description: Serving Weekly Meeting
-        day: 
-        time: 
-        frequency: 
+        day: Saturday
+        time: 21:30 (Beijing Time)
+        frequency: bi-weekly
         url: 
         archive_url: 
         recordings_url: 
     contact:
-      slack: 
-      mailing_list: 
+      slack: https://paddleserving.slack.com/archives/CUBPKHKMJ
+      mailing_list:
+      wechat_group:
+      qq_group:
       teams:
         - name: ppsig-serving-benchmark
           description: 
@@ -232,20 +246,48 @@ ppsigs:
           description: 
         - name: ppsig-serving-models
           description: 
-    subprojects:
-      - name: ppsig-serving-benchmark
+    ppsubsigs:
+      - name: ppsubsig-serving-benchmark
         owners:
-          - 
-          - 
-      - name: ppsig-serving-dashboard
+          -
+        meetings:
+          - description: SUBSIG Benchmark Weekly Meeting
+            day: Wednesday
+            time: 21:00 (Beijing Time)
+            frequency: bi-weekly
+            url:
+            archive_url:
+            recordings_url:
+      - name: ppsubsig-serving-dashboard
         owners:
-          - 
-          - 
-      - name: ppsig-serving-documentation
+          - teslazhao
+        meetings:
+          - description: SUBSIG Dashboard Weekly Meeting
+            day: Thursday
+            time: 21:00 (Beijing Time)
+            frequency: bi-weekly
+            url:
+            archive_url:
+            recordings_url:
+      - name: ppsubsig-serving-documentation
         owners:
-          - 
-          - 
-      - name: ppsig-serving-models
+          -
+        meetings:
+          - description: SUBSIG Documentation Weekly Meeting
+            day: Tuesday
+            time: 21:00 (Beijing Time)
+            frequency: bi-weekly
+            url:
+            archive_url:
+            recordings_url:
+      - name: ppsubsig-serving-model
         owners:
-          - 
-          - 
+          - wangjiawei04
+        meetings:
+          - description: SUBSIG Model Weekly Meeting
+            day: Monday
+            time: 21:00 (Beijing Time)
+            frequency: bi-weekly
+            url:
+            archive_url:
+            recordings_url:

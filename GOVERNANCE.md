@@ -136,7 +136,7 @@ Teams should choose to use collaboration to conduct meetings through scheduled c
 - Mainly perform management functions, including collecting and compiling weekly (bi-weekly) agenda topics, presiding over meetings, ensuring the release of high-quality meeting minutes, and tracking and solving follow-up actions.
 - If someone has the time and ability to perform these two roles at the same time, as long as the TOC and PPSIG members are satisfied, they can be performed by the technical director.
 
-#### technical director
+#### Technical director
 
 - Leading PPSIG projects.
 - Is there time and ability to conduct in-depth technical exploration of the project. Projects may include formal PaddlePaddle projects or other projects in the areas covered by the PPSIG.
@@ -146,7 +146,7 @@ Teams should choose to use collaboration to conduct meetings through scheduled c
 - Named and defined by PPSIG (e.g. public relations supervisor, document/training supervisor, etc.)
 - Approved by the vast majority of chairpersons.
 
-#### other members
+#### Other members
 
 - Self-appointment
 - There may be no clear roles or responsibilities, and no officially assigned roles (see above).
