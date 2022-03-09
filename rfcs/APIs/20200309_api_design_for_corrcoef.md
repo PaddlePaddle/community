@@ -1,6 +1,5 @@
-# 标题
+# paddle.corrcoef 设计文档
 
-标题如：paddle.corrcoef 设计文档
 |API名称 | 新增API名称 | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 张一乔 | 
@@ -39,15 +38,13 @@ Numpy中实现方案见https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/fun
 Numpy中允许输入两个矩阵以获取拼合后的相关系数，并且可以通过rowvar指定按行求解还是按列求解。
 
 # 五、设计思路与实现方案
-
-
-
   
 ## 命名与参数设计
 API设计为'paddle.corrcoef(x, rowvar=True, ddof=True, name=None)'
 ## 底层OP设计
 使用已有API组合实现，不再单独设计OP。
 ## API实现方案
+  
 1. 使用'paddle.cov'得到协方差矩阵
 2. 使用'paddle.diag'提取协方差矩阵的迹T
 3. 使用'paddle.mm'获得矩阵{ C{ii} * C{jj} }
