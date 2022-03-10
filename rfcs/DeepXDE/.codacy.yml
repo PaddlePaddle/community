@@ -1,0 +1,13 @@
+---
+engines:
+  duplication:
+    enabled: true
+    exclude_paths:
+      - 'examples/**'
+  prospector:
+    exclude_paths:
+      - 'deepxde/backend/backend.py'
+exclude_paths:
+  - 'README.md'
+  - 'docs/**'
+  - 'examples/**'

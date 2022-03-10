@@ -1,0 +1,19 @@
+matplotlib
+numpy
+scikit-learn
+scikit-optimize
+scipy
+docutils<0.18  # https://github.com/readthedocs/readthedocs.org/issues/8616
+
+# TensorFlow 1.x
+tensorflow>=2.2.0
+# TensorFlow 2.x
+tensorflow-probability>=0.10.0
+# PyTorch
+torch
+# PaddlePaddle develop
+paddlepaddle
+# JAX
+jax
+flax
+optax

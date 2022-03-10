@@ -1,0 +1,9 @@
+pep257:
+  disable:
+    - D203
+    - D213
+
+pylint:
+  disable:
+    - consider-using-f-string
+    - too-many-arguments
