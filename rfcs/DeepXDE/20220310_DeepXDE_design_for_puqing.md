@@ -13,10 +13,8 @@ GitHub Issue：[deepxde](https://github.com/lululxvi/deepxde/issues/559)
 ## requirements
 
 - paddlepaddle-develop版本
-(因为develop版本中有高阶导的支持，所以需要使用develop版本)
 
 # 开发说明
-
 
 paddlepaddle暂时不支持`L-BFGS` 、`L-BFGS-B`
 
@@ -67,3 +65,4 @@ print(lists.ndim) # 1
 ```
 
 - net.apply_output_transform()出现错误
+> 该问题定位于是paddle不支持部分算子的高阶导数，解决方式可以像torch一样返回1
