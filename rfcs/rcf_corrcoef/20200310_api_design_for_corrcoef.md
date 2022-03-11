@@ -3,7 +3,7 @@
 |API名称 | paddle.linalg.corrcoef | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 李啟铜 | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-10 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-11 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.2 | 
 |文件名 | 20200310_design_for_corrcoef.md<br> | 
@@ -186,12 +186,11 @@ API方面,要实现的API是在paddle.linalg.cov实现的基础上实现的.自�
 ```
 整体逻辑为：
 
-- 若未指定维度，则flatten展平处理。使用`np.moveaxis`将指定的维度放到0处理；
-- 将`q [0,1]`根据shape放缩到 `indice [0, nums-1]`
-- 如果`indice`是整数，表示分位数是该Tensor的元素，后续直接按`indice`取元素即可；如果仍是小数，则找到其相邻位置的两个元素,后续需要用`np.lerp`插值计算得到对应元素。
-- 对输入Tensor，当`indice`为整数时，直接通过`np.partition`将其按每个`indice`分为两部分(即快速排序算法中的partition部分，不完整执行排序过程以降低时间复杂度)，`indice`位置就是`q分位数`；当size为偶数时则将两端的`indice_below`和`indice_above`都做`partition`操作，并取出两端的对应结果，并利用`np.lerp`计算插值结果。
-- `NaN`的处理：对存在`NaN`的情况，使用`np.isnan`确定标志位，标志位对应的位置输出值为`NaN`.
--  Numpy支持多个维度处理，以`tuple`形式作为输入。此时的分位数计算是将指定的多个维度合并后计算得到的。
+- 若输入中的ddof不为False，发出警告，因为计算皮尔逊积矩相关系数和ddof无关
+- 使用cov计算协方差
+- 得到对角线的值(分母)，如果值错误返回1
+- 计算分母部分，使用实部进行计算，然后用协方差分别除以分母的两个部分
+- 判断是否是复数，并进行值的范围控制
 
 # 四、对比分析
 - 使用场景与功能：通过调用函数计算皮尔逊积矩相关系数。
@@ -213,7 +212,7 @@ API设计为`corrcoef(x,rowvar=True,ddof=False,name=None)`
 2. 使用`paddle.linalg.cov`得到协方差.
 3. 使用paddle.diag获取对角线元素,如果发生值错误 返回1
 4. 对上述结果使用paddle.sqrt求平方根
-5. 然后使用协方差分别除C{ii}，C{jj}
+5. 然后使用协方差分别除C{ii}，C{jj},不存在虚部所以不用进行判断
 6. 最后用paddle.clip进行裁剪范围[-1，1]
  
 # 六、测试和验收的考量
