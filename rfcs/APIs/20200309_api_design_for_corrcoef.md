@@ -37,6 +37,8 @@ Numpy中实现方案见https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/fun
 # 四、对比分析
 Numpy中允许输入两个矩阵以获取拼合后的相关系数，并且可以通过rowvar指定按行求解还是按列求解。
 
+Numpy中的corrcoef效果较好，能满足大多数情况的使用需求，因此，本api拟实现和numpy.corrcoef效果相同的paddle.corrcoef
+
 # 五、设计思路与实现方案
   
 ## 命名与参数设计
