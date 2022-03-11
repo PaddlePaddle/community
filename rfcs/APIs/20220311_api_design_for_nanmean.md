@@ -3,7 +3,7 @@
 |API名称 | paddle.nanmean | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 李芳钰 | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-10 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-11 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.0 | 
 |文件名 | 20220310_design_for_nanmean.md<br> | 
@@ -79,11 +79,33 @@ If keepdim is True, the output tensor is of the same size as input except in the
 ```
 
 ### 实现方法
-由于没有找到Pytorch实现nanmeanAPI的源码，所以未能提供其核心代码，但通过其在document上的介绍[torch.nanmean](https://pytorch.org/docs/stable/generated/torch.nanmean.html#torch.nanmean),可以确定其整体逻辑与Numpy基本一致。
+在实现方法上，Pytorch的整体逻辑与Numpy一致，[代码位置](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L1232-L1244)。其中核心代码为：
+```c++
+    Tensor nanmean(
+    const Tensor& self,
+    IntArrayRef dim,
+    bool keepdim,
+    optional<ScalarType> opt_dtype) {
+  TORCH_CHECK(
+      self.is_floating_point(),
+      "nanmean(): expected input to have floating point dtype but got ",
+      self.scalar_type());
+  const auto factor =
+      at::native::isnan(self.detach()).logical_not_().sum(dim, keepdim);
+  return at::nansum(self, dim, keepdim, opt_dtype).div_(factor);
+}
+```
+整体逻辑为：
+- 通过`isnan`获取张量nan值的mask。
+- 然后利用`logical_not_`,`sum`结合`mask`获取指定轴的非nan值的计数值factor。
+- 再通过`nansum`获取指定轴上张量非nan值的总和。
+- 最后利用`div_`除以factor(对标Numpy的cnt)得到张量在指定轴上的算数平均值。
+
 
 
 # 四、对比分析
 - 使用场景与功能：在维度支持上，Pytorch和Numpy都支持指向多个轴，但Numpy在指定多轴时指支持tuple输入，这里对标Pytorch支持tuple输入以及python:ints。
+- 需要注意的是Numpy当`(cnt == 0).any() == True`时说明在指定轴上，存在元素全为nan的情况，这时候Numpy会额外抛出一个警告，且该元素上的均值任然为nan。
 
 # 五、方案设计
 ## 命名与参数设计
