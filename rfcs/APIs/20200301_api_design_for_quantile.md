@@ -211,13 +211,6 @@ API设计为`paddle.quantile(x, q, axis=None, keepdim=False, name=None)`及`padd
 
 
 
-# 九、评审意见
-（由评审人填写，开发者无需填写）
-|状态 | 提出人 | 问题 | 
-|---|---|---|
-|通过| dingjiaweiww | 无 | 
-
-
 # 名词解释
 无
 #附件及参考资料
