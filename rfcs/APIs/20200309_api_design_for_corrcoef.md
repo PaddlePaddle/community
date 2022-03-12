@@ -37,7 +37,16 @@ Numpy中实现方案见https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/fun
 # 四、对比分析
 Numpy中允许输入两个矩阵以获取拼合后的相关系数，并且可以通过rowvar指定按行求解还是按列求解。
 
-Numpy中的corrcoef效果较好，能满足大多数情况的使用需求，因此，本api拟实现和numpy.corrcoef效果相同的paddle.corrcoef
+Numpy中的corrcoef效果较好，能满足大多数情况的使用需求。在实际使用中，很少会有需求正好需要输入两组变量，从而拼合求相关系数。在有两组或者两组以上的变量时，通常可以在调用np.corrcoef之前，将这些变量进行拼合。即通常的调用方式为
+  np.corrcoef(x)
+  或
+  d=np.concatenate((a,b,c),axis=0)
+  np.corrcoef(d)
+  
+  没有必要特意保留输入参数y通过np.corrcoef(x,y)求拼合后的相关系数矩阵
+  
+因此，本api拟实现在仅有输入x的情况下，与numpy.corrcoef效果相同的paddle.corrcoef。
+  即paddle.corrcoef不接收参数y，仅接收参数x。
 
 # 五、设计思路与实现方案
   
