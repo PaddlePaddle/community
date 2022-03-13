@@ -1,68 +1,69 @@
-功能名称： 增加paddle作为DeepXDE的 backend
+# 增加paddle作为DeepXDE的 backend
 
-开始日期：2022/03/10
+| |  |
+|---|---|
+|提交作者 | 梁嘉铭 |
+|提交时间 | 2022-03-10 |
+|版本号 | V1.0 |
+|依赖飞桨版本 | develop版本 |
+|文件名 | 20220310_DeepXDE_design.md|
 
-GitHub Issue：[deepxde](https://github.com/lululxvi/deepxde/issues/559)
+# 一、概述
 
-# 总结
+## 1、相关背景
 
-增加paddle作为DeepXDE的 backend
+[lululxvi/deepxde/issues/559](https://github.com/lululxvi/deepxde/issues/559)
 
-# 使用指南
+## 2、功能目标
 
-## requirements
+1. Support function approximation
+   
+   Goal: Support the following test examples: func.py, dataset.py
 
-- paddlepaddle-develop版本
+2. Support solving forward ODEs
+   
+   Goal: Support the following test examples: A simple ODE system, Lotka-Volterra equation
 
-# 开发说明
+3. Support solving inverse ODEs
 
-paddlepaddle暂时不支持`L-BFGS` 、`L-BFGS-B`
+    Goal: Support the following test examples: Inverse problem for the Lorenz system, Inverse problem for the Lorenz system with exogenous input
 
-相关issue:
-https://github.com/PaddlePaddle/Paddle/issues/38444
-https://github.com/PaddlePaddle/Paddle/issues/36002
 
-在需要L-BFGS降低Loss时，应予以注释
+## 3、意义
 
-例如：
+[Deepxde](https://github.com/lululxvi/deepxde)是一个非常有用的求解函数逼近，正向/逆常/偏微分方程 (ODE/PDE)代码仓库。该功能会增加Paddle在科学计算方面的使用。
 
-https://github.com/lululxvi/deepxde/blob/master/examples/pinn_forward/Burgers.py 案例中
+# 二、飞桨现状
 
-```python
-net = dde.nn.FNN([2] + [20] * 3 + [1], "tanh", "Glorot normal")
-model = dde.Model(data, net)
+1. Paddle暂时不支持`L-BFGS`方法，等待后续支持。
 
-model.compile("adam", lr=1e-3)
-model.train(epochs=15000)
-model.compile("L-BFGS")
-losshistory, train_state = model.train()
-```
+2. 例如`paddle.sin()`,`paddle.cos()`算子的求高阶导数，所以不支持`apply_feature_transform()`以及`apply_output_transform()`函数。
+考虑参考[#32188](https://github.com/PaddlePaddle/Paddle/pull/32188)pr，对sin/cos函数的求二阶导数算子进行支持。具体将在[#L93](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/phi/kernels/funcs/activation_functor.h#L93)行添加`SinGradGradFunctor`方法，以及`CosGradGradFunctor`方法，并在[L267](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/operators/activation_op.h#L267)处进行调用，在[L1477](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/operators/activation_op.cc#L1477)处进行注册。
 
-使用`L-BFGS`降低Loss。可修改为如下继续预测：
-```python
-net = dde.nn.FNN([2] + [20] * 3 + [1], "tanh", "Glorot normal")
-model = dde.Model(data, net)
+# 三、业内方案调研
 
-model.compile("adam", lr=1e-3)
-model.train(epochs=15000)
-```
+Tensorflow、Pytorch、jax均在deepxde中得到支持。`pytorch`在[L183-L475](https://github.com/pytorch/pytorch/blob/master/torch/optim/lbfgs.py#L183-L475)中添加了`L-BFGS`方法，支持`L-BFGS`本身可以作为一个题目[issues](https://github.com/PaddlePaddle/Paddle/issues/36002)
 
-# 未解决的问题
+# 四、设计思路与实现方案
 
-- 在训练时，如果损失函数为`L-BFGS`，`L-BFGS-B`，则会出现错误
-- [deepxdeL31](https://github.com/lululxvi/deepxde/blob/master/deepxde/icbc/initial_conditions.py#L31)以及[L71](https://github.com/lululxvi/deepxde/blob/master/deepxde/icbc/boundary_conditions.py#L71)中判断tensor的维度，当tensor的维度为1时，会出现错误，问题来源于paddlepaddle中没有零维向量。暂行的结局方案是当tensor的维度为1时，则返回的ndim为0。如下是该问题的代码例子：
-```python
-import paddle
-const =paddle.to_tensor(1) 
-lists = paddle.to_tensor([1])
-print(const.ndim) # 1
-print(lists.ndim) # 1
-import torch 
-const = torch.tensor(1)
-lists = torch.tensor([1])
-print(const.ndim) # 0
-print(lists.ndim) # 1
-```
+## 命名与参数设计
 
-- net.apply_output_transform()出现错误
-> 该问题定位于是paddle不支持部分算子的高阶导数，解决方式可以像torch一样返回1
+在代码中PaddlePaddle的名称会被替换为paddle。
+
+## API实现方案
+
+实现方式主要参考`Pytorch`的实现方式，并且做了一些改动。
+
+# 六、测试和验收的考量
+
+根据任务要求，测试在excample中如下文件。
+-  func.py, dataset.py
+-  ode_system.py, Lotka_Volterra.py
+-  Lorenz_inverse.py, Lorenz_inverse_forced.ipynb
+
+# 七、可行性分析和排期规划
+
+paddle日益完善，基础算子以及函数均有支持，但是暂时不支持L-BFGS方法，以及对高阶导数。总体可以在活动时间内完成。
+
+# 八、影响面
+对deepxde新增backend, 无影响
