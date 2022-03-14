@@ -133,6 +133,7 @@ API设计为`paddle.nanmean(x, axis=None, keepdim=False, name=None)`
 - 未输入维度时的输出正确性；
 - 输入含`NaN`结果的正确性；
 - 输入在指定轴上存在元素都为NaN时,结果的正确性；
+- 测试在进行反向梯度计算时结果的正确性(包含nan值和非nan值位置的梯度)；
 - 错误检查：输入`x`不是Tensor时,能否正确抛出错误；
 - 错误检查：`axis`所指维度在当前Tensor中不合法时能正确抛出错误。
 
