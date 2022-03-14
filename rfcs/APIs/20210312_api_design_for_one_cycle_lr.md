@@ -56,12 +56,45 @@ The default behaviour of this scheduler follows the fastai implementation of 1cy
 
 在实现方法上, Pytorch直接使用python实现，[代码位置](https://github.com/pytorch/pytorch/blob/master/torch/optim/lr_scheduler.py#L1341)。
 
-由于Paddle的lr_scheduler调用方式与Pytorch区别较大，因此做了修改，修改如下：
+核心代码如下：
 
-- 取消momentum的相关参数，因为不可能通过`lr_scheduler`修改`momentum`或者`beta`
-- `max_lr`参数类型仅为`float`， 而非Pytorch中的`float or list`，当`max_lr`为`list` 时，Pytorch会为`optimizer.param_groups` 内的各个元素分配不同的学习率，而paddle的`lr_scheduler`并不能获取到`optimizer`，因此可由用户在外部自行实现。
+```python
+def get_lr(self):
+    if not self._get_lr_called_within_step:
+        warnings.warn("To get the last learning rate computed by the scheduler, "
+                        "please use `get_last_lr()`.", UserWarning)
 
-实现方法与Pytorch基本相同。
+    lrs = []
+    step_num = self.last_epoch
+
+    if step_num > self.total_steps:
+        raise ValueError("Tried to step {} times. The specified number of total steps is {}"
+                            .format(step_num + 1, self.total_steps))
+
+    for group in self.optimizer.param_groups:
+        start_step = 0
+        for i, phase in enumerate(self._schedule_phases):
+            end_step = phase['end_step']
+            if step_num <= end_step or i == len(self._schedule_phases) - 1:
+                pct = (step_num - start_step) / (end_step - start_step)
+                computed_lr = self.anneal_func(group[phase['start_lr']], group[phase['end_lr']], pct)
+                if self.cycle_momentum:
+                    computed_momentum = self.anneal_func(group[phase['start_momentum']], group[phase['end_momentum']], pct)
+                break
+            start_step = phase['end_step']
+
+        lrs.append(computed_lr)
+        if self.cycle_momentum:
+            if self.use_beta1:
+                _, beta2 = group['betas']
+                group['betas'] = (computed_momentum, beta2)
+            else:
+                group['momentum'] = computed_momentum
+
+    return lrs
+```
+
+
 
 # 四、对比分析
 
@@ -73,15 +106,26 @@ API设计为`paddle.optimizer.lr.OneCycleLR(max_lr, total_step=None, epochs=None
 
 形参名`div_factor`->`divide_factor`, `final_div_factor`->`final_divide_factor`
 
+
+
 ## 底层OP设计
 
 仅使用python实现
+
+## API实现方案
+
+由于Paddle的lr_scheduler调用方式与Pytorch区别较大，因此做了修改，修改如下：
+
+- 取消momentum的相关参数，因为不可能通过`lr_scheduler`修改`momentum`或者`beta`
+- `max_lr`参数类型仅为`float`， 而非Pytorch中的`float or list`，当`max_lr`为`list` 时，Pytorch会为`optimizer.param_groups` 内的各个元素分配不同的学习率，而paddle的`lr_scheduler`并不能获取到`optimizer`，因此可由用户在外部自行实现。
+
+实现方法与Pytorch基本相同。
 
 # 六、测试和验收的考量
 
 测试考虑的case如下：
 
--  `paddle.optimizer.lr.OneCycleLR`和`torch.optim.lr_scheduler.OneCycleLR` 与`numpy`结果的数值一致性
+-  `paddle.optimizer.lr.OneCycleLR`与`numpy`结果的数值一致性
 - 错误检查：`total_step`, `epochs`和`steps_per_epoch`都未指定时能正确抛出错误，并且其数值小于等于0时能正确抛出错误；
 - 错误检查：`anneal_strategy`不在指定范围时能正确抛出错误；
 - 错误检查：`pct_start`值不在[0，1]时能正确抛出错误；
@@ -93,14 +137,6 @@ API设计为`paddle.optimizer.lr.OneCycleLR(max_lr, total_step=None, epochs=None
 # 八、影响面
 
 为独立新增API，对其他模块没有影响
-
-# 九、评审意见
-
-（由评审人填写，开发者无需填写）
-
-| 状态   | 提出人          | 问题   |
-| ---- | ------------ | ---- |
-| 通过   | dingjiaweiww | 无    |
 
 # 名词解释
 
