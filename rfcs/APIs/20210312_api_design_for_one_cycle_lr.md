@@ -81,7 +81,7 @@ API设计为`paddle.optimizer.lr.OneCycleLR(max_lr, total_step=None, epochs=None
 
 测试考虑的case如下：
 
-- 和pytorch结果的数值的一致性, `paddle.optimizer.lr.OneCycleLR`和`torch.optim.lr_scheduler.OneCycleLR` 在不同情况下`step`后的`learning_rate`是否一致；
+-  `paddle.optimizer.lr.OneCycleLR`和`torch.optim.lr_scheduler.OneCycleLR` 与`numpy`结果的数值一致性
 - 错误检查：`total_step`, `epochs`和`steps_per_epoch`都未指定时能正确抛出错误，并且其数值小于等于0时能正确抛出错误；
 - 错误检查：`anneal_strategy`不在指定范围时能正确抛出错误；
 - 错误检查：`pct_start`值不在[0，1]时能正确抛出错误；
