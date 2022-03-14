@@ -192,16 +192,65 @@ API方面,要实现的API是在paddle.linalg.cov实现的基础上实现的.自�
 - 计算分母部分，使用实部进行计算，然后用协方差分别除以分母的两个部分
 - 判断是否是复数，并进行值的范围控制
 
+## Pyrotch
+### 实现方法
+以torch现有的API实现，并且是用c++实现.
+其中核心代码为：
+``C++
+  Tensor corrcoef(const Tensor& self) {
+  TORCH_CHECK(
+      self.ndimension() <= 2,
+      "corrcoef(): expected input to have two or fewer dimensions but got an input with ",
+      self.ndimension(),
+      " dimensions");
+
+  auto c = at::cov(self);
+
+  if (c.ndimension() == 0) {
+    // scalar covariance, return nan if c in {nan, inf, 0}, 1 otherwise
+    return c / c;
+  }
+
+  // normalize covariance
+  const auto d = c.diag();
+  const auto stddev = at::sqrt(d.is_complex() ? at::real(d) : d);
+  c = c / stddev.view({-1, 1});
+  c = c / stddev.view({1, -1});
+  
+  // due to floating point rounding the values may be not within [-1, 1], so
+  // to improve the result we clip the values just as NumPy does.
+  return c.is_complex()
+      ? at::complex(at::real(c).clip(-1, 1), at::imag(c).clip(-1, 1))
+      : c.clip(-1, 1);
+}
+```
+整体逻辑为：
+
+可以看到整体的逻辑和numpy是一样的。
+- 首先计算cov。
+- 接着判断输入数据是否合法，不合法返回1。
+- 接着获取其对角线元素。
+- 然后判断是否是complex类型，如果是就对实部进行平方，不是的话就正常平方。
+- 接着计算分母和numpy的方式一样，判断是否是complex类型。
+- 最后使用clip将结果控制在[-1,1]
+
+
 # 四、对比分析
 - 使用场景与功能：通过调用函数计算皮尔逊积矩相关系数。
-- 实现对比：paddle的cov函数已经实现的相对完全，只需要和numpy一样，在cov的基础上进行修改，就可实现该功能。
+- 实现对比：paddle的cov函数已经实现的相对完全，只需要和numpy一样，在cov的基础上进行修改，就可实现该功能,并且numpy是基础的库，pytorch中的实现也是1.10以上版本才有，其实现
+  也是参考numpy，所以我们在实现的时候也需要参考numpy，在改动的方式上参考一些pytorch，由于pytorch是用c++写的，而且没有使用cuda加速，所以速度不会快很多，综合实现的复杂度和
+  性能，使用python实现，参照numpy，模仿pytorch实现numpy的方式进行实现。
+
 
 
 # 五、方案设计
 ## 命名与参数设计
 API设计为`corrcoef(x,rowvar=True,ddof=False,name=None)`
 命名与参数顺序为：形参名`x`->`x`和`rowvar`->`rowvar`,  与paddle的covAPI保持一致性，不影响实际功能使用。
-
+- **x** (Tensor) - 一个N(N<=2)维矩阵，包含多个变量。默认矩阵的每行是一个观测变量，由参数rowvar设置。
+- **rowvar** (bool, 可选) - 若是True，则每行作为一个观测变量；若是False，则每列作为一个观测变量。默认True。
+- **ddof** (bool, 可选) - 在计算中不起作用，不需要。默认False。
+- **name** (str, 可选) - 具体用法请参见 :ref:`api_guide_Name` ，一般无需设置，默认值为None。
 
 ## 底层OP设计
 使用已有API组合实现，不再单独设计OP。
@@ -211,9 +260,9 @@ API设计为`corrcoef(x,rowvar=True,ddof=False,name=None)`
 1. 由于在计算时，和ddof参数无关，所以在其设为TRUE时，进行警告，"ddof  have no effect"
 2. 使用`paddle.linalg.cov`得到协方差.
 3. 使用paddle.diag获取对角线元素,如果发生值错误 返回1
-4. 对上述结果使用paddle.sqrt求平方根
-5. 然后使用协方差分别除C{ii}，C{jj},不存在虚部所以不用进行判断
-6. 最后用paddle.clip进行裁剪范围[-1，1]
+4. 对上述结果判断是否是complex类型，并使用paddle.sqrt求平方根
+5. 然后使用协方差分别除C{ii}，C{jj}，
+6. 判断是否是complex类型，如果是，对实部虚部分别处理，不是就单独处理，最后用paddle.clip进行裁剪范围[-1，1]
  
 # 六、测试和验收的考量
 测试考虑的case如下：
