@@ -145,11 +145,11 @@ Pytorch官方文档中提到参考了上述tensorflow仓库进行修改实现，
 
 ## 命名与参数设计
 
-API设计为`paddle.optim.lr.CyclicLR(learning_rate,max_learning_rate,step_size_up,step_size_down, mode='triangular',gamma=1.,scale_fn=None,scale_mode='cycle',last_epoch=-1,verbose=False)`
+API设计为`paddle.optimizer.lr.CyclicLR(learning_rate,max_learning_rate,step_size_up,step_size_down, mode='triangular',gamma=1.,scale_fn=None,scale_mode='cycle',last_epoch=-1,verbose=False)`
 
 去除了Pytorch中`momentum`的相关参数。
 
-同时，为了保持与paddle其他lrscheduler相关的api保持一致，将`base_lr`修改为`learning_rate`，`max_lr`修改为`max_learning_rate`，此修改有待商榷。
+同时，为了保持与paddle其他lrscheduler相关的api保持一致，将`base_lr`修改为`base_learning_rate`，`max_lr`修改为`max_learning_rate`。
 
 ## 底层OP设计
 
