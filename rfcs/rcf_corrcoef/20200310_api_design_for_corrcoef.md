@@ -3,7 +3,7 @@
 |API名称 | paddle.linalg.corrcoef | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 李啟铜 | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-10 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-11 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.2 | 
 |文件名 | 20200310_design_for_corrcoef.md<br> | 
@@ -11,26 +11,27 @@
 # 一、概述
 
 ## 1、相关背景
-为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充API`paddle.linalg.corrcoef`.
+为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充API`paddle.linalg.corrcoef`。
 ##2、功能目标
 增加API`paddle.linalg.corrcoef`,实现求皮尔逊积矩相关系数功能。
 
 ##3、意义
-飞桨支持计算皮尔逊积矩相关系数
+飞桨支持计算皮尔逊积矩相关系数。
 
 # 二、飞桨现状
 目前paddle缺少相关功能实现。
 
-API方面,要实现的API是在paddle.linalg.cov实现的基础上实现的.自己的OP，其主要实现逻辑为：
-1.其主要功能是计算协方差
+API方面,要实现的API是在`paddle.linalg.cov`实现的基础上实现的，没有实现的自己的OP，其主要功能为：
 
-在实际实现时,需要在paddle.linalg.cov的基础上进行实现
+1.计算协方差
+
+在实际实现时,可以通过调用`paddle.linalg.cov`，再结合公式进行实现`paddle.linalg.corrcoef`。
 
 # 三、业内方案调研
 
 ## Numpy 
 ### 实现方法
-以现有numpy python API组合实现numpy.cov,numpy.corrcoef.
+以现有numpy python API`numpy.cov`，进行实现`numpy.corrcoef`。
 其中核心代码为：
 ```Python
   def corrcoef(x, y=None, rowvar=True, bias=np._NoValue, ddof=np._NoValue, *,
@@ -186,41 +187,91 @@ API方面,要实现的API是在paddle.linalg.cov实现的基础上实现的.自�
 ```
 整体逻辑为：
 
-- 若未指定维度，则flatten展平处理。使用`np.moveaxis`将指定的维度放到0处理；
-- 将`q [0,1]`根据shape放缩到 `indice [0, nums-1]`
-- 如果`indice`是整数，表示分位数是该Tensor的元素，后续直接按`indice`取元素即可；如果仍是小数，则找到其相邻位置的两个元素,后续需要用`np.lerp`插值计算得到对应元素。
-- 对输入Tensor，当`indice`为整数时，直接通过`np.partition`将其按每个`indice`分为两部分(即快速排序算法中的partition部分，不完整执行排序过程以降低时间复杂度)，`indice`位置就是`q分位数`；当size为偶数时则将两端的`indice_below`和`indice_above`都做`partition`操作，并取出两端的对应结果，并利用`np.lerp`计算插值结果。
-- `NaN`的处理：对存在`NaN`的情况，使用`np.isnan`确定标志位，标志位对应的位置输出值为`NaN`.
--  Numpy支持多个维度处理，以`tuple`形式作为输入。此时的分位数计算是将指定的多个维度合并后计算得到的。
+- 因为计算皮尔逊积矩相关系数和ddof无关，所以若输入中的ddof不为False，发出警告。
+- 使用cov计算协方差。
+- 得到对角线的值(分母)，如果值错误返回1。
+- 计算分母部分，使用实部进行计算，然后用协方差分别除以分母的两个部分。
+- 判断是否是复数，并进行值的范围控制。
+
+## Pyrotch
+### 实现方法
+以torch现有的API实现，并且是用c++实现.
+其中核心代码为：
+```C++
+  Tensor corrcoef(const Tensor& self) {
+  TORCH_CHECK(
+      self.ndimension() <= 2,
+      "corrcoef(): expected input to have two or fewer dimensions but got an input with ",
+      self.ndimension(),
+      " dimensions");
+
+  auto c = at::cov(self);
+
+  if (c.ndimension() == 0) {
+    // scalar covariance, return nan if c in {nan, inf, 0}, 1 otherwise
+    return c / c;
+  }
+
+  // normalize covariance
+  const auto d = c.diag();
+  const auto stddev = at::sqrt(d.is_complex() ? at::real(d) : d);
+  c = c / stddev.view({-1, 1});
+  c = c / stddev.view({1, -1});
+  
+  // due to floating point rounding the values may be not within [-1, 1], so
+  // to improve the result we clip the values just as NumPy does.
+  return c.is_complex()
+      ? at::complex(at::real(c).clip(-1, 1), at::imag(c).clip(-1, 1))
+      : c.clip(-1, 1);
+}
+```
+可以看到整体的逻辑和numpy是一样的。
+
+整体逻辑为：
+
+- 首先计算cov。
+- 接着判断输入数据是否合法，不合法返回1。
+- 接着获取其对角线元素。
+- 然后判断是否是complex类型，如果是就对实部进行平方，不是的话就正常平方。
+- 接着计算分母和numpy的方式一样，判断是否是complex类型。
+- 最后使用clip将结果控制在[-1,1]。
+
 
 # 四、对比分析
 - 使用场景与功能：通过调用函数计算皮尔逊积矩相关系数。
-- 实现对比：paddle的cov函数已经实现的相对完全，只需要和numpy一样，在cov的基础上进行修改，就可实现该功能。
+- 实现对比：paddle的cov函数已经实现的相对完全，只需要和numpy一样，在cov的基础上进行修改，就可实现该功能,并且numpy是基础的库，pytorch中的实现也是1.10以上版本才有，其实现
+  也是参考numpy，所以我们在实现的时候也需要参考numpy，在改动的方式上参考一些pytorch，由于pytorch是用c++写的，而且没有使用cuda加速，所以速度不会快很多，综合实现的复杂度和
+  性能，使用python实现，参照numpy，模仿pytorch实现numpy的方式进行实现。
+
 
 
 # 五、方案设计
 ## 命名与参数设计
 API设计为`corrcoef(x,rowvar=True,ddof=False,name=None)`
-命名与参数顺序为：形参名`x`->`x`和`rowvar`->`rowvar`,  与paddle的covAPI保持一致性，不影响实际功能使用。
-
+命名与参数顺序为：形参名`x`->`x`,`rowvar`->`rowvar`,`ddof`->`ddof`,  与paddle的covAPI保持一致性，不影响实际功能使用。
+- **x** (Tensor) - 一个N(N<=2)维矩阵，包含多个变量。默认矩阵的每行是一个观测变量，由参数rowvar设置。
+- **rowvar** (bool, 可选) - 若是True，则每行作为一个观测变量；若是False，则每列作为一个观测变量。默认True。
+- **ddof** (bool, 可选) - 在计算中不起作用，不需要。默认False。
+- **name** (str, 可选) - 与paddle其他API保持一致性，不影响实际功能使用。
 
 ## 底层OP设计
 使用已有API组合实现，不再单独设计OP。
 
 ## API实现方案
 主要按下列步骤进行组合实现,实现位置为`python/paddle/tensor/linalg.py`与`cov`等方法放在一起：
-1. 由于在计算时，和ddof参数无关，所以在其设为TRUE时，进行警告，"ddof  have no effect"
-2. 使用`paddle.linalg.cov`得到协方差.
-3. 使用paddle.diag获取对角线元素,如果发生值错误 返回1
-4. 对上述结果使用paddle.sqrt求平方根
-5. 然后使用协方差分别除C{ii}，C{jj}
-6. 最后用paddle.clip进行裁剪范围[-1，1]
+1. 由于在计算时，和ddof参数无关，所以在其设为TRUE时，进行警告，"ddof  have no effect"。
+2. 使用`paddle.linalg.cov`得到协方差。
+3. 使用`paddle.diag`获取对角线元素,如果发生值错误 返回1。
+4. 对上述结果判断是否是complex类型，并使用`paddle.sqrt`求平方根。
+5. 然后使用协方差分别除C{ii}，C{jj}。
+6. 判断是否是complex类型，如果是，对实部虚部分别处理，不是就单独处理，最后用`paddle.clip`进行裁剪范围[-1，1]。
  
 # 六、测试和验收的考量
 测试考虑的case如下：
 
 - 和numpy结果的数值的一致性, `paddle.linalg.corrcoef`和`numpy.corrcoef`的结果是否一致；
 - x的输入值如果输入错误,在cov的时候会报错,所以无需实现值判断；
+- 输入数据类型如果是complex类型也要输出正确的结果；
 - ddof在实现时并不需要,如果用户输入,则发出警告；
 
 # 七、可行性分析及规划排期
