@@ -33,17 +33,34 @@ The values of R are between -1 and 1, inclusive.
 '''
   
 Numpy中实现方案见https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/function_base.py#L2330-L2410
+
+pytorch中的corrcoef：https://pytorch.org/docs/master/generated/torch.corrcoef.html#torch-corrcoef
+  函数定义为 torch.corrcoef(tensor)
+  仅有一个输入参数，按行求对应的相关系数
+  
+tensorflow1.15的corrcoef:https://tensorflow.google.cn/versions/r1.15/api_docs/python/tf/contrib/metrics/streaming_pearson_correlation
+  函数定义为 
+  tf.contrib.metrics.streaming_pearson_correlation(
+    predictions, labels, weights=None, metrics_collections=None,
+    updates_collections=None, name=None)
+  用于获得两个输入变量的相关系数矩阵。
   
 # 四、对比分析
 Numpy中允许输入两个矩阵以获取拼合后的相关系数，并且可以通过rowvar指定按行求解还是按列求解。
-
-Numpy中的corrcoef效果较好，能满足大多数情况的使用需求。在实际使用中，很少会有需求正好需要输入两组变量，从而拼合求相关系数。在有两组或者两组以上的变量时，通常可以在调用np.corrcoef之前，将这些变量进行拼合。即通常的调用方式为
+Numpy中的corrcoef效果较好，能满足大多数情况的使用需求。在实际使用中，可以在调用np.corrcoef之前，将这些变量进行拼合。即通常的调用方式为
   np.corrcoef(x)
 或
   d=np.concatenate((a,b,c),axis=0)
   np.corrcoef(d)
   
-没有必要特意保留输入参数y通过np.corrcoef(x,y)求拼合后的相关系数矩阵
+pytorch中的corrcoef仅允许输入一个变量，即需要将一组用于求得相关系数的变量进行拼合。调用方式为：
+  x = torch.tensor([[0, 1, 2], [2, 1, 0]])
+  torch.corrcoef(x)
+
+tensorflow中需要给定两个变量，将输出结果作为一种metric来进行使用，调用方式为：
+  tf.contrib.metrics.streaming_pearson_correlation(predictions, labels)
+  
+综合考虑，允许输入两个变量x,y在函数内部进行拼合，有利于调用corrcoef并将结果用作metric。这种方式仅利于处理仅有一个返回值的回归问题。因此，没有必要特意保留输入参数y,仅允许用户将拼合后的矩阵传入函数求得对应的相关系数矩阵即可。
   
 因此，本api拟实现在仅有输入x的情况下，与numpy.corrcoef效果相同的paddle.corrcoef。即paddle.corrcoef不接收参数y，仅接收参数x。
 
