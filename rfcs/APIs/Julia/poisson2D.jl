@@ -69,7 +69,7 @@ function training(NN, opt, iterations::Int, rhs_func::Function, bc_func::Functio
     for iter in 1:iterations
         x, rhs, bc_x, bc_value = sample_to_tensor(rhs_func, bc_func, batch_size, bc_size)
         loss = loss_func(NN, x, rhs, bc_x, bc_value)
-        # println(loss.numpy()[1])
+        println(loss.numpy()[1])
         loss.backward()
         opt.step()
         opt.clear_grad()
