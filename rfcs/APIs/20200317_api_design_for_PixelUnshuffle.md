@@ -23,8 +23,15 @@ Sub-Pixel Convolutional Neural Network](https://arxiv.org/pdf/1609.05158)》。
 飞桨将支持PixelUnshuffle 组网 API。
 
 # 二、飞桨现状
-飞桨目前不支持此功能，但可以通过组合API的方式实现此功能。
+飞桨目前不支持此功能，但可以通过三个步骤组合内置API的方式实现此功能。
 
+```python
+n, c, h, w = x.shape
+downscale_factor = 4
+x = paddle.reshape(x, [n, c, h // downscale_factor, downscale_factor, w // downscale_factor, downscale_factor])
+x = paddle.transpose(x, [0, 1, 3, 5, 2, 4])
+x = paddle.reshape(x, [n, c * downscale_factor * downscale_factor, h // downscale_factor, w // downscale_factor])
+```
 
 # 三、业内方案调研
 ## PyTorch
@@ -47,7 +54,7 @@ class PixelUnshuffle(Module):
         return 'downscale_factor={}'.format(self.downscale_factor)
 ```
 
-其中的`F.channel_shuffle`是由C++实现的，主要代码为：
+其中的`F.pixel_unshuffle`是由C++实现的，主要代码为：
 
 ```c++
 Tensor pixel_unshuffle(const Tensor& self, int64_t downscale_factor) {
@@ -76,9 +83,27 @@ Tensor pixel_unshuffle(const Tensor& self, int64_t downscale_factor) {
 }
 ```
 
+TensorFlow目前也没有直接提供PixelUnshuffle的API，但是也可以通过基础API进行组网实现:
+
+def pixel_unshuffle_unit(self, x, downscale_factor):
+    with tf.variable_scope('pixel_unshuffle_unit'):
+        n, h, w, c = x.get_shape().as_list()
+        x = tf.reshape(x, shape=tf.convert_to_tensor([tf.shape(x)[0], h / downscale_factor, downscale_factor, w / downscale_factor, downscale_factor, c]))
+        x = tf.transpose(x, tf.convert_to_tensor([0, 1, 3, 5, 2, 4]))
+        x = tf.reshape(x, shape=tf.convert_to_tensor([tf.shape(x)[0], h / downscale_factor, w / downscale_factor, c * downscale_factor * downscale_factor]))
+
+主要逻辑步骤包括:
+1. 先改变张量形状,[N, C, H, W]为[N, C, H/factor, factor, W/factor, factor]；
+2. 通过转置操作, 得到形为[N, C, factor, factor, H/factor, W/factor]的张量；
+3. 再将第二步得到结果改为[N, C*factor*factor, H/factor, W/factor]的形状。
+
 
 # 四、对比分析
+目前可以三种方案实现，组合API，C++ CPU算子， CUDA GPU算子。 组合API的方式的执行效率以及显存效率会稍微差一些; CUDA GPU算子可以将全部运算逻辑封装在一个kernel下运行，但就在这种简单逻辑处理来讲， 效率不会有非常大的提升。
+Pytorch支持三维张量, 对于四维张量来说相当于一个单通道，所以优势并不突出
+Pytorch不支持NHWC格式输入
 无论是C++实现还是组合API实现，其逻辑都是十分简单的，故考虑使用C++编写新的算子以期取得更高的效率。
+
 
 # 五、设计思路与实现方案
 
@@ -95,12 +120,49 @@ PixelUnshuffle与飞桨中已有的PixelShuffle在操作上是类似的，参考
 
 参考`paddle.nn.PixelShuffle`来实现`paddle.nn.PixelUnshuffle`，顺便实现`paddle.nn.functional.pixel_unshuffle`。
 
+## 代码实现文件路径
+
+在文件paddle/phi/kernels/impl/pixel_unshuffle_kernel_impl.h和paddle/phi/kernels/impl/pixel_unshuffle_grad_kernel_impl.h中编写主要的正向和反向计算逻辑：
+
+
+```c++
+template <typename T, typename Context>
+void PixelUnshuffleKernel(const Context& ctx,
+                          const DenseTensor& x,
+                          int downscale_factor,
+                          const std::string& data_format,
+                          DenseTensor* out);
+                          
+template <typename T, typename Context>
+void PixelUnshuffleGradKernel(const Context& ctx,
+                            const DenseTensor& out_grad,
+                            int downscale_factor,
+                            const std::string& data_format,
+                            DenseTensor* x_grad);
+```
+
+算子注册路径：
+
+```c++
+    paddle/phi/kernels/cpu/pixel_unshuffle_kernel.cc
+    paddle/phi/kernels/cpu/pixel_unshuffle_grad_kernel.cc
+    paddle/phi/kernels/gpu/pixel_unshuffle_kernel.cu
+    paddle/phi/kernels/gpu/pixel_unshuffle_grad_kernel.cu
+```
+nn.Layer组网API实现路径: python/paddle/nn/layer/vision.py
+函数API实现路径: python/paddle/nn/functional/vision.py
+单元测试路径： python/paddle/fluid/tests/unittests/test_pixel_unshuffle.py
+
 # 六、测试和验收的考量
 
 考虑测试的情况：
-- 与PyTorch的结果的一致性；
-- 反向传播的正确性；
-- 错误检查：`downscale_factor`不合法或不整除通道数时能正确抛出异常。
+- 计算结果跟Numpy基准值保持一致
+- 前向和反向传播梯度计算的正确性；
+- 支持NCHW以及NHWC输入数据格式， 不支持其他格式
+- `downscale_factor`输入合法性校验, 是否是正整数，是否能整除。
+- 覆盖CPU和GPU测试场景
+- 覆盖静态图和动态图测试场景
+- 入参的有效性和边界值测试
 
 # 七、可行性分析和排期规划
 已经基本实现，待该设计文档通过验收后可在短时间内提交。
