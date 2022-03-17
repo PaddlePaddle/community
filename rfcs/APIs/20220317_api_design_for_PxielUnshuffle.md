@@ -104,7 +104,7 @@ def shuffle_unit(self, x, downscale_factor):
 
 ## 飞桨
 
-TensorFlow目前没有直接提供`ChannelShuffle`的API，但是也可以通过组合API的方式实现该操作：
+飞桨目前没有直接提供`ChannelShuffle`的API，但是也可以通过组合API的方式实现该操作：
 
 ```python
 class PixelUnshuffle(paddle.nn.Layer):
