@@ -22,7 +22,21 @@ PixelUnshuffle是PixelShuffle 的逆操作，由论文《[Real-Time Single Image
 飞桨将支持PxielUnshuffle组网 API。
 
 # 二、飞桨现状
-飞桨目前不支持此功能，但可以通过组合API的方式实现此功能。
+飞桨目前不支持此功能，但可以通过组合API的方式实现此功能：
+```python
+class PixelUnshuffle(paddle.nn.Layer):
+    def __init__(self, downscale_factor):
+        super(PixelUnshuffle, self).__init__()
+        self.factor = downscale_factor
+        self.data_format = data_format
+
+    def forward(self, x):
+        n, c, h, w = x.shape
+        x = paddle.reshape(x, [n, c, h / self.factor, self.factor, w / self.factor, self.factor])
+        x = paddle.transpose(x, [0, 1, 3, 5, 2, 4])
+        x = paddle.reshape(x, [n, c * self.factor * self.factor, h / self.factor, w / self.factor])
+        return x
+```
 
 # 三、业内方案调研
 ## PyTorch
@@ -90,10 +104,10 @@ Tensor pixel_unshuffle(const Tensor& self, int64_t downscale_factor) {
 
 ## TensorFlow
 
-TensorFlow目前没有直接提供`ChannelShuffle`的API，但是也可以通过组合API的方式实现该操作：
+TensorFlow目前没有直接提供`PixelUnshuffle`的API，但是也可以通过组合API的方式实现该操作：
 
 ```python
-def shuffle_unit(self, x, downscale_factor):
+def pixel_unshuffle_unit(self, x, downscale_factor):
     with tf.variable_scope('pixel_unshuffle_unit'):
         n, h, w, c = x.get_shape().as_list()
         x = tf.reshape(x, shape=tf.convert_to_tensor([tf.shape(x)[0], h / downscale_factor, downscale_factor, w / downscale_factor, downscale_factor, c]))
@@ -102,28 +116,18 @@ def shuffle_unit(self, x, downscale_factor):
 
 ```
 
-## 飞桨
+## 实现逻辑
+我们以NCHW格式的4D张量为例来描述PixelUnshuffle的实现逻辑：
 
-飞桨目前没有直接提供`ChannelShuffle`的API，但是也可以通过组合API的方式实现该操作：
-
-```python
-class PixelUnshuffle(paddle.nn.Layer):
-    def __init__(self, downscale_factor):
-        super(PixelUnshuffle, self).__init__()
-        self.factor = downscale_factor
-        self.data_format = data_format
-
-    def forward(self, x):
-        n, c, h, w = x.shape
-        x = paddle.reshape(x, [n, c, h / self.factor, self.factor, w / self.factor, self.factor])
-        x = paddle.transpose(x, [0, 1, 3, 5, 2, 4])
-        x = paddle.reshape(x, [n, c * self.factor * self.factor, h / self.factor, w / self.factor])
-        return x
-```
-
+1. 把形为[N, C, H, W]的张量重塑成[N, C, H/r, r, W/r, r]的形状；
+2. 转置得到形为[N, C, r, r, H/r, W/r]的张量；
+3. 把形为[N, C, r, r, H/r, W/r]的张量重塑为[N, C\*r\*r, H/r, W/r]的形状。
 # 四、对比分析
 
-无论是C++实现还是组合API实现，其逻辑都是十分简单的，故考虑使用C++编写新的算子以期取得更高的效率。
+- PyTorch在C++层面为PixelUnshuffle设计了底层算子，执行效率高，但不利于（不参与框架设计的）开发者从源码层面了解该API的行为。
+- 使用组合API的方式来实现PixelUnshuffle是简洁易懂的，开发者可以直接从Python源码的层面来了解该API的行为，但在执行效率上可能会逊色于原生算子实现方案。
+
+无论是C++实现还是组合API实现，其逻辑都是十分简单的，故考虑使用C++编写新的算子以期取得更高的效率。另一方面，可以在文档中详细描述该API的行为，避免（不参与框架设计的）开发者在阅读源码上耗费过多时间。
 
 # 五、设计思路与实现方案
 
@@ -136,16 +140,79 @@ API设计为`paddle.nn.PixelUnshuffle(downscale_factor, data_format='NCHW')`，
 ## 底层OP设计
 PixelUnshuffle与飞桨中已有的PixelShuffle操作在逻辑上是一样的，故可参考PixelShuffle的OP设计来实现PixelUnshuffle的底层OP。
 
+核函数的原型（定义在`paddle/phi/kernels/pixel_unshuffle_kernel.h`）设计为
+
+```c++
+template <typename T, typename Context>
+void PixelUnshuffleKernel(const Context& ctx,
+                          const DenseTensor& x,
+                          int downscale_factor,
+                          const std::string& data_format,
+                          DenseTensor* out);
+```
+
+反向核函数的原型（定义在`paddle/phi/kernels/pixel_unshuffle_grad_kernel.h`）设计为
+
+```c++
+template <typename T, typename Context>
+void PixelUnshuffleGradKernel(const Context& ctx,
+                            const DenseTensor& out_grad,
+                            int downscale_factor,
+                            const std::string& data_format,
+                            DenseTensor* x_grad);
+```
+
+它们的实现定义在`paddle/phi/kernels/impl/pixel_unshuffle_kernel_impl.h`和`paddle/phi/kernels/impl/pixel_unshuffle_grad_kernel_impl.h`，它们的注册放在
+
+- `paddle/phi/kernels/cpu/pixel_unshuffle_kernel.cc`
+- `paddle/phi/kernels/cpu/pixel_unshuffle_grad_kernel.cc`
+- `paddle/phi/kernels/gpu/pixel_unshuffle_kernel.cu`
+- `paddle/phi/kernels/gpu/pixel_unshuffle_grad_kernel.cu`
+
 ## API实现方案
 
 参考`paddle.nn.PixelShuffle`来实现`paddle.nn.PixelUnshuffle`，顺便实现`paddle.nn.functional.pixel_unshuffle`。
 
+### nn.functional.pixel_unshuffle
+
+将`nn.functional.pixel_unshuffle`定义在`python/paddle/nn/functional/vision.py`中：
+
+```python
+def pixel_unshuffle(x, downscale_factor, data_format="NCHW", name=None):
+    # ...
+    if in_dynamic_mode():
+        return _C_ops.pixel_unshuffle(x, "downscale_factor", downscale_factor,
+                                      "data_format", data_format)
+		# ...
+    return out
+```
+
+### nn.PixelUnshuffle
+
+将`nn.PixelUnshuffle`定义在`python/paddle/nn/layer/vision.py`中：
+
+```python
+class PixelUnshuffle(Layer):
+    def __init__(self, downscale_factor, data_format="NCHW", name=None):
+        pass
+
+    def forward(self, x):
+        return functional.pixel_unshuffle(x, self._downscale_factor,
+                                          self._data_format, self._name)
+
+    def extra_repr(self):
+        pass
+```
+
 # 六、测试和验收的考量
 
-考虑测试的情况：
-- 与PyTorch的结果的一致性；
-- 反向传播的正确性；
-- 错误检查：`downscale_factor`不是正整数或不同时整除宽度和高度时能正确抛出异常。
+- 是否同时支持静态图和动态图；
+- 是否同时支持CPU和GPU平台；
+- 测试不同张量类型下的表现；
+- 对全部入参进行参数有效性和边界值测试，确定每个入参都可以正确生效；
+- 前向计算的正确性（与组合API实现比较、与PyTorch比较）；
+- 反向计算的正确性；
+- 当传入的`downscale_factor`不合法（不是正整数、不同时整除高度和宽度）时会抛出异常并有友好的提示。
 
 # 七、可行性分析和排期规划
 已经实现，待该设计文档通过验收后可马上提交。
