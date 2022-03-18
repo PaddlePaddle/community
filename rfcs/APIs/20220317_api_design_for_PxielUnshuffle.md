@@ -102,6 +102,14 @@ Tensor pixel_unshuffle(const Tensor& self, int64_t downscale_factor) {
 
 ```
 
+PyTorch在C++层面执行步骤为：
+
+1. 检查张量维度（要求>=3）；
+2. 检查downscale_factor是否为正数；
+3. 检查downscale_factor是否同时整除宽度和高度；
+4. 计算输出张量的形状；
+5. 按`PixelUnshuffle`的逻辑（见本小节末尾）向前计算。
+
 ## TensorFlow
 
 TensorFlow目前没有直接提供`PixelUnshuffle`的API，但是也可以通过组合API的方式实现该操作：
@@ -122,12 +130,16 @@ def pixel_unshuffle_unit(self, x, downscale_factor):
 1. 把形为[N, C, H, W]的张量重塑成[N, C, H/r, r, W/r, r]的形状；
 2. 转置得到形为[N, C, r, r, H/r, W/r]的张量；
 3. 把形为[N, C, r, r, H/r, W/r]的张量重塑为[N, C\*r\*r, H/r, W/r]的形状。
+
+这里的r就是代码中的`downscale_factor`。
+
 # 四、对比分析
 
-- PyTorch在C++层面为PixelUnshuffle设计了底层算子，执行效率高，但不利于（不参与框架设计的）开发者从源码层面了解该API的行为。
-- 使用组合API的方式来实现PixelUnshuffle是简洁易懂的，开发者可以直接从Python源码的层面来了解该API的行为，但在执行效率上可能会逊色于原生算子实现方案。
+在功能目的上，PyTorch的实现和Tensorflow的实现是一致的（其逻辑见上一小节末尾）。
 
-无论是C++实现还是组合API实现，其逻辑都是十分简单的，故考虑使用C++编写新的算子以期取得更高的效率。另一方面，可以在文档中详细描述该API的行为，避免（不参与框架设计的）开发者在阅读源码上耗费过多时间。
+不过PyTorch只支持NCHW格式的张量，而这里的TensorFlow实现是针对NHWC格式的。由于TensorFlow是通过组合API实现的，所以我们也很容易使它再支持NCHW格式的张量。
+
+考虑到PixelUnshuffle一般是结合卷积操作使用的，而飞桨中的卷积有`data_format`参数，因此我们可以让PixelUnshuffle也拥有`data_format`参数。
 
 # 五、设计思路与实现方案
 
@@ -206,13 +218,15 @@ class PixelUnshuffle(Layer):
 
 # 六、测试和验收的考量
 
-- 是否同时支持静态图和动态图；
-- 是否同时支持CPU和GPU平台；
-- 测试不同张量类型下的表现；
-- 对全部入参进行参数有效性和边界值测试，确定每个入参都可以正确生效；
-- 前向计算的正确性（与组合API实现比较、与PyTorch比较）；
-- 反向计算的正确性；
-- 当传入的`downscale_factor`不合法（不是正整数、不同时整除高度和宽度）时会抛出异常并有友好的提示。
+- 错误检查：
+   - `downscale_factor`不是整数时抛出异常，
+   - `downscale_factor`不是正数时抛出异常，
+   - `data_format`不是NCHW和NHWC中的一个时抛出异常，
+   - 输入的`x`不是4D张量时抛出异常；
+ - 向前计算：`data_format`分别为NCHW和NHWC时与NumPy的一致性
+ - 反向计算：`data_format`分别为NCHW和NHWC时与NumPy的一致性
+ - 平台支持：CPU和GPU
+ - 支持静态图和动态图
 
 # 七、可行性分析和排期规划
 已经实现，待该设计文档通过验收后可马上提交。
