@@ -5,7 +5,7 @@
 |提交作者<input type="checkbox" class="rowselector hidden"> | 李芳钰 | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-10 | 
 |版本号 | V1.0 | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.0 | 
+|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | 基于develop版本开发 | 
 |文件名 | 20220310_design_for_nanmean.md<br> | 
 
 # 一、概述
@@ -120,15 +120,6 @@ API设计为`paddle.nanmean(x, axis=None, keepdim=False, name=None)`
 
 # 八、影响面
 为独立新增API，对其他模块没有影响
-
-
-
-# 九、评审意见
-（由评审人填写，开发者无需填写）
-|问题 | 提出人 | 处理说明 | 状态 | 
-|---|---|---|---|
-| |  |  |  | 
-
 
 # 名词解释
 无
