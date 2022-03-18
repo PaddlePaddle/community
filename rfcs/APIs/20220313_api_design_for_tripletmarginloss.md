@@ -20,8 +20,7 @@ paddle.nn.TripletMarginLoss 是三元损失函数，其针对 anchor 和正负�
 
 # 二、飞桨现状
 
-目前paddle缺少相关功能实现。
-需要独立设计实现相关的函数
+飞桨内已有margin_rank_loss,rank_loss,hinge_loss 等类似的应用于度量学习的计算loss的方法。
 
 # 三、业内方案调研
 Pytorch 中有相关的`torch.nn.functional.triplet_margin_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`和`torch.nn.TripletMarginLoss(margin=1.0, p=2.0, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`
@@ -44,7 +43,7 @@ Pytorch 中有相关的`torch.nn.functional.triplet_margin_loss(anchor, positive
 > $$
 
 PyTorch C++ 代码：
-
+"""
 Tensor triplet_margin_loss(const Tensor& anchor, const Tensor& positive, const Tensor& negative, double margin,
                            double p, double eps, bool swap, int64_t reduction) {
   auto a_dim = anchor.dim();
@@ -73,9 +72,9 @@ Tensor triplet_margin_loss(const Tensor& anchor, const Tensor& positive, const T
 - 如果swap为True，计算正负锚点的距离，将dist_neg改为 负锚点与样本间距离与正负锚点的距离之间 较小的值。
 - 将dist_pos减去dist_neg加上margin，与0比较，取较大的值。
 - apply_loss_redution() 函数选择输出的方式包括（` mean`、`sum` 等）
-
+"""
 Tensorflow python 代码
-
+"""
 def triplet_loss(queries, positives, negatives, margin=0.1):
   """Calculates Triplet Loss.
   Triplet loss tries to keep all queries closer to positives than to any
@@ -113,7 +112,7 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
   loss = tf.reduce_sum(
       tf.maximum(distance_positives - distance_negatives + margin, 0.0))
   return loss
-  
+"""
  整体逻辑为：
 
 - 得到输入的batch_size和dim的大小，以及negatives的数目。
