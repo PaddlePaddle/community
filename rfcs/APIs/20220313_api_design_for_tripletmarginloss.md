@@ -72,9 +72,9 @@ Tensor triplet_margin_loss(const Tensor& anchor, const Tensor& positive, const T
 - 如果swap为True，计算正负锚点的距离，将dist_neg改为 负锚点与样本间距离与正负锚点的距离之间 较小的值。
 - 将dist_pos减去dist_neg加上margin，与0比较，取较大的值。
 - apply_loss_redution() 函数选择输出的方式包括（` mean`、`sum` 等）
-"""
+
 Tensorflow python 代码
-"""
+```
 def triplet_loss(queries, positives, negatives, margin=0.1):
   """Calculates Triplet Loss.
   Triplet loss tries to keep all queries closer to positives than to any
@@ -132,20 +132,19 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 共添加以下两个 API：
 
 
-- `padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度为[batch_size,dim] 
--                                          positive, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim] 
--                                          negative, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim] 
--                                          p=2.0, 求距离时的范数,
--                                          margin=1.0,
--                                          epsilon=1e-06,误差参数swap=False, 
--                                          reduction='mean', 'mean' 求平均,'sum'求和,'None'直接输出维度为[batch_size,1]
--                                          name=None) -> Tensor`
-- `paddle.nn.TripletMarginLoss(margin=1.0  
--                              p=2.0  
--                              epsilon=1e-06
--                              swap=False, 
--                              reduction='mean', 
--                              name=None) -> Tensor`
+`padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度为[batch_size,dim] 
+                                          positive, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim]                                                                                           negative, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim] 
+                                          p=2.0, 求距离时的范数,
+                                          margin=1.0,
+                                          epsilon=1e-06,误差参数swap=False, 
+                                          reduction='mean', 'mean' 求平均,'sum'求和,'None'直接输出维度为[batch_size,1]
+                                          name=None) -> Tensor`
+ `paddle.nn.TripletMarginLoss(margin=1.0  
+                              p=2.0  
+                              epsilon=1e-06                              
+                              swap=False, 
+                              reduction='mean', 
+                              name=None) -> Tensor`
 ## 底层OP设计
 ## API实现方案
 distance functions可以采用paddle.nn.PairWiseDistance来进行实现
