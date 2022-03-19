@@ -43,7 +43,7 @@ Pytorch 中有相关的`torch.nn.functional.triplet_margin_loss(anchor, positive
 > $$
 
 PyTorch C++ 代码：
-"""
+```
 Tensor triplet_margin_loss(const Tensor& anchor, const Tensor& positive, const Tensor& negative, double margin,
                            double p, double eps, bool swap, int64_t reduction) {
   auto a_dim = anchor.dim();
@@ -112,7 +112,7 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
   loss = tf.reduce_sum(
       tf.maximum(distance_positives - distance_negatives + margin, 0.0))
   return loss
-"""
+```
  整体逻辑为：
 
 - 得到输入的batch_size和dim的大小，以及negatives的数目。
