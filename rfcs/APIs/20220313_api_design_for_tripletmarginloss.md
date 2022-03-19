@@ -42,7 +42,8 @@ torch.nn.TripletMarginLoss(margin=1.0,
                               swap=False, 
                               size_average=None, 
                               reduce=None, 
-                              reduction='mean') -> Tensor```
+                              reduction='mean') -> Tensor
+```
 
 在 pytorch 中，介绍为：
 
