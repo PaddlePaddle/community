@@ -1,12 +1,12 @@
 # paddle.frac设计文档
 
-| API名称                                                      | 新增API名称                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                                              |
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-19                                                   |
-| 版本号                                                       | 此设计文档的版本号，如V1.0                                   |
-| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                                      |
-| 文件名                                                       | 提交的markdown设计文档文件名称，如：20200319_api_design_for_frac.md<br> |
+| API名称                                                      | 新增API名称                     |
+| ------------------------------------------------------------ | ------------------------------- |
+| 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                 |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-19                      |
+| 版本号                                                       | V1.0                            |
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                         |
+| 文件名                                                       | 20200319_api_design_for_frac.md |
 
 
 # 一、概述
