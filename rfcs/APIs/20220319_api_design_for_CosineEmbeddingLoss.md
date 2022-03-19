@@ -30,7 +30,7 @@
 
 ## Pytorch
 
-pytorch中由API `torch.nn.CosineEmbeddingLoss(margin=0.0, size_average=None, reduce=None, reduction='mean')`以及对应的`torch.nn.functional.``cosine_embedding_loss(input1, input2, target, margin=0, size_average=None, reduce=None, reduction='mean')->Tensor`，在pytorch中，介绍为：
+pytorch中由API `torch.nn.CosineEmbeddingLoss(margin=0.0, size_average=None, reduce=None, reduction='mean')`以及对应的`torch.nn.functional.cosine_embedding_loss(input1, input2, target, margin=0, size_average=None, reduce=None, reduction='mean')->Tensor`，在pytorch中，介绍为：
 
 ~~~
 Creates a criterion that measures the loss given input tensors x1, x2 and a Tensor label y with values 1 or -1. This is used for measuring whether two inputs are similar or dissimilar, using the cosine distance, and is typically used for learning nonlinear embeddings or semi-supervised learning.
@@ -122,11 +122,14 @@ def cosine_similarity(y_true, y_pred, axis=-1):
 
 ## 命名与参数设计
 
-API设计为`paddle.optimizer.lr.CyclicLR(base_learning_rate,max_learning_rate,step_size_up,step_size_down, mode='triangular',gamma=1.,scale_fn=None,scale_mode='cycle',last_epoch=-1,verbose=False)`
+CosineEmbeddingLoss的API设计为`torch.nn.CosineEmbeddingLoss(margin=0, reduction='mean')`，cosine_embedding_loss的API设计为`torch.nn.functional.cosine_embedding_loss(x1, x2, target)`
 
-去除了Pytorch中`momentum`的相关参数。
+整体设计与paddle保持一致，其中：
 
-同时，为了保持与paddle其他lrscheduler相关的api保持一致，将`base_lr`修改为`base_learning_rate`，`max_lr`修改为`max_learning_rate`。
+* margin：余弦相似度损失函数中的margin值
+* reduction：结果后处理的类型，可以为`mean`或者`sum`
+* x1和x2：输入的两个tensor
+* target：真实的类别标签
 
 ## 底层OP设计
 
@@ -147,7 +150,7 @@ API设计为`paddle.optimizer.lr.CyclicLR(base_learning_rate,max_learning_rate,s
 
 - 动态图，静态图，与numpy的结果保持一致；
 - 输入含`NaN`结果的正确性；
-- 错误检查：`input`和 `target`维度不为1-0或2-1时能抛出输入维度错误；
+- 错误检查：`input`和 `target`维度不为不合规时能抛出输入维度错误；
 
 # 七、可行性分析及规划排期
 
