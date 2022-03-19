@@ -67,7 +67,7 @@ Tensor triplet_margin_loss(const Tensor& anchor, const Tensor& positive, const T
   auto output = at::clamp_min(margin + dist_pos - dist_neg, 0);
   return apply_loss_reduction(output, reduction);
 }
-
+```
 - 分别计算样本与正负锚点的距离dist_pos,dist_neg，
 - 如果swap为True，计算正负锚点的距离，将dist_neg改为 负锚点与样本间距离与正负锚点的距离之间 较小的值。
 - 将dist_pos减去dist_neg加上margin，与0比较，取较大的值。
