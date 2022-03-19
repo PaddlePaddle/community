@@ -12,15 +12,16 @@
 
 # 一、概述
 ## 1、相关背景
-为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充APIpaddle.nn.TripleMarginDistanceLoss以及paddle.nn.functional.triplet_margin_with_distance_loss
+为了提升飞桨API丰富度，Paddle需要扩充APIpaddle.nn.TripleMarginDistanceLoss以及paddle.nn.functional.triplet_margin_with_distance_loss
 ## 2、功能目标
-paddle.nn.TripletMarginDistanceLoss 是三元损失函数，其针对 anchor 和正负对计算 任意给定距离函数下的三元损失，从而获得损失值。
+paddle.nn.TripletMarginDistanceLoss 是三元损失函数，其针对样本和正负锚点计算任意给定距离函数下的三元损失，从而获得损失值。
 ## 3、意义
 为 paddle 框架中新增计算损失函数的方法
 
 # 二、飞桨现状
 目前paddle缺少相关功能实现。
 需要独立设计实现相关的函数。
+飞桨内已有margin_rank_loss,rank_loss,hinge_loss 等类似的应用于度量学习的计算loss的方法。
 可以在之前TripletMarginLoss的基础上设计。
 
 # 三、业内方案调研
@@ -95,7 +96,7 @@ def triplet_margin_with_distance_loss(
 - 分别计算样本与正负锚点的距离dist_pos,dist_neg，
 - 如果swap为True，计算正负锚点的距离，将dist_neg改为 负锚点与样本间距离与正负锚点的距离之间 较小的值。
 - 将dist_pos减去dist_neg加上margin，与0比较，取较大的值。
-- apply_loss_redution() 函数选择输出的方式包括（ mean、sum 等
+- reduction_enum 函数选择输出的方式包括 None、mean、sum 等
 
 tensorflow 代码
 ```
