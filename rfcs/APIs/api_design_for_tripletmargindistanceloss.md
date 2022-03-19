@@ -14,17 +14,18 @@
 ## 1、相关背景
 为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充APIpaddle.nn.TripleMarginDistanceLoss以及paddle.nn.functional.triplet_margin_with_distance_loss
 ## 2、功能目标
-paddle.nn.TripletMarginDistanceLoss 是三元损失函数，其针对 anchor 和正负对计算 P 范数距离下的三元损失，从而获得损失值。
+paddle.nn.TripletMarginDistanceLoss 是三元损失函数，其针对 anchor 和正负对计算 任意给定距离函数下的三元损失，从而获得损失值。
 ## 3、意义
 为 paddle 框架中新增计算损失函数的方法
 
 # 二、飞桨现状
-对飞桨框架目前支持此功能的现状调研，如果不支持此功能，如是否可以有替代实现的API，是否有其他可绕过的方式，或者用其他API组合实现的方式；
 目前paddle缺少相关功能实现。
-需要独立设计实现相关的函数
+需要独立设计实现相关的函数。
+可以在之前TripletMarginLoss的基础上设计。
 
 # 三、业内方案调研
-Pytorch 中有相关的`torch.nn.functional.triplet_margin_with_distance_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`和`torch.nn.TripletMarginLoss(margin=1.0, p=2.0, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`
+Pytorch 中有相关的
+`torch.nn.functional.triplet_margin_with_distance_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`和`torch.nn.TripletMarginLoss(margin=1.0, p=2.0, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`
 
 在 pytorch 中，介绍为：
 
@@ -37,15 +38,120 @@ Pytorch 中有相关的`torch.nn.functional.triplet_margin_with_distance_loss(an
 > L(a, p, n)=\max \left\{d\left(a_{i}, p_{i}\right)-d\left(a_{i}, n_{i}\right)+\operatorname{margin}, 0\right\}
 > $$
 >
+Pytorch 代码
+```
+def triplet_margin_with_distance_loss(
+    anchor: Tensor,
+    positive: Tensor,
+    negative: Tensor,
+    *,
+    distance_function: Optional[Callable[[Tensor, Tensor], Tensor]] = None,
+    margin: float = 1.0,
+    swap: bool = False,
+    reduction: str = "mean"
+) -> Tensor:
+    r"""
+    See :class:`~torch.nn.TripletMarginWithDistanceLoss` for details.
+    """
+    if torch.jit.is_scripting():
+        raise NotImplementedError(
+            "F.triplet_margin_with_distance_loss does not support JIT scripting: "
+            "functions requiring Callables cannot be scripted."
+        )
 
+    if has_torch_function_variadic(anchor, positive, negative):
+        return handle_torch_function(
+            triplet_margin_with_distance_loss,
+            (anchor, positive, negative),
+            anchor,
+            positive,
+            negative,
+            distance_function=distance_function,
+            margin=margin,
+            swap=swap,
+            reduction=reduction,
+        )
+
+    distance_function = distance_function if distance_function is not None else pairwise_distance
+
+    positive_dist = distance_function(anchor, positive)
+    negative_dist = distance_function(anchor, negative)
+
+    if swap:
+        swap_dist = distance_function(positive, negative)
+        negative_dist = torch.min(negative_dist, swap_dist)
+
+    output = torch.clamp(positive_dist - negative_dist + margin, min=0.0)
+
+    reduction_enum = _Reduction.get_enum(reduction)
+    if reduction_enum == 1:
+        return output.mean()
+    elif reduction_enum == 2:
+        return output.sum()
+    else:
+        return output
+```
+- 定义distance_function，如果没有传入参数就设为2norm距离函数
+- 分别计算样本与正负锚点的距离dist_pos,dist_neg，
+- 如果swap为True，计算正负锚点的距离，将dist_neg改为 负锚点与样本间距离与正负锚点的距离之间 较小的值。
+- 将dist_pos减去dist_neg加上margin，与0比较，取较大的值。
+- apply_loss_redution() 函数选择输出的方式包括（ mean、sum 等
+
+tensorflow 代码
+```
+def triplet_loss(queries, positives, negatives, margin=0.1):
+  """Calculates Triplet Loss.
+  Triplet loss tries to keep all queries closer to positives than to any
+  negatives. Differently from the Contrastive Loss, Triplet Loss uses squared
+  distances when computing the loss.
+  Args:
+    queries: [batch_size, dim] Anchor input tensor.
+    positives: [batch_size, dim] Positive sample input tensor.
+    negatives: [batch_size, num_neg, dim] Negative sample input tensor.
+    margin: Float triplet loss loss margin.
+  Returns:
+    loss: Scalar tensor.
+  """
+  dim = tf.shape(queries)[1]
+  # Number of `queries`.
+  batch_size = tf.shape(queries)[0]
+  # Number of `negatives`.
+  num_neg = tf.shape(negatives)[1]
+
+  # Preparing negatives.
+  stacked_negatives = tf.reshape(negatives, [num_neg * batch_size, dim])
+
+  # Preparing queries for further loss calculation.
+  stacked_queries = tf.repeat(queries, num_neg, axis=0)
+
+  # Preparing positives for further loss calculation.
+  stacked_positives = tf.repeat(positives, num_neg, axis=0)
+
+  # Computes *squared* distances.
+  distance_positives = tf.reduce_sum(
+      tf.square(stacked_queries - stacked_positives), axis=1)
+  distance_negatives = tf.reduce_sum(
+      tf.square(stacked_queries - stacked_negatives), axis=1)
+  # Final triplet loss calculation.
+  loss = tf.reduce_sum(
+      tf.maximum(distance_positives - distance_negatives + margin, 0.0))
+  return loss
+```
+
+
+- 得到输入的batch_size和dim的大小，以及negatives的数目。
+- 将queries，positives，negatives的维度都改为[num_neg*batch_size,dim]。
+- 通过计算正负锚点与样本之间2范数距离，并分别求和得到 distance_positives 和 distance_negatives
+- 通过 tf.maximum() ，计算出 loss
 
 # 四、对比分析
-paddle 和 pytorch整体框架相似，故直接采用其方法进行设计。
-
+- 1.pytorch对输入的数据维度进行一致性检测，并且支持任意distance_function包括lambda以及def的函数计算，tensorflow没有维度的检查，且只支持平方差计算。 
+- 2.tensorflow没有swap和eps的参数选线，没有实现swap功能。 
+- 3.pytorch可以选择reduction方法,即"mean","sum","None"。 
+- 总体看来pytorch的设计功能更加完善丰富一些，且pytorch框架与paddle相似，故采用pytorch的方案。
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
-参考：[飞桨API 设计及命名规范]
 共添加以下两个 API：
 
 - `paddle.nn.TripletMarginDistanceLoss(margin=1.0, distance_function=None, swap=False, reduction='mean', name=None) -> Tensor`
