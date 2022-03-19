@@ -124,6 +124,7 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 1.pytorch对输入的数据维度进行一致性检测，并且支持p范数的计算，tensorflow没有维度的检查，只支持平方差计算。
 2.tensorflow没有swap和eps的参数选线，没有实现swap功能。
 3.pytorch可以选择reduction方法,即"mean","sum","None"。
+总体看来pytorch的设计功能更加完善丰富一些，且pytorch框架与paddle相似，故采用pytorch的方案。
 
 
 # 五、设计思路与实现方案
@@ -132,19 +133,19 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 共添加以下两个 API：
 
 
-`padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度为[batch_size,dim] 
+padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度为[batch_size,dim] 
                                           positive, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim]                                                                                           negative, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim] 
                                           p=2.0, 求距离时的范数,
                                           margin=1.0,
                                           epsilon=1e-06,误差参数swap=False, 
                                           reduction='mean', 'mean' 求平均,'sum'求和,'None'直接输出维度为[batch_size,1]
-                                          name=None) -> Tensor`
- `paddle.nn.TripletMarginLoss(margin=1.0  
+                                          name=None) -> Tensor
+ paddle.nn.TripletMarginLoss(margin=1.0  
                               p=2.0  
                               epsilon=1e-06                              
                               swap=False, 
                               reduction='mean', 
-                              name=None) -> Tensor`
+                              name=None) -> Tensor
 ## 底层OP设计
 ## API实现方案
 distance functions可以采用paddle.nn.PairWiseDistance来进行实现
