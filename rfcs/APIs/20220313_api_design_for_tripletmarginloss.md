@@ -12,7 +12,7 @@
 
 # 一、概述
 ## 1、相关背景
-为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充APIpaddle.nn.TripleMarginLoss以及paddle.nn.functional.triple_margin_loss
+Paddle需要扩充APIpaddle.nn.TripleMarginLoss以及paddle.nn.functional.triple_margin_loss
 ## 2、功能目标
 paddle.nn.TripletMarginLoss 是三元损失函数，其针对 anchor 和正负对计算 P 范数距离下的三元损失，从而获得损失值。
 ## 3、意义
@@ -141,10 +141,10 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 - 通过 `tf.maximum()` ，计算出 loss
 
 # 四、对比分析
-1.pytorch对输入的数据维度进行一致性检测，并且支持p范数的计算，tensorflow没有维度的检查，只支持平方差计算。
-2.tensorflow没有swap和eps的参数选线，没有实现swap功能。
-3.pytorch可以选择reduction方法,即"mean","sum","None"。
-总体看来pytorch的设计功能更加完善丰富一些，且pytorch框架与paddle相似，故采用pytorch的方案。
+- 1.pytorch对输入的数据维度进行一致性检测，并且支持p范数的计算，tensorflow没有维度的检查，只支持平方差计算。
+- 2.tensorflow没有swap和eps的参数，没有实现swap功能。 
+- 3.pytorch可以选择reduction方法,即"mean","sum","None"。 
+- 总体看来pytorch的设计功能更加完善丰富一些，且pytorch框架与paddle相似，故采用pytorch的方案。。
 
 
 # 五、设计思路与实现方案
