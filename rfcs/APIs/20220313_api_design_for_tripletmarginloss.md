@@ -23,7 +23,26 @@ paddle.nn.TripletMarginLoss 是三元损失函数，其针对 anchor 和正负�
 飞桨内已有margin_rank_loss,rank_loss,hinge_loss 等类似的应用于度量学习的计算loss的方法。
 
 # 三、业内方案调研
-Pytorch 中有相关的`torch.nn.functional.triplet_margin_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`和`torch.nn.TripletMarginLoss(margin=1.0, p=2.0, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`
+Pytorch 中有相关的函数       
+```
+torch.nn.functional.triplet_margin_loss(anchor,
+                                           positive, 
+                                           negative, 
+                                           margin=1.0, 
+                                           p=2, 
+                                           eps=1e-06, 
+                                           swap=False, 
+                                           size_average=None, 
+                                           reduce=None, 
+                                           reduction='mean') -> Tensor
+   和
+torch.nn.TripletMarginLoss(margin=1.0, 
+                              p=2.0, 
+                              eps=1e-06, 
+                              swap=False, 
+                              size_average=None, 
+                              reduce=None, 
+                              reduction='mean') -> Tensor```
 
 在 pytorch 中，介绍为：
 
