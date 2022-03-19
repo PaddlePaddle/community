@@ -161,9 +161,10 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 ## API实现方案
 distance functions可以采用paddle.nn.PairWiseDistance来进行实现
 1. 检查参数
-
+    
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
    2. 检查输入的 dtype（含 `input`、`positive`、`negative`）（同其余 functional loss 中的实现）
+   3. 检查输入的`input`、`positive`、`negative`维度是否相同
 
 2. 计算
 
@@ -175,10 +176,12 @@ distance functions可以采用paddle.nn.PairWiseDistance来进行实现
 # 六、测试和验收的考量
 
 测试考虑的case如下:
-1.动态图，静态图，要与np计算下的结果输出需要一致。
-2.自定义distanc_function动态图静态图下输出一致。
-2.在swap下，动态图静态图输出结果一致。
-
+- 1.动态图，静态图，要与np计算下的结果输出需要一致。
+- 2.CPU、GPU下计算一致。
+- 3.各reduction下计算一致
+- 4.各参数输入有效。
+- 5.反向梯度的正确性。
+- 
 # 七、可行性分析和排期规划
 方案主要依赖现有paddle api组合而成，可以满足在当前版本周期内开发完成。
 
