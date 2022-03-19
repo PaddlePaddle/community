@@ -132,7 +132,7 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 ## 命名与参数设计
 共添加以下两个 API：
 
-
+```
 padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度为[batch_size,dim] 
                                           positive, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim]                                                                                           negative, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim] 
                                           p=2.0, 求距离时的范数,
@@ -146,6 +146,7 @@ padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度�
                               swap=False, 
                               reduction='mean', 
                               name=None) -> Tensor
+```
 ## 底层OP设计
 ## API实现方案
 distance functions可以采用paddle.nn.PairWiseDistance来进行实现
