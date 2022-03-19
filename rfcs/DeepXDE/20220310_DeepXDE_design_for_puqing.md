@@ -4,7 +4,7 @@
 |---|---|
 |提交作者 | 梁嘉铭 |
 |提交时间 | 2022-03-10 |
-|版本号 | V1.0 |
+|版本号 | V1.1 |
 |依赖飞桨版本 | develop版本 |
 |文件名 | 20220310_DeepXDE_design.md|
 
@@ -22,7 +22,7 @@
 
 2. Support solving forward ODEs
    
-   Goal: Support the following test examples: A simple ODE system, Lotka-Volterra equation
+   Goal: Support the following test examples: A simple ODE system
 
 3. Support solving inverse ODEs
 
@@ -54,11 +54,21 @@ Tensorflow、Pytorch、jax均在deepxde中得到支持。`pytorch`在[L183-L475]
 
 实现方式主要参考`Pytorch`的实现方式，并且做了一些改动。
 
+## 求解Jacobian
+
+在paddle中已经通过[commit提交](https://github.com/PaddlePaddle/Paddle/commit/ec2f68e85d413655d5774d03fb81c5ba13db54cd)对Jacobian进行了支持，该求导方式就是通过`paddle.grad()`对函数求导，而deepxde已经实现了Jacobian类，所以只需要求解y对x的导即可，使用`paddle.autograd.grad`进行求导，具体为
+
+```python
+self.J[i] = paddle.autograd.grad(y, self.xs, create_graph=True, retain_graph=True)[0]
+```
+
+含义为求解y对x的导，并且保留求导过程中的计算图，以便后续求解y对x的二阶导。
+
 # 六、测试和验收的考量
 
 根据任务要求，测试在excample中如下文件。
 -  func.py, dataset.py
--  ode_system.py, Lotka_Volterra.py
+-  ode_system.py
 -  Lorenz_inverse.py, Lorenz_inverse_forced.ipynb
 
 # 七、可行性分析和排期规划
@@ -67,3 +77,6 @@ paddle日益完善，基础算子以及函数均有支持，但是暂时不支�
 
 # 八、影响面
 对deepxde新增backend, 无影响
+
+# 九、Feature
+pinn中需要利用到sin/cos的高阶导数，所以希望未来Paddle可以支持sin/cos的高阶导数，同时为了支持L-BFGS方法，需要添加相关优化器的实现，以便优化loss。
