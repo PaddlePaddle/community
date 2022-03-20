@@ -26,7 +26,7 @@ paddle.nn.Softmax2D 是 [paddle.nn.Softmax](https://www.paddlepaddle.org.cn/docu
 
 # 二、飞桨现状
 
-可以使用`Softmax`API进行实现
+paddle中有相关API [paddle.nn.softmax](https://github.com/PaddlePaddle/Paddle/blob/release/2.2/python/paddle/nn/layer/activation.py#L1051)，使用底层算子实现，`softmax2d`可以使用`softmax`API进行实现
 
 # 三、业内方案调研
 
@@ -56,11 +56,14 @@ def forward(self, input: Tensor) -> Tensor:
 	return F.softmax(input, -3, _stacklevel=5)
 ```
 
+主要逻辑如下：
 
+1. 对输入的维度进行判断；
+2. 直接调用`torch.functional.softmax`，并将`dim`固定为-3。
 
 # 四、对比分析
 
-
+并未找到其他实现。
 
 # 五、设计思路与实现方案
 
