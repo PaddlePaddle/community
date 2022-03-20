@@ -1,12 +1,12 @@
 #paddle.optimizer.lr.OneCycleLR设计文档
 
-| API名称                                    | paddle.optimizer.lr.OneCycleLR           |
-| ---------------------------------------- | ---------------------------------------- |
-| 提交作者<input type="checkbox" class="rowselector hidden"> | Asthestarsfalll                          |
-| 提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-12                               |
-| 版本号                                      | V1.0                                     |
-| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.0                                   |
-| 文件名                                      | 20210312_api_design_for_one_cycle_lr.md<br> |
+| API名称                                                      | paddle.optimizer.lr.OneCycleLR              |
+| ------------------------------------------------------------ | ------------------------------------------- |
+| 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                             |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-12                                  |
+| 版本号                                                       | V1.0                                        |
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                     |
+| 文件名                                                       | 20210312_api_design_for_one_cycle_lr.md<br> |
 
 # 一、概述
 
@@ -94,15 +94,68 @@ def get_lr(self):
     return lrs
 ```
 
+## 其他实现
+
+该[仓库](https://github.com/dkumazaw/onecyclelr/blob/master/onecyclelr.py)有一个基于Pytorch的实现，[代码位置](https://github.com/dkumazaw/onecyclelr/blob/master/onecyclelr.py#L4)
+
+介绍为：
+
+```
+ Sets the learing rate of each parameter group by the one cycle learning rate policy
+ proposed in https://arxiv.org/pdf/1708.07120.pdf. 
+ It is recommended that you set the max_lr to be the learning rate that achieves 
+ the lowest loss in the learning rate range test, and set min_lr to be 1/10 th of max_lr.
+ So, the learning rate changes like min_lr -> max_lr -> min_lr -> final_lr, 
+ where final_lr = min_lr * reduce_factor.
+ Note: Currently only supports one parameter group.
+```
+
+核心代码：
+
+```python
+    def step(self):
+        """Conducts one step of learning rate and momentum update
+        """
+        current_step = self.last_step + 1
+        self.last_step = current_step
+
+        if current_step <= self.num_cycle_steps // 2:
+            # Scale up phase
+            scale = current_step / (self.num_cycle_steps // 2)
+            lr = self.min_lr + (self.max_lr - self.min_lr) * scale
+            momentum = self.max_momentum - (self.max_momentum - self.min_momentum) * scale
+        elif current_step <= self.num_cycle_steps:
+            # Scale down phase
+            scale = (current_step - self.num_cycle_steps // 2) / (self.num_cycle_steps - self.num_cycle_steps // 2)
+            lr = self.max_lr - (self.max_lr - self.min_lr) * scale
+            momentum = self.min_momentum + (self.max_momentum - self.min_momentum) * scale
+        elif current_step <= self.num_steps:
+            # Annihilation phase: only change lr
+            scale = (current_step - self.num_cycle_steps) / (self.num_steps - self.num_cycle_steps)
+            lr = self.min_lr - (self.min_lr - self.final_lr) * scale
+            momentum = None
+        else:
+            # Exceeded given num_steps: do nothing
+            return
+
+        self.optimizer.param_groups[0]['lr'] = lr
+        if momentum:
+            self.optimizer.param_groups[0]['momentum'] = momentum
+```
+
 
 
 # 四、对比分析
+
+两种实现基于Pytorch，思路基本相同，Pytorch官方实现更加简洁完善，因此参考Pytorch代码进行实现。
+
+
 
 # 五、方案设计
 
 ## 命名与参数设计
 
-API设计为`paddle.optimizer.lr.OneCycleLR(max_lr, total_step=None, epochs=None, steps_per_epoch=None, pct_start=0.3, anneal_strategy='cos', divide_factor=25., final_divide_factor=1e4, three_phase=False, last_epoch=-1, verbose=False)`
+API设计为`paddle.optimizer.lr.OneCycleLR(max_learning_rate, total_steps=None, epochs=None, steps_per_epoch=None, pct_start=0.3, anneal_strategy='cos', divide_factor=25., final_divide_factor=1e4, three_phase=False, last_epoch=-1, verbose=False)`
 
 形参名`div_factor`->`divide_factor`, `final_div_factor`->`final_divide_factor`
 
@@ -110,7 +163,7 @@ API设计为`paddle.optimizer.lr.OneCycleLR(max_lr, total_step=None, epochs=None
 
 ## 底层OP设计
 
-仅使用python实现
+仅使用python实现，无需设计底层OP。
 
 ## API实现方案
 
