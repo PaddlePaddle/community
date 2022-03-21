@@ -36,10 +36,10 @@
 
 国内外主流框架及其文档组织风格罗列如下：
 
-- TensorFlow 2.0：[TF 文档](https://www.tensorflow.org/overview) 主要分为 learn、tutorial、guide、API 四个分类。
+- TensorFlow：[TF 文档](https://www.tensorflow.org/overview) 主要分为 learn、tutorial、guide、API 四个分类。
 - PyTorch：[PyTorch](https://pytorch.org/docs/stable/index.html) 主要分为 tutorial 和 API 两个分类。
-- 飞桨 2.0： [Paddle](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html) 主要分为 使用指南、应用实践、API 与 FAQ 四个分类。
-- OneFlow 0.5： [OneFlow](https://docs.oneflow.org) 主要包括了教程与 API 两个分类。
+- 飞桨： [Paddle](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html) 主要分为 使用指南、应用实践、API 与 FAQ 四个分类。
+- OneFlow： [OneFlow](https://docs.oneflow.org) 主要包括了教程与 API 两个分类。
 - MindSpore： [MindSpore](https://www.mindspore.cn/lite) 主要包括了教程、文档、API 三个分类。
 
 
