@@ -6,7 +6,7 @@
 |提交作者<input type="checkbox" class="rowselector hidden"> | 李强、张明 | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-01 | 
 |版本号 | 此设计文档的版本号，如V1.0 | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | 基于飞桨哪个版本开发的，黑客松活动应为develop | 
+|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | 如无特殊情况，都应基于develop版本开发 | 
 |文件名 | 提交的markdown设计文档文件名称，如：20200301_api_design_for_dataset.md<br> | 
 
 
@@ -43,14 +43,6 @@
 
 # 八、影响面
 需要进一步讨论的问题，开放性问题，有争议问题；对其他模块是否有影响
-
-# 九、评审意见
-（由评审人填写，开发者无需填写）
-
-|问题 | 提出人 | 处理说明 | 状态 | 
-|---|---|---|---|
-|   |   |   |   | 
-
 
 # 名词解释
 
