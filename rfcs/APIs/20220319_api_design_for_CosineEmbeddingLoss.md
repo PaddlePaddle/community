@@ -88,7 +88,9 @@ Tensor cosine_embedding_loss(const Tensor& input1, const Tensor& input2, const T
 1. 首先判定输入维度是否正确
 2. 计算向量点乘`prod_sum`和向量二阶范式乘积`denom`
 3. 求出余弦相似度`cos = prod_sum / denom`
-4. 计算出正负样本损失值总和`output`
+4. 对正负样本结果做不同处理，即`output = output_pos + output_neg`
+   * 当`target`为1时，`output_pos`为`1 - cos`，此时`output_neg`为0
+   * 当`target`为1时，且如果`cos - margin`大于0，`output_neg`为`cos - margin`，否则为0，此时`output_pos`为0
 5. 利用已实现API进行结果后处理`apply_loss_reduction(output, reduction)`
 
 ## 其他实现
@@ -122,7 +124,7 @@ def cosine_similarity(y_true, y_pred, axis=-1):
 
 ## 命名与参数设计
 
-CosineEmbeddingLoss的API设计为`torch.nn.CosineEmbeddingLoss(margin=0, reduction='mean')`，cosine_embedding_loss的API设计为`torch.nn.functional.cosine_embedding_loss(x1, x2, target)`
+CosineEmbeddingLoss的API设计为`paddle.nn.CosineEmbeddingLoss(margin=0, reduction='mean')`，cosine_embedding_loss的API设计为`paddle.nn.functional.cosine_embedding_loss(x1, x2, target, margin=0, reduction='mean')`
 
 整体设计与paddle保持一致，其中：
 
@@ -130,6 +132,38 @@ CosineEmbeddingLoss的API设计为`torch.nn.CosineEmbeddingLoss(margin=0, reduct
 * reduction：结果后处理的类型，可以为`mean`或者`sum`
 * x1和x2：输入的两个tensor
 * target：真实的类别标签
+
+在pytorch中，CosineEmbeddingLoss还有`size_average`、`reduce`两个参数，但是已经弃用，其功能转移到`reduction`参数上。两个参数的描述文档如下
+
+~~~
+size_average (bool, optional) – Deprecated (see reduction). By default, the losses are averaged over each loss element in the batch. Note that for some losses, there are multiple elements per sample. If the field size_average is set to False, the losses are instead summed for each minibatch. Ignored when reduce is False. Default: True
+
+reduce (bool, optional) – Deprecated (see reduction). By default, the losses are averaged or summed over observations for each minibatch depending on size_average. When reduce is False, returns a loss per batch element instead and ignores size_average. Default: True
+~~~
+
+通过查看pytorch源码可以确认，两个参数只是引用时可以传入，但是之后不再调用
+
+~~~python
+    def __init__(self, margin: float = 0., size_average=None, reduce=None, reduction: str = 'mean') -> None:
+        super(CosineEmbeddingLoss, self).__init__(size_average, reduce, reduction)
+        self.margin = margin
+
+    def forward(self, input1: Tensor, input2: Tensor, target: Tensor) -> Tensor:
+        return F.cosine_embedding_loss(input1, input2, target, margin=self.margin, reduction=self.reduction)
+~~~
+
+在cosine_embedding_loss中，也有`size_average`、`reduce`两个参数，并且默认为`None`，下面是cosine_embedding_loss部分源码
+
+~~~python
+    if size_average is not None or reduce is not None:
+        reduction_enum = _Reduction.legacy_get_enum(size_average, reduce)
+    else:
+        reduction_enum = _Reduction.get_enum(reduction)
+~~~
+
+可以看到只有当`size_average`或`reduce`不为`None`时，才会作为`reduction`的替代，并由C++算子调用
+
+因此此处省略`size_average`、`reduce`两个参数
 
 ## 底层OP设计
 
@@ -142,7 +176,11 @@ CosineEmbeddingLoss的API设计为`torch.nn.CosineEmbeddingLoss(margin=0, reduct
 1. 使用`paddle.zero`初始化结果列表
 2. 使用`paddle.matmul`实现向量点乘
 3. 使用`paddle.norm`实现向量二次范数相乘
-4. 使用paddle API`sum` 和`mean` 实现reduction计算
+4. 利用python语句和内置`max`函数实现正负样本分开处理
+   * 若标签为1，正样本损失值为`1 - 余弦相似度`
+   * 若标签为-1，`余弦相似度-margin`小于0，负样本损失值为0
+   * 若标签为-1，`余弦相似度-margin`大于0，负样本损失值为`余弦相似度-margin`
+5. 使用paddle API`sum` 和`mean` 实现reduction计算
 
 # 六、测试和验收的考量
 
@@ -150,7 +188,9 @@ CosineEmbeddingLoss的API设计为`torch.nn.CosineEmbeddingLoss(margin=0, reduct
 
 - 动态图，静态图，与numpy的结果保持一致；
 - 输入含`NaN`结果的正确性；
-- 错误检查：`input`和 `target`维度不为不合规时能抛出输入维度错误；
+- 错误检查：`input`和 `target`维度不合规时能抛出输入维度错误；
+- 错误检查：`margin`设置超出[-1, 1]范围时抛出参数设置错误；
+- 错误检查：`reduction`设置除`sum` 和`mean`以外时抛出参数设置错误；
 
 # 七、可行性分析及规划排期
 
