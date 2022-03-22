@@ -154,7 +154,7 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 
 ```
 padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度为[batch_size,dim] 
-                                          positive, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim]                                                                                           negative, 1 or -1 Tensor[float64 or float32],维度为[batch_size,dim] 
+                                          positive, Tensor[float64 or float32],维度为[batch_size,dim]                                                                                                 negative, Tensor[float64 or float32],维度为[batch_size,dim] 
                                           p=2.0, 求距离时的范数,
                                           margin=1.0,
                                           epsilon=1e-06,误差参数swap=False, 
@@ -169,16 +169,15 @@ padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度�
 ```
 ## 底层OP设计
 ## API实现方案
-distance functions可以采用paddle.nn.PairWiseDistance来进行实现
 1. 检查参数
 
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
    2. 检查输入的 dtype（含 `input`、`positive`、`negative`）（同其余 functional loss 中的实现）
-   3. 检查参数维度是否相同
+   3. 用reshape方法进行转换为维度,[batch_size,dim],并检查参数维度是否相同。
  
 2. 计算
 
-   1. 使用 `paddle.nn.Pairwisedistance` 分别计算得到正锚点与样本和负锚点与样本的距离。
+   1. 使用 `paddle.linalg.norm` 分别计算得到正锚点与样本和负锚点与样本的距离。
    2. `swap` 参数判断：正锚点和负锚点间距离，并与负锚点与样本间距离进行比较，取更小的距离作为负锚点与样本间的距离。
    3. 通过 `paddle.clip` 实现公式所示求出得 loss。
 
@@ -191,7 +190,6 @@ distance functions可以采用paddle.nn.PairWiseDistance来进行实现
 - 2.CPU、GPU下计算一致。
 - 3.各reduction下计算一致
 - 4.各参数输入有效。
-- 5.反向梯度的正确性。
 
 # 七、可行性分析和排期规划
 方案主要依赖现有paddle api组合而成，可以满足在当前版本周期内开发完成。
