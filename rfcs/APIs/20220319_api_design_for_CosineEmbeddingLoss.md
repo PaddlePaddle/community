@@ -124,7 +124,7 @@ def cosine_similarity(y_true, y_pred, axis=-1):
 
 ## 命名与参数设计
 
-CosineEmbeddingLoss的API设计为`paddle.nn.CosineEmbeddingLoss(margin=0, reduction='mean')`，cosine_embedding_loss的API设计为`paddle.nn.functional.cosine_embedding_loss(x1, x2, target, margin=0, reduction='mean')`
+CosineEmbeddingLoss的API设计为`paddle.nn.CosineEmbeddingLoss(margin=0, reduction='mean', size_average=None, reduce=None)`，cosine_embedding_loss的API设计为`paddle.nn.functional.cosine_embedding_loss(x1, x2, target, margin=0, reduction='mean', size_average=None, reduce=None)`
 
 整体设计与paddle保持一致，其中：
 
@@ -188,6 +188,8 @@ reduce (bool, optional) – Deprecated (see reduction). By default, the losses a
 
 - 动态图，静态图，与numpy的结果保持一致；
 - 输入含`NaN`结果的正确性；
+- 在`cpu`和`gpu`环境下结果保持一致
+- 支持`float64`、`float32`、`int64`、`int32`类型变量输入;
 - 错误检查：`input`和 `target`维度不合规时能抛出输入维度错误；
 - 错误检查：`margin`设置超出[-1, 1]范围时抛出参数设置错误；
 - 错误检查：`reduction`设置除`sum` 和`mean`以外时抛出参数设置错误；
