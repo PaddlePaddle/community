@@ -1,13 +1,12 @@
 # paddle.frac设计文档
 
-| API名称                                                      | 新增API名称                     |
+| API名称                                                      | paddle.frac                     |
 | ------------------------------------------------------------ | ------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                 |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-19                      |
 | 版本号                                                       | V1.0                            |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                         |
 | 文件名                                                       | 20200319_api_design_for_frac.md |
-
 
 # 一、概述
 
@@ -25,7 +24,10 @@ Paddle支持frac数学计算API。
 
 # 二、飞桨现状
 
-飞浆目前并无此API，具体实现可由`trunc`和`elementwise_sub`组合实现。
+飞桨目前并无此API，相关API有`paddle.trunc`，将输入 Tensor 的小数部分置0，返回置0后的 Tensor ，如果输入 Tensor 的数据类型为整数，则不做处理。
+
+因此`paddle.frac`的实现可在Python端调用`trunc`和`elementwise_sub`的C++ OP组合实现。
+
 
 
 # 三、业内方案调研
@@ -92,15 +94,15 @@ Pytorch与TensorFlow思路一致。
 
 ## 命名与参数设计
 
-API设计为`paddle.frac(x, name=None)`和tensor.frac(x, name=None)
+API设计为`paddle.frac(x, name=None)`和`Tensor.frac(x, name=None)`
 
 ## 底层OP设计
 
-使用先用API组合完成，无需设计底层OP
+使用现有C++ Op组合完成，无需设计底层OP
 
 ## API实现方案
 
-使用`trunc`与`elementwise_sub`组合实现，实现位置为`paddle/tensor/math.py`与`sum`,`nansum`等方法放在一起：
+使用`trunc`与`elementwise_sub`组合实现，实现位置为`paddle/tensor/math.py`与`trunc`，`sum`和`nansum`等方法放在一起：
 
 1. 首先使用`trunc`获取输入tensor的整数部分；
 2. 再用输入x减去上一步得到的整数部分即可获取小数部分。
@@ -113,7 +115,7 @@ API设计为`paddle.frac(x, name=None)`和tensor.frac(x, name=None)
 
 # 七、可行性分析和排期规划
 
-方案主要依赖现有paddle api组合而成，工期上可以满足在当前版本周期内开发完成。
+方案主要依赖现有Paddle C++ Op组合而成，工期上可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 
