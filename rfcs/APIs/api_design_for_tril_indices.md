@@ -305,16 +305,16 @@ API设计为`paddle.tril_indices(rows, cols, offset,dtype=None)`，产生一个2
 在`paddle/phi/infermeta/multiary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/multiary.cc`中实现。
 
 ```c++
-void tril_indicesInferMeta(const & rows,
-                       const & cols,
-                       const & offset,
+void tril_indicesInferMeta(const int& rows,
+                       const int& cols,
+                       const int& offset,
                        MetaTensor* out);
 ```
 
 在`paddle/phi/kernels/tril_indices_kernel.h`中声明核函数的原型  
 
 ```c++
-template <typename T, typename Context>
+template <typename Context>
 void tril_indicesKernel(const Context& rows,
                         const Context& cols,
                         const Context& offset,
