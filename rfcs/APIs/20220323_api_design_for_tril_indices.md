@@ -4,19 +4,19 @@
 |API名称 | paddle.tril_indices |
 |---|---|
 |提交作者 | 哆啦A梦 |
-|提交时间 | 2022-03-25 |
+|提交时间 | 2022-03-23 |
 |版本号 | V1.0 |
 |依赖飞桨版本 | develop |
-|文件名 | api_design_for_tril_indices.md |
+|文件名 | 20220323_api_design_for_tril_indices.md |
 
 
 # 一、概述
 ## 1、相关背景
-`tril_indices`与`triu_indice`对应，`tril_indice(rows, cols, offset)`返回2行x列`tensor`,分别表示行数为`rows`列数为`cols`的二维矩阵下三角元素的行列索引。
-当`offset`=-1时产生不包含主对角线的下三角区域；
-当`offset`=0时产生包含主对角线的下三角区域；（主对角线坐标为（i，i）其中i\in{0，min(rows,cols)-1}
-当`offset`=1时产生包含主对角线及主对角线上一对角线的下三角区域；
-以此类推。offset 范围在[-rows+1,cols-1]中有意义
+`tril_indices`与`triu_indice`对应，`tril_indice(rows, cols, offset)`返回2行x列`tensor`,分别表示行数为`rows`列数为`cols`的二维矩阵下三角元素的行列索引。  
+当`offset`=-1时产生不包含主对角线的下三角区域；  
+当`offset`=0时产生包含主对角线的下三角区域；（主对角线坐标为（i，i）其中$i\epsilon[0，min(rows,cols)-1]$  
+当`offset`=1时产生包含主对角线及主对角线上一对角线的下三角区域；  
+以此类推,offset 范围在[-rows+1,cols-1]中有意义
 
 ## 2、功能目标
 
@@ -27,11 +27,11 @@
 飞桨将直接提供`tril_indices`这个API,高效运行在CPU和GPU后端
 
 # 二、飞桨现状
-飞桨提供tril(triu)函数，实现返回矩阵下三角元素，其余部分元素设为0的功能
-接口为paddle.tril(input, diagonal=0, name=None)[源码](https://github.com/PaddlePaddle/Paddle/blob/release/2.2/python/paddle/tensor/creation.py#L582)
+飞桨提供tril(triu)函数，输入二维矩阵，返回下三角元素为1，其余部分元素为0的矩阵  
+接口为`paddle.tril(input, diagonal=0, name=None)`[源码](https://github.com/PaddlePaddle/Paddle/blob/release/2.2/python/paddle/tensor/creation.py#L582)  
 使用示例:
 ```python
-ata = np.arange(1, 13, dtype="int64").reshape(3,-1)
+data = np.arange(1, 13, dtype="int64").reshape(3,-1)
 # array([[ 1,  2,  3,  4],
 #        [ 5,  6,  7,  8],
 #        [ 9, 10, 11, 12]])
@@ -58,8 +58,16 @@ PyTorch和Numpy中都有tril_indices这个API
 ## PyTorch
 
 ### 实现解读
+pytorch 中python接口配置为：  
 
-在PyTorch中，tril_indices是由C++和cuda实现的，CPU核心代码为：
+```python
+func: tril_indices(int row, int col, int offset=0, *, ScalarType? dtype=long, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor
+  dispatch:
+    CPU: tril_indices_cpu
+    CUDA: tril_indices_cuda
+```
+
+在PyTorch中，tril_indices是由C++和cuda实现的，CPU核心代码为：  
 
 ```c++
 Tensor tril_indices_cpu(
@@ -115,7 +123,7 @@ Tensor tril_indices_cpu(
 2. get_tril_size()计算返回的tensor列方向维度：
 3. 开辟返回值空间，按规律给二维tensor赋值（同时注意行列坐标是否越界）
 
-在GPU运行时rows*cols的规模要小于2^59,避免在计算过程中内存溢出
+在GPU运行时rows*cols的规模要小于&2^59&,避免在计算过程中内存溢出
 GPU核心代码为：
 ```c++
 void tril_indices_kernel(scalar_t * tensor,
@@ -192,8 +200,8 @@ Tensor tril_indices_cuda(
   return tensor;
 }
 ```
-上述代码流程与CPU端代码相同，只因为GPU的并行模式特殊，需实现不同block对应输出代码，
-以tril_indices_kernel()实现，需要对每个block负责的绝对坐标进行计算
+上述代码流程与CPU端代码相同，只因为GPU的并行模式特殊，需实现不同block的核函数，以tril_indices_kernel()实现，  
+外层函数需要对每个block负责的绝对坐标进行计算
 ### 使用示例
 
 ```python
@@ -218,7 +226,7 @@ tensor([[0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3],
 
 ### 实现解读
 
-调用接口为numpytril_indices(n,k=0,m=None)，n为矩阵行数，m为矩阵列数（可选），k为偏移，正数向右上方向偏移，  
+调用接口为`numpy.tril_indices(n,k=0,m=None)`，n为矩阵行数，m为矩阵列数（可选），k为偏移，正数向右上方向偏移，  
 返回二维数组为指定元素的行列
 
 ```python
@@ -228,8 +236,9 @@ def tril_indices(n, k, m):
     return tuple(broadcast_to(inds, tri_.shape)[tri_]
                  for inds in indices(tri_.shape, sparse=True))
 ```
-上述代码调用函数`tri()`获得一个n*m维矩阵，其下三角元素为True，其余元素为false.  
+上述代码调用函数`tri()`获得一个n*m维矩阵，其下三角元素为True，其余元素为False.  
 通过indices()函数取出此矩阵的行列下标,用broadcast_to()函数展开坐标.原理如下:
+
 ```python
 >>> c = np.indices((3,3), sparse=True)
 (array([[0],
@@ -295,7 +304,7 @@ API设计为`paddle.tril_indices(rows, cols, offset,dtype=None)`，产生一个2
 
 参数类型要求：
 
-- `rows`、`cols`、`offset`的类型是`int32` 或`int64`、或者类型相同形状为`[1]`的`Tensor`；
+- `rows`、`cols`、`offset`的类型是`int32` 或`int64`、(<不确定>或者类型相同形状为`[1]`的`Tensor`)；
 - 输出`Tensor`的数据类型与输入的类型对齐。（numpy中默认是`float`类型）
 
 ## 底层OP设计
@@ -337,7 +346,7 @@ def tril_indices(rows, cols, offset, dtype=None):
     # 参数检查,非整数类型转换成整数类型，给出提示
     # ...
     if dtype == None :
-        dtype == int64_t
+        dtype == int
     # ...
     # 调用核函数
     tril_indicesKernel(rows,cols,offset,dtype,out)
