@@ -291,12 +291,12 @@ array([[-10, -10, -10,   3],
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
-API设计为`paddle.tril_indices(rows, cols, offset)`，产生一个2行x列的二维数组存放指定下三角区域的，第一行为行坐标，第二行为列坐标
+API设计为`paddle.tril_indices(rows, cols, offset,dtype=None)`，产生一个2行x列的二维数组存放指定下三角区域的，第一行为行坐标，第二行为列坐标
 
 参数类型要求：
 
 - `rows`、`cols`、`offset`的类型是`int32` 或`int64`、或者类型相同形状为`[1]`的`Tensor`；
-- 输出`Tensor`的数据类型与输入的类型对齐。
+- 输出`Tensor`的数据类型与输入的类型对齐。（numpy中默认是`float`类型）
 
 ## 底层OP设计
 
@@ -305,10 +305,10 @@ API设计为`paddle.tril_indices(rows, cols, offset)`，产生一个2行x列的�
 在`paddle/phi/infermeta/multiary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/multiary.cc`中实现。
 
 ```c++
-void tril_indicesInferMeta(const Scalar& rows,
-                       const Scalar& cols,
-                       const MetaTensor& offset,
-                       MetaTensor* indices);
+void tril_indicesInferMeta(const & rows,
+                       const & cols,
+                       const & offset,
+                       MetaTensor* out);
 ```
 
 在`paddle/phi/kernels/tril_indices_kernel.h`中声明核函数的原型  
@@ -319,7 +319,7 @@ void tril_indicesKernel(const Context& rows,
                         const Context& cols,
                         const Context& offset,
                         DataType dtype,
-                        DenseTensor* indices);
+                        DenseTensor* out);
 ```
 
 分别在 `paddle/phi/kernels/cpu/tril_indices_kernel.cc``paddle/phi/kernels/gpu/tril_indices_kernel.cu`注册和实现核函数  
@@ -329,16 +329,20 @@ GPU实现逻辑：计算输出数组大小，计算每个block负责的原始行
 
 ## python API实现方案
 
-在`python/paddle/fluid/layers/tensor.py`中增加`tril_indices`函数：  
+在`python/paddle/fluid/layers/tensor.py`中增加`tril_indices`函数,添加英文描述
 
 ```python
 def tril_indices(rows, cols, offset, dtype=None):
     # ...
-    # 参数检查
+    # 参数检查,非整数类型转换成整数类型，给出提示
+    # ...
+    if dtype == None :
+        dtype == int64_t
     # ...
     # 调用核函数
+    tril_indicesKernel(rows,cols,offset,dtype,out)
     # ...
-
+    return out
 ```
 ## 单测及文档填写
 在` python/paddle/fluid/tests/unittests/`中添加`test_tril_indices.py`文件进行单测,测试代码与pytorch对齐  
