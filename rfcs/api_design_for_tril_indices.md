@@ -4,7 +4,7 @@
 |API名称 | paddle.tril_indices |
 |---|---|
 |提交作者 | 哆啦A梦 |
-|提交时间 | 2022-03- |
+|提交时间 | 2022-03-25 |
 |版本号 | V1.0 |
 |依赖飞桨版本 | develop |
 |文件名 | api_design_for_tril_indices.md |
@@ -12,7 +12,7 @@
 
 # 一、概述
 ## 1、相关背景
-`tril_indices`与`triu_indice`对应，`tril_indice(rows, cols, offset)`返回2行x列`tensor`,分别表示行数为`rows`列数为`cols`的二维矩阵下三角元素的行列索引
+`tril_indices`与`triu_indice`对应，`tril_indice(rows, cols, offset)`返回2行x列`tensor`,分别表示行数为`rows`列数为`cols`的二维矩阵下三角元素的行列索引。
 当`offset`=-1时产生不包含主对角线的下三角区域；
 当`offset`=0时产生包含主对角线的下三角区域；（主对角线坐标为（i，i）其中i\in{0，min(rows,cols)-1}
 当`offset`=1时产生包含主对角线及主对角线上一对角线的下三角区域；
@@ -222,11 +222,32 @@ tensor([[0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3],
 返回二维数组为指定元素的行列
 
 ```python
-def tril_indices(n, k, m ):
-   
-    return 
-```
+def tril_indices(n, k, m):
+    tri_ = tri(n, m, k=k, dtype=bool)
 
+    return tuple(broadcast_to(inds, tri_.shape)[tri_]
+                 for inds in indices(tri_.shape, sparse=True))
+```
+上述代码调用函数`tri()`获得一个n*m维矩阵，其下三角元素为True，其余元素为false.
+通过indices()函数取出此矩阵的行列下标,用broadcast_to()函数展开坐标.原理如下:
+```python
+>>> c = np.indices((3,3), sparse=True)
+(array([[0],
+       [1],
+       [2]]), array([[0, 1, 2]]))
+>>> for i in c
+...     print(i)
+[[0]
+ [1]
+ [2]]
+[[0 1 2]]
+>>> for i in c:
+...     j = np.broadcast_to(i,tri_.shape)[tri_]
+...     print(j)
+...
+[0 1 1 2 2 2]
+[0 0 1 0 1 2]
+```
 
 ### 使用示例
 
@@ -263,7 +284,8 @@ array([[-10, -10, -10,   3],
 使用tril_indices接口可以取出指定的对角线元素行列坐标，从而修改矩阵中指定的对角线元素值
 
 # 四、对比分析
- `numpy.tril_indices`比`torch.tril_indices`功能相同
+ `numpy.tril_indices`比`torch.tril_indices`功能相同,但实现方式不同pytorch中使用数学方式直接计算需要输出的下标，而numpy中使用一系列的函数巧妙地进行输出。
+ 分析numpy的实现巧妙，但是中间变量占用空间大，在规模大时会影响性能
 
 # 五、设计思路与实现方案
 
@@ -300,6 +322,7 @@ void tril_indicesKernel(const Context& rows,
 ```
 
 分别在 `paddle/phi/kernels/cpu/tril_indices_kernel.cc``paddle/phi/kernels/gpu/tril_indices_kernel.cu`注册和实现核函数
+实现逻辑借鉴pytorch直接计算下标。
 CPU实现逻辑：计算输出数组大小，开辟空间，遍历每个位置赋值行列坐标。
 GPU实现逻辑：计算输出数组大小，计算每个block负责的原始行列，按照输出数组大小进行平均的任务划分，实现每个block的赋值kernel
 
