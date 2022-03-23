@@ -14,7 +14,7 @@
 ## 1、相关背景
 `tril_indices`与`triu_indice`对应，`tril_indice(rows, cols, offset)`返回2行x列`tensor`,分别表示行数为`rows`列数为`cols`的二维矩阵下三角元素的行列索引。  
 当`offset`=-1时产生不包含主对角线的下三角区域；  
-当`offset`=0时产生包含主对角线的下三角区域；（主对角线坐标为（i，i）其中i\epsilon[0，min(rows,cols)-1]
+当`offset`=0时产生包含主对角线的下三角区域；（主对角线坐标为（i，i）其中i=[0,min(rows,cols)-1]
 当`offset`=1时产生包含主对角线及主对角线上一对角线的下三角区域；  
 以此类推,offset 范围在[-rows+1,cols-1]中有意义
 
