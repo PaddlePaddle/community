@@ -12,15 +12,12 @@
 
 # 一、概述
 ## 1、相关背景
-`tril_indices`与`triu_indice`对应，`tril_indice(rows, cols, offset)`返回2行x列`tensor`,分别表示行数为`rows`列数为`cols`的二维矩阵下三角元素的行列索引。  
-当`offset`=-1时产生不包含主对角线的下三角区域；  
-当`offset`=0时产生包含主对角线的下三角区域；（主对角线坐标为（i，i）其中i=[0,min(rows,cols)-1]
-当`offset`=1时产生包含主对角线及主对角线上一对角线的下三角区域；  
-以此类推,offset 范围在[-rows+1,cols-1]中有意义
+`tril_indices`与`triu_indice`对应，`tril_indices(rows, cols, offset)`返回2行x列`tensor`,分别表示行数为`rows`列数为`cols`的二维矩阵下三角元素的行列索引。  
+如果offset = 0，表示主对角线; 如果offset是正数，表示主对角线之上的对角线; 如果offset是负数，表示主对角线之下的对角线。offset的范围为[-rows+1,cols-1] 
 
 ## 2、功能目标
 
-在飞桨中增加`paddle.tril_indices`这个API。
+在飞桨中增加`paddle.tril_indicess`这个API。
 
 ## 3、意义
 
@@ -304,8 +301,8 @@ API设计为`paddle.tril_indices(rows, cols, offset,dtype=None)`，产生一个2
 
 参数类型要求：
 
-- `rows`、`cols`、`offset`的类型是`int32` 或`int64`、(<不确定>或者类型相同形状为`[1]`的`Tensor`)；
-- 输出`Tensor`的数据类型与输入的类型对齐。（numpy中默认是`float`类型）
+- `rows`、`cols`、`offset`的类型是`int`
+- 输出`Tensor`的dtype默认参数，为None时使用'int64'，否则以用户输入为准
 
 ## 底层OP设计
 
@@ -314,7 +311,7 @@ API设计为`paddle.tril_indices(rows, cols, offset,dtype=None)`，产生一个2
 在`paddle/phi/infermeta/multiary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/multiary.cc`中实现。
 
 ```c++
-void tril_indicesInferMeta(const int& rows,
+void TrilIndicesInferMeta(const int& rows,
                        const int& cols,
                        const int& offset,
                        MetaTensor* out);
@@ -324,7 +321,8 @@ void tril_indicesInferMeta(const int& rows,
 
 ```c++
 template <typename Context>
-void tril_indicesKernel(const Context& rows,
+void TrilIndicesKernel( const Context& dev_ctx,
+                        const Context& rows,
                         const Context& cols,
                         const Context& offset,
                         DataType dtype,
@@ -349,12 +347,12 @@ def tril_indices(rows, cols, offset, dtype=None):
         dtype == int
     # ...
     # 调用核函数
-    tril_indicesKernel(rows,cols,offset,dtype,out)
+    TrilIndicesKernel(dev_ctx,rows,cols,offset,dtype,out)
     # ...
     return out
 ```
 ## 单测及文档填写
-在` python/paddle/fluid/tests/unittests/`中添加`test_tril_indices.py`文件进行单测,测试代码与pytorch对齐  
+在` python/paddle/fluid/tests/unittests/`中添加`test_tril_indices.py`文件进行单测,测试代码使用numpy计算结果后对比，与numpy对齐    
 在` docs/api/paddle/`中添加中文API文档
 
 # 六、测试和验收的考量
