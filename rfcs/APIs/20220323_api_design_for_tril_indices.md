@@ -302,13 +302,13 @@ API设计为`paddle.tril_indices(rows, cols, offset,dtype=None)`，产生一个2
 参数类型要求：
 
 - `rows`、`cols`、`offset`的类型是`int`
-- 输出`Tensor`的dtype默认参数，为None时使用'int64'，否则以用户输入为准
+- 输出`Tensor`的dtype默认参数s为None时使用'int64'，否则以用户输入为准
 
 ## 底层OP设计
 
 在`paddle/fluid/operators/tril_indices_op.cc`添加tril_indices算子的描述，
 
-在`paddle/phi/infermeta/multiary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/multiary.cc`中实现。
+在`paddle/phi/infermeta/nultiary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/nultiary.cc`中实现。
 
 ```c++
 void TrilIndicesInferMeta(const int& rows,
