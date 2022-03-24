@@ -3,10 +3,10 @@
 |API名称 | paddle.nanmean | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 李芳钰 | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-10 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-11 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
-|文件名 | 20220310_design_for_nanmean.md<br> | 
+|文件名 | 20220311_api_design_for_nanmean.md.md<br> | 
 
 # 一、概述
 
@@ -38,20 +38,17 @@ API方面，已有相关功能的API，[paddle.nansum](https://github.com/Paddle
     if mask is None:
         return np.mean(arr, axis=axis, dtype=dtype, out=out, keepdims=keepdims,
                        where=where)
-
     if dtype is not None:
         dtype = np.dtype(dtype)
     if dtype is not None and not issubclass(dtype.type, np.inexact):
         raise TypeError("If a is inexact, then dtype must be inexact")
     if out is not None and not issubclass(out.dtype.type, np.inexact):
         raise TypeError("If a is inexact, then out must be inexact")
-
     cnt = np.sum(~mask, axis=axis, dtype=np.intp, keepdims=keepdims,
                  where=where)
     tot = np.sum(arr, axis=axis, dtype=dtype, out=out, keepdims=keepdims,
                  where=where)
     avg = _divide_by_count(tot, cnt, out=out)
-
     isbad = (cnt == 0)
     if isbad.any():
         warnings.warn("Mean of empty slice", RuntimeWarning, stacklevel=3)
@@ -72,18 +69,38 @@ API方面，已有相关功能的API，[paddle.nansum](https://github.com/Paddle
 Pytorch中有API`torch.nanmean(input, dim=None, keepdim=False, *, dtype=None, out=None) → Tensor`。在pytorch中，介绍为：
 ```
 Computes the mean of all non-NaN elements along the specified dimensions.
-
 This function is identical to torch.mean() when there are no NaN values in the input tensor. In the presence of NaN, torch.mean() will propagate the NaN to the output whereas torch.nanmean() will ignore the NaN values (torch.nanmean(a) is equivalent to torch.mean(a[~a.isnan()])).
-
 If keepdim is True, the output tensor is of the same size as input except in the dimension(s) dim where it is of size 1. Otherwise, dim is squeezed (see torch.squeeze()), resulting in the output tensor having 1 (or len(dim)) fewer dimension(s).
 ```
 
 ### 实现方法
-由于没有找到Pytorch实现nanmeanAPI的源码，所以未能提供其核心代码，但通过其在document上的介绍[torch.nanmean](https://pytorch.org/docs/stable/generated/torch.nanmean.html#torch.nanmean),可以确定其整体逻辑与Numpy基本一致。
+在实现方法上，Pytorch的整体逻辑与Numpy一致，[代码位置](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L1232-L1244)。其中核心代码为：
+```c++
+    Tensor nanmean(
+    const Tensor& self,
+    IntArrayRef dim,
+    bool keepdim,
+    optional<ScalarType> opt_dtype) {
+  TORCH_CHECK(
+      self.is_floating_point(),
+      "nanmean(): expected input to have floating point dtype but got ",
+      self.scalar_type());
+  const auto factor =
+      at::native::isnan(self.detach()).logical_not_().sum(dim, keepdim);
+  return at::nansum(self, dim, keepdim, opt_dtype).div_(factor);
+}
+```
+整体逻辑为：
+- 通过`isnan`获取张量nan值的mask。
+- 然后利用`logical_not_`,`sum`结合`mask`获取指定轴的非nan值的计数值factor。
+- 再通过`nansum`获取指定轴上张量非nan值的总和。
+- 最后利用`div_`除以factor(对标Numpy的cnt)得到张量在指定轴上的算数平均值。
+
 
 
 # 四、对比分析
 - 使用场景与功能：在维度支持上，Pytorch和Numpy都支持指向多个轴，但Numpy在指定多轴时指支持tuple输入，这里对标Pytorch支持tuple输入以及python:ints。
+- 需要注意的是Numpy当`(cnt == 0).any() == True`时说明在指定轴上，存在元素全为nan的情况，这时候Numpy会额外抛出一个警告，且该元素上的均值任然为nan。
 
 # 五、方案设计
 ## 命名与参数设计
@@ -101,7 +118,7 @@ API设计为`paddle.nanmean(x, axis=None, keepdim=False, name=None)`
 3. 使用`paddle.divide`得到忽略nan的输入张量的算术平均值。
 
 - 对`keepdim`参数的处理，对标Numpy融合到各个API当中。
- 
+
 # 六、测试和验收的考量
 测试考虑的case如下：
 
@@ -111,6 +128,7 @@ API设计为`paddle.nanmean(x, axis=None, keepdim=False, name=None)`
 - 未输入维度时的输出正确性；
 - 输入含`NaN`结果的正确性；
 - 输入在指定轴上存在元素都为NaN时,结果的正确性；
+- 测试在进行反向梯度计算时结果的正确性(包含nan值和非nan值位置的梯度)；
 - 错误检查：输入`x`不是Tensor时,能否正确抛出错误；
 - 错误检查：`axis`所指维度在当前Tensor中不合法时能正确抛出错误。
 
@@ -123,5 +141,6 @@ API设计为`paddle.nanmean(x, axis=None, keepdim=False, name=None)`
 
 # 名词解释
 无
-#附件及参考资料
+# 附件及参考资料
 无
+
