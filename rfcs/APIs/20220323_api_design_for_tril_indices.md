@@ -17,7 +17,7 @@
 
 ## 2、功能目标
 
-在飞桨中增加`paddle.tril_indicess`这个API。
+在飞桨中增加`paddle.tril_indices`这个API。
 
 ## 3、意义
 
@@ -302,7 +302,7 @@ API设计为`paddle.tril_indices(rows, cols, offset,dtype=None)`，产生一个2
 参数类型要求：
 
 - `rows`、`cols`、`offset`的类型是`int`
-- 输出`Tensor`的dtype默认参数s为None时使用'int64'，否则以用户输入为准
+- 输出`Tensor`的dtype默认参数为None时使用'int64'，否则以用户输入为准
 
 ## 底层OP设计
 
