@@ -322,9 +322,9 @@ void TrilIndicesInferMeta(const int& rows,
 ```c++
 template <typename Context>
 void TrilIndicesKernel( const Context& dev_ctx,
-                        const Context& rows,
-                        const Context& cols,
-                        const Context& offset,
+                        const int& rows,
+                        const int& cols,
+                        const int& offset,
                         DataType dtype,
                         DenseTensor* out);
 ```
