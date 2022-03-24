@@ -4,7 +4,7 @@
 | ------------------------------------------------------------ | ------------------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                             |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-12                                  |
-| 版本号                                                       | V1.0                                        |
+| 版本号                                                       | V1.1                                        |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                     |
 | 文件名                                                       | 20210312_api_design_for_one_cycle_lr.md<br> |
 
@@ -157,7 +157,21 @@ def get_lr(self):
 
 API设计为`paddle.optimizer.lr.OneCycleLR(max_learning_rate, total_steps=None, epochs=None, steps_per_epoch=None, pct_start=0.3, anneal_strategy='cos', divide_factor=25., final_divide_factor=1e4, three_phase=False, last_epoch=-1, verbose=False)`
 
-形参名`div_factor`->`divide_factor`, `final_div_factor`->`final_divide_factor`
+形参名`div_factor`->`divide_factor`, `final_div_factor`->`final_divide_factor`, `max_lr`->`max_learning_rate`。
+
+参数：
+
+- max_learning_rate：训练过程中的最大学习率；
+- total_steps：训练总步数，若为指定则会通过`epochs`*`steps_per_epoch`计算得来；
+- epochs：训练的epoch数；
+- steps_per_epoch：每个epoch中训练的步数；
+- pct_start：提高学习率所需步数占总训练步数的比例，默认：0.3；
+- anneal_strategy：学习率退火策略，'cos'或'linear'，默认为'cos'；
+- divide_factor：初始学习率`initial_learning_rate`由`max_learning_rate`/`divide_factor`确定，默认为25；
+- final_divide_factor：最小学习率`min_learning_rate`由`initial_learning_rate`/`final_divide_factor`确定，默认为1e4；
+- three_phase：若为`True`，则使用三阶段的调度策略，即学习率先由`initial_learning_rate`上升至`max_learning_rate`，再下降回initial_learning_rate，最后下降到min_learning_rate；若为False，则使用两阶段的调度策略，即学习率先由`initial_learning_rate`上升至`max_learning_rate`，再直接下降到`min_learning_rate`。默认为`False`；
+- last_epoch：可选，上一轮的轮数，重启训练时设置为上一轮的epoch数。默认值为 -1，则为初始学习率；
+- verbose：可选，如果是 `True` ，则在每一轮更新时在标准输出 stdout 输出一条信息。默认值为 `False` 。
 
 
 
