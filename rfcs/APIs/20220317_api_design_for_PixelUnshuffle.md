@@ -1,16 +1,18 @@
 # paddle.nn.PxielUnshuffle设计文档
 
-|API名称 | paddle.nn.PxielUnshuffle |
-|---|---|
-|提交作者 | 为往圣继绝学 |
-|提交时间 | 2022-03-17 |
-|版本号 | V1.0 |
-|依赖飞桨版本 | develop |
-|文件名 | 20220317_api_design_for_PxielUnshuffle.md |
+| API名称      | paddle.nn.PxielUnshuffle                  |
+| ------------ | ----------------------------------------- |
+| 提交作者     | 为往圣继绝学                              |
+| 提交时间     | 2022-03-17                                |
+| 版本号       | V1.0                                      |
+| 依赖飞桨版本 | develop                                   |
+| 文件名       | 20220317_api_design_for_PxielUnshuffle.md |
 
 
 # 一、概述
+
 ## 1、相关背景
+
 PixelUnshuffle是PixelShuffle 的逆操作，由论文《[Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel Convolutional Neural Network](https://arxiv.org/abs/1609.05158)》提出。这个操作通过将空间维度的特征转移到通道，来将亚像素卷积的结果恢复。
 
 ## 2、功能目标
@@ -22,7 +24,9 @@ PixelUnshuffle是PixelShuffle 的逆操作，由论文《[Real-Time Single Image
 飞桨将支持PxielUnshuffle组网 API。
 
 # 二、飞桨现状
+
 飞桨目前不支持此功能，但可以通过组合API的方式实现此功能：
+
 ```python
 class PixelUnshuffle(paddle.nn.Layer):
     def __init__(self, downscale_factor):
@@ -39,6 +43,7 @@ class PixelUnshuffle(paddle.nn.Layer):
 ```
 
 # 三、业内方案调研
+
 ## PyTorch
 
 PyTorch中已经有了`torch.nn.PixelUnshuffle`（文档在[这里](https://pytorch.org/docs/stable/_modules/torch/nn/modules/pixelshuffle.html#PixelUnshuffle)）。在Python层面的主要实现代码为：
@@ -125,6 +130,7 @@ def pixel_unshuffle_unit(self, x, downscale_factor):
 ```
 
 ## 实现逻辑
+
 我们以NCHW格式的4D张量为例来描述PixelUnshuffle的实现逻辑：
 
 1. 把形为[N, C, H, W]的张量重塑成[N, C, H/r, r, W/r, r]的形状；
@@ -144,12 +150,14 @@ def pixel_unshuffle_unit(self, x, downscale_factor):
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
+
 API设计为`paddle.nn.PixelUnshuffle(downscale_factor, data_format='NCHW')`，
 
 - **downscale_factor** (int) - 空间分辨率缩小的比例，需要同时整除宽度和高度；
 - **data_format**(str) - 指定输入的数据格式，输出的数据格式将与输入保持一致，可以是"NCHW"和"NHWC"。N是批尺寸，C是通道数，H是特征高度，W是特征宽度。默认值："NCHW"。
 
 ## 底层OP设计
+
 PixelUnshuffle与飞桨中已有的PixelShuffle操作在逻辑上是一样的，故可参考PixelShuffle的OP设计来实现PixelUnshuffle的底层OP。
 
 核函数的原型（定义在`paddle/phi/kernels/pixel_unshuffle_kernel.h`）设计为
@@ -163,6 +171,8 @@ void PixelUnshuffleKernel(const Context& ctx,
                           DenseTensor* out);
 ```
 
+其实现方式与设备无关，将其实现以及在CPU、GPU上的注册放在`paddle/phi/kernels/pixel_unshuffle_kernel.cc`中。
+
 反向核函数的原型（定义在`paddle/phi/kernels/pixel_unshuffle_grad_kernel.h`）设计为
 
 ```c++
@@ -174,12 +184,7 @@ void PixelUnshuffleGradKernel(const Context& ctx,
                             DenseTensor* x_grad);
 ```
 
-它们的实现定义在`paddle/phi/kernels/impl/pixel_unshuffle_kernel_impl.h`和`paddle/phi/kernels/impl/pixel_unshuffle_grad_kernel_impl.h`，它们的注册放在
-
-- `paddle/phi/kernels/cpu/pixel_unshuffle_kernel.cc`
-- `paddle/phi/kernels/cpu/pixel_unshuffle_grad_kernel.cc`
-- `paddle/phi/kernels/gpu/pixel_unshuffle_kernel.cu`
-- `paddle/phi/kernels/gpu/pixel_unshuffle_grad_kernel.cu`
+其实现方式与设备无关，将其实现以及在CPU、GPU上的注册放在`paddle/phi/kernels/pixel_unshuffle_grad_kernel.cc`中。
 
 ## API实现方案
 
@@ -219,19 +224,21 @@ class PixelUnshuffle(Layer):
 # 六、测试和验收的考量
 
 - 错误检查：
-   - `downscale_factor`不是整数时抛出异常，
-   - `downscale_factor`不是正数时抛出异常，
-   - `data_format`不是NCHW和NHWC中的一个时抛出异常，
-   - 输入的`x`不是4D张量时抛出异常；
+  - `downscale_factor`不是整数时抛出异常，
+  - `downscale_factor`不是正数时抛出异常，
+  - `data_format`不是NCHW和NHWC中的一个时抛出异常，
+  - 输入的`x`不是4D张量时抛出异常；
  - 向前计算：`data_format`分别为NCHW和NHWC时与NumPy的一致性
  - 反向计算：`data_format`分别为NCHW和NHWC时与NumPy的一致性
  - 平台支持：CPU和GPU
  - 支持静态图和动态图
 
 # 七、可行性分析和排期规划
+
 已经实现，待该设计文档通过验收后可马上提交。
 
 # 八、影响面
+
 `PxielUnshuffle`为独立新增API，对其他模块没有影响。
 
 # 名词解释
