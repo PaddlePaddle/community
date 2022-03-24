@@ -224,21 +224,22 @@ def heaviside(x1, x2):  # pylint: disable=missing-function-docstring
 
 # 五、设计思路与实现方案
 
-- 向前计算设计为`x == 0 ? y : static_cast<T>(x > 0) `；
-
+- 前向计算设计为`x == 0 ? y : static_cast<T>(x > 0) `；
 - 关于`x`的偏导数设计为恒等于0（与事实上的偏导数仅在直线x=0上取值不同，事实上此时偏导数是∞）；
 - 关于`y`的偏导数设计为`static_cast<T>(x == 0) `。
 
 ## 命名与参数设计
 
-API设计为`heaviside(x, y, name=None)`，它支持广播，参数为
+API设计为`paddle.heaviside(x, y, name=None)`，它逐元素计算输入的两个Tensor的heaviside函数，支持广播，参数为
 
 - x （Tensor）- 输入的Tensor。数据类型为 float32、 float64、int32或 int64；
 - y （Tensor）- 输入的Tensor。数据类型为 float32、 float64 、int32或int64；
 - name （str, 可选）- 操作的名称(可选，默认值为None）。
 
+也可以通过`paddle.Tensor.heaviside(y)`来调用。
 
 ## 底层OP设计
+
 在`paddle/fluid/operators/elementwise/elementwise_heaviside_op.cc`中增加heaviside算子的描述。
 
 ### 正向算子
@@ -319,10 +320,16 @@ def heaviside(x, y, name=None):
 # 六、测试和验收的考量
 
 - 输入合法性检验；
+    - 输入不是张量，
+    - 输入的dtype不一致；
 - 与Numpy对比计算结果的一致性：
-    - x和y的形状一样时，
-    - x和y中有一个是标量时，
-    - 广播机制测试；
+    - x和y是形状都是[13, 17]，
+    - x的形状是[2, 3, 20]，y的形状是[1]，
+    - x的形状是[100, 5, 2]，y的形状是[100, 1, 1]，
+    - x的形状是[2, 100, 3]，y的形状是[100, 1]，
+    - x的形状是[1, 3, 100]，y的形状是[100]，
+    - x的形状是[2, 50, 2, 1]，y的形状是[50, 2, 1]，
+    - x的形状是[2, 3, 4, 5]，y的形状是[2, 3, 1, 5]；
 - 梯度测试；
 - 对各种`dtype`的测试；
 - 动态图、静态图测试；
