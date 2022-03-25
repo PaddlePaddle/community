@@ -4,7 +4,7 @@
 | ------------------------------------------------------------ | -------------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                        |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-20                             |
-| 版本号                                                       | V1.0                                   |
+| 版本号                                                       | V1.2                                   |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                |
 | 文件名                                                       | 20200301_design_for_nanquantile.md<br> |
 
@@ -12,7 +12,7 @@
 
 ## 1、相关背景
 
-为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充API`paddle.nanquantile`以及`paddle.Tensor.nanquantile`.paddle.nanquantile 是 [paddle.quantile](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/quantile_cn.html) 的变体，即沿给定的轴计算非nan元素的分位数。
+为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充API`paddle.nanquantile`以及`paddle.Tensor.nanquantile`。paddle.nanquantile 是 [paddle.quantile](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/quantile_cn.html) 的变体，即沿给定的轴计算非nan元素的分位数。
 
 ## 2、功能目标
 
@@ -20,16 +20,16 @@
 
 ## 3、意义
 
-飞桨支持计算非nan元素分位数.
+飞桨支持计算非nan元素分位数。
 
 # 二、飞桨现状
 
 目前paddle缺少相关功能实现。
 
-API方面，已有类似功能的API，[paddle.quantile](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/stat.py#L340), 在Paddle中是一个由多个其他API组合成的API，没有实现自己的OP，其主要实现逻辑为：
+API方面，已有类似功能的API，[paddle.quantile](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/stat.py#L340)，在Paddle中是一个由多个其他API组合成的API，没有实现自己的OP，其主要实现逻辑为：
 
-1. 如未指定维度，则通过`paddle.flatten`展平处理，使用`paddle.moveaxis`将指定的维度放到0处理；
-2. 使用`paddle.sort`得到排序后的tensor.
+1. 如未指定维度，则通过`paddle.flatten`展平处理，若指定维度，使用`paddle.moveaxis`将指定的维度放到0处理；
+2. 使用`paddle.sort`得到排序后的tensor；
 3. 将`q`:[0, 1]映射到`indice`:[0, numel_of_dim-1]；并对`indice`分别做`paddle.floor`和`paddle.ceil`求得需要计算的两端元素位置；
 4. `paddle.lerp`计算两端元素的加权插值，作为最终结果；
 5. 根据`keepdim`参数调整至对应的shape。
@@ -126,16 +126,16 @@ Compute the qth quantile of the data along the specified axis, while ignoring na
 # 四、对比分析
 
 - 使用场景与功能：在维度支持上，Pytorch只支持一维，而Numpy支持多维，这里对齐Numpy的实现逻辑，同时支持一维和多维场景。
-- 实现对比：由于`pytorch.gather`和`paddle.gather`实际在秩大于1时的表现不一致；在出现多个`q`值时，pytorch可直接通过处理后的`indice`进行多维索引，paddle则需要分别索引再组合到一起。因此这里不再使用`paddle.gather`索引，改使用`paddle.take_along_axis`API进行索引。
-
+- 代码复用：Pytorch与Numpy都是针对输入
 
 # 五、方案设计
 
 ## 命名与参数设计
 
-API设计为`paddle.unquantile(x, q, axis=None, keepdim=False, name=None)`及`paddle.Tensor.unquantile(q, axis=None, keepdim=False, name=None)`
+API设计为`paddle.nanquantile(x, q, axis=None, keepdim=False, name=None)`及`paddle.Tensor.nanquantile(q, axis=None, keepdim=False, name=None)`，额外添加了函数`_compute_quantile(x, q, axis=None, keepdim=Flase, ignore_nan=False)`，当`ignore_nan=True`时，表示计算`nanquantile`。
+
 命名与参数顺序为：形参名`input`->`x`和`dim`->`axis`,  与paddle其他API保持一致性，不影响实际功能使用。
-参数类型中，`axis`支持`int`与`1-D Tensor`输入,以同时支持一维和多维的场景。
+参数类型中，`axis`支持`int`与`1-D Tensor`输入，以同时支持一维和多维的场景。
 
 ## 底层OP设计
 
@@ -143,25 +143,47 @@ API设计为`paddle.unquantile(x, q, axis=None, keepdim=False, name=None)`及`pa
 
 ## API实现方案
 
-主要按下列步骤进行组合实现, 实现位置为`paddle/tensor/stat.py`与`mean`,`median`等方法放在一起：
+主要按下列步骤进行组合实现, 实现位置为`paddle/tensor/stat.py`与`quantile` 、`mean`和`median`等方法放在一起：
+
+`Pytorch`和`Numpy`中的`quantile`对含有NaN的输入将会返回NaN，而`paddle.quantile`对此不能返回正确的结果，因此对其进行修改，修改后可与`nanquantile`共用大部分代码。
 
 1. 使用`isnan`得到标志着NaN位置的mask，使用`paddle.where`将`NaN`替换为`Inf`；
-1. 对替换后的tensor使用`paddle.sort`，因为`sort`不能对含有`NaN`的输入进行正确排序；
-1. 同时对`mask`使用`paddle.logical_not`取反，在最后一维上求和，得到每个位置上的有效数字的个数，这是一个向量；
-1. 使用上述的有效数字向量乘以`q`:[0,1]得到`indice`:[-1, dim_wo_nan-1]，若全是NaN，则indice为-1，经过上述的排序，`Inf`将被排序到最后，对于输出，再将`Inf`替换为`NaN`即可得到正确结果；
-2. 对`indice`分别做`paddle.floor`和`paddle.ceil`求得需要计算的两端元素位置；
-3. 使用`paddle.take_along_axis`取出对应`axis`和`indice`的两端元素；
-4. `paddle.lerp`计算两端元素的加权插值，作为结果；
-5. 根据`keepdim`参数，确定是否需要对应调整结果的shape；
-5. 将结果中的`Inf`再替换回`NaN`，输出即可。
+
+1. 对`mask`使用`paddle.logical_not`取反，在指定维度上求和，得到每个位置上的有效数字的个数，这是一个矩阵；
+
+2. 对替换后的tensor使用`paddle.sort`，因为`sort`不能对含有`NaN`的输入进行正确排序；
+
+2. 使用上述**有效数字矩阵**-1乘以`q`:[0, 1]得到`indices`:[-1, dim_wo_nan-1]；
+
+3. 针对`NaN`的处理分为了两种情况：
+
+   1. 若为`nanquantile`：
+
+      无需额外操作，若全是NaN，最后结果将会正确返回`NaN`；
+
+   2. 若为`quantile`：
+
+      使用`paddle.where`和`mask.any()`来将存在`NaN`的位置替换为对应轴上最后一个元素的索引值；
+
+4. 对`indice`分别做`paddle.floor`和`paddle.ceil`求得需要计算的两端元素位置，对于`nanquantile`中全是`NaN`的位置，将会分别得到-1和0，对于`quantile`中存在NaN的位置，将会分别得到0和0；
+
+5. 使用`paddle.take_along_axis`取出对应`axis`和`indice`的两端元素，若索引值为-1，将会返回0.0；
+
+6. `paddle.lerp`计算两端元素的加权插值，作为结果，只要两输入之一为`Inf\-Inf`，其输出依旧是`Inf\-Inf`；
+
+7. 根据`keepdim`参数，确定是否需要对应调整结果的shape；
+
+8. 将结果中的`Inf`或`-Inf`再替换回`NaN`，输出即可。
 
 - 如果后续版本`paddle.sort`支持将NaN排序到最后，即可将两次`NaN`和`Inf`的转化取消。
+
+上述计算逻辑实现在`_compute_quantile(x, q, axis=None, keepdim=Flase, ignore_nan=False)`中。
 
 # 六、测试和验收的考量
 
 测试考虑的case如下：
 
-- 和numpy结果的数值的一致性, `paddle.nanquantile`,`paddle.Tensor.nanquantile`和`np.nanquantile`结果是否一致；
+- 和numpy结果的数值的一致性， `paddle.nanquantile`，`paddle.Tensor.nanquantile`和`np.nanquantile`结果是否一致；
 - 参数`q`为int和1-D Tensor时输出的正确性；
 - 参数`axis`为int 和1-D Tensor时输出的正确性
 - `keepdim`参数的正确性；
@@ -175,7 +197,7 @@ API设计为`paddle.unquantile(x, q, axis=None, keepdim=False, name=None)`及`pa
 
 # 八、影响面
 
-为独立新增API，对其他模块没有影响。
+由于修改了`paddle.quantile`的代码，会对其造成影响。
 
 
 
