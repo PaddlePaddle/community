@@ -21,7 +21,7 @@
 
 ```julia
 # full connected Neural Network, return a julia wrapper of paddle's network
-paddlewrap = PaddleFCNet(dim_ins, dim_outs, num_layers, hidden_size; dtype=Float32, activation='sigmiod')
+paddlewrap = PaddleFCNet(dim_ins, dim_outs, num_layers, hidden_size; dtype=Float32, activation='sigmoid')
 
 # get the initial parameters of Neural network
 initθ = Optimisers.destructure(paddlewrap)[1]
@@ -90,7 +90,7 @@ end
 
 实现全连接神经网络的构造函数，能够返回对应的PaddleModuleWrap实例，如：
 ```julia
-function PaddleFCNet(dim_ins, dim_outs, num_layers, hidden_size; dtype=Float32, activation='sigmiod')
+function PaddleFCNet(dim_ins, dim_outs, num_layers, hidden_size; dtype=Float32, activation='sigmoid')
 ```
 
 实现前向传播：
