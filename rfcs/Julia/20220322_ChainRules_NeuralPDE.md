@@ -13,7 +13,7 @@
 ## 1、相关背景
 [使用PaddlePaddle + Julia求解2D Poisson方程](https://github.com/X4Science/INFINITY/issues/1)
 
-[NeuralPDE.jl](https://neuralpde.sciml.ai/dev/)为求解PDE提供了许多基于神经网络的算法实现，该库的神经网络模块主要基于[Flux.jl](https://github.com/FluxML/Flux.jl)。
+[NeuralPDE.jl](https://neuralpde.sciml.ai/dev/)为求解PDE提供了许多基于神经网络的算法实现，该库的神经网络模块主要基于[DiffEqFlux.jl](https://github.com/SciML/DiffEqFlux.jl)。
 
 ## 2、功能目标
 
@@ -71,7 +71,7 @@ end
 
 # 四、对比分析
 
-- [PyCallChainRules.jl](https://github.com/rejuvyesh/PyCallChainRules.jl)利用了DLPack协议实现了python里tensor数据和julia内array数据的共享，[Torch.jl](https://github.com/FluxML/Torch.jl)则是为tensor封装了julia里的api, 前者的实现会更加简单方便些，paddle也支持[DLPack协议](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/utils/dlpack.py)
+- [PyCallChainRules.jl](https://github.com/rejuvyesh/PyCallChainRules.jl)利用了DLPack协议实现了python里tensor数据和julia内array数据的共享，[Torch.jl](https://github.com/FluxML/Torch.jl)则是为tensor封装了julia里的api， 前者的实现会更加简单方便些，paddle也支持[DLPack协议](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/utils/dlpack.py)
 - [PyCallChainRules.jl](https://github.com/rejuvyesh/PyCallChainRules.jl)使用了[functorch](https://github.com/pytorch/functorch)作为torch的函数式实现，并实现了`ChainRulesCore.rrlue`。[Torch.jl](https://github.com/FluxML/Torch.jl)则是定义了相关运算的`@adjoint`。
 
 [PyCallChainRules.jl](https://github.com/rejuvyesh/PyCallChainRules.jl)的实现较为快捷，但封装的粒度不如[Torch.jl](https://github.com/FluxML/Torch.jl)。本方案目标主要是使得封装的paddle神经网络能够支持NeuralPDE的求解，理论上仅需实现对`Zygote.gradient`的支持，因此先采用[PyCallChainRules.jl](https://github.com/rejuvyesh/PyCallChainRules.jl)的方案进行实现。
@@ -89,14 +89,14 @@ struct PaddleModuleWrapper
 end
 ```
 
-实现相应的构造函数，能够直接构造简单的全连接神经网络，如：
+实现全连接神经网络的构造函数，能够返回对应的PaddleModuleWrap实例，如：
 ```julia
-PaddleModuleWrapper(dim_ins,
-                    dim_outs,
-                    num_layers,
-                    hidden_size,
-                    dtype='Float32',
-                    activation='tanh'))
+PaddleFCNet(dim_ins,
+            dim_outs,
+            num_layers,
+            hidden_size,
+            dtype='Float32',
+            activation='tanh'))
 ```
 
 实现前向传播：
@@ -111,7 +111,7 @@ function vjp(stateless_module::PaddleStatelessModule, pyparams, pyargs...; kwarg
 
 实现`ChainRulesCore.rrule`:
 ```julia
-ChainRulesCore.rrule(wrap::PaddleModuleWrapper, args...; kwargs...)
+function ChainRulesCore.rrule(wrap::PaddleModuleWrapper, args...; kwargs...)
 ```
 
 ## API实现方案
@@ -119,7 +119,7 @@ ChainRulesCore.rrule(wrap::PaddleModuleWrapper, args...; kwargs...)
 为完成以上api，需要：
 - 使用DLPack.jl对tensor和array进行转换
 - 在实现`PaddleStatelessModule`的运算功能时，使用paddle的运算符，如`paddle.matmul()`，`paddle.add()`和`paddle.nn.Sigmoid()()`
-- 在实现`vjp`时，使用[`paddle.fluid.dygraph.grad((outputs,inputs,grad_outputs)`](https://github.com/PaddlePaddle/Paddle/blob/d9a41fc479009f75aa976ea18bd759504497796b/python/paddle/fluid/dygraph/base.py#L428)，例如：
+- 在实现`vjp`时，使用[`paddle.fluid.dygraph.grad(outputs,inputs,grad_outputs)`](https://github.com/PaddlePaddle/Paddle/blob/d9a41fc479009f75aa976ea18bd759504497796b/python/paddle/fluid/dygraph/base.py#L428)，例如：
 ```julia
 function vjp(stateless_module::PaddleStatelessModule, pyparams, pyargs...; kwargs...)
     res = stateless_module(pyparams, pyargs...; kwargs...)
@@ -133,11 +133,15 @@ end
 
 # 六、测试和验收的考量
 
-测试考虑的case如下：
-- 实现对CPU和GPU的支持
-- 实现对Zygote.gradient的支持
-- 相应的梯度运算结果与使用paddle的原生api计算的结果一致
-- 对NeuralPDE.jl的支持，将[示例](https://github.com/SciML/NeuralPDE.jl#example-solving-2d-poisson-equation-via-physics-informed-neural-networks)中的神经网络模块替换成封装后的paddle模块，求解器仍能正常运行
+最后提供的代码为一个Julia的Package，主要内容为对Paddle网络的封装和对`Zygote.gradient`的支持，在测试代码中考虑的case如下：
+- 构造全连接网络，前向传播的结果与paddle的api计算结果一致
+- 梯度运算结果与paddle的api计算的结果一致
+- 在GPU和CPU上的前向和反向传播
+
+同时提供一些benchmark，方便性能上的研究和进一步优化
+- 和paddle的原生api相比，前向传播的计算效率，以及梯度运算的计算效率
+- 和NeuralPDE.jl结合使用的示例代码，将[示例](https://github.com/SciML/NeuralPDE.jl#example-solving-2d-poisson-equation-via-physics-informed-neural-networks)中的神经网络模块替换成封装后的paddle模块，和使用DiffEqFlux.jl或PyCallChainRules.jl之间的性能差别
+
 
 # 七、可行性分析和排期规划
 
