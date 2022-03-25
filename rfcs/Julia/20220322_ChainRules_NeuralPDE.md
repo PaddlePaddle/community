@@ -20,14 +20,13 @@
 在Julia中封装paddle的神经网络，使得NeuralPDE基于paddle的神经网络模块，实现PDE的求解。在[NeuralPDE example](https://github.com/SciML/NeuralPDE.jl#example-solving-2d-poisson-equation-via-physics-informed-neural-networks)中，可以将网络模块部分直接替换成封装后的paddle模块，如：
 
 ```julia
-# Neural network
-paddlewrap = PaddleModuleWrap(paddle_module)
-chain = Chain(paddlewrap)
+# full connected Neural Network, return a julia wrapper of paddle's network
+paddlewrap = PaddleFCNet(dim_ins, dim_outs, num_layers, hidden_size; dtype=Float32, activation='sigmiod')
 
-# Initial parameters of Neural network
-initθ = Float64.(DiffEqFlux.initial_params(chain))
+# get the initial parameters of Neural network
+initθ = Optimisers.destructure(paddlewrap)[1]
 
-discretization = PhysicsInformedNN(chain, QuadratureTraining(),init_params =initθ)
+discretization = PhysicsInformedNN(paddlewrap, QuadratureTraining(), init_params = initθ)
 ```
 
 ## 3、意义
@@ -36,7 +35,7 @@ discretization = PhysicsInformedNN(chain, QuadratureTraining(),init_params =init
 
 # 二、飞桨现状
 
-目前paddle在Julia可以直接采用[PyCall.jl](https://github.com/JuliaPy/PyCall.jl)，但缺少相关封装可以和Julia生态直接结合。
+目前paddle在Julia可以直接使用[PyCall.jl](https://github.com/JuliaPy/PyCall.jl)调用，但缺少相关封装可以和Julia生态直接结合。
 
 # 三、业内方案调研
 
@@ -91,12 +90,7 @@ end
 
 实现全连接神经网络的构造函数，能够返回对应的PaddleModuleWrap实例，如：
 ```julia
-PaddleFCNet(dim_ins,
-            dim_outs,
-            num_layers,
-            hidden_size,
-            dtype='Float32',
-            activation='tanh'))
+function PaddleFCNet(dim_ins, dim_outs, num_layers, hidden_size; dtype=Float32, activation='sigmiod')
 ```
 
 实现前向传播：
