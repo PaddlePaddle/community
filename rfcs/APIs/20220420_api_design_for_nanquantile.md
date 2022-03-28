@@ -126,7 +126,7 @@ Compute the qth quantile of the data along the specified axis, while ignoring na
 # 四、对比分析
 
 - 使用场景与功能：在维度支持上，Pytorch只支持一维，而Numpy支持多维，这里对齐Numpy的实现逻辑，同时支持一维和多维场景。
-- 代码复用：Pytorch与Numpy都是针对输入
+- 代码复用：Pytorch与Numpy中的`quantile`和`nanquantile`都是对输入中的`NaN`进行不同的处理，随后使用相同的计算逻辑来获得结果，代码复用性较高，因此本方案参考其设计，最大化代码利用率。
 
 # 五、方案设计
 
@@ -147,13 +147,13 @@ API设计为`paddle.nanquantile(x, q, axis=None, keepdim=False, name=None)`及`p
 
 `Pytorch`和`Numpy`中的`quantile`对含有NaN的输入将会返回NaN，而`paddle.quantile`对此不能返回正确的结果，因此对其进行修改，修改后可与`nanquantile`共用大部分代码。
 
-1. 使用`isnan`得到标志着NaN位置的mask，使用`paddle.where`将`NaN`替换为`Inf`；
+1. 使用`isnan`得到标志着NaN位置的mask，使用`paddle.where`将`NaN`替换为`Inf`，因为`sort`不能对含有`NaN`的输入进行正确排序；
 
 1. 对`mask`使用`paddle.logical_not`取反，在指定维度上求和，得到每个位置上的有效数字的个数，这是一个矩阵；
 
-2. 对替换后的tensor使用`paddle.sort`，因为`sort`不能对含有`NaN`的输入进行正确排序；
+2. 对第一步替换后的tensor使用`paddle.sort`；
 
-2. 使用上述**有效数字矩阵**-1乘以`q`:[0, 1]得到`indices`:[-1, dim_wo_nan-1]；
+2. 使用第二步的**有效数字矩阵**-1乘以`q`（值域为[0, 1]）得到`indices`（值域为[-1, dim_wo_nan-1]）；
 
 3. 针对`NaN`的处理分为了两种情况：
 
@@ -169,13 +169,13 @@ API设计为`paddle.nanquantile(x, q, axis=None, keepdim=False, name=None)`及`p
 
 5. 使用`paddle.take_along_axis`取出对应`axis`和`indice`的两端元素，若索引值为-1，将会返回0.0；
 
-6. `paddle.lerp`计算两端元素的加权插值，作为结果，只要两输入之一为`Inf\-Inf`，其输出依旧是`Inf\-Inf`；
+6. `paddle.lerp`计算两端元素的加权插值，作为结果，只要两输入之一为`Inf\NaN`，其输出依旧是`Inf\NaN`；
 
 7. 根据`keepdim`参数，确定是否需要对应调整结果的shape；
 
 8. 将结果中的`Inf`或`-Inf`再替换回`NaN`，输出即可。
 
-- 如果后续版本`paddle.sort`支持将NaN排序到最后，即可将两次`NaN`和`Inf`的转化取消。
+- 如果后续版本`paddle.sort`支持将NaN排序到最后，即可将第一步和第十步的两次`NaN`和`Inf`的转化取消。
 
 上述计算逻辑实现在`_compute_quantile(x, q, axis=None, keepdim=Flase, ignore_nan=False)`中。
 
