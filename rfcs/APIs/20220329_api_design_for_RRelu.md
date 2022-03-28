@@ -3,10 +3,10 @@
 |API名称 | paddle.nn.RReLU |
 |---|---|
 |提交作者 | thunder95 |
-|提交时间 | 2022-03-17 |
+|提交时间 | 2022-03-29 |
 |版本号 | V1.0 |
 |依赖飞桨版本 | develop |
-|文件名 | 20200317_api_design_for_RReLU.md |
+|文件名 | 20200329_api_design_for_RReLU.md |
 
 
 # 一、概述
