@@ -224,7 +224,7 @@ array([[3.1192703 , 2.0958931 ],
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-API设计为 `paddle.cdist(x1, x2, p=2.0)`。其中 `x1` 为 `B X P X M` 张量，`x2` 为 `B X R X M` 张量。`p` 为 p-范数对应的 p 值，p ∈[0,∞]。输出张量的形状为 `B X P X R`。
+API设计为 `paddle.cdist(x1, x2, p=2.0)`。其中 `x1` 为 `B1 X ... X Bn X P X M` 张量，`x2` 为 `B1 X ... X Bn X R X M` 张量。`p` 为 p-范数对应的 p 值，p ∈[0,∞]。输出张量的形状为 `B1 X ... X Bn X P X R`。
 
 这里与 `torch.cdist(x1, x2, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')` 的设计不同之处是去除了 `compute_mode` 参数，其作用是使用矩阵乘法加速欧氏距离（p=2）的计算。在 PyTorch 中，参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`，当 P > 25 或 R > 25 时，则使用矩阵乘法加速计算，否则使用普通的欧氏距离计算。对于 PaddlePaddle 的实现这应该成为默认的优化计算行为，无需做成用户可选的行为。
 
