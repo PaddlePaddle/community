@@ -5,7 +5,7 @@
 |提交作者<input type="checkbox" class="rowselector hidden"> | PeachML                            | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-22                         | 
 |版本号 | V1.0                               | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.0                             | 
+|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                             | 
 |文件名 | 20200322_api_design_for_AdaptiveLogSoftmaxWithLoss.md<br> | 
 
 # 一、概述
