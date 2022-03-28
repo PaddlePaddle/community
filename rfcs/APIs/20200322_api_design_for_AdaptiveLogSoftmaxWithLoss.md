@@ -1,4 +1,4 @@
-# paddle.Tensor.quantile 设计文档
+# paddle.nn.AdaptiveLogSoftmaxWithLoss 设计文档
 
 |API名称 | paddle.nn.AdaptiveLogSoftmaxWithLoss             | 
 |---|------------------------------------|
