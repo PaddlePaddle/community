@@ -132,7 +132,7 @@ class paddle.fluid.optimizer.ASGDOptimizer(learning_rate, parameter_list=None, r
 第三周：在 Code Review 中迭代。
 
 # 八、影响面
-ASGD 对其它模块没有影响。
+ASGD 对其它模块没有影响。PyTorch ASGD 的问题已经向 PyTorch 提交 issue：https://github.com/pytorch/pytorch/issues/74884
 
 # 名词解释
 
