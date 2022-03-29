@@ -124,7 +124,7 @@ class paddle.fluid.optimizer.ASGDOptimizer(learning_rate, parameter_list=None, r
 基本可以仿照 python/paddle/optimizer/sgd.py，只是把调用的 op 从 sgd 变成 asgd，并在 outputs 中增加一个输出 “AveragedParamOut”，并提供一个 `GetAveragedParameters` 方法。
 
 # 六、测试和验收的考量
-增加完善的测试和文档，并和 PyTorch 的结果对比一致。
+增加完善的测试和文档，本地测试和 PyTorch 的结果一致。构造基于 Paddle SGD、在 Python 中计算参数平均值的参考实现，作为 CI 对比中的 baseline。
 
 # 七、可行性分析和排期规划
 前两周：实现相关代码、测试用例和文档。
