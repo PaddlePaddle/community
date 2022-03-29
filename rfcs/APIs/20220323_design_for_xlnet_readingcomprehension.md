@@ -5,7 +5,7 @@
 | 提交作者     | Tukta                                             |
 | 提交时间     | 2022-03-23                                        |
 | 版本号       | V1.0                                              |
-| 依赖飞桨版本 | v2.2.2                                            |
+| 依赖飞桨版本 | develop                                            |
 | 文件名       | 20220323_design_for_xlnet_readingcomprehension.md |
 
 # 一、概述
