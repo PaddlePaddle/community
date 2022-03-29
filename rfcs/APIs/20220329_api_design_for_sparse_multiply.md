@@ -13,7 +13,7 @@
 ## 1、相关背景
 
 为了提升飞桨API丰富度，multiply 是一个基础乘法运算操作，目前 Paddle 中还没有 sparse 的乘法算子。 本任务的目标是在 Paddle 中添加
-sparse.multiply 算子， 实现输入是两个 SparseCooTensor 或者两个 SparseCsrTensor 逐元素相加的功能。
+sparse.multiply 算子， 实现输入是两个 SparseCooTensor 或者两个 SparseCsrTensor 逐元素相乘的功能。
 Paddle需要扩充API,新增 sparse.multiply API， 调用路径为：`paddle.sparse.multiply`
 实现稀疏Tensor相加的功能。
 
