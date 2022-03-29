@@ -56,7 +56,7 @@ PyTorch 的实现其实是**有问题**的，它最初版的实现参考了 [bot
         param.add_(grad, alpha=-eta.item())
 ```
 
-PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 的计算平均值的经典算法，ax 在 t0 时刻之前是当前权重，在 t0 时刻之后是从 t0 时刻开始到当前为止的权重平均值。
+PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 地计算平均值的经典算法，ax 在 t0 时刻之前是当前权重，在 t0 时刻之后是从 t0 时刻开始到当前为止的权重平均值。
 
 ```python
         # averaging
@@ -91,7 +91,7 @@ PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 的计
         param.add_(grad, alpha=-eta.item())
 ```
 
-经过一些简单的数学变换，不难发现 `weight_decay` 和 `lambd` 虽然看起来差异很大，但在这段代码里的作用是完全一模一样的。
+经过一些简单的数学变换，不难发现在这段代码里 `weight_decay` 和 `lambd` 的用法虽然形式上差异很大，但作用是完全一模一样的。
 
 `lambd` 和 `weight_decay` 唯一不同的地方，是在 200-201 行学习率更新的策略里用到了 `lambd` 而没有用到 `weight_decay`。但 ASGD 作为一个优化方法并不应该和某种具体的学习率更新策略耦合。如果改由外部某个 lr scheduler 来控制 ASGD 的学习率，那么 ASGD 内的 `lambd` 和 `weight_decay` 就完全可以只留一个了。
 
