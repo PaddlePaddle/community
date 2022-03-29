@@ -14,23 +14,23 @@
 ## 1、相关背景
 对应 Issue：https://github.com/PaddlePaddle/Paddle/issues/40314
 
-Averaged SGD 是一种对 SGD 优化算法的改进。可以证明[1]这个优化算法在理论上和使用 Hessian 矩阵的二阶 SGD 有相同的收敛速度，但在实现上要简单的多。它所做的事情和 SGD 完全一样，只是从某一次 iteration t0 之后，它会开始维护模型参数从 t0 时刻到现在的所有版本的平均值，并以这个平均值作为它优化得到的模型参数。
+Averaged SGD 是一种对 SGD 优化算法的改进。可以证明[1]这个优化算法在理论上和使用 Hessian 矩阵的二阶随机梯度下降法有相同的收敛速度，但在实现上要比二阶随机梯度下降法简单的多。Averaged SGD 所做的事情和 SGD 完全一样，只是从某一次 iteration t0 之后，它会开始维护模型参数从 t0 时刻到现在的所有版本的平均值，并以这个平均值作为它优化得到的模型参数。
 
 ## 2、功能目标
 
 在飞桨中增加 `paddle.optimizer.ASGD` 优化器
 
 ## 3、意义
-飞桨用户将和 PyTorch 用户一样可以使用 `paddle.optimizer.ASGD` 优化器。
+飞桨用户将可以使用 `paddle.optimizer.ASGD` 优化器。
 
 # 二、飞桨现状
-飞桨目前不支持直接使用 ASGD 优化器，但用户仍可以自己用 SGD 优化器实现相同的功能，只需要在每次迭代时维护参数的平均值即可。但如果想用 ASGD 优化器取得理想的效果，一个合理的学习率策略非常重要[2]，这对用户提出了很高的要求。
+飞桨目前不支持直接使用 ASGD 优化器，但用户仍可以自己用 SGD 优化器实现相同的功能，只需要在每次迭代时维护参数的平均值即可。但如果想用 ASGD 优化器取得理想的效果，一个合理的学习率策略非常重要[2]，所以如果能以开箱即用的方式提供 ASGD 优化器，对用户来说会是很好的体验。
 
 
 # 三、业内方案调研
 PyTorch 有 ASGD 优化器的实现，文档在 https://pytorch.org/docs/stable/generated/torch.optim.ASGD.html ，代码在 https://github.com/pytorch/pytorch/blob/master/torch/optim/asgd.py 。
 
-PyTorch 的实现其实是**有问题**的，它最初版的实现参考了 [bottou-sgd](https://github.com/npinto/bottou-sgd) （在 PyTorch ASGD 的[最初一个版本](https://github.com/pytorch/pytorch/commit/554a1d83365cf80d8676686e8fcc190c0c95d1a9)中有说明），实现时可能没有特别重视这个优化器，因此没有消化它的原理而是囫囵吞枣的照搬公式和术语，导致它的文档和代码中出现了重复的概念，如：文档中 “eta update” 中的 “eta” 其实就是学习率 lr；参数`lambd` 其实就是 l2 regularization 的系数，和 `weight_decay` 参数的功能是高度重叠的。
+PyTorch 的实现其实是**有问题**的，它最初版的实现参考了 [bottou-sgd](https://github.com/npinto/bottou-sgd) （在 PyTorch ASGD 的[最初一个版本](https://github.com/pytorch/pytorch/commit/554a1d83365cf80d8676686e8fcc190c0c95d1a9)中有说明），当时的 PyTorch 开发者可能没有特别重视这个优化器，因此没有消化它的原理而是囫囵吞枣的照搬公式和术语，导致它的文档和代码出现了问题，如：文档中 “eta update” 中的 “eta” 其实就是学习率 lr；参数`lambd` 其实就是 l2 regularization 的系数，和 `weight_decay` 参数的功能是高度重叠的。
 
 这里对照着 PyTorch ASGD 源码的逻辑把 [bottou-sgd](https://github.com/npinto/bottou-sgd) README 里的内容转述如下：
 
@@ -56,7 +56,7 @@ PyTorch 的实现其实是**有问题**的，它最初版的实现参考了 [bot
         param.add_(grad, alpha=-eta.item())
 ```
 
-PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 的计算平均值的算法，ax 在 t0 时刻之前是当前权重，在 t0 时刻之后是从 t0 时刻开始到当前为止的权重平均值。
+PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 的计算平均值的经典算法，ax 在 t0 时刻之前是当前权重，在 t0 时刻之后是从 t0 时刻开始到当前为止的权重平均值。
 
 ```python
         # averaging
@@ -93,11 +93,11 @@ PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 的计
 
 经过一些简单的数学变换，不难发现 `weight_decay` 和 `lambd` 虽然看起来差异很大，但在这段代码里的作用是完全一模一样的。
 
-`lambd` 和 `weight_decay` 唯一不同的地方，是在学习率更新的策略里用到了 `lambd` 而没有用到 `weight_decay`。但 ASGD 作为一个优化方法并不应该和某种具体的学习率更新策略耦合。如果改由外部某个 lr scheduler 来控制 ASGD 的学习率，那么 ASGD 内的 `lambd` 和 `weight_decay` 就完全可以只留一个了。
+`lambd` 和 `weight_decay` 唯一不同的地方，是在 200-201 行学习率更新的策略里用到了 `lambd` 而没有用到 `weight_decay`。但 ASGD 作为一个优化方法并不应该和某种具体的学习率更新策略耦合。如果改由外部某个 lr scheduler 来控制 ASGD 的学习率，那么 ASGD 内的 `lambd` 和 `weight_decay` 就完全可以只留一个了。
 
-PyTorch 的 ASGD 还同时存在着 single_tensor 和 multi_tensor 两种实现，其它 PyTorch 优化器也是一样，和 ASGD 本身无关。
+PyTorch 的 ASGD 还同时存在着 single_tensor 和 multi_tensor 两种实现，其它 PyTorch 优化器也是一样。和 ASGD 本身无关。multi_tensor 使用了 PyTorch 的 foreach API，效率更高，但没有默认启用。
 
-到现在，PyTorch 的代码已经分析完成，我们也明白了 ASGD 的实现：它和普通的 SGD 可以说完全一样，只是在 `ax` 里保存了一份权重的平均值而已。因为相关作者的囫囵吞枣，它和其它优化器的实现风格格格不入，这阻碍了对它的理解。
+到现在，PyTorch 的代码已经分析完成，我们也明白了 ASGD 的实现：它和普通的 SGD 可以说完全一样，只是在 `ax` 里保存了一份权重的平均值而已。由于相关作者的囫囵吞枣，它和其它优化器的实现风格格格不入，这阻碍了对它的理解。
 
 注意：PyTorch 和 TensorFlow 也实现了 Stochastic Weight Averaging，它和 Averaged SGD 并不是相同的概念。具体可以参考 https://pytorch.org/blog/stochastic-weight-averaging-in-pytorch。
 
@@ -111,7 +111,7 @@ PyTorch 的 ASGD 还同时存在着 single_tensor 和 multi_tensor 两种实现�
 class paddle.fluid.optimizer.ASGDOptimizer(learning_rate, parameter_list=None, regularization=None, name=None)
 ```
 
-和飞桨中其它优化器的风格保持一致。weight_decay 通过 `regularization` 参数设置，支持 L1/L2 正则。而学习率用 LR Scheduler 来控制，不内置在优化器内。并新增一个 LRScheduler 实现 [2] 中提出的学习率更新策略（具体名字可以后续决定）。
+和飞桨中其它优化器的风格保持一致。weight_decay 通过 `regularization` 参数设置，支持 L1/L2 正则。而学习率用 LR Scheduler 来控制，不内置在优化器内。并新增一个 LRScheduler 实现 [2] 中提出的学习率更新策略（具体名字可以后续决定），用户也可以通过使用其它 LRScheduler 或者 LambdaLR，自由选择其它的学习率更新策略。
 
 
 
