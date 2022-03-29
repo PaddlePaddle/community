@@ -71,14 +71,14 @@ PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 地计
 
 
 
-200-201 行，是更新学习率（在 PyTorch 的实现里，eta 就是学习率，而 lr 是一个常量，专指用户设置的初始学习率）的策略，这个更新策略是照搬自 bottou-sgd，bottou-sgd 参考自 [2]。和其它的优化器不一样，ASGD 优化器的学习率并不能由 lr scheduler 控制，这可能也是它是被不经消化地加入 PyTorch 的一个表现。
+200-201 行，是更新学习率（在 PyTorch 的实现里，eta 就是学习率，而 lr 是一个常量，专指用户设置的初始学习率）的策略，这个更新策略是照搬自 bottou-sgd，bottou-sgd 参考自 [2]。和其它的优化器不一样，ASGD 优化器的学习率并不能由 lr scheduler 控制，这可能也是它被不经消化地加入 PyTorch 的一个表现。
 
 ```python
         new_eta = torch.tensor(lr / math.pow((1 + lambd * lr * step), alpha))
         eta.copy_(new_eta)
 ```
 
-再看看 PyTorch 的实现，除了上述的几段代码之外，还有一个名叫 weight_decay 的参数，在上面的推导里我们已经了解到，其实 lambda 就是 l2 正则项的系数，也就是 weight decay，再看看相关的代码来实锤这一点：
+再看看 PyTorch 的实现，除了上述的几段代码之外，还有一个名叫 weight_decay 的参数，在上面的推导里我们已经了解到，其实 lambda 就是 l2 正则项的系数，也就是 “weight decay”，因此不应该再有另一个 weight_decay 参数了。再看看相关的代码：
 
 ```python
         if weight_decay != 0:
@@ -97,12 +97,12 @@ PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 地计
 
 PyTorch 的 ASGD 还同时存在着 single_tensor 和 multi_tensor 两种实现，其它 PyTorch 优化器也是一样。和 ASGD 本身无关。multi_tensor 使用了 PyTorch 的 foreach API，效率更高，但没有默认启用。
 
-到现在，PyTorch 的代码已经分析完成，我们也明白了 ASGD 的实现：它和普通的 SGD 可以说完全一样，只是在 `ax` 里保存了一份权重的平均值而已。由于相关作者的囫囵吞枣，它和其它优化器的实现风格格格不入，这阻碍了对它的理解。
+到现在，PyTorch 的代码已经分析完成，我们也明白了 ASGD 的实现：它和普通的 SGD 可以说完全一样，只是在 `ax` 里保存了一份权重的平均值而已。由于相关作者的囫囵吞枣，它和其它优化器的实现风格格格不入，这才阻碍了对它的理解。
 
 注意：PyTorch 和 TensorFlow 也实现了 Stochastic Weight Averaging，它和 Averaged SGD 并不是相同的概念。具体可以参考 https://pytorch.org/blog/stochastic-weight-averaging-in-pytorch。
 
 # 四、对比分析
-经过上面的分析可以发现 PyTorch 的实现是很有问题的。在飞桨里的实现可以以更加优雅和一致的方式实现。
+经过上面的分析可以发现 PyTorch 的实现是很有问题的。在飞桨里它可以以更加优雅和一致的方式实现。
 
 # 五、设计思路与实现方案
 
@@ -129,7 +129,7 @@ class paddle.fluid.optimizer.ASGDOptimizer(learning_rate, parameter_list=None, r
 # 七、可行性分析和排期规划
 前两周：实现相关代码、测试用例和文档。
 
-第三周：在 Code Review 中迭代。
+第三周：Code Review 和迭代 PR。
 
 # 八、影响面
 ASGD 对其它模块没有影响。PyTorch ASGD 的问题已经向 PyTorch 提交 issue：https://github.com/pytorch/pytorch/issues/74884
