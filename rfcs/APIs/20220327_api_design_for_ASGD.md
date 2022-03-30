@@ -117,7 +117,13 @@ class paddle.fluid.optimizer.ASGDOptimizer(learning_rate, parameter_list=None, r
 
 ## 底层OP设计
 
-基本可以仿照飞桨 SGD 优化器的实现，实现 paddle/fluid/operators/optimizers/asgd_op.cc 和相应的 asgd_kernel.h/.cc/.cu。
+基本可以仿照飞桨 SGD 优化器的实现，实现 paddle/fluid/operators/optimizers/asgd_op.cc 和相应的 asgd_kernel.h/.cc/.cu，注册 ASGDOP 和 CPU 与 CUDA 版的 ASGDOpKernel。
+
+飞桨中 SGD 和 Adam 等常见的优化器的 CPU 版的实现是通过代码生成机制在运行时生成并加载的，而 ASGD 是较冷门的优化器，可以类似于飞桨中的 RMSProp 等优化器，通过 Eigen 库实现 CPU Kernel，通过 for_range + Functor 实现 CUDA Kernel 即可。
+
+ASGD 优化器计划暂不支持 SelectedRows 等稀疏张量和 AMP，毕竟这个优化器实在是冷门，即使是用户量多如 PyTorch，它的 ASGD 优化器可能也没有用户真的使用过。
+
+新增的 LR Scheduler 将是纯 Python 代码（和其它 LR Scheduler 相同），不涉及新增底层 OP。
 
 ## API实现方案
 
