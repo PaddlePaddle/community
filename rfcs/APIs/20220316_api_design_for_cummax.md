@@ -17,7 +17,7 @@ $$
     y_i = \max\(x_1, x_2, x_3, \cdots , x_i\)
 $$
 
-PyTorch 和 Pandas 提供了该算子。
+PyTorch、NumPy 和 Pandas 提供了相似算子。
 
 ## 2、功能目标
 
@@ -50,11 +50,14 @@ Keyword Arguments
 ```
 即输入参数为 Tensor 和指定的维，两个值和索引的切片。
 
+相关联的 PR [Cumulative Maximum · Issue #20240 · pytorch/pytorch (github.com)](https://github.com/pytorch/pytorch/issues/20240)，其中提及`logcumsumexp` 依赖于 `cummax` 功能。
+
 ### 实现方法
 
 在实现方法上, PyTorch 通用实现采用的遍历，[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L638)，CUDA 采用的[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L17)。
 核心代码为：
 CPU:
+
 ```cpp
 template<typename T1, typename T2, typename Operation>
 void cummax_cummin_helper(const T1* self_data, T1* values_data, T2* indices_data,
@@ -137,6 +140,11 @@ void launch_cummax_cuda_kernel(const TensorBase& self, const TensorBase& values,
 }
 ```
 
+## NumPy
+
+NumPy 具有相似功能的 API 是 `numpy.maximum.accumulate()`，文档参见 [numpy.ufunc.accumulate — NumPy v1.22 Manual](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.accumulate.html)。
+
+NumPy 的策略是提供一种更具兼容性的实现方式，组合实现该功能（尽管其单独提供了 `cumsum` 和 `cumprod`，但没有单独提供 `cummax`），有别于 PyTorch 分别 native 实现 `cumprod`、`cumsum` 以及 `cummax`。
 
 ## Pandas
 
@@ -216,15 +224,16 @@ Return cumulative maximum of Series or DataFrame.
 
 # 四、对比分析
 
-比较分析：在基于 CPU 的方案上思路较为一致，其中 PyTorch 对于矩阵的操作是基于 stride 和指针完成的，Pandas 基于 Numpy 提供的矩阵操作能力，所以以索引方式操作。
+比较分析：不同框架在基于 CPU 的方案上思路较为一致。其中 PyTorch 对于矩阵的操作是基于 stride 和指针完成的；Pandas 基于 Numpy 提供的矩阵操作能力，所以以索引方式操作；NumPy 没有原生实现该功能。
 PyTorch 还提供了基于 CUDA 的算子实现。
-评价：Pandas 的矩阵操作实际由 Numpy 支撑，在该运算实现效率上应不如 PyTorch 实现的；在功能上，Pandas 支持了可选的 NaN 值处理选项，有一定灵活性。
+评价：Pandas 的矩阵操作实际由 Numpy 支撑，在该运算实现效率上应不如 PyTorch 实现的；在功能上，Pandas 支持了可选的 NaN 值处理选项，有一定灵活性；NumPy 没有提供原生的 `cummax` 实现，而是基于组合的方式。
+就基于已有的方法组合实现这一途径，经过调研，PaddlePaddle 和 PyTorch 都已原生实现 `cumsum` 和 `cumprod`，为 `cummax` 提供原生实现，应能够提供更好的性能。
 
 # 五、方案设计
 
 ## 命名与参数设计
 
-API设计为`paddle.cummax(x, axis , dtype, name)`以及`paddle.Tensor.cumax(axis, dtype, name)`。参数设计参考`paddle.cumsum`。
+API设计为`paddle.cummax(x, axis , dtype, name)`以及`paddle.Tensor.cummax(axis, dtype, name)`。参数设计参考`paddle.cumsum`。
 - x (Tensor) - 需要进行累积最大值统计的 Tensor。
 - axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累加计算。
 - dtype (str，可选) - 输出Tensor的数据类型，支持int32、int64、float32、float64. 如果指定了，那么在执行操作之前，输入张量将被转换为dtype. 这对于防止数据类型溢出非常有用。默认为：None。
@@ -232,7 +241,7 @@ API设计为`paddle.cummax(x, axis , dtype, name)`以及`paddle.Tensor.cumax(axi
 
 ## 底层OP设计
 
-参考 PyTorch 实现。
+参考 paddle.cumsum 实现。
 
 ## API实现方案
 
@@ -243,15 +252,25 @@ Python 接口实现位置为`paddle/tesnor/math.py`。
 
 测试考虑的case如下：
 
-- 动态图，静态图，与 PyTorch 的结果保持一致；
-- NaN 处理：关注异常值，边界情况的处理；
-- 错误检查：输入输出矩阵形状的检查。
+- 正确性验证：可以与 NumPy 的结果对齐；
+  - axis 维度：0，1，默认（None），-1等；
+  - dtype 类型：验证 `float64`，`int32`等；
+
+- 边界情况：对 NaN 等异常值的检查；
+- 不同计算设备：覆盖 CPU 和 GPU 等实现；
+- 错误检查：输入参数类型、形状的有效性校验。
 
 # 七、可行性分析及规划排期
 
-3/20 完成技术方案；
-3/25 开发 Python 实现代码 & 英文 API文档；
-3/30 开发 C++ 实现代码 & CUDA 实现代码。
+技术可行性：参考同类项目和相似的 API，无重大难点；
+
+1st week：中英文 API 文档编写 & 测试样例；
+
+2nd week：CPU 后端 C++ 实现和前端 Python 代码；
+
+3rd week：CUDA 后端 C++ 实现和前端 Python 代码；
+
+4th week：测试和完善文档。
 
 # 八、影响面
 
