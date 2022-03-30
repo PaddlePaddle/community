@@ -12,10 +12,10 @@
 
 ## 1、相关背景
 为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充API`paddle.quantile`以及`paddle.Tensor.quantile`，
-##2、功能目标
+## 2、功能目标
 增加API`paddle.quantile`以及`paddle.Tensor.quantile`，实现对一个张量沿指定维度计算q分位数的功能。
 
-##3、意义
+## 3、意义
 飞桨支持计算分位数
 
 # 二、飞桨现状
@@ -213,5 +213,5 @@ API设计为`paddle.quantile(x, q, axis=None, keepdim=False, name=None)`及`padd
 
 # 名词解释
 无
-#附件及参考资料
+# 附件及参考资料
 无
