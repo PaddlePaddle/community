@@ -1,0 +1,83 @@
+# 飞桨文档体验方案
+
+|领域 | 飞桨文档体验方案 | 
+|---|---|
+|提交作者<input type="checkbox" class="rowselector hidden"> | mkm wjc | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-30 | 
+|版本号 | V1.0 | 
+|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | paddlepaddle-gpu==2.2 | 
+|文件名 | 20220320_docs_eval_docs.md<br> | 
+
+
+# 一、概述
+## 1、相关背景
+
+飞桨框架于 2.0 正式版全面支持了动态图训练，并在2.1、2.2 两个大版本中不断完善分布式能力，同时大幅增强了训练功能。需要进行飞浆动态图分布式训练的评估。
+
+## 2、功能目标
+
+根据文档示例，体验分布式训练相关功能，包括但不限于：在Fleet API使用、分布式动态图训练、环境配置、报错查错、性能调优、文档质量等方面，反馈使用体验。
+
+## 3、意义
+
+从用户角度体验飞桨分布式框架，发掘文档体系中可以改善的功能点。
+
+# 二、飞桨现状
+
+飞桨从 [2.0.0](https://github.com/PaddlePaddle/Paddle/releases/tag/v2.0.0) 从 1.x 到 2.0 做了较大的功能更新。对应的文档，也随着做出了较大的改动。
+
+[飞桨的文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/index_cn.html) 显式遵循了 https://documentation.divio.com/ 所描述的文档体系。这与 [MindSpore](https://www.mindspore.cn/) 类似。与 [PyTorch](https://pytorch.org/docs/stable/index.html) 不同。这在用户体验上各有特色，给用户不同的感受。
+
+在本次黑客松之前，未见有人发起对飞桨 2.0 之后的文档做充分分析并生成体验报告。
+
+# 三、业内方案调研
+
+Pytorch目前支持分布式训练，其API包括torch.nn.parallel.DataParallel与torch.nn.parallel.DistributedDataParallel这两个，其都属于数据并行。
+DataParallel和DistributedDataParallel有如下不同：
+    DataParallel是单进程，多线程的并行训练方式，并且只能在单台机器上运行。
+    DistributedDataParallel是多进程，并且适用于单机和多机训练。DistributedDataParallel 还预先复制模型，而不是在每次迭代时复制模型，并避免了全局解释器锁定，相对来说，
+    DistributedDataParallel数据并行的效率比DataParallel数据并行的效率高。
+
+Distributed Data-Parallel Training (DDP) 分布式数据并行训练（DDP）是一种广泛采用的单程序多数据训练范式。
+使用DDP，在每个进程上复制模型，每个模型副本都将提供一组不同的输入数据样本。DDP负责梯度通信以保持模型副本的同步，并将其与梯度计算重叠以加快训练。
+
+RPC-Based Distributed Training (RPC)基于RPC的分布式训练（RPC）支持无法适应数据并行训练的一般训练结构，如分布式管道并行、参数服务器范例以及DDP与其他训练范例的组合。
+
+Collective Communication (c10d) library集体通信（c10d）库支持跨组内的进程发送张量。它提供了集体通信API（例如，all_reduce和all_gather）和P2P通信API（例如，send和isend）。DDP和RPC（ProcessGroup后端）构建在c10d上，前者使用集体通信，后者使用P2P通信。通常，开发人员不需要直接使用这个原始通信API，因为DDP和RPC API可以服务于许多分布式培训场景。但是，在一些用例中，此API仍然很有用。一个例子是分布参数平均，应用程序希望在向后传递后计算所有模型参数的平均值，而不是使用DDP传递梯度。这可以将通信与计算分离，并允许对通信内容进行更精细的控制，但另一方面，它也放弃了DDP提供的性能优化。
+
+
+# 四、对比分析
+
+对比pytorch框架以及飞浆分布式并行框架的运行速度，识别准确的度，分析两个框架使用的难易程度，使用方式。
+
+# 五、设计思路与实现方案
+
+1、实现pytorch版本的DDP分布式并行训练，预期采用cifar10数据集完成图像分类的样例。
+2、实现飞浆分布式框架的训练，完成图像分类的样例
+3、对比分析1 2 中的数据
+4、给出评估报告
+
+## 命名与参数设计
+
+因为是报告形式，无 API 接口设计
+
+
+# 六、测试和验收的考量
+
+一份飞桨分布式使用评估报告文档，包括分布式产品基本情况摸底表格和至少包含以上提示中3项功能的评测报告，且每项评估至少包含3点内容：
+（1）你认为的该功能比较好的使用体验（提供竞品名称及功能描述）；
+（2）该功能 Paddle 的使用体验；
+（3）1和2之间的使用体验对比（易用性、完整性、前瞻性等）
+
+# 七、可行性分析和排期规划
+
+对各Pytorch分布式训练框架ddp已经有一定了解，之后需要对比ddp和飞浆分布式框架之间的不同，进一步做细致的体验测试及分析。形成详细的报告文档。
+
+
+# 八、影响面
+
+无
+
+# 名词解释
+
+# 附件及参考资料
