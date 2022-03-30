@@ -38,7 +38,7 @@ https://www.convertmodel.com/ 支持了训练框架到 NCNN、MNN 和 Tengine �
 
 # 五、设计思路与实现方案
 
-使用 emsdk 将 opt 工具编译为 WebAssembly，集成进
+使用 emsdk 将 opt 工具编译为 WebAssembly，集成进网页端即可。可能需要处理一些 opt 工具的编译错误。
 
 # 六、测试和验收的考量
 
