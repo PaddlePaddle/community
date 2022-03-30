@@ -4,7 +4,7 @@
 | ------------------------------------------------------------ | -------------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                        |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-20                             |
-| 版本号                                                       | V1.2                                   |
+| 版本号                                                       | V1.3                                   |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                |
 | 文件名                                                       | 20200301_design_for_nanquantile.md<br> |
 
@@ -147,11 +147,11 @@ API设计为`paddle.nanquantile(x, q, axis=None, keepdim=False, name=None)`及`p
 
 `Pytorch`和`Numpy`中的`quantile`对含有NaN的输入将会返回NaN，而`paddle.quantile`对此不能返回正确的结果，因此对其进行修改，修改后可与`nanquantile`共用大部分代码。
 
-1. 使用`isnan`得到标志着NaN位置的mask，使用`paddle.where`将`NaN`替换为`Inf`，因为`sort`不能对含有`NaN`的输入进行正确排序；
+1. 使用`isnan`得到标志着NaN位置的mask；
 
 1. 对`mask`使用`paddle.logical_not`取反，在指定维度上求和，得到每个位置上的有效数字的个数，这是一个矩阵；
 
-2. 对第一步替换后的tensor使用`paddle.sort`；
+2. 对输入tensor使用`paddle.sort`，其中`NaN`会被排序至最后；
 
 2. 使用第二步的**有效数字矩阵**-1乘以`q`（值域为[0, 1]）得到`indices`（值域为[-1, dim_wo_nan-1]）；
 
@@ -169,13 +169,9 @@ API设计为`paddle.nanquantile(x, q, axis=None, keepdim=False, name=None)`及`p
 
 5. 使用`paddle.take_along_axis`取出对应`axis`和`indice`的两端元素，若索引值为-1，将会返回0.0；
 
-6. `paddle.lerp`计算两端元素的加权插值，作为结果，只要两输入之一为`Inf\NaN`，其输出依旧是`Inf\NaN`；
+6. `paddle.lerp`计算两端元素的加权插值，作为结果，只要两输入之一为`NaN`，其输出依旧是`NaN`；
 
-7. 根据`keepdim`参数，确定是否需要对应调整结果的shape；
-
-8. 将结果中的`Inf`或`-Inf`再替换回`NaN`，输出即可。
-
-- 如果后续版本`paddle.sort`支持将NaN排序到最后，即可将第一步和第十步的两次`NaN`和`Inf`的转化取消。
+9. 根据`keepdim`参数，确定是否需要对应调整结果的shape，输出即可。
 
 上述计算逻辑实现在`_compute_quantile(x, q, axis=None, keepdim=Flase, ignore_nan=False)`中。
 
