@@ -237,7 +237,7 @@ API设计为`paddle.cummax(x, axis , dtype, name)`以及`paddle.Tensor.cummax(ax
 - x (Tensor) - 需要进行累积最大值统计的 Tensor。
 - axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累加计算。
 - dtype (str，可选) - 输出Tensor的数据类型，支持int32、int64、float32、float64. 如果指定了，那么在执行操作之前，输入张量将被转换为dtype. 这对于防止数据类型溢出非常有用。默认为：None。
-- name  (str，可选) - 操作的名称（可选，默认值为None）。更多信息请参见 Name 。
+- name  (str，可选) - 操作的名称（可选，默认值为None）。
 
 ## 底层OP设计
 
@@ -256,7 +256,7 @@ Python 接口实现位置为`paddle/tesnor/math.py`。
   - axis 维度：0，1，默认（None），-1等；
   - dtype 类型：验证 `float64`，`int32`等；
 
-- 边界情况：对 NaN 等异常值的检查；
+- 边界情况：对 NaN 等异常值的处理，参考 `paddle.cumsum` 的测试，这里选择与 NumPy 保持一致，即遇到 NaN 结果也为 NaN；
 - 不同计算设备：覆盖 CPU 和 GPU 等实现；
 - 错误检查：输入参数类型、形状的有效性校验。
 
