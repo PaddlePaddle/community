@@ -97,7 +97,7 @@ PyTorch 源码中接下来的 194-198 行和 202-203 行，是 on-the-fly 地计
 
 PyTorch 的 ASGD 还同时存在着 single_tensor 和 multi_tensor 两种实现，其它 PyTorch 优化器也是一样。和 ASGD 本身无关。multi_tensor 使用了 PyTorch 的 foreach API，效率更高，但没有默认启用。
 
-到现在，PyTorch 的代码已经分析完成，我们也明白了 ASGD 的实现：它和普通的 SGD 可以说完全一样，只是在 `ax` 里保存了一份权重的平均值而已。由于相关作者的囫囵吞枣，它和其它优化器的实现风格格格不入，这才阻碍了对它的理解。
+到现在，PyTorch 的代码已经分析完成，我们也明白了 ASGD 的实现：它和普通的 SGD 可以说完全一样，只是在 `ax` 里保存了一份权重的平均值而已。由于相关作者的囫囵吞枣，它和其它优化器的实现风格格格不入，这才阻碍了对它的理解。而 ASGD 并没有一定要使用某一种特定的学习率更新策略，举例来说，PyTorch ASGD 和 bottou-sgd 所用的学习率更新策略 [2] 是比 ASGD 本身 [1] 更晚提出的。这一点也可以从 [维基百科](https://en.wikipedia.org/wiki/Stochastic_gradient_descent) 和 [这个课件](https://courses.cs.washington.edu/courses/cse547/18sp/slides/sgd_averaging.pdf) 对 ASGD 的描述里证实 —— ASGD 只是记录参数的平均值而已。
 
 注意：PyTorch 和 TensorFlow 也实现了 Stochastic Weight Averaging，它和 Averaged SGD 并不是相同的概念。具体可以参考 https://pytorch.org/blog/stochastic-weight-averaging-in-pytorch。
 
