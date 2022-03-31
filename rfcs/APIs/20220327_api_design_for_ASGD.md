@@ -183,8 +183,14 @@ ASGD 对其它模块没有影响。PyTorch ASGD 的问题已经向 PyTorch 提�
 
 # 附件及参考资料
 
-[1] http://dl.acm.org/citation.cfm?id=131098
+[1] http://dl.acm.org/citation.cfm?id=131098 提出 ASGD 算法的 Paper
 
-[2] https://arxiv.org/abs/1107.2490
+[2] https://arxiv.org/abs/1107.2490 提出 PyTorch 和 bottou-sgd 所用的学习率更新策略的 Paper
 
 [3] https://pytorch.org/blog/stochastic-weight-averaging-in-pytorch/
+
+[4] https://en.wikipedia.org/wiki/Stochastic_gradient_descent SGD 的维基百科，里面有介绍 Averaged SGD
+
+[5] https://courses.cs.washington.edu/courses/cse547/18sp/slides/sgd_averaging.pdf 讲述 ASGD 原理的课件
+
+[6] https://github.com/npinto/bottou-sgd/blob/master/README.txt bottou-sgd README
