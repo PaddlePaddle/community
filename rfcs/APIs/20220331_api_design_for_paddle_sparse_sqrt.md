@@ -85,7 +85,11 @@ PyTorch 和 SciPy 的实现是类似的，稀疏张量的一元操作并不复�
 
 ## 命名与参数设计
 
-新增两个 API：
+sparse sqrt 这个稀疏张量上的方法的命名和参数不需要额外设计，在 python/paddle/utils/code_gen/sparse_api.yaml 里新增一项即可。
+
+## 底层OP设计
+
+新增两个 Kernel：
 
 ```    cpp
  SparseCooTensor SqrtKernel(const Context& dev_ctx,
@@ -98,8 +102,6 @@ PyTorch 和 SciPy 的实现是类似的，稀疏张量的一元操作并不复�
  const SparseCsrTensor& x,
  SparseCsrTensor* out);
 ```
-
-## 底层OP设计
 
 一元操作的实现较简单，取出 DenseTensor 类型的 non_zero_elements() 后，逐元素进行 sqrt 操作，并创建新的稀疏张量即可。
 
