@@ -121,6 +121,45 @@ class paddle.fluid.optimizer.ASGDOptimizer(learning_rate, parameter_list=None, r
 
 飞桨中 SGD 和 Adam 等常见的优化器的 CPU 版的实现是通过代码生成机制在运行时生成并加载的，而 ASGD 是较冷门的优化器，可以类似于飞桨中的 RMSProp 等优化器，通过 Eigen 库实现 CPU Kernel，通过 for_range + Functor 实现 CUDA Kernel 即可。
 
+具体来讲，如上文所述，ASGD 和普通的 SGD 可以说完全一样，只是额外保存了一份权重沿时间的平均值而已。因此 CPU 版 Kernel 的伪代码如下：
+
+```c++
+    const auto *learning_rate = ctx.Input<framework::Tensor>("LearningRate");
+    const auto *param = ctx.Input<framework::Tensor>("Param");
+    // 相比 SGD 优化器增加一个 AveragedParam 输入，表示该权重到目前为止的平均值
+    const auto *averaged_param = ctx.Input<framework::Tensor>("AveragedParam");
+    std::string regularization_method =
+        ctx.Attr<std::string>("regularization_method");
+    float regularization_coeff = ctx.Attr<float>("regularization_coeff");
+    int64_t t0 = ctx.Attr<int64_t>("t0");
+    auto *param_out = ctx.Output<framework::Tensor>("ParamOut");
+    // 相比 SGD 优化器增加一个 AveragedParamOut 输出，表示经过本次更新之后的该权重的新平均值
+    auto *averaged_param_out = ctx.Output<framework::Tensor>("AveragedParamOut");
+    const auto *grad = ctx.Input<framework::Tensor>("Grad");
+    
+    // 省略构造 EigenVector 的代码
+    // ...
+    
+    auto &place =
+        *execution_context.template device_context<DeviceContext>().eigen_device();
+    if (regularization_method == "l2_decay") {
+      param_out.device(place) = param * (1 - learning_rate * weight_decay); // 处理 weight decay
+    } else if (regularization_method == "l1_decay") {
+      ...
+    }
+    param_out -= learning_rate * grad;  // 梯度下降
+
+    // 与普通 SGD 的关键区别，维护参数平均值：
+    if (current_step() < t0) {
+      averaged_param_out.device(place) = param_out;
+    } else {
+      // 与 PyTorch 中的方法相同，更新平均值
+      averaged_param_out.device(place) = update_average(averaged_param, param_out, current_step(), t0);
+    }
+```
+
+CUDA Kernel 的实现也将是类似的。
+
 ASGD 优化器计划暂不支持 SelectedRows 等稀疏张量和 AMP，毕竟这个优化器实在是冷门，即使是用户量多如 PyTorch，它的 ASGD 优化器可能也没有用户真的使用过。
 
 新增的 LR Scheduler 将是纯 Python 代码（和其它 LR Scheduler 相同），不涉及新增底层 OP。
