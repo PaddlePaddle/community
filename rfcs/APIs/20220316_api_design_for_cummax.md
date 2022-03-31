@@ -2,11 +2,11 @@
 
 | API名称                                                      | paddle.[Tensor.]cummax               |
 | ------------------------------------------------------------ | ----------------------------------- |
-| 提交作者<input type="checkbox" class="rowselector hidden">   | jinyouzhi                             |
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-16                            |
+| 提交作者   | jinyouzhi                             |
+| 提交时间| 2022-03-16                            |
 | 版本号                                                       | V1.0                                |
-| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.0                              |
-| 文件名                                                       | 20220316_api_design_for_cummax.md<br> |
+| 依赖飞桨版本 | develop                             |
+| 文件名                                                       | 20220316_api_design_for_cummax.md |
 
 # 一、概述
 
@@ -253,10 +253,13 @@ Python 接口实现位置为`paddle/tesnor/math.py`。
 测试考虑的case如下：
 
 - 正确性验证：可以与 NumPy 的结果对齐；
+  - 不同 shape；
   - axis 维度：0，1，默认（None），-1等；
-  - dtype 类型：验证 `float64`，`int32`等；
+  - dtype 类型：验证 `float64`，`int32`等。
 
 - 边界情况：对 NaN 等异常值的处理，参考 `paddle.cumsum` 的测试，这里选择与 NumPy 保持一致，即遇到 NaN 结果也为 NaN；
+  - 含有 NaN 的用例；
+
 - 不同计算设备：覆盖 CPU 和 GPU 等实现；
 - 错误检查：输入参数类型、形状的有效性校验。
 
