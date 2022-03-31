@@ -2,9 +2,9 @@
 |API名称 | paddlefsl.hpo.rand | 
 |---|---|
 |提交作者 | jinyouzhi | 
-|提交时间 | 2022-03-16 | 
+|提交时间 | 2022-03-31 | 
 |版本号 | V1.0 | 
-|依赖飞桨版本 | v2.2.0 | 
+|依赖飞桨版本 | develop | 
 |文件名 | 20220316_api_design_for_hop_rand.md | 
 
 # 一、概述
@@ -332,8 +332,8 @@ def suggest_parameter(rng, spec):
 # 七、可行性分析和排期规划
 已有广泛实现，无需论证可行性。
 
-1-2nd week，开发基类；
-3-4th week，开发随机搜索；
+1-2nd week，开发随机搜索；
+3-4th week，开发单测；
 5th week，完善 API 文档。
 
 # 八、影响面
