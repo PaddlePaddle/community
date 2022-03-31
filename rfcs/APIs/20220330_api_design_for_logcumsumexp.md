@@ -25,7 +25,7 @@ logcumsumexp(x) 会计算 x 沿某一个坐标轴的以 e 为底的指数的前�
 
 # 二、飞桨现状
 
-在飞桨中，logcumsumexp 可以通过已有的 API 组合而成：paddle.log(paddle.cumsum(paddle.exp(x)))，但这样做的数值稳定性很差。
+在飞桨中，logcumsumexp 可以通过已有的 API 组合而成：paddle.log(paddle.cumsum(paddle.exp(x)))，但这样做的数值稳定性很差，原因是 paddle.cumsum(paddle.exp(x)) 很有可能溢出。
 
 
 # 三、业内方案调研
@@ -80,7 +80,7 @@ axis 默认为 None，表示将 tensor flatten 后再进行操作；dtype 会用
 
 一定程度上可以仿照 Paddle 中已有的 cumsum op 来实现。Paddle 的 cumsum CUDA kernel 中，直接调用了 thrust 的 API `thrust::exclusive_scan` 或 `thrust::inclusive_scan` 。幸运的是 thrust 有一族 [Transformed Prefix Scans 接口](https://thrust.github.io/doc/group__transformed__prefixsums.html)，支持以任意一个满足结合律的二元运算代替 “加法” 的角色。因此 logcumsumexp 的 CUDA kernel 只要使用这族接口，将 log_add_exp 作为参与 prefix scan 的二元运算即可。
 
-但 Paddle cumsum CPU kernel 使用 eigen 作为运算库，eigen 只有普通的 cumsum 和 cumprod 接口，而不支持任意满足结合律的二元运算，因此 Paddle logcumsumexp 的 CPU Kernel 可能只能先写一个串行的 naive 版而不容易实现高效的并行。
+但 Paddle cumsum CPU kernel 使用 eigen 作为运算库，eigen 只有普通的 cumsum 和 cumprod 接口，而不支持任意满足结合律的二元运算，因此 Paddle logcumsumexp 的 CPU Kernel 这一版本写一个串行的 naive 版。
 
 ## API实现方案
 
@@ -88,7 +88,14 @@ axis 默认为 None，表示将 tensor flatten 后再进行操作；dtype 会用
 
 # 六、测试和验收的考量
 
-实现基于 NumPy 的参考实现，将 Paddle logcumsumexp kernel 的结果与参考实现对比。在 CPU 和 GPU、静态图与动态图模式，以及各种参数设置下，均与 NumPy 的结果一致。
+实现基于 NumPy 的参考实现，预期实现效果与 NumPy 保持一致：
+
+1. 测试API 动态图和静态图下的一致性。
+2. 测试CPU、GPU上的一致性。
+3. 测试在 fp16、fp32 和 fp64 下的一致性。
+4. 构造几个按 paddle.log(paddle.cumsum(paddle.exp(x))) 的计算方式来计算会溢出，使用变换后的 log_add_exp 计算则不会溢出的的测试用例，验证该 OP 的实现不会发生溢出。
+5. axis/exclusive/reverse/dtype 的每一个可能的取值都需要有测试用例覆盖到。
+6. 在本地对比与 TensorFlow 的性能，确保 CUDA 版本不低于 PyTorch。
 
 # 七、可行性分析和排期规划
 
