@@ -25,7 +25,7 @@ logcumsumexp(x) 会计算 x 沿某一个坐标轴的以 e 为底的指数的前�
 
 # 二、飞桨现状
 
-在飞桨中，logcumsumexp 可以通过已有的 API 组合而成：paddle.log(paddle.cumsum(paddle.exp(x)))，但这样做的数值稳定性很差，原因是 paddle.cumsum(paddle.exp(x)) 很有可能溢出。
+在飞桨中，logcumsumexp 可以通过已有的 API 组合而成：paddle.log(paddle.cumsum(paddle.exp(x)))，但这样做的数值稳定性很差，原因是 paddle.cumsum(paddle.exp(x)) 很有可能溢出，此外这种在 Python 层组合实现的操作性能也会较差。
 
 
 # 三、业内方案调研
