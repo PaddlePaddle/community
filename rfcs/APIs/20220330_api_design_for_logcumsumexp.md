@@ -95,7 +95,7 @@ axis 默认为 None，表示将 tensor flatten 后再进行操作；dtype 会用
 3. 测试在 fp16、fp32 和 fp64 下的一致性。
 4. 构造几个按 paddle.log(paddle.cumsum(paddle.exp(x))) 的计算方式来计算会溢出，使用变换后的 log_add_exp 计算则不会溢出的的测试用例，验证该 OP 的实现不会发生溢出。
 5. axis/exclusive/reverse/dtype 的每一个可能的取值都需要有测试用例覆盖到。
-6. 在本地对比与 TensorFlow 的性能，确保 CUDA 版本不低于 PyTorch。
+6. 在本地对比 Paddle logcumsumexp CUDA kernel 与 TensorFlow cumulative_logsumexp CUDA kernel 的性能，确保 CUDA Kernel 性能不低于 TensorFlow。
 
 # 七、可行性分析和排期规划
 
