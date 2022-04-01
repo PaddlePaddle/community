@@ -22,23 +22,23 @@ RRELU激活函数是从[Empirical Evaluation of Rectified Activations in Convolu
 飞桨将支持RReLU激活函数API。
 
 # 二、飞桨现状
-飞桨目前不支持此功能，但可以基于内置API的方式实现。训练阶段和测试阶段需要分别处理。
+飞桨目前不支持此功能，但可以基于内置API的方式实现。训练阶段可用paddle.nn.functional.prelu进行模拟，测试阶段可用paddle.nn.functional.leaky_relu模拟。
 
 ```python
 import paddle
 import numpy as np
+import paddle.nn.functional as F
 lower = 1 / 8.
 upper = 1 / 3.
+input = paddle.rand([2, 3, 4])
 is_train = False #判断是否是训练状态
 if is_train:
-    negative_slope = paddle.uniform((1, ), dtype='float32', min=lower, max=upper)
-    negative_slope = negative_slope.numpy()[0]
+    alpha = paddle.uniform(input.shape, dtype='float32', min=lower, max=upper)
+    alpha_x = alpha * input
+    out = paddle.where(input >= 0, input, alpha_x)
 else:
     negative_slope = (lower + upper) / 2.0
-print(negative_slope)
-m = paddle.nn.LeakyReLU(negative_slope)
-x = paddle.to_tensor(np.array([-2, 0, 1], 'float32'))
-out = m(x) 
+    out = F.leaky_relu(input, negative_slope)
 print(out)
 ```
 
