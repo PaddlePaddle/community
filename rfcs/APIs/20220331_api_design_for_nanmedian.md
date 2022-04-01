@@ -48,6 +48,21 @@ for i in range(sum_t.shape[0]):
 print(paddle.to_tensor(sum_t).reshape(x.shape[:-1]))
 ```
 
+通过组合API，也可以扩展到多个axis，先计算需要转置的axis顺序，再flatten到指定的多个axis， 后面就可以继续按照axis=-1的方式继续计算：
+
+```Python
+old_axis = len(x.shape)
+target_axis=[0,2]
+new_axis = []
+for xs in range(old_axis):
+    if xs not in target_axis:
+        new_axis.append(xs)
+new_axis_len = len(new_axis)
+new_axis += target_axis
+x = paddle.transpose(x, new_axis)
+x = x.flatten(start_axis=new_axis_len)
+```
+
 # 三、业内方案调研
 ## Numpy 
 ### 实现方法
@@ -141,17 +156,18 @@ tf.contrib.distributions.percentile(
 ## 命名与参数设计
 API设计为`paddle.nanmedian(x, axis=None, keepdim=False, name=None)`
 命名与参数顺序为：形参名`input`->`x`和`dim`->`axis`,  与paddle其他API保持一致性，不影响实际功能使用。
-参数类型中，`axis`支持`int`输入， keepdim支持返回保持原来的形状。
+参数类型中，`axis`支持`int|tuple|list`输入， keepdim支持返回保持原来的形状。
 
 ## 底层OP设计
 基于已有API组合实现，不再单独设计OP。
 
 ## API实现方案
 主要按下列步骤进行组合实现,实现位置为`paddle/tensor/math.py`与`sum`,`nansum`等方法放在一起：
-1. 使用`paddle.take_along_axis`获取axis上的元素.
-2. 使用`paddle.isnan`以及`paddle.where`得到输入Tensor的nan mask，以及指定轴的非nan值的计数值cnt.
-3. 使用`paddle.sort`得到忽略nan的输入张量的排序。
-4. 计算已排序张量上中位数索引值，根据总长的奇偶提取中位数的值。
+1. 多个axis时，先计算出需要转置的axis序列，将目标axis数据元素转置到最后。
+2. 使用`paddle.transpose`获取axis上的元素。
+3. 使用`paddle.isnan`以及`paddle.where`得到输入Tensor的nan mask，以及指定轴的非nan值的计数值cnt.
+4. 使用`paddle.sort`得到忽略nan的输入张量的排序。
+5. 计算已排序张量上中位数索引值，根据总长的奇偶提取中位数的值。
 
 - 对`keepdim`参数的处理，对标Numpy融合到各个API当中。
 
@@ -159,9 +175,12 @@ API设计为`paddle.nanmedian(x, axis=None, keepdim=False, name=None)`
 测试考虑的case如下：
 
 - 和numpy结果的数值的一致性, `paddle.nanmedian`,和`np.nanmdian`结果是否一致；
-- 参数`axis`校验参数类型int，并进行边界检查；
+- 参数`axis`校验参数类型int，tuple以及list，判断axis合法，并进行边界检查；
 - `keepdim`参数的正确性，输出结果的正确性；
 - 输入含`NaN`结果的正确性；
+- 输入所有轴上都不含`NaN`结果的正确性；
+- 输入轴上不同数量的`NaN`结果的正确性；
+- 输入少量或大量的`NaN`结果的正确性；
 - 输入axis上全为`NaN`结果的正确性；
 - 测试在进行反向梯度计算时结果的正确性(包含nan值和非nan值位置的梯度)；
 - 错误检查：输入`x`不是Tensor时,能否正确抛出错误；
