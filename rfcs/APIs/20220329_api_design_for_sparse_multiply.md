@@ -12,10 +12,9 @@
 
 ## 1、相关背景
 
-为了提升飞桨API丰富度，multiply 是一个基础乘法运算操作，目前 Paddle 中还没有 sparse 的乘法算子。 本任务的目标是在 Paddle 中添加
-sparse.multiply 算子， 实现输入是两个 SparseCooTensor 或者两个 SparseCsrTensor 逐元素相乘的功能。
-Paddle需要扩充API,新增 sparse.multiply API， 调用路径为：`paddle.sparse.multiply`
-实现稀疏Tensor相加的功能。
+为了提升飞桨API丰富度，multiply 是一个基础乘法运算操作，目前 Paddle 中还没有 sparse 的乘法算子。 本任务的目标是在 Paddle 中添加 sparse.multiply 算子， 实现输入是两个
+SparseCooTensor 或者两个 SparseCsrTensor 逐元素相乘的功能。 Paddle需要扩充API,新增 sparse.multiply API， 调用路径为：`paddle.sparse.multiply`
+实现稀疏Tensor相乘的功能。
 
 ## 3、意义
 
@@ -148,27 +147,34 @@ torch设计结构复杂，为了适配paddle phi库的设计模式，故采用sc
 
 ## 命名与参数设计
 
-在paddle/phi/kernels/sparse/目录下， API设计为
+在paddle/phi/kernels/sparse/目录下， kernel设计为
 
- ```    
- SparseCooTensor MultiplyKernel(const Context& dev_ctx,
- const SparseCooTensor& x,
- const SparseCooTensor& y,
- SparseCooTensor* out);
- ```
+```    
+void MultiplyCsrKernel(const Context& dev_ctx,
+                       const SparseCsrTensor& x,
+                       const SparseCsrTensor& y
+                       SparseCsrTensor* out);
+```
+
+api设计为
+
+```    
+SparseCooTensor Multiply(const Context& dev_ctx,
+                         const SparseCooTensor& x,
+                         const SparseCooTensor& y);
+```
 
 和
 
- ```
- SparseCsrTensor MultiplyKernel(const Context& dev_ctx,
- const SparseCsrTensor& x,
- const SparseCsrTensor& y,
- SparseCsrTensor* out);
- ```
+```
+SparseCsrTensor Multiply(const Context& dev_ctx,
+                         const SparseCsrTensor& x,
+                         const SparseCsrTensor& y);
+```
 
 ## 底层OP设计
 
-使用已有op组合实现，主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+新增一个sparse elementwise 的功能模块，然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
 
 ## API实现方案
 
