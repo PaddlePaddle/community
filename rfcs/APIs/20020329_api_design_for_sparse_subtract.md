@@ -156,7 +156,18 @@ void SubtractCsrKernel(const Context& dev_ctx,
                        SparseCsrTensor* out);
 ```
 
-api设计为
+```    
+//暂定
+void SubtractCsrGradKernel(const Context& dev_ctx,
+                           const SparseCsrTensor& x,
+                           const SparseCsrTensor& y,
+                           const SparseCsrTensor& dout,
+                           int axis,
+                           SparseCsrTensor* dx,
+                           SparseCsrTensor* dy;
+```
+
+函数设计为
 
 ```    
 SparseCooTensor Subtract(const Context& dev_ctx,
@@ -174,7 +185,7 @@ SparseCsrTensor Subtract(const Context& dev_ctx,
 
 ## 底层OP设计
 
-新增一个sparse elementwise 的功能模块，然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+新增一个sparse elementwise 的功能模块（暂定），然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
 
 ## API实现方案
 
