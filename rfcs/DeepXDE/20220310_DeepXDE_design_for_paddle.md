@@ -3,10 +3,10 @@
 | |  |
 |---|---|
 |提交作者 | 梁嘉铭 |
-|提交时间 | 2022-03-10 |
-|版本号 | V1.1 |
+|提交时间 | 2022-04-04 |
+|版本号 | V1.2 |
 |依赖飞桨版本 | develop版本 |
-|文件名 | 20220310_DeepXDE_design.md|
+|文件名 | 20220310_DeepXDE_design_for_paddle.md|
 
 # 一、概述
 
@@ -35,24 +35,29 @@
 
 # 二、飞桨现状
 
-1. Paddle暂时不支持`L-BFGS`方法，等待后续支持。
-
-2. 例如`paddle.sin()`,`paddle.cos()`算子的求高阶导数，所以不支持`apply_feature_transform()`以及`apply_output_transform()`函数。
+1. 例如`paddle.sin()`,`paddle.cos()`算子的求高阶导数，所以不支持`apply_feature_transform()`以及`apply_output_transform()`函数。
 考虑参考[#32188](https://github.com/PaddlePaddle/Paddle/pull/32188)pr，对sin/cos函数的求二阶导数算子进行支持。具体将在[#L93](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/phi/kernels/funcs/activation_functor.h#L93)行添加`SinGradGradFunctor`方法，以及`CosGradGradFunctor`方法，并在[L267](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/operators/activation_op.h#L267)处进行调用，在[L1477](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/operators/activation_op.cc#L1477)处进行注册。
+
+1. Paddle近期合入了`L-BFGS`优化器以及`BFGS`优化器，调用方式为函数式调用
 
 # 三、业内方案调研
 
-Tensorflow、Pytorch、jax均在deepxde中得到支持。`pytorch`在[L183-L475](https://github.com/pytorch/pytorch/blob/master/torch/optim/lbfgs.py#L183-L475)中添加了`L-BFGS`方法，支持`L-BFGS`本身可以作为一个题目[issues](https://github.com/PaddlePaddle/Paddle/issues/36002)
+Tensorflow、Pytorch、jax均在deepxde中得到支持。
+
+## L-BFGS优化器
+
+其中Pytorch的[`L-BFGS`](https://pytorch.org/docs/stable/generated/torch.optim.LBFGS.html#torch.optim.LBFGS)优化器可以类似于optimizer式的调用，而[tensorflow](https://tensorflow.google.cn/probability/api_docs/python/tfp/optimizer/lbfgs_minimize?hl=zh-cn)中是类似于Paddle合入的`L-BFGS`优化器，通过构造一个待优化的函数进行优化。
+
 
 # 四、设计思路与实现方案
 
 ## 命名与参数设计
 
-在代码中PaddlePaddle的名称会被替换为paddle。
+在代码中PaddlePaddle的名称会被书写为paddle。
 
 ## API实现方案
 
-实现方式主要参考`Pytorch`的实现方式，并且做了一些改动。
+实现方式主要参考`Pytorch`的实现方式。
 
 ## 求解Jacobian
 
@@ -63,6 +68,10 @@ self.J[i] = paddle.autograd.grad(y, self.xs, create_graph=True, retain_graph=Tru
 ```
 
 含义为求解y对x的导，并且保留求导过程中的计算图，以便后续求解y对x的二阶导。
+
+## 静态图
+
+与类似于动态图的构建方式一样，通过
 
 # 六、测试和验收的考量
 
