@@ -152,7 +152,7 @@ torch设计结构复杂，为了适配paddle phi库的设计模式，故采用sc
 ```    
 void MultiplyCsrKernel(const Context& dev_ctx,
                        const SparseCsrTensor& x,
-                       const SparseCsrTensor& y
+                       const SparseCsrTensor& y,
                        SparseCsrTensor* out);
 ```
 
@@ -162,7 +162,6 @@ void MultiplyCsrGradKernel(const Context& dev_ctx,
                            const SparseCsrTensor& x,
                            const SparseCsrTensor& y,
                            const SparseCsrTensor& dout,
-                           int axis,
                            SparseCsrTensor* dx,
                            SparseCsrTensor* dy）
 ```
