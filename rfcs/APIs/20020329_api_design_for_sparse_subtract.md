@@ -12,10 +12,9 @@
 
 ## 1、相关背景
 
-为了提升飞桨API丰富度，subtract 是一个基础减法运算操作，目前 Paddle 中还没有 sparse 的减法算子。 本任务的目标是在 Paddle 中添加 
-sparse.subtract 算子， 实现输入是两个 SparseCooTensor 或者两个 SparseCsrTensor 逐元素相减的功能。
-Paddle需要扩充API,新增 sparse.subtract API， 调用路径为：`paddle.sparse.subtract`
-实现稀疏Tensor相加的功能。
+为了提升飞桨API丰富度，subtract 是一个基础减法运算操作，目前 Paddle 中还没有 sparse 的减法算子。 本任务的目标是在 Paddle 中添加 sparse.subtract 算子， 实现输入是两个
+SparseCooTensor 或者两个 SparseCsrTensor 逐元素相减的功能。 Paddle需要扩充API,新增 sparse.subtract API， 调用路径为：`paddle.sparse.subtract`
+实现稀疏Tensor相减的功能。
 
 ## 3、意义
 
@@ -148,27 +147,44 @@ torch设计结构复杂，为了适配paddle phi库的设计模式，故采用sc
 
 ## 命名与参数设计
 
-在paddle/phi/kernels/sparse/目录下， API设计为
+在paddle/phi/kernels/sparse/目录下， kernel设计为
 
- ```    
- SparseCooTensor SubtractKernel(const Context& dev_ctx,
- const SparseCooTensor& x,
- const SparseCooTensor& y,
- SparseCooTensor* out);
- ```
+```    
+void SubtractCsrKernel(const Context& dev_ctx,
+                       const SparseCsrTensor& x,
+                       const SparseCsrTensor& y,
+                       SparseCsrTensor* out);
+```
+
+```    
+//暂定
+void SubtractCsrGradKernel(const Context& dev_ctx,
+                           const SparseCsrTensor& x,
+                           const SparseCsrTensor& y,
+                           const SparseCsrTensor& dout,
+                           SparseCsrTensor* dx,
+                           SparseCsrTensor* dy);
+```
+
+函数设计为
+
+```    
+SparseCooTensor Subtract(const Context& dev_ctx,
+                         const SparseCooTensor& x,
+                         const SparseCooTensor& y);
+```
 
 和
 
- ```
- SparseCsrTensor SubtractKernel(const Context& dev_ctx,
- const SparseCsrTensor& x,
- const SparseCsrTensor& y,
- SparseCsrTensor* out);
- ```
+```
+SparseCsrTensor Subtract(const Context& dev_ctx,
+                         const SparseCsrTensor& x,
+                         const SparseCsrTensor& y);
+```
 
 ## 底层OP设计
 
-使用已有op组合实现，主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+新增一个sparse elementwise 的功能模块（暂定），然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
 
 ## API实现方案
 
