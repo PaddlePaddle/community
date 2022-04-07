@@ -22,7 +22,9 @@ RRELU激活函数是从[Empirical Evaluation of Rectified Activations in Convolu
 飞桨将支持RReLU激活函数API。
 
 # 二、飞桨现状
-飞桨目前不支持此功能，但可以基于内置API的方式实现。训练阶段可用paddle.nn.functional.prelu进行模拟，测试阶段可用paddle.nn.functional.leaky_relu模拟。
+飞桨目前不支持此功能， 需要基于飞桨框架新增OP。
+
+计算原理相对简单，逻辑上可用下方的python代码模拟：
 
 ```python
 import paddle
