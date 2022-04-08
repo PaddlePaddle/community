@@ -25,6 +25,6 @@ https://meeting.tencent.com/dm/0H8LXZlYY37s
 - 每人一句话的自我介绍（5 minutes）
 - 飞桨框架近期开源贡献进展（10minutes）
 - 框架贡献者贡献的2~3个议题。（30minutes）
-- 头脑风暴与自由发言（10 minutes）
-- 确定下次会议的主席与副主席，以及召开时间（3 minutes)
+- 自由发言，可以提想法、提问和讨论（10 minutes）
+- 确定下次会议的主席与副主席，以及召开时间 和 部分议题预告（3 minutes)
 
