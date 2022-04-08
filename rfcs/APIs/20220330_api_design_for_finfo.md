@@ -1,35 +1,54 @@
-# Paddle.iinfo设计文档
+# Paddle.finfo设计文档
 
-| API名称                                                      | 新增API名称                      |
+| API名称                                                      | paddle.finfo                     |
 | ------------------------------------------------------------ | -------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | 林旭(isLinXu)                    |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-30                       |
 | 版本号                                                       | V1.0                             |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                          |
-| 文件名                                                       | 20220330_api-design_for_iinfo.md |
+| 文件名                                                       | 20220330_api-design_for_finfo.md |
 
 # 一、概述
 
 ## 1、相关背景
 
-为提升飞桨API接口丰富度，支持数值计算、科学计算相关领域API，因此针对Paddle进行扩充`paddle.iinfo`。
-任务认领：[链接](https://github.com/PaddlePaddle/Paddle/issues/40333)
+为提升飞桨API接口丰富度，支持数值计算、科学计算相关领域API，因此针对Paddle进行扩充`paddle.finfo`。
+任务认领：[链接](https://github.com/PaddlePaddle/Paddle/issues/40334)
 
 ## 2、功能目标
 
 
 详细描述： finfo计算浮点数类型的数值限制，输入参数为Paddle浮点数类型(paddle.float16/paddle.float32/paddle.float64/paddle.complex64/paddle.complex128)，返回包含如下属性对象:
 
-| 属性 | 类型 | 描述      |
-| ---- | ---- | --------- |
-| bits | int  | 占用bit数 |
-| max  | int  | 最大数    |
-| min  | int  | 最小数    |
+| 属性       | 类型  | 描述                                                         |
+| ---------- | ----- | ------------------------------------------------------------ |
+| bits       | int   | 该类型占用的bit数                                            |
+| eps        | float | 该类型所能表示的epsilon值，即满足1.0 + eps != 1.0的最小值，参考https://numpy.org/doc/stable/reference/generated/numpy.finfo.html |
+| min        | float | 该类型能表示的最小值                                         |
+| max        | float | 该类型能表示最大值                                           |
+| tiny       | float | 该类型所能表示的最小正数                                     |
+| resolution | float | 该类型十进制形式精度 `10**-precision`. 其中precision为IEEE754标准中该类型有效数字位数 |
+
 
 
 ## 3、意义
 
-本次升级的意义在于为其他计算API的数值计算提升精度与准确率。
+本次升级的意义在于为其他计算API的数值计算提升精度与准确率，也更加方便Paddle在复现其他框架代码计算loss、softmax等的数值对齐等。
+
+例如在下面这样的用法中，finfo的功能就可以起到限制数值溢出的作用。
+
+```python
+from torch import finfo
+def get_loss(self, y_pred, y_true, *args, **kwargs):
+        if isinstance(self.criterion_, torch.nn.NLLLoss):
+            eps = torch.finfo(y_pred.dtype).eps
+            y_pred = torch.log(y_pred + eps)
+        return super().get_loss(y_pred, y_true, *args, **kwargs)
+
+    # pylint: disable=signature-differs 
+```
+
+
 
 # 二、飞桨现状
 
@@ -43,19 +62,38 @@ Paddle目前不支持该API功能。
 
 Pytorch目前已实现该API功能。
 
+```python
+import torch
+print(torch.finfo(torch.float32).eps) #1.1920928955078125e-07
+print(torch.finfo(torch.float64).eps) #2.220446049250313e-16
+print(torch.finfo(torch.double).eps)  #2.220446049250313e-16 
+```
+
+Torch.finfo是表示浮点Torch.dtype的数字属性的对象，（即Torch.float32，Torch.float64，Torch.float16和Torch.bfloat16）。这类似于numpy.finfo。
+
 torch.finfo提供以下属性：
 
-A [`torch.iinfo`](https://pytorch.org/docs/stable/type_info.html?highlight=finfo#torch.torch.iinfo) provides the following attributes:
+| Name       | Type  | Description                                                  |
+| ---------- | ----- | ------------------------------------------------------------ |
+| bits       | int   | The number of bits occupied by the type.                     |
+| eps        | float | The smallest representable number such that `1.0 + eps != 1.0`. |
+| max        | float | The largest representable number.                            |
+| min        | float | The smallest representable number (typically `-max`).        |
+| tiny       | float | The smallest positive normal number. See notes.              |
+| resolution | float | The approximate decimal resolution of this type, i.e., `10**-precision`. |
 
-| Name | Type | Description                              |
-| ---- | ---- | ---------------------------------------- |
-| bits | int  | The number of bits occupied by the type. |
-| max  | int  | The largest representable number.        |
-| min  | int  | The smallest representable number.       |
 
-Pytorch实现
+可以无参数调用torch.finfo的构造函数，在这种情况下，在这种情况下，将为pytorch默认数据类型创建类（由torch.get_default_dtype()返回）
 
-```cpp
+    井号后为返回值
+    max_neg_value0 = torch.finfo(torch.float16).tiny #6.103515625e-05
+    max_neg_value1 = torch.finfo(torch.float16).max  #65504.0
+    max_neg_value2 = torch.finfo(torch.float32).max  #3.4028234663852886e+38
+    max_neg_value3 = torch.finfo(torch.float64).max  #1.7976931348623157e+308
+
+Pytorch实现方案
+
+```C++
 PyObject* THPFInfo_New(const at::ScalarType& type) {
   auto finfo = (PyTypeObject*)&THPFInfoType;
   auto self = THPObjectPtr{finfo->tp_alloc(finfo, 0)};
@@ -278,28 +316,32 @@ static PyMethodDef THPFInfo_methods[] = {
 
 ## 2、 TensorFlow
 
-TensorFlow同样具有.iinfo的API功能，但与Pytorch不同的是，它的实现方式仅仅只是通过改写变体来转发到Numpy的同名函数进行处理。
+TensorFlow同样具有.finfo的API功能，但与Pytorch不同的是，它的实现方式仅仅只是通过改写变体来转发到Numpy的同名函数进行处理。
 
-NumPy 的 TensorFlow 变体`iinfo`。
+NumPy 的 TensorFlow 变体`finfo`。
 
 ```python
-tf.experimental.numpy.iinfo(int_type)
+tf.experimental.numpy.finfo(dtype)
 ```
 
 ```python
-import math
 import tensorflow as tf
-int_value = math.pi
-print(tf.experimental.numpy.iinfo(int(int_value)))
+print(tf.experimental.numpy.finfo(tf.as_type()))
 ```
 
 ```python
-Machine parameters for int64
+Machine parameters for float32
 ---------------------------------------------------------------
-min = -9223372036854775808
-max = 9223372036854775807
+precision =   6   resolution = 1.0000000e-06
+machep =    -23   eps =        1.1920929e-07
+negep =     -24   epsneg =     5.9604645e-08
+minexp =   -126   tiny =       1.1754944e-38
+maxexp =    128   max =        3.4028235e+38
+nexp =        8   min =        -max
 ---------------------------------------------------------------
 ```
+
+
 
 ## 3、Numpy
 
@@ -309,17 +351,98 @@ max = 9223372036854775807
 
 Attributes
 
-- **bits**int
+- **bits** int
 
   The number of bits occupied by the type.
 
-- [`min`](https://numpy.org/doc/stable/reference/generated/numpy.iinfo.min.html#numpy.iinfo.min)int
+- **eps** float
 
-  Minimum value of given dtype.
+  The difference between 1.0 and the next smallest representable float larger than 1.0. For example, for 64-bit binary floats in the IEEE-754 standard, `eps = 2**-52`, approximately 2.22e-16.
 
-- [`max`](https://numpy.org/doc/stable/reference/generated/numpy.iinfo.max.html#numpy.iinfo.max)int
+- **epsneg** float
 
-  Maximum value of given dtype.
+  The difference between 1.0 and the next smallest representable float less than 1.0. For example, for 64-bit binary floats in the IEEE-754 standard, `epsneg = 2**-53`, approximately 1.11e-16.
+
+- **iexp** int
+
+  The number of bits in the exponent portion of the floating point representation.
+
+- [`machar`](https://numpy.org/doc/stable/reference/generated/numpy.finfo.machar.html#numpy.finfo.machar)MachAr
+
+  The object which calculated these parameters and holds more detailed information.
+
+- **machep** int
+
+  The exponent that yields *eps*.
+
+- **max**floating point number of the appropriate type
+
+  The largest representable number.
+
+- **maxexp** int
+
+  The smallest positive power of the base (2) that causes overflow.
+
+- **min** floating point number of the appropriate type
+
+  The smallest representable number, typically `-max`.
+
+- **minexp** int
+
+  The most negative power of the base (2) consistent with there being no leading 0’s in the mantissa.
+
+- **negep** int
+
+  The exponent that yields *epsneg*.
+
+- **nexp** int
+
+  The number of bits in the exponent including its sign and bias.
+
+- **nmant** int
+
+  The number of bits in the mantissa.
+
+- **precision** int
+
+  The approximate number of decimal digits to which this kind of float is precise.
+
+- **resolution** floating point number of the appropriate type
+
+  The approximate decimal resolution of this type, i.e., `10**-precision`.
+
+- [`tiny`](https://numpy.org/doc/stable/reference/generated/numpy.finfo.tiny.html#numpy.finfo.tiny) float
+
+  Return the value for tiny, alias of smallest_normal.
+
+- [`smallest_normal`](https://numpy.org/doc/stable/reference/generated/numpy.finfo.smallest_normal.html#numpy.finfo.smallest_normal) float
+
+  Return the value for the smallest normal.
+
+- **smallest_subnormal** float
+
+  The smallest positive floating point number with 0 as leading bit in the mantissa following IEEE-754.
+
+**接口调用测试**
+
+```python
+"""
+np.finfo使用方法
+    eps是一个很小的非负数
+    除法的分母不能为0的,不然会直接跳出显示错误。
+    使用eps将可能出现的零用eps来替换，这样不会报错。
+"""
+import numpy as np
+ 
+x = np.array([1, 2, 3], dtype=float)
+eps = np.finfo(x.dtype).eps  # eps = 2.220446049250313e-16 type = <class 'numpy.float64'>
+print(eps, type(eps))
+height = np.array([0, 2, 3], dtype=float)
+height = np.maximum(height, eps) #一旦height中出现0，就用eps进行替换
+print(height)   #[2.22044605e-16 2.00000000e+00 3.00000000e+00]
+dy = x / height
+print(dy)   #[4.50359963e+15 1.00000000e+00 1.00000000e+00]
+```
 
 # 四、对比分析
 
@@ -337,7 +460,7 @@ Attributes
 
 ## 命名与参数设计
 
-API设计为`paddle.iinfo(dtype)`，根据选择计算方法(比如eps、max、min、tiny)的不同，输出不同的结果。
+API设计为`paddle.finfo(dtype)`，根据选择计算方法(比如eps、max、min、tiny)的不同，输出不同的结果。
 
 参数类型要求：
 
@@ -346,11 +469,10 @@ API设计为`paddle.iinfo(dtype)`，根据选择计算方法(比如eps、max、m
 其他说明：
 
 - 使用时，可只进行参数类型指定，例如dtype=float
+
 - 根据计算需要进行方法选择，那么得出的结果类型也不同。
 
-
-
-
+  
 
 ## 底层OP设计
 
@@ -364,7 +486,7 @@ API设计为`paddle.iinfo(dtype)`，根据选择计算方法(比如eps、max、m
    public:
     using framework::OperatorWithKernel::OperatorWithKernel;
   
-    DataType IInfo(DataType *) const override {
+    DataType Finfo(DataType *) const override {
         AddInput("Input","(Dtype)input DataType");
         AddOutput("Out", "(Dtype)input DataType");
     }
@@ -380,28 +502,34 @@ API设计为`paddle.iinfo(dtype)`，根据选择计算方法(比如eps、max、m
   public:
   using framework::SingleGradOpMaker<T>::SingleGradOpMaker;
   protected:
-  DataType IInfo::max(DataType &d,void*);
-  DataType IInfo::min(DataType &d,void*);
-  DataType IInfo::bits(DataType &d,void*);
+  DataType Finfo::max(DataType &d,void*);
+  DataType Finfo::min(DataType &d,void*);
+  DataType Finfo::eps(DataType &d,void*);
+  DataType Finfo::tiny(DataType &d,void*);
+  DataType Finfo::resolution(DataType &d,void*);
   };
   ```
 
-  
   
   
 
 - 在`paddle/phi/core/TypeInfo.cc`中实现。|
 
   ```cpp
-  DataType IInfo::max(DataType &d,void*){
+  DataType Finfo::max(DataType &d,void*){
       return std::numeric_limits<scalar_t>::max(d);
   }
-  DataType IInfo::min(DataType &d,void*){
+  DataType Finfo::min(DataType &d,void*){
       return std::numeric_limits<scalar_t>::lowest(d);
   }
-  DataType IInfo::bits(DataType &d,void*){
-      int bits = elementSize(self->type) * 8;
-  	return THPUtils_packInt64(bits);
+  DataType Finfo::eps(DataType &d,void*){
+      return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::epsilon(d));
+  }
+  DataType Finfo::tiny(DataType &d,void*){
+      return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::min(d));
+  }
+  DataType Finfo::resolution(DataType &d,void*){
+      return std::pow(10, -std::numeric_limits<at::scalar_value_type<scalar_t>::type>::digits10));
   }
   ```
 
@@ -413,33 +541,39 @@ API设计为`paddle.iinfo(dtype)`，根据选择计算方法(比如eps、max、m
 
 
 
-
-
-
-
 ## API实现方案
 
 在`python/paddle/中增加`typeinfo.py
 
 ```python
 def max(dtype=None):
-    return iinfo_max()
+    # 调用核函数
+    return finfo_max()
 def min(dtype=None):
+    # 调用核函数
     return finfo_min()
-def bits(dtype=None):
-    return iinfo_eps()
+def eps(dtype=None):
+    # 调用核函数
+    return finfo_eps()
+def tiny(dtype=None):
+    # 调用核函数
+    return finfo_max()
 
 ```
+
+
 
 # 六、测试和验收的考量
 
 测试考虑的case如下所示：
 
-- 保证与torch.iinfo各个属性计算结果的对齐
+- 保证与torch.finfo各个属性计算结果的对齐
 - 保证与调用接口时计算其他模块或函数时的与numpy的结果对齐
 - 输入输出的容错性与错误提示信息
 - 输出Dtype错误或不兼容时抛出异常
 - 保证调用属性时是可以被正常找到的
+
+
 
 # 七、可行性分析和排期规划
 
@@ -455,6 +589,10 @@ def bits(dtype=None):
 对其他模块暂无影响。
 
 
+
+
+
+
 # 名词解释
 
 暂无。
@@ -465,9 +603,9 @@ def bits(dtype=None):
 
 ## 1、参考材料：
 
-1.`numpy.iinfo`文档：[链接](https://numpy.org/doc/stable/reference/generated/numpy.iinfo.html)
-2.`torch.iinfo`文档：[链接](https://pytorch.org/docs/stable/type_info.html?highlight=finfo#torch.torch.finfo)
-3.`tf.experimental.numpy.iinfo`文档：[链接](https://www.tensorflow.org/api_docs/python/tf/experimental/numpy/iinfo)
+1.`numpy.finfo`文档：[链接](https://numpy.org/doc/stable/reference/generated/numpy.finfo.html)
+2.`torch.finfo`文档：[链接](https://pytorch.org/docs/stable/type_info.html?highlight=finfo#torch.torch.finfo)
+3.`tf.experimental.numpy.finfo`文档：[链接](https://www.tensorflow.org/api_docs/python/tf/experimental/numpy/finfo)
 
 ## 2、附件
 
