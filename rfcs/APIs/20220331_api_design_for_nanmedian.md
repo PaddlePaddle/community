@@ -26,41 +26,87 @@ API方面，已有相关功能的API，[paddle.nansum](https://github.com/Paddle
 3. 由于每行NAN数量不同，非NAN的元素无法再轴上对齐，可以进行遍历对指定轴获取中位数。
 4. 用组合API的方式效率较低， 操作较为繁琐。
 
-下面以axis=-1为例， 若是其他axis可以简单通过 `paddle.transpose()`实现:
+参考paddle.quantile, 支持axis是None, int, list或tuple类型, 计算步骤可基于下方代码模拟实现:
+
 
 ```Python
-x0 = paddle.expand_as(paddle.min(x), x)
-x2 = paddle.where(paddle.isnan(x), x0, x)
-sorted_t = paddle.sort(x2, descending=True).flatten(stop_axis=-2)
+import paddle
+import numpy as np
 
-x1 = paddle.ones_like(x)
-x3 = paddle.zeros_like(x)
-x4 = paddle.where(paddle.isnan(x), x3, x1)
-sum_t = paddle.sum(x4, axis=-1).flatten().numpy()
+def nan_median(x, axis=None):
+    dims = len(x.shape)
+    ori_axis = [d for d in range(dims)]
 
-for i in range(sum_t.shape[0]):
-    sz = int(sum_t[i])
-    kth = sz >>1
-    if sz & 1 == 0:
-        sum_t[i] = (sorted_t[i, kth-1] + sorted_t[i, kth]) / 2.0
+    is_axis_single = True
+
+    if isinstance(axis, (list, tuple)):
+        axis_src, axis_dst = [], []
+        for axis_single in axis:
+            if axis_single < 0:
+                axis_single = axis_single + dims
+            axis_src.append(axis_single)
+        axis_dst = list(range(-len(axis), 0))
+        x = paddle.moveaxis(x, axis_src, axis_dst)
+        x = paddle.flatten(x, axis_dst[0], axis_dst[-1])
+        axis = axis_dst[0]
+        is_axis_single = False
     else:
-        sum_t[i] = sorted_t[i, kth]
-print(paddle.to_tensor(sum_t).reshape(x.shape[:-1]))
-```
+        if axis is None:
+            x = paddle.flatten(x)
+            axis = 0
+        elif isinstance(axis, int):
+            if axis < 0:
+                axis += dims
+        else:
+            return False
 
-通过组合API，也可以扩展到多个axis，先计算需要转置的axis顺序，再flatten到指定的多个axis， 后面就可以继续按照axis=-1的方式继续计算：
+    mask = x.isnan().logical_not()
+    out = paddle.masked_select(x, mask)
+    x0 = paddle.expand_as(paddle.min(out), x)
+    x2 = paddle.where(paddle.isnan(x), x0, x)
 
-```Python
-old_axis = len(x.shape)
-target_axis=[0,2]
-new_axis = []
-for xs in range(old_axis):
-    if xs not in target_axis:
-        new_axis.append(xs)
-new_axis_len = len(new_axis)
-new_axis += target_axis
-x = paddle.transpose(x, new_axis)
-x = x.flatten(start_axis=new_axis_len)
+    if is_axis_single:
+        ori_axis.append(ori_axis[axis])
+        del ori_axis[axis]
+        x2 = paddle.transpose(x2, perm=ori_axis)
+
+    sorted_t = paddle.sort(x2, descending=True)
+    out_shape = sorted_t.shape[:-1]
+
+    if is_axis_single and dims > 1:
+        sorted_t = sorted_t.flatten(stop_axis=dims - 2)
+    if len(sorted_t.shape) == 1:
+        sorted_t = paddle.unsqueeze(sorted_t, axis=0)
+
+    sum_t = mask.astype("float64").sum(axis=axis, keepdim=True).flatten().numpy()
+    for i in range(sum_t.shape[0]):
+        sz = int(sum_t[i])
+        if sz == 0:
+            sum_t[i] = float('nan')
+        else:
+            kth = sz >> 1
+            if sz & 1 == 0:
+                sum_t[i] = (sorted_t[i, kth - 1] + sorted_t[i, kth]) / 2.0
+            else:
+                sum_t[i] = sorted_t[i, kth]
+
+    if len(out_shape):
+        return paddle.to_tensor(sum_t).reshape(out_shape).numpy()
+    return paddle.to_tensor(sum_t).numpy()
+
+
+y = np.arange(24).reshape((2, 3, 4)).astype(np.float32)
+y[0, 1, 1] = -10
+y[0, 1, 0] = np.nan
+y[0, 1, 2] = np.nan
+y[1, 1, :2] = np.nan
+x = paddle.to_tensor(y)
+axis_list = [0, 1, 2, [0, 1], [0, 2], [1, 2], [0, 1, 2]]
+for a in axis_list:
+    print("running axis: ", a)
+    c1 = np.nanmedian(y, axis=a).astype("float64")
+    c2 = nan_median(x, axis=a).astype("float64")
+    print(np.allclose(c1, c2, equal_nan=True))
 ```
 
 # 三、业内方案调研
