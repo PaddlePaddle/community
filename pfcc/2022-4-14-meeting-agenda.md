@@ -15,9 +15,23 @@ https://meeting.tencent.com/dm/0H8LXZlYY37s
 
 - 本次拟参会Paddle Framework Contributor列表：
     - [TCChenlong](https://github.com/TCChenlong)
-    - A
-    - B
-    - C
+    - [Tao Luo](https://github.com/luotao1)
+    - [Ligoml](https://github.com/Ligoml)
+    - [S-HuaBomb](https://github.com/S-HuaBomb)
+    - [guguguzi](https://github.com/guguguzi)
+    - [gsq7474741](https://github.com/gsq7474741)
+    - [SigureMo](https://github.com/SigureMo)
+    - [chenyanlann](https://github.com/chenyanlann)
+    - [GeYuYao-hub](https://github.com/GeYuYao-hub)
+    - [isLinXu](https://github.com/isLinXu)
+    - [yangguohao](https://github.com/yangguohao)
+    - [Li-fAngyU](https://github.com/Li-fAngyU)
+    - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
+    - [jinyouzhi](https://github.com/jinyouzhi)
+    - [thunder95](https://github.com/thunder95)
+    - [Liyulingyue](https://github.com/Liyulingyue)
+    - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
+    - [Asthestarsfalll](https://github.com/Asthestarsfalll)
 
 # 会议议程
 
