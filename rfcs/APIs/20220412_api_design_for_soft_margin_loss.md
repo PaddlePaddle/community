@@ -30,13 +30,7 @@ $$loss(x,y)= \sum _i
 # 三、业内方案调研
 Pytorch 中有相关的函数       
 ```
-torch.nn.SoftMarginLoss(margin=1.0, 
-                              p=2.0, 
-                              eps=1e-06, 
-                              swap=False, 
-                              size_average=None, 
-                              reduce=None, 
-                              reduction='mean') -> Tensor
+torch.nn.SoftMarginLoss(size_average=None, reduce=None, reduction='mean')
 ```
 
 在 pytorch 中，介绍为：
