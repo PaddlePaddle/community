@@ -216,14 +216,15 @@ API设计为`paddle.nanmedian(x, axis=None, keepdim=False, name=None)`
 4. 将最终结果reshape到目标维度
 5. 对`keepdim`参数的处理，对标Numpy融合到各个API当中。
 
+反向计算主要逻辑参考MaxOrMinGradFunctor
+1. 对median计算有贡献的元素梯度为1， 其他元素梯度为0, 
+2. 考虑到奇偶数量需要缓存中间输出变量, 若是奇数存储两个一样的中间数值, 若是偶数存储左右两边的数值
+3. 分别对两个数值进行equals判断
+
 ## 代码实现文件路径
 
-在文件paddle/phi/kernels/impl/nanmedian_kernel_impl.h和paddle/phi/kernels/impl/nanmedian_grad_kernel_impl.h中编写主要的正向计算逻辑：
-
-CPU中正向计算逻辑： paddle/phi/kernels/cpu/nanmedian_kernel.cc
-
-GPU中正向计算逻辑： paddle/phi/kernels/gpu/nanmedian_funcs.h paddle/phi/kernels/gpu/nanmedian_kernel.cu
-
+CPU中正向和反向计算： paddle/phi/kernels/cpu/nanmedian_kernel.cc paddle/phi/kernels/cpu/nanmedian_grad_kernel.cc
+GPU中正向和反向计算： paddle/phi/kernels/gpu/nanmedian_kernel.cu paddle/phi/kernels/gpu/nanmedian_grad_kernel.cu
 
 
 ```c++
