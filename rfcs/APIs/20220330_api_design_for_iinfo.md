@@ -3,8 +3,8 @@
 | API名称                                                      | 新增API名称                      |
 | ------------------------------------------------------------ | -------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | 林旭(isLinXu)                    |
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-30                       |
-| 版本号                                                       | V1.0                             |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-04-12                       |
+| 版本号                                                       | V2.0                             |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                          |
 | 文件名                                                       | 20220330_api-design_for_iinfo.md |
 
@@ -354,82 +354,79 @@ API设计为`paddle.iinfo(dtype)`，根据选择计算方法(比如eps、max、m
 
 ## 底层OP设计
 
-- 在`paddle/fluid/operators/typeinfo_op.cc`添加`finfo`的描述
-
-  ```Cpp
-  namespace paddle {
-  namespace operators {
-  
-  class TypeInfo : public framework::OperatorWithKernel {
-   public:
-    using framework::OperatorWithKernel::OperatorWithKernel;
-  
-    DataType IInfo(DataType *) const override {
-        AddInput("Input","(Dtype)input DataType");
-        AddOutput("Out", "(Dtype)input DataType");
-    }
-  ```
-
-  
-
-- 在`paddle/phi/core/TypeInfo.h`中声明函数原型
-
-  ```cpp
-  template<typename T>
-  class TypeInfo::public framework::SingleGradOpMaker <T> {
-  public:
-  using framework::SingleGradOpMaker<T>::SingleGradOpMaker;
-  protected:
-  DataType IInfo::max(DataType &d,void*);
-  DataType IInfo::min(DataType &d,void*);
-  DataType IInfo::bits(DataType &d,void*);
-  };
-  ```
-
-  
-  
-  
-
-- 在`paddle/phi/core/TypeInfo.cc`中实现。|
-
-  ```cpp
-  DataType IInfo::max(DataType &d,void*){
-      return std::numeric_limits<scalar_t>::max(d);
-  }
-  DataType IInfo::min(DataType &d,void*){
-      return std::numeric_limits<scalar_t>::lowest(d);
-  }
-  DataType IInfo::bits(DataType &d,void*){
-      int bits = elementSize(self->type) * 8;
-  	return THPUtils_packInt64(bits);
-  }
-  ```
-
-实现思路：
-
-- 主要思路是使用C++的std标准库numeric_limits来进行函数实现
-- 通过类的成员函数分别来实现eps、min、max等函数
-- 其余部分参考官方OP的注册与绑定流程，按部就班进行实现即可。
-
-
-
-
+由于API本身并不涉及计算逻辑，为了保证API返回值类型与numpy一致，同时本着敏捷开发的角度，因此这里不直接通过OP/Kernel方式来进行设计和实现。
 
 
 
 ## API实现方案
 
-在`python/paddle/中增加`typeinfo.py
+通过设计实现与API对应的Class，并通过pybind将相应的成员函数绑定到python，从而实现该API。
 
-```python
-def max(dtype=None):
-    return iinfo_max()
-def min(dtype=None):
-    return finfo_min()
-def bits(dtype=None):
-    return iinfo_eps()
+- `.h`头文件定义声明
 
+```cpp
+namespace paddle {
+namespace pybind {
+    void BindFinfoVarDsec(pybind11::module *m);
+    void BindIinfoVarDsec(pybind11::module *m);
+}
+}
 ```
+
+- `.cc`绑定实现设计
+
+```cpp
+void BindFInfoVarDsec(pybind11::module *m){
+	pybind11::class_<pd::VarDesc> finfo_var_desc(*m, "VarDesc", "");
+    finfo_var_desc.def(pybind11::init<const std::string &>())
+    .def("bits", &pd::Tinfo::Bits)
+    .def("min", &pd::Tinfo::Min)
+   	.def("max", &pd::Tinfo::Max)
+}
+```
+
+实现思路：
+
+- 从调研Torch的实现方案来看，它并没有使用OP或者重写Kernel来进行实现，而是通过设计实现一个Class来进行返回API结果。
+
+- 因此要实现该API，需要如上抽象出一个符合要求的Class，同时并声明定义类下的成员函数来分别实现功能
+
+- 通过类的成员函数分别来实现eps、min、max等函数，通过Pybind11来进行接口与参数的绑定
+
+## API实现方案
+
+在paddle/fluid/framework/Info.h与Info.cc下新增实现函数
+定义class为`Tinfo`(借鉴Torch的结构设计，将finfo与iinfo合并为一个类进行实现)
+
+```c
+class Tinfo {
+public:
+	int Bits(const at::ScalarType& type)
+    float Min(const at::ScalarType& type)
+    float Max(const at::ScalarType& type)
+}
+```
+
+`.cc`实现
+
+```cpp
+int Tinfo::Bits(const at::ScalarType& type){
+	int bits = elementSize(self->type) * 8;
+  	return THPUtils_packInt64(bits);
+}
+
+float Tinfo::Min(const at::ScalarType& type){
+    return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::lowest());
+}
+
+float Tinfo::Max(const at::ScalarType& type){
+    return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::max());
+}
+```
+
+
+
+
 
 # 六、测试和验收的考量
 

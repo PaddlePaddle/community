@@ -3,8 +3,8 @@
 | API名称                                                      | paddle.finfo                     |
 | ------------------------------------------------------------ | -------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | 林旭(isLinXu)                    |
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-30                       |
-| 版本号                                                       | V1.0                             |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-04-12                       |
+| 版本号                                                       | V2.0                             |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                          |
 | 文件名                                                       | 20220330_api-design_for_finfo.md |
 
@@ -85,11 +85,13 @@ torch.finfo提供以下属性：
 
 可以无参数调用torch.finfo的构造函数，在这种情况下，在这种情况下，将为pytorch默认数据类型创建类（由torch.get_default_dtype()返回）
 
-    井号后为返回值
-    max_neg_value0 = torch.finfo(torch.float16).tiny #6.103515625e-05
-    max_neg_value1 = torch.finfo(torch.float16).max  #65504.0
-    max_neg_value2 = torch.finfo(torch.float32).max  #3.4028234663852886e+38
-    max_neg_value3 = torch.finfo(torch.float64).max  #1.7976931348623157e+308
+```python
+井号后为返回值
+max_neg_value0 = torch.finfo(torch.float16).tiny #6.103515625e-05
+max_neg_value1 = torch.finfo(torch.float16).max  #65504.0
+max_neg_value2 = torch.finfo(torch.float32).max  #3.4028234663852886e+38
+max_neg_value3 = torch.finfo(torch.float64).max  #1.7976931348623157e+308
+```
 
 Pytorch实现方案
 
@@ -469,96 +471,103 @@ API设计为`paddle.finfo(dtype)`，根据选择计算方法(比如eps、max、m
 其他说明：
 
 - 使用时，可只进行参数类型指定，例如dtype=float
-
 - 根据计算需要进行方法选择，那么得出的结果类型也不同。
 
-  
+
 
 ## 底层OP设计
 
-- 在`paddle/fluid/operators/typeinfo_op.cc`添加`finfo`的描述
-
-  ```Cpp
-  namespace paddle {
-  namespace operators {
-  
-  class TypeInfo : public framework::OperatorWithKernel {
-   public:
-    using framework::OperatorWithKernel::OperatorWithKernel;
-  
-    DataType Finfo(DataType *) const override {
-        AddInput("Input","(Dtype)input DataType");
-        AddOutput("Out", "(Dtype)input DataType");
-    }
-  ```
-
-  
-
-- 在`paddle/phi/core/TypeInfo.h`中声明函数原型
-
-  ```cpp
-  template<typename T>
-  class TypeInfo::public framework::SingleGradOpMaker <T> {
-  public:
-  using framework::SingleGradOpMaker<T>::SingleGradOpMaker;
-  protected:
-  DataType Finfo::max(DataType &d,void*);
-  DataType Finfo::min(DataType &d,void*);
-  DataType Finfo::eps(DataType &d,void*);
-  DataType Finfo::tiny(DataType &d,void*);
-  DataType Finfo::resolution(DataType &d,void*);
-  };
-  ```
-
-  
-  
-
-- 在`paddle/phi/core/TypeInfo.cc`中实现。|
-
-  ```cpp
-  DataType Finfo::max(DataType &d,void*){
-      return std::numeric_limits<scalar_t>::max(d);
-  }
-  DataType Finfo::min(DataType &d,void*){
-      return std::numeric_limits<scalar_t>::lowest(d);
-  }
-  DataType Finfo::eps(DataType &d,void*){
-      return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::epsilon(d));
-  }
-  DataType Finfo::tiny(DataType &d,void*){
-      return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::min(d));
-  }
-  DataType Finfo::resolution(DataType &d,void*){
-      return std::pow(10, -std::numeric_limits<at::scalar_value_type<scalar_t>::type>::digits10));
-  }
-  ```
-
-实现思路：
-
-- 主要思路是使用C++的std标准库numeric_limits来进行函数实现
-- 通过类的成员函数分别来实现eps、min、max等函数
-- 其余部分参考官方OP的注册与绑定流程，按部就班进行实现即可。
-
+由于API本身并不涉及计算逻辑，为了保证API返回值类型与numpy一致，同时本着敏捷开发的角度，因此这里不直接通过OP/Kernel方式来进行设计和实现。
 
 
 ## API实现方案
 
-在`python/paddle/中增加`typeinfo.py
+通过设计实现与API对应的Class，并通过pybind将相应的成员函数绑定到python，从而实现该API。
 
-```python
-def max(dtype=None):
-    # 调用核函数
-    return finfo_max()
-def min(dtype=None):
-    # 调用核函数
-    return finfo_min()
-def eps(dtype=None):
-    # 调用核函数
-    return finfo_eps()
-def tiny(dtype=None):
-    # 调用核函数
-    return finfo_max()
+- `.h`头文件定义声明
 
+```cpp
+namespace paddle {
+namespace pybind {
+    void BindFinfoVarDsec(pybind11::module *m);
+    void BindIinfoVarDsec(pybind11::module *m);
+}
+}
+```
+
+- `.cc`绑定实现设计
+
+```cpp
+
+void BindFInfoVarDsec(pybind11::module *m){
+	pybind11::class_<pd::VarDesc> finfo_var_desc(*m, "VarDesc", "");
+    finfo_var_desc.def(pybind11::init<const std::string &>())
+    .def("bits", &pd::Tinfo::Bits)
+    .def("eps", &pd::Tinfo::Eps)
+    .def("min", &pd::Tinfo::Min)
+   	.def("max", &pd::Tinfo::Max)
+    .def("tiny", &pd::Tinfo::Tiny)
+    .def("resolution", &pd::Tinfo::Resolution)
+}
+```
+
+
+
+实现思路：
+
+- 从调研Torch的实现方案来看，它并没有使用OP或者重写Kernel来进行实现，而是通过设计实现一个Class来进行返回API结果。
+
+- 因此要实现该API，需要如上抽象出一个符合要求的Class，同时并声明定义类下的成员函数来分别实现功能
+
+- 通过类的成员函数分别来实现eps、min、max等函数，通过Pybind11来进行接口与参数的绑定
+
+  
+
+## API实现方案
+
+在paddle/fluid/framework/Info.h与Info.cc下新增实现函数
+定义class为`Tinfo`(借鉴Torch的结构设计，将finfo与iinfo合并为一个类进行实现)
+
+```c
+class Tinfo {
+public:
+	int Bits(const at::ScalarType& type)
+    float Eps(const at::ScalarType& type)
+    float Min(const at::ScalarType& type)
+    float Max(const at::ScalarType& type)
+    float Tiny(const at::ScalarType& type)
+    float Resolution(const at::ScalarType& type)
+}
+```
+
+`.cc`实现
+
+```cpp
+int Tinfo::Bits(const at::ScalarType& type){
+	int bits = elementSize(self->type) * 8;
+  	return THPUtils_packInt64(bits);
+}
+
+float Tinfo::Eps(const at::ScalarType& type){
+    return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::epsilon());
+}
+
+float Tinfo::Min(const at::ScalarType& type){
+    return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::lowest());
+}
+
+float Tinfo::Max(const at::ScalarType& type){
+    return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::max());
+}
+
+float Tinfo::Tiny(const at::ScalarType& type){
+    return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::min());
+}
+
+float Tinfo::Resolution(const at::ScalarType& type){
+    return std::numeric_limits<at::scalar_value_type<scalar_t>::type>::resolution());
+   
+}
 ```
 
 
@@ -573,11 +582,7 @@ def tiny(dtype=None):
 - 输出Dtype错误或不兼容时抛出异常
 - 保证调用属性时是可以被正常找到的
 
-
-
 # 七、可行性分析和排期规划
-
-时间和开发排期规划，主要milestone
 
 暂定。
 
