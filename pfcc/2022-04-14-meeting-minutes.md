@@ -4,7 +4,7 @@
 
 - 会议时间：2022-4-14 19：00 - 20：10
 - 会议地点：线上会议
-- 参会人：本次会议共有21名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由本次轮值主席张军（[jzhang533](https://github.com/jzhang533))主持。
+- 参会人：本次会议共有22名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由本次轮值主席张军（[jzhang533](https://github.com/jzhang533))主持。
 
 ## 会议分享与讨论
 
@@ -23,17 +23,17 @@
 
 本次会议，有四名为飞桨框架做出贡献的贡献者向大家介绍了给飞桨框架贡献的经验。
 
-- [S-HuaBomb](https://github.com/S-HuaBomb) ： 向大家介绍了自己给飞桨贡献贡献[paddle.nn.HingeEmbeddingLoss](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/HingeEmbeddingLoss_cn.html#hingeembeddingloss)的经历。
+- [S-HuaBomb](https://github.com/S-HuaBomb) ： 向大家介绍了自己给飞桨贡献 `paddle.nn.HingeEmbeddingLoss` 的经历。（[#37540](https://github.com/PaddlePaddle/Paddle/pull/37540)）
 - [GeYuYao-hub](https://github.com/GeYuYao-hub)：向大家介绍了自己参与飞桨黑客松活动，评测飞桨文档的经历。
-- [xiaoguoguo626807](https://github.com/xiaoguoguo626807)：向大家介绍了，给飞桨贡献tril_indices kernel的经历。（[#41639](https://github.com/PaddlePaddle/Paddle/pull/41639)）同时，分享了贡献代码时的经验，并与大家进行了交流和讨论。
+- [xiaoguoguo626807](https://github.com/xiaoguoguo626807)：向大家介绍了给飞桨贡献 `tril_indices` kernel的经历。（[#41639](https://github.com/PaddlePaddle/Paddle/pull/41639)）同时，分享了贡献代码时的经验，并与大家进行了交流和讨论。
 - [liqitong-a](https://github.com/liqitong-a)：向大家介绍了自己给飞桨贡献 `paddle.linalg.corrcoef
-` API的经历。（[#40690](https://github.com/PaddlePaddle/Paddle/pull/40690)）。
+` API的经历。（[#40690](https://github.com/PaddlePaddle/Paddle/pull/40690)）
 
 ### 自由发言和讨论
 参会的飞桨框架的贡献者积极的就开发飞桨框架过程中碰到的具体问题，包括编译、注册OP、开发kernel、CI系统等方面进行了经验分享和交流。部分的讨论在会后也通过新建issue的方式展开更多的线上交流。（[#41827](https://github.com/PaddlePaddle/Paddle/issues/41827), [#41837](https://github.com/PaddlePaddle/Paddle/issues/41837)）。
 
 ### 下次会议安排
-- 确定下次会议的时间为两周后的同一个时间段。并确定，下次会议的主席为：高翔（[jeff41404](https://github.com/jeff41404)，副主席为：骆涛([Tao Luo](https://github.com/luotao1))。
+- 确定下次会议的时间为两周后的同一个时间段。并确定，下次会议的主席为：高翔（[jeff41404](https://github.com/jeff41404)），副主席为：骆涛（[Tao Luo](https://github.com/luotao1)）。
 
 
 
