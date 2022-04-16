@@ -1,0 +1,74 @@
+#include "paddle/phi/kernels/bce_loss_kernel.h"
+
+#include <algorithm>  // for max
+#include "paddle/fluid/operators/math.h"
+#include "paddle/phi/backends/cpu/cpu_context.h"
+#include "paddle/phi/core/kernel_registry.h"
+
+namespace phi {
+
+template <typename T, typename Context>
+void SoftMarginLossKernel(const Context& dev_ctx,
+                   const DenseTensor& input,
+                   const DenseTensor& label,
+                   DenseTensor* out) {
+  auto x_data = input.data<T>();
+  auto label_data = label.data<T>();
+  auto out_data = dev_ctx.template Alloc<T>(out);
+  auto x_numel = input.numel();
+
+  // out = ln(1+(-label * (x))
+  for (int64_t i = 0; i < x_numel; ++i) {
+    PADDLE_ENFORCE_GE(
+        x_data[i],
+        static_cast<T>(0),
+        phi::errors::InvalidArgument(
+            "Illegal input, input must be greater than  or equal to 0"));
+    PADDLE_ENFORCE_LE(
+        x_data[i],
+        static_cast<T>(1),
+        phi::errors::InvalidArgument(
+            "Illegal input, input must be less than or equal to 1"));
+    out_data[i] =paddle::operators::real_log(static_cast<T>(1) + std::exp(-label_data[i]* x_data[i]));
+  }
+}
+
+}  // namespace phi
+
+PD_REGISTER_KERNEL(
+    bce_loss, CPU, ALL_LAYOUT, phi::BCELossKernel, float, double) {}
+
+
+#include "paddle/phi/kernels/bce_loss_grad_kernel.h"
+
+#include <algorithm>  // for max
+#include "paddle/phi/backends/cpu/cpu_context.h"
+#include "paddle/phi/core/kernel_registry.h"
+
+namespace phi {
+
+template <typename T, typename Context>
+void BCELossGradKernel(const Context& dev_ctx,
+                       const DenseTensor& input,
+                       const DenseTensor& label,
+                       const DenseTensor& out_grad,
+                       DenseTensor* input_grad) {
+  auto dx_data = dev_ctx.template Alloc<T>(input_grad);
+  auto dout_data = out_grad.data<T>();
+  auto x_data = input.data<T>();
+  auto label_data = label.data<T>();
+
+  int x_numel = input.numel();
+
+  // dx = dout * ((x - label)/(x - x^2))
+  for (int i = 0; i < x_numel; ++i) {
+    dx_data[i] =
+        dout_data[i] * ((- label_data[i]*std::exp(-label_data[i]*x_data[i] )) /
+                        std::max((static_cast<T>(1) + std::exp(-label_data[i]*x_data[i])),
+                                 static_cast<T>(1e-12)));
+  }
+}
+}  // namespace phi
+
+PD_REGISTER_KERNEL(
+    bce_loss_grad, CPU, ALL_LAYOUT, phi::BCELossGradKernel, float, double) {}
