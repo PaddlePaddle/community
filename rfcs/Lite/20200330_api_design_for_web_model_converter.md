@@ -30,7 +30,7 @@ Paddle Lite 目前不支持 Web 模型转换。
 
 # 三、业内方案调研
 
-https://www.convertmodel.com/ 支持了训练框架到 NCNN、MNN 和 Tengine 模型的 Web 转换，以及 ONNX Optimizer 等模型优化器。
+https://convertmodel.com/ 支持了训练框架到 NCNN、MNN 和 Tengine 模型的 Web 转换，以及 ONNX Optimizer 等模型优化器。
 
 # 四、对比分析
 
@@ -38,7 +38,7 @@ https://www.convertmodel.com/ 支持了训练框架到 NCNN、MNN 和 Tengine �
 
 # 五、设计思路与实现方案
 
-使用 emsdk 将 opt 工具编译为 WebAssembly，集成进网页端即可。可能需要处理一些 opt 工具的编译错误。
+使用 emsdk 将 opt 工具编译为 WebAssembly，集成进 https://convertmodel.com 已有的前端页面里，或挂载在 Paddle 提供的专用域名下（如有）。
 
 # 六、测试和验收的考量
 
