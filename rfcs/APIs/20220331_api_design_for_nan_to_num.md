@@ -105,24 +105,51 @@ PyTorch 和 NumPy 的思路是一样的，Paddle 也可以这样实现。
 ## 命名与参数设计
 
 ```python
-paddle.nan_to_num(input, nan=0.0, posinf=None, neginf=None)
+paddle.nan_to_num(x, nan=0.0, posinf=None, neginf=None)
 ```
 
 参数和 PyTorch 对齐。nan、posinf、neginf 分别表示输入张量内值为 nan、正无穷、负无穷的元素的替换值，正无穷和负无穷默认用数据类型内最大可以表示的数字来替换。
 
 ## 底层OP设计
 
-nan_to_num 是一个 element-wise 操作。可以在 paddle/phi/kernels/funcs/eigen 使用 Eigen 的 unaryExpr 实现如下的 Eigen Function：
+添加 paddle/fluid/operators/math/nan_to_num.cc，实现继承 OpProtoAndCheckerMaker 的 NanToNumOpMaker，代码类似下方：
 
 ```c++
-out = in.unaryExpr([](float x) { if (std::isnan(x)) { return .. } else { ... } });
+class NanToNumOpMaker : public framework::OpProtoAndCheckerMaker {
+ public:
+  void Make() override {
+    AddInput("X", "(Tensor) The input tensor of NanToNum op,");
+    AddOutput("Out", "(Tensor) The output tensor of NanToNum op,");
+    AddAttr<double>("nan", "...")
+        .SetDefault(0.0);
+    AddAttr<bool>("replace_posinf_with_max", "Whether replace +inf with max value of the data type");
+    AddAttr<double>("posinf", "Only used when 'replace_posinf_with_max' is false. Replace +inf with it.");
+    AddAttr<bool>("replace_neginf_with_min", "Whether replace +inf with max value of the data type");
+    AddAttr<double>("neginf", "Only used when 'replace_neginf_with_max' is false. Replace -inf with it.");
+    AddComment(R"DOC(
+          ...
+      )DOC");
+  }
+};
 ```
 
-并在 phi::NanToNumKernel 中调用。
+
+
+并添加 paddle/phi/kernels/nan_to_num_kernel.h 文件，在其中实现计算逻辑，并添加 paddle/phi/kernels/cpu/nan_to_num_kernel.cc 和 paddle/phi/kernels/gpu/nan_to_num_kernel.cu 两个文件，它们引用 nan_to_num_kernel.h，并负责实现和注册 CPU 或 CUDA Kernel。
+
+nan_to_num 是一个 element-wise 操作。可以使用 for_range + lambda 函数来实现，无需调用第三方库。伪代码如下：
+
+```c++
+auto numel = x->numel();
+platform::ForRange<DeviceContext> for_range(dev_ctx, numel);
+for_range([x](size_t idx) { if (std::isnan(x[idx])) { x[idx] = ...; } });
+```
+
+这段伪代码会在 phi::NanToNumKernel 中调用。
 
 ## API实现方案
 
-API 无需特殊考虑。
+API 无需特殊考虑，都是 boilerplate code，代码放置在 python/paddle/tensor/math.py 文件中。
 
 # 六、测试和验收的考量
 
