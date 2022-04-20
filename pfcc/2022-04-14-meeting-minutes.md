@@ -30,7 +30,7 @@
 ` API的经历。（[#40690](https://github.com/PaddlePaddle/Paddle/pull/40690)）
 
 ### 自由发言和讨论
-参会的飞桨框架的贡献者积极的就开发飞桨框架过程中碰到的具体问题，包括编译、注册OP、开发kernel、CI系统等方面进行了经验分享和交流。部分的讨论在会后也通过新建issue的方式展开更多的线上交流。（[#41827](https://github.com/PaddlePaddle/Paddle/issues/41827), [#41837](https://github.com/PaddlePaddle/Paddle/issues/41837)）。
+参会的飞桨框架的贡献者积极的就开发飞桨框架过程中碰到的具体问题，包括编译、注册OP、开发kernel、CI系统等方面进行了经验分享和交流。部分的讨论在会后也通过新建issue的方式展开更多的线上交流。（[#41827](https://github.com/PaddlePaddle/Paddle/issues/41827), [#41837](https://github.com/PaddlePaddle/Paddle/issues/41837), [#41979](https://github.com/PaddlePaddle/Paddle/issues/41979)）。
 
 ### 下次会议安排
 - 确定下次会议的时间为两周后的同一个时间段。并确定，下次会议的主席为：高翔（[jeff41404](https://github.com/jeff41404)），副主席为：骆涛（[Tao Luo](https://github.com/luotao1)）。
