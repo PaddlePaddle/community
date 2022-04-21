@@ -11,6 +11,7 @@
 - 本次会议副主席：骆涛（[luotao1](https://github.com/luotao1)，飞桨团队）
 
 - 本次拟参会Paddle Framework Contributor列表：
+    - [jzhang533](https://github.com/jzhang533)
     - [TCChenlong](https://github.com/TCChenlong)
     - [Tao Luo](https://github.com/luotao1)
     - [Ligoml](https://github.com/Ligoml)
