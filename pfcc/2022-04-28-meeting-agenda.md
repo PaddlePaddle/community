@@ -13,15 +13,36 @@
 - 本次拟参会Paddle Framework Contributor列表：
     - [jzhang533](https://github.com/jzhang533)
     - [TCChenlong](https://github.com/TCChenlong)
-    - [Tao Luo](https://github.com/luotao1)
     - [Ligoml](https://github.com/Ligoml)
-    - ...
+    - [S-HuaBomb](https://github.com/S-HuaBomb)
+    - [guguguzi](https://github.com/guguguzi)
+    - [gsq7474741](https://github.com/gsq7474741)
+    - [SigureMo](https://github.com/SigureMo)
+    - [chenyanlann](https://github.com/chenyanlann)
+    - [GeYuYao-hub](https://github.com/GeYuYao-hub)
+    - [isLinXu](https://github.com/isLinXu)
+    - [yangguohao](https://github.com/yangguohao)
+    - [Li-fAngyU](https://github.com/Li-fAngyU)
+    - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
+    - [jinyouzhi](https://github.com/jinyouzhi)
+    - [thunder95](https://github.com/thunder95)
+    - [Liyulingyue](https://github.com/Liyulingyue)
+    - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
+    - [Asthestarsfalll](https://github.com/Asthestarsfalll)
+    - [liqitong-a](https://github.com/liqitong-a)
+    - [unseenme](https://github.com/unseenme)
+    - [greatv](https://github.com/greatv)
+    - [fuqianya](https://github.com/fuqianya)
+    - [liyongchao911](https://github.com/liyongchao911)
+    - [LielinJiang](https://github.com/LielinJiang)
 
 # 会议议程
 
-
+- PFCC 简介 & 新同学的一句话自我介绍（5 minutes）
 - 框架贡献者的分享，内容不限，3~4个（30 minutes）
-  - ...
+  - [SigureMo](https://github.com/SigureMo)
+  - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
+  - [Asthestarsfalll](https://github.com/Asthestarsfalll)
 - 自由发言，可以提想法、提问和讨论（10 minutes）
 - 飞桨接下来会开展的一些重点工作和技术方向介绍（15 minutes），大家可以根据兴趣选择加入开发，每个方向均会配备飞桨在这个领域比较资深的同学一起开发，包括但不限于：
     - API 文档和单测增强：在飞桨开发早期，API 的测试规范没有目前完备，因此有些 API 存在文档描述不够全面或单测缺失的问题；本方向主要开发：增强文档质量，文档能覆盖描述API的所有功能、默认行为的说明和代码一致；增强示例代码。去除示例代码中的旧用法、覆盖API所有参数、更换为更有代表性的例子；增强单测case。补齐API缺失的某些类型的单测case。
