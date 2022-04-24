@@ -1,11 +1,11 @@
-# 增加 paddle 作为 DeepXDE 的 backend
+# 为 PaddleScience 新增支持随机/Quasi 采样法&&增加（2D/3D/ND ）Geometry
 
-|              |                            |
-| ------------ | -------------------------- |
-| 提交作者     | 梁嘉铭                     |
-| 提交时间     | 2022-03-22                 |
-| 版本号       | V1.0                       |
-| 依赖飞桨版本 | develop 版本               |
+|              |                                       |
+| ------------ | ------------------------------------- |
+| 提交作者     | 梁嘉铭                                |
+| 提交时间     | 2022-04-24                            |
+| 版本号       | V1.1                                  |
+| 依赖飞桨版本 | develop 版本                          |
 | 文件名       | 20220322_Science_design_for_sample.md |
 
 # 一、概述
@@ -14,18 +14,25 @@
 
 https://github.com/PaddlePaddle/PaddleScience/issues/40
 
+https://github.com/PaddlePaddle/PaddleScience/issues/38
+
 ## 2、功能目标
 
 1. 为 PaddleScience 新增支持随机/Quasi 采样法
 2. 支持重点区域增强采样
+3. 增加 Circle 类型 Geometry（2D/3D）
+4. 增加 （2D/3D/ND ）Geometry
 
 ## 3、意义
 
 传统方法是画网格方法，而 PINN 方法无需画网格，可以用随机采样法，目前 paddlescience 需要支持随机/Quasi 采样法
 
+增加多种 Geometry 类型以提高 PaddleScience 的灵活性
+
 # 二、飞桨现状
 
 1. PaddleScience 现在仅支持空间维度的网格采样法。
+2. 目前 PaddleScience 的 Geometry 类型仅支持`cylinder_in_cube`，`rectangular`等几何体，并且均不支持随机化采样。
 
 # 三、业内方案调研
 
@@ -54,141 +61,198 @@ def random_boundary_points(self, n, random="pseudo"):
 
 实现了在边界上的随机采样。
 
-# 四、设计思路与实现方案
-
-## 命名与参数设计
-
-此次将会在 paddlescience.geometry.sampler 中实现 Quasi random 采样法，并且支持重点区域增强采样。
-
-下面是该 API 的参数设置：
+deepxde 在[geometry](https://github.com/lululxvi/deepxde/tree/master/deepxde/geometry)中将 geometry 抽象为 1D/2D/3D 的几何体，并且提供了一些几何体的构造函数，如：
 
 ```python
-def sample(n_samples, dim, sampler, **key):
-    """Gunerate samples from a given distribution.
+class Disk(Geometry):
+    def __init__(self, center, radius):
 
-    Parameters
-    ----------
-    n_samples: int
-        Number of samples to generate.
-    dim: int
-        Number of dimensions.
-    sampler: str
-        Sampler to use.
-    key: dict
-        Parameters for the sampler.
+    def inside(self, x):
 
-    Returns
-    -------
-    np.ndarray
-        Samples.
-    """
+    def on_boundary(self, x):
+
+    def distance2boundary_unitdirn(self, x, dirn):
+
+    def distance2boundary(self, x, dirn):
+
+
+    def mindist2boundary(self, x):
+
+    def boundary_normal(self, x):
 ```
 
-## API 实现方案
+并且在[csg](https://github.com/lululxvi/deepxde/blob/master/deepxde/geometry/csg.py)中实现了几何体的合并。
 
-对于采样将会使用 scipy.stats 中函数，如：
+# 四、设计思路与实现方案
+
+## 几何体
+
+因原有仓库中的 Gemetry 仅提供一个 discretize 方法进行离散化，非常不利于其他功能的实现，在该 RFC 将重新实现该类。
+
+如下是该类的抽象类型：
+
+```python
+class Geometry(abc.ABC):
+    def __init__(self, time_dependent):
+        self.time_dependent = time_dependent
+        self.points = []
+        self.time_points = []
+        self.shapes = []
+        self.boundary_points = dict()
+
+    @abc.abstractmethod
+    def is_internal(self, x):
+        """
+        Returns True if the point x is internal to the Geometry.
+        """
+        pass
+
+    @abc.abstractmethod
+    def is_boundary(self, x):
+        """
+        Returns True if the point x is on the boundary of the Geometry.
+        """
+        pass
+
+    @abc.abstractmethod
+    def grid_points(self, n):
+        """
+        Returns a list of n grid points.
+        """
+        pass
+
+    @abc.abstractmethod
+    def grid_points_on_boundary(self, n):
+        """
+        Returns a list of n grid points on the boundary.
+        """
+        pass
+
+    @abc.abstractmethod
+    def random_points(self, n):
+        """
+        Returns a list of n random points.
+        """
+        pass
+
+    @abc.abstractmethod
+    def random_points_on_boundary(self, n):
+        """
+        Returns a list of n random points on the boundary.
+        """
+        pass
+
+    def uniform_time_dependent(self, n, time_start, time_end):
+        """
+        Returns a list of n time-dependent points.
+        """
+        pass
+
+    def random_time_dependent(self,
+                              n,
+                              time_start,
+                              time_end,
+                              samplingtype=None):
+
+    def union(self, other):
+        """
+        Returns the union of the two geometries.
+        """
+        pass
+
+    def intersection(self, other):
+        """
+        Returns the intersection of the two geometries.
+        """
+        pass
+
+    def difference(self, other):
+```
+
+### 说明
+
+1. 为了方便对几何体的不同边界设定初始条件，该类提供了一个 `boundary_points` 属性，该属性是一个字典，其中的键是边界的名称，值是一个列表，列表中的元素是边界上的点。这样可以方便地设定不同边界上的初始条件。完成之后可以使用如下方式进行设定：
 
 ```python
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.stats as st
+def GenBCWeight(boundary_points):
+    bc_weight = {}
+    for key in boundary_points:
+        bc_weight[key] = np.zeros((len(boundary_points[key]), 2))
 
-r = st.uniform.rvs(size=(1000, 2))
-plt.scatter(r[:, 0], r[:, 1], s=0.8)
-plt.show()
+    bc_weight['b0'][0] = 1 * np.ones((len(boundary_points['b0'])))
+    bc_weight['b0'][1] = 1 * np.ones((len(boundary_points['b0'])))
+
+    bc_weight['b1'][0] = 1 * np.ones((len(boundary_points['b1'])))
+
+    return bc_weight
 ```
 
-即可产生随机二维点集。
+2. 我们计划实例化如下几种几何体：
 
-同时考虑到随机采样将会影响 be_index 的计算，从而影响边界条件的设置，这里提出两种方法：
+- Point(圆面，球体)(已有 demo)
+- Polygon(非凸多边形)(已有 demo)
+- Box(矩形)(已有 demo)
+- Cone(圆锥体)
+- Cylinder(圆柱体)
+- Ellipsoid(椭球体)
+- pyramid(棱锥体)
+- ring(环形)
 
-1. 在各种几何图形中重写 bc_index 的生成方式。
+3. 支持几何图像的并集，差集，交集运算方法。
+   为了实现几何图形的运算，我们需要在不同的几何体中实现 is_internal 和 is_boundary 方法。下面是 Point 几何体一个简单的实现：
+
+   ```python
+    def is_internal(self, x):
+        return np.linalg.norm(x - self.center, axis=1) <= self.radius
+
+    def is_boundary(self, x):
+        return np.linalg.norm(x - self.center, axis=1) == self.radius
+   ```
+
+4. 支持便捷“ 挖空 ”几何体的实现，所有几何体均支持输入一个 Geometry 对象列表，返回一个新的几何体，该几何体是原几何体列表中所有几何体的差集。
 
 ```python
-point = geod.get_space_domain()
-plt.scatter(point[:, 0], point[:, 1], s=0.6)
-bc_index = []
-for i in range(10201):
-    for j in range(2):
-        if abs(point[i][j]) - 0.048 > 1e-10:
-            bc_index.append(i)
-
-plt.scatter(point[bc_index, 0], point[bc_index, 1], s=0.6, c='r')
+point = Point([0, 0, 0], 1)
+box = Box([0, 0, 0], 4, 4, 10, [point])
 ```
 
-![](https://img1.imgtp.com/2022/03/22/KbeD877L.png)
+5. 多次运算实现逻辑
 
-同时对 BC 初始化参数时也需要适应性调整，否则将不会被选中设置：
+   > 对于所有的几何体，将保留全部的图形运算记录，这样判断是否在内部或者边界的时候只需要判断记录中的图形即可。即有如下逻辑关系
 
-```python
-# Generate BC value
-def GenBC(xy, bc_index):
-    bc_value = np.zeros((len(bc_index), 2)).astype(np.float32)
-    for i in range(len(bc_index)):
-        id = bc_index[i]
-        if abs(xy[id][1] - 0.05) < 1e-3:
-            bc_value[i][0] = 1.0
-            bc_value[i][1] = 0.0
-        else:
-            bc_value[i][0] = 0.0
-            bc_value[i][1] = 0.0
-    return bc_value
+   ![](https://images.puqing.work/image4d6d54ed1cddd9e2.png)
 
-# visual bc value
-plt.scatter(point[bc_index, 0], point[bc_index, 1], s=0.1, c='r')
-for i in range(len(bc_index)):
-    if bc_value[i][0] == 1.0:
-        plt.scatter(point[bc_index[i], 0], point[bc_index[i], 1], s=0.6, c='b')
-plt.show()
-```
+## 随机采样
 
-![](https://img1.imgtp.com/2022/03/22/e1iFC8wl.png)
-
-2. 第二种方式是将 sample_boundary 和 sample_interior 分别实现。
-
-即像 deepxde 中 boundary_sampler 中单独对边缘采样。
-
-第一种随机性过高，可能需要重复调整边界取点条件。所以推荐第二种方式。
+不同几何体在类中分别实现了 `random_points` 和 `random_points_on_boundary` 方法
 
 ## 增强采样
 
-对于一些任务的特殊性，可以在采样时增强采样，如下采样点生成方式
+注意该增强方法仅对几何体内部中的挖孔几何体进行讨论，并且对于多个挖空几何体的情况，会分别对其增强采样。
 
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-import scipy.stats as st
+### 中心十字形区域类型
 
-c = 1.2
-r = st.rdist.rvs(size=(10000, 2), c=c)
-plt.scatter(r[:, 0], r[:, 1], s=0.8)
-plt.show()
+该方法将会在几何体周围生成一个中心十字形区域，该区域的大小为 `width` 参数，该区域的中心为 `center` 参数(该参数默认为几何体中心), 密度为 `density` 参数。
 
-c = 5
-x = st.uniform.rvs(size=(10000, 1))
-y = st.bradford.rvs(size=(10000, 1), c=c)
-plt.scatter(x, y, s=0.8)
-plt.show()
-```
+### 中心方向区域
 
-![](https://i.bmp.ovh/imgs/2022/03/a87e271a7a79ab09.png)
-
-scipy.stats支持多种随机分布采样，可以参考[scipy](https://docs.scipy.org/doc/scipy/reference/stats.html)
+该方法将会在几何体周围生成一个中心区域，该区域的大小为 `width` 参数，该区域的中心为 `center` 参数(该参数默认为几何体中心), 密度为 `density` 参数。
 
 # 五、测试和验收的考量
 
-对比网格采样与随机采样效果与优劣，以及网络的收敛性，达到任务要求
+上述提案涉及众多，现阶段，将考察在 2D/3D 圆柱绕流问题中的网格采样与随机采样的效果，以及网络的收敛性。
 
 # 六、可行性分析和排期规划
 
-scipy 中函数直接可以调用。相关效果已经完成 demo，见如下图。
+本次 RFC 对 Geometry 进行优化，对于 Geometry 的部分实现可在本人[Geometry](https://github.com/AndPuQing/Geometry)库中查看。
 
-![](https://img1.imgtp.com/2022/03/22/YacAtbHy.png)
-
-但是可视化由于随机采样是非结构网格，在进行可视化之前需要插值或者选用scatter绘制。
-
-大致可以在任务时间内完成要求
+本计划改动颇大，计划将在 5 月 10 日之前完成验收部分内容。
 
 # 七、影响面
 
-将在 PaddleScience 仓库添加 sample 方法，以及修改几何体的边界生成方式与内部点的生成。
+将优化 Geometry 的实现，将会影响到以下几个面：
+
+- 几何体的构造
+- 几何体采样
+- 网络计算 Loss 部分
