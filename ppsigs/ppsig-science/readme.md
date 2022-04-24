@@ -2,6 +2,8 @@
 
 PPSIG Science aims to unite creative and thoughtful people together, to challenge the most cutting-edge AI+Science technology R&D and scientific research innovation.
 
+PPSIG Science 聚焦科研创新与业务应用落地，围绕飞桨科学计算套件进行框架开发、套件模型算法共建等工作，富有创造力的你，一起来挑战最前沿的AI+Science技术研发与科研创新吧！
+
 ## Recent updates
 - 【PaddlePaddle Hackathon 2】科学计算方向任务合集https://github.com/X4Science/INFINITY/issues/2
 - 【PaddlePaddle Hackathon 2】科学计算方向直播课 https://m.bilibili.com/video/BV1W3411p7A1
