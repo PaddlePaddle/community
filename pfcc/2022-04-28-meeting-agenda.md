@@ -39,7 +39,7 @@
 # 会议议程
 
 - PFCC 简介 & 新同学的一句话自我介绍（5 minutes）
-- 集体选出5名在2.3版本中贡献了代码的同学参加Wave Summit活动。（5minutes）
+- 集体选出5名在2.3版本中贡献了代码的同学作为代表参加Wave Summit活动。（5minutes）
 - 框架贡献者的分享，内容不限，3~4个（30 minutes）
   - [SigureMo](https://github.com/SigureMo)
   - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
