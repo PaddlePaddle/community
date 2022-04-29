@@ -1,4 +1,4 @@
-# Paddle Frawework Contributor Club 第二次会议会议纪要
+# Paddle Frawework Contributor Club 第二次会议纪要
 
 ## 会议概况
 
@@ -19,7 +19,7 @@
 本次会议，有三位为飞桨框架做出贡献的贡献者向大家介绍了给飞桨框架贡献的经验。
 - [SigureMo](https://github.com/SigureMo) ： 向大家介绍了自己给飞桨贡献高层API `paddle.vision.models.MobileNetV3*` 的经历（[#38653](https://github.com/PaddlePaddle/Paddle/pull/38653)）和使用CI及文档预览的一些特性以提升开发效率的经验技巧。
 - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)：向大家介绍了自己给飞桨贡献API `paddle.logspace` 的经历([#41261](https://github.com/PaddlePaddle/Paddle/pull/41261)) 及编写单测和文档的经验技巧。
-- [Asthestarsfalll](https://github.com/Asthestarsfalll)：向大家介绍了给飞桨贡献 `paddle.nanquantile` （[#41343](https://github.com/PaddlePaddle/Paddle/pull/41343)）、`paddle.frac`（[#41226](https://github.com/PaddlePaddle/Paddle/pull/41226)）和`paddle.nn.Softmax2D`（[#40910](https://github.com/PaddlePaddle/Paddle/pull/40910)）的经历，及编写异常检查、单测、文档和使用代码格式检查工具的经验。非常高产！
+- [Asthestarsfalll](https://github.com/Asthestarsfalll)：向大家介绍了给飞桨贡献 `paddle.nanquantile` （[#41343](https://github.com/PaddlePaddle/Paddle/pull/41343)）、`paddle.frac`（[#41226](https://github.com/PaddlePaddle/Paddle/pull/41226)）和`paddle.nn.Softmax2D`（[#40910](https://github.com/PaddlePaddle/Paddle/pull/40910)）的经历，及编写代码异常检查、单测和文档的经验，并介绍了使用代码格式检查工具的心得。非常高产！
 
 ### 飞桨接下来会开展的一些重点工作和技术方向介绍
 为了让大家能 深入地了解飞桨、在飞桨收获更多成长、解决更有挑战性的问题，飞桨团队计划将正在开展的重点工作和技术方向逐渐share给PFCC成员。
