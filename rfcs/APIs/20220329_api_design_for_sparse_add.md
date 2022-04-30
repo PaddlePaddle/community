@@ -147,7 +147,7 @@ torch设计结构复杂，为了适配paddle phi库的设计模式，故参考sc
 
 ## 命名与参数设计
 
-在paddle/phi/kernels/sparse/目录下， API设计为
+在paddle/phi/kernels/sparse/目录下， kernel设计为
 
 ```    
 void ElementWiseAddCsrCPUKernel(const Context& dev_ctx,
@@ -165,9 +165,35 @@ void ElementWiseAddCooKernel(const Context& dev_ctx,
                              SparseCooTensor* out) 
 ```
 
+```    
+//暂定
+void AddCsrGradKernel(const Context& dev_ctx,
+                      const SparseCsrTensor& x,
+                      const SparseCsrTensor& y,
+                      const SparseCsrTensor& dout,
+                      SparseCsrTensor* dx,
+                      SparseCsrTensor* dy);
+```
+函数设计为
+
+```    
+SparseCooTensor Add(const Context& dev_ctx,
+                    const SparseCooTensor& x,
+                    const SparseCooTensor& y);
+```
+
+和
+
+```
+SparseCsrTensor Add(const Context& dev_ctx,
+                    const SparseCsrTensor& x,
+                    const SparseCsrTensor& y);
+```
+
 ## 底层OP设计
 
 实现对应的 CPU Kernel，使用 Merge 两个有序数组的算法。
+新增一个sparse elementwise 的功能模块（暂定），然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
 
 ## API实现方案
 
