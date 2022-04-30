@@ -142,7 +142,7 @@ Scipy中有csr类型的稀疏矩阵，可以支持相除操作，通过`binary_o
 
 # 四、对比分析
 
-torch设计结构复杂，为了适配paddle phi库的设计模式，故采用scipy的实现方式
+torch设计结构复杂，为了适配paddle phi库的设计模式，故参考scipy的实现方式
 
 # 五、方案设计
 
@@ -150,39 +150,41 @@ torch设计结构复杂，为了适配paddle phi库的设计模式，故采用sc
 
 在paddle/phi/kernels/sparse/目录下， API设计为
 
- ```    
- SparseCooTensor DivideKernel(const Context& dev_ctx,
- const SparseCooTensor& x,
- const SparseCooTensor& y,
- SparseCooTensor* out);
- ```
+```    
+void ElementWiseDivideCsrCPUKernel(const Context& dev_ctx,
+                                   const SparseCsrTensor& x,
+                                   const SparseCsrTensor& y,
+                                   SparseCsrTensor* out) 
+```
 
 和
 
- ```
- SparseCsrTensor DivideKernel(const Context& dev_ctx,
- const SparseCsrTensor& x,
- const SparseCsrTensor& y,
- SparseCsrTensor* out);
- ```
+```
+void ElementWiseDivideCooKernel(const Context& dev_ctx,
+                                const SparseCooTensor& x,
+                                const SparseCooTensor& y,
+                                SparseCooTensor* out) 
+```
 
 ## 底层OP设计
 
-使用已有op组合实现，主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+实现对应的 CPU Kernel，使用 Merge 两个有序数组的算法。
 
 ## API实现方案
 
-主要参考scipy实现，将coo转换成csr再进行除法，然后转换回coo
+将csr转换成coo再进行运算，然后转换回。coo直接运算
 
 # 六、测试和验收的考量
 
 测试考虑的case如下：
 
 - 数值正确性
+- 反向
+- 不同 `sparse_dim` 
 
 # 七、可行性分析及规划排期
 
-方案主要依赖paddle现有op组合而成
+方案主要依赖paddle现有op组合而成，并自行实现核心算法
 
 # 八、影响面
 
