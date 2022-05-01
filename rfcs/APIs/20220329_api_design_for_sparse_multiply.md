@@ -1,12 +1,12 @@
 # paddle.sparse.multiply 设计文档
 
-|API名称 | paddle.sparse.multiply                 | 
- |----------------------------------------|-----------------------------------------------------------|
-|提交作者<input type="checkbox" class="rowselector hidden"> | PeachML                                | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-29                             | 
-|版本号 | V1.0                                   | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                | 
-|文件名 | 20220329_api_design_for_sparse_multiply.md<br> | 
+| API名称                                                    | paddle.sparse.multiply                         | 
+|----------------------------------------------------------|------------------------------------------------|
+| 提交作者<input type="checkbox" class="rowselector hidden">   | PeachML                                        | 
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-29                                     | 
+| 版本号                                                      | V1.0                                           | 
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                        | 
+| 文件名                                                      | 20220329_api_design_for_sparse_multiply.md<br> | 
 
 # 一、概述
 
@@ -156,7 +156,6 @@ void ElementWiseMultiplyCsrCPUKernel(const Context& dev_ctx,
                                      SparseCsrTensor* out) 
 ```
 
-和
 
 ```
 void ElementWiseMultiplyCooKernel(const Context& dev_ctx,
@@ -166,35 +165,43 @@ void ElementWiseMultiplyCooKernel(const Context& dev_ctx,
 ```
 
 ```
-//暂定    
-void MultiplyCsrGradKernel(const Context& dev_ctx,
-                           const SparseCsrTensor& x,
-                           const SparseCsrTensor& y,
-                           const SparseCsrTensor& dout,
-                           SparseCsrTensor* dx,
-                           SparseCsrTensor* dy）
+template <typename T, typename Context>
+void ElementWiseMultiplyCsrGradKernel(const Context& dev_ctx,
+                                      const SparseCsrTensor& x,
+                                      const SparseCsrTensor& y,
+                                      const SparseCsrTensor& dout,
+                                      SparseCsrTensor* dx,
+                                      SparseCsrTensor* dy);
+```
+
+```
+void ElementWiseMultiplyCooGradKernel(const Context& dev_ctx,
+                                      const SparseCooTensor& x,
+                                      const SparseCooTensor& y,
+                                      const SparseCooTensor& dout,
+                                      SparseCooTensor* dx,
+                                      SparseCooTensor* dy);
 ```
 
 函数设计为
 
 ```    
-SparseCooTensor Multiply(const Context& dev_ctx,
-                         const SparseCooTensor& x,
-                         const SparseCooTensor& y);
+SparseCsrTensor ElementWiseMultiplyCsr(const Context& dev_ctx,
+                                       const SparseCsrTensor& x,
+                                       const SparseCsrTensor& y)
 ```
 
 和
 
 ```
-SparseCsrTensor Multiply(const Context& dev_ctx,
-                         const SparseCsrTensor& x,
-                         const SparseCsrTensor& y);
+SparseCooTensor ElementWiseMultiplyCoo(const Context& dev_ctx,
+                                       const SparseCooTensor& x,
+                                       const SparseCooTensor& y)
 ```
 
 ## 底层OP设计
 
-实现对应的 CPU Kernel，使用 Merge 两个有序数组的算法。
-新增一个sparse elementwise 的功能模块（暂定），然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+实现对应的 CPU Kernel，使用 Merge 两个有序数组的算法，然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
 
 ## API实现方案
 
@@ -206,7 +213,7 @@ SparseCsrTensor Multiply(const Context& dev_ctx,
 
 - 数值正确性
 - 反向
-- 不同 `sparse_dim` 
+- 不同 `sparse_dim`
 
 # 七、可行性分析及规划排期
 
