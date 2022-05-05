@@ -200,9 +200,11 @@ tf.contrib.distributions.percentile(
 
 # 五、方案设计
 ## 命名与参数设计
-API设计为`paddle.nanmedian(x, axis=None, keepdim=False, name=None)`
+API设计为`paddle.nanmedian(x, axis=None, ignore_nan=True, keepdim=True, name=None)`
 命名与参数顺序为：形参名`input`->`x`和`dim`->`axis`,  与paddle其他API保持一致性，不影响实际功能使用。
-参数类型中，`axis`支持`int|tuple|list`输入， keepdim支持返回保持原来的形状。
+- `axis` 支持`None|int|tuple|list`输入
+- `ignore_nan` 设置是否忽略Nan元素，当为False时计算过程跟median一致。 
+- `keepdim` 支持返回Tensor保持原来的形状。
 
 ## 底层OP设计
 现有API对NAN元素支持比较有限, 需要单独设计一个OP, 支持cpu和cuda, 对最后一维度进行nanmedian算子操作.
