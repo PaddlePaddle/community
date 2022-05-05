@@ -71,14 +71,12 @@ tensorflow没有官方实现。
 
 # 五、设计思路与实现方案
 ## 命名与参数设计
-参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html)
-paddle.nn.SoftMarginLoss( input: Tensor, target: Tensor, reduction(str,可选) ) -> Tensor:
+- paddle.nn.SoftMarginLoss(reduction(str,可选)，name(str，可选)) -> Tensor:
 
-paddle.nn.functional.soft_margin_loss(input, target, reduction: str = "mean", name:str=None, ) -> Tensor:
-
-- input:Tensor, 维度为[N,*],其中N是batch_size， `*` 是任意其他维度。数据类型是float32、float64。
-- label:Tensor, 维度为[batchsize,num_classes]维度、数据类型与输入 input 相同。
-- reduction:str，可选，指定应用于输出结果的计算方式，可选值有: ``'none'``, ``'mean'``, ``'sum'`` 。默认为 ``'mean'``，计算 Loss 的均值；设置为 ``'sum'`` 时，计算 Loss 的总和；设置为 ``'none'`` 时，则返回原始Loss。
+- paddle.nn.functional.soft_margin_loss(input, target, reduction: str = "mean", name:str=None, ) -> Tensor:
+    - input:Tensor, 维度为[N,*],其中N是batch_size， `*` 是任意其他维度。数据类型是float32、float64。
+    - label:Tensor, 维度为[batchsize,num_classes]维度、数据类型与输入 input 相同。
+    - reduction:str，可选，指定应用于输出结果的计算方式，可选值有: ``'none'``, ``'mean'``, ``'sum'`` 。默认为 ``'mean'``，计算 Loss 的均值；设置为 ``'sum'`` 时，计算 Loss 的总和；设置为 ``'none'`` 时，则返回原始Loss。
 
 ## 底层OP设计
 核心部分需要分别完成 softmarginloss.cc softmarginloss.cu 前向计算以及反向传播的算子kernel。
