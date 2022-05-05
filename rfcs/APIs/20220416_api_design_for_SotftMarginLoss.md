@@ -70,19 +70,21 @@ tensorflow没有官方实现。
 - 采用pytorch方法，对算子进行CPU以及GPU设计
 
 # 五、设计思路与实现方案
+## 命名与参数设计
+参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html)
 paddle.nn.SoftMarginLoss( input: Tensor, target: Tensor, reduction(str,可选) ) -> Tensor:
 
 paddle.nn.functional.soft_margin_loss(input, target, reduction: str = "mean", name:str=None, ) -> Tensor:
-input:Tensor, 维度为[batchsize,num_classes]
-label:Tensor, 维度为[batchsize,num_classes]
-reduction:str,'None','mean','sum
 
-## 命名与参数设计
-参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html)
+- input:Tensor, 维度为[N,*],其中N是batch_size， `*` 是任意其他维度。数据类型是float32、float64。
+- label:Tensor, 维度为[batchsize,num_classes]维度、数据类型与输入 input 相同。
+- reduction:str，可选，指定应用于输出结果的计算方式，可选值有: ``'none'``, ``'mean'``, ``'sum'`` 。默认为 ``'mean'``，计算 Loss 的均值；设置为 ``'sum'`` 时，计算 Loss 的总和；设置为 ``'none'`` 时，则返回原始Loss。
+
 ## 底层OP设计
-要分别完成softmarginloss.cc softmarginloss.cu 前向计算以及反向传播的算子
-包含前向计算kernel
-namespace phi {
+核心部分需要分别完成 softmarginloss.cc softmarginloss.cu 前向计算以及反向传播的算子kernel。
+
+### 前向计算kernel
+```namespace phi {
 
 template <typename T, typename Context>
 void SoftMarginLossKernel(const Context& dev_ctx,
@@ -111,10 +113,11 @@ void SoftMarginLossKernel(const Context& dev_ctx,
 }
 }  // namespace phi
 PD_REGISTER_KERNEL(
-    soft_margin_loss, CPU, ALL_LAYOUT, phi::SoftMarginLossKernel, float, double) {}
-梯度计算kernel
+    soft_margin_loss, CPU, ALL_LAYOUT, phi::SoftMarginLossKernel, float, double) {}```
+ 
+### 反向计算kernel
 
-namespace phi {
+```namespace phi {
 
 template <typename T, typename Context>
 void SoftMarginLossGradKernel(const Context& dev_ctx,
@@ -141,20 +144,21 @@ void SoftMarginLossGradKernel(const Context& dev_ctx,
 
 PD_REGISTER_KERNEL(
     soft_margin_loss_grad, CPU, ALL_LAYOUT, phi::SoftMarginLossGradKernel, float, double) {}
-以及其他GPU版本的
+```
+以及GPU版本的算子kernel。
+同时还需要实现算子的描述及定义，以及InferMeta函数。
 
 ## API实现方案
 
 在python中调用算子来实现paddle.nn.SoftMarginLoss和paddle.nn.functional.soft_margin_loss
 
-检查参数
-  检查 reduction 有效性（同其余 functional loss 中的实现）
-  检查输入的 dtype（含 input、target）（同其余 functional loss 中的实现）
-  检查输入的input、target维度是否相同
-计算
-  调用OP计算loss
-
-根据 reduction，输出 loss（同其余 functional loss 中的实现）
+- 检查参数
+  - 检查 reduction 有效性（同其余 functional loss 中的实现）
+  - 检查输入的 dtype（含 input、target）（同其余 functional loss 中的实现）
+  - 检查输入的input、target维度是否相同
+- 计算
+  - 调用OP计算loss
+- 根据 reduction，输出 loss（同其余 functional loss 中的实现）
 
 # 六、测试和验收的考量
 - CPU算子与numpy结果一致
