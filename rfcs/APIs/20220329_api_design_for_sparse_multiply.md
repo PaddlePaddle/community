@@ -215,7 +215,9 @@ SparseCooTensor ElementWiseMultiplyCoo(const Context& dev_ctx,
 
 ## API实现方案
 
-将csr转换成coo再进行运算，然后转换回。coo直接运算
+对于SparseCsrTensor，将csr格式转换成coo格式再进行运算，然后转换回csr格式输出。
+
+对于SparseCooTensor，直接进行运算。
 
 # 六、测试和验收的考量
 

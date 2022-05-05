@@ -211,12 +211,16 @@ SparseCooTensor ElementWiseDivideCoo(const Context& dev_ctx,
 在sparse tensor构造时，索引按升序排序，可以采取merge有序数组的方式，若两输入索引相等，则计算`x[i][j] ∘ y[i][j]`，
 若不相等则说明该位置上的二元运算有一个元为0，
 `x`索引小时计算 `x[i][j] ∘ 0`，`y`索引小时计算 `0 ∘ y[i][j]`。
-计算过的位置存储在新的索引数组中，这样，索引没有覆盖到的位置依然为0，节省了计算开销，时间复杂度为`O(nnz(x) + nnz(y))`，
-`nnz(x)`为`x`中非零元素个数。
+对于除法而言，两个输入都为0的位置运算结果不为0，所以需要将`y`中索引未覆盖到的位置（原tensor中为0），在运算中通过指向一个零常量的方式填充为0，
+以参与除法运算。
+此时，时间复杂度为`O(numel(x))`，鉴于实际场景中动辄50% ~ 99%的稀疏性 [[1]][1] ，
+虽然时间复杂度与dense tensor一样，但是可以节省大量的存储空间。
 
 ## API实现方案
 
-将csr转换成coo再进行运算，然后转换回。coo直接运算
+对于SparseCsrTensor，将csr格式转换成coo格式再进行运算，然后转换回csr格式输出。
+
+对于SparseCooTensor，直接进行运算。
 
 # 六、测试和验收的考量
 
@@ -240,4 +244,6 @@ SparseCooTensor ElementWiseDivideCoo(const Context& dev_ctx,
 
 # 附件及参考资料
 
-无
+[[1]: 深度学习中的稀疏性][1]
+
+[1]: https://sinews.siam.org/Details-Page/the-future-of-deep-learning-will-be-sparse
