@@ -203,6 +203,16 @@ SparseCooTensor ElementWiseMultiplyCoo(const Context& dev_ctx,
 
 实现对应的 CPU Kernel，使用 Merge 两个有序数组的算法，然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
 
+对于dense tensor，值连续的存储在一块内存中，二元运算需要处理每一个元素，即`x[i][j] ∘ y[i][j]`，运算时间复杂度为 `O(numel(x))`，
+`numel(x)`为`x`中总素个数。
+
+而sparse tensor以索引和值的模式存储一个多数元素为零的tensor，二元运算只需要处理两个输入不全为0的位置，
+在sparse tensor构造时，索引按升序排序，可以采取merge有序数组的方式，若两输入索引相等，则计算`x[i][j] ∘ y[i][j]`，
+若不相等则说明该位置上的二元运算有一个元为0，
+`x`索引小时计算 `x[i][j] ∘ 0`，`y`索引小时计算 `0 ∘ y[i][j]`。
+计算过的位置存储在新的索引数组中，这样，索引没有覆盖到的位置依然为0，节省了计算开销，时间复杂度为`O(nnz(x) + nnz(y))`，
+`nnz(x)`为`x`中非零元素个数。
+
 ## API实现方案
 
 将csr转换成coo再进行运算，然后转换回。coo直接运算
