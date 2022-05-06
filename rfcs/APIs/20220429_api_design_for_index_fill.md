@@ -122,7 +122,7 @@ Pytorch中有API`Tensor.index_fill_(dim, index, value)`和`Tensor.index_fill(dim
 
 其中dim是选取index所在的轴， value是待填充的值, index_fill_是对原输入张量的修改。
 
-index_fill_对应的out of palce 
+index_fill对应的out of palce
 
 
 
@@ -210,11 +210,11 @@ void index_fill_kernel(
 
 index_fill_支持inplace方式修改输入张量。
 
-axis是index索引选择的轴, 只支持int参数类型。
+axis是index索引选择的轴, 支持int以及0维的Tensor参数类型。
 
-index在指定轴上含索引下标的1-D Tensor。
+index在指定轴上含索引下标的list of int, tuple of int 或者 1-D Tensor。
 
-fill_value是待填充的数据，参数类型支持int,float以及仅包含1个元素的Tensor。
+fill_value是待填充的数据，参数类型支持bool, int, float, complex以及0维的Tensor。
 
 
 
@@ -230,7 +230,9 @@ fill_value是待填充的数据，参数类型支持int,float以及仅包含1个
 
 计算正确的stride之后，参考index_select算子进行逻辑修改
 
-在指定轴上指定索引的元素梯度为0.0，其他未被选中的元素梯度是1.0
+在指定轴上指定索引的输入元素梯度为0.0，其他未被选中的元素梯度是1.0
+
+若fill_value是0维的Tensor，其反向传播的梯度是对应选中的输出梯度的平均值。
 
 
 ## 代码实现文件路径
@@ -247,14 +249,12 @@ GPU中正向和反向计算： paddle/phi/kernels/gpu/index_fill_kernel.cu paddl
 
 template <typename T, typename Context>
 
-void IndexFillKernelKernel(const Context& dev_ctx,
-
-                 const DenseTensor& x,
-
-                 DenseTensor* out);
-
-                          
-
+void IndexFillKernel(const Context& ctx,
+                     const DenseTensor& x,
+                     const DenseTensor& index,
+                     int axis,
+                     float fill_value,
+                     DenseTensor* output);
 ```
 
 
