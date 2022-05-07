@@ -214,13 +214,14 @@ axis是index索引选择的轴, 支持int以及0维的Tensor参数类型。
 
 index在指定轴上含索引下标的list of int, tuple of int 或者 1-D Tensor。
 
-fill_value是待填充的数据，参数类型支持bool, int, float, complex以及0维的Tensor。
+fill_value是待填充的数据，参数类型支持bool, int, float以及0维的Tensor。
 
 
 
 ## 底层OP设计
 
 参考飞桨现有算子，分别实现cpu和cuda的算子kernel。
+对于fill_value是Tensor和非Tensor的两种不同情况各自使用单独的OP。
 
 
 
@@ -232,37 +233,46 @@ fill_value是待填充的数据，参数类型支持bool, int, float, complex以
 
 在指定轴上指定索引的输入元素梯度为0.0，其他未被选中的元素梯度是1.0
 
-若fill_value是0维的Tensor，其反向传播的梯度是对应选中的输出梯度的平均值。
+若fill_value是0维的Tensor，其反向传播的梯度是对应选中的输出梯度的总和sum。
 
 
 ## 代码实现文件路径
 
 
 
-CPU中正向和反向计算： paddle/phi/kernels/cpu/index_fill_kernel.cc paddle/phi/kernels/cpu/index_fill_grad_kernel.cc
+CPU中正向和反向计算： 
+paddle/phi/kernels/cpu/index_fill_scalar_kernel.cc paddle/phi/kernels/cpu/index_fill_scalar_grad_kernel.cc
+paddle/phi/kernels/cpu/index_fill_tensor_kernel.cc paddle/phi/kernels/cpu/index_fill_tensor_grad_kernel.cc
 
-GPU中正向和反向计算： paddle/phi/kernels/gpu/index_fill_kernel.cu paddle/phi/kernels/gpu/index_fill_grad_kernel.cu
+GPU中正向和反向计算:
+paddle/phi/kernels/gpu/index_fill_scalar_kernel.cu paddle/phi/kernels/gpu/index_fill_scalar_grad_kernel.cu
+paddle/phi/kernels/gpu/index_fill_tensor_kernel.cu paddle/phi/kernels/gpu/index_fill_tensor_grad_kernel.cu
 
 
 
 ```c++
 
 template <typename T, typename Context>
-
-void IndexFillKernel(const Context& ctx,
+void IndexFillScalarKernel(const Context& ctx,
                      const DenseTensor& x,
                      const DenseTensor& index,
-                     int axis,
                      float fill_value,
+                     int axis,
+                     DenseTensor* output);
+
+template <typename T, typename Context>
+void IndexFillTensorKernel(const Context& ctx,
+                     const DenseTensor& x,
+                     const DenseTensor& index,
+                     const DenseTensor& fill_value,
+                     int axis,
                      DenseTensor* output);
 ```
 
-
-
 算子注册路径：
 
-paddle/fluid/operators/index_fill_op.cc
-
+paddle/fluid/operators/index_fill_scalar_op.cc
+paddle/fluid/operators/index_fill_tensor_op.cc
 
 
 函数API实现路径: python/paddle/tensor/manipulation.py
@@ -279,11 +289,11 @@ paddle/fluid/operators/index_fill_op.cc
 
 - 和numpy结果的数值的一致性, `paddle.index_fill`和numpy切片操作结果是否一致；
 
-- 参数`axis`校验参数类型int，判断axis合法，并进行边界检查；
+- 参数`axis`校验参数类型int, list, tuple以及0维的tensor，判断axis合法，并进行边界检查；
 
 - 校验参数`index`的正确性，索引边界检查，输出结果的正确性；
 
-- 校验参数fill_value的正确性， 是否是支持的数据类型
+- 校验参数fill_value的正确性， 是否是支持的数据类型，当fill_value是0维tensor时梯度正确回传
 
 - 测试在进行反向梯度计算时结果的正确性；
 
