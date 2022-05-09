@@ -289,7 +289,7 @@ paddle/fluid/operators/index_fill_tensor_op.cc
 
 - 和numpy结果的数值的一致性, `paddle.index_fill`和numpy切片操作结果是否一致；
 
-- 参数`axis`校验参数类型int, list, tuple以及0维的tensor，判断axis合法，并进行边界检查；
+- 参数`axis`校验参数类型int以及0维的tensor，判断axis合法，并进行边界检查；
 
 - 校验参数`index`的正确性，索引边界检查，输出结果的正确性；
 
