@@ -41,8 +41,9 @@
 # 会议议程
 
 - PFCC 新同学的一句话自我介绍（2 minutes）
-- 飞桨接下来会开展的一些重点工作和技术方向介绍（[luotao1](https://github.com/luotao1)，8 minutes），详见[PFCC-Roadmap](https://github.com/PaddlePaddle/Paddle/issues/42571)。
+- 飞桨接下来会开展的一些重点工作和技术方向介绍（[luotao1](https://github.com/luotao1)，6 minutes），详见[PFCC-Roadmap](https://github.com/PaddlePaddle/Paddle/issues/42571)。
   大家可以根据兴趣选择加入开发，每个方向均会配备飞桨在这个领域比较资深的同学一起开发，欢迎大家报名。
+- 飞桨 [2022年开源之夏活动介绍](https://github.com/PaddlePaddle/Paddle/issues/42565)（[jzhang533](https://github.com/jzhang533)，2 minutes） 
 - 飞桨框架的分享（20 minutes）
   - 飞桨高性能算子开发介绍（[JamesLim](https://github.com/JamesLim)）:由[【PFCC-Roadmap】算子性能优化](https://github.com/PaddlePaddle/Paddle/issues/42286)
     负责同学介绍高性能算子开发技巧和性能测试方法。
