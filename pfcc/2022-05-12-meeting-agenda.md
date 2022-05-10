@@ -13,7 +13,6 @@
     - [jeff41404](https://github.com/jeff41404)
     - [TCChenlong](https://github.com/TCChenlong)
     - [Ligoml](https://github.com/Ligoml)
-    - [S-HuaBomb](https://github.com/S-HuaBomb)
     - [guguguzi](https://github.com/guguguzi)
     - [gsq7474741](https://github.com/gsq7474741)
     - [SigureMo](https://github.com/SigureMo)
