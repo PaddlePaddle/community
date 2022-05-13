@@ -26,7 +26,7 @@
 同时，和Inference同学[Shixiaowei02](https://github.com/Shixiaowei02)交流：使用C接口而非直接调用C++接口的原因是，C++编译动态库有问题，C接口具有更好的兼容性。
 
 ### 自由发言和讨论
-参会的飞桨框架的贡献者积极的就开发飞桨框架过程中碰到的具体问题，包括注册kernel、支持自定义算子补充高阶导数等方面进行了经验分享和交流。
+参会的飞桨框架的贡献者积极的就开发飞桨框架过程中碰到的具体问题，包括注册kernel（已提[issue#422370](https://github.com/PaddlePaddle/Paddle/issues/42730)）、支持自定义算子补充高阶导数等方面进行了经验分享和交流。
 
 ### 下次会议安排
-确定下次会议的时间为两周后的同一个时间段。并确定下次会议的主席为：石华榜（[S-HuaBomb](https://github.com/S-HuaBomb)，广西大学），副主席为王儒婷。
+确定下次会议的时间为两周后的同一个时间段。并确定下次会议的主席为：石华榜（[S-HuaBomb](https://github.com/S-HuaBomb)，广西大学），副主席为王儒婷（[xiaoguoguo626807](https://github.com/xiaoguoguo626807)）。
