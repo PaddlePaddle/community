@@ -26,6 +26,7 @@ Active Contributors:
 * [edencfc](https://github.com/edencfc)
 * [xiaxianlei](https://github.com/xiaxianlei)
 * [Wei-JL](https://github.com/Wei-JL)
+
 Contributors:
 
 * [hao6699](https://github.com/hao6699)
@@ -39,11 +40,11 @@ Contributors:
 
 |Name|Introduce |link|
 |:----|:----|:----|
-|PPOCRLabel|适用于OCR领域的半自动化图形标注工具，内置PP-OCR模型对数据自动标注和重新识别。使用Python3和PyQT5编写，支持矩形框标注和四点标注模式，导出格式可直接用于PaddleOCR检测和识别模型的训练。|[https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.4/PPOCRLabel/README_ch.md](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.4/PPOCRLabel/README_ch.md)|
-|FastOCRLabel|完整的C#版本标注GUI|[https://gitee.com/BaoJianQiang/FastOCRLabel](https://gitee.com/BaoJianQiang/FastOCRLabel)|
+|PPOCRLabel|适用于OCR领域的半自动化图形标注工具，内置PP-OCR模型对数据自动标注和重新识别。使用Python3和PyQT5编写，支持矩形框标注和四点标注模式，导出格式可直接用于PaddleOCR检测和识别模型的训练。|[PPOCRLabel/README_ch.md](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.4/PPOCRLabel/README_ch.md)|
+|FastOCRLabel|完整的C#版本标注GUI|[FastOCRLabel](https://gitee.com/BaoJianQiang/FastOCRLabel)|
 |PaddleSharp|基于PaddleOCR的C++代码修改并封装的.NET的类库。包含文本识别、文本检测、基于文本检测结果的统计分析的表格识别功能，同时针对小图识别不准的情况下，做了优化，提高识别准确率。相较于之前的项目，封装极其简化，实际调用仅一行代码.|[PaddleOCRSharp](https://gitee.com/raoyutian/paddle-ocrsharp)|
-|车牌识别|支持汽车多种车牌(黄牌，双层黄牌，蓝牌，绿牌)检测和识别<br>|[https://aistudio.baidu.com/aistudio/projectdetail/2768559](https://aistudio.baidu.com/aistudio/projectdetail/2768559)|
-|电表识别|在PPOCRLabel半自动标注的基础上，使用PPOCR的检测模型finetune，实现电表读数和编号的检测。|[https://aistudio.baidu.com/aistudio/projectdetail/3429765?channelType=0&channel=0](https://aistudio.baidu.com/aistudio/projectdetail/3429765?channelType=0&channel=0)|
+|车牌识别|支持汽车多种车牌(黄牌，双层黄牌，蓝牌，绿牌)检测和识别<br>|[projectdetail/2768559](https://aistudio.baidu.com/aistudio/projectdetail/2768559)|
+|电表识别|在PPOCRLabel半自动标注的基础上，使用PPOCR的检测模型finetune，实现电表读数和编号的检测。|[projectdetail/3429765](https://aistudio.baidu.com/aistudio/projectdetail/3429765?channelType=0&channel=0)|
 |版面恢复与文本纠错应用程序|具备识别文本纠错和恢复识别区域内文字原本的版面两大核心功能，后续会支持摄像头实时识别和在线编辑的功能|    |
 |DangoOCR离线版|通用型桌面级即时翻译GUI|[PantsuDango](https://github.com/PantsuDango)|
 |scr2txt|截屏转文字GUI|[lstwzd](https://github.com/lstwzd)|
