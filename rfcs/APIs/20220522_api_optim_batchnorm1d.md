@@ -72,18 +72,94 @@ torch
 	batch_norm_transform_input_kernel 298 us
 ```
 
+经过和工程师的沟通，完善了测试脚本
 
+```
+import paddle
+import torch
+import time
+
+shape=[126000, 16]
+x = paddle.randn(shape)
+print(x.shape)
+
+bn = paddle.nn.BatchNorm1D(16)
+
+#warm up
+out = bn(x)
+paddle.device.cuda.synchronize()
+print(out.shape)
+
+t0 = time.time()
+for i in range(100):
+    out = bn(x)
+paddle.device.cuda.synchronize()
+t1 = time.time()
+print("paddle time : ", t1-t0)
+
+
+device = torch.device("cuda")
+torch_x = torch.tensor(x.numpy(), device=device)
+
+torch_bn = torch.nn.BatchNorm1d(16, device=device)
+
+print(torch_x.shape)
+torch_out = torch_bn(torch_x)
+torch.cuda.synchronize(device)
+print(torch_out.shape)
+
+t0 = time.time()
+for i in range(100):
+    torch_out = torch_bn(torch_x)
+torch.cuda.synchronize(device)
+t1 = time.time()
+print("torch time : ", t1-t0)
+```
+
+测试输出：
+```
+paddle time :  0.7719755172729492
+torch time :  0.011815071105957031
+
+Nsight Compute也显示，在[126000, 16]的配置下，torch使用了自己编写的kernel，而paddle使用了cudnn库导致了较差的性能。
+```
+
+特别的，paddle在[136000, 16]的配置下报了错误
+
+```
+Traceback (most recent call last):
+  File "prof_paddle_bn.py", line 10, in <module>
+    batch_norm_out = batch_norm(x)
+  File "/usr/local/python3.7.0/lib/python3.7/site-packages/paddle/fluid/dygraph/layers.py", line 930, in __call__
+    return self._dygraph_call_func(*inputs, **kwargs)
+  File "/usr/local/python3.7.0/lib/python3.7/site-packages/paddle/fluid/dygraph/layers.py", line 915, in _dygraph_call_func
+    outputs = self.forward(*inputs, **kwargs)
+  File "/usr/local/python3.7.0/lib/python3.7/site-packages/paddle/nn/layer/norm.py", line 666, in forward
+    use_global_stats=self._use_global_stats)
+  File "/usr/local/python3.7.0/lib/python3.7/site-packages/paddle/nn/functional/norm.py", line 207, in batch_norm
+    variance_out, *attrs)
+OSError: (External) CUDNN error(9), CUDNN_STATUS_NOT_SUPPORTED.
+  [Hint: 'CUDNN_STATUS_NOT_SUPPORTED'.  The functionality requested is not presently supported by cuDNN.  ] (at /paddle/paddle/phi/kernels/gpu/batch_norm_kernel.cu:532)
+  [operator < batch_norm > error]
+```
+
+又去调研了另一个开源框架oneflow的实现，发现oneflow跟paddle都采用了cudnn来处理BatchNorm1d，但是oneflow在[136000, 16]下并未报错，ncu profile之后发现oneflow调用的kernel是batchnorm_fwtr_nhwc_semiPersist，而paddle是bn_fw_tr_1CHW_kernel_new，也可以去调研下cudnn使用的不同之处。
 
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html)
 ## 底层OP设计
-需要进一步研究讨论
+
+### 性能问题解决方案
+参考torch的判定条件，在一定条件下使用自己编写的CUDA kernel完成batchnorm1d的计算。
+
+### 报错问题解决方案
+参考oneflow的kernel实现，对比查看对cudnn使用的不同之处。
 
 ## API实现方案
 
-需要进一步研究讨论
+本任务中无需更改API
 
 # 六、测试和验收的考量
 
