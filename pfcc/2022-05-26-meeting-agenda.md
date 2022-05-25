@@ -15,7 +15,6 @@
     - [Ligoml](https://github.com/Ligoml)
     - [guguguzi](https://github.com/guguguzi)
     - [gsq7474741](https://github.com/gsq7474741)
-    - [SigureMo](https://github.com/SigureMo)
     - [chenyanlann](https://github.com/chenyanlann)
     - [GeYuYao-hub](https://github.com/GeYuYao-hub)
     - [isLinXu](https://github.com/isLinXu)
