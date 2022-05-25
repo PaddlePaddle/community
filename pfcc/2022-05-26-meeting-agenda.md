@@ -4,7 +4,7 @@
 - 本次会议接入方式： 
   - 腾讯会议：763-545-348
   - 会议密码：**** (群内通知)
-  - [点击链接入会](https://meeting.tencent.com/dm/HO3hhiOEHOba)，或添加至会议列表
+  - [点击链接入会](https://meeting.tencent.com/dm/N62pGjjeyQb6)，或添加至会议列表
 - 本次会议主席：石华榜（[S-HuaBomb](https://github.com/S-HuaBomb)，广西大学）
 - 本次会议副主席：王儒婷（[xiaoguoguo626807](https://github.com/xiaoguoguo626807)，中科院计算所）
 - 本次拟参会Paddle Framework Contributor列表：
