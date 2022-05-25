@@ -38,7 +38,7 @@
 
 - PFCC 新同学 [Yulv-git](https://github.com/Yulv-git) 的一句话自我介绍（30 seconds）
 - [GitLink](https://github.com/PaddlePaddle/Paddle/issues/42843) 编程夏令营（GLCC）活动介绍（[jzhang533](https://github.com/jzhang533)，5 minutes）
-- PFCC-roadmap：API单测增强、算子性能扩展、算子数据类型扩展专题介绍 （5-10 minutes）
+- PFCC-Roadmap：API单测增强、算子性能扩展、算子数据类型扩展专题介绍 （5-10 minutes）
 - 文档方向启动信息（[TCChenlong](https://github.com/TCChenlong)，5-10 minutes）
 - 提了一个新需求的 issue [【PFCC-Roadmap】API高维功能扩展 #42904](https://github.com/PaddlePaddle/Paddle/issues/42904)，为部分paddle api增加3D输入能力（API范围，增加方式，应用举例，性能考虑等）（10 minutes）
   - `F.affine_grrid` 和 `F.grid_sample()`，目前不支持 3D 处理。
