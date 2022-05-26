@@ -28,6 +28,7 @@ BatchNorm1D是一个被广泛使用的算子，提升BatchNorm1D算子性能将�
 Pytorch方案：在满足一定条件时（training batch size <= 880801 or eval batch size <= 65535....）调用cudnn库, 在满足一定条件时（CUDA使用了MIOpen）使用MIOpen进行计算，其余使用自己开发的batchnorm算子进行计算。
 
 # 四、对比分析
+这个PR的任务主要是优化BatchNorm1D，所以在测试的时候采用[num_batch, num_feature]的shape来测试，NCHW这种shape留在之后的优化任务中。
 我简单的调用了pytorch和paddle中的batchnorm1d进行性能评测：
 
 ```
@@ -37,58 +38,36 @@ import torch
 import torch.nn
 import numpy as np
 
-np.random.seed(123)
+shape=[126000, 16]
 device = torch.device("cuda")
-x_data = np.random.random(size=(200000, 1, 3)).astype('float32')
-x = torch.from_numpy(x_data).to(device)
-batch_norm = torch.nn.BatchNorm1d(1, device=device)
-batch_norm_out = batch_norm(x)
+torch_x = torch.tensor(x.numpy(), device=device)
+
+torch_bn = torch.nn.BatchNorm1d(16, device=device)
+
+#warm up
+torch_out = torch_bn(torch_x)
+torch.cuda.synchronize(device)
+
+t0 = time.time()
+for i in range(100):
+    torch_out = torch_bn(torch_x)
+# torch.cuda.synchronize(device)
+t1 = time.time()
+print("torch time : ", t1-t0)
 ```
 
 ```
 ### paddle 代码 ###
-
 import paddle
-import numpy as np
-
-np.random.seed(123)
-x_data = np.random.random(size=(2000000, 1, 3)).astype('float32')
-x = paddle.to_tensor(x_data).cuda()
-batch_norm = paddle.nn.BatchNorm1D(1)
-batch_norm_out = batch_norm(x)
-```
-
-简单的进行端到端实验测试，可以发现在数据规模较小时，torch和paddle都使用cudnn进行计算，而当数据规模大于一定阈值后，torch使用自己开发的算子进行计算使得计算时延小于paddle，进一步使用nsight compute查看profile结果：
-
-```
-paddle  
-	bn_fw_tr_1C11_kernel_NCHW kernel   133.06 ms
-```
-
-```
-torch
-	batch_norm_collect_statistics_kernel 71.51 ms
-	unrolled_elementwise_kernel_for_multi_outputs 4.4 us
-	batch_norm_transform_input_kernel 298 us
-```
-
-经过和工程师的沟通，完善了测试脚本
-
-```
-import paddle
-import torch
-import time
 
 shape=[126000, 16]
-x = paddle.randn(shape)
-print(x.shape)
+x = paddle.randn(shape).cuda()
 
 bn = paddle.nn.BatchNorm1D(16)
 
 #warm up
 out = bn(x)
 paddle.device.cuda.synchronize()
-print(out.shape)
 
 t0 = time.time()
 for i in range(100):
@@ -96,35 +75,44 @@ for i in range(100):
 paddle.device.cuda.synchronize()
 t1 = time.time()
 print("paddle time : ", t1-t0)
+```
 
+```
+### oneflow 代码 ###
+import oneflow as flow
 
-device = torch.device("cuda")
-torch_x = torch.tensor(x.numpy(), device=device)
+device = flow.device("cuda")
+flow_x = flow.tensor(x.numpy(), device=device)
 
-torch_bn = torch.nn.BatchNorm1d(16, device=device)
+flow_bn = flow.nn.BatchNorm1d(16).cuda()
 
-print(torch_x.shape)
-torch_out = torch_bn(torch_x)
-torch.cuda.synchronize(device)
-print(torch_out.shape)
+#warm up
+flow_out = flow_bn(flow_x)
+flow.device.cuda.synchronize()
 
 t0 = time.time()
 for i in range(100):
-    torch_out = torch_bn(torch_x)
-torch.cuda.synchronize(device)
+    flow_out = flow_bn(flow_x)
+flow.cuda.synchronize(device)
 t1 = time.time()
-print("torch time : ", t1-t0)
+print("oneflow time : ", t1-t0)
 ```
+调研了这三种框架的源码之后，发现三种框架采取了不同的kernel策略，其中torch应为最优的解决方案（kernel策略均使用nvprof证实了运行了不同的kernel）。
 
-测试输出：
-```
-paddle time :  0.7719755172729492
-torch time :  0.011815071105957031
+### torch
++ 在[N, C]的输入下，直接使用自己编写的CUDA kernel（后面统称native kernel）
++ 在[N, C, L]及[N, C, H, W]（所有dim>=3）的shape下，根据N的值进行判断，小于阈值时使用cudnn的库kernel，大于阈值时使用native kernel。特别的，train mode阈值为880801，eval mode为65535.
 
-Nsight Compute也显示，在[126000, 16]的配置下，torch使用了自己编写的kernel，而paddle使用了cudnn库导致了较差的性能。
-```
+### oneflow
++ 在所有输入下，全部使用CUDNN_BATCHNORM_SPATIAL_PERSISTENT mode进行cudnn计算，这样的坏处是特定模型输入下会产生精度问题，该问题在cudnn文档中有说明：https://docs.nvidia.com/deeplearning/cudnn/api/index.html#cudnnBatchNormMode_t。
 
-特别的，paddle在[136000, 16]的配置下报了错误
+### paddle
++ 在FLAGS_cudnn_batchnorm_spatial_persistent开启时且cudnn版本满足时，全部使用CUDNN_BATCHNORM_SPATIAL_PERSISTENT mode
++ 在[N, C]的输入下，使用CUDNN_BATCHNORM_PER_ACTIVATION mode，测试可以发现在这个shape下的输入下，使用CUDNN_BATCHNORM_PER_ACTIVATION比CUDNN_BATCHNORM_SPATIAL的性能要更好，参考issue：https://github.com/PaddlePaddle/Paddle/pull/33887
++ 在其余shape输入下，使用CUDNN_BATCHNORM_SPATIAL进行计算
+
+
+特别的，paddle在[136000, 16]的配置下报了错误(对应PER_ACTIVATION mode)，在[2100000, 256, 4]的配置下报了错误(对应SPATIAL mode和SPATIAL_PERSISTENT mode)，查阅资料可以发现，这个问题是由于过大的batch size导致的cudnn报错，torch也有相关的issue汇报了这一情况：https://github.com/pytorch/pytorch/issues/29744
 
 ```
 Traceback (most recent call last):
@@ -143,8 +131,6 @@ OSError: (External) CUDNN error(9), CUDNN_STATUS_NOT_SUPPORTED.
   [operator < batch_norm > error]
 ```
 
-又去调研了另一个开源框架oneflow的实现，发现oneflow跟paddle都采用了cudnn来处理BatchNorm1d，但是oneflow在[136000, 16]下并未报错，ncu profile之后发现oneflow调用的kernel是batchnorm_fwtr_nhwc_semiPersist，而paddle是bn_fw_tr_1CHW_kernel_new，也可以去调研下cudnn使用的不同之处。
-
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
@@ -152,10 +138,11 @@ OSError: (External) CUDNN error(9), CUDNN_STATUS_NOT_SUPPORTED.
 ## 底层OP设计
 
 ### 性能问题解决方案
-参考torch的判定条件，在一定条件下使用自己编写的CUDA kernel完成batchnorm1d的计算。
+编写native CUDA kernel完成batchnorm1d的计算。
 
 ### 报错问题解决方案
-参考oneflow的kernel实现，对比查看对cudnn使用的不同之处。
++ 方案1：全部使用native kernel（因为暂时没发现使用cudnn的好处）
++ 方案2：进行判断，当batch size大于一定阈值后使用native kernel
 
 ## API实现方案
 
