@@ -148,6 +148,45 @@ OSError: (External) CUDNN error(9), CUDNN_STATUS_NOT_SUPPORTED.
 
 本任务中无需更改API
 
+## 方案迭代
+
+实现前的baseline测试，使用对比分析里的测试代码，shape分别为NC:[126000, 16]、NCL:[1000000, 16, 16] ，测试结果：
+```
+# [126000, 16]
+paddle time :  0.7727415561676025
+torch time :  0.011563777923583984
+oneflow time :  0.08174824714660645
+
+# [1000000, 16, 16]
+paddle time :  7.080853462219238
+torch time :  3.952852487564087
+oneflow time :  7.155768871307373
+```
+
+针对BatchNorm1D的native kernel，有以下优化点需要尝试：
+
+- [ ] 使用welford算法在线计算方差和均值
+- [ ] 使用4-way循环展开提升内存吞吐，隐藏时延
+- [ ] 针对channel-last形状张量与其他形状张量（e.g. NCL）分别实现kernel
+
+
+### Native kernel第一版
+
++ block.dim：C
++ block中的所有thread处理每个channel的N\*H\*W元素,使用cub blockreduce计算平均值和方差。
++ 使用计算得到的方差、均值、weight、bias进行elementwise计算
+
+```
+# [126000, 16]
+paddle time :  0.06167960166931152
+torch time :  0.012059926986694336
+oneflow time :  0.08394908905029297
+
+# [1000000, 16, 16]
+paddle time :  6.160153388977051
+torch time :  3.9497106075286865
+oneflow time :  7.15362024307251
+```
 # 六、测试和验收的考量
 
 参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
