@@ -12,10 +12,10 @@
 
 ## 1、相关背景
 为了提升飞桨API丰富度，支持科学计算领域API，Paddle需要扩充API`paddle.quantile`以及`paddle.Tensor.quantile`，
-##2、功能目标
+## 2、功能目标
 增加API`paddle.quantile`以及`paddle.Tensor.quantile`，实现对一个张量沿指定维度计算q分位数的功能。
 
-##3、意义
+## 3、意义
 飞桨支持计算分位数
 
 # 二、飞桨现状
@@ -188,17 +188,19 @@ API设计为`paddle.quantile(x, q, axis=None, keepdim=False, name=None)`及`padd
 4. `paddle.lerp`计算两端元素的加权插值，作为结果。
 5. 根据`keepdim`参数，确定是否需要对应调整结果shape。
 
-- 对`NaN`的处理，对原tensor采用`paddle.isnan`检查`Nan`值，包含`NaN`的，在步骤4所对应位置的元素置`NaN`。
+- 对`NaN`的处理，对原tensor采用`paddle.isnan`检查`NaN`值，包含`NaN`的，在步骤4所对应位置的元素置`NaN`。
  
 # 六、测试和验收的考量
 测试考虑的case如下：
-
-- 和numpy结果的数值的一致性, `paddle.quantile`,`paddle.Tensor.quantile`和`np.quantile`结果是否一致；
-- 参数`q`为int和1-D Tensor时输出的正确性；
-- 参数`axis`为int 和1-D Tensor时输出的正确性
-- `keepdim`参数的正确性；
-- 未输入维度时的输出正确性；
-- 输入含`NaN`结果的正确性；
+- 数值准确性：和numpy结果的数值的一致性, `paddle.quantile`,`paddle.Tensor.quantile`和`np.quantile`结果是否一致；
+- 数值准确性：输入含`NaN`结果的正确性；
+- 入参测试：参数`q`为int和1-D Tensor时输出的正确性；
+- 入参测试：参数`axis`为int 和1-D Tensor时输出的正确性；
+- 入参测试：`keepdim`参数的正确性；
+- 入参测试：未输入维度时的输出正确性；
+- 数据类型：输入Tensor`x`的`dtype`为`float32`和`float64`时的结果正确性；
+- 运行设备：在CPU/GPU设备上执行时的结果正确性；
+- 运行模式：动态图、静态图下执行时的结果正确性；
 - 错误检查：`q`值不在[0，1]时能正确抛出错误；为tensor时维度大于1时正确抛出错误；
 - 错误检查：`axis`所指维度在当前Tensor中不合法时能正确抛出错误。
 
@@ -213,5 +215,5 @@ API设计为`paddle.quantile(x, q, axis=None, keepdim=False, name=None)`及`padd
 
 # 名词解释
 无
-#附件及参考资料
+# 附件及参考资料
 无
