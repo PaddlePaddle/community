@@ -124,12 +124,12 @@ def cosine_similarity(y_true, y_pred, axis=-1):
 
 ## 命名与参数设计
 
-CosineEmbeddingLoss的API设计为`paddle.nn.CosineEmbeddingLoss(margin=0, reduction='mean')`，cosine_embedding_loss的API设计为`paddle.nn.functional.cosine_embedding_loss(x1, x2, target, margin=0, reduction='mean')`，其中：
+CosineEmbeddingLoss的API设计为`paddle.nn.CosineEmbeddingLoss(margin=0, reduction='mean', name=None)`，cosine_embedding_loss的API设计为`paddle.nn.functional.cosine_embedding_loss(input1, input2, label, margin=0, reduction='mean', name=None)`，其中：
 
 * margin：余弦相似度损失函数中的margin值
 * reduction：结果后处理的类型，可以为`mean`或者`sum`
-* x1和x2：输入的两个tensor
-* target：真实的类别标签
+* input1和input2：输入的两个tensor
+* label：真实的类别标签
 
 在pytorch中，CosineEmbeddingLoss还有`size_average`、`reduce`两个参数，但是已经弃用，其功能转移到`reduction`参数上。两个参数的描述文档如下
 
