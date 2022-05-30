@@ -24,7 +24,7 @@ PFCC 新成员 [Yulv-git](https://github.com/Yulv-git) 进行了自我介绍，�
 
 ### 文档方向启动信息介绍
 
-- 会前，飞桨团队 [TCChenlong](https://github.com/TCChenlong) 向各位 PFCC 成员发送了题为**【PFCC-Roadmap】飞桨框架文档** 的邮件，介绍了 PFCC - 框架文档方向进一步的规划。邮件中提供了为文档修复和完善做贡献的方案和参考链接。
+- 会前，飞桨团队 [TCChenlong](https://github.com/TCChenlong) 向各位 PFCC 成员发送了题为 **【PFCC-Roadmap】飞桨框架文档** 的邮件，介绍了 PFCC - 框架文档方向进一步的规划。邮件中提供了为文档修复和完善做贡献的方案和参考链接。
 - 会上，[TCChenlong](https://github.com/TCChenlong) 再次介绍了飞桨框架文档修复方向的背景说明、参与文档修复的做法，并欢迎大家加入 PFCC - 文档方向，我们会每月同步最新的进展与规划，如果大家有任何想法/建议/问题，欢迎随时回复该邮件，与大家一起讨论沟通。
 
 ### API 高维功能扩展的议题分享
