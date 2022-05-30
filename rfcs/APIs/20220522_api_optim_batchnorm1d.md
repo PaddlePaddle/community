@@ -187,6 +187,30 @@ paddle time :  6.160153388977051
 torch time :  3.9497106075286865
 oneflow time :  7.15362024307251
 ```
+
+### Native kernel第二版
+
+使用wellford算法完成均值和方差的计算，公式：
+$$
+\overline{x_{n+1}}=\overline{x_{n}}+\frac{x_{n+1}-\overline{x_{n}}}{n+1}
+$$
+$$
+\sigma_{n+1}^{2}=\sigma_{n}^{2}+\frac{\left(x_{n+1}-\overline{x_{n}}\right)\left(x_{n+1}-\overline{x_{n+1}}\right)-\sigma_{n}^{2}}{n+1}
+$$
+
+```
+# [126000, 16]
+paddle time :  0.0656125545501709
+torch time :  0.011774539947509766
+oneflow time :  0.08371567726135254
+
+# [1000000, 16, 16]
+paddle time :  7.180898189544678
+torch time :  3.950751543045044
+oneflow time :  7.150729656219482
+```
+
+结论：将求和算法（batch update）替换为wellford算法（iterative update）并未获得性能提升，需要进一步分析pytorch性能提升的来源。
 # 六、测试和验收的考量
 
 参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
