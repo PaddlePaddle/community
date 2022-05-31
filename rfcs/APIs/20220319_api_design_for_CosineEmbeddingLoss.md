@@ -130,6 +130,7 @@ CosineEmbeddingLoss的API设计为`paddle.nn.CosineEmbeddingLoss(margin=0, reduc
 * reduction：结果后处理的类型，可以为`mean`或者`sum`
 * input1和input2：输入的两个tensor
 * label：真实的类别标签
+* name：操作的名称，更多信息请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)。
 
 在pytorch中，CosineEmbeddingLoss还有`size_average`、`reduce`两个参数，但是已经弃用，其功能转移到`reduction`参数上。两个参数的描述文档如下
 
