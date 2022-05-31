@@ -129,7 +129,7 @@ def clr(self):
 	if self.scale_mode == 'cycle':
 		return self.base_lr + (self.max_lr-self.base_lr)*np.maximum(0, (1-x))*self.scale_fn(cycle)
 	else:
-		return self.base_lr + (self.max_lr-self.base_lr)*np.maximum(0, (1-					x))*self.scale_fn(self.clr_iterations)
+		return self.base_lr + (self.max_lr-self.base_lr)*np.maximum(0, (1-x))*self.scale_fn(self.clr_iterations)
 ```
 
 # 四、对比分析
@@ -145,7 +145,7 @@ Pytorch官方文档中提到参考了上述tensorflow仓库进行修改实现，
 
 ## 命名与参数设计
 
-API设计为`paddle.optimizer.lr.CyclicLR(base_learning_rate,max_learning_rate,step_size_up,step_size_down, mode='triangular',gamma=1.,scale_fn=None,scale_mode='cycle',last_epoch=-1,verbose=False)`
+API设计为`paddle.optimizer.lr.CyclicLR(base_learning_rate,max_learning_rate,step_size_up,step_size_down, mode='triangular',exp_gamma=1.,scale_fn=None,scale_mode='cycle',last_epoch=-1,verbose=False)`
 
 去除了Pytorch中`momentum`的相关参数。
 
