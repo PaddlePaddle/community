@@ -168,6 +168,7 @@ oneflow time :  7.155768871307373
 - [ ] 使用welford算法在线计算方差和均值
 - [ ] 使用4-way循环展开提升内存吞吐，隐藏时延
 - [ ] 针对channel-last形状张量与其他形状张量（e.g. NCL）分别实现kernel
+- [ ] 在数据量较小时使用寄存器/共享内存缓存输入x的数据
 
 
 ### Native kernel第一版
@@ -211,6 +212,33 @@ oneflow time :  7.150729656219482
 ```
 
 结论：将求和算法（batch update）替换为wellford算法（iterative update）并未获得性能提升，需要进一步分析pytorch性能提升的来源。
+
+### Native kernel第三版
+进一步对比分析与pytorch kernel的区别，发现pytorch使用的block size是512，调整block dim测试：
+
+```
+# [1000000, 16, 16] (block dim: 512)
+paddle time :  4.0992326736450195
+torch time :  3.949974298477173
+oneflow time :  7.151297330856323
+
+# [1000000, 16, 16] (block dim: 1024)
+paddle time :  2.581002712249756
+torch time :  3.949730157852173
+oneflow time :  7.152151823043823
+
+# [126000, 16] (block dim: 512)
+paddle time :  0.04084587097167969
+torch time :  0.011934041976928711
+oneflow time :  0.08137869834899902
+
+# [126000, 16] (block dim: 1024)
+paddle time :  0.03381657600402832
+torch time :  0.011205434799194336
+oneflow time :  0.08815956115722656
+```
+
+能够发现NCL shape下已经能够与pytorch性能持平，但是NC还有三倍的性能差距，经过对pytorch源码的研究，发现pytorch在NC shape下，会采用2D tile的方式，每个block处理一块数据（在之前的实现中，block数量与C正相关，每个block处理一列数据）
 # 六、测试和验收的考量
 
 参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
