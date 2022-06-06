@@ -37,7 +37,7 @@
 
 - PFCC 新同学 [Patrick-Star125](https://github.com/Patrick-Star125) 的一句话自我介绍（30 seconds）
 - PFCC-Roadmap：算子性能优化贡献文档解析（[JamesLim](https://github.com/JamesLim)，10 minutes）
-- 框架贡献者的分享，内容不限：（15-25 minutes）
+- 框架贡献者的分享，内容不限：（20-35 minutes）
   - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)：分享稀疏矩阵向量乘（SpMV）优化方法
   - [gsq7474741](https://github.com/gsq7474741)：分享为飞桨框架贡献稀疏算子经历
   - [yangguohao](https://github.com/yangguohao)：分享为飞桨框架贡献基础算子经历
