@@ -155,8 +155,8 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 ```
 padde.nn.functional.triplet_margin_loss(input Tensor[float64 or float32] 维度为[batch_size,dim] 
                                           positive, Tensor[float64 or float32],维度为[batch_size,dim]                                                                                                 negative, Tensor[float64 or float32],维度为[batch_size,dim] 
-                                          p=2.0, 求距离时的范数,
                                           margin=1.0,
+                                          p=2.0, 求距离时的范数,
                                           epsilon=1e-06,误差参数swap=False, 
                                           reduction='mean', 'mean' 求平均,'sum'求和,'None'直接输出维度为[batch_size,1]
                                           name=None) -> Tensor

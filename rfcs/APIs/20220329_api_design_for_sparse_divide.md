@@ -1,12 +1,12 @@
 # paddle.sparse.divide 设计文档
 
-|API名称 | paddle.sparse.divide                         | 
- |----------------------------------------------|-----------------------------------------------------------|
-|提交作者<input type="checkbox" class="rowselector hidden"> | PeachML                                      | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-29                                   | 
-|版本号 | V1.0                                         | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                      | 
-|文件名 | 20220329_api_design_for_sparse_divide.md<br> | 
+| API名称                                                    | paddle.sparse.divide                         | 
+|----------------------------------------------------------|----------------------------------------------|
+| 提交作者<input type="checkbox" class="rowselector hidden">   | PeachML                                      | 
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-29                                   | 
+| 版本号                                                      | V1.0                                         | 
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                      | 
+| 文件名                                                      | 20220329_api_design_for_sparse_divide.md<br> | 
 
 # 一、概述
 
@@ -141,65 +141,98 @@ Scipy中有csr类型的稀疏矩阵，可以支持相除操作，通过`binary_o
 
 # 四、对比分析
 
-torch设计结构复杂，为了适配paddle phi库的设计模式，故采用scipy的实现方式
+torch设计结构复杂，为了适配paddle phi库的设计模式，故参考scipy的实现方式
 
 # 五、方案设计
 
 ## 命名与参数设计
 
-在paddle/phi/kernels/sparse/目录下，在paddle/phi/kernels/sparse/目录下， kernel设计为
+在paddle/phi/kernels/sparse/目录下， kernel设计为
 
 ```    
-void DivideCsrKernel(const Context& dev_ctx,
-                     const SparseCsrTensor& x,
-                     const SparseCsrTensor& y,
-                     SparseCsrTensor* out);
+void ElementWiseDivideCsrCPUKernel(const Context& dev_ctx,
+                                   const SparseCsrTensor& x,
+                                   const SparseCsrTensor& y,
+                                   SparseCsrTensor* out) 
 ```
 
 ```
-//暂定    
-void DivideGradKernel(const Context& dev_ctx,
-                      const SparseCsrTensor& x,
-                      const SparseCsrTensor& y,
-                      const SparseCsrTensor& out,
-                      const SparseCsrTensor& dout,
-                      SparseCsrTensor* dx,
-                      SparseCsrTensor* dy);
+void ElementWiseDivideCooKernel(const Context& dev_ctx,
+                                const SparseCooTensor& x,
+                                const SparseCooTensor& y,
+                                SparseCooTensor* out) 
+```
+
+```    
+template <typename T, typename Context>
+void ElementWiseDivideCsrGradKernel(const Context& dev_ctx,
+                                    const SparseCsrTensor& x,
+                                    const SparseCsrTensor& y,
+                                    const SparseCsrTensor& out,
+                                    const SparseCsrTensor& dout,
+                                    SparseCsrTensor* dx,
+                                    SparseCsrTensor* dy);
+```
+
+```                                 
+void ElementWiseDivideCooGradKernel(const Context& dev_ctx,
+                                    const SparseCooTensor& x,
+                                    const SparseCooTensor& y,
+                                    const SparseCooTensor& out,
+                                    const SparseCooTensor& dout,
+                                    SparseCooTensor* dx,
+                                    SparseCooTensor* dy);
 ```
 
 函数设计为
 
 ```    
-SparseCooTensor Divide(const Context& dev_ctx,
-                       const SparseCooTensor& x,
-                       const SparseCooTensor& y);
+SparseCsrTensor ElementWiseDivideCsr(const Context& dev_ctx,
+                                     const SparseCsrTensor& x,
+                                     const SparseCsrTensor& y)
 ```
 
 和
 
 ```
-SparseCsrTensor Divide(const Context& dev_ctx,
-                       const SparseCsrTensor& x,
-                       const SparseCsrTensor& y);
+SparseCooTensor ElementWiseDivideCoo(const Context& dev_ctx,
+                                     const SparseCooTensor& x,
+                                     const SparseCooTensor& y)
 ```
 
 ## 底层OP设计
 
-新增一个sparse elementwise 的功能模块（暂定），然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+实现对应的 CPU Kernel，使用 Merge 两个有序数组的算法，然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+
+对于dense tensor，值连续的存储在一块内存中，二元运算需要处理每一个元素，即`x[i][j] ∘ y[i][j]`，运算时间复杂度为 `O(numel(x))`，
+`numel(x)`为`x`中总素个数。
+
+而sparse tensor以索引和值的模式存储一个多数元素为零的tensor，二元运算只需要处理两个输入不全为0的位置，
+在sparse tensor构造时，索引按升序排序，可以采取merge有序数组的方式，若两输入索引相等，则计算`x[i][j] ∘ y[i][j]`，
+若不相等则说明该位置上的二元运算有一个元为0，
+`x`索引小时计算 `x[i][j] ∘ 0`，`y`索引小时计算 `0 ∘ y[i][j]`。
+对于除法而言，两个输入都为0的位置运算结果不为0，所以需要将`y`中索引未覆盖到的位置（原tensor中为0），在运算中通过指向一个零常量的方式填充为0，
+以参与除法运算。
+此时，时间复杂度为`O(numel(x))`，鉴于实际场景中动辄50% ~ 99%的稀疏性 [[1]][1] ，
+虽然时间复杂度与dense tensor一样，但是可以节省大量的存储空间。
 
 ## API实现方案
 
-主要参考scipy实现，将coo转换成csr再进行除法，然后转换回coo
+对于SparseCsrTensor，将csr格式转换成coo格式再进行运算，然后转换回csr格式输出。
+
+对于SparseCooTensor，直接进行运算。
 
 # 六、测试和验收的考量
 
 测试考虑的case如下：
 
 - 数值正确性
+- 反向
+- 不同 `sparse_dim`
 
 # 七、可行性分析及规划排期
 
-方案主要依赖paddle现有op组合而成
+方案主要依赖paddle现有op组合而成，并自行实现核心算法
 
 # 八、影响面
 
@@ -211,4 +244,6 @@ SparseCsrTensor Divide(const Context& dev_ctx,
 
 # 附件及参考资料
 
-无
+[[1]: 深度学习中的稀疏性][1]
+
+[1]: https://sinews.siam.org/Details-Page/the-future-of-deep-learning-will-be-sparse
