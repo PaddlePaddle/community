@@ -18,7 +18,7 @@
     - [gsq7474741](https://github.com/gsq7474741)
     - [chenyanlann](https://github.com/chenyanlann)
     - [GeYuYao-hub](https://github.com/GeYuYao-hub)
-    - [isLinXu](https://github.com/isLinXu)
+    - [isLinXu](https://github.com/isLinXu)(时间冲突，请假)
     - [yangguohao](https://github.com/yangguohao)
     - [Li-fAngyU](https://github.com/Li-fAngyU)
     - [jinyouzhi](https://github.com/jinyouzhi)
