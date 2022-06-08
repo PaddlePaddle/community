@@ -180,7 +180,7 @@ std::tuple<Tensor&, Tensor&> nanmedian_out_cuda(
 
 ## TensorFlow
 tensorflow没有支持median接口，但可以通过percentile接口， 也没有支持nanmedian功能。
-在tensorflow里也可以通过tf.exprimental.numpy直接调用numpy函数
+在tensorflow里也可以通过tf.experimental.numpy直接调用numpy函数
 
 ```Python
 tf.contrib.distributions.percentile(

@@ -1,12 +1,12 @@
 # paddle.sparse.add 设计文档
 
-|API名称 | paddle.sparse.add                                         | 
-|---|-----------------------------------------------------------|
-|提交作者<input type="checkbox" class="rowselector hidden"> | PeachML                                                   | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-29                                                | 
-|版本号 | V1.0                                                      | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                                   | 
-|文件名 | 20220329_api_design_for_sparse_add.md<br> | 
+| API名称                                                    | paddle.sparse.add                         | 
+|----------------------------------------------------------|-------------------------------------------|
+| 提交作者<input type="checkbox" class="rowselector hidden">   | PeachML                                   | 
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-29                                | 
+| 版本号                                                      | V1.0                                      | 
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                   | 
+| 文件名                                                      | 20220329_api_design_for_sparse_add.md<br> | 
 
 # 一、概述
 
@@ -141,7 +141,7 @@ void csr_binop_csr_general(const I n_row, const I n_col,
 
 # 四、对比分析
 
-torch设计结构复杂，为了适配paddle phi库的设计模式，故采用scipy的实现方式
+torch设计结构复杂，为了适配paddle phi库的设计模式，故参考scipy的实现方式
 
 # 五、方案设计
 
@@ -150,54 +150,83 @@ torch设计结构复杂，为了适配paddle phi库的设计模式，故采用sc
 在paddle/phi/kernels/sparse/目录下， kernel设计为
 
 ```    
-void AddCsrKernel(const Context& dev_ctx,
-                  const SparseCsrTensor& x,
-                  const SparseCsrTensor& y,
-                  SparseCsrTensor* out);
+void ElementWiseAddCsrKernel(const Context& dev_ctx,
+                                const SparseCsrTensor& x,
+                                const SparseCsrTensor& y,
+                                SparseCsrTensor* out) 
+```
+
+
+```
+void ElementWiseAddCooKernel(const Context& dev_ctx,
+                             const SparseCooTensor& x,
+                             const SparseCooTensor& y,
+                             SparseCooTensor* out) 
 ```
 
 ```    
-//暂定
-void AddCsrGradKernel(const Context& dev_ctx,
-                      const SparseCsrTensor& x,
-                      const SparseCsrTensor& y,
-                      const SparseCsrTensor& dout,
-                      SparseCsrTensor* dx,
-                      SparseCsrTensor* dy);
+void ElementWiseAddCsrGradKernel(const Context& dev_ctx,
+                                 const SparseCsrTensor& x,
+                                 const SparseCsrTensor& y,
+                                 const SparseCsrTensor& dout,
+                                 SparseCsrTensor* dx,
+                                 SparseCsrTensor* dy);
+```                                 
+```                                 
+void ElementWiseAddCooGradKernel(const Context& dev_ctx,
+                                 const SparseCooTensor& x,
+                                 const SparseCooTensor& y,
+                                 const SparseCooTensor& dout,
+                                 SparseCooTensor* dx,
+                                 SparseCooTensor* dy);
 ```
 函数设计为
 
 ```    
-SparseCooTensor Add(const Context& dev_ctx,
-                    const SparseCooTensor& x,
-                    const SparseCooTensor& y);
+SparseCsrTensor ElementWiseAddCsr(const Context& dev_ctx,
+                                  const SparseCsrTensor& x,
+                                  const SparseCsrTensor& y)
 ```
 
 和
 
 ```
-SparseCsrTensor Add(const Context& dev_ctx,
-                    const SparseCsrTensor& x,
-                    const SparseCsrTensor& y);
+SparseCooTensor ElementWiseAddCoo(const Context& dev_ctx,
+                                  const SparseCooTensor& x,
+                                  const SparseCooTensor& y) 
 ```
 
 ## 底层OP设计
 
-新增一个sparse elementwise 的功能模块（暂定），然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+实现对应的 CPU Kernel，使用 Merge 两个有序数组的算法，然后使用已有op组合实现， 主要涉及`SparseCooToCsrKernel`和`SparseCsrToCooKernel`。
+
+对于dense tensor，值连续的存储在一块内存中，二元运算需要处理每一个元素，即`x[i][j] ∘ y[i][j]`，运算时间复杂度为 `O(numel(x))`，
+`numel(x)`为`x`中总素个数。
+
+而sparse tensor以索引和值的模式存储一个多数元素为零的tensor，二元运算只需要处理两个输入不全为0的位置，
+在sparse tensor构造时，索引按升序排序，可以采取merge有序数组的方式，若两输入索引相等，则计算`x[i][j] ∘ y[i][j]`，
+若不相等则说明该位置上的二元运算有一个元为0，
+`x`索引小时计算 `x[i][j] ∘ 0`，`y`索引小时计算 `0 ∘ y[i][j]`。
+计算过的位置存储在新的索引数组中，这样，索引没有覆盖到的位置依然为0，节省了计算开销，时间复杂度为`O(nnz(x) + nnz(y))`，
+`nnz(x)`为`x`中非零元素个数。
 
 ## API实现方案
 
-主要参考scipy实现，将coo转换成csr再进行加法，然后转换回coo
+对于SparseCsrTensor，将csr格式转换成coo格式再进行运算，然后转换回csr格式输出。
+
+对于SparseCooTensor，直接进行运算。
 
 # 六、测试和验收的考量
 
 测试考虑的case如下：
 
 - 数值正确性
+- 反向
+- 不同 `sparse_dim` 
 
 # 七、可行性分析及规划排期
 
-方案主要依赖paddle现有op组合而成
+方案主要依赖paddle现有op组合而成，并自行实现核心算法
 
 # 八、影响面
 

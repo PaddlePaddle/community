@@ -1,6 +1,6 @@
-# paddle.nn.RReLU设计文档
+# paddle.nn.RReLU, paddle.nn.functional.rrelu设计文档
 
-|API名称 | paddle.nn.RReLU |
+|API名称 | paddle.nn.RReLU, paddle.nn.functional.rrelu |
 |---|---|
 |提交作者 | thunder95 |
 |提交时间 | 2022-03-29 |
@@ -152,7 +152,14 @@ Pytorch支持inplace操作, 能有效降低显存占用。
 API设计为`paddle.nn.RRelu(lower=1. / 8., upper=1. / 3., name=None)`，
 
 - **lower** (float) - 均匀分布的下边界。
-- **upper**(float) - 均匀分布的上边界。
+- **upper** (float) - 均匀分布的上边界。
+
+`paddle.nn.functional.rrelu(x, lower=1. / 8., upper=1. / 3., training=True, name=None)`,
+
+- **x** (tensor) - 输入的张量。
+- **lower** (float) - 均匀分布的下边界。
+- **upper** (float) - 均匀分布的上边界。
+- **training** (bool) - 是否在训练阶段, 默认是True。
 
 ## 底层OP设计
 RRelu与飞桨中已有的PRelu在操作上是类似的，参考PReluOp设计来实现RRelu的底层OP。
@@ -162,8 +169,6 @@ RRelu与飞桨中已有的PRelu在操作上是类似的，参考PReluOp设计来
 参考`paddle.nn.PRelu`来实现`paddle.nn.RRelu`，以及`paddle.nn.functional.rrelu`。
 
 ## 代码实现文件路径
-
-在文件paddle/phi/kernels/impl/pixel_unshuffle_kernel_impl.h和paddle/phi/kernels/impl/pixel_unshuffle_grad_kernel_impl.h中编写主要的正向和反向计算逻辑：
 
 CPU中正向和反向计算逻辑：
  paddle/phi/kernels/cpu/rrelu_grad_kernel.cc

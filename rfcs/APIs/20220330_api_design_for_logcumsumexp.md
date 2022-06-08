@@ -78,9 +78,7 @@ axis 默认为 None，表示将 tensor flatten 后再进行操作；dtype 会用
 
 ## 底层OP设计
 
-一定程度上可以仿照 Paddle 中已有的 cumsum op 来实现。Paddle 的 cumsum CUDA kernel 中，直接调用了 thrust 的 API `thrust::exclusive_scan` 或 `thrust::inclusive_scan` 。幸运的是 thrust 有一族 [Transformed Prefix Scans 接口](https://thrust.github.io/doc/group__transformed__prefixsums.html)，支持以任意一个满足结合律的二元运算代替 “加法” 的角色。因此 logcumsumexp 的 CUDA kernel 只要使用这族接口，将 log_add_exp 作为参与 prefix scan 的二元运算即可。
-
-但 Paddle cumsum CPU kernel 使用 eigen 作为运算库，eigen 只有普通的 cumsum 和 cumprod 接口，而不支持任意满足结合律的二元运算，因此 Paddle logcumsumexp 的 CPU Kernel 这一版本写一个串行的 naive 版。
+一定程度上可以仿照 Paddle 中已有的 cumsum op 来实现。Paddle 的 cumsum CUDA kernel 中，直接调用了 thrust 和 cub 的 API 如`thrust::exclusive_scan` 和 `thrust::inclusive_scan`，CPU kernel 调用了 eigen 的 API。幸运的是 thrust、cub 和 eigen 都支持以任意一个满足结合律的二元运算代替 “加法” 的角色，例如 thrust 有一族 [Transformed Prefix Scans 接口](https://thrust.github.io/doc/group__transformed__prefixsums.html)。因此 logcumsumexp 的 CUDA kernel 只要使用这族接口，将 log_add_exp 作为参与 prefix scan 的二元运算即可。
 
 ## API实现方案
 
@@ -92,7 +90,7 @@ axis 默认为 None，表示将 tensor flatten 后再进行操作；dtype 会用
 
 1. 测试API 动态图和静态图下的一致性。
 2. 测试CPU、GPU上的一致性。
-3. 测试在 fp16、fp32 和 fp64 下的一致性。
+3. 测试在 fp32 和 fp64 下的一致性。
 4. 构造几个按 paddle.log(paddle.cumsum(paddle.exp(x))) 的计算方式来计算会溢出，使用变换后的 log_add_exp 计算则不会溢出的的测试用例，验证该 OP 的实现不会发生溢出。
 5. axis/exclusive/reverse/dtype 的每一个可能的取值都需要有测试用例覆盖到。
 6. 在本地对比 Paddle logcumsumexp CUDA kernel 与 TensorFlow cumulative_logsumexp CUDA kernel 的性能，确保 CUDA Kernel 性能不低于 TensorFlow。
