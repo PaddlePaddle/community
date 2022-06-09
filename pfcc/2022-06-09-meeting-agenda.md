@@ -32,6 +32,7 @@
     - [liyongchao911](https://github.com/liyongchao911)（时间冲突，请假）
     - [Yulv-git](https://github.com/Yulv-git)
     - [Patrick-Star125](https://github.com/Patrick-Star125) 
+    - [SmirnovKol](https://github.com/SmirnovKol)
 
 # 会议议程
 
