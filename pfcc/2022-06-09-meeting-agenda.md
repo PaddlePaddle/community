@@ -18,7 +18,7 @@
     - [gsq7474741](https://github.com/gsq7474741)
     - [chenyanlann](https://github.com/chenyanlann)
     - [GeYuYao-hub](https://github.com/GeYuYao-hub)
-    - [isLinXu](https://github.com/isLinXu)
+    - [isLinXu](https://github.com/isLinXu)(时间冲突，请假)
     - [yangguohao](https://github.com/yangguohao)
     - [Li-fAngyU](https://github.com/Li-fAngyU)
     - [jinyouzhi](https://github.com/jinyouzhi)
@@ -32,10 +32,17 @@
     - [liyongchao911](https://github.com/liyongchao911)
     - [Yulv-git](https://github.com/Yulv-git)
     - [Patrick-Star125](https://github.com/Patrick-Star125) 
+    - [liyongchao911](https://github.com/liyongchao911)（时间冲突，请假）
+    - [Yulv-git](https://github.com/Yulv-git)
+    - [Patrick-Star125](https://github.com/Patrick-Star125) 
+    - [SmirnovKol](https://github.com/SmirnovKol)
+    - [nlp-zn](https://github.com/nlp-zn)
+    - [zkh2016](https://github.com/zkh2016)
+    - [zhouwei25](https://github.com/zhouwei25)
 
 # 会议议程
 
-- PFCC 新同学 [Patrick-Star125](https://github.com/Patrick-Star125) 的一句话自我介绍（30 seconds）
+- PFCC 新同学 [Patrick-Star125](https://github.com/Patrick-Star125) 、[SmirnovKol](https://github.com/SmirnovKol) 的一句话自我介绍（30 seconds）
 - PFCC-Roadmap：算子性能优化贡献文档解析（[JamesLim](https://github.com/JamesLim)，10 minutes）
 - 框架贡献者的分享，内容不限：（20-35 minutes）
   - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)：分享稀疏矩阵向量乘（SpMV）优化方法
