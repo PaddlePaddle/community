@@ -13,7 +13,7 @@ PFCC 新成员 [Patrick-Star125](https://github.com/Patrick-Star125)[SmirnovKol]
 
 ### PFCC-Roadmap 活动介绍
 
-- 飞桨团队 [JamesLim](https://github.com/JamesLim)介绍了算子性能优化贡献文档，分别介绍设计文档提交流程，代码贡献流程，测试及验收标准等。详细讲解设计文档示例，测试及验收标准文档，OP benchmark使用方法。
+- 飞桨团队 [JamesLim](https://github.com/JamesLim)介绍了算子性能优化贡献文档[4912](https://github.com/PaddlePaddle/docs/pull/4912),[152](https://github.com/PaddlePaddle/community/pull/152)，分别介绍设计文档提交流程，代码贡献流程，测试及验收标准等。详细讲解设计文档示例，测试及验收标准文档，OP benchmark使用方法。
 [xiaoguoguo626807](https://github.com/xiaoguoguo626807)对OP benchmark测试时pytorch的链接及结果对比提问，目前OP benchmark需要额外下载pytorch测试，可使用多任务测试进行PaddlePaddle OP和pytorch OP同时测试后整合对比。
 
 ### 飞桨框架贡献者的议题分享
