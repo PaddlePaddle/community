@@ -22,10 +22,10 @@ Paddle中暂时没有IndexSample OP的GPU实现，需要实现一个GPU版本的
 Pytorch中对应`paddle.index_sample` 的Api为 `torch.gather`。调研发现Pytorch中采用的是`_scatter_gather_elementwise_kernel` Kernel完成该OP的GPU实现。PyTorch采用的方案是1维线程设置完成整体计算，整体性能如下：
 
 | Case No. | index_shape | input_shape | Pytorch Perf(ms) |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | 1 | [5100,1] | [5100,38506] |1.7032 | 
-| 2 | [100,64]  |  [100, 128] | 0.0083 |
-| 3 | [5100,96] | [5100,128]  |0.0377  |
+| 2 | [100,64]  |  [100, 128] | 0.0083|
+| 3 | [5100,96] | [5100,128]  |0.0377 |
 
 ## 1.3 对比分析
 
