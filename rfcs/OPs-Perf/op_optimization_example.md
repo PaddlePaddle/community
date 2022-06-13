@@ -83,9 +83,9 @@ Device端则是完全按照2维的线程设置，快速在`Index`中搜索每行
 
 | No. | index_shape | input_shape | Paddle Perf(ms) | Pytorch Perf(ms) | diff |
 |---|---|---|---|---|---|
-| 1 | [5100,1] | [5100,38506] |  0.7052 | 1.7032 |  faster than 58.5 97% |
-| 2 | [100,64]  |  [100, 128] | 0.0055 | 0.0083 | faster than 33.874% |
-| 3 | [5100,96] | [5100,128]  | 0.0323  |  0.0377  |  faster than  14.131% |
+| 1 | [5100,1] | [5100,38506] |  0.7052 | 1.7032 | faster than 58.597% |
+| 2 | [100,64] |  [100, 128]  | 0.0055  | 0.0083 | faster than 33.874% |
+| 3 | [5100,96]| [5100,128]   | 0.0323  | 0.0377 | faster than 14.131% |
 
 
 # 4 可行性分析和排期规划
@@ -110,5 +110,5 @@ Device端则是完全按照2维的线程设置，快速在`Index`中搜索每行
 
 
 # 附件及参考资料
-[1]: [OP Benchmark使用指南](https://github.com/PaddlePaddle/benchmark/blob/master/api/README.md)
+[1]. [OP Benchmark使用指南](https://github.com/PaddlePaddle/benchmark/blob/master/api/README.md)
 
