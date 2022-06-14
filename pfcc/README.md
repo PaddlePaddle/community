@@ -23,7 +23,7 @@ PFCC每两周进行一次例行会议。时间在每隔两周的周四的19点-2
 
 第一次的例会的时间定在2022-4-14 19:00。
 
-每期会议分享材料见：[百度网盘 - PFCC](https://pan.baidu.com/s/1ARW0A9wP5sVjMmcmzJGuvg)（提取码：issr）
+每期会议分享材料见：[百度网盘 - PFCC](https://pan.baidu.com/s/139f3HuOsp4EbVNbwAmSkxg)（提取码见微信群公告）
 
 # 开放交流
 
