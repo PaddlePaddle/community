@@ -37,7 +37,6 @@
     - [zkh2016](https://github.com/zkh2016)
     - [zhouwei25](https://github.com/zhouwei25)
 
-
 # 会议议程
 
 - PFCC 新同学 [Patrick-Star125](https://github.com/Patrick-Star125) 、[SmirnovKol](https://github.com/SmirnovKol) 的一句话自我介绍（30 seconds）
