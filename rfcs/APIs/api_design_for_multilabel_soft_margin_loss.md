@@ -25,6 +25,7 @@ paddle都有这两个函数的实现，可以调用
 
 # 三、业内方案调研
 Pytorch 中有相关的
+
 `torch.nn.functional.multilabel_soft_margin_loss(
     input: Tensor,
     label: Tensor,
@@ -32,7 +33,11 @@ Pytorch 中有相关的
     size_average: Optional[bool] = None,
     reduce: Optional[bool] = None,
     reduction: str = "mean",
-) -> Tensor:`和`torch.nn.MultiLabelSoftMarginLoss(
+) -> Tensor:`
+
+和
+
+`torch.nn.MultiLabelSoftMarginLoss(
     input: Tensor,
     label: Tensor,
     weight: Optional[Tensor] = None,
@@ -40,7 +45,9 @@ Pytorch 中有相关的
     reduce: Optional[bool] = None,
     reduction: str = "mean",
 ) -> Tensor:`
-其中的size_average和reduce将被弃用，统一使用reduction
+
+其中的size_average和reduce将被弃用，统一使用reduction。
+
 在 pytorch 中，介绍为：
 ```
 """Creates a criterion that optimizes a multi-label one-versus-all
