@@ -117,7 +117,7 @@ tensorflow没有专门的multilabelsoftmarginloss
 ## 命名与参数设计
 共添加以下两个 API：
 
-- `paddle.nn.functional.multilabel_soft_margin_loss(
+`paddle.nn.functional.multilabel_soft_margin_loss(
     input,
     label,
     weight= None,
@@ -127,15 +127,17 @@ tensorflow没有专门的multilabelsoftmarginloss
 - input:Tensor, 维度为[batchsize,num_classes]
 - label:Tensor, 维度为[batchsize,num_classes]
 - weight: Optional[Tensor],维度为[batchsize,1]
-- reduction:str,'None','mean','sum
-- name (str,可选)
-和`
-- paddle.nn.MultiLabelSoftMarginLoss(
-    input: Tensor, 
-    target: Tensor, 
-    weight (Tensor,可选) 
-    reduction(str,可选) 
-) -> Tensor:
+- reduction: str, 'None' , 'mean' , 'sum'
+- name (str, 可选)
+和
+`paddle.nn.MultiLabelSoftMarginLoss(
+    weight,
+    reduction,
+    name,
+) -> Tensor:`
+- weight: Optional[Tensor], 维度为[batchsize,1]
+- reduction: str, 'None' , 'mean' , 'sum'
+- name: (str, 可选)
 
 ## 底层OP设计
 ## API实现方案
