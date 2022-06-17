@@ -129,7 +129,9 @@ tensorflow没有专门的multilabelsoftmarginloss
 - weight: Optional[Tensor],维度为[batchsize,1]
 - reduction: str, 'None' , 'mean' , 'sum'
 - name (str, 可选)
+
 和
+
 `paddle.nn.MultiLabelSoftMarginLoss(
     weight,
     reduction,
