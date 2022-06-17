@@ -1,0 +1,81 @@
+# 飞桨单机转分布式训练与评估
+
+|---|---|
+|提交作者<input type="checkbox" class="rowselector hidden"> | wjc、mkm | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-30 | 
+|版本号 | V1.0 | 
+|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | V2.2 | 
+|文件名 | 20220330_api_eval_for_fleet.md<br> | 
+
+
+# 一、概述
+## 1、相关背景
+飞桨框架于 2.0 正式版全面支持了动态图训练，并在2.1、2.2 两个大版本中不断完善分布式能力，同时大幅增强了训练功能。需要进行飞桨分布式训练的使用与评估，并与其他深度学习框架做功能对比，并产出一份对应的评估报告。
+## 2、功能目标
+进行飞桨分布式训练的使用与评估，并与其他深度学习框架做功能对比，并产出一份对应的评估报告。
+## 3、意义
+从用户角度深度体验飞桨单机转分布式训练全流程，并产出一份评估报告
+
+# 二、飞桨现状
+飞桨框架于 2.0 正式版全面支持了动态图训练，并在2.1、2.2 两个大版本中不断完善分布式能力，同时大幅增强了训练功能。
+
+
+# 三、业内方案调研
+Pytorch目前支持分布式训练，其API包括torch.nn.parallel.DataParallel与torch.nn.parallel.DistributedDataParallel这两个，其都属于数据并行。
+DataParallel和DistributedDataParallel有如下不同：
+    DataParallel是单进程，多线程的并行训练方式，并且只能在单台机器上运行。
+    DistributedDataParallel是多进程，并且适用于单机和多机训练。DistributedDataParallel 还预先复制模型，而不是在每次迭代时复制模型，并避免了全局解释器锁定，相对来说，
+    DistributedDataParallel数据并行的效率比DataParallel数据并行的效率高。
+DataParallel：
+    单卡转为分布式只需要将模型经过torch.nn.parallel.DataParallel函数包装，代码如下：
+    device_ids = [0, 1]
+    model = torch.nn.DataParallel(model, device_ids=device_ids).cuda()
+    DataParallel单卡转为分布式比较简单，但是效率比较低。
+DistributedDataParallel：
+    单卡转为分布式需要如下步骤：
+    1、导入分布式所需要的包，即
+    import torch.distributed as dist
+    2、初始化分布式环境，即
+    dist.init_process_group(backend=dist_backend, init_method=dist_url,
+                            world_size=world_size, rank=rank)
+    需要指定其通信后端，例如NCCL/GLOO、进程组初始化的方法例如环境变量初始化、共享文件初始化以及TCP初始化以及world size与rank，world为总的进程数，rank为当前进程号。
+    3、数据集的拆分
+    首先通过DistributedSampler为每个rank对应的进程分配训练的样本索引，即
+    train_sampler = torch.utils.data.distributed.DistributedSampler(train_data_set)
+    然后构建DataLoader数据加载器，同时指定其他参数，例如batchsize即
+    train_loader = torch.utils.data.DataLoader(train_data_set,
+                                         batch_size=batch_size,
+                                         sampler=train_sampler,
+                                         pin_memory=True,
+                                         num_workers=nw)
+    4、将单机的model转为分布式下的DDP模型：
+    model = torch.nn.parallel.DistributedDataParallel(model)
+    5、构建训练代码：
+    相对于单机而言，需要在每次训练时执行train_sampler.set_epoch(epoch)，这样可以在每个epoch时进行shuffle，然后其余代码和单机类似。
+    对于训练过程中模型的保存，需要进行判断当前进程是否为主进程，即：
+    if dist.get_rank() == 0:
+        torch.save(model.module.state_dict())
+# 四、对比分析
+对第三部分调研的方案进行对比**评价**和**对比分析**，论述各种方案的优劣势。
+   1、pytorch下DataParallel单卡转分布式比较简单，但是其数据并行的效率比较低；
+   2、pytorch下DistributedDataParallel单卡转分布式相比于DataParallel麻烦一些，但是其数据并行的效率相对比较高
+   总体来说，paddlepaddle的单机转为分布式的过程与pytorch下DistributedDataParallel比较类似。
+# 五、设计思路与实现方案
+   单机转为分布式设计与评估思路如下：
+   1、导入分布式训练需要的依赖包
+   2、初始化分布式环境
+   3、设置分布式所需要的优化器
+   4、数据集的拆分
+   5、构建训练代码
+   6、单机多卡分布式训练
+   7、多机多卡分布式训练
+# 六、测试和验收的考量
+  从用户的角度提供一份飞桨单卡转分布式使用评估表格，按照第五步转换步骤完成打卡，并反馈每个步骤的问题和卡点；写下完成转换任务的使用体验和感受。
+# 七、可行性分析和排期规划
+  对分布式有一定的了解，对paddlepaddle单卡转为分布式进行评估，参考其官网代码进行单卡与分布式的转换，可以满足在当前版本周期内评估完成。
+# 八、影响面
+需要进一步讨论的问题，开放性问题，有争议问题；对其他模块是否有影响
+  从用户的角度基于paddlepaddle框架对单机转分布式进行评估。
+# 名词解释
+
+# 附件及参考资料
