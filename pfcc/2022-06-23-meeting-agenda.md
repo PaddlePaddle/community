@@ -39,7 +39,7 @@
 # 会议议程
 
 - [Ligoml](https://github.com/Ligoml) 介绍 PFCC-Roadmap 文档方向的近期工作总结（20 minutes）
-- PFCC 文档工作小组成员分享文档修复工作的 PR（5-10 minute）：
+- PFCC 文档工作小组成员分享文档修复工作的 PR（5-10 minutes）：
   - [Liyulingyue](https://github.com/Liyulingyue)
   - [liyongchao911](https://github.com/liyongchao911)
   - [SigureMo](https://github.com/SigureMo)
