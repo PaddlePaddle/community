@@ -3,7 +3,7 @@
 - 本次会议时间：2022-06-23 19：00
 - 本次会议接入方式： 
   - 腾讯会议：962-544-651
-  - 会议密码：\*\*\*\* (群内通知)
+  - 会议密码：\*\*\*\*（群内通知）
   - [点击链接入会](https://meeting.tencent.com/dm/XdEtJIh2yEJB)，或添加至会议列表
 - 本次会议主席：虞凯民（[BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)，浙江大学）
 - 本次会议副主席：张楠（[nlp-zn](https://github.com/nlp-zn)，飞桨团队）
