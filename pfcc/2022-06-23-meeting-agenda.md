@@ -35,8 +35,6 @@
      - [unseenme](https://github.com/unseenme)
      - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
      - [yangguohao](https://github.com/yangguohao)
-     - [zhouwei25](https://github.com/zhouwei25)
-     - [zkh2016](https://github.com/zkh2016)
 
 # 会议议程
 
