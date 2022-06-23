@@ -8,7 +8,6 @@
 - 本次会议主席：虞凯民（[BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)，浙江大学）
 - 本次会议副主席：张楠（[nlp-zn](https://github.com/nlp-zn)，飞桨团队）
 - 本次拟参会 Paddle Framework Contributor 列表：
-     - [Asthestarsfalll](https://github.com/Asthestarsfalll)
      - [GeYuYao-hub](https://github.com/GeYuYao-hub)
      - [Li-fAngyU](https://github.com/Li-fAngyU)
      - [Ligoml](https://github.com/Ligoml)
