@@ -29,7 +29,7 @@
      - [jinyouzhi](https://github.com/jinyouzhi)
      - [jzhang533](https://github.com/jzhang533)
      - [liqitong-a](https://github.com/liqitong-a)
-     - [liyongchao911](https://github.com/liyongchao911)
+     - [liyongchao911](https://github.com/liyongchao911)（会议时间有冲突，请假）
      - [luotao1](https://github.com/luotao1)
      - [thunder95](https://github.com/thunder95)
      - [unseenme](https://github.com/unseenme)
