@@ -40,7 +40,7 @@
 
 #### 展望未来
 
-[Ligoml](https://github.com/Ligoml) 回顾了“定义飞桨框架的明天”的口号，呼吁外部开发者通过各种方式参与飞桨的建设，最后说明了飞桨在 API 文档方面的未来的规划：
+[Ligoml](https://github.com/Ligoml) 回顾了“定义飞桨框架的明天（Shaping Paddle Framework Tomorrow with You）”的口号，呼吁外部开发者通过各种方式参与飞桨的建设，最后说明了飞桨在 API 文档方面的未来的规划：
 
 - 系统性问题：利用各种工具做出全量的检索和修改，并汇聚这些工具起到 pre-commit 的作用；
 
@@ -56,7 +56,7 @@
 2. 以 [paddle.argmax](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/argmax_cn.html#argmax)、[paddle.arange](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/arange_cn.html)、[paddle.allclose](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/allclose_cn.html)、[paddle.angle](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/angle_cn.html#angle) 和 [paddle.fft.fft](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/fft/fft_cn.html) 介绍了 `x`、$x$ 和 x 的区别。
 3. 以 [paddle.cos](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/cos_cn.html#cos) 和 [paddle.sin](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/sin_cn.html#sin) 为例指出了同类 API 的文档写法的不一致。
 4. 以 [paddle.cos](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/cos_cn.html#cos) 和 [paddle.deg2rad](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/deg2rad_cn.html#deg2rad) 为例指出了飞桨文档中数学公式的不规范之处。
-5. 以 [paddle.nn.initializer.KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/initializer/KaimingNormal_cn.html#kaimingnormal) 和 [paddle.nn.initializer.XavierNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/initializer/XavierNormal_cn.html) 指出了飞桨文档对人民的处理的不妥。
+5. 以 [paddle.nn.initializer.KaimingNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/initializer/KaimingNormal_cn.html#kaimingnormal) 和 [paddle.nn.initializer.XavierNormal](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/initializer/XavierNormal_cn.html) 指出了飞桨文档对人名的处理的不妥。
 6. 说明了《[飞桨 API 文档书写规范](https://github.com/PaddlePaddle/docs/wiki/飞桨API文档书写规范)》已经长时间没有更新。
 
 ### 自由发言和讨论
