@@ -21,10 +21,10 @@
   - 完成了 500 多篇文档的评估，对 200 多篇文档进行了修复
   - 在第四期评估任务中得到 79.3 分，仍有红线问题存在
 - 欣赏了几个工作小组成员的 PR：
-  - [Liyulingyue](https://github.com/Liyulingyue)
-  - [liyongchao911](https://github.com/liyongchao911)
+  - [Liyulingyue](https://github.com/Liyulingyue) 的 [PaddlePaddle/docs#4824](https://github.com/PaddlePaddle/docs/pull/4824) 和 [PaddlePaddle/Paddle#42916](https://github.com/PaddlePaddle/Paddle/pull/42916)
+  - [liyongchao911](https://github.com/liyongchao911) 的 [PaddlePaddle/docs#4638](https://github.com/PaddlePaddle/docs/pull/4638) 和 [PaddlePaddle/Paddle#42058](https://github.com/PaddlePaddle/Paddle/pull/42058)
   - [SigureMo](https://github.com/SigureMo) 的 [PaddlePaddle/docs#4936](https://github.com/PaddlePaddle/docs/pull/4936) 和 [PaddlePaddle/Paddle#43636](https://github.com/PaddlePaddle/Paddle/pull/43636)
-  - [Yulv-git](https://github.com/Yulv-git)
+  - [Yulv-git](https://github.com/Yulv-git) 的 [PaddlePaddle/docs#4901](https://github.com/PaddlePaddle/docs/pull/4901) 和 [PaddlePaddle/docs#4919](https://github.com/PaddlePaddle/docs/pull/4919)
   - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin) 的 [PaddlePaddle/docs#4850](https://github.com/PaddlePaddle/docs/pull/4850) 和 [PaddlePaddle/Paddle#42942](https://github.com/PaddlePaddle/Paddle/pull/42942)
 
 #### 文档工作小组成员分享
