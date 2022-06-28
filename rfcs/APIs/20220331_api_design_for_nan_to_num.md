@@ -105,10 +105,10 @@ PyTorch 和 NumPy 的思路是一样的，Paddle 也可以这样实现。
 ## 命名与参数设计
 
 ```python
-paddle.nan_to_num(x, nan=0.0, posinf=None, neginf=None)
+paddle.nan_to_num(x, nan=0.0, posinf=None, neginf=None, name=None)
 ```
 
-参数和 PyTorch 对齐。nan、posinf、neginf 分别表示输入张量内值为 nan、正无穷、负无穷的元素的替换值，正无穷和负无穷默认用数据类型内最大可以表示的数字来替换。
+前四个参数和 PyTorch 对齐。nan、posinf、neginf 分别表示输入张量内值为 nan、正无穷、负无穷的元素的替换值，正无穷和负无穷默认用数据类型内最大可以表示的数字来替换。name 是 paddle 特有的，表示该算子的名字。
 
 ## 底层OP设计
 
