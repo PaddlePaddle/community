@@ -73,7 +73,7 @@ tensorflow没有官方实现。
 ## 命名与参数设计
 - paddle.nn.SoftMarginLoss(reduction(str,可选)，name(str，可选)) -> Tensor:
 
-- paddle.nn.functional.soft_margin_loss(input, target, reduction: str = "mean", name:str=None, ) -> Tensor:
+- paddle.nn.functional.soft_margin_loss(input, label, reduction: str = "mean", name:str=None, ) -> Tensor:
     - input:Tensor, 维度为[N,*],其中N是batch_size， `*` 是任意其他维度。数据类型是float32、float64。
     - label:Tensor, 维度与输入 input 相同，数据类型为int32, int64, float32, float64，数值为-1或1。
     - reduction:str，可选，指定应用于输出结果的计算方式，可选值有: ``'none'``, ``'mean'``, ``'sum'`` 。默认为 ``'mean'``，计算 Loss 的均值；设置为 ``'sum'`` 时，计算 Loss 的总和；设置为 ``'none'`` 时，则返回原始Loss。
