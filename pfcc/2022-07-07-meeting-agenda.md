@@ -9,6 +9,7 @@
 - 本次会议副主席：王志宇（[fuqianya](https://github.com/fuqianya)，湖南大学）
 - 本次拟参会 Paddle Framework Contributor 列表：
      - [Asthestarsfalll](https://github.com/Asthestarsfalll)
+     - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
      - [GeYuYao-hub](https://github.com/GeYuYao-hub)
      - [Li-fAngyU](https://github.com/Li-fAngyU)
      - [Ligoml](https://github.com/Ligoml)
@@ -20,7 +21,6 @@
      - [TCChenlong](https://github.com/TCChenlong)
      - [Yulv-git](https://github.com/Yulv-git)
      - [chenyanlann](https://github.com/chenyanlann)
-     - [fuqianya](https://github.com/fuqianya)
      - [greatv](https://github.com/greatv)
      - [gsq7474741](https://github.com/gsq7474741)
      - [guguguzi](https://github.com/guguguzi)
