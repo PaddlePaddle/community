@@ -41,7 +41,7 @@
 
 # 会议议程
 
-- 新同学 [gglin001](https://github.com/gglin001) 自我介绍
+- 新同学 [gglin001](https://github.com/gglin001)、[tizhou86](https://github.com/tizhou86) 自我介绍
 - [gglin001](https://github.com/gglin001) 主题分享《PaddlePaddle on IPU intro》（30 minutes）
 - 飞桨论文复现活动冠军浩浩、佳青同学主题分享（20-30 minutes）
 - PFCC 成员自由发言讨论（5 minutes）
