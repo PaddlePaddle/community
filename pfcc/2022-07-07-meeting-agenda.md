@@ -11,7 +11,6 @@
      - [Asthestarsfalll](https://github.com/Asthestarsfalll)
      - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
      - [GeYuYao-hub](https://github.com/GeYuYao-hub)
-     - [Li-fAngyU](https://github.com/Li-fAngyU)
      - [Ligoml](https://github.com/Ligoml)
      - [Liyulingyue](https://github.com/Liyulingyue)
      - [Patrick-Star125](https://github.com/Patrick-Star125) 
