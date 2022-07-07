@@ -18,9 +18,9 @@
 飞桨支持`paddle.count_nonzero`的API功能。
 
 # 二、飞桨现状
-目前paddle缺少相关功能实现。
+目前paddle可由其他API组合成该功能的API，不需要实现自己的OP。
 
-API方面，已有相关功能的API，[paddle.nansum](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/math.py#L910), 由于容易实现，所以在Paddle中是一个由其他API组合成的API，没有实现自己的OP，其主要实现逻辑为：
+API方面已有相关功能的基础API, 其主要实现逻辑为：
 1. 通过`paddle.where()`将输入x中的非零元素设置成1, 也可以通过`paddle.cast()`将元素设置成bool数据类型再转成整型int64数据1。
 2. 通过`paddle.sum()`按照指定轴计算非零元素的求和, 也就是非零元素的个数。
 
@@ -118,11 +118,11 @@ API设计为`paddle.count_nonzero(x, axis=None, keepdim=False, name=None)`
 # 六、测试和验收的考量
 测试考虑的case如下：
 
-- 和numpy结果的数值的一致性, `paddle.nanmean`,和`np.nanmean`结果是否一致；
+- 和numpy结果的数值的一致性, `paddle.count_nonzero`,和`np.count_nonzero`结果是否一致；
 - 参数`axis`为int,tuple和list时输出的正确性；
 - `keepdim`参数的正确性；
 - 未输入维度时的输出正确性；
-- 测试在进行反向梯度计算时结果的正确性(包含nan值和非nan值位置的梯度)；
+- 测试在进行反向梯度计算时结果的正确性；
 - 错误检查：输入`x`不是Tensor时,能否正确抛出错误；
 - 错误检查：`axis`所指维度在当前Tensor中不合法时能正确抛出错误。
 
