@@ -35,12 +35,12 @@ Pytorch 中有相关的
     size_average: Optional[bool] = None,
     reduce: Optional[bool] = None,
     reduction: str = "mean",
-) -> Tensor:`和`torch.nn.MultiLabelSoftMarginLoss(p: int = 1, 
-                                                  margin: float = 1.,
-                                                  weight: Optional[Tensor] = None, 
-                                                  size_average=None,
-                                                  reduce=None, 
-                                                  reduction: str = 'mean') -> None:`
+) -> Tensor:`和`torch.nn.MultiMarginLoss(p: int = 1, 
+                                         margin: float = 1.,
+                                         weight: Optional[Tensor] = None, 
+                                         size_average=None,
+                                         reduce=None, 
+                                         reduction: str = 'mean') -> None:`
 其中的size_average和reduce将被弃用，统一使用reduction
 在 pytorch 中，介绍为：
 ```
@@ -110,7 +110,7 @@ def multi_margin_loss(
 ```
 
 
-tensorflow没有专门的multilabelsoftmarginloss
+tensorflow没有专门的multimarginloss
 
 # 四、对比分析
 - 采取使用pytorch的框架方法。
@@ -121,49 +121,51 @@ tensorflow没有专门的multilabelsoftmarginloss
 ## 命名与参数设计
 共添加以下两个 API：
 
-- `paddle.nn.functional.multilabel_soft_margin_loss(
+- `paddle.nn.functional.multi_margin_loss(
     input,
     label,
+    p:int=1,
+    margin:float=1.0,
     weight= None,
     reduction: str = "mean",
     name:str=None,
 ) -> Tensor:`
-- input:Tensor, 维度为[batchsize,num_classes]
-- label:Tensor, 维度为[batchsize,num_classes]
-- weight: Optional[Tensor],维度为[batchsize,1]
-- reduction:str,'None','mean','sum
-- name (str,可选)
+    - input:Tensor, 维度为[batchsize,num_classes]
+    - label:Tensor, 维度为[batchsize,1]
+    - weight: Optional[Tensor],维度为[num_classes,1]
+    - reduction:str,'None','mean','sum
+    - name (str,可选)
 和`
-- paddle.nn.MultiLabelSoftMarginLoss(
-    input: Tensor, 
-    target: Tensor, 
-    weight (Tensor,可选) 
-    reduction(str,可选) 
-) -> Tensor:
+- paddle.nn.MultiMarginLoss(
+    p:int = 1,
+    margin:float=1.0,
+    weight (Tensor,可选), 
+    reduction(str,可选), 
+) -> None:
 
 ## 底层OP设计
 ## API实现方案
-sigmoid函数可以通过 paddle.nn.functional.log_sigmoid()实现
+
 1. 检查参数
     
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
-   2. 检查输入的 dtype（含 `input`、`target`、`weight`）（同其余 functional loss 中的实现）
-   3. 检查输入的`input`、`target`、`weight`维度是否相同
+   2. 检查输入的 dtype（含 `input`、`label`、`weight`）（同其余 functional loss 中的实现）
+   3. 检查输入的`input`、`label`、`weight`维度是否相同。
 
 2. 计算
 
    1. 先计算loss
-   2. 如果有权重weight，乘以权重
-   3. 沿轴1将loss相加
+   2. 沿轴1将loss相加
 
 3. 根据 `reduction`，输出 loss（同其余 functional loss 中的实现）
 # 六、测试和验收的考量
 
 测试考虑的case如下:
-- 1.动态图，静态图，要与np计算下的结果输出需要一致。
-- 2.CPU、GPU下计算一致。
-- 3.各reduction下计算一致
-- 4.各参数输入有效。
+- 1.动态图，静态图，要与numpy计算下的结果输出需要一致。
+- 2.检查 p 的合法性。
+- 3.检查 margin 的合法性
+- 4.各reduction下计算一致
+- 5.各参数输入有效。
 
  
 # 七、可行性分析和排期规划
