@@ -352,7 +352,7 @@ class API 中的具体实现：
 - 通过 `_in_legacy_dygraph` 判断是否为旧动态图，如果是，则先通过调用 `_C_ops.elementwise_sub` 逐元素相减，然后则调用 `_C_ops.p_norm` 计算两组张量间的距离范数。
 - 如果是静态图的话，首先实例化 `LayerHelper("PairwiseDistance", name=self.name)` ，然后调用 `paddle.subtract` 逐元素相减，调用`helper.append_op`加载参数， 调用`helper.create_variable_for_type_inference` 计算两组张量间的距离范数。
 
-经测试，输入 x，y 的 shape 皆为(D, )，调用 `nn.PairwiseDistance` class API 进行计算时会报维度错误，因为调用 `_C_ops.p_norm` 或 `_C_ops.final_state_p_norm` 时，维度参数为 1。
+经测试，输入 x，y 的 shape 皆为(D, )，调用 `nn.PairwiseDistance` class API 进行计算时会报维度错误，因为调用 `_C_ops.p_norm` 或 `_C_ops.final_state_p_norm` 时，维度参数为 1，将该参数更改为 -1 即可。
 
 # 六、测试和验收的考量
 
