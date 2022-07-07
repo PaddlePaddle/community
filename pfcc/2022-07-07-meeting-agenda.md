@@ -11,7 +11,6 @@
      - [Asthestarsfalll](https://github.com/Asthestarsfalll)
      - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
      - [GeYuYao-hub](https://github.com/GeYuYao-hub)
-     - [Li-fAngyU](https://github.com/Li-fAngyU)
      - [Ligoml](https://github.com/Ligoml)
      - [Liyulingyue](https://github.com/Liyulingyue)
      - [Patrick-Star125](https://github.com/Patrick-Star125) 
@@ -30,6 +29,7 @@
      - [jzhang533](https://github.com/jzhang533)
      - [liqitong-a](https://github.com/liqitong-a)
      - [liyongchao911](https://github.com/liyongchao911)
+     - [Li-fAngyU](https://github.com/Li-fAngyU)（请假一次）
      - [luotao1](https://github.com/luotao1)
      - [thunder95](https://github.com/thunder95)
      - [unseenme](https://github.com/unseenme)
