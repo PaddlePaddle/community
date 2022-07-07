@@ -12,10 +12,14 @@
 
 # 一、概述
 ## 1、相关背景
-为了提升飞桨API丰富度，Paddle需要扩充 API paddle.nn.MultiMarginLoss以及paddle.functional.multi_margin__loss
+为了提升飞桨API丰富度，Paddle需要扩充 API paddle.nn.MultiMarginLoss 以及 paddle.functional.multi_margin_loss
 
 ## 2、功能目标
 paddle.nn.MultiMarginLoss 为多分类问题的 Hinge loss。
+loss 按照以下公式计算
+$$\text{loss}(x, y) = \frac{\sum_i \max(0, \text{margin} - x[y] + x[i])^p}{\text{x.size}(0)}$$
+如果有权重 w 下，公式为
+$$\text{loss}(x, y) = \frac{\sum_i \max(0, w[y] * (\text{margin} - x[y] + x[i]))^p}{\text{x.size}(0)}$$
 
 ## 3、意义
 为 paddle 框架中新增计算损失函数的方法，完善并丰富飞桨深度学习框架的功能及实用性。
