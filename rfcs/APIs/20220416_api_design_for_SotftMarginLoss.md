@@ -25,7 +25,7 @@ $$loss(x,y)= \sum _i
 为paddle增加新的API计算loss
 
 # 二、飞桨现状
-paddle目前没有SoftMarginLoss损失函数并且要搭建CPU以及GPU算子；
+paddle目前没有SoftMarginLoss损失函数；
 
 
 # 三、业内方案调研
@@ -94,9 +94,9 @@ tensorflow没有官方实现。
 
 - 检查参数
   - 检查 reduction 有效性（同其余 functional loss 中的实现）
-  - 检查输入的 dtype（含 input、target）（同其余 functional loss 中的实现）
+  - 检查输入的 dtype（含 input、label）（同其余 functional loss 中的实现）
   - 对 label 的 dtype 进行转换，尽量与 input 一致。
-  - 检查输入的input、target维度是否相同
+  - 检查输入的input、label维度是否相同
 - 计算
   - 调用 paddle.log 以及 paddle.exp 计算loss
 - 根据 reduction，输出 loss（同其余 functional loss 中的实现）
