@@ -22,7 +22,9 @@
 
 # 二、飞桨现状
 
-目前paddle缺少相关功能实现。
+目前paddle拥有类似的对于实数进行运算的API：sign
+sign对输入x中每个元素进行正负判断，并且输出正负判断值：1代表正，-1代表负，0代表零。
+sgn是对sign复数功能的实现
 
 # 三、业内方案调研
 
@@ -38,6 +40,22 @@ Pytorch中有API`torch.sgn(input, *, out=None)` ， 在pytorch中，介绍为：
 
 可以支持complex运算
 
+## Tensorflow
+
+在Tensorflow中sign此API同时支持复数与实数运算：
+ ```
+y = sign(x) = -1 if x < 0; 0 if x == 0; 1 if x > 0.
+对于复数，y = sign(x) = x / |x| if x != 0, otherwise y = 0.
+ ```
+## Numpy
+
+在Numpy中无专门对于复数计算的符号函数，其拥有相关API，sign：
+ ```
+The sign function returns -1 if x < 0, 0 if x==0, 1 if x > 0. nan is returned for nan inputs.
+For complex inputs, the sign function returns sign(x.real) + 0j if x.real != 0 else sign(x.imag) + 0j.
+complex(nan, 0) is returned for complex nan inputs.
+ ```
+其中对于复数的返回并不是我们期望得到的
 
 ### 实现方法
 
@@ -59,7 +77,7 @@ inline c10::complex<T> sgn_impl (c10::complex<T> z) {
 
 # 四、对比分析
 
-pytorch实现逻辑简单，故直接参考其代码
+只有pytorch和paddle类似拆分为两个API分别实现实数和复数功能的符号函数运算，且该运算实现的数学逻辑简单，故参考pytorch的代码
 
 # 五、方案设计
 
@@ -72,6 +90,9 @@ API设计为`paddle.sgn(x, name=None)`和`paddle.Tensor.sgn(x, name=None)`
 ## 底层OP设计
 
 使用已有API进行组合，不再单独设计底层OP。
+具体使用了：sign,abs,is_complex,as_real,reshape,as_complex
+按照计算逻辑组合API实现复数功能
+y = sign(x) = x / |x| if x != 0, otherwise y = 0
 
 ## API实现方案
 
@@ -83,6 +104,9 @@ API设计为`paddle.sgn(x, name=None)`和`paddle.Tensor.sgn(x, name=None)`
 测试考虑的case如下：
 
 - 数值正确性
+- 反向
+- 异常测试：由于使用了已有API：sign 该API不支持整型运算，仅支持float16， float32 或 float64，所以需要做数据类型的异常测试
+  
 
 
 # 七、可行性分析及规划排期
