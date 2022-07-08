@@ -24,7 +24,7 @@ Paddle需要扩充API：paddle.trapezoid 和 Tensor.trapezoid。
 
 # 二、飞桨现状
 
-飞桨内暂时无相关近似求积分都API。
+飞桨内暂时无相关近似求积分的API。
 
 # 三、业内方案调研
 
