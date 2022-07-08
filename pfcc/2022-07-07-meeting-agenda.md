@@ -10,16 +10,16 @@
 - 本次拟参会 Paddle Framework Contributor 列表：
      - [Asthestarsfalll](https://github.com/Asthestarsfalll)
      - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
-     - [GeYuYao-hub](https://github.com/GeYuYao-hub)
+     - [GeYuYao-hub](https://github.com/GeYuYao-hub)（缺勤）
      - [Ligoml](https://github.com/Ligoml)
      - [Liyulingyue](https://github.com/Liyulingyue)
      - [Patrick-Star125](https://github.com/Patrick-Star125) 
      - [S-HuaBomb](https://github.com/S-HuaBomb)
      - [SigureMo](https://github.com/SigureMo)
-     - [SmirnovKol](https://github.com/SmirnovKol)
+     - [SmirnovKol](https://github.com/SmirnovKol)（缺勤）
      - [TCChenlong](https://github.com/TCChenlong)
      - [Yulv-git](https://github.com/Yulv-git)
-     - [chenyanlann](https://github.com/chenyanlann)
+     - [chenyanlann](https://github.com/chenyanlann)（缺勤）
      - [greatv](https://github.com/greatv)
      - [gsq7474741](https://github.com/gsq7474741)
      - [guguguzi](https://github.com/guguguzi)
@@ -36,10 +36,12 @@
      - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
      - [yangguohao](https://github.com/yangguohao)
      - [OuyangChao](https://github.com/OuyangChao)
-     - [yang131313](https://github.com/yang131313)
+     - [yang131313](https://github.com/yang131313)（请假一次）
      - [gglin001](https://github.com/gglin001)
      - [tizhou86](https://github.com/tizhou86) 
 
+
+到场30人
 # 会议议程
 
 - 新同学 [gglin001](https://github.com/gglin001)、[tizhou86](https://github.com/tizhou86) 自我介绍
