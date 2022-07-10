@@ -84,10 +84,8 @@ std::tuple<Tensor&, Tensor&> frexp_out(const Tensor& self,
 }
 ```
 
-`frexp_stub` 函数
-```cpp
-
-```
+`frexp_stub` 函数：
+暂无
 
 参数表为：
 
@@ -179,45 +177,19 @@ paddle.frexp(
 
 ## 底层 OP 设计
 
-使用已有 API 组合实现，不再单独设计 OP。
+可以使用已有的 `paddle.bitwise_and` 实现与运算。
 
 ## API 实现方案
 
-实现代码：
+实现逻辑为：
 
-```python
-def frexp(x, out=None, name=None):
-    """
-    Decomposes input into mantissa and exponent tensors such that input = mantissa × 2 ^ exponent.
-
-    Args:
-        x (Tensor): The input N-D tensor, which data type should be int32, int64, float32, float64.
-        name (str, optional): Name for the operation (optional, default is None). For more information, please refer to :ref:`api_guide_Name`.
-
-    Returns:
-        Tuple: The output Tuple of decompose to mantissa and exponent.
-            Index 0: Mantissa Tensor
-            Index 1: Exponent Tensor
-
-    Examples:
-        .. code-block:: Python
-
-            import paddle
-            import numpy as np
-
-            x = paddle.arange(9.)
-            print(input.numpy())
-            # [0, 1, 2, 3, 4, 5, 6, 7, 8]
-
-            mantissa, exponent = paddle.frexp(x)
-            print(mantissa)
-            # [0.   , 0.5  , 0.5  , 0.75 , 0.5  , 0.625, 0.75 , 0.875, 0.5  ]
-            print(exponent)
-            # [ 0, 1, 2, 2, 3, 3, 3, 3, 4 ]
-    """
-
-    pass
-```
+1. 对 tensor 进行移位操作，为了保证运算时的性能
+2. 判断输入张量 `x` 的正负，得到尾数的正负
+3. 对 `x` 求绝对值
+4. 对每一个元素右移 23 位得到对应的阶码，再减去 127
+5. 用 `x` 和 `2 ** 23 - 1` 进行与操作
+6. 最后尾数张量乘以对应的正负
+7. 输出最后结果
 
 # 六、测试和验收的考量
 
