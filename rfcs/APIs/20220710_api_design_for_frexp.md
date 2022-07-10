@@ -1,4 +1,4 @@
-# paddle.nn.functional.pairwise_distance 设计文档
+# paddle.frexp 设计文档
 
 | API 名称     | paddle.frexp   |
 | ------------ | ---------------------------------------- |
@@ -12,10 +12,11 @@
 
 ## 1、相关背景
 
-为了提升飞桨 API 丰富度，支持神经网络搭建相关 API，Paddle 需要扩充 API `paddle.frexp`。
+为了提升飞桨 API 丰富度，支持科学计算相关 API，Paddle 需要扩充 API `paddle.frexp`。
 
 ## 2、功能目标
 
+实现给出一个张量 `x`，会对张量当中的所有元素进行分解，
 
 ## 3、意义
 
