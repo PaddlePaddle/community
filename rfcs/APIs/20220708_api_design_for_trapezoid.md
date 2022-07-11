@@ -82,7 +82,6 @@ Tensor do_trapezoid(const Tensor& y, const Tensor& dx, int64_t dim) {
 Tensor do_trapezoid(const Tensor& y, double dx, int64_t dim) {
     return (y.sum(dim) - (y.select(dim, 0) + y.select(dim, -1)) * (0.5)) * dx;
 }
-
 ```
 
 - 如果输入的`dx`是double，即相邻两个采样点间隔相同，则计算如下：$$\sum_{i=1}^{n-1} \frac{\Delta x}{2}\left(y_{i}+y_{i-1}\right)$$
@@ -164,12 +163,12 @@ def trapz(
   - 若 `dx` 不为空，根据下式按照指定维度直接计算结果：$$\sum_{i=1}^{n-1} \frac{\Delta x}{2}\left(y_{i}+y_{i-1}\right)$$
 - 若 `x` 不为空：按照指定维度利用差分求解间距，根据下式直接计算结果：$$\sum_{i=1}^{n-1} \frac{\left(x_{i}-x_{i-1}\right)}{2}\left(y_{i}+y_{i-1}\right)$$
 
+
 # 四、对比分析
 
 计算思路基本一致，无功能差别，只是在分片方式上不一样。
 
 在计算差分过程中，PyTorch使用slice然后相减，从而完成差分；Tensorflow使用gather然后相减，从而完成差分。
-
 
 # 五、设计思路与实现方案
 
@@ -199,26 +198,49 @@ def trapz(
 
 ## 底层OP设计
 
-使用已有API组合实现，不再单独设计OP。
+使用`paddle.diff`和`Tensor.sum`组合实现。
 
 ## API实现方案
 
-- 确保 `x` 和 `dx` 不都为空
-- 确保输入 `axis` 是一个有效的 `int` 维度
-- 若 `x` 为空
-  - 若 `dx` 为空
-    - 设 `dx` 等于 1，根据下式按照指定维度直接计算结果：$$\sum_{i=1}^{n-1} \frac{1}{2}\left(y_{i}+y_{i-1}\right)$$
-  - 若 `dx` 不为空，根据下式按照指定维度直接计算结果：$$\sum_{i=1}^{n-1} \frac{\Delta x}{2}\left(y_{i}+y_{i-1}\right)$$
-- 若 `x` 不为空：按照指定维度利用paddle.diff差分求解间距，根据下式直接计算结果：$$\sum_{i=1}^{n-1} \frac{\left(x_{i}-x_{i-1}\right)}{2}\left(y_{i}+y_{i-1}\right)$$
+核心计算公式如下: $$\sum_{i=1}^{n-1} \frac{\Delta x_i}{2}\left(y_{i}+y_{i-1}\right)$$
 
+- 若 `x` 为空
+  - 若 `dx` 为空, 则 $\Delta x_i = 1.0$
+  - 若 `dx` 不为空, 则 $\Delta x_i = \text{dx}$
+- 若 `x` 不为空：按照指定维度进行如下差分：$\Delta x_i = x_{i+1} - x_{i}$
+
+
+demo:
+
+```python
+def trapezoid(y, x=None, dx=1.0, axis=-1):
+    if x is None:
+        d = dx
+    else:
+        d = paddle.diff(x, axis=axis)
+
+    nd = y.ndim
+    slice1 = [slice(None)] * nd
+    slice2 = [slice(None)] * nd
+    slice1[axis] = slice(1, None)
+    slice2[axis] = slice(None, -1)
+
+    result = (d * (y[tuple(slice1)] + y[tuple(slice2)]) / 2.0).sum(axis)
+
+    return result
+```
 
 # 六、测试和验收的考量
 
 测试考量的角度如下:
 
-1. 要与PyTorch计算下的**结果输出**和**反向传播后的gradient**一致。
-  
-2. CPU、GPU下计算一致。
+1. 结果正确性: 
+    - 前向计算: `paddle.trapezoid`(和 `Tensor.trapezoid`) 计算结果与 `np.trapz` 计算结果一致。
+    - 反向计算: `paddle.trapezoid`(和 `Tensor.trapezoid`) 计算结果反向传播所得到的梯度与使用 numpy 手动计算的结果一致。梯度计算公式如下：
+    ![](https://latex.codecogs.com/svg.image?g_i&space;=&space;\begin{cases}\Delta&space;x_1&space;\quad&space;&\text{i=1}&space;\\&space;\frac{\Delta&space;x_{i-1}&space;&plus;&space;\Delta&space;x_{i}}{2}&space;\quad&space;&\text{1}&space;<&space;\text{i}<&space;\text{n-1}&space;\\&space;\Delta&space;x_{n-1}&space;\quad&space;&\text{i=n}\end{cases})
+        
+
+2. 硬件场景: 在CPU和GPU硬件条件下的运行结果一致。
   
 3. 各参数输入有效。
   
