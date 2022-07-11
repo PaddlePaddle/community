@@ -180,7 +180,7 @@ def trapz(
   
 - **x** (Tensor) – 可选，**y** 中数值对应的点的浮点数所组成的 Tensor；**x** 的形状应与 **y** 的形状相匹配；如果 **x** 为 None，则假定采样点均匀分布 **dx**。
   
-- **dx** (float) - 相邻采样点之间的常数间隔；当**x**和**dx**均未指定时，**dx**默认为-1。
+- **dx** (float) - 相邻采样点之间的常数间隔；当**x**和**dx**均未指定时，**dx**默认为1.0。
   
 - **dim** (int) – 计算 trapezoidal rule 时 **y** 的维度。
   
@@ -189,7 +189,7 @@ def trapz(
 
 - **x** (Tensor) – 可选，`Tensor` 中数值对应的点的浮点数所组成的 Tensor；**x** 的形状应与 **y** 的形状相匹配；如果 **x** 为 None，则假定采样点均匀分布 **dx**。
   
-- **dx** (float) - 相邻采样点之间的常数间隔；当**x**和**dx**均未指定时，**dx**默认为-1。
+- **dx** (float) - 相邻采样点之间的常数间隔；当**x**和**dx**均未指定时，**dx**默认为1.0。
   
 - **dim** (int) – 计算 trapezoidal rule 时 **y** 的维度。
   
@@ -232,29 +232,41 @@ def trapezoid(y, x=None, dx=1.0, axis=-1):
 
 # 六、测试和验收的考量
 
-测试考量的角度如下:
-
 1. 结果正确性: 
     - 前向计算: `paddle.trapezoid`(和 `Tensor.trapezoid`) 计算结果与 `np.trapz` 计算结果一致。
-    - 反向计算: `paddle.trapezoid`(和 `Tensor.trapezoid`) 计算结果反向传播所得到的梯度与使用 numpy 手动计算的结果一致。梯度计算公式如下：
-    ![](https://latex.codecogs.com/svg.image?g_i&space;=&space;\begin{cases}\Delta&space;x_1&space;\quad&space;&\text{i=1}&space;\\&space;\frac{\Delta&space;x_{i-1}&space;&plus;&space;\Delta&space;x_{i}}{2}&space;\quad&space;&\text{1}&space;<&space;\text{i}<&space;\text{n-1}&space;\\&space;\Delta&space;x_{n-1}&space;\quad&space;&\text{i=n}\end{cases})
+    - 反向计算: `paddle.trapezoid`(和 `Tensor.trapezoid`) 计算结果反向传播所得到的梯度与使用 numpy 手动计算的结果一致。令输出 $p$ 对 $x_i$ 求导所得梯度为 $g_i$ 则:
+        - 当 $i=1$ 时, $g_i = \Delta x_1$ 
+        - 当 $\text{1} < \text{i}< \text{n-1}$ 时, $g_i = \frac{\Delta x_{i-1} + \Delta x_{i}}{2}$
+        - 当 $i=n$ 时, $g_i = \Delta x_{n-1}$
         
-
 2. 硬件场景: 在CPU和GPU硬件条件下的运行结果一致。
   
-3. 各参数输入有效。
-  
-
-测试样例的构造思路：
-
-- 检查只输入 **y** 的情况
-  
-- 检查输入**y** 和 **dx** 的情况
-  
-- 检查输入 **y** 的 **x** 情况
-  
-
-以上3种测试样例中，分别考虑 **y** 为 1-D Tensor 和 **y** 为 n-D Tensor (n>1) 的情况
+3. 异常测试:
+    - 数据类型检验:
+        - y 要求为 paddle.Tensor
+        - x 若有输入, 则要求为 paddle.Tensor
+        - dx 若有输入, 则要求为 float
+        - axis 若有输入, 则要求为 int
+    - 具体数值检验:
+        - 若 x 有输入, 已知 y 的尺寸为 `[d_1, d_2, ... , d_n]` 且 `axis=k` , 则 x 的尺寸只能为 `[d_k]` 或 `[d_1, d_2, ... , d_n]`
+        - 若 dx 有输入, 则要非负
+        - 若 axis 有输入, 则要求 y 存在该维度
+        
+3. 各参数输入组合有效:
+    - 检查只输入 y 的情况
+        - 正常计算
+    - 检查输入 y 和 dx 的情况
+        - 正常计算
+    - 检查输入 y 和 x 的情况
+        - 正常计算
+    - 检查输入 y, dx 和 axis 的情况
+        - 检查y是否存在输入的axis索引, 若存在则正常计算; 否则抛出异常
+    - 检查输入 y, x 和 axis 的情况
+        - 检查 y 是否存在输入的 axis 索引, 若存在则正常计算; 否则抛出异常
+        - 检查 x 和 y 的尺寸是否匹配, 若存在则正常计算; 否则抛出异常
+        - 其余情况正常计算
+    - 其他组合输入
+        - 异常组合输入, 抛出异常
 
 # 七、可行性分析和排期规划
 
