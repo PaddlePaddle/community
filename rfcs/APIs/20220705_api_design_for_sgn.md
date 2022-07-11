@@ -78,26 +78,24 @@ inline c10::complex<T> sgn_impl (c10::complex<T> z) {
 }
 
  ```
-github链接为：https://github.com/pytorch/pytorch/blob/d7fc864f0da461512fb7b972f04e24e296bd266d/aten/src/ATen/native/cpu/zmath.h
-156-163
-
+github链接为：https://github.com/pytorch/pytorch/blob/d7fc864f0da461512fb7b972f04e24e296bd266d/aten/src/ATen/native/cpu/zmath.h#L156-L163
 Tensorflow中使用python实现复数功能
 
 ```
-if x.dtype.is_complex:
-return gen_math_ops.div_no_nan(
-x,
-cast(
-gen_math_ops.complex_abs(
-x,
-Tout=dtypes.float32
-if x.dtype == dtypes.complex64 else dtypes.float64),
-dtype=x.dtype),
-name=name)
-return gen_math_ops.sign(x, name=name)
+  if x.dtype.is_complex:
+    return gen_math_ops.div_no_nan(
+        x,
+        cast(
+            gen_math_ops.complex_abs(
+                x,
+                Tout=dtypes.float32
+                if x.dtype == dtypes.complex64 else dtypes.float64),
+            dtype=x.dtype),
+        name=name)
+  return gen_math_ops.sign(x, name=name)
 ```
-github链接为：https://github.com/tensorflow/tensorflow/blob/7272e9f1f52ffe1b5aee67d1af3c2127634ab47d/tensorflow/python/ops/math_ops.py
-746-790
+github链接为：https://github.com/tensorflow/tensorflow/blob/7272e9f1f52ffe1b5aee67d1af3c2127634ab47d/tensorflow/python/ops/math_ops.py#L746-L790
+
 # 四、对比分析
 
 Tensorflow与Pytorch对于实现复数功能部分的代码核心逻辑相同，torch的代码使用C++实现但它将实数和复数拆分成了两个API，类似于paddle的想法；
@@ -120,14 +118,17 @@ API设计为`paddle.sgn(x, name=None)`和`paddle.Tensor.sgn(x, name=None)`
 ## API实现方案
 
 使用is_complex判断输入是否为复数、若为实数则使用sign进行运算；若为复数则使用as_real将其转化为实数tensor，将其中的非零部分除以它自己的绝对值
-，最后在使用as_complex将其转换回复数返回。
+，最后再使用as_complex将其转换回复数返回。
 
 # 六、测试和验收的考量
 
 测试考虑的case如下：
 
-- 数值正确性
-- 反向
+- 编程范式场景
+- 硬件场景
+- Tensor精度场景：支持float16， float32 ， float64， complex64 , complex128
+- 参数组合场景
+- 计算精度：前向计算，和numpy实现的函数对比结果；反向计算，由Python组合的新增API无需验证反向计算
 - 异常测试：由于使用了已有API：sign，该API不支持整型运算，仅支持float16， float32 或 float64，所以需要做数据类型的异常测试
   
 
