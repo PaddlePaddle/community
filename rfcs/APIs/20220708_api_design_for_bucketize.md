@@ -110,7 +110,7 @@ API设计为`paddle.bucketize(x, sorted_sequence, out_int32=False, right=False, 
 # 六、测试和验收的考量
 测试考虑的case如下：
 
-- 和pytorch结果的数值的一致性, `paddle.bucketize`,和`torch.bucketize`结果是否一致；
+- 和numpy结果的数值的一致性, `paddle.bucketize`,和`numpy.searchsorted`结果是否一致；
 - 参数`right`为True和False时输出的正确性；
 - `out_int32`为True和False时输出dtype正确性；
 - 未输入`right`时的输出正确性；
