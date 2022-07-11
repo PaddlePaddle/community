@@ -219,9 +219,9 @@ class GradNorm(NetworkBase):
 
     def __getattr__(self, __name):
         try:
-			return super().__getattr__(__name)
+            return super().__getattr__(__name)
         except:
-			return getattr(self.net, __name)
+            return getattr(self.net, __name)
 
     def get_grad_norm_loss(self, losses):
         if isinstance(losses, list):
