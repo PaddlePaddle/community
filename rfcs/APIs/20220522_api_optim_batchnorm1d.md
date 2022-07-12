@@ -241,7 +241,7 @@ oneflow time :  0.012895822525024414
 
 测试结果可以看到，使用共享内存来减少global memory访问这种优化很难应用到batch size较大的输入中，并且端到端性能提升非常有限，需要进一步profile kernel来查看优化效果。
 
-### Native kernel第三版
+### Native kernel第四版
 进一步对比分析与pytorch kernel的区别，发现pytorch使用的block size是512，调整block dim测试：
 
 ```
@@ -266,24 +266,31 @@ torch time :  0.011205434799194336
 oneflow time :  0.08815956115722656
 ```
 
-能够发现NCL shape下已经能够与pytorch性能持平，但是NC还有三倍的性能差距，经过对pytorch源码的研究，发现pytorch在NC shape下，会采用2D tile的方式，每个block处理一块数据（在之前的实现中，block数量与C正相关，每个block处理一列数据）
+能够发现NCL shape下已经能够与pytorch性能持平，但是NC还有三倍的性能差距，经过对pytorch源码的对比研究以及对数据输入shape的调研，我们能够得到一个观察：在之前的实现中，block数量与C正相关，每个block负责处理一个channel的数据，这造成两个问题：
+
++ channel维度通常不会特别大，在给定模型的输入下最多只达到64，这使得原先kernel的block数量不会超过64，如果使用较为先进的硬件，则会因为block数量过少导致资源利用不充分
++ 当输入shape是NC时，block访问内存的locality受到限制(因为底层数据是按照Channel维紧密排列的)
+
+设计图如下所示，可以看到，不管对于NC输入还是NCL输入，我们都不再使用一个block来计算一个channel的全部结果，而是将其按照N（NL）的维度继续切割，使得一个channel的结果是由多个block计算完成的（代码中也会涉及到多个block之间结果的reduce，这一过程使用了一些global memory存储各个block的计算控制信号以及中间结果）。
+
+值得一提的是，当输入是NC时，block.x的方向与C是一致的，这也是为了让一个warp的32线程在访问global memory时能够获得更好的memory locality；而输入是NCL时，由于最后一维是L，所以block.x的方向与L是一致的。
+
+![设计图](image/bn-opt.png)
+
+编写相对应的kernel进行测试，结果如下
 
 ```
 # [126000, 16] (block dim: 512)
 paddle time :  0.0233461856842041
 torch time :  0.013725042343139648
 oneflow time :  0.0818324089050293
-```
-可以发现性能能够获得提升，但是与pytorch仍然有一定差距.
-进一步思考，输入的channel数量一般不会超过64，而NCL shape下的block个数是和channel一致，这会限制算子对硬件资源的利用率，因此NCL shape的算子也使用2D的方式进行计算，编写相对应的kernel进行测试，结果如下
 
-```
 # [1000000, 16, 16] (block dim: 512)
 paddle time :  0.8661682605743408
 torch time :  3.956289529800415
 oneflow time :  7.153130769729614
 ```
-可以看到与pytorch相比，我们能够获得4.6倍的性能提升
+可以看到与pytorch相比，我们能够获得8.2倍的性能提升，而NC输入的性能还有一定差距，profile之后发现kernel时间并未与pytorch有太大差距，需要进一步从其他方面定位原因。
 
 # 六、测试和验收的考量
 
