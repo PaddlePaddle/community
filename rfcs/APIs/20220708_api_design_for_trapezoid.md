@@ -6,7 +6,7 @@
 | 提交时间<input type="checkbox" class="rowselector hidden"> | 2022-07-08 |
 | 版本号 | V1.0 |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop |
-| 文件名 | 20220313_api_design_for_trapezoid.md<br> |
+| 文件名 | 20220708_api_design_for_trapezoid.md<br> |
 
 # 一、概述
 
@@ -270,7 +270,7 @@ def trapezoid(y, x=None, dx=1.0, axis=-1):
 
 # 七、可行性分析和排期规划
 
-方案主要依赖现有paddle api组合而成，可以满足在当前版本周期内开发完成。
+方案主要依赖现有`paddle.diff`和`Tensor.sum`组合实现，可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 
