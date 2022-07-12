@@ -73,7 +73,7 @@ API设计和参数跟现在非inplace版本的remainder算子保持一致。
 
 - 参考paddle/fluid/operators/elementwise/elementwise_sub_op.cc，完成elementwise_mod_op的inplace版本注册。
 - 在 Paddle repo 的 python/paddle/tensor/math.py 文件实现remainder_算子接口.
-- 在 Paddle repo 的 python/paddle/fluid/tests/unittests/test_inplace.py中完成单测代码。
+- 在 Paddle repo 的 python/paddle/fluid/tests/unittests/test_inplace.py 和 python/paddle/fluid/tests/unittests/test_elementwise_mod_op.py中，分别加上 remainder_ 的测试代码。
 
 # 六、测试和验收的考量
 测试考虑的case如下：
