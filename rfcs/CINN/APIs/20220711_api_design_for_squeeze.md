@@ -138,6 +138,16 @@ squeeze( $A$, axis = None) 结果尺寸为$(N, M, K)$，且数据值不变。
 3. 在 `cinn/pybind/frontend` 对 Python 类 `BaseBuilder` 添加 `squeeze` 接口，并绑定到 `BaseBuilder::Squeeze`。
 4. 上层 `load_paddle_model` 调用提交到 `cinn/frontend/paddle_model_to_program.h` 和 `.cc` 文件下。
 
+通过使用 Builder 类的方法调用 squeeze。
+```python
+builder = CinnBuilder("test_basic")
+a = builder.create_input(Float(32), (1, 24, 16, 1, 16, 16), "A")  # shape=(1, 24, 16, 1, 16, 16)
+a = builder.squeeze(a)  # 与 a = builder.squeeze(a，axis=None) 等价。shape=(24, 16, 16, 16)
+a = builder.squeeze(a，axis=0)  # shape=(24, 16, 1, 16, 16)
+a = builder.squeeze(a，axis=3)  # shape=(1, 24, 16, 16, 16)
+a = builder.squeeze(a，axis=4)  # raise error
+```
+
 # 六、测试和验收的考量
 
 1. 提供基础的 demo 文件。
