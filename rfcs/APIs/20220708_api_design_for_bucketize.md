@@ -116,7 +116,7 @@ API设计为`paddle.bucketize(x, sorted_sequence, out_int32=False, right=False, 
 - 未输入`right`时的输出正确性；
 - 未输入`out_int32`时的输出正确性；
 - 错误检查：输入`x`不是Tensor时,能否正确抛出错误；
-- 错误检查：`axis`所指维度在当前Tensor中不合法时能正确抛出错误。
+- 错误检查：输入`sorted_sequence`不是一维张量时,能否正确抛出错误；
 
 # 七、可行性分析及规划排期
 
