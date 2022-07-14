@@ -19,7 +19,7 @@
 | Case No. | device | input_shape | input_type | Paddle Perf(ms) |
 |---|---|---|---|---|
 | 1 | Tesla T4 | [8, 1024, 3072] | float32 | 0.9122 | 
-| 1 | Tesla T4 | [8, 1024, 3072] | float64 | 5.2592 |
+| 2 | Tesla T4 | [8, 1024, 3072] | float64 | 5.2592 |
 
 ## 1.2 业内方案调研
 
@@ -27,7 +27,7 @@ Pytorch中对应`paddle.nn.functional.selu` 的Api为 `torch.nn.functional.selu`
 | Case No. | device | input_shape | input_type | Pytorch Perf(ms) |
 |---|---|---|---|---|
 | 1 | Tesla T4 | [8, 1024, 3072] | float32 | 0.8349 | 
-| 1 | Tesla T4 | [8, 1024, 3072] | float64 | 5.4939 |
+| 2 | Tesla T4 | [8, 1024, 3072] | float64 | 5.4939 |
 
 ## 1.3 对比分析
 
@@ -54,13 +54,13 @@ Pytorch中对应`paddle.nn.functional.selu` 的Api为 `torch.nn.functional.selu`
 | Case No. | device | input_shape | input_type | Paddle Perf(ms) | Old-Paddle Perf(ms) | diff |
 |---|---|---|---|---|---|---|
 | 1 | Tesla T4 | [8, 1024, 3072] | float32 | 0.8277 | 0.9122 | faster than 9.26% |
-| 1 | Tesla T4 | [8, 1024, 3072] | float64 | 4.5655 | 5.2592 | faster than 13.19% |
+| 2 | Tesla T4 | [8, 1024, 3072] | float64 | 4.5655 | 5.2592 | faster than 13.19% |
 
 完成优化后，Paddle与Pytorch的性能对比效果如下，在fp32情况下基本与Pytorch持平，在fp64情况下提升较大 ：
 | Case No. | device | input_shape | input_type | Paddle Perf(ms) | Pytorch Perf(ms) | diff |
 |---|---|---|---|---|---|---|
 | 1 | Tesla T4 | [8, 1024, 3072] | float32 | 0.8277 | 0.8349 | faster than 0.86% |
-| 1 | Tesla T4 | [8, 1024, 3072] | float64 | 4.5655 | 5.4939 | faster than 16.89% |
+| 2 | Tesla T4 | [8, 1024, 3072] | float64 | 4.5655 | 5.4939 | faster than 16.89% |
 
 # 4 可行性分析和排期规划
 
