@@ -124,8 +124,8 @@ API设计为`paddle.sgn(x, name=None)`和`paddle.Tensor.sgn(x, name=None)`
 
 测试考虑的case如下：
 
-- 编程范式场景
-- 硬件场景
+- 编程范式场景：覆盖静态图和动态图测试场景
+- 硬件场景：覆盖CPU和GPU测试场景
 - Tensor精度场景：支持float16， float32 ， float64， complex64 , complex128
 - 参数组合场景
 - 计算精度：前向计算，和numpy实现的函数对比结果；反向计算，由Python组合的新增API无需验证反向计算
