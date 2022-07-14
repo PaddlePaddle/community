@@ -141,11 +141,14 @@ squeeze( $A$, axis = None) 结果尺寸为$(N, M, K)$，且数据值不变。
 通过使用 Builder 类的方法调用 squeeze。
 ```python
 builder = CinnBuilder("test_basic")
-a = builder.create_input(Float(32), (1, 24, 16, 1, 16, 16), "A")  # shape=(1, 24, 16, 1, 16, 16)
-a = builder.squeeze(a)  # 与 a = builder.squeeze(a，axis=None) 等价。shape=(24, 16, 16, 16)
-a = builder.squeeze(a，axis=0)  # shape=(24, 16, 1, 16, 16)
-a = builder.squeeze(a，axis=3)  # shape=(1, 24, 16, 16, 16)
-a = builder.squeeze(a，axis=4)  # raise error
+a = builder.create_input(Float(32), (1, 24, 16, 1, 16, 16), "A1")
+b = builder.squeeze(a)  # 与 a = builder.squeeze(a，axis=None) 等价。shape=(24, 16, 16, 16)
+a = builder.create_input(Float(32), (1, 24, 16, 1, 16, 16), "A2")
+b = builder.squeeze(a，axis=0)  # shape=(24, 16, 1, 16, 16)
+a = builder.create_input(Float(32), (1, 24, 16, 1, 16, 16), "A3")
+b = builder.squeeze(a，axis=3)  # shape=(1, 24, 16, 16, 16)
+a = builder.create_input(Float(32), (1, 24, 16, 1, 16, 16), "A4")
+b = builder.squeeze(a，axis=4)  # raise error
 ```
 
 # 六、测试和验收的考量
