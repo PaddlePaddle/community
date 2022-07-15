@@ -265,6 +265,8 @@ paddle.take(
 1. 通过 `Tensor.flatten()` 将输入 x 和 index 展开成 1D Tensor。
 
 2. 通过 `Tensor.index_select(index)` 按照 index 中的索引提取对应元素。
+    - `numpy.take` 和 `torch.take` 支持负值索引；
+    - 然而 `index_select` 不支持，因此需要先将 index 的负值索引转为对应的正值索引。
 
 3. 通过 `Tensor.reshape(index.shape)` 将输出的 Tensor 形状转成 index 的形状。
 
@@ -272,7 +274,7 @@ paddle.take(
 
 测试考虑的 case 如下：
 
-- 参数 `index` 数据类型必须为 `paddle.int64` 类型（与 `torch.long` 同精度）。
+- 参数 `index` 数据类型必须为 `paddle.int32` 和 `paddle.int64` 类型（与 `paddle.index_select` 一致）。
 
 - `index` 索引越界时直接报错。
 
