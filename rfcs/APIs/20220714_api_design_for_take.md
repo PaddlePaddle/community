@@ -227,7 +227,7 @@ def take(a, indices, axis=None, out=None, mode='raise'):
 
 # 四、对比分析
 
-- `torch.take` 的 `index` 参数必须为 LongTensor 类型，`numpy.take` 的 `indices` 参数直接取整。
+- `torch.take` 的 `index` 参数必须为 LongTensor 类型；`numpy.take` 直接对参数 `indices` 的元素取整再进行索引。
 
 - 当不指定轴时，对于相同的索引矩阵，`Numpy.take` 的执行结果等于 `torch.take`。
 
@@ -239,7 +239,7 @@ def take(a, indices, axis=None, out=None, mode='raise'):
 
 ## 命名与参数设计
 
-添加 API
+选择与 PyTorch 相同的参数，添加 API：
 
 ```python
 paddle.take(
@@ -274,7 +274,9 @@ paddle.take(
 
 测试考虑的 case 如下：
 
-- 参数 `index` 数据类型必须为 `paddle.int32` 和 `paddle.int64` 类型（与 `paddle.index_select` 一致）。
+- 参数 `index` 数据类型必须为 `paddle.int32` 和 `paddle.int64` 类型的 Tensor（与 `paddle.index_select` 一致）。
+
+- `input` 的数据类型支持 `int32`，`int64`，`float32`，`float64`。
 
 - `index` 索引越界时直接报错。
 
