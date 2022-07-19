@@ -32,8 +32,6 @@ PINNs方法中损失函数由 PDE Loss、初值 Loss、边值 Loss及 data Loss 
 6. 通过Norm Loss求解相对于相对于$w$的梯度，手动更新$w$的梯度；
 7. 更新参数即可。
 
-
-
 ## 2、功能目标
 
 为 PaddleScience 新增 GradNorm Loss 权重自适应功能，集成入 PaddleScience 作为 API 调用。
@@ -160,8 +158,6 @@ class RegressionTrain(torch.nn.Module):
                 model.weights.grad = torch.autograd.grad(grad_norm_loss, model.weights)[0]
 ```
 
-
-
 # 四、对比分析
 
 实现清晰，与论文一致，按照上述代码实现即可。
@@ -191,7 +187,7 @@ class GradNorm(NetworkBase):
     r"""
     Gradient normalization for adaptive loss balancing.
     Parameters:
-        net(NetworkBase): The network which must have "get_last_shared_layer" method.
+        net(NetworkBase): The network which must have "get_shared_layer" method.
         n_loss(int): The number of loss, must be greater than 1.
         alpha(float): The hyperparameter which controls learning rate.
         weight_attr(list, tuple): The inital weights for "loss_weights". If not specified, "loss_weights" will be initialized with 1.
@@ -230,8 +226,8 @@ class GradNorm(NetworkBase):
             self.initial_losses = losses.numpy()
 
         W = self.net.get_last_shared_layer()
-        # if self.loss_weights.grad is not None:
-        #     self.loss_weights.grad.set_value(paddle.zeros_like(self.loss_weights))
+        if self.loss_weights.grad is not None
+            self.loss_weights.grad.set_value(paddle.zeros_like(self.loss_weights))
 
         norms = []
         for i in range(losses.shape[0]):
