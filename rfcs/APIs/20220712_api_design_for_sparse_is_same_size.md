@@ -31,7 +31,12 @@ Paddle需要扩充API,新增 sparse.is_same_size API， 调用路径为：`paddl
 Pytorch中有API`torch.is_same_size` ， 在pytorch中参数列表为`is_same_size(input: Tensor, other: Tensor) -> _bool: ...`
 
 ### 实现方法
-该api在torch\_C\_VariableFunctions.pyi中出现，pytorch仓库中未找到该api实现，推测是使用了代码生成的方式
+该api在torch\_C\_VariableFunctions.pyi中出现，在 aten/src/ATen/native/TensorProperties.cpp 中实现，
+```c++
+bool is_same_size(const Tensor& self, const Tensor& other) {
+  return self.sizes().equals(other.sizes());
+}
+```
 
 ## Numpy
 Numpy中一般使用`a.size()==b.size()`进行判断
@@ -44,23 +49,20 @@ paddle中要实现四种交叉比较，故自行实现
 
 ## 命名与参数设计
 
-在paddle/phi/kernels/sparse/目录下， kernel设计为
+在python/paddle/incubate/sparse/binary.py中新增api
 
-```    
-void IsSameSizeKernel(const Context& dev_ctx,
-                  const SparseCsr/Coo/DenseTensor& x,
-                  const SparseCsr/Coo/DenseTensor& y,
-                  bool* out);
+```python
+def is_same_size(x, y)
 ```
 
 
 ## 底层OP设计
 
-新增一个op用于比较size，调用对应tensor的dims方法。
+可以使用python api组合，无需新增op
 
 ## API实现方案
 
-Python前端调用C_ops
+Python端参考numpy实现
 
 # 六、测试和验收的考量
 
@@ -71,11 +73,11 @@ Python前端调用C_ops
 
 # 七、可行性分析及规划排期
 
-方案主要依赖paddle现有op组合而成
+方案主要依赖paddle现有api组合而成
 
 # 八、影响面
 
-为独立新增op，对其他模块没有影响
+为独立新增api，对其他模块没有影响
 
 # 名词解释
 
