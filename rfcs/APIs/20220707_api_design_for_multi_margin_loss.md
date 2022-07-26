@@ -17,8 +17,11 @@
 ## 2、功能目标
 paddle.nn.MultiMarginLoss 为多分类问题的 Hinge loss。
 loss 按照以下公式计算
+
 $$\text{loss}(x, y) = \frac{\sum_i \max(0, \text{margin} - x[y] + x[i])^p}{\text{x.size}(0)}$$
+
 如果有权重 w 下，公式为
+
 $$\text{loss}(x, y) = \frac{\sum_i \max(0, w[y] * (\text{margin} - x[y] + x[i]))^p}{\text{x.size}(0)}$$
 
 ## 3、意义
@@ -154,11 +157,11 @@ tensorflow没有专门的multimarginloss
     
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
    2. 检查输入的 dtype（含 `input`、`label`、`weight`）（同其余 functional loss 中的实现）
-   3. 检查输入的`input`、`label`、`weight`维度是否相同。
+   3. 检查输入的`input`、`label`、`weight`维度是否正确。
 
 2. 计算
 
-   1. 先计算loss
+   1. 根据公式先计算loss值
    2. 沿轴1将loss相加
 
 3. 根据 `reduction`，输出 loss（同其余 functional loss 中的实现）
