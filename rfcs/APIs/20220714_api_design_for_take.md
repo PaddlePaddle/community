@@ -90,7 +90,7 @@ Tensor take(const Tensor& self, const Tensor& index) {
 }
 ```
 
-在 [代码位置](https://github.com/pytorch/pytorch/blob/fc389cc0a0ba0ff34164e0eacca818f365a644a9/torch/onnx/symbolic_opset9.py#L4998) 中也定义了 `take` 方法：
+在 [torch/onnx/symbolic_opset*.py](https://github.com/pytorch/pytorch/blob/fc389cc0a0ba0ff34164e0eacca818f365a644a9/torch/onnx/symbolic_opset9.py#L4998) 中也定义了 `take` 的 Python 实现方法， 该方法是 `Aten` 中的运算符中已经存在的同名方法，故实现逻辑相同。
 
 ```python
 def take(g, self, index):
