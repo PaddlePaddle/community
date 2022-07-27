@@ -90,7 +90,7 @@ Tensor take(const Tensor& self, const Tensor& index) {
 }
 ```
 
-在 [代码位置](https://github.com/pytorch/pytorch/blob/master/torch/onnx/symbolic_opset9.py#L4932) 中也定义了 `take` 方法：
+在 [代码位置](https://github.com/pytorch/pytorch/blob/fc389cc0a0ba0ff34164e0eacca818f365a644a9/torch/onnx/symbolic_opset9.py#L4998) 中也定义了 `take` 方法：
 
 ```python
 def take(g, self, index):
@@ -225,6 +225,10 @@ def take(a, indices, axis=None, out=None, mode='raise'):
 
 - 当提供参数 `out` 的时候，输出的数据将填充到 `out` 中。
 
+## TensorFlow
+
+据我们的调研情况，TensorFlow 中没有自己实现 `take` API，而是直接调用 `numpy.take`：[tf.experimental.numpy.take](https://tensorflow.google.cn/api_docs/python/tf/experimental/numpy/take)。
+
 # 四、对比分析
 
 - `torch.take` 的 `index` 参数必须为 LongTensor 类型，`numpy.take` 的 `indices` 参数直接取整。
@@ -256,7 +260,7 @@ paddle.take(
 
 ## API 实现方案
 
-该 API 需要添加在 Paddle repo 的 `python/paddle/tensor/math.py` 文件中；并在 `python/paddle/tensor/init.py` 中添加 `take` API，以支持 Tensor.take 的调用方式。
+该 API 需要添加在 Paddle repo 的 `python/paddle/tensor/math.py` 文件中；并在 `python/paddle/tensor/__init__.py` 以及 ``python/paddle/__init__.py`` 中添加 `take` API，以支持 Tensor.take 和 `paddle.take` 的调用方式。
 
 目前 paddle 可由 `Tensor.flatten`、`Tensor.index_select` 和 `Tensor.reshape` 组合实现该 API 的功能。
 
@@ -278,7 +282,7 @@ paddle.take(
 
 - `index` 索引越界时直接报错。
 
-- 在动态图、静态图下的都能得到正确的结果。
+- 在动态图、静态图下，以及 CPU、GPU 下，都能得到正确的结果。
 
 # 七、可行性分析及规划排期
 
@@ -296,7 +300,7 @@ paddle.take(
 
 # 八、影响面
 
-增加了一个 `paddle.take` API。
+增加了一个 `paddle.take` API，为独立新增 API，对其他模块没有影响。
 
 # 名词解释
 
