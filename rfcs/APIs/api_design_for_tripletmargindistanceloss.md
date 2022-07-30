@@ -1,7 +1,7 @@
-#  paddle.nn.TripletMarginDistanceLoss 设计文档
+#  paddle.nn.TripletMarginWithDistanceLoss 设计文档
 
 
-|API名称 | TripletMarginDistanceLoss | 
+|API名称 | TripletMarginWithDistanceLoss | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | yangguohao | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-16 | 
@@ -12,9 +12,9 @@
 
 # 一、概述
 ## 1、相关背景
-为了提升飞桨API丰富度，Paddle需要扩充APIpaddle.nn.TripleMarginDistanceLoss以及paddle.nn.functional.triplet_margin_with_distance_loss
+为了提升飞桨API丰富度，Paddle需要扩充APIpaddle.nn.TripleMarginWithDistanceLoss以及paddle.nn.functional.triplet_margin_with_distance_loss
 ## 2、功能目标
-paddle.nn.TripletMarginDistanceLoss 是三元损失函数，其针对样本和正负锚点计算任意给定距离函数下的三元损失，从而获得损失值。
+paddle.nn.TripletMarginWithDistanceLoss 是三元损失函数，其针对样本和正负锚点计算任意给定距离函数下的三元损失，从而获得损失值。
 ## 3、意义
 为 paddle 框架中新增计算损失函数的方法
 
@@ -26,7 +26,7 @@ paddle.nn.TripletMarginDistanceLoss 是三元损失函数，其针对样本和�
 
 # 三、业内方案调研
 Pytorch 中有相关的
-`torch.nn.functional.triplet_margin_with_distance_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`和`torch.nn.TripletMarginLoss(margin=1.0, p=2.0, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`
+`torch.nn.functional.triplet_margin_with_distance_loss(anchor, positive, negative, margin=1.0, p=2, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`和`torch.nn.TripletMarginWithDistanceLoss(margin=1.0, p=2.0, eps=1e-06, swap=False, size_average=None, reduce=None, reduction='mean') -> Tensor`
 
 在 pytorch 中，介绍为：
 
@@ -155,7 +155,7 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
 ## 命名与参数设计
 共添加以下两个 API：
 
-- `paddle.nn.TripletMarginDistanceLoss(margin=1.0, distance_function=None, swap=False, reduction='mean', name=None) -> Tensor`
+- `paddle.nn.TripletMarginWithDistanceLoss(distance_function=None, margin=1.0, swap=False, reduction='mean', name=None) -> Tensor`
 - `padde.nn.functional.triplet_margin_with_distance_loss(input, positive, negative, distance_function=None, margin=1.0, swap=False, reduction='mean', name=None) -> Tensor`
 ## 底层OP设计
 ## API实现方案
@@ -164,11 +164,11 @@ def triplet_loss(queries, positives, negatives, margin=0.1):
     
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
    2. 检查输入的 dtype（含 `input`、`positive`、`negative`）（同其余 functional loss 中的实现）
-   3. 用reshape方法进行转换为维度,[batch_size,dim],并检查参数维度是否相同。
+   3. 检查参数维度是否相同。
 
 2. 计算
 
-   1. 用户可传入distance_function参数，如果未指定则使用 `paddle.linalg.norm` 分别计算得到正锚点与样本和负锚点与样本的距离。
+   1. 用户可传入distance_function参数，如果未指定则使用 `paddle.nn.PairwiseDistance(2)` 分别计算得到正锚点与样本和负锚点与样本的距离。
    2. `swap` 参数判断：正锚点和负锚点间距离，并与负锚点与样本间距离进行比较，取更小的距离作为负锚点与样本间的距离。
    3. 通过 `paddle.clip` 实现公式所示求出得 loss。
 
