@@ -35,8 +35,8 @@
 ```python
 target_shape: list
 
-def transform_index(target_shape: list):
-    source_index: list = list(target_shape)
+def transform_index(target_index: list):
+    source_index: list = list(target_index)
     for ax in axis:
         source_index[ax] = target_shape[ax] - 1 - target_index[ax]
     return source_index
