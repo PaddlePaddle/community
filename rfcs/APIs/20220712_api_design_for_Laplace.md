@@ -41,13 +41,11 @@
 - 目前 飞桨没有 API `paddle.distribution.Laplace`，但是有API`paddle.distribution.Multinomial`paddle.distribution.Laplace的开发代码风格主要参考API
 - 通过反馈可以发现，代码需采用飞桨2.0之后的API，故此处不再参考Normal等API的代码风格。
 
-
 # 三、业内方案调研
 
 ## PyTorch
 
 PyTorch 中包含 API `torch.distributions.laplace.Laplace(loc, scale, validate_args=None)`
-
 
 ### 源代码
 
@@ -144,6 +142,7 @@ from torch.distributions.utils import broadcast_all
     def entropy(self):
         return 1 + torch.log(2 * self.scale)
 ```
+
 ## TensorFlow
 
 TensorFlow 中包含 class API `tf.compat.v1.distributions.Laplace`
@@ -342,32 +341,80 @@ paddle.distribution.Laplace(loc, scale)
 
 该 API 实现于 `paddle.distribution.Laplace`。
 基于`paddle.distribution` API基类进行开发。
-class API 中的具体实现（部分方法已完成开发，故直接使用源代码）：
-- `mean`计算均值；`self.loc`
-- `variance`计算方差 ；`2 * self.scale.pow(2)`
-- `stddev`计算标准偏差 `(2 ** 0.5) * self.scale`
-- `sample`随机采样；` with paddle.no_grad():
-            return self.rsample(shape)`
-- `rsample` 重参数化采样；`u = paddle.uniform(shape=shape, min=eps - 1, max=1) paddle.subtract(self.loc, self.scale * u.sign() * paddle.log1p(-u.abs()),)`   参考上面的API开发，有finfo的开发计划，故在此添加try except模块使用finfo的API
-- `prob` 概率密度；`paddle.divide(ops.exp(-1. * ((value - self.loc) *(value - self.loc)) / (2. * var)),(math.sqrt(2 * math.pi) * self.scale))`
-- `log_prob`对数概率密度；`subtract(-nn.log(2 * self.scale), paddle.abs(value - self.loc) / self.scale)
-`
-- `entropy` 熵计算；`1 + paddle.log(2 * self.scale)`
-- `cdf` 累积分布函数(Cumulative Distribution Function)`0.5 * (1 + paddle.erf((value - self.loc) * self.scale.reciprocal() / math.sqrt(2)))`
-- `icdf` 逆累积分布函数`self.loc + self.scale * paddle.erfinv(2 * value - 1) * math.sqrt(2)`
-- 注册KL散度  TODO
-- TODO:额外实现laplace与其它分布之间的KL散度计算逻辑，作为加分项
+class API 中的具体实现（部分方法已完成开发，故直接使用源代码），该api有两个参数：位置参数self.loc, 尺度参数self.scale。包含以下方法：
 
+- `mean` 计算均值: 
+
+        self.loc
+- `stddev` 计算标准差: 
+        
+        (2 ** 0.5) * self.scale;
+
+- `variance` 计算方差: 
+
+        self.stddev.pow(2)
+
+- `sample` 随机采样(参考pytorch复用重参数化采样结果): 
+
+        self.rsample(shape)
+
+- `rsample` 重参数化采样: 
+
+        self.loc - self.scale * u.sign() * paddle.log1p(-u.abs())
+    其中 `u = paddle.uniform(shape=shape, min=eps - 1, max=1)`; eps根据dtype决定;
+- `prob` 概率密度(包含传参value): 
+
+        self.log_prob(value).exp()
+
+    直接继承父类实现
+
+- `log_prob` 对数概率密度(value): 
+
+        -paddle.log(2 * self.scale) - paddle.abs(value - self.loc) / self.scale
+
+- `entropy` 熵计算: 
+
+        1 + paddle.log(2 * self.scale)
+
+- `cdf` 累积分布函数(value): 
+
+        0.5 - 0.5 * (value - self.loc).sign() * paddle.expm1(-(value - self.loc).abs() / self.scale)
+
+- `icdf` 逆累积分布函数(value): 
+
+        self.loc - self.scale * (value - 0.5).sign() * paddle.log1p(-2 * (value - 0.5).abs())
+
+- `kl_divergence` 两个Laplace分布之间的kl散度(other--Laplace类的一个实例):
+
+        (self.scale * paddle.exp(paddle.abs(self.loc - other.loc) / self.scale) + paddle.abs(self.loc - other.loc)) / other.scale + paddle.log(other.scale / self.scale) - 1
+     该方法在竞品pytorch和tensorflow中均未实现，参考文献：https://openaccess.thecvf.com/content/CVPR2021/supplemental/Meyer_An_Alternative_Probabilistic_CVPR_2021_supplemental.pdf 
 
 # 六、测试和验收的考量
 
-测试考虑的 case 如下：
+根据api类各个方法及特性传参的不同，把单测分成三个部分：测试分布的特性（无需额外参数）、测试分布的概率密度函数（需要传值）以及测试KL散度（需要传入一个实例）。
 
-- 调用API的各种方法，能够产生正确的结果。
+1. 测试Lapalce分布的特性
+
+- 测试方法：该部分主要测试分布的均值、方差、熵等特征。类TestLaplace继承unittest.TestCase，分别实现方法setUp（初始化），test_mean（mean单测），test_variance（variance单测），test_stddev（stddev单测），test_entropy（entropy单测），test_sample（sample单测）。其中均值、方差、标准差通过Numpy计算相应值，对比Laplace类中相应property的返回值，若一致即正确；采样方法验证其返回的数据类型及数据形状是否合法；熵计算通过对比`scipy.stats.laplace.entropy`的值是否与类方法返回值一致验证结果的正确性。
+
+- 测试用例：单测需要覆盖单一维度的Laplace分布和多维度分布情况，因此使用两种初始化参数：1. 'one-dim': `loc=parameterize.xrand((2, )), scale=parameterize.xrand((2, ))`; 2. 'multi-dim': loc=parameterize.xrand((10, 20)), scale=parameterize.xrand((10, 20))。
+
+
+2. 测试Lapalce分布的概率密度函数
+
+- 测试方法：该部分主要测试分布各种概率密度函数。类TestMultinomialPdf继承unittest.TestCase，分别实现方法setUp（初始化），test_prob（prob单测），test_log_prob（log_prob单测），test_cdf（cdf单测），test_icdf（icdf）。以上分布在`scipy.stats.laplace`中均有实现，因此给定某个输入value，对比相同参数下Laplace分布的scipy实现以及paddle实现的结果，若误差在容忍度范围内则证明实现正确。
+
+- 测试用例：为不失一般性，测试使用多维位置参数和尺度参数初始化Laplace类，并覆盖int型输入及float型输入。1. 'value-float': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([2., 5.])`; 2. 'value-int': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([2, 5])`; 3. 'value-multi-dim': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([[4., 6], [8, 2]])`。
+
+3. 测试Lapalce分布之间的KL散度
+
+- 测试方法：该部分测试两个Laplace分布之间的KL散度。类TestMultinomialKl继承unittest.TestCase，分别实现setUp（初始化），test_kl_divergence（kl_divergence）。在scipy中`scipy.stats.entropy`可用来计算两个分布之间的散度。因此对比两个Laplace分布在paddle.Laplace下和在scipy.stats.laplace下计算的散度，若结果在误差范围内，则证明该方法实现正确。
+
+- 测试用例：分布1：`loc=np.array([0.0]), scale=np.array([1.0])`, 分布2: `loc=np.array([1.0]), scale=np.array([0.5])`
+
 
 
 # 七、可行性分析及规划排期
-
 
 具体规划为
 
@@ -389,8 +436,6 @@ class API 中的具体实现（部分方法已完成开发，故直接使用源�
 
 [torch.distributions.laplace.Laplace](https://pytorch.org/docs/stable/distributions.html#laplace)
 
-
-
 ## TensorFlow
 
 [tf.compat.v1.distributions.Laplace](https://www.tensorflow.org/api_docs/python/tf/compat/v1/distributions/Laplace)
@@ -398,4 +443,3 @@ class API 中的具体实现（部分方法已完成开发，故直接使用源�
 ## Paddle
 
 [paddle.distribution.Normal](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/distribution/Normal_cn.html#normal)
-
