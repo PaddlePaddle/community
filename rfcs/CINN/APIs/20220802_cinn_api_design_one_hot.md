@@ -20,8 +20,6 @@
 
 本 RFC 中的 `indices` 均表示输入索引，也即第一个输入参数，而非 Compute 中的输出元素的索引，如果两者冲突（如传入 Compute 的函数中），需修改 Compute 中索引命名。
 
-- indices
-
 ### 3、功能目标
 
 该算子根据输入的索引（`indices`），返回一个 Tensor，该 Tensor 将索引的位置标注为用户指定的一个值（`on_value`），非索引的位置标注为另一个值（`off_value`）。最常见的是 `1/0` 标值（`on_value=1`、`off_value=0`）
