@@ -20,10 +20,7 @@ step：步长 ，序列中相邻的两个元素的差值
 ## 3、功能目标
 实现`arange`算子。  
 算子输入起始 $start$ ，终点 $end$ ，以及步长 $step$   
-算子输出序列 $(x_0,x_1,...,x_n)$ ，序列长度 $n=\left [ (start-end)/step \right ]$，且 $x_{i+1} - x_i = step$ $(0 \leqslant i < n)$   
-1. 若 $start < end$ , $step>0$ ，序列满足 $start\leqslant x_0 < x_1 < ... < x_n < end$  
-2. 若 $start > end$ , $step<0$ ，序列满足 $start\geqslant x_0 > x_1 > ... > x_n > end$
-
+算子输出序列 $(x_0,x_1,...,x_n)$ ，序列长度 $n=\left [ (start-end)/step \right ]$，序列满足 $x0=start$ ， $x_i < end$ $(0 \leqslant i \leqslant n)$ ， $x_{j+1} - x_j = step$ $(0 \leqslant j < n)$  
 算子的输入参数可能有异常情况，并且部分的参数可缺省，需考虑处理。
 ## 4、意义
 实现`arange`算子，将进一步CINN的基础算子库。
