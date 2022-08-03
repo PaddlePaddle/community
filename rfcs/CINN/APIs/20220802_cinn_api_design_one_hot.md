@@ -4,7 +4,7 @@
 | -------------- | ----------------------------------- |
 | 提交作者       | Nyakku Shigure（@SigureMo）         |
 | 提交时间       | 2022-08-02                          |
-| 版本号         | v0.1                                |
+| 版本号         | v0.2                                |
 | 依赖 CINN 版本 | develop                             |
 | 文件名         | 20220802_cinn_api_design_one_hot.md |
 
@@ -406,7 +406,7 @@ class BaseBuilder {
   Variable OneHot(const Variable& indices,
                   const Variable& on_value,
                   const Variable& off_value,
-                  const int depth           = {1, 1},
+                  const int depth,
                   const int axis            = -1
                   const std::string& dtype  = "float32");
 };
@@ -426,7 +426,12 @@ res = builder.one_hot(indices, on_value, off_value, depth=3, axis=-1, dtype="flo
 
 ## 六、测试和验收的考量
 
-TODO:
+单元测试（`python/tests/ops/test_ont_hot.py`）需要进行以下考量：
+
+- `axis` 的各种取值，包括 `-1` 以及正数
+- `indices` 高维度输入的正确性
+- `depth` 的各种取值
+- `dtype` 的各种取值最后输出的数据类型的正确性
 
 ## 七、可行性分析和排期规划
 
