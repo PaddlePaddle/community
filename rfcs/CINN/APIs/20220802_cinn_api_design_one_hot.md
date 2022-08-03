@@ -360,7 +360,7 @@ XLA 是通过算子的组合方式实现的，TVM 是通过写 Compute 描述计
 
 由于 XLA 与 TVM 均使用 `OneHot` 作为算子名称，因此直接使用 `OneHot` 作为算子名称，没有相近名称的算子，因此没有任何歧义
 
-设计算子参数如下（``）：
+设计算子参数如下：
 
 ```cpp
 // cinn/hlir/op/contrib/one_hot.h
