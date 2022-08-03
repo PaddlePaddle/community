@@ -121,6 +121,7 @@ static xla::Literal Range(T start, T end, T step) {
   return xla::LiteralUtil::CreateR1<T>(xla::util::Range<T>(start, end, step));
 }
 
+//xla::util::Range
 template <typename T>
 std::vector<T> Range(T start, T end, T step = 1) {
   std::vector<T> result;
