@@ -4,7 +4,7 @@
 | -------------- | ----------------------------------- |
 | 提交作者       | Nyakku Shigure（@SigureMo）         |
 | 提交时间       | 2022-08-02                          |
-| 版本号         | v0.3                                |
+| 版本号         | v0.4                                |
 | 依赖 CINN 版本 | develop                             |
 | 文件名         | 20220802_cinn_api_design_one_hot.md |
 
@@ -435,7 +435,7 @@ res = builder.one_hot(indices, on_value, off_value, depth=3, axis=-1, dtype="flo
 
 ## 七、可行性分析和排期规划
 
-该算子所需的 API 在 CINN 中均已存在，因此可行
+该算子所需的 API 在 CINN 中均已存在，但 CINN 目前不支持 0 维数据，而 `on_value` 和 `off_value` 应当是 Scalar，因此暂时使用仅含一个元素的一维数据来代替，相关检查也会对此进行检查，并在注释中说明情况，在将来 CINN 支持 0 维数据后再修改
 
 具体规划为：
 
