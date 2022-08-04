@@ -1,4 +1,4 @@
-# CINN squeeze 设计文档
+# CINN argmax 和 argmin 设计文档
 
 | API名称                                                      | 新增API名称                                          |
 | ---------------------------------------------------------- | ------------------------------------------------ |
@@ -13,18 +13,19 @@
 ## 1、相关背景
 
 `argmax`和`argmin` 是众多神经网络编译器中基础的算子。
-假设输入为$x$，尺寸为 $(256, 256, 3)$，输入算子`argmax/argmin`可以得到张量$x$取得最大值时的索引值，当未指定`axis`参数时，返回索引为将张量拉平时的索引数值，当指定`axis`参数时，只在指定维度上进行比较，返回最大值的索引，例如当`axis=1`时，返回的张量尺寸为$(256, 3)$。
+假设输入为$x$，尺寸为 $(256, 256, 3)$，输入算子`argmax/argmin`可以得到张量$x$取得最大值/最小值时的索引值，当未指定`axis`参数时，返回索引为将张量拉平时的索引数值，当指定`axis`参数时，只在指定维度上进行比较，返回最大值的索引，例如当`axis=1`时，返回的张量尺寸为$(256, 3)$。
 为了提升 CINN API 丰富度，需要扩充 API `argmax`和`argmin``。
 
 ## 2、名词解释
 
 张量/Tensor：指高维数组。
-argmax：指数组或张量取得最大值时的索引值。
+argmax/argmin：指数组或张量取得最大值/最小值时的索引值。
 axis：指张量的维度。
 
 ## 3、功能目标
 
-实现 squeeze 功能，删除张量指定尺寸为一的维度。例如，对于张量 $A$ = range(9).reshape([3, 3])，squeeze( $A$, axis = None) 结果为$8$，squeeze( $A$, axis = 1) 结果为$[2, 2, 2]$，squeeze( A, axis = 1，keepdim=True) 结果为[[2, 2, 2]]。
+实现 argmax 功能，删除张量指定尺寸为一的维度。例如，对于张量 $A$ = range(9).reshape([3, 3])，
+argmax( $A$, axis = None) 结果为$8$，argmax( $A$, axis = 1) 结果为$[2, 2, 2]$，argmax( A, axis = 1，keepdim=True) 结果为[[2, 2, 2]]。
 
 ## 4、意义
 
@@ -36,7 +37,7 @@ axis：指张量的维度。
 
 # 三、业内方案调研
 
-- TVM：整体上通过实现fcombine和fidentity方法，传入CommReduceIdx类。以argmax为例，fcombine输入两个索引值对，比较之间的值，返回更大的索引值对。
+- [TVM](https://github.com/apache/tvm/blob/6df070aac6d0e26d1e127095a323c61c2287eb9d/include/tvm/topi/reduction.h)：整体上通过实现fcombine和fidentity方法，传入CommReduceIdx类。以argmax为例，fcombine输入两个索引值对，比较之间的值，返回更大的索引值对。
   
   ```cpp
   inline Tensor CommReduceIdx(const Tensor& data, const Array<Integer>& axis, FCommReduce func,
@@ -137,7 +138,7 @@ axis：指张量的维度。
   }
 
 ```
-- XLA：与TVM类似。
+- [XLA](https://github.com/pytorch/xla/blob/3d24d955b6121289a3c8bb86eda541fca7a0d69f/torch_xla/csrc/ops/arg_max.cpp)：与TVM类似。
 
 ```cpp
 xla::XlaOp BuildArgMax(xla::XlaOp input, int64_t dim, bool keepdim) {
@@ -178,14 +179,14 @@ TVM 与 XLA 实现方案类似。
 
 1. 在 `cinn/hlir/op/contrib/argmin.h` 里声明`argmin`算子。
 2. 在 `cinn/hlir/op/contrib/argmin.cc` 里实现`argmin`算子和 `strategy`。
-   3- 在 `cinn/hlir/op/contrib/argmax.h` 里声明`argmax`算子。
-   4- 在 `cinn/hlir/op/contrib/argmax.cc` 里实现`argmax`算子和 `strategy`。
+3. 在 `cinn/hlir/op/contrib/argmax.h` 里声明`argmax`算子。
+4. 在 `cinn/hlir/op/contrib/argmax.cc` 里实现`argmax`算子和 `strategy`。
 
 ## API实现方案
 
 例如，对于张量 A = range(9).reshape([3, 3])，
-squeeze( A, axis = None) 结果为8，
-squeeze( A, axis = 1) 结果为[2, 2, 2]。
+argmax( A, axis = None) 结果为8，
+argmax( A, axis = 1) 结果为[2, 2, 2]。
 
 1. 在 `cinn/frontend/net_build.h` 里声明 `BaseBuilder::ArgMax`和`BaseBuilder::ArgMin`。
 2. 在 `cinn/frontend/net_build.cc` 里实现 `BaseBuilder::ArgMax`和`BaseBuilder::ArgMin`。
@@ -199,15 +200,15 @@ builder = CinnBuilder("test_basic")
 a = builder.create_input(Float(32), (8, 24, 124), "A1")
 b = builder.argmax(a)  # 输出值最大的的索引，shape=()
 a = builder.create_input(Float(32), (8, 24, 124), "A2")
-b = builder.squeeze(a，axis=0)  # shape=(24, 124)
+b = builder.argmax(a，axis=0)  # shape=(24, 124)
 a = builder.create_input(Float(32), (8, 24, 124), "A3")
-b = builder.squeeze(a，axis=1, keepdim=True)  # shape=(8, 1, 124)
+b = builder.argmax(a，axis=1, keepdim=True)  # shape=(8, 1, 124)
 ```
 
 # 六、测试和验收的考量
 
 1. 提供基础的 demo 文件。
-2. 在`cinn/hlir/op/contrib/argmax_test.cc`和`cinn/hlir/op/argmin_test.cc`中添加对底层OP进行测试的代码，在`cinn/frontend/net_builder_test.cc`中添加对前端的测试。
+2. 在`cinn/hlir/op/contrib/argmax_test.cc`和`cinn/hlir/op/contrib/argmin_test.cc`中添加对底层OP进行测试的代码，在`cinn/frontend/net_builder_test.cc`中添加对前端的测试。
 3. 提交 API 使用方法到相应的文档中。
 
 # 七、可行性分析和排期规划
