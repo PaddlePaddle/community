@@ -1,6 +1,6 @@
-# paddle.is_same_shape 设计文档
+# paddle.incubate.sparse.is_same_shap 设计文档
 
-|API名称 | paddle.is_same_shape       | 
+|API名称 | paddle.incubate.sparse.is_same_shap       | 
 |---|-------------------------------------------|
 |提交作者<input type="checkbox" class="rowselector hidden"> | PeachML                                   | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2022-07-12                                | 
@@ -13,8 +13,8 @@
 ## 1、相关背景
 
 为了提升飞桨API丰富度，is_same_shape 是一个基础的形状比较操作，目前 Paddle 中还没有 is_same_shape 算子。 
-本任务的目标是在 Paddle 中添加 paddle.is_same_shape 算子， 实现输入是 dense、coo、csr 之间的形状比较。 
-Paddle需要扩充API,新增 is_same_shape API， 调用路径为：`paddle.is_same_shape`
+本任务的目标是在 Paddle 中添加 paddle.incubate.sparse.is_same_shap 算子， 实现输入是 dense、coo、csr 之间的形状比较。 
+Paddle需要扩充API,新增 is_same_shape API， 调用路径为：`paddle.incubate.sparse.is_same_shap`
 
 ## 3、意义
 
@@ -41,18 +41,11 @@ paddle中要实现九种交叉比较，故自行实现
 
 ## 命名与参数设计
 
-在 python/paddle/tensor/attribute.py 中新增api，
-在 paddle/fluid/pybind/eager_method.cc 中实现，作为TensorObject的类成员函数，对比self.tensor.shape是否一致
+在 python/paddle/incubate/sparse/multiary.py 中新增api，
+
 
 ```python
 def is_same_shape(x, y)
-```
-
-```c
-static PyObject* tensor_method_is_same_shape(TensorObject* self,
-                                             TensorObject* other,
-                                             PyObject* args,
-                                             PyObject* kwargs)
 ```
 
 
@@ -62,7 +55,15 @@ static PyObject* tensor_method_is_same_shape(TensorObject* self,
 
 ## API实现方案
 
-参考numpy实现，对比self.tensor.shape是否一致
+在 paddle/fluid/pybind/eager_method.cc 中实现，作为TensorObject的类成员函数，对比self.tensor.shape是否一致
+静态图实现：目前sparse系列暂不支持静态图
+
+```c
+static PyObject* tensor_method_is_same_shape(TensorObject* self,
+                                             TensorObject* other,
+                                             PyObject* args,
+                                             PyObject* kwargs)
+```
 
 # 六、测试和验收的考量
 
