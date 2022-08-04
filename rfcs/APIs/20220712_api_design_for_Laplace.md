@@ -387,7 +387,10 @@ class API 中的具体实现（部分方法已完成开发，故直接使用源�
 - `kl_divergence` 两个Laplace分布之间的kl散度(other--Laplace类的一个实例):
 
         (self.scale * paddle.exp(paddle.abs(self.loc - other.loc) / self.scale) + paddle.abs(self.loc - other.loc)) / other.scale + paddle.log(other.scale / self.scale) - 1
-     该方法在竞品pytorch和tensorflow中均未实现，参考文献：https://openaccess.thecvf.com/content/CVPR2021/supplemental/Meyer_An_Alternative_Probabilistic_CVPR_2021_supplemental.pdf 
+     参考文献：https://openaccess.thecvf.com/content/CVPR2021/supplemental/Meyer_An_Alternative_Probabilistic_CVPR_2021_supplemental.pdf 
+
+    同时在`paddle/distribution/kl.py` 中注册`_kl_laplace_laplace`函数，使用时可直接调用kl_divergence计算laplace分布之间的kl散度。
+  
 
 # 六、测试和验收的考量
 
@@ -395,20 +398,31 @@ class API 中的具体实现（部分方法已完成开发，故直接使用源�
 
 1. 测试Lapalce分布的特性
 
-- 测试方法：该部分主要测试分布的均值、方差、熵等特征。类TestLaplace继承unittest.TestCase，分别实现方法setUp（初始化），test_mean（mean单测），test_variance（variance单测），test_stddev（stddev单测），test_entropy（entropy单测），test_sample（sample单测）。其中均值、方差、标准差通过Numpy计算相应值，对比Laplace类中相应property的返回值，若一致即正确；采样方法验证其返回的数据类型及数据形状是否合法；熵计算通过对比`scipy.stats.laplace.entropy`的值是否与类方法返回值一致验证结果的正确性。
+- 测试方法：该部分主要测试分布的均值、方差、熵等特征。类TestLaplace继承unittest.TestCase，分别实现方法setUp（初始化），test_mean（mean单测），test_variance（variance单测），test_stddev（stddev单测），test_entropy（entropy单测），test_sample（sample单测）。
 
-- 测试用例：单测需要覆盖单一维度的Laplace分布和多维度分布情况，因此使用两种初始化参数：1. 'one-dim': `loc=parameterize.xrand((2, )), scale=parameterize.xrand((2, ))`; 2. 'multi-dim': loc=parameterize.xrand((10, 20)), scale=parameterize.xrand((10, 20))。
+  * 均值、方差、标准差通过Numpy计算相应值，对比Laplace类中相应property的返回值，若一致即正确；
+  
+  * 采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合laplace分布。验证策略如下：随机采样30000个laplace分布下的样本值，计算采样样本的均值和方差，并比较同分布下`scipy.stats.laplace`返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于laplace分布，若计算所得ks值小于0.02，则拒绝不一致假设，两者属于同一分布；
+  
+  * 熵计算通过对比`scipy.stats.laplace.entropy`的值是否与类方法返回值一致验证结果的正确性。
+
+- 测试用例：单测需要覆盖单一维度的Laplace分布和多维度分布情况，因此使用两种初始化参数
+
+  * 'one-dim': `loc=parameterize.xrand((2, )), scale=parameterize.xrand((2, ))`; 
+  * 'multi-dim': loc=parameterize.xrand((10, 20)), scale=parameterize.xrand((10, 20))。
 
 
 2. 测试Lapalce分布的概率密度函数
 
-- 测试方法：该部分主要测试分布各种概率密度函数。类TestMultinomialPdf继承unittest.TestCase，分别实现方法setUp（初始化），test_prob（prob单测），test_log_prob（log_prob单测），test_cdf（cdf单测），test_icdf（icdf）。以上分布在`scipy.stats.laplace`中均有实现，因此给定某个输入value，对比相同参数下Laplace分布的scipy实现以及paddle实现的结果，若误差在容忍度范围内则证明实现正确。
+- 测试方法：该部分主要测试分布各种概率密度函数。类TestLaplacePDF继承unittest.TestCase，分别实现方法setUp（初始化），test_prob（prob单测），test_log_prob（log_prob单测），test_cdf（cdf单测），test_icdf（icdf）。以上分布在`scipy.stats.laplace`中均有实现，因此给定某个输入value，对比相同参数下Laplace分布的scipy实现以及paddle实现的结果，若误差在容忍度范围内则证明实现正确。
 
-- 测试用例：为不失一般性，测试使用多维位置参数和尺度参数初始化Laplace类，并覆盖int型输入及float型输入。1. 'value-float': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([2., 5.])`; 2. 'value-int': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([2, 5])`; 3. 'value-multi-dim': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([[4., 6], [8, 2]])`。
+- 测试用例：为不失一般性，测试使用多维位置参数和尺度参数初始化Laplace类，并覆盖int型输入及float型输入。
+  * 'value-float': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([2., 5.])`; * 'value-int': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([2, 5])`; 
+  * 'value-multi-dim': `loc=np.array([0.2, 0.3]), scale=np.array([2, 3]), value=np.array([[4., 6], [8, 2]])`。
 
 3. 测试Lapalce分布之间的KL散度
 
-- 测试方法：该部分测试两个Laplace分布之间的KL散度。类TestMultinomialKl继承unittest.TestCase，分别实现setUp（初始化），test_kl_divergence（kl_divergence）。在scipy中`scipy.stats.entropy`可用来计算两个分布之间的散度。因此对比两个Laplace分布在paddle.Laplace下和在scipy.stats.laplace下计算的散度，若结果在误差范围内，则证明该方法实现正确。
+- 测试方法：该部分测试两个Laplace分布之间的KL散度。类TestLaplaceAndLaplaceKL继承unittest.TestCase，分别实现setUp（初始化），test_kl_divergence（kl_divergence）。在scipy中`scipy.stats.entropy`可用来计算两个分布之间的散度。因此对比两个Laplace分布在`paddle.distribution.kl_divergence`下和在scipy.stats.laplace下计算的散度，若结果在误差范围内，则证明该方法实现正确。
 
 - 测试用例：分布1：`loc=np.array([0.0]), scale=np.array([1.0])`, 分布2: `loc=np.array([1.0]), scale=np.array([0.5])`
 
