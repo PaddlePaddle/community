@@ -4,7 +4,7 @@
 | -------------- | ----------------------------------- |
 | 提交作者       | Nyakku Shigure（@SigureMo）         |
 | 提交时间       | 2022-08-02                          |
-| 版本号         | v0.4                                |
+| 版本号         | v0.5                                |
 | 依赖 CINN 版本 | develop                             |
 | 文件名         | 20220802_cinn_api_design_one_hot.md |
 
@@ -369,7 +369,8 @@ ir::Tensor OneHot(const ir::Tensor& indices,
                   const ir::Tensor& off_value,
                   const int depth,
                   const int axis,
-                  const Type& dtype);
+                  const Type& dtype,
+                  const std::string& output_name);
 ```
 
 ### 底层 OP 设计
