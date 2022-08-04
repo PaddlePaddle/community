@@ -1,6 +1,6 @@
 # CINN clip 设计文档
 
-| API名称                                                      | 新增API名称                                                  |
+| API名称                                                      | clip                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | 小张1998                                                     |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-03-01                                                   |
@@ -104,9 +104,9 @@ template <
 
 实现目标为对于张量 A = (M, N, K)，clip( A, a_max, a_min) 结果尺寸为 A = (M, N, K) 不变，但其中的数值发生变化，任一元素的值都在[ a_min, a_max ]的区间范围内
 
-1. 在 `cinn/frontend/base_build.h` 里声明 `BaseBuilder::Clip`。
-2. 在 `cinn/frontend/base_build.cc` 里实现 `BaseBuilder::Clip`。
-3. 在 `cinn/pybind/frontend` 对 Python 类 `BaseBuilder` 添加 `clip` 接口，并绑定到 `BaseBuilder::Clip`。
+1. 在 `cinn/frontend/net_build.h` 里声明 `NetBuilder::Clip`。
+2. 在 `cinn/frontend/net_build.cc` 里实现 `NetBuilder::Clip`。
+3. 在 `cinn/pybind/frontend` 对 Python 类 `NetBuilder` 添加 `clip` 接口，并绑定到 `NetBuilder::Clip`。
 4. 上层 `load_paddle_model` 调用提交到 `cinn/frontend/paddle_model_to_program.h` 和 `.cc` 文件下。
 
 通过使用 Builder 类的方法调用 clip。
