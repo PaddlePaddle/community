@@ -13,7 +13,7 @@
 ## 1、相关背景
 
 `argmax`和`argmin` 是众多神经网络编译器中基础的算子。
-假设输入为$x$，尺寸为 $(256, 256, 3)$，输入算子`argmax/argmin`可以得到张量$x$取得最大值/最小值时的索引值，当未指定`axis`参数时，返回索引为将张量拉平时的索引数值，当指定`axis`参数时，只在指定维度上进行比较，返回最大值的索引，例如当`axis=1`时，返回的张量尺寸为$(256, 3)$。
+假设输入为 $x$，尺寸为 $(256, 256, 3)$，输入算子`argmax/argmin`可以得到张量$x$取得最大值/最小值时的索引值，当未指定`axis`参数时，返回索引为将张量拉平时的索引数值，当指定`axis`参数时，只在指定维度上进行比较，返回最大值的索引，例如当`axis=1`时，返回的张量尺寸为 $(256, 3)$。
 为了提升 CINN API 丰富度，需要扩充 API `argmax`和`argmin`。
 
 ## 2、名词解释
@@ -47,14 +47,14 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
     auto real_axis = GetRealAxis(static_cast<int>(ndim), axis);
     auto reduce_axes = MakeReduceAxes(real_axis, data);
     auto target_shape = MakeReduceTargetShape(real_axis, data, keepdims, atleast1d);
-  
+
     auto compute = [ndim, keepdims, &real_axis, &reduce_axes, &func,
                     &data](const Array<Var>& indices) {
       Array<PrimExpr> eval_range;
       Array<PrimExpr> eval_indices;
       int arg_counter = 0;
       int red_counter = 0;
-  
+
       for (size_t i = 0; i < ndim; ++i) {
         if (std::find(real_axis.begin(), real_axis.end(), i) != real_axis.end()) {
           // real_axis contains i
@@ -70,7 +70,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
           }
         }
       }
-  
+
       Array<PrimExpr> ravel_shape;
       for (auto i : real_axis) {
         ravel_shape.push_back(data->shape[i]);
@@ -78,7 +78,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
       auto idx = detail::RavelIndex(eval_indices, ravel_shape);
       return func({idx, data(eval_range)}, reduce_axes, nullptr);
     };
-  
+
     auto temp_idx_val =
         tvm::te::compute(target_shape, compute, data->op->name + "_red_temp", kCommReduceIdx);
     auto temp_idx = temp_idx_val[0];
@@ -97,11 +97,11 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
       PrimExpr rhs_idx = static_cast<PrimExpr>(rhs[0]);
       PrimExpr lhs_val = static_cast<PrimExpr>(lhs[1]);
       PrimExpr rhs_val = static_cast<PrimExpr>(rhs[1]);
-    
+
       // These variables compare the actual values of the array
       auto is_bigger = lhs_val > rhs_val;
       auto is_same = lhs_val == rhs_val;
-    
+
       // This checks if the indices are correct for the reduction. E.g. for select_last_index
       // it gives precedence for later indices of the same element and precedence for sooner
       // indices if not select_last_index;
@@ -111,7 +111,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
       } else {
         proper_index = lhs_idx < rhs_idx;
       }
-    
+
       PrimExpr update_index = is_bigger || (is_same && proper_index);
       result.push_back(tvm::tir::Select(update_index, lhs[0], rhs[0]));  // idx
       result.push_back(tvm::tir::Select(is_bigger, lhs[1], rhs[1]));     // val
@@ -134,8 +134,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
         },
         name, tag);
   }
-
-```
+  ```
 
 - [XLA](https://github.com/pytorch/xla/blob/3d24d955b6121289a3c8bb86eda541fca7a0d69f/torch_xla/csrc/ops/arg_max.cpp)：与TVM类似。
 
