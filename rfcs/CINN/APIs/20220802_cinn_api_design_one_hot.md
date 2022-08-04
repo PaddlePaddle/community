@@ -1,10 +1,10 @@
 # CINN one_hot 设计文档
 
-| API 名称       | 新增 API 名称                       |
+| API 名称       | one_hot                             |
 | -------------- | ----------------------------------- |
 | 提交作者       | Nyakku Shigure（@SigureMo）         |
 | 提交时间       | 2022-08-02                          |
-| 版本号         | v0.2                                |
+| 版本号         | v0.3                                |
 | 依赖 CINN 版本 | develop                             |
 | 文件名         | 20220802_cinn_api_design_one_hot.md |
 
@@ -401,8 +401,8 @@ ir::Tensor OneHot(const ir::Tensor& indices,
 API 设计如下：
 
 ```cpp
-// cinn/frontend/base_builder.h
-class BaseBuilder {
+// cinn/frontend/net_builder.h
+class NetBuilder {
   Variable OneHot(const Variable& indices,
                   const Variable& on_value,
                   const Variable& off_value,
@@ -415,7 +415,7 @@ class BaseBuilder {
 Python 端调用示例如下：
 
 ```python
-builder = frontend.CinnBuilder(name="one_hot")
+builder = frontend.NetBuilder(name="one_hot")
 
 indices = builder.create_input(type=common.Float(32), shape=(3, ), id_hint="A")
 on_value = builder.create_input(type=common.Float(32), shape=(), id_hint="B")
@@ -440,7 +440,7 @@ res = builder.one_hot(indices, on_value, off_value, depth=3, axis=-1, dtype="flo
 具体规划为：
 
 - 编写 Compute、InferShape、InferDtype、Strategy，并注册算子
-- 向前端 BaseBuilder 添加该 API
+- 向前端 NetBuilder 添加该 API
 - 向前端 Paddle 添加该算子
 - 该算子单测
 
