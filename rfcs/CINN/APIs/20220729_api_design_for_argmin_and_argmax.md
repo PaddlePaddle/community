@@ -14,18 +14,18 @@
 
 `argmax`和`argmin` 是众多神经网络编译器中基础的算子。
 假设输入为$x$，尺寸为 $(256, 256, 3)$，输入算子`argmax/argmin`可以得到张量$x$取得最大值/最小值时的索引值，当未指定`axis`参数时，返回索引为将张量拉平时的索引数值，当指定`axis`参数时，只在指定维度上进行比较，返回最大值的索引，例如当`axis=1`时，返回的张量尺寸为$(256, 3)$。
-为了提升 CINN API 丰富度，需要扩充 API `argmax`和`argmin``。
+为了提升 CINN API 丰富度，需要扩充 API `argmax`和`argmin`。
 
 ## 2、名词解释
 
-张量/Tensor：指高维数组。
-argmax/argmin：指数组或张量取得最大值/最小值时的索引值。
-axis：指张量的维度。
+- 张量/Tensor：指高维数组。
+- argmax/argmin：指数组或张量取得最大值/最小值时的索引值。
+- axis：指张量的维度。
 
 ## 3、功能目标
 
 实现 argmax 功能，删除张量指定尺寸为一的维度。例如，对于张量 $A$ = range(9).reshape([3, 3])，
-argmax( $A$, axis = None) 结果为$8$，argmax( $A$, axis = 1) 结果为$[2, 2, 2]$，argmax( A, axis = 1，keepdim=True) 结果为[[2, 2, 2]]。
+argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2, 2]，argmax( A, axis = 1，keepdim=True) 结果为[[2, 2, 2]]。
 
 ## 4、意义
 
@@ -87,8 +87,6 @@ argmax( $A$, axis = None) 结果为$8$，argmax( $A$, axis = 1) 结果为$[2, 2,
         target_shape, [&temp_idx](const Array<Var>& indices) { return temp_idx(indices); },
         data->op->name + "_red", kCommReduceIdx);
   }
-  ```
-
   inline FCommReduce MakeArgmaxReducer(bool select_last_index = false) {
     // Create a Commutative Reducer with a comparison operation, and method to get the initial value.
     auto fcombine = [=](Array<Var> lhs, Array<Var> rhs) {
@@ -138,6 +136,7 @@ argmax( $A$, axis = None) 结果为$8$，argmax( $A$, axis = 1) 结果为$[2, 2,
   }
 
 ```
+
 - [XLA](https://github.com/pytorch/xla/blob/3d24d955b6121289a3c8bb86eda541fca7a0d69f/torch_xla/csrc/ops/arg_max.cpp)：与TVM类似。
 
 ```cpp
