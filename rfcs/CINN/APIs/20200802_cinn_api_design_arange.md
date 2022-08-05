@@ -1,5 +1,5 @@
 # CINN arange 设计文档
-|API名称 | 新增API名称 | 
+|API名称 | arange | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | MayYouBeProsperous | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2022-08-02 | 
@@ -148,19 +148,22 @@ tvm与xla的arange实现方法基本类似。
 start：区间起点（且区间包括此值），默认值为0。   
 end：区间终点（且通常区间不包括此值），默认值为None。  
 step：均匀分割的步长，默认值为1。  
-dtype：输出`tensor`的数据类型，支持int32、int64、float32、float64。当该参数值为None时， 输出`tensor`的数据类型为int64。默认值为None。  
+dtype：输出`tensor`的数据类型，支持int32、int64、float32、float64。默认值为float32。  
+注：当仅提供一个数值参数时，该参数用于设置end，而start设置为默认值0。例如，  
+arange(5) = [0, 1, 2, 3, 4]
+
 ## 底层OP设计
 1. 在 `cinn/hlir/op/contrib/arange.h` 里声明`arange`算子。
 2. 在 `cinn/hlir/op/contrib/arange.cc` 里实现`arange`算子和 `strategy`。
 ## API实现方案
-1. 在 `cinn/frontend/base_build.h` 里声明 `BaseBuilder::Arange`。
-2. 在 `cinn/frontend/base_build.cc` 里实现 `BaseBuilder::Arange`。
-3. 在 `cinn/pybind/frontend` 对 Python 类 `BaseBuilder` 添加 `arange` 接口，并绑定到 `BaseBuilder::Arange`。
+1. 在 `cinn/frontend/net_build.h` 里声明 `NetBuilder::Arange`。
+2. 在 `cinn/frontend/net_build.cc` 里实现 `NetBuilder::Arange`。
+3. 在 `cinn/pybind/frontend` 对 Python 类 `NetBuilder` 添加 `arange` 接口，并绑定到 `NetBuilder::Arange`。
 4. 上层 `load_paddle_model` 调用提交到 `cinn/frontend/paddle_model_to_program.h` 和 `.cc` 文件下。
 
 python通过Builder类的方法调用`arange`。
 ```python
-builder = CinnBuilder("test_basic")
+builder = NetBuilder("test_basic")
 b = builder.arange(1,10,1,"int32")
 ```
 # 六、测试和验收的考量
