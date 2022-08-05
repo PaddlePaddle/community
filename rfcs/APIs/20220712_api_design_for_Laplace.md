@@ -409,7 +409,7 @@ class API 中的具体实现（部分方法已完成开发，故直接使用源�
 - 测试用例：单测需要覆盖单一维度的Laplace分布和多维度分布情况，因此使用两种初始化参数
 
   * 'one-dim': `loc=parameterize.xrand((2, )), scale=parameterize.xrand((2, ))`; 
-  * 'multi-dim': loc=parameterize.xrand((10, 20)), scale=parameterize.xrand((10, 20))。
+  * 'multi-dim': loc=parameterize.xrand((5, 5)), scale=parameterize.xrand((5, 5))。
 
 
 2. 测试Lapalce分布的概率密度函数
