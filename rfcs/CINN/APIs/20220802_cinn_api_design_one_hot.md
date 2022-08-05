@@ -407,7 +407,7 @@ ir::Tensor OneHot(const ir::Tensor& indices,
                   const ir::Tensor& off_value,
                   const int depth,
                   const int axis,
-                  const Type& dtype,
+                  const std::string& dtype,
                   const std::string& output_name);
 ```
 
