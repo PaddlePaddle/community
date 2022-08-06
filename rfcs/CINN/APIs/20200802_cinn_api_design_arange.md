@@ -179,4 +179,10 @@ b = builder.arange(1,10,1,"int32")
 对其他模块无影响。
 
 # 附件及参考资料
-[深度学习框架开发指南-飞桨黑客松3.0](https://aistudio.baidu.com/aistudio/course/introduce/26351?directly=1&shared=1)
+[深度学习框架开发指南-飞桨黑客松3.0](https://aistudio.baidu.com/aistudio/course/introduce/26351?directly=1&shared=1)  
+[tvm的arange实现代码](https://github.com/apache/tvm/blob/111169c7df2831ab8ee40d5388ebcfcf551fd86f/include/tvm/topi/transform.h)  
+[xla的arange实现代码](https://github.com/pytorch/xla/blob/f72dcc655d8adbdef36e1f5c724a7dc8c2610fce/torch_xla/csrc/ops/ops.cpp)  
+[CINN IR抽象语法树](https://github.com/PaddlePaddle/CINN/pull/775)  
+[CINN项目贡献指南](https://github.com/PaddlePaddle/CINN/pull/810)  
+[CINN算子开发示例：pool2d_grad算子](https://github.com/PaddlePaddle/CINN/pull/858)  
+[CINN IR DSL在C++的matmul写法例子](https://github.com/PaddlePaddle/CINN/blob/develop/tutorials/matmul.cc)  
