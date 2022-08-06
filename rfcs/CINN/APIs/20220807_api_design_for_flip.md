@@ -119,7 +119,7 @@ torch.flip makes a copy of input’s data. This is different from NumPy’s np.f
 
 ## API实现方案
 
-实现目标为对于张量 A = (M, N, K)，flip( A, a_max, a_min) 结果尺寸为 A = (M, N, K) 不变，但其中的数值发生变化，任一元素的值都在[ a_min, a_max ]的区间范围内
+实现目标为对于张量 A = (M, N, K)，flip( A, dim) 结果尺寸为 A = (M, N, K) 不变，但其中的数值顺序发生变化，dim维度上的数据发生翻转。
 
 1. 在 `cinn/frontend/net_build.h` 里声明 `NetBuilder::flip`。
 2. 在 `cinn/frontend/net_build.cc` 里实现 `NetBuilder::flip`。
