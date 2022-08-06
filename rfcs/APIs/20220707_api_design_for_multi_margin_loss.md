@@ -138,9 +138,9 @@ tensorflow没有专门的multimarginloss
     name:str=None,
 ) -> Tensor:`
     - input:Tensor, 维度为[batchsize,num_classes]
-    - label:Tensor, 维度为[batchsize,1]
-    - weight: Optional[Tensor],维度为[num_classes,1]
-    - reduction:str,'None','mean','sum
+    - label:Tensor, 维度为[batchsize,]
+    - weight: Optional[Tensor],维度为[num_classes,]
+    - reduction:str,'none','mean','sum
     - name (str,可选)
 和`
 - paddle.nn.MultiMarginLoss(
@@ -158,11 +158,11 @@ tensorflow没有专门的multimarginloss
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
    2. 检查输入的 dtype（含 `input`、`label`、`weight`）（同其余 functional loss 中的实现）
    3. 检查输入的`input`、`label`、`weight`维度是否正确。
+   4. 检查 p， 只支持 1 和 2（同 pytorch 的实现）。
 
 2. 计算
 
-   1. 根据公式先计算loss值
-   2. 沿轴1将loss相加
+   1. 根据公式计算每一个 batchsize 的 loss。
 
 3. 根据 `reduction`，输出 loss（同其余 functional loss 中的实现）
 # 六、测试和验收的考量
