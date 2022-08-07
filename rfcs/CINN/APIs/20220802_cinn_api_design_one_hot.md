@@ -422,17 +422,24 @@ ir::Tensor OneHot(const ir::Tensor& indices,
     - `depth` 大于 `0`
     - `on_value`、`off_value` 为 Scalar
     - `axis == -1` 时，将其修改为 `indices.ndim`
+  - 计算输出 shape（`input_shape.insert(axis, depth)`）
   - 利用 `lang::Compute` 描述计算（基本与 TVM 一致，主要利用 `ir::Select::Make` 进行选择）
 
 - `InferShapeForOneHot`
 
-  - 与 XLA 和 TVM 实现一致（`input_shape.insert(axis, depth)`）
+  - 对数据 shape 进行检查
+    - 对 shape 数量进行检查
+    - `on_value`、`off_value` 为 Scalar
+  - 计算输出 shape（`input_shape.insert(axis, depth)`）
 
 - `InferDtypeForOneHot`
 
   - 与参数 `dtype` 一致
 
 - `StrategyForOneHot`
+
+  - 包装 `OneHot` 返回的 compute，添加 Stages
+  - 编写 schedule 接收 compute 的输出
   - 注册 compute 和 schedule
 
 ### API 实现方案
@@ -465,9 +472,9 @@ res = builder.one_hot(indices, on_value, off_value, depth=3, axis=-1, dtype="flo
 
 ## 六、测试和验收的考量
 
-单元测试（`python/tests/ops/test_ont_hot.py`）需要进行以下考量：
+单元测试（`cinn/hlir/op/contrib/one_hot_test.cc`）需要进行以下考量：
 
-- `axis` 的各种取值，包括 `-1` 以及正数
+- `axis` 的各种取值，包括 `-1` 以及正数（含上界 `indices.ndim`）
 - `indices` 高维度输入的正确性
 - `depth` 的各种取值
 - `dtype` 的各种取值最后输出的数据类型的正确性
@@ -478,12 +485,12 @@ res = builder.one_hot(indices, on_value, off_value, depth=3, axis=-1, dtype="flo
 
 具体规划为：
 
-- 编写 Compute、InferShape、InferDtype、Strategy，并注册算子
-- 向前端 NetBuilder 添加该 API
-- 向前端 Paddle 添加该算子
-- 该算子单测
-
-整体大概在 1~3 周内完成
+- 基本算子编写和注册「半周内，已完成」
+  - 编写 Compute、InferShape、InferDtype、Strategy，并注册算子
+  - 向前端 NetBuilder 添加该 API
+  - 通过 pybind 暴露该 API 到 Python 端
+- 调试算子，处理边界情况，编写单测「一周内」
+- 向前端 Paddle 添加该算子「一周内」
 
 ## 八、影响面
 
