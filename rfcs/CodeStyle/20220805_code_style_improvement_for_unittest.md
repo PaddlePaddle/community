@@ -4,7 +4,7 @@
 | ------------ | ----------------------------------------------- |
 | 提交作者     | Nyakku Shigure(@SigureMo)、何双池（@Yulv-git）  |
 | 提交时间     | 2022-08-05                                      |
-| 版本号       | v0.1                                            |
+| 版本号       | v0.2                                            |
 | 依赖飞桨版本 | develop                                         |
 | 文件名       | 20220805_code_style_improvement_for_unittest.md |
 
@@ -250,56 +250,93 @@ print("Transformed code:", ast.unparse(new_tree))
 
 可以看到，通过 AST 解析的方式可以轻松实现对 Python 代码的转换，可读性也非常好，也可以轻松涵盖 Python 中既支持位置参数也支持关键字参数的各种情况。
 
-但由于 AST 转换并不是无损的（在 Python 语法层面无损，但比如注释之类的无法保留），因此不能直接将代码文件转换后整个写回，而是应当对匹配到的位置进行局部替换。由于 AST 上是包含 `lineno`、`col_offset` 等信息的，因此这也是可实现的（目前暂未实现，但可行性是没问题的）。
+但由于 AST 转换并不是无损的（在 Python 语法层面无损，但比如注释之类的无法保留），因此不能直接将代码文件转换后整个写回，而是应当对匹配到的位置进行局部替换。由于 AST 上是包含 `lineno`、`col_offset` 等信息的，这些目前也已经实现。
 
 #### 类型判断问题
 
 对于 `self.assertTrue(np.array_equal(...))` 是要判断类型来进一步替换的，而在本问题中，在代码语法分析阶段（或者说编译时）基本不可能把所有类型没有疏漏地推断出来，最可靠的只有运行时来进行类型判断，这需要将 `np.array_equal` 参数的 `dtype` 打印出来，因此需要在 `np.array_equal(a, b)` 代码下面插入类似 `print(__file__, a.dtype, b.dtype)` 的代码来将类型及文件名打印出来，这样可以知道各个文件中的数据类型是什么了。
 
-<!-- 但这样有一个问题是依赖于运行时，而且需要预先插入 `print` 相关的代码，因此 -->
+但这样有一个问题是依赖于运行时，而且需要预先插入 `print` 相关的代码，在实现上稍有麻烦。
+
+另一种解决方案是直接用肉眼对代码上下文进行判断，进而判断比较变量的数据类型，但由于上下文一般比较复杂，有些数据的数据类型信息隐藏的很深，因此可能判断并不准确。
+
+为了避免全部肉眼判断与手动替换带来的巨大工作量，这里首先将 `self.assertTrue(np.array_equal(...))` 全部自动替换为 `np.testing.assert_array_equal(...)`，之后对现存 `np.testing.assert_array_equal(...)` 进行搜索，手动将 `float` 类型数据的替换为 `np.testing.assert_allclose(...)`。
+
+在已有的测试中（https://github.com/PaddlePaddle/Paddle/pull/44947），已经尝试将 `self.assertTrue(np.array_equal(...))` 全部自动替换为 `np.testing.assert_array_equal(...)`，CI 没有任何问题，因此该替换是安全的，因此在不进行手工替换的情况下也是没有任何问题的。但为了让测试更加严谨，应当手动再将 `float` 的替换为 `np.testing.assert_allclose(...)`。在无法立即判断的情况下保持现状。
+
+<!-- TODO: 这里的描述需要优化，方案目前还没有完全确定 -->
 
 ### 目标二
 
-<!-- python/paddle/tests,python/paddle/fluid/tests,python/paddle/fluid/contrib -->
+如目标一中所述，`self.assertTrue(np.allclose(...))` 这一文本模式前缀（`self.assertTrue(np.allclose(`）的匹配是非常简单的，使用简单的正则足矣。在 yapf 自动格式化的前提下，该模式不会过于复杂化，唯一需要额外考虑的情况是有可能如下折行的情况：
 
-<!-- *_mlu.py,*_ipu.py,*_npu.py,*_xpu.py, -->
+```python
+self.assertTrue(
+    np.allclose(...))
 
-<!-- check_approval的人是qili93 (Recommend), luotao1 -->
+# 一个现有的案例
+# https://github.com/PaddlePaddle/Paddle/blob/ce9d2a9ec4daa8e0809eac7f44d731ed8189dc66/python/paddle/fluid/tests/unittests/test_sparse_elementwise_op.py#L112-L123
+# python/paddle/fluid/tests/unittests/test_sparse_elementwise_op.py
+self.assertTrue(
+    np.allclose(expect_res.numpy(),
+                actual_res.to_dense().numpy(),
+                equal_nan=True))
+self.assertTrue(
+    np.allclose(dense_x.grad.numpy(),
+                coo_x.grad.to_dense().numpy(),
+                equal_nan=True))
+self.assertTrue(
+    np.allclose(dense_y.grad.numpy(),
+                coo_y.grad.to_dense().numpy(),
+                equal_nan=True))
+```
 
-## 二、飞桨现状
+因此正则需要覆盖这一情况。此外当然需要考虑 `np.array_equal` 的情况及之前提到的一些等价情况，根据这些目前拟定的正则为 `self\.assert(True|Equal)\(\s*(np|numpy)\.(allclose|array_equal)`，可在后续开发过程中根据其他边界情况进行细化。
 
-对飞桨框架目前支持此功能的现状调研，如果不支持此功能，如是否可以有替代实现的 API，是否有其他可绕过的方式，或者用其他 API 组合实现的方式；
+在关键词触发时应当正确地阻止提交并给出明确的提示信息，并给出 Wiki 链接以详细说明问题，因此需要编写相应的 Wiki 页面。
 
-## 三、业内方案调研
+check_approval 的人是 qili93 (Recommend), luotao1。
 
-描述业内深度学习框架如何实现此功能，包括与此功能相关的现状、未来趋势；调研的范围包括不限于 TensorFlow、PyTorch、NumPy 等
+## 三、任务分工和排期规划
 
-## 四、对比分析
+整个任务可以根据前文所述的目标一和目标二进行划分，两个目标分别由两人各自主导，另外一人进行辅助（视具体工作量和完成进度而定）
 
-对第三部分调研的方案进行对比**评价**和**对比分析**，论述各种方案的优劣势。
+- 目标一：存量修改
+  - 主要负责人：Nyakku（@SigureMo）
+  - 主要工作内容
+    - 编写脚本修改现有单测代码「半周内」
+      - `self.assertTrue(np.allclose(...))` -> `np.testing.assert_allclose(...)`
+      - `self.assertTrue(np.array_equal(...))` -> `np.testing.assert_array_equal(...)`
+    - 根据 CI 结果进行调试，尽可能使其通过「一周内」
+    - 肉眼判断现有的 `np.testing.assert_array_equal(...)`，将判断为 `float` 类型的数据修改为 `np.testing.assert_allclose(...)`「一周半内」
+- 目标二：增量阻止
+  - 主要负责人：何双池（@Yulv-git）
+  - 主要工作内容
+    - 编写 Wiki 页面（可参考本 RFC 和 [#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)）「一周内」
+    - 编写 CI 增量阻止脚本「一周内」
+    - 调试脚本使其能够正确工作（需测试存在关键词的 commit 确实无法提交）「一周内」
 
-## 五、设计思路与实现方案
+工作小组可互相配合，共同完成目标一和目标二的工作。
 
-### 命名与参数设计
+整体工作大概为三周，可根据实际情况提前完成，主要工作时间为 8 月 8 日（周一）到 8 月 29 日（周一），预计在八月末完成全部工作。
 
-参考：[飞桨 API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html)
+## 四、其他注意事项及风险评估
 
-### 底层 OP 设计
+由于 Paddle 内部已经有部分 IPU、NPU、XPU、MLU 相关单测的优化，因此在修改过程中应当注意避开这些单测文件（`*_mlu.py,*_ipu.py,*_npu.py,*_xpu.py`）。
 
-### API 实现方案
+CI 实在过不去的单测可交给 Paddle 内部修复，但这应当是在充分测试后确定自身无法修复的情况下。
 
-## 六、测试和验收的考量
+## 五、影响面
 
-参考：[新增 API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
-
-## 七、可行性分析和排期规划
-
-时间和开发排期规划，主要 milestone
-
-## 八、影响面
-
-需要进一步讨论的问题，开放性问题，有争议问题；对其他模块是否有影响
+不会也不应该对现有模块产生任何影响，会极大优化现有单测的报错信息，提高开发人员的开发效率。
 
 ## 名词解释
 
+- AST（Abstract Syntax Tree）：抽象语法树
+
 ## 附件及参考资料
+
+- [issue #44641](https://github.com/PaddlePaddle/Paddle/issues/44641)
+- [NumPy testing module docs](https://numpy.org/doc/stable/reference/routines.testing.html)
+- [Python ast reference](https://docs.python.org/3/library/ast.html)
+- [Paddle CI `check_file_diff_approvals` script](https://github.com/PaddlePaddle/Paddle/blob/develop/tools/check_file_diff_approvals.sh)
