@@ -74,10 +74,6 @@ if [ "${INVALID_PADDLE_CHECK}" != "" ] && [ "${GIT_PR_ID}" != "" ]; then
 fi
 ```
 
-<!-- python/paddle/tests,python/paddle/fluid/tests,python/paddle/fluid/contrib -->
-
-<!-- *_mlu.py,*_ipu.py,*_npu.py,*_xpu.py, -->
-
 ### 3、意义
 
 修改为 `np.testing` 模块下的函数来进行提示可以极大优化单测的提示信息，为开发人员定位错误问题提供更全面的参考信息。
@@ -86,9 +82,189 @@ fi
 
 ### 目标一
 
-对于现有代码来说 `self.assertTrue(np.allclose(...))` 是一个非常简单的模式，可通过正则来直接匹配
+#### 文本替换问题
+
+对于现有代码来说 `self.assertTrue(np.allclose(...))` 是一个非常简单的模式，其前缀 `self.assertTrue(np.allclose(` 是完全可以通过正则甚至简单的文本搜索来搜索到，但如果想要无错漏地将整个模式匹配出来进行替换，可能正则表达式并不能很好地完成（要考虑到括号是可以无限嵌套的，而正则表达式是不能表达无限嵌套的，除非将其嵌套限制在一个深度，但那样写出来的正则可读性也极差）
+
+而对于 Python 代码的解析，当然最好的方式是直接将其翻译为 Python 的语法树，然后在语法树上匹配相应的模式并进行替换即可。Python 代码到语法树的解析，我们可以利用 builtin 的 `ast` 模块，以下是一个目前实现的 `self.assertTrue(np.allclose(...))` 替换的简单 demo：
+
+```python
+# required: python >= 3.10
+import ast
+from typing import Optional
+
+class TransformAssertTrueAllClose(ast.NodeTransformer):
+    def visit_Call(self, node: ast.Call):
+        transformed_node: ast.AST
+        match node:
+            case ast.Call(
+                func=ast.Attribute(value=ast.Name(id="self"), attr="assertTrue"),
+                args=[
+                    ast.Call(
+                        func=ast.Attribute(value=ast.Name(id="np"), attr="allclose"),
+                        args=allclose_args,
+                        keywords=allclose_kwargs,
+                    ),
+                    *assert_true_args,
+                ],
+                keywords=assert_true_kwargs,
+            ):
+                actual: ast.AST
+                desired: ast.AST
+                rtol: Optional[ast.AST] = None
+                atol: Optional[ast.AST] = None
+                equal_nan: Optional[ast.AST] = None
+                err_msg: Optional[ast.AST] = None
+
+                # https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertEqual
+                # self.assertTrue(np.allclose(...), assert_true_args)
+                # self.assertTrue(np.allclose(...), msg=assert_true_kwargs)
+                if assert_true_args:
+                    err_msg = assert_true_args[0]
+                for kw in assert_true_kwargs:
+                    if kw.arg == "msg":
+                        err_msg = kw.value
+
+                # https://numpy.org/doc/stable/reference/generated/numpy.allclose.html
+                assert allclose_args, "allclose_args is empty"
+                # parse actual and desired
+                actual = allclose_args[0]
+                desired = allclose_args[1]
+                # parse rtol and atol from remaining args
+                if len(allclose_args) > 2:
+                    rtol = allclose_args[2]
+                    if len(allclose_args) > 3:
+                        atol = allclose_args[3]
+                        if len(allclose_args) > 4:
+                            equal_nan = allclose_args[4]
+                # or parse from kwargs
+                for kw in allclose_kwargs:
+                    if kw.arg == "rtol":
+                        rtol = kw.value
+                    elif kw.arg == "atol":
+                        atol = kw.value
+                    elif kw.arg == "equal_nan":
+                        equal_nan = kw.value
+
+                # https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html
+                # testing.assert_allclose(actual, desired, rtol=1e-07, atol=0, equal_nan=True, err_msg='', verbose=True)
+                keyword_args: list[ast.AST] = []
+                if rtol is not None:
+                    keyword_args.append(ast.keyword(arg="rtol", value=rtol))
+                if atol is not None:
+                    keyword_args.append(ast.keyword(arg="atol", value=atol))
+                if equal_nan is not None:
+                    keyword_args.append(ast.keyword(arg="equal_nan", value=equal_nan))
+                if err_msg is not None:
+                    keyword_args.append(ast.keyword(arg="err_msg", value=err_msg))
+                transformed_node = ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Attribute(value=ast.Name(id="np", ctx=ast.Load()), attr="testing", ctx=ast.Load()),
+                        attr="assert_allclose",
+                        ctx=ast.Load(),
+                    ),
+                    args=[actual, desired],
+                    keywords=keyword_args,
+                )
+            case _:
+                transformed_node = node
+        return transformed_node
+
+
+
+code = """
+self.assertTrue(
+    np.allclose(res[0],
+        feed_add,
+        rtol=1e-5),
+    # 这个字符串里括号都不匹配，正则可是很难写的
+    msg='blabla((((()()((xxxdfdf('
+)
+"""
+tree = ast.parse(code)
+new_tree = ast.fix_missing_locations(TransformAssertTrueAllClose().visit(tree))
+
+print("Before:")
+print(ast.dump(tree, indent=4))
+
+# Before:
+# Module(
+#     body=[
+#         Expr(
+#             value=Call(
+#                 func=Attribute(
+#                     value=Attribute(
+#                         value=Name(id='np', ctx=Load()),
+#                         attr='testing',
+#                         ctx=Load()),
+#                     attr='assert_allclose',
+#                     ctx=Load()),
+#                 args=[
+#                     Subscript(
+#                         value=Name(id='res', ctx=Load()),
+#                         slice=Constant(value=0),
+#                         ctx=Load()),
+#                     Name(id='feed_add', ctx=Load())],
+#                 keywords=[
+#                     keyword(
+#                         arg='rtol',
+#                         value=Constant(value=1e-05)),
+#                     keyword(
+#                         arg='err_msg',
+#                         value=Constant(value='blabla((((()()((xxxdfdf('))]))],
+#     type_ignores=[])
+
+print("After:")
+print(ast.dump(new_tree, indent=4))
+
+# After:
+# Module(
+#     body=[
+#         Expr(
+#             value=Call(
+#                 func=Attribute(
+#                     value=Attribute(
+#                         value=Name(id='np', ctx=Load()),
+#                         attr='testing',
+#                         ctx=Load()),
+#                     attr='assert_allclose',
+#                     ctx=Load()),
+#                 args=[
+#                     Subscript(
+#                         value=Name(id='res', ctx=Load()),
+#                         slice=Constant(value=0),
+#                         ctx=Load()),
+#                     Name(id='feed_add', ctx=Load())],
+#                 keywords=[
+#                     keyword(
+#                         arg='rtol',
+#                         value=Constant(value=1e-05)),
+#                     keyword(
+#                         arg='err_msg',
+#                         value=Constant(value='blabla((((()()((xxxdfdf('))]))],
+#     type_ignores=[])
+
+print("Transformed code:", ast.unparse(new_tree))
+# Transformed code: np.testing.assert_allclose(res[0], feed_add, rtol=1e-05, err_msg='blabla((((()()((xxxdfdf(')
+```
+
+可以看到，通过 AST 解析的方式可以轻松实现对 Python 代码的转换，可读性也非常好，也可以轻松涵盖 Python 中既支持位置参数也支持关键字参数的各种情况。
+
+但由于 AST 转换并不是无损的（在 Python 语法层面无损，但比如注释之类的无法保留），因此不能直接将代码文件转换后整个写回，而是应当对匹配到的位置进行局部替换。由于 AST 上是包含 `lineno`、`col_offset` 等信息的，因此这也是可实现的（目前暂未实现，但可行性是没问题的）。
+
+#### 类型判断问题
+
+对于 `self.assertTrue(np.array_equal(...))` 是要判断类型来进一步替换的，而在本问题中，在代码语法分析阶段（或者说编译时）基本不可能把所有类型没有疏漏地推断出来，最可靠的只有运行时来进行类型判断，这需要将 `np.array_equal` 参数的 `dtype` 打印出来，因此需要在 `np.array_equal(a, b)` 代码下面插入类似 `print(__file__, a.dtype, b.dtype)` 的代码来将类型及文件名打印出来，这样可以知道各个文件中的数据类型是什么了。
+
+<!-- 但这样有一个问题是依赖于运行时，而且需要预先插入 `print` 相关的代码，因此 -->
 
 ### 目标二
+
+<!-- python/paddle/tests,python/paddle/fluid/tests,python/paddle/fluid/contrib -->
+
+<!-- *_mlu.py,*_ipu.py,*_npu.py,*_xpu.py, -->
+
+<!-- check_approval的人是qili93 (Recommend), luotao1 -->
 
 ## 二、飞桨现状
 
