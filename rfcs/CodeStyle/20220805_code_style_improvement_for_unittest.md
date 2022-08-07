@@ -4,7 +4,7 @@
 | ------------ | ----------------------------------------------- |
 | 提交作者     | Nyakku Shigure(@SigureMo)、何双池（@Yulv-git）  |
 | 提交时间     | 2022-08-05                                      |
-| 版本号       | v0.2                                            |
+| 版本号       | v0.3                                            |
 | 依赖飞桨版本 | develop                                         |
 | 文件名       | 20220805_code_style_improvement_for_unittest.md |
 
@@ -250,7 +250,7 @@ print("Transformed code:", ast.unparse(new_tree))
 
 可以看到，通过 AST 解析的方式可以轻松实现对 Python 代码的转换，可读性也非常好，也可以轻松涵盖 Python 中既支持位置参数也支持关键字参数的各种情况。
 
-但由于 AST 转换并不是无损的（在 Python 语法层面无损，但比如注释之类的无法保留），因此不能直接将代码文件转换后整个写回，而是应当对匹配到的位置进行局部替换。由于 AST 上是包含 `lineno`、`col_offset` 等信息的，这些目前也已经实现。
+但由于 AST 转换并不是无损的（在 Python 语法层面无损，但比如注释之类的无法保留），因此不能直接将代码文件转换后整个写回，而是应当对匹配到的位置进行局部替换。由于 AST 上是包含 `lineno`、`col_offset` 等信息的，因此是完全可以实现的，目前也已经进行了相应的尝试实现。
 
 #### 类型判断问题
 
@@ -268,7 +268,7 @@ print("Transformed code:", ast.unparse(new_tree))
 
 ### 目标二
 
-如目标一中所述，`self.assertTrue(np.allclose(...))` 这一文本模式前缀（`self.assertTrue(np.allclose(`）的匹配是非常简单的，使用简单的正则足矣。在 yapf 自动格式化的前提下，该模式不会过于复杂化，唯一需要额外考虑的情况是有可能如下折行的情况：
+如目标一中所述，`self.assertTrue(np.allclose(...))` 这一文本模式前缀（`self.assertTrue(np.allclose(`）的匹配是非常简单的，使用简单的正则即可（利用 `grep`）。在 yapf 自动格式化的前提下，该模式不会过于复杂化，唯一需要额外考虑的情况是有可能如下折行的情况：
 
 ```python
 self.assertTrue(
@@ -291,7 +291,18 @@ self.assertTrue(
                 equal_nan=True))
 ```
 
-因此正则需要覆盖这一情况。此外当然需要考虑 `np.array_equal` 的情况及之前提到的一些等价情况，根据这些目前拟定的正则为 `self\.assert(True|Equal)\(\s*(np|numpy)\.(allclose|array_equal)`，可在后续开发过程中根据其他边界情况进行细化。
+因此正则需要覆盖这一情况。此外当然需要考虑 `np.array_equal` 的情况及之前提到的一些等价情况，根据这些目前拟定的正则如下：
+
+```text
+self\.assert(True|Equal)\(\s*(np|numpy)\.(allclose|array_equal)
+                 │         │    │                 │
+                 │         │    │                 └─────────  两种需要修改替换的函数
+                 │         │    └───────────────────────────  等价情况：np 与 numpy
+                 │         └────────────────────────────────  边界情况：折行
+                 └──────────────────────────────────────────  等价情况：self.assertTrue(...) 与 self.assertEqual(..., True)
+```
+
+部分未考虑到的情况可在后续开发过程中根据其他边界情况进行细化。
 
 在关键词触发时应当正确地阻止提交并给出明确的提示信息，并给出 Wiki 链接以详细说明问题，因此需要编写相应的 Wiki 页面。
 
