@@ -4,7 +4,7 @@
 | ------------ | ----------------------------------------------- |
 | 提交作者     | Nyakku Shigure(@SigureMo)、何双池（@Yulv-git）  |
 | 提交时间     | 2022-08-05                                      |
-| 版本号       | v0.3                                            |
+| 版本号       | v0.4                                            |
 | 依赖飞桨版本 | develop                                         |
 | 文件名       | 20220805_code_style_improvement_for_unittest.md |
 
@@ -47,9 +47,7 @@ np.testing.assert_allclose(x, y, err_msg="compare x and y")
 修改 Paddle 现有单测中的利用 `self.assertEqual` 或者 `self.assertTrue` 来对 np.ndarray 进行比较断言的代码，替换成合适的 `np.testing` 函数，这主要包含了以下几种情况（模式）。
 
 - `self.assertTrue(np.allclose(...))`，需要修改为 `np.testing.assert_allclose(...)`
-- `self.assertTrue(np.array_equal(...))`，视情况而定
-  - 如果测试的数据的数据类型为 `float`（含 `float16`、`float32` 等）类型，则需要修改为 `np.testing.assert_allclose(...)`
-  - 如果测试的数据的数据类型为 `int`（含 `int32`、`int64` 等）类型，则需要修改为 `np.testing.assert_array_equal(...)`
+- `self.assertTrue(np.array_equal(...))`，需要修改为 `np.testing.assert_array_equal(...)`，如果修改后因为硬件本身的精度问题导致测试无法通过，需要修改为 `np.testing.assert_allclose(...)`，并搭配其参数 `atol` 和 `rtol` 来保证 CI 通过。
 
 > **Note**
 >
@@ -84,7 +82,7 @@ fi
 
 #### 文本替换问题
 
-对于现有代码来说 `self.assertTrue(np.allclose(...))` 是一个非常简单的模式，其前缀 `self.assertTrue(np.allclose(` 是完全可以通过正则甚至简单的文本搜索来搜索到，但如果想要无错漏地将整个模式匹配出来进行替换，可能正则表达式并不能很好地完成（要考虑到括号是可以无限嵌套的，而正则表达式是不能表达无限嵌套的，除非将其嵌套限制在一个深度，但那样写出来的正则可读性也极差）
+对于现有代码来说 `self.assertTrue(np.allclose(...))` 是一个非常简单的模式，其前缀 `self.assertTrue(np.allclose(` 是完全可以通过正则甚至简单的文本搜索来搜索到，但如果想要无错漏地将整个模式匹配出来进行替换，可能正则表达式并不能很好地完成（要考虑到括号是可以无限嵌套的，而正则表达式是不能表达无限嵌套的，除非将其嵌套限制在一个深度，但那样写出来的正则可读性也极差）。
 
 而对于 Python 代码的解析，当然最好的方式是直接将其翻译为 Python 的语法树，然后在语法树上匹配相应的模式并进行替换即可。Python 代码到语法树的解析，我们可以利用 builtin 的 `ast` 模块，以下是一个目前实现的 `self.assertTrue(np.allclose(...))` 替换的简单 demo：
 
@@ -248,23 +246,15 @@ print("Transformed code:", ast.unparse(new_tree))
 # Transformed code: np.testing.assert_allclose(res[0], feed_add, rtol=1e-05, err_msg='blabla((((()()((xxxdfdf(')
 ```
 
-可以看到，通过 AST 解析的方式可以轻松实现对 Python 代码的转换，可读性也非常好，也可以轻松涵盖 Python 中既支持位置参数也支持关键字参数的各种情况。
+可以看到，通过 AST 解析的方式可以轻松实现对 Python 代码的转换，可读性和可调试性也非常好，也可以轻松涵盖 Python 中既支持位置参数也支持关键字参数的各种情况。
 
-但由于 AST 转换并不是无损的（在 Python 语法层面无损，但比如注释之类的无法保留），因此不能直接将代码文件转换后整个写回，而是应当对匹配到的位置进行局部替换。由于 AST 上是包含 `lineno`、`col_offset` 等信息的，因此是完全可以实现的，目前也已经进行了相应的尝试实现。
+但由于 AST 转换并不是无损的（在 Python 语法层面无损，但比如注释之类的无法保留），因此不能直接将代码文件转换后整个写回，而是应当对匹配到的位置进行局部替换。由于 AST 上是包含 `lineno`、`col_offset` 等信息的，因此是完全可以实现的，目前也已经尝试了相应的实现。
 
-#### 类型判断问题
+#### 测试通过性问题
 
-对于 `self.assertTrue(np.array_equal(...))` 是要判断类型来进一步替换的，而在本问题中，在代码语法分析阶段（或者说编译时）基本不可能把所有类型没有疏漏地推断出来，最可靠的只有运行时来进行类型判断，这需要将 `np.array_equal` 参数的 `dtype` 打印出来，因此需要在 `np.array_equal(a, b)` 代码下面插入类似 `print(__file__, a.dtype, b.dtype)` 的代码来将类型及文件名打印出来，这样可以知道各个文件中的数据类型是什么了。
+在测试（或者说 CI）可以通过的情况下，不应对 `atol` 和 `rtol` 进行修改，仅仅在测试无法通过的情况下，可根据 `np.testing` 模块返回的信息（包含一些 diff 信息）调整 `atol` 和 `rtol`。
 
-但这样有一个问题是依赖于运行时，而且需要预先插入 `print` 相关的代码，在实现上稍有麻烦。
-
-另一种解决方案是直接用肉眼对代码上下文进行判断，进而判断比较变量的数据类型，但由于上下文一般比较复杂，有些数据的数据类型信息隐藏的很深，因此可能判断并不准确。
-
-为了避免全部肉眼判断与手动替换带来的巨大工作量，这里首先将 `self.assertTrue(np.array_equal(...))` 全部自动替换为 `np.testing.assert_array_equal(...)`，之后对现存 `np.testing.assert_array_equal(...)` 进行搜索，手动将 `float` 类型数据的替换为 `np.testing.assert_allclose(...)`。
-
-在已有的测试中（https://github.com/PaddlePaddle/Paddle/pull/44947），已经尝试将 `self.assertTrue(np.array_equal(...))` 全部自动替换为 `np.testing.assert_array_equal(...)`，CI 没有任何问题，因此该替换是安全的，因此在不进行手工替换的情况下也是没有任何问题的。但为了让测试更加严谨，应当手动再将 `float` 的替换为 `np.testing.assert_allclose(...)`。在无法立即判断的情况下保持现状。
-
-<!-- TODO: 这里的描述需要优化，方案目前还没有完全确定 -->
+如果原来使用的是 `array_equal`，若测试不通过，可尝试修改为 `allclose` 并修改 `rtol` 和 `atol` 使其通过。
 
 ### 目标二
 
@@ -304,32 +294,34 @@ self\.assert(True|Equal)\(\s*(np|numpy)\.(allclose|array_equal)
 
 部分未考虑到的情况可在后续开发过程中根据其他边界情况进行细化。
 
-在关键词触发时应当正确地阻止提交并给出明确的提示信息，并给出 Wiki 链接以详细说明问题，因此需要编写相应的 Wiki 页面。
+在关键词触发时应当正确地阻止提交并给出明确的提示信息，并给出 Wiki 链接以详细说明问题，当然这需要额外编写相应的 Wiki 页面。
 
-check_approval 的人是 qili93 (Recommend), luotao1。
+在脚本中需要填写相应检查的人员，本问题 `check_approval` 的人是 `qili93 (Recommend), luotao1`。
 
 ## 三、任务分工和排期规划
 
 整个任务可以根据前文所述的目标一和目标二进行划分，两个目标分别由两人各自主导，另外一人进行辅助（视具体工作量和完成进度而定）
 
 - 目标一：存量修改
+
   - 主要负责人：Nyakku（@SigureMo）
   - 主要工作内容
     - 编写脚本修改现有单测代码「半周内」
       - `self.assertTrue(np.allclose(...))` -> `np.testing.assert_allclose(...)`
       - `self.assertTrue(np.array_equal(...))` -> `np.testing.assert_array_equal(...)`
+    - 编写 Wiki 页面（可参考本 RFC 和 [#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，原目标二任务调整到这里）「半周内」
     - 根据 CI 结果进行调试，尽可能使其通过「一周内」
-    - 肉眼判断现有的 `np.testing.assert_array_equal(...)`，将判断为 `float` 类型的数据修改为 `np.testing.assert_allclose(...)`「一周半内」
+
 - 目标二：增量阻止
+
   - 主要负责人：何双池（@Yulv-git）
   - 主要工作内容
-    - 编写 Wiki 页面（可参考本 RFC 和 [#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)）「一周内」
     - 编写 CI 增量阻止脚本「一周内」
     - 调试脚本使其能够正确工作（需测试存在关键词的 commit 确实无法提交）「一周内」
 
 工作小组可互相配合，共同完成目标一和目标二的工作。
 
-整体工作大概为三周，可根据实际情况提前完成，主要工作时间为 8 月 8 日（周一）到 8 月 29 日（周一），预计在八月末完成全部工作。
+整体工作大概为 2~3 周，可根据实际情况提前完成，主要工作时间为 8 月 8 日（周一）到 8 月 29 日（周一），预计在八月底之前完成全部工作。
 
 ## 四、其他注意事项及风险评估
 
