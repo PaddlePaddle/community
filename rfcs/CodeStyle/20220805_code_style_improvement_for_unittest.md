@@ -53,6 +53,8 @@ np.testing.assert_allclose(x, y, err_msg="compare x and y")
 >
 > 还需要考虑一些等价情况，比如 `self.assertEqual(..., True)` 与 `self.assertTrue(...)` 等价，因此 `self.assertEqual(np.allclose(...), True)` 等价于 `self.assertTrue(np.allclose(...))`，`self.assertEqual(np.array_equal(...), True)` 等价于 `self.assertTrue(np.array_equal(...))`。
 >
+> 再比如说 `self.assertTrue(np.isclose(...).all())` 也是与 `self.assertTrue(np.allclose(...))` 等价的。
+>
 > 另外，还有部分单测仅仅使用了 `import numpy` 而非 `import numpy as np`，因此上述模式中的 `np` 在替换为 `numpy` 时也是等价的。
 
 #### 目标二：添加 CI 检测脚本，阻止增量问题
@@ -284,12 +286,13 @@ self.assertTrue(
 因此正则需要覆盖这一情况。此外当然需要考虑 `np.array_equal` 的情况及之前提到的一些等价情况，根据这些目前拟定的正则如下：
 
 ```text
-self\.assert(True|Equal)\(\s*(np|numpy)\.(allclose|array_equal)
-                 │         │    │                 │
-                 │         │    │                 └─────────  两种需要修改替换的函数
-                 │         │    └───────────────────────────  等价情况：np 与 numpy
-                 │         └────────────────────────────────  边界情况：折行
-                 └──────────────────────────────────────────  等价情况：self.assertTrue(...) 与 self.assertEqual(..., True)
+self\.assert(True|Equal)\(\s*(np|numpy)\.(isclose|allclose|array_equal)
+                 │         │    │            │            │
+                 │         │    │            │            └─────────  两种需要修改替换的函数
+                 │         │    │            └──────────────────────  等价情况：np.isclose(...).all() 与 np.allclose(...)
+                 │         │    └───────────────────────────────────  等价情况：np 与 numpy
+                 │         └────────────────────────────────────────  边界情况：折行
+                 └──────────────────────────────────────────────────  等价情况：self.assertTrue(...) 与 self.assertEqual(..., True)
 ```
 
 部分未考虑到的情况可在后续开发过程中根据其他边界情况进行细化。
