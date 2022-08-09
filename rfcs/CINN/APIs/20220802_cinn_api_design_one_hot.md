@@ -472,13 +472,17 @@ res = builder.one_hot(indices, on_value, off_value, depth=3, axis=-1, dtype="flo
 
 ## 六、测试和验收的考量
 
-单元测试（`cinn/hlir/op/contrib/one_hot_test.cc`）需要覆盖以下情况：
+`cinn/hlir/op/contrib/one_hot_test.cc` 主要包含一些编译时的检测，主要检测是否能正常 codegen。
+
+`cinn/frontend/net_builder_test.cc` 主要包含一些运行时的检测，主要检测输出结果是否正确。
+
+两者在检测时都需要考虑覆盖以下情况：
 
 - `axis` 的各种取值，包括 `-1` 以及正数（含上界 `indices.ndim`）
 - `indices` 高维度输入的正确性
 - `depth` 的各种取值
 - `dtype` 的各种取值最后输出的数据类型的正确性
-- CPU 和 GPU 设备均可正常 codegen
+- CPU 和 GPU 设备
 
 ## 七、可行性分析和排期规划
 
