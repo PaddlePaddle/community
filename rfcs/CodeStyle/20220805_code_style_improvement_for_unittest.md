@@ -254,9 +254,75 @@ print("Transformed code:", ast.unparse(new_tree))
 
 #### 测试通过性问题
 
-在测试（或者说 CI）可以通过的情况下，不应对 `atol` 和 `rtol` 进行修改，仅仅在测试无法通过的情况下，可根据 `np.testing` 模块返回的信息（包含一些 diff 信息）调整 `atol` 和 `rtol`。
+经过测试发现，`np.array_equal` -> `np.testing.assert_array_equal` 基本上没有问题，仅仅会在某些特殊硬件上会出现些精度的问题，在这种情况下应当使用 `np.testing.assert_allclose`，并根据两者误差调整 `rtol` 和 `atol`。
 
-如果原来使用的是 `array_equal`，若测试不通过，可尝试修改为 `allclose` 并修改 `rtol` 和 `atol` 使其通过。
+而 `np.allclose` -> `np.testing.assert_allclose` 出现了大量测试（CI）失败，经排查问题主要出在以下两个方面：
+
+- 精度问题
+
+  这是由于两者默认值不同
+
+  - `np.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)`
+  - `np.testing.assert_allclose(actual, desired, rtol=1e-07, atol=0, equal_nan=True, err_msg='', verbose=True)`
+
+  明显 `np.testing.assert_allclose` 精度要求更高，所以这里暂时 `np.allclose` 无 `rtol`（即设为默认值）时将值设为 `1e-5`，使其与原来行为一致，`atol` 暂时不改看看情况
+
+  修改后测试失败减少了一半，余量已经很少了，经检查，余量大多都是些误差非常小的（`1e-10` 以下），针对这些手动加上 `atol=1e-8` 应可解决
+
+- shape 不对齐
+
+  这是由于 `np.allclose` 在比较时会自动 broadcast，而 `np.testing.allclose` 不会，因此需要手动对这些数据进行检查及修改
+
+  修改精度问题后，本问题占了 90% 以上，也就是将近 200 个需要考虑本问题，逐个手动修复，需要进一步评估成本
+
+  目前发现最主要的问题是，静态图执行结果是一个 list，但有的开发者直接将返回值进行比较，这会在比较时认为静态图结果的 shape 比预期值多一维度
+
+  ```python
+  # https://github.com/PaddlePaddle/Paddle/blob/c91aaced74aa1a34c8bde2e53b3072baf8012e73/python/paddle/fluid/tests/unittests/test_softmax2d.py#L32-L41
+  def test_static_api(self):
+      paddle.enable_static()
+      with paddle.static.program_guard(paddle.static.Program()):
+          x = paddle.fluid.data('X', self.x_np.shape, self.x_np.dtype)
+          m = paddle.nn.Softmax2D()
+          out = m(x)
+          exe = paddle.static.Executor(self.place)
+          res = exe.run(feed={'X': self.x_np}, fetch_list=[out])
+      out_ref = ref_softmax(self.x_np, self.axis)
+      self.assertTrue(np.allclose(out_ref, res))
+  ```
+
+  此外还有少许误操作，需要逐一排查。
+
+此外还发现有的测试静态图代码报错，经排查发现是由于 shape 不对齐问题导致测试不通过而无法转为静态图，进而后续静态图测试全部无法通过，本质上还是问题二。
+
+对于精度问题，上面已经给出解决方案，而且已经减少到了一个非常小的数字。
+
+对于 shape 不对齐问题，需要考虑问题是否是因为静态图返回的原因导致的，目前该原因导致的问题基本上报错类似下面这种：
+
+```text
+2022-08-09 00:59:56 ======================================================================
+2022-08-09 00:59:56 FAIL: test_static_api (test_softmax2d.TestSoftmax2DAPI)
+2022-08-09 00:59:56 ----------------------------------------------------------------------
+2022-08-09 00:59:56 Traceback (most recent call last):
+2022-08-09 00:59:56   File "/workspace/Paddle/build/python/paddle/fluid/tests/unittests/test_softmax2d.py", line 41, in test_static_api
+2022-08-09 00:59:56     np.testing.assert_allclose(out_ref, res, rtol=1e-05)
+2022-08-09 00:59:56   File "/opt/_internal/cpython-3.7.0/lib/python3.7/site-packages/numpy/testing/_private/utils.py", line 1531, in assert_allclose
+2022-08-09 00:59:56     verbose=verbose, header=header, equal_nan=equal_nan)
+2022-08-09 00:59:56   File "/opt/_internal/cpython-3.7.0/lib/python3.7/site-packages/numpy/testing/_private/utils.py", line 763, in assert_array_compare
+2022-08-09 00:59:56     raise AssertionError(msg)
+2022-08-09 00:59:56 AssertionError:
+2022-08-09 00:59:56 Not equal to tolerance rtol=1e-05, atol=0
+2022-08-09 00:59:56
+2022-08-09 00:59:56 (shapes (2, 6, 5, 4), (1, 2, 6, 5, 4) mismatch)
+2022-08-09 00:59:56  x: array([[[[0.099922, 0.185298, 0.217424, 0.078946],
+2022-08-09 00:59:56          [0.09362 , 0.356357, 0.193014, 0.055791],
+2022-08-09 00:59:56          [0.313798, 0.074912, 0.173342, 0.101163],...
+2022-08-09 00:59:56  y: array([[[[[0.099922, 0.185298, 0.217424, 0.078946],
+2022-08-09 00:59:56           [0.09362 , 0.356357, 0.193014, 0.055791],
+2022-08-09 00:59:56           [0.313798, 0.074912, 0.173342, 0.101163],...
+```
+
+可以看到 y 相对于 x 少了第一个维度，而且该维度为 1，可以认为这种模式的错误都是由于 x 是静态图返回的结果导致的，因此可以从 log 中分别提取出 `test_function`（`test_static_api`）、`test_file`（`test_softmax2d`）、`test_case`（`TestSoftmax2DAPI`）以及静态图返回的结果变量（本例中是右值 y），之后在替换时在该变量后加上 `[0]`。
 
 ### 目标二
 
@@ -312,8 +378,8 @@ self\.assert(True|Equal)\(\s*(np|numpy)\.(isclose|allclose|array_equal)
     - 编写脚本修改现有单测代码「半周内」
       - `self.assertTrue(np.allclose(...))` -> `np.testing.assert_allclose(...)`
       - `self.assertTrue(np.array_equal(...))` -> `np.testing.assert_array_equal(...)`
+    - 根据 CI 结果进行调试，尽可能使其通过「一周半内」
     - 编写 Wiki 页面（可参考本 RFC 和 [#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，原目标二任务调整到这里）「半周内」
-    - 根据 CI 结果进行调试，尽可能使其通过「一周内」
 
 - 目标二：增量阻止
 
