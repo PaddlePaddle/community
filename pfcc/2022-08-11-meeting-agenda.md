@@ -50,7 +50,7 @@
 
 # 会议议程
 
-* 新同学 [Ainavo](https://github.com/Ainavo)、[ReganYue](https://github.com/ReganYue) 、[mrcangye](https://github.com/mrcangye) 自我介绍 (5 minutes)
+- 新同学 [Ainavo](https://github.com/Ainavo)、[ReganYue](https://github.com/ReganYue) 、[mrcangye](https://github.com/mrcangye) 自我介绍 (5 minutes)
 - [OccupyMars2025](https://github.com/OccupyMars2025) 经验分享《零基础学习CUDA》（15 minutes）
 - [thunder95](https://github.com/thunder95) 主题分享 《带你从零了解CUDA》（15 minutes）
 - 飞桨研发工程师 [ZzSean](https://github.com/ZzSean) 主题分享 《GPU优化经验分享》（15 minutes）
