@@ -1,6 +1,6 @@
 # CINN argmax 和 argmin 设计文档
 
-| API名称                                                      | 新增API名称                                          |
+| API名称                                                      | argmax/argmin                                          |
 | ---------------------------------------------------------- | ------------------------------------------------ |
 | 提交作者<input type="checkbox" class="rowselector hidden">     | 六个骨头                                             |
 | 提交时间<input type="checkbox" class="rowselector hidden">     | 2022-07-11                                       |
@@ -47,14 +47,14 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
     auto real_axis = GetRealAxis(static_cast<int>(ndim), axis);
     auto reduce_axes = MakeReduceAxes(real_axis, data);
     auto target_shape = MakeReduceTargetShape(real_axis, data, keepdims, atleast1d);
-
+  
     auto compute = [ndim, keepdims, &real_axis, &reduce_axes, &func,
                     &data](const Array<Var>& indices) {
       Array<PrimExpr> eval_range;
       Array<PrimExpr> eval_indices;
       int arg_counter = 0;
       int red_counter = 0;
-
+  
       for (size_t i = 0; i < ndim; ++i) {
         if (std::find(real_axis.begin(), real_axis.end(), i) != real_axis.end()) {
           // real_axis contains i
@@ -70,7 +70,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
           }
         }
       }
-
+  
       Array<PrimExpr> ravel_shape;
       for (auto i : real_axis) {
         ravel_shape.push_back(data->shape[i]);
@@ -78,7 +78,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
       auto idx = detail::RavelIndex(eval_indices, ravel_shape);
       return func({idx, data(eval_range)}, reduce_axes, nullptr);
     };
-
+  
     auto temp_idx_val =
         tvm::te::compute(target_shape, compute, data->op->name + "_red_temp", kCommReduceIdx);
     auto temp_idx = temp_idx_val[0];
@@ -91,17 +91,17 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
     // Create a Commutative Reducer with a comparison operation, and method to get the initial value.
     auto fcombine = [=](Array<Var> lhs, Array<Var> rhs) {
       Array<PrimExpr> result;
-
+  
       // Casting to avoid operator ambiguity
       PrimExpr lhs_idx = static_cast<PrimExpr>(lhs[0]);
       PrimExpr rhs_idx = static_cast<PrimExpr>(rhs[0]);
       PrimExpr lhs_val = static_cast<PrimExpr>(lhs[1]);
       PrimExpr rhs_val = static_cast<PrimExpr>(rhs[1]);
-
+  
       // These variables compare the actual values of the array
       auto is_bigger = lhs_val > rhs_val;
       auto is_same = lhs_val == rhs_val;
-
+  
       // This checks if the indices are correct for the reduction. E.g. for select_last_index
       // it gives precedence for later indices of the same element and precedence for sooner
       // indices if not select_last_index;
@@ -111,7 +111,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
       } else {
         proper_index = lhs_idx < rhs_idx;
       }
-
+  
       PrimExpr update_index = is_bigger || (is_same && proper_index);
       result.push_back(tvm::tir::Select(update_index, lhs[0], rhs[0]));  // idx
       result.push_back(tvm::tir::Select(is_bigger, lhs[1], rhs[1]));     // val
@@ -124,7 +124,7 @@ argmax( $A$, axis = None) 结果为 $8$，argmax( $A$, axis = 1) 结果为 [2, 2
       return result;
     };
     return MakeCommReducer(fcombine, fidentity, "argmax");
-
+  
   }       } else {
               real_indices.push_back(0);
               flag += 1;
@@ -170,7 +170,7 @@ TVM 与 XLA 实现方案类似。
 
 - A：输入张量
 - axis：指定维度
-- keepdim：是否保持维度不变
+- keepdim：是否保持维度不变，如果未指定axis，此参数会被忽略
 - name：输出名称
 
 ## 底层OP设计
