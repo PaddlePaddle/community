@@ -8,38 +8,47 @@
 - 本次会议主席：王志宇（[fuqianya](https://github.com/fuqianya)，湖南大学）
 - 本次会议副主席：OccupyMars2025（[OccupyMars2025](https://github.com/OccupyMars2025)）
 - 本次拟参会 Paddle Framework Contributor 列表：
+     - [jzhang533](https://github.com/jzhang533)
+     - [jeff41404](https://github.com/jeff41404)
+     - [luotao1](https://github.com/luotao1)
+     - [Ligoml](https://github.com/Ligoml)
+     - [TCChenlong](https://github.com/TCChenlong)
+     
+     
+     - [guguguzi](https://github.com/guguguzi)
+     - [S-HuaBomb](https://github.com/S-HuaBomb)
      - [Asthestarsfalll](https://github.com/Asthestarsfalll)
      - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
-     - [Ligoml](https://github.com/Ligoml)
-     - [Liyulingyue](https://github.com/Liyulingyue)
-     - [Patrick-Star125](https://github.com/Patrick-Star125) 
-     - [S-HuaBomb](https://github.com/S-HuaBomb)
-     - [SigureMo](https://github.com/SigureMo)
-     - [TCChenlong](https://github.com/TCChenlong)
-     - [Yulv-git](https://github.com/Yulv-git)
-     - [greatv](https://github.com/greatv)
-     - [gsq7474741](https://github.com/gsq7474741)
-     - [guguguzi](https://github.com/guguguzi)
-     - [isLinXu](https://github.com/isLinXu)
-     - [jeff41404](https://github.com/jeff41404)
-     - [jinyouzhi](https://github.com/jinyouzhi)
-     - [jzhang533](https://github.com/jzhang533)
+     - [Li-fAngyU](https://github.com/Li-fAngyU)
      - [liqitong-a](https://github.com/liqitong-a)
-     - [liyongchao911](https://github.com/liyongchao911)
-     - [luotao1](https://github.com/luotao1)
-     - [thunder95](https://github.com/thunder95)
      - [unseenme](https://github.com/unseenme)
-     - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
+     - [isLinXu](https://github.com/isLinXu)
+     - [greatv](https://github.com/greatv)
+     - [SigureMo](https://github.com/SigureMo)
+     - [jinyouzhi](https://github.com/jinyouzhi)
+     - [gsq7474741](https://github.com/gsq7474741)
+     - [thunder95](https://github.com/thunder95)
+     - [chenyanlann](https://github.com/chenyanlann)
      - [yangguohao](https://github.com/yangguohao)
+     - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
+     - [Liyulingyue](https://github.com/Liyulingyue)
+     - [GeYuYao-hub](https://github.com/GeYuYao-hub)
+     - [fuqianya](https://github.com/fuqianya)
+     - [liyongchao911](https://github.com/liyongchao911)
+     - [Yulv-git](https://github.com/Yulv-git)
+     - [Patrick-Star125](https://github.com/Patrick-Star125) 
+     - [nlp-zn](https://github.com/nlp-zn)
+     - [OccupyMars2025](https://github.com/OccupyMars2025)
      - [OuyangChao](https://github.com/OuyangChao)
+     - [yang131313](https://github.com/yang131313)
      - [gglin001](https://github.com/gglin001)
      - [tizhou86](https://github.com/tizhou86) 
-     - [yang131313](https://github.com/yang131313)
-     - [Li-fAngyU](https://github.com/Li-fAngyU)
-     - [OccupyMars2025](https://github.com/OccupyMars2025)
      - [Ainavo](https://github.com/Ainavo)
      - [ReganYue](https://github.com/ReganYue)
      - [mrcangye](https://github.com/mrcangye)
+     - [ZzSean](https://github.com/ZzSean)
+     - [JamesLim](https://github.com/JamesLim)
+     
 
 # 会议议程
 
@@ -47,6 +56,6 @@
 
 - [OccupyMars2025](https://github.com/OccupyMars2025) 经验分享《零基础学习CUDA》（15 minutes）
 - [thunder95](https://github.com/thunder95) 主题分享 《带你从零了解CUDA》（15 minutes）
-- 飞桨开发者 ZzSean 主题分享 《GPU优化经验分享》（15 minutes）
+- 飞桨研发工程师 [ZzSean](https://github.com/ZzSean) 主题分享 《GPU优化经验分享》（15 minutes）
 - PFCC 成员自由发言讨论（5 minutes）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 minutes）
