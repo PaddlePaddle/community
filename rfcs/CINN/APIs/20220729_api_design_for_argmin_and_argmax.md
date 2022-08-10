@@ -219,5 +219,6 @@ b = builder.argmax(a，axis=1, keepdim=True)  # shape=(8, 1, 124)
 对其他模块无影响。
 
 # 附件及参考资料
-
+[TVM文档](https://github.com/apache/tvm/blob/6df070aac6d0e26d1e127095a323c61c2287eb9d/include/tvm/topi/reduction.h)
+[XLA文档](https://github.com/pytorch/xla/blob/3d24d955b6121289a3c8bb86eda541fca7a0d69f/torch_xla/csrc/ops/arg_max.cpp)
 [CINN文档](https://paddlepaddle.github.io/CINN/)
