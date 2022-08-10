@@ -1,4 +1,4 @@
-# Paddle Framework Contributor Club 第七次会议
+# Paddle Framework Contributor Club 第八次会议
 
 - 本次会议时间：2022-08-11 19：00
 - 本次会议接入方式： 
@@ -6,7 +6,7 @@
   - 会议密码：\*\*\*\*（群内通知）
   - [点击链接入会](https://meeting.tencent.com/dm/uFp1iq4Bqw06)，或添加至会议列表
 - 本次会议主席：王志宇（[fuqianya](https://github.com/fuqianya)，湖南大学）
-- 本次会议副主席：OccupyMars2025（[OccupyMars2025](https://github.com/OccupyMars2025)）
+- 本次会议副主席：任子跻（[OccupyMars2025](https://github.com/OccupyMars2025)）
 - 本次拟参会 Paddle Framework Contributor 列表：
      - [jzhang533](https://github.com/jzhang533)
      - [jeff41404](https://github.com/jeff41404)
