@@ -116,7 +116,7 @@ class TransformAssertTrueAllClose(ast.NodeTransformer):
                 equal_nan: Optional[ast.AST] = None
                 err_msg: Optional[ast.AST] = None
 
-                # https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertEqual
+                # https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertTrue
                 # self.assertTrue(np.allclose(...), assert_true_args)
                 # self.assertTrue(np.allclose(...), msg=assert_true_kwargs)
                 if assert_true_args:
@@ -273,7 +273,7 @@ print("Transformed code:", ast.unparse(new_tree))
 
   这是由于 `np.allclose` 在比较时会自动 broadcast，而 `np.testing.allclose` 不会，因此需要手动对这些数据进行检查及修改
 
-  修改精度问题后，本问题占了 90% 以上，也就是将近 200 个需要考虑本问题，逐个手动修复，需要进一步评估成本
+  修改精度问题后，本问题占了 90% 以上，仍然不是很难逐个手动修复
 
   目前发现最主要的问题是，静态图执行结果是一个 list，但有的开发者直接将返回值进行比较，这会在比较时认为静态图结果的 shape 比预期值多一维度
 
@@ -322,7 +322,7 @@ print("Transformed code:", ast.unparse(new_tree))
 2022-08-09 00:59:56           [0.313798, 0.074912, 0.173342, 0.101163],...
 ```
 
-可以看到 y 相对于 x 少了第一个维度，而且该维度为 1，可以认为这种模式的错误都是由于 x 是静态图返回的结果导致的，因此可以从 log 中分别提取出 `test_function`（`test_static_api`）、`test_file`（`test_softmax2d`）、`test_case`（`TestSoftmax2DAPI`）以及静态图返回的结果变量（本例中是右值 y），之后在替换时在该变量后加上 `[0]`。
+可以看到 y 相对于 x 多了第一个维度，而且该维度为 1，可以认为这种模式的错误都是由于 y 是静态图返回的结果导致的，因此可以从 log 中分别提取出 `test_function`（`test_static_api`）、`test_file`（`test_softmax2d`）、`test_case`（`TestSoftmax2DAPI`）以及静态图返回的结果变量（本例中是右值 y），之后在替换时在该变量后加上 `[0]`。
 
 ### 目标二
 
