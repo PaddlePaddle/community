@@ -19,8 +19,8 @@ step：步长 ，序列中相邻的两个元素的差值
 
 ## 3、功能目标
 实现`arange`算子。  
-算子输入起始 $start$ ，终点 $end$ ，以及步长 $step$   
-算子输出序列 $(x_0,x_1,...,x_n)$ ，序列长度 $n=\left [ (start-end)/step \right ]$，序列满足 $x_0=start$ ， $x_{i+1} - x_i = step$ $(0 \leqslant i < n)$  
+算子输入起始 $start$ ，终点 $stop$ ，以及步长 $step$   
+算子输出序列 $(x_0,x_1,...,x_n)$ ，序列长度 $n=\left [ (start-stop)/step \right ]$，序列满足 $x_0=start$ ， $x_{i+1} - x_i = step$ $(0 \leqslant i < n)$  
 算子的输入参数可能有异常情况，并且部分输入参数可缺省，需考虑处理。
 ## 4、意义
 实现`arange`算子，将进一步完善CINN的基础算子库。
@@ -146,11 +146,9 @@ tvm与xla的arange实现方法基本类似。
 
 ## 命名与参数设计
 start：区间起点（且区间包括此值），默认值为0。   
-end：区间终点（且通常区间不包括此值），默认值为None。  
+stop：区间终点（且通常区间不包括此值）。  
 step：均匀分割的步长，默认值为1。  
 dtype：输出`tensor`的数据类型，支持int32、int64、float32、float64。默认值为float32。  
-注：当仅提供一个数值参数时，该参数用于设置end，而start设置为默认值0。例如，  
-arange(5) = [0, 1, 2, 3, 4]
 
 ## 底层OP设计
 1. 在 `cinn/hlir/op/contrib/arange.h` 里声明`arange`算子。
