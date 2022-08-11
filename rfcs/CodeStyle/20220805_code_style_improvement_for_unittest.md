@@ -265,17 +265,17 @@ print("Transformed code:", ast.unparse(new_tree))
   - `np.allclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)`
   - `np.testing.assert_allclose(actual, desired, rtol=1e-07, atol=0, equal_nan=True, err_msg='', verbose=True)`
 
-  明显 `np.testing.assert_allclose` 精度要求更高，所以这里暂时 `np.allclose` 无 `rtol`（即设为默认值）时将值设为 `1e-5`，使其与原来行为一致，`atol` 暂时不改看看情况
+  明显 `np.testing.assert_allclose` 精度要求更高，所以当 `np.allclose` 无 `rtol`（即设为默认值）时将值修改为 `1e-5`，使其与原来行为一致，本着在测试能通过的情况下尽可能使用默认参数的原则，`atol` 暂时没有修改。
 
-  修改后测试失败减少了一半，余量已经很少了，经检查，余量大多都是些误差非常小的（`1e-10` 以下），针对这些手动加上 `atol=1e-8` 应可解决
+  修改后测试失败减少了一半，余量已经很少了（20 个左右），经检查，余量大多都是些误差非常小的（`1e-10` 以下），针对这些手动加上 `atol=1e-8` 即可解决。
 
 - shape 不对齐
 
-  这是由于 `np.allclose` 在比较时会自动 broadcast，而 `np.testing.allclose` 不会，因此需要手动对这些数据进行检查及修改
+  这是由于 `np.allclose` 在比较时会自动 broadcast，而 `np.testing.allclose` 不会，因此需要手动对这些数据进行检查及修改。
 
-  修改精度问题后，本问题占了 90% 以上，仍然不是很难逐个手动修复
+  修改精度问题后，本问题占了 90% 以上，仍然很难逐个手动修复。
 
-  目前发现最主要的问题是，静态图执行结果是一个 list，但有的开发者直接将返回值进行比较，这会在比较时认为静态图结果的 shape 比预期值多一维度
+  目前发现最主要的问题是，静态图执行结果是一个 list，但有的开发者直接将返回值进行比较，这会在比较时认为静态图结果的 shape 比预期值多一维度。
 
   ```python
   # https://github.com/PaddlePaddle/Paddle/blob/c91aaced74aa1a34c8bde2e53b3072baf8012e73/python/paddle/fluid/tests/unittests/test_softmax2d.py#L32-L41
@@ -295,7 +295,7 @@ print("Transformed code:", ast.unparse(new_tree))
 
 此外还发现有的测试静态图代码报错，经排查发现是由于 shape 不对齐问题导致测试不通过而无法转为静态图，进而后续静态图测试全部无法通过，本质上还是问题二。
 
-对于精度问题，上面已经给出解决方案，而且已经减少到了一个非常小的数字。
+对于精度问题，上面已经给出解决方案，修改后已经减少到了一个非常小的数字。
 
 对于 shape 不对齐问题，需要考虑问题是否是因为静态图返回的原因导致的，目前该原因导致的问题基本上报错类似下面这种：
 
@@ -323,6 +323,8 @@ print("Transformed code:", ast.unparse(new_tree))
 ```
 
 可以看到 y 相对于 x 多了第一个维度，而且该维度为 1，可以认为这种模式的错误都是由于 y 是静态图返回的结果导致的，因此可以从 log 中分别提取出 `test_function`（`test_static_api`）、`test_file`（`test_softmax2d`）、`test_case`（`TestSoftmax2DAPI`）以及静态图返回的结果变量（本例中是右值 y），之后在替换时在该变量后加上 `[0]`。
+
+此外，在统计后可以发现该现象发生的聚集性较强，一般出问题的整个测试代码文件都会有此问题，因此也可以尝试手动对剩余文件进行修复。具体方案将在后续开发中进一步确定。
 
 ### 目标二
 
@@ -352,13 +354,23 @@ self.assertTrue(
 因此正则需要覆盖这一情况。此外当然需要考虑 `np.array_equal` 的情况及之前提到的一些等价情况，根据这些目前拟定的正则如下：
 
 ```text
-self\.assert(True|Equal)\(\s*(np|numpy)\.(isclose|allclose|array_equal)
-                 │         │    │            │            │
-                 │         │    │            │            └─────────  两种需要修改替换的函数
-                 │         │    │            └──────────────────────  等价情况：np.isclose(...).all() 与 np.allclose(...)
-                 │         │    └───────────────────────────────────  等价情况：np 与 numpy
-                 │         └────────────────────────────────────────  边界情况：折行
-                 └──────────────────────────────────────────────────  等价情况：self.assertTrue(...) 与 self.assertEqual(..., True)
+self\.assert(True|Equal)\(\s*(np|numpy)\.(allclose|array_equal)
+                 │         │    │                 │
+                 │         │    │                 └─────────  两种需要修改替换的函数
+                 │         │    └───────────────────────────  等价情况：np 与 numpy
+                 │         └────────────────────────────────  边界情况：折行
+                 └──────────────────────────────────────────  等价情况：self.assertTrue(...) 与 self.assertEqual(..., True)
+```
+
+这里未阻止 `np.isclose(...).all()` 与 `np.allclose(...)` 这一等价情况是为了避免在有 `np.isclose(...).any()` 的使用需求时的误检问题，比如下面的测试就是这样使用的：
+
+```python
+# https://github.com/PaddlePaddle/Paddle/blob/9b35f03572867bbca056da93698f36035106c1f3/python/paddle/fluid/tests/custom_op/test_custom_relu_op_setup.py#L323-L326
+# python/paddle/fluid/tests/custom_op/test_custom_relu_op_setup.py
+self.assertTrue(
+    np.isclose(predict, predict_infer, rtol=5e-5).any(),
+    "custom op predict: {},\n custom op infer predict: {}".format(
+        predict, predict_infer))
 ```
 
 部分未考虑到的情况可在后续开发过程中根据其他边界情况进行细化。
