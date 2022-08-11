@@ -1,6 +1,6 @@
 # CINN flip 设计文档
 
-| API名称                                                      | 新增API名称                                                  |
+| API名称                                                      | flip                                                 |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | 小小夏                                                    |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-08-06                                                   |
@@ -13,11 +13,43 @@
 
 ## 1、相关背景
 
-flip是众多神经网络编译器中基础的算子，属于injection级别，它将输入的指定维度上进行元素翻转。
+flip是众多神经网络编译器中基础的算子，属于injective类型的算子，它将输入的指定维度上进行元素翻转。（Injective operator, can always injectively map output axis to a single input axis. All injective operator can still be safely fused to injective and reduction.）
 
 ## 2、功能目标
 
-实现flip功能
+实现flip功能，在指定维度翻转元素顺序。Reverse the order of elements in an array along the given axis.
+可以实现对所有维度，单个维度，多个指定维度的数据转化，并返回一个新的拷贝。输入需要处理的张量以及需要翻转的维度（可以为None,int ,tuple）缺省时表示翻转所有维度。
+```
+example
+
+    A = [[[0, 1],
+            [2, 3]],
+        [[4, 5],
+            [6, 7]]]
+
+    flip(A, 0)
+    >>>[[[4, 5],
+            [6, 7]],
+        [[0, 1],
+            [2, 3]]]
+    flip(A, 1)
+    >>>[[[2, 3],
+            [0, 1]],
+        [[6, 7],
+            [4, 5]]]
+    flip(A)
+    >>>[[[7, 6],
+            [5, 4]],
+        [[3, 2],
+            [1, 0]]]
+    flip(A, (0, 2))
+    >>>[[[5, 4],
+            [7, 6]],
+        [[1, 0],
+            [3, 2]]]
+
+
+```
 
 ## 3、意义
 
