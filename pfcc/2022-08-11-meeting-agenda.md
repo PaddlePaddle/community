@@ -33,7 +33,7 @@
      - [GeYuYao-hub](https://github.com/GeYuYao-hub)
      - [fuqianya](https://github.com/fuqianya)
      - [liyongchao911](https://github.com/liyongchao911)
-     - [Yulv-git](https://github.com/Yulv-git)
+     - [Yulv-git](https://github.com/Yulv-git)（请假一次）
      - [Patrick-Star125](https://github.com/Patrick-Star125) 
      - [nlp-zn](https://github.com/nlp-zn)
      - [OccupyMars2025](https://github.com/OccupyMars2025)
