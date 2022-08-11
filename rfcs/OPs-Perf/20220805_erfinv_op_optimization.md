@@ -23,7 +23,7 @@
 | Case No. | device | input_shape | input_type | Paddle Perf(ms) |
 |---|---|---|---|---|
 | 1 | RTX 2070s | [-1L, 204800L] | float32 | 0.1438 | 
-| 2 | RTX 2070s |[10L, 20L, 30L, 40L, 5L, 6L] | float64 8| 8.6485 |
+| 2 | RTX 2070s |[10L, 20L, 30L, 40L, 5L, 6L] | float64 | 8.6485 |
 
 API文档 https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/erfinv_cn.html#erfinv
 
@@ -31,7 +31,7 @@ API文档 https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/erfin
 
 Pytorch中对Erfinv算子的实现基于GPU计算,  forward整体性能如下(基于pytorch　v1.12)：
 
-| Case No. | device | input_shape | input_type | Paddle Perf(ms) |
+| Case No. | device | input_shape | input_type | Pytorch Perf(ms) |
 |---|---|---|---|---|
 | 1 | RTX 2070s | [-1L, 204800L] | float32 |  0.0677 | 
 | 2 | RTX 2070s |[10L, 20L, 30L, 40L, 5L, 6L] | float64 | 2.7904 |
@@ -44,7 +44,7 @@ Pytorch中对Erfinv算子的实现基于GPU计算,  forward整体性能如下(�
 
 ## 2.1 关键模块与性能提升点
 
-通过使用飞桨内部的Elementwise Kernel来进行计算。通过向量化读取、向量化写入以及gpu_launch_config.h中的线程配置方法对算子进行优化，预计提升1.2倍。
+通过使用飞桨内部的Elementwise Kernel来进行计算。通过向量化读取、向量化写入以及gpu_launch_config.h中的线程配置方法对算子进行优化, 使用cuda内置函数后预计比当前算子提升２倍以上。
 
 ## 2.2 Host端计算流程
 
