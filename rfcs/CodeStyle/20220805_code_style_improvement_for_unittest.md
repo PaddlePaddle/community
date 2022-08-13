@@ -14,7 +14,7 @@
 
 来源于 GitHub Paddle repo 下的一个 issue [Recommend to use np.testing.assert_allclose instead of assertTrue(np.allclose(...)) #44641](https://github.com/PaddlePaddle/Paddle/issues/44641)
 
-由于 Paddle repo 中的单测在进行比较时大多使用的是 `self.assertTrue(np.allclose(a, b))` 来断言两个 np.ndarray 之间在容忍误差范围内相等，而该报错信息是由 `self.assertTrue` 控制的，也就是说在 `self.assertTrue` 看来只有 `True` 和 `False` 的分别，报错信息也只会提示 `np.allclose(...)` 返回的是 `False`，就像下面这样：
+由于 Paddle repo 中的单测在进行比较时大多使用 `self.assertTrue(np.allclose(a, b))` 来断言两个 np.ndarray 在容忍误差范围内相等，而 `self.assertTrue` 只会区分 `True` 和 `False`，即报错信息只会提示 `np.allclose(...)` 返回的是 `False`，就像下面这样：
 
 ```python
 # in unittest class
@@ -22,7 +22,7 @@ self.assertTrue(np.allclose(x, y), "compare x and y")
 # AssertionError: False is not true : compare x and y
 ```
 
-这对于单测的报错信息是不友好的，既不能知道 `a` 和 `b` 的的值是多少，也不知道到底问题（diff）出现在哪里，另外，`np.allclose` 对于 `shape` 也是不敏感的，`np.allclose` 会在比较时自动应用广播机制，因此有些时候测试的检查并不是全面的。
+这样的单测报错信息是不友好的，既不能知道 `a` 和 `b` 的值是多少，也不知道到底问题（diff）出现在哪里。另外，`np.allclose` 对于 `shape` 也是不敏感的，`np.allclose` 会在比较时自动应用广播机制，因此有些时候测试的检查并不是全面的。
 
 NumPy 还有一个函数 `np.testing.assert_allclose` 是专门用于单元测试的，它可以提供更友好的报错信息，比如下面的示例：
 
