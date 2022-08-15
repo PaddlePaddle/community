@@ -4,7 +4,7 @@
 | ------------ | ----------------------------------------------- |
 | 提交作者     | Nyakku Shigure(@SigureMo)、何双池（@Yulv-git）  |
 | 提交时间     | 2022-08-05                                      |
-| 版本号       | v0.4                                            |
+| 版本号       | v1.0                                            |
 | 依赖飞桨版本 | develop                                         |
 | 文件名       | 20220805_code_style_improvement_for_unittest.md |
 
@@ -328,7 +328,7 @@ print("Transformed code:", ast.unparse(new_tree))
 
 ### 目标二
 
-如目标一中所述，`self.assertTrue(np.allclose(...))` 这一文本模式前缀（`self.assertTrue(np.allclose(`）的匹配是非常简单的，使用简单的正则即可（利用 `grep`）。在 yapf 自动格式化的前提下，该模式不会过于复杂化，唯一需要额外考虑的情况是有可能如下折行的情况：
+如目标一中所述，`self.assertTrue(np.allclose(...))` 这一文本模式前缀（`self.assertTrue(np.allclose(`）的匹配是非常简单的，使用简单的正则即可。在 yapf 自动格式化的前提下，该模式不会过于复杂化，唯一需要额外考虑的情况是有可能如下折行的情况：
 
 ```python
 self.assertTrue(
@@ -375,9 +375,15 @@ self.assertTrue(
 
 部分未考虑到的情况可在后续开发过程中根据其他边界情况进行细化。
 
-在关键词触发时应当正确地阻止提交并给出明确的提示信息，并给出 Wiki 链接以详细说明问题，当然这需要额外编写相应的 Wiki 页面。
+为了获取增量代码，可首先使用 `git diff` 来获取当前 PR 的 diff，并通过 `grep` 匹配出开头为 `+` 的行。之后通过 `grep` 进一步在增量行中搜索相应的关键词。
 
-在脚本中需要填写相应检查的人员，本问题 `check_approval` 的人是 `qili93 (Recommend), luotao1`。
+> **Note**
+>
+> 为了避免误检，可将检测的范围限定在某几个单测目录中，这可以在 `git diff` 命令中传入参数来实现。
+
+在关键词触发时应当正确地阻止提交并给出明确的提示信息，并给出 RFC 链接以详细说明问题。
+
+并需要填写相应检查的人员，本问题 `check_approval` 的人是 `qili93 (Recommend), luotao1`。
 
 ## 三、任务分工和排期规划
 
@@ -390,15 +396,14 @@ self.assertTrue(
     - 编写脚本修改现有单测代码「半周内」
       - `self.assertTrue(np.allclose(...))` -> `np.testing.assert_allclose(...)`
       - `self.assertTrue(np.array_equal(...))` -> `np.testing.assert_array_equal(...)`
-    - 根据 CI 结果进行调试，尽可能使其通过「一周半内」
-    - 编写 Wiki 页面（可参考本 RFC 和 [#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，原目标二任务调整到这里）「半周内」
+    - 根据 CI 结果进行调试，尽可能使其通过「两周内」
 
 - 目标二：增量阻止
 
   - 主要负责人：何双池（@Yulv-git）
   - 主要工作内容
     - 编写 CI 增量阻止脚本「一周内」
-    - 调试脚本使其能够正确工作（需测试存在关键词的 commit 确实无法提交）「一周内」
+    - 调试脚本使其能够正确工作（需测试存在关键词的 commit 确实无法提交）「一周半内」
 
 工作小组可互相配合，共同完成目标一和目标二的工作。
 
