@@ -57,13 +57,10 @@ PyTorch和Numpy中都有triu_indices这个API
 ## PyTorch
 
 ### 实现解读
-pytorch 中接口配置为：  
+pytorch 中接口配置为: [在线文档](https://pytorch.org/docs/stable/generated/torch.triu_indices.html?highlight=triu_indices#torch.triu_indices)
 
 ```python
-func: triu_indices(int row, int col, int offset=0, *, ScalarType? dtype=long, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor
-  dispatch:
-    CPU: triu_indices_cpu
-    CUDA: triu_indices_cuda
+  torch.triu_indices(row, col, offset=0, *, dtype=torch.long, device='cpu', layout=torch.strided) → Tensor
 ```
 
 在PyTorch中，triu_indices是由C++和CUDA实现的，其中CPU核心代码为：  
@@ -330,18 +327,14 @@ GPU实现逻辑：计算输出数组大小，计算每个block负责的原始行
 
 ## python API实现方案
 
-在`python/paddle/fluid/layers/tensor.py`中增加`triu_indices`函数,添加英文描述
+在`python/paddle/tensor/creation.py`中增加`triu_indices`函数，并添加英文描述
 
 ```python
-def triu_indices(rows, cols, offset, dtype=None):
+def triu_indices(row, col, offset=0, dtype='int64'):
     # ...
-    # 参数检查,非整数类型转换成整数类型，给出提示
+    # 参数检查
     # ...
-    if dtype == None :
-        dtype == int
-    # ...
-    # 调用核函数
-    TriuIndicesKernel(dev_ctx,rows,cols,offset,dtype,out)
+    # 增加算子
     # ...
     return out
 ```
