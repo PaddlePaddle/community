@@ -4,13 +4,13 @@
 | ------------ | ----------------------------------------------- |
 | 提交作者     | Nyakku Shigure(@SigureMo)、何双池（@Yulv-git）  |
 | 提交时间     | 2022-08-05                                      |
-| 版本号       | v1.0                                            |
+| 版本号       | v1.1                                            |
 | 依赖飞桨版本 | develop                                         |
 | 文件名       | 20220805_code_style_improvement_for_unittest.md |
 
 ## 一、概述
 
-### 1、相关背景
+### 1、相关背景<a id='background'></a>
 
 来源于 GitHub Paddle repo 下的一个 issue [Recommend to use np.testing.assert_allclose instead of assertTrue(np.allclose(...)) #44641](https://github.com/PaddlePaddle/Paddle/issues/44641)
 
@@ -39,6 +39,12 @@ np.testing.assert_allclose(x, y, err_msg="compare x and y")
 ```
 
 该函数不仅可以展示两个 ndarray 各自的值，而且可以将差异的一些统计信息展示出来，帮助开发人员快速定位和解决问题。
+
+因此，建议使用 `np.testing.assert_allclose(...)` 来替代 `self.assertEqual(np.allclose(...))`，并使用 `np.testing.assert_array_equal` 来替代 `self.assertTrue(np.array_equal(...))`，以提供更全面的错误信息。
+
+> **Note**
+>
+> 在进行替换时，应当注意两者在默认参数上的差异，这可能是导致替换后单测无法通过的主要原因。
 
 ### 2、功能目标
 
