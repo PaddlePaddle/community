@@ -13,40 +13,40 @@
 
 ## 1、相关背景
 
-flip是众多神经网络编译器中基础的算子，属于injective类型的算子，它将输入的指定维度上进行元素翻转。（Injective operator, can always injectively map output axis to a single input axis. All injective operator can still be safely fused to injective and reduction.）
+flip是众多神经网络编译器中基础的算子，该算子代表的数学函数属于injection类型。它将输入的指定维度上进行元素翻转。（Injective operator, can always injectively map output axis to a single input axis. All injective operator can still be safely fused to injective and reduction.）
 
 ## 2、功能目标
 
-flip(tensor,dim):Reverse the order of elements in an array along the given axis.
+flip(tensor, dim):Reverse the order of elements in an array along the given axis.
 实现flip功能，在指定维度翻转元素顺序。
-可以实现对所有维度，单个维度，多个指定维度的数据转化，并返回一个新的拷贝。输入需要处理的张量以及需要翻转的维度（可以为None,int ,tuple）缺省时表示翻转所有维度。
+可以实现对所有维度，单个维度，多个指定维度的数据转化，并返回一个新的拷贝。输入需要处理的张量以及需要翻转的维度（可以为None, int, tuple）缺省时表示翻转所有维度。
 ```
 example
 
-    A = [[[0, 1],
-            [2, 3]],
-        [[4, 5],
+    A = [[[0, 1], 
+            [2, 3]], 
+        [[4, 5], 
             [6, 7]]]
 
     flip(A, 0)
-    >>>[[[4, 5],
-            [6, 7]],
-        [[0, 1],
+    >>>[[[4, 5], 
+            [6, 7]], 
+        [[0, 1], 
             [2, 3]]]
     flip(A, 1)
-    >>>[[[2, 3],
-            [0, 1]],
-        [[6, 7],
+    >>>[[[2, 3], 
+            [0, 1]], 
+        [[6, 7], 
             [4, 5]]]
     flip(A)
-    >>>[[[7, 6],
-            [5, 4]],
-        [[3, 2],
+    >>>[[[7, 6], 
+            [5, 4]], 
+        [[3, 2], 
             [1, 0]]]
     flip(A, (0, 2))
-    >>>[[[5, 4],
-            [7, 6]],
-        [[1, 0],
+    >>>[[[5, 4], 
+            [7, 6]], 
+        [[1, 0], 
             [3, 2]]]
 
 
@@ -79,7 +79,7 @@ def flip(m, axis=None):
     m : array_like
         Input array.
     axis : None or int or tuple of ints, optional
-         Axis or axes along which to flip over. The default,
+         Axis or axes along which to flip over. The default, 
          axis=None, will flip over all of the axes of the input array.
          If axis is negative it counts from the last to the first axis.
          If axis is a tuple of ints, flipping is performed on all of the axes
@@ -99,16 +99,16 @@ def flip(m, axis=None):
     -----
     flip(m, 0) is equivalent to flipud(m).
     flip(m, 1) is equivalent to fliplr(m).
-    flip(m, n) corresponds to ``m[...,::-1,...]`` with ``::-1`` at position n.
-    flip(m) corresponds to ``m[::-1,::-1,...,::-1]`` with ``::-1`` at all
+    flip(m, n) corresponds to ``m[..., ::-1, ...]`` with ``::-1`` at position n.
+    flip(m) corresponds to ``m[::-1, ::-1, ..., ::-1]`` with ``::-1`` at all
     positions.
-    flip(m, (0, 1)) corresponds to ``m[::-1,::-1,...]`` with ``::-1`` at
+    flip(m, (0, 1)) corresponds to ``m[::-1, ::-1, ...]`` with ``::-1`` at
     position 0 and position 1.
     """
     if not hasattr(m, 'ndim'):
         m = asarray(m)
     if axis is None:
-        indexer = (np.s_[::-1],) * m.ndim
+        indexer = (np.s_[::-1], ) * m.ndim
     else:
         axis = _nx.normalize_axis_tuple(axis, m.ndim)
         indexer = [np.s_[:]] * m.ndim
@@ -128,7 +128,7 @@ Reverse the order of a n-D tensor along given axis in dims.
 
 NOTE
 
-torch.flip makes a copy of input’s data. This is different from NumPy’s np.flip, which returns a view in constant time. Since copying a tensor’s data is more work than viewing that data, torch.flip is expected to be slower than np.flip.
+torch.flip makes a copy of input's data. This is different from NumPy's np.flip, which returns a view in constant time. Since copying a tensor's data is more work than viewing that data, torch.flip is expected to be slower than np.flip.
 }
 ```
 
@@ -143,7 +143,7 @@ torch.flip makes a copy of input’s data. This is different from NumPy’s np.f
 ## 命名与参数设计
 
 - A：输入张量
-- dim:需要翻转的维度（可以为None,int ,tuple）缺省时表示翻转所有维度
+- dim:需要翻转的维度（可以为None, int, tuple）缺省时表示翻转所有维度
 
 ## 底层OP设计
 
@@ -164,15 +164,14 @@ torch.flip makes a copy of input’s data. This is different from NumPy’s np.f
 ```python
 builder = CinnBuilder("test_basic")
 a = builder.create_input(Float(32), (32, 16, 16), "A")
-b = builder.flip(a，1)
-b = builder.flip(a，(0,1))
+b = builder.flip(a, 1)
+b = builder.flip(a, (0, 1))
 b = builder.flip(a)
 ```
 
 # 六、测试和验收的考量
 
 1. 提供基础的 demo 文件。
-
 2. 在`cinn/hlir/op/contrib/flip_test.cc`中添加对底层OP进行测试的代码，在`cinn/frontend/net_builder_test.cc`中添加对前端的测试。
 3. 提交 API 使用方法到相应的文档中。
 
