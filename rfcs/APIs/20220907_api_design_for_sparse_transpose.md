@@ -1,0 +1,263 @@
+# paddle.incubate.sparse.transpose 设计文档
+
+| API名称                                                    | paddle.incubate.sparse.transpose                |
+|----------------------------------------------------------|-----------------------------------------------|
+| 提交作者<input type="checkbox" class="rowselector hidden">   | 六个骨头                                       |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-09-07                                    |
+| 版本号                                                      | V1.0                                          |
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                       |
+| 文件名                                                      | 20220907_api_design_for_sparse_transpose.md<br> |
+
+# 一、概述
+
+## 1、相关背景
+
+为了提升飞桨API丰富度，针对 Paddle 的两种稀疏 Tensor 格式 COO 与 CSR ，都需新增 transpose 的计算逻辑，
+一共需要新增 2个 kernel 的前向与反向，其中 CSR 的 kernel 需支持 2D/3D Tensor，COO 的 kernel 需支持任意维度的 Tensor。
+
+## 3、意义
+
+支持稀疏tensor的transpose操作，丰富基础功能，提升稀疏tensor的API完整度。
+
+# 二、飞桨现状
+
+目前paddle缺少相关功能实现。
+
+# 三、业内方案调研
+
+## Pytorch
+
+Pytorch中相关实现如下
+
+```c
+static inline Tensor & sparse_transpose_(Tensor & self, int64_t dim0, int64_t dim1) {
+  int64_t nsparse_dim = self.sparse_dim();
+  TORCH_CHECK(dim0 < nsparse_dim && dim1 < nsparse_dim,
+           "sparse transpose: transposed dimensions must be sparse ",
+           "Got sparse_dim: ", nsparse_dim, ", d0: ", dim0, ", d1: ", dim1);
+
+  if (self._indices().numel() == 0 && self._values().numel() == 0) {
+    auto sizes = self.sizes().vec();
+    std::swap(sizes[dim0], sizes[dim1]);
+
+    at::sparse::get_sparse_impl(self)->raw_resize_(self.sparse_dim(), self.dense_dim(), sizes);
+  } else {
+    auto indices = self._indices();
+    auto row0 = indices.select(0, dim0);
+    auto row1 = indices.select(0, dim1);
+
+    // swap row0 and row1
+    auto tmp = at::zeros_like(row0, LEGACY_CONTIGUOUS_MEMORY_FORMAT);
+    tmp.copy_(row0);
+    row0.copy_(row1);
+    row1.copy_(tmp);
+
+    self._coalesced_(false);
+
+    auto sizes = self.sizes().vec();
+    std::swap(sizes[dim0], sizes[dim1]);
+
+    at::sparse::get_sparse_impl(self)->raw_resize_(self._indices().size(0), self._values().dim() - 1, sizes);
+  }
+  return self;
+}
+```
+## scipy
+scipy中转换为csr再进行transpose
+```python
+def transpose(self, axes=None, copy=False):
+        """
+        Reverses the dimensions of the sparse matrix.
+        Parameters
+        ----------
+        axes : None, optional
+            This argument is in the signature *solely* for NumPy
+            compatibility reasons. Do not pass in anything except
+            for the default value.
+        copy : bool, optional
+            Indicates whether or not attributes of `self` should be
+            copied whenever possible. The degree to which attributes
+            are copied varies depending on the type of sparse matrix
+            being used.
+        Returns
+        -------
+        p : `self` with the dimensions reversed.
+        See Also
+        --------
+        numpy.matrix.transpose : NumPy's implementation of 'transpose'
+                                 for matrices
+        """
+        return self.tocsr(copy=copy).transpose(axes=axes, copy=False)
+```
+csr transpose实现如下
+```python
+
+def transpose(self, axes=None, copy=False):
+        if axes is not None:
+            raise ValueError(("Sparse matrices do not support "
+                              "an 'axes' parameter because swapping "
+                              "dimensions is the only logical permutation."))
+
+        M, N = self.shape
+        return self._csc_container((self.data, self.indices,
+                                    self.indptr), shape=(N, M), copy=copy)
+
+```
+## paddle DenseTensor
+参数dims在DenseTensor中被表达为perm，其长度与输入张量的维度必须相等，
+返回多维张量的第i维对应输入Tensor的perm[i]维。。
+
+代码如下
+```python
+x = [[[ 1  2  3  4] [ 5  6  7  8] [ 9 10 11 12]]
+    [[13 14 15 16] [17 18 19 20] [21 22 23 24]]]
+shape(x) =  [2,3,4]
+
+# 例0
+perm0 = [1,0,2]
+y_perm0 = [[[ 1  2  3  4] [13 14 15 16]]
+          [[ 5  6  7  8]  [17 18 19 20]]
+          [[ 9 10 11 12]  [21 22 23 24]]]
+shape(y_perm0) = [3,2,4]
+
+# 例1
+perm1 = [2,1,0]
+y_perm1 = [[[ 1 13] [ 5 17] [ 9 21]]
+          [[ 2 14] [ 6 18] [10 22]]
+          [[ 3 15]  [ 7 19]  [11 23]]
+          [[ 4 16]  [ 8 20]  [12 24]]]
+shape(y_perm1) = [4,3,2]
+```
+但是此处是Dense的，直接使用指针在Sparse中不可行
+# 四、对比分析
+为了适配paddle phi库的设计模式，需自行设计实现方式
+# 五、方案设计
+## 命名与参数设计
+在 paddle/phi/kernels/sparse/impl/unary_kernel_impl.cc 中， kernel设计为
+```
+template <typename T, typename Context>
+void TransposeCooGradKernel(const Context& dev_ctx,
+                            const SparseCooTensor& x,
+                            const SparseCooTensor& dout,
+                            SparseCooTensor* dx)
+template <typename T, typename Context>
+void TransposeCsrGradKernel(const Context& dev_ctx,
+                            const SparseCooTensor& x,
+                            const SparseCooTensor& dout,
+                            SparseCooTensor* dx)
+```
+在 paddle/phi/kernels/sparse/impl/unary_grad_kernel_impl.cc 中， kernel设计为
+```
+template <typename T, typename Context>
+void TransposeCooKernel(const Context& dev_ctx,
+                        const SparseCsrTensor& x,
+                        const std::vector<int>& dims,
+                        SparseCsrTensor* out)
+                        template <typename T, typename Context>
+void TransposeCsrKernel(const Context& dev_ctx,
+                        const SparseCsrTensor& x,
+                        const std::vector<int>& dims,
+                        SparseCsrTensor* out)
+```
+并在yaml中新增对应API
+```yaml
+- api : transpose
+  args : (Tensor x, int[] dims)
+  output : Tensor(out)
+  kernel :
+    func : transpose_coo{sparse_coo -> sparse_coo},
+           transpose_csr{sparse_csr -> sparse_csr}
+    layout : x
+  backward : transpose_grad
+
+```
+```yaml
+- backward_api : transpose_grad
+  forward : transpose(Tensor x, int[] shape) -> Tensor(out)
+  args : (Tensor out, Tensor out_grad)
+  output : Tensor(x_grad)
+  kernel :
+    func : transpose_coo_grad {sparse_coo, sparse_coo -> sparse_coo},
+           transpose_csr_grad {sparse_csr, sparse_csr -> sparse_csr}
+
+```
+## 底层OP设计
+对于Coo格式，主要分为两步，第一步操作indices，通过遍历每一行，
+按照指定顺序复制给输出值，第二步使用DDim::transpose改变dims值。
+
+对于Csr格式，通过分类讨论的方式，分别实现2维和3维的功能，
+对于2维只需要确定两个维度是否切换，3维情况也可通过较复杂的判断实现。
+## API实现方案
+对于SparseCsrTensor和SparseCooTensor有相同的API，
+均只需要给定输入张量和维度转换目标。
+
+# 六、测试和验收的考量
+测试考虑的case如下：
+- 正确性
+- csr对2维和3维测试
+- coo对2维、3维、6维和10维测试
+
+具体样例如下
+```python
+class TestTranspose(unittest.TestCase):
+    # x: sparse, out: sparse
+    def check_result(self, x_shape, dims, format):
+        if len(x_shape) == 3:
+            mask = paddle.randint(0, 2, [x_shape[-2], x_shape[-1]])
+        else:
+            mask = paddle.randint(0, 2, x_shape)
+        origin_x = paddle.rand(x_shape) * mask
+
+        dense_x = origin_x.detach()
+        dense_x.stop_gradient = False
+        dense_out = paddle.transpose(dense_x, dims)
+
+        if format == "coo":
+            sp_x = origin_x.detach().to_sparse_coo(len(x_shape))
+        else:
+            sp_x = origin_x.detach().to_sparse_csr()
+        sp_x.stop_gradient = False
+        sp_out = paddle.incubate.sparse.transpose(sp_x, dims)
+
+        np.testing.assert_allclose(sp_out.numpy(),
+                                   dense_out.numpy(),
+                                   rtol=1e-05)
+        if get_cuda_version() >= 11030:
+            dense_out.backward()
+            sp_out.backward()
+            np.testing.assert_allclose(sp_x.grad.to_dense().numpy(),
+                                       (dense_x.grad * mask).numpy(),
+                                       rtol=1e-05)
+
+    @unittest.skipIf(not paddle.is_compiled_with_cuda()
+                     or get_cuda_version() < 11000, "only support cuda>=11.0")
+    def test_transpose_case1(self):
+        self.check_result([16, 12, 3], [2, 1, 0], 'coo')
+        self.check_result([16, 12, 3], [2, 1, 0], 'csr')
+
+    @unittest.skipIf(not paddle.is_compiled_with_cuda()
+                     or get_cuda_version() < 11070, "only support cuda>=11.7")
+    def test_transpose_case2(self):
+        self.check_result([12, 5], [1, 0], 'coo')
+        self.check_result([12, 5], [1, 0], 'csr')
+
+    @unittest.skipIf(not paddle.is_compiled_with_cuda()
+                     or get_cuda_version() < 11070, "only support cuda>=11.7")
+    def test_transpose_case3(self):
+        self.check_result([8, 16, 12, 4, 2, 12], [2, 3, 4, 1, 0, 2], 'coo')
+
+    @unittest.skipIf(not paddle.is_compiled_with_cuda()
+                     or get_cuda_version() < 11070, "only support cuda>=11.7")
+    def test_transpose_case3(self):
+        self.check_result([i + 2 for i in range(10)],
+                          [(i + 2) % 10 for i in range(10)], 'coo')
+```
+
+# 七、可行性分析及规划排期
+方案主要自行实现核心算法，并使用paddle现有func
+# 八、影响面
+为独立新增op，对其他模块没有影响
+# 名词解释
+无
+# 附件及参考资料
+无
