@@ -1,4 +1,4 @@
-# CINN argmax 和 argmin 设计文档
+# CINN gather 和 scatter 设计文档
 
 | API名称                                                      | gather/gather_nd/scatter/scatter_nd                                          |
 | ---------------------------------------------------------- | ------------------------------------------------ |
@@ -14,8 +14,8 @@
 
 `gather`和`scatter` 是众多神经网络编译器中均实现的常用算子，
 `gather_nd`和`scatter_nd`是`gather`和`scatter`的多维扩展，`gather`和`scatter`互为逆运算。
-假设张量 $x$尺寸为 $(16, 16, 3)$，张量 $i$尺寸为 $(12, )$，每个元素的值均在区间 $[0, 15]$，输入算子`gather`可以得到张量 $x$在指定维度 $i$各取值位置的取值，`axis`参数默认值为 $0$，返回的张量尺寸为 $(12, 16, 3)$，`gather_nd`可以指定多个`axis`，相应的 $i$也要增加维度。
-假设张量 $x$尺寸为 $(5, 3)$，张量 $y$尺寸为 $(16, 4)$，初始值全为$0$，张量 $i$尺寸为 $(5, 4)$，每个元素的值均在区间 $[0, 15]$，输入算子`scatter`可以改变张量 $x$在指定维度 $i$各取值位置的取值为 $i$各取值对应位置 $x$的取值，`axis`参数默认值为 $0$，`scatter_nd`可以指定多个`axis`，相应的 $i$也要增加维度。
+假设张量 $x$尺寸为 $(16, 16, 3)$，张量 $i$尺寸为 $(12, )$，每个元素的值均在区间 $[0, 15]$，输入算子`gather`可以得到张量 $x$在指定维度 $i$各取值位置的取值，`axis`参数默认值为 $0$，返回的张量尺寸为 $(12, 16, 3)$，`gather_nd`可以指定多个`axis`，相应的 $i$也要增加1个大小为`axis`个数的维度，若未指定`axis`，会根据 $i$的尺寸自定推算`axis`，选取前n维。
+假设张量 $x$尺寸为 $(5, 3)$，张量 $y$尺寸为 $(16, 4)$，初始值全为$0$，张量 $i$尺寸为 $(5, 4)$，每个元素的值均在区间 $[0, 15]$，输入算子`scatter`可以改变张量 $x$在指定维度 $i$各取值位置的取值为 $i$各取值对应位置 $x$的取值，`axis`参数默认值为 $0$，`scatter_nd`可以指定多个`axis`，相应的 $i$也要增加1个大小为`axis`个数的维度，若未指定`axis`，会根据 $i$的尺寸自定推算`axis`，选取前n维。
 为了提升 CINN API 丰富度，需要扩充 API `gather`和`scatter`。
 
 ## 2、名词解释
@@ -49,7 +49,7 @@ $C$ = zeros(4, 3)，gather( $C$, dim=0, index=index, src=$B_1$)=[[0.0000, 0.0000
 
 # 三、业内方案调研
 
-- [TVM](https://github.com/apache/tvm/blob/b79f9501fdba5cf286f015277aeae867081b77df/python/tvm/topi/scatter.py)：整体上通过实现fcombine和fidentity方法，传入CommReduceIdx类。以argmax为例，fcombine输入两个索引值对，比较之间的值，返回更大的索引值对。
+- [TVM](https://github.com/apache/tvm/blob/b79f9501fdba5cf286f015277aeae867081b77df/python/tvm/topi/scatter.py)：scatter_nd对不同维度分别实现了不同函数。gather通过一些计算的到适当的索引值，并取值。
   
   ```python
 @hybrid.script
@@ -143,7 +143,7 @@ Array<te::Tensor> GatherCompute(const Attrs& attrs, const Array<te::Tensor>& inp
   ```
 
 
-- [XLA](https://github.com/pytorch/xla/blob/3d24d955b6121289a3c8bb86eda541fca7a0d69f/torch_xla/csrc/ops/arg_max.cpp)：与TVM类似。
+- [XLA](https://github.com/tensorflow/tensorflow/blob/0b6b491d21d6a4eb5fbab1cca565bc1e94ca9543/tensorflow/compiler/tf2xla/kernels/gather_scatter_ops.cc)：与TVM类似。
 
 ```cpp
 class GatherOp : public XlaOpKernel {
@@ -244,6 +244,86 @@ TVM 与 XLA 实现方案类似。
 2. 在 `cinn/hlir/op/contrib/scatter.cc` 里实现`scatter/scatter_nd`算子和 `strategy`。
 3. 在 `cinn/hlir/op/contrib/gather.h` 里声明`gather/gather_nd`算子。
 4. 在 `cinn/hlir/op/contrib/gather.cc` 里实现`gather/gather_nd`算子和 `strategy`。
+使用python初步实现如下
+```python
+def gather(x, index, dim=0):
+    y = torch.empty(index.shape, device='mps')
+
+    def compute(indices: tuple):
+        eval_indices = list(indices)
+        eval_indices[dim] = index[indices].item()
+        y[indices] = x[tuple(eval_indices)]
+
+    for indices in product(*[range(s) for s in y.shape]):
+        compute(indices)
+    return y
+
+
+def gather_nd(x, index, dims=None):
+    x_shape = x.shape
+    x_len = len(x_shape)
+    index_shape = index.shape
+    index_len = len(index_shape)
+    n_dim = index_shape[-1]
+    if dims is None:
+        dims = range(n_dim)
+    else:
+        assert len(dims) == n_dim
+    assert index_len - 1 > x_len - n_dim
+    out_shape = index_shape[:-1]
+
+    y = torch.empty(out_shape, device='mps')
+
+    def compute(indices: tuple):
+        x_indices = list(indices)
+        index_indices = [0 for _ in range(index_len)]
+
+        index_indices[:-1] = indices
+        for i, dim in enumerate(dims):
+            index_indices[-1] = i
+            x_indices[dim] = index[tuple(index_indices)].item()
+        y[indices] = x[tuple(x_indices)]
+
+    for indices in product(*[range(s) for s in y.shape]):
+        compute(indices)
+    return y
+
+
+def scatter(y, src, index, dim=0):
+    def compute(indices: tuple):
+        eval_indices = list(indices)
+        eval_indices[dim] = index[indices].item()
+        y[tuple(eval_indices)] = src[indices]
+
+    for indices in product(*[range(s) for s in src.shape]):
+        compute(indices)
+    return y
+
+  
+def scatter_nd(y, src, index, dims=None):
+    x_shape = x.shape
+    index_shape = index.shape
+    index_len = len(index_shape)
+    n_dim = index_shape[-1]
+    if dims is None:
+        dims = range(n_dim)
+    else:
+        assert len(dims) == n_dim
+
+    def compute(indices: tuple):
+        x_indices = list(indices)
+        index_indices = [0 for _ in range(index_len)]
+
+        index_indices[:-1] = indices
+        for i, dim in enumerate(dims):
+            index_indices[-1] = i
+            x_indices[dim] = index[tuple(index_indices)].item()
+        y[tuple(x_indices)] = x[indices]
+
+    for indices in product(*[range(s) for s in src.shape]):
+        compute(indices)
+    return y
+```
 
 ## API实现方案
 
@@ -266,14 +346,11 @@ $C$ = zeros(4, 3)，gather( $C$, dim=0, index=index, src=$B_1$)=[[0.0000, 0.0000
 
 ```python
 builder = NetBuilder("test_basic")
-a = builder.create_input(Float(32), (8, 24), "A1")
+a = builder.create_input(Float(32), (8, 24), "A")
 i = builder.create_input(Int(32), (3, 24), "index")
-b = builder.argmax(a)  # 输出值最大的的索引，shape=()
-a = builder.create_input(Float(32), (8, 24, 124), "A2")
-b = builder.argmax(a，axis=0)  # shape=(24, 124)
-a = builder.create_input(Float(32), (8, 24, 124), "A3")
-b = builder.argmax(a，axis=1, keepdim=True)  # shape=(8, 1, 124)
-```
+b = builder.gather(a, index=i, dim=0)  # shape=(3, 24)
+z = builder.create_input(Float(32), (8, 24), "C")
+z = builder.scatter(z, scr=b, index=i, dim=0) # shape=()
 
 # 六、测试和验收的考量
 
