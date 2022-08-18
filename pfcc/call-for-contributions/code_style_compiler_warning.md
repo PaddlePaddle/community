@@ -3,7 +3,7 @@
 - 减少paddle在编译时的warning，提升代码质量和开发者体验。
 - 为什么要这么做？参考 [知乎：对于程序员来说， Warning 真的不重要吗？](https://www.zhihu.com/question/29155164/answer/43374842)
 ## 现状
-### linux 明面warning（几百）
+### linux 明面warning
 以8.16日某成功PR的流水线 [PR-CI-Build](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/21068?module=github%2FPaddlePaddle%2FPaddle&pipeline=PR-CI-Build&branch=branches) 为例，
 编译选项：`cmake .. -DPY_VERSION=3.8 -DWITH_DISTRIBUTE=ON -DWITH_GPU=ON -DWITH_LITE=ON`。
 可下载 [日志](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/detail/6367838/job/17573866)，
@@ -22,7 +22,7 @@ grep warning: a.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -
    2 [-Wmaybe-uninitialized]
    1 [-Wunused-local-typedefs]
 ```
-### mac 明面warning（上万）
+### mac 明面warning
 以8.16日某成功PR的流水线 [PR-CI-Mac-Python3](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/10496?module=github%2FPaddlePaddle%2FPaddle&pipeline=PR-CI-Mac-Python3&branch=branches) 为例，
 编译选项：`cmake .. -DPY_VERSION=3.7 -DWITH_DISTRIBUTE=ON -DWITH_TESTING=ON`
 可下载[日志](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/detail/6373552/job/17594587)，
