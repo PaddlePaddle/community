@@ -9,11 +9,11 @@
 可下载 [日志](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/detail/6367838/job/17573866)，
 统计编译warning如下（linux明面上的warning相对比较少，因为修过很多轮了）：
 ```shell
-grep warning a.txt |wc -l 
-# 334
-grep warning a.txt |grep party|wc -l
+grep warning: a.txt |grep "\[\-W" | wc -l 
+# 305
+grep warning: a.txt |grep "\[\-W" | grep party |wc -l
 # 265，这里很多是第三方库lite repo引入的，可以先不做处理
-grep warn a.txt|grep -v party | awk '{print $NF}'|sort|uniq -c
+grep warning: a.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -c
 # 
    2 [-Wmaybe-uninitialized]
   25 [-Wsign-compare]
@@ -21,13 +21,6 @@ grep warn a.txt|grep -v party | awk '{print $NF}'|sort|uniq -c
    2 [-Wunknown-pragmas]
    1 [-Wunused-local-typedefs]
    4 [-Wunused-variable]
-   1 dsacre/fix-clang-warnings
-   7 https://pip.pypa.io/warnings/venv
-   1 mode.
-   7 rule.
-   1 src/CMakeFiles/BUTIL_LIB.dir/butil/threading/thread_collision_warner.cc.o
-  12 warning).
-   1 warning.
 ```
 ### mac 明面warning（上万）
 以8.16日某成功PR的流水线 [PR-CI-Mac-Python3](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/10496?module=github%2FPaddlePaddle%2FPaddle&pipeline=PR-CI-Mac-Python3&branch=branches) 为例，
@@ -35,14 +28,13 @@ grep warn a.txt|grep -v party | awk '{print $NF}'|sort|uniq -c
 可下载[日志](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/detail/6373552/job/17594587)，
 统计编译warning如下（mac的warning相对就多多了）
 ```shell
-grep warning b.txt |wc -l 
-# 9635
-grep warning b.txt |grep party|wc -l
+grep warning: b.txt |grep "\[\-W" | wc -l 
+# 7909
+grep warning: b.txt |grep "\[\-W" | grep party |wc -l
 # 7166，很多是eigen引入的，看如何屏蔽eigen带来的warning
-grep warn b.txt|grep -v party | awk '{print $NF}'|sort|uniq -c
+grep warning: b.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -c
 #
-   2 MACOSX_DEPLOYMENT_TARGET:
-  13 [-Wbraced-scalar-init]
+   13 [-Wbraced-scalar-init]
    4 [-Wc++17-extensions]
    2 [-Wexceptions]
   31 [-Wformat]
@@ -52,12 +44,6 @@ grep warn b.txt|grep -v party | awk '{print $NF}'|sort|uniq -c
    1 [-Wreturn-type-c-linkage]
    1 [-Wtautological-constant-out-of-range-compare]
    1 [-Wuninitialized]
-1573 generated.
-  18 mode.
- 123 padding
-   7 symbols)
-   2 warning.
-   1 warnings.warn(msg)
 ```
 ### Windows 明面warning（可忽略）
 以8.16日某成功PR的效率云流水线 [PR-CI-Windows](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/10090?module=github%2FPaddlePaddle%2FPaddle&pipeline=PR-CI-Windows&branch=branches) 为例，
