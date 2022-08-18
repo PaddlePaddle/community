@@ -2,7 +2,7 @@
 ## 背景
 来源于[issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，使用`np.testing.assert_allclose代替assertTrue(np.allclose(...))`，
 可以获得更全面的单测报错信息。
-```
+```python
 ------ 现有问题 ------
 飞桨现有单测代码为
 self.assertTrue(np.allclose(x, y), "compare x and y")
@@ -32,7 +32,7 @@ y: array([1, 3, 3])
     修复PR参考：https://github.com/PaddlePaddle/Paddle/pull/44135
 2. CI中增加对`assertTrue(np.allclose(`和`self.assertTrue(np.array_equal(`的检查，即增量不能使用该方式。
    可参考`tools/check_file_diff_approvals.sh`对字段进行监控，并给出修复建议，如报错信息的监控。
-```
+```shell
 ALL_ADDED_LINES=git diff -U0 upstream/$BRANCH |grep "^+" || true
 ALL_PADDLE_CHECK=echo $ALL_ADDED_LINES |grep -zoE "(PADDLE_ENFORCE[A-Z_]{0,9}|PADDLE_THROW)\(.[^,\);]*.[^;]*\);\s" || true
 VALID_PADDLE_CHECK=echo "$ALL_PADDLE_CHECK" | grep -zoE '(PADDLE_ENFORCE[A-Z_]{0,9}|PADDLE_THROW)\((.[^,;]+,)*.[^";]*(errors::).[^"]*".[^";]{20,}.[^;]*\);\s' || true
