@@ -1,7 +1,8 @@
 # 编译warning的消除
 ## 目的
-- 减少paddle在编译时的warning，提升代码质量和开发者体验。
-- 为什么要这么做？参考 [知乎：对于程序员来说， Warning 真的不重要吗？](https://www.zhihu.com/question/29155164/answer/43374842)
+
+作为一个大型的基础设施类开源项目，减少飞桨框架在编译时的warning，可以提升工程质量和整个代码仓库的可维护性，以及减少潜在的bug。
+
 ## 现状
 ### linux 明面warning
 以8.16日某成功PR的流水线 [PR-CI-Build](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/21068?module=github%2FPaddlePaddle%2FPaddle&pipeline=PR-CI-Build&branch=branches) 为例，
