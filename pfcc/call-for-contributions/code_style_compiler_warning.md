@@ -13,14 +13,14 @@ grep warning: a.txt |grep "\[\-W" | wc -l
 # 305
 grep warning: a.txt |grep "\[\-W" | grep party |wc -l
 # 265，这里很多是第三方库lite repo引入的，可以先不做处理
-grep warning: a.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -c
+grep warning: a.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -c|sort -nr
 # 
-   2 [-Wmaybe-uninitialized]
   25 [-Wsign-compare]
    6 [-Wterminate]
-   2 [-Wunknown-pragmas]
-   1 [-Wunused-local-typedefs]
    4 [-Wunused-variable]
+   2 [-Wunknown-pragmas]
+   2 [-Wmaybe-uninitialized]
+   1 [-Wunused-local-typedefs]
 ```
 ### mac 明面warning（上万）
 以8.16日某成功PR的流水线 [PR-CI-Mac-Python3](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/10496?module=github%2FPaddlePaddle%2FPaddle&pipeline=PR-CI-Mac-Python3&branch=branches) 为例，
@@ -32,18 +32,18 @@ grep warning: b.txt |grep "\[\-W" | wc -l
 # 7909
 grep warning: b.txt |grep "\[\-W" | grep party |wc -l
 # 7166，很多是eigen引入的，看如何屏蔽eigen带来的warning
-grep warning: b.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -c
+grep warning: b.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -c|sort -nr
 #
-   13 [-Wbraced-scalar-init]
+ 685 [-Winconsistent-missing-override]
+  31 [-Wformat]
+  13 [-Wbraced-scalar-init]
+   4 [-Wliteral-conversion]
    4 [-Wc++17-extensions]
    2 [-Wexceptions]
-  31 [-Wformat]
- 685 [-Winconsistent-missing-override]
-   4 [-Wliteral-conversion]
-   1 [-Wpragma-pack]
-   1 [-Wreturn-type-c-linkage]
-   1 [-Wtautological-constant-out-of-range-compare]
    1 [-Wuninitialized]
+   1 [-Wtautological-constant-out-of-range-compare]
+   1 [-Wreturn-type-c-linkage]
+   1 [-Wpragma-pack]
 ```
 ### Windows 明面warning（可忽略）
 以8.16日某成功PR的效率云流水线 [PR-CI-Windows](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/10090?module=github%2FPaddlePaddle%2FPaddle&pipeline=PR-CI-Windows&branch=branches) 为例，
