@@ -113,19 +113,20 @@ class FRexpResult {
 
 # 四、对比分析
 
-- 使用场景与功能：pytorch和Numpy都支持多维，这里模仿他们的实现逻辑，使用paddle.frexp(x)，返回尾数张量，指数张量。
+pytorch和Numpy都支持多维，正负数，0。这里模仿他们的实现逻辑，使用paddle.frexp(x)
+，返回尾数张量，指数张量。但是，参考paddle.log2，我新增一个type属性来增加特殊场景的使用情况
 
 # 五、方案设计
 
 ## 命名与参数设计
 
-### 函数命名
-
-API设计为`paddle.frexp(x)`，返回尾数张量位于开区间 (-1, 1)，返回二进制指数是有符号整数张量。
-
-x为输入张量，y为输出张量
-
-
+* 函数名称: paddle.frexp(x,dtype=paddle.float32)
+* 输入参数
+    * x: 任意数值
+    * dtype: paddle.float32或paddle.float64
+* 返回值:
+    * 返回位于开区间 (-1, 1) 的尾数张量**mantissa**
+    * 返回位于指数张量 **exponent**
 
 ## 底层OP设计
 
@@ -135,15 +136,30 @@ x为输入张量，y为输出张量
 
 **思路来源**
 参考[paddle炼丹师提交的提案](https://github.com/PaddlePaddle/community/pull/180/files/96ff9847d01a28e16fa455c40aad450f2bffb511#diff-a1cb961065ef85e96f4f68364a77eedc2066171fb04574de1cb2e1cceb424564)
-中tizhou86同学的建议，使用paddle log以及devide组合的方式来实现对应的功能，面向对象，python NO1。
+中tizhou86同学的建议，使用paddle log以及devide组合的方式来实现对应的功能。
 
 **实现细节**
+
 * 大致方法: 使用对输入数据取log2，利用devide广播除对应的数字。
-* 注意点: 输入值含有0元素时，警告，并且将返回值中该元素对应位置设置为0
+* 注意点:
+    * 由于paddle.log2只接受paddle.float32, paddle.float64这两个类型，因此输入数据不是paddle.float32,
+      paddle.float64这两个类型时，要进行类型转换
+    * 输入值含有0元素时，将对应位置的指数值转换为0，防止出现inf的情况
+    * 输入数据为负数时，先转换成正数，再进行计算，最后把尾数正负统一
 
 # 六、测试和验收的考量
 
 和numpy结果的数值的一致性
+
+test.py中的case如下:
+
+* 小正整数
+* 大正整数
+* 0
+* 小负整数
+* 大负整数
+* 短浮点数
+* 长浮点数
 
 # 七、可行性分析及规划排期
 
