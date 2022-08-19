@@ -29,13 +29,13 @@ y: array([1, 3, 3])
 
 1. 存在以上问题的单测列表，具体修复步骤如下：
 
-- 对于 `self.assertTrue(np.allclose(...))` 类型的代码，统一修改为 `np.testing.assert_allclose(...)` 格式
-- 对于 `self.assertTrue(np.array_equal(...))` 类型的代码，先判断其中的数据类型：
-  - 如果是 float 类型(包括 fp16)，则统一修改为 `np.testing.assert_allclose(...)` 格式
-  - 如果是 int 数据类型，这统一修改为 `np.testing.assert_array_equal(...)` 格式
-- 验证修改后的单测代码，保证单测可以通过
-  - 在单测通过的情况下，请尽量使用 `numpy.testing.assert_allclose` 接口中默认的 rtol 与 atol 的值。
-    修复 PR 参考：https://github.com/PaddlePaddle/Paddle/pull/44135
+   - 对于 `self.assertTrue(np.allclose(...))` 类型的代码，统一修改为 `np.testing.assert_allclose(...)` 格式
+   - 对于 `self.assertTrue(np.array_equal(...))` 类型的代码，先判断其中的数据类型：
+     - 如果是 float 类型(包括 fp16)，则统一修改为 `np.testing.assert_allclose(...)` 格式
+     - 如果是 int 数据类型，这统一修改为 `np.testing.assert_array_equal(...)` 格式
+   - 验证修改后的单测代码，保证单测可以通过
+     - 在单测通过的情况下，请尽量使用 `numpy.testing.assert_allclose` 接口中默认的 rtol 与 atol 的值。
+       修复 PR 参考：https://github.com/PaddlePaddle/Paddle/pull/44135
 
 2. CI 中增加对 `assertTrue(np.allclose(` 和 `self.assertTrue(np.array_equal(` 的检查，即增量不能使用该方式。
    可参考 `tools/check_file_diff_approvals.sh` 对字段进行监控，并给出修复建议，如报错信息的监控。
