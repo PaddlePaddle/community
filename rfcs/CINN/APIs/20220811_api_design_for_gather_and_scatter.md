@@ -87,59 +87,48 @@ def _scatter_2d(data, indices, updates, axis):
 
   ```cpp
 
-  bool GatherRel(const Array<Type>& types, int num_inputs, const Attrs& attrs,
-               const TypeReporter& reporter) {
-  // `types` contains: [data, indices, result]
-  ICHECK_EQ(types.size(), 3);
-  const auto* data = types[0].as<TensorTypeNode>();
-  const auto* indices = types[1].as<TensorTypeNode>();
-  if (data == nullptr) {
-    ICHECK(types[0].as<IncompleteTypeNode>())
-        << "Gather: expect input data type to be TensorType but get " << types[0];
-    return false;
-  }
-  if (indices == nullptr) {
-    ICHECK(types[1].as<IncompleteTypeNode>())
-        << "Gather: expect indices type to be TensorType but get " << types[1];
-    return false;
-  }
-  ICHECK(indices->dtype.is_int()) << "indices of take must be tensor of integer";
-  const auto param = attrs.as<GatherAttrs>();
-  ICHECK(param != nullptr);
-  ICHECK(param->axis.defined());
-
-  const auto ndim_data = data->shape.size();
-  const auto ndim_indices = indices->shape.size();
-  int axis = param->axis->value;
-  ICHECK_EQ(ndim_data, ndim_indices);
+  binline Tensor gather(const Tensor& data, int axis, const Tensor& indices,
+                     std::string name = "T_gather", std::string tag = kInjective) {
+  size_t ndim_d = data->shape.size();
+  size_t ndim_i = indices->shape.size();
+  ICHECK_GE(ndim_d, 1) << "Cannot gather from a scalar.";
+  ICHECK_EQ(ndim_d, ndim_i);
   if (axis < 0) {
-    axis += ndim_data;
+    axis += ndim_d;
   }
   ICHECK_GE(axis, 0);
-  ICHECK_LT(axis, ndim_data);
-
-  std::vector<IndexExpr> oshape;
-  oshape.reserve(ndim_data);
-  for (size_t i = 0; i < ndim_data; ++i) {
-    if (i == static_cast<size_t>(axis)) {
-      if (indices->shape[i].as<IntImmNode>()) {
-        const int64_t* indice_shape_i = tir::as_const_int(indices->shape[i]);
-        ICHECK_GE(*indice_shape_i, 1);
-      }
-    } else {
-      ICHECK(reporter->AssertEQ(indices->shape[i], data->shape[i]));
-    }
-    oshape.emplace_back(indices->shape[i]);
+  ICHECK_LT(axis, ndim_d);
+  if (indices->shape[axis].as<IntImmNode>()) {
+    size_t indices_dim_i = static_cast<size_t>(GetConstInt(indices->shape[axis]));
+    ICHECK_GE(indices_dim_i, 1);
   }
-  reporter->Assign(types[2], TensorType(oshape, data->dtype));
-  return true;
-}
+  ICHECK(indices->dtype.is_int() || indices->dtype.is_uint());
 
-Array<te::Tensor> GatherCompute(const Attrs& attrs, const Array<te::Tensor>& inputs,
-                                const Type& out_type) {
-  const auto* param = attrs.as<GatherAttrs>();
-  return {topi::gather(inputs[0], param->axis.IntValue(), inputs[1])};
-}
+  Array<PrimExpr> out_shape;
+  for (size_t i = 0; i < ndim_i; ++i) {
+    out_shape.push_back(indices->shape[i]);
+  }
+
+  return compute(
+      out_shape,
+      [&](const Array<Var>& out_index) {
+        Array<PrimExpr> indices_position;
+        for (size_t i = 0; i < ndim_i; ++i) {
+          indices_position.push_back(out_index[i]);
+        }
+        Array<PrimExpr> real_indices;
+        for (size_t i = 0; i < ndim_i; ++i) {
+          if (i == static_cast<size_t>(axis)) {
+            real_indices.push_back(indices(indices_position));
+          } else {
+            real_indices.push_back(indices_position[i]);
+          }
+        }
+        return data(real_indices);
+      },
+      name, tag);
+  }
+
   ```
 
 
