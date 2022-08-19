@@ -71,11 +71,11 @@ fi
 
 #### 存量代码单测断言转换
 
-经过 4 个 PR（#44947、#44988、#45213、#45251）的逐步替换，已经将 400+ 文件中的近 2000 处 `self.assertTrue(np.allclose(...))` 和 700+ 处 `self.assertTrue(np.array_equal(...))` 替换为合适的 `np.testing` 模块下的断言函数。并对替换后出现的一些问题进行了修复，修复后 CI 上的测试可全部通过。
+经过 4 个 PR（[#44947](https://github.com/PaddlePaddle/Paddle/pull/44947)、[#44988](https://github.com/PaddlePaddle/Paddle/pull/44988)、[#45213](https://github.com/PaddlePaddle/Paddle/pull/45213)、[#45251](https://github.com/PaddlePaddle/Paddle/pull/45251)）的逐步替换，已经将 400+ 文件中的近 2000 处 `self.assertTrue(np.allclose(...))` 和 700+ 处 `self.assertTrue(np.array_equal(...))` 替换为合适的 `np.testing` 模块下的断言函数。并对替换后出现的一些问题进行了修复，修复后 CI 上的测试可全部通过。
 
 #### 增量代码关键词阻止
 
-通过一个 PR（#45126）增加了阻止增量代码中出现 `self.assertTrue(np.allclose(` 前缀的 CI 检查项，并在 #45184 测试阻止的效果以及 Approve 的效果，两者均有效。
+通过一个 PR（[#45126](https://github.com/PaddlePaddle/Paddle/pull/45126)）增加了阻止增量代码中出现 `self.assertTrue(np.allclose(` 前缀的 CI 检查项，并在 [#45184](https://github.com/PaddlePaddle/Paddle/pull/45184) 测试阻止的效果以及 Approve 的效果，两者均有效。
 
 在该 PR 合入后很快就成功地阻止了一个使用 `self.assertTrue(np.allclose(...))` 进行断言的 PR（见 [#45168 (comment)](https://github.com/PaddlePaddle/Paddle/pull/45168#discussion_r948767123)）。成功避免了增量代码中出现新的问题。
 
