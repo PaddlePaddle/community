@@ -349,7 +349,7 @@ z = builder.scatter(z, scr=b, index=i, dim=0) # shape=()
 # 七、可行性分析和排期规划
 
 - 可行性分析：非常可行
-- 排期规划：预计9月5日前完成
+- 排期规划：预计9月5日前完成，已完成部分见 [PaddlePaddle/CINN#897](https://github.com/PaddlePaddle/CINN/pull/897)
 
 # 八、影响面
 
