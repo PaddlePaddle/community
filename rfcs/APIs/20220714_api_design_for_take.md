@@ -282,6 +282,7 @@ paddle.take(
 
 4. 通过 `Tensor.reshape(index.shape)` 将输出的 Tensor 形状转成 index 的形状。
 
+
 # 六、测试和验收的考量
 
 测试考虑的 case 如下：
