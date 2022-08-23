@@ -288,7 +288,7 @@ array([[ -1,  -1, -10, -10],
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
-API设计为`paddle.triu_indices(rows, cols, offset,dtype=None)`，产生一个2行x列的二维数组存放指定上三角区域的坐标，第一行为行坐标，第二行为列坐标
+API设计为`paddle.triu_indices(rows, cols=None, offset=0,dtype='int64')`，产生一个2行x列的二维数组存放指定上三角区域的坐标，第一行为行坐标，第二行为列坐标
 
 参数类型要求：
 
@@ -330,9 +330,10 @@ GPU实现逻辑：计算输出数组大小，计算每个block负责的原始行
 在`python/paddle/tensor/creation.py`中增加`triu_indices`函数，并添加英文描述
 
 ```python
-def triu_indices(row, col, offset=0, dtype='int64'):
+def triu_indices(row, col=None, offset=0, dtype='int64'):
     # ...
     # 参数检查
+    # col默认为None, 当col取None时代表输入为正方形，将row值赋给col
     # ...
     # 增加算子
     # ...
