@@ -6,7 +6,7 @@
   - 会议密码：\*\*\*\*（群内通知）
   - [点击链接入会](https://meeting.tencent.com/dm/uFp1iq4Bqw06)，或添加至会议列表
 - 本次会议主席：任子跻（[OccupyMars2025](https://github.com/OccupyMars2025)）
-- 本次会议副主席：
+- 本次会议副主席：徐晓健 ([Nyakku Shigure](https://github.com/SigureMo))
 - 本次拟参会 Paddle Framework Contributor 列表：
      - [jzhang533](https://github.com/jzhang533)
      - [jeff41404](https://github.com/jeff41404)
@@ -44,14 +44,13 @@
      - [Ainavo](https://github.com/Ainavo)
      - [ReganYue](https://github.com/ReganYue)
      - [mrcangye](https://github.com/mrcangye)
-     - [ZzSean](https://github.com/ZzSean)
-     - [JamesLim](https://github.com/JamesLim)
+     - [wanghuancoder](https://github.com/wanghuancoder)
      
 
 # 会议议程
 
 - [OccupyMars2025](https://github.com/OccupyMars2025) 学习经验分享《关于PaddlePaddle框架和Pytorch框架中python端与C++端如何互动的入门级理解》（15 minutes）
-- 飞桨研发工程师主题分享《PYTHON_C_API》：https://github.com/PaddlePaddle/Paddle/pull/32524 （15 minutes）
+- 飞桨研发工程师[wanghuancoder](https://github.com/wanghuancoder)主题分享《PYTHON_C_API》：https://github.com/PaddlePaddle/Paddle/pull/32524 （15 minutes）
 - [luotao1](https://github.com/luotao1)发布 [Call for Contributions 任务介绍](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions) （10 minutes）
 - PFCC 成员自由发言讨论（5 minutes）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 minutes）
