@@ -27,7 +27,7 @@ Poisson OP性能优化设计文档
 |5 | 9.01% | 2.50930s | 6000 | maxwell_sgemm_128x64_nn|
 |6 | 8.70% | 2.42293s | 6000 | sgemm_128x128x8_NT|
 
-结合代码实现逻辑，分析得到：前向执行时进行的操作为6000次的No.3, 以及6000次的No.4, 其余均为后向执行时调用。故得到如下性能表
+结合代码实现逻辑，分析得到：前向执行时进行的操作为6000次的No.3, 以及6000次的No.5, 其余均为后向执行时调用。故得到如下性能表
 
 | Case No. | input_shape | offset | weight | mask | data_type | Paddle Perf(s) |
 |---|---|---|---|---|---|---| 
@@ -50,16 +50,22 @@ Poisson OP性能优化设计文档
  + 通过调研目前开源代码中与Deformable conv相关的实现都采用了统一的逻辑，即参考论文原作者的方式。
  + 可能的性能提升关键在点在于以下几方面：
    + 优化点1: 通过优化grid， block数量寻找更优配置。
-   + 优化点2: 优化deformable_conv_kernel_impl中计算像素和权重乘积的循环；
-   + 优化点3: 优化deformable_conv_functor中ModulatedDeformableIm2colGpuKernel内的两层循环。
+   + 优化点2: 将deformable_conv_kernel_impl中计算像素和权重乘积的循环迁移到ModulatedDeformableIm2colGpuKernel中，将col_buffer的并行计算和output_3d的计算整合，减少部分搬运开销
+   + 优化点3: 单独优化deformable_conv_kernel_impl中计算像素和权重乘积的循环；
+   + 优化点4: 优化deformable_conv_functor中ModulatedDeformableIm2colGpuKernel内的两层循环。
   
+ 根据kernels运行时间分析：65%时间消耗在No.5上，而cuBlas本身的实现难以有较大优化空间，所以单独优化两个kernel较难实现目标
+
+ 根据CUDA API时间分析：63%时间消耗在同步，26%时间消耗在内存分配。通过减少需要线程同步的次数，降低数据在内存和CUDA间迁移应该可以较大程度优化。故优化点1和优化点2是重点考虑的对象。
 
 ##  2.2 Host / Device 端计算流程
-1. 针对优化点1: 考虑通过paddle已实现的gpu_launch_config.h中GetGpuLaunchConfig1D方法获得较优的参数配置，或手动对BlockSize的不同大小进行性能测试验证
+1. 针对优化点1: 考虑通过paddle已实现的gpu_launch_config.h中GetGpuLaunchConfig1D方法获得较优的参数配置，或手动对BlockSize的不同大小进行性能测试验证（可能有一定优化空间）
+   
+2. 针对优化点2: ModulatedDeformableIm2colGpuKernel的Host端多接入两个参数，Device端计算完成col_buffer后继续计算output（可能有较大优化空间）
 
-2. 针对优化点2: 乘积继续使用blas.MatMul实现，循环可以进行展开或实现新的GPU kernel尝试并行
+3. 针对优化点3: 乘积继续使用blas.MatMul实现，循环可以进行展开或实现新的GPU kernel尝试并行（benchmark中循环次数为1，优化空间较小）
 
-3. 针对优化点3: Im2colGpuKernel中的两层循环可以尝试展开或使用实现 Child kernel将循环并行执行。
+4. 针对优化点3: Im2colGpuKernel中的两层循环可以尝试展开或使用实现 Child kernel将循环并行执行。（探索，不确定优化可行性）
 
  ## 3 测试和验收的考量
 
@@ -68,7 +74,8 @@ Poisson OP性能优化设计文档
  # 4 可行性分析和排期规划
 
 8.23～8.26测试优化点1
-8.26～9.15测试优化点2和优化点3
+
+8.26～9.15测试优化点2～4
 
 
 #  5 影响面
