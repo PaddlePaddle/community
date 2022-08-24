@@ -1,4 +1,4 @@
-# paddle.tril_indices设计文档
+# paddle.triu_indices设计文档
 
 
 |API名称 | paddle.triu_indices |
