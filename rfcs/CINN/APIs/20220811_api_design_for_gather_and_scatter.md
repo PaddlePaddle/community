@@ -15,7 +15,7 @@
 `gather`和`scatter` 是众多神经网络编译器中均实现的常用算子，
 `gather_nd`和`scatter_nd`是`gather`和`scatter`的多维扩展，`gather`和`scatter`互为逆运算。
 假设张量 $x$尺寸为 $(16, 16, 3)$，张量 $i$尺寸为 $(12, )$，每个元素的值均在区间 $[0, 15]$，输入算子`gather`可以得到张量 $x$在指定维度 $i$各取值位置的取值，`axis`参数默认值为 $0$，返回的张量尺寸为 $(12, 16, 3)$，`gather_nd`可以指定多个`axis`，相应的 $i$也要增加1个大小为`axis`个数的维度，若未指定`axis`，会根据 $i$的尺寸自定推算`axis`，选取前n维。
-假设张量 $x$尺寸为 $(5, 3)$，张量 $y$尺寸为 $(16, 4)$，初始值全为$0$，张量 $i$尺寸为 $(5, 4)$，每个元素的值均在区间 $[0, 15]$，输入算子`scatter`可以改变张量 $x$在指定维度 $i$各取值位置的取值为 $i$各取值对应位置 $x$的取值，`axis`参数默认值为 $0$，`scatter_nd`可以指定多个`axis`，相应的 $i$也要增加1个大小为`axis`个数的维度，若未指定`axis`，会根据 $i$的尺寸自定推算`axis`，选取前n维。
+假设张量 $x$尺寸为 $(5, 3)$，张量 $y$尺寸为 $(16, 4)$，初始值全为 $0$，张量 $i$尺寸为 $(5, 4)$，每个元素的值均在区间 $[0, 15]$，输入算子`scatter`可以改变张量 $x$在指定维度 $i$各取值位置的取值为 $i$各取值对应位置 $x$的取值，`axis`参数默认值为 $0$，`scatter_nd`可以指定多个`axis`，相应的 $i$也要增加1个大小为`axis`个数的维度，若未指定`axis`，会根据 $i$的尺寸自定推算`axis`，选取前n维。
 为了提升 CINN API 丰富度，需要扩充 API `gather`和`scatter`。
 
 ## 2、名词解释
@@ -52,36 +52,36 @@ $C$ = zeros(4, 3)，gather( $C$, dim=0, index=index, src=$B_1$)=[[0.0000, 0.0000
 - [TVM](https://github.com/apache/tvm/blob/b79f9501fdba5cf286f015277aeae867081b77df/python/tvm/topi/scatter.py)：scatter_nd对不同维度分别实现了不同函数。gather通过一些计算的到适当的索引值，并取值。
   
   ```python
-@hybrid.script
-def _scatter_1d(data, indices, updates):
-    out = output_tensor(data.shape, data.dtype)
-    for i in range(data.shape[0]):
-        out[i] = data[i]
-    for i in range(indices.shape[0]):
-        out[indices[i] if indices[i] >= 0 else indices[i] + data.shape[0]] = updates[i]
-    return out
-
-
-@hybrid.script
-def _scatter_2d(data, indices, updates, axis):
-    out = output_tensor(data.shape, data.dtype)
-    for i in range(data.shape[0]):
-        for j in range(data.shape[1]):
-            out[i, j] = data[i, j]
-    if axis == 0:
+    @hybrid.script
+    def _scatter_1d(data, indices, updates):
+        out = output_tensor(data.shape, data.dtype)
+        for i in range(data.shape[0]):
+            out[i] = data[i]
         for i in range(indices.shape[0]):
-            for j in range(indices.shape[1]):
-                out[
-                    indices[i, j] if indices[i, j] >= 0 else indices[i, j] + data.shape[axis], j
-                ] = updates[i, j]
-    else:
-        for i in range(indices.shape[0]):
-            for j in range(indices.shape[1]):
-                out[
-                    i, indices[i, j] if indices[i, j] >= 0 else indices[i, j] + data.shape[axis]
-                ] = updates[i, j]
+            out[indices[i] if indices[i] >= 0 else indices[i] + data.shape[0]] = updates[i]
+        return out
 
-    return out
+
+    @hybrid.script
+    def _scatter_2d(data, indices, updates, axis):
+        out = output_tensor(data.shape, data.dtype)
+        for i in range(data.shape[0]):
+            for j in range(data.shape[1]):
+                out[i, j] = data[i, j]
+        if axis == 0:
+            for i in range(indices.shape[0]):
+                for j in range(indices.shape[1]):
+                    out[
+                        indices[i, j] if indices[i, j] >= 0 else indices[i, j] + data.shape[axis], j
+                    ] = updates[i, j]
+        else:
+            for i in range(indices.shape[0]):
+                for j in range(indices.shape[1]):
+                    out[
+                        i, indices[i, j] if indices[i, j] >= 0 else indices[i, j] + data.shape[axis]
+                    ] = updates[i, j]
+
+        return out
 
   ```
 
@@ -233,6 +233,10 @@ TVM 与 XLA 实现方案类似。
 2. 在 `cinn/hlir/op/contrib/scatter.cc` 里实现`scatter/scatter_nd`算子和 `strategy`。
 3. 在 `cinn/hlir/op/contrib/gather.h` 里声明`gather/gather_nd`算子。
 4. 在 `cinn/hlir/op/contrib/gather.cc` 里实现`gather/gather_nd`算子和 `strategy`。
+5. 在 `cinn/runtime/cpu/host_intrinsics.cc` 里实现`cinn_host_find_value_nd`函数和声明外部函数。
+5. 在 `cinn/runtime/cuda/cinn_cuda_runtime_source.cuh` 里实现`cinn_cuda_find_value_nd`函数。
+5. 在 `cinn/runtime/cuda/cuda_intrinsics.cuh` 里声明`cinn_cuda_find_value_nd`外部函数。
+6. 在 `cinn/runtime/cpu/host_intrinsics_test.cc` 里添加测试。
 使用python初步实现如下
 ```python
 def gather(x, index, dim=0):
@@ -316,14 +320,10 @@ def scatter_nd(y, src, index, dims=None):
 
 ## API实现方案
 
-例如，张量index = [[0, 1, 1], [3, 2, 0]]，
-$A$ = range(12).reshape([4, 3])=[[ 0.0000,  1.0000,  2.0000],
+例如，张量index = [[0, 1, 1], [3, 2, 0]]， $A$ = range(12).reshape([4, 3])=[[ 0.0000,  1.0000,  2.0000],
         [ 3.0000,  4.0000,  5.0000],
         [ 6.0000,  7.0000,  8.0000],
-        [ 9.0000, 10.0000, 11.0000]]，
-$B_1$ = gather( $A$, dim=0, index=index)=[[0.0000, 4.0000, 5.0000], [9.0000, 7.0000, 2.0000]]，
-$B_2$ = gather( $A$, dim=1, index=index)=[[0.0000, 1.0000, 1.0000], [0.0000, 5.0000, 3.0000]]，
-$C$ = zeros(4, 3)，gather( $C$, dim=0, index=index, src=$B_1$)=[[0.0000, 0.0000, 2.0000],
+        [ 9.0000, 10.0000, 11.0000]]， $B_1$ = gather( $A$, dim=0, index=index)=[[0.0000, 4.0000, 5.0000], [9.0000, 7.0000, 2.0000]]， $B_2$ = gather( $A$, dim=1, index=index)=[[0.0000, 1.0000, 1.0000], [0.0000, 5.0000, 3.0000]]， $C$ = zeros(4, 3)，gather( $C$, dim=0, index=index, src=$B_1$)=[[0.0000, 0.0000, 2.0000],
         [0.0000, 4.0000, 5.0000],
         [0.0000, 7.0000, 0.0000],
         [9.0000, 0.0000, 0.0000]]。
