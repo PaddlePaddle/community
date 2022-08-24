@@ -36,14 +36,10 @@
 [9.0000, 0.0000, 0.0000]]。
 
 gather_nd的公式表达如下：
-$$
-output[(i0,...,iK−2)]=x[index[(i0,...,iK−2)]]
-$$
+$$output[(i0,...,iK−2)]=x[index[(i0,...,iK−2)]]$$
 
 scatter_nd的公式表达如下：
-$$
-output[index[(i0,...,iK−2)]]=x[(i0,...,iK−2)]
-$$
+$$output[index[(i0,...,iK−2)]]=x[(i0,...,iK−2)]$$
 
 使用python实现代码可见 `五、设计思路与实现方案 底层OP设计`部分。
 
