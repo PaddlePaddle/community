@@ -44,6 +44,7 @@
      - [Ainavo](https://github.com/Ainavo)
      - [ReganYue](https://github.com/ReganYue)
      - [mrcangye](https://github.com/mrcangye)
+     - [peachlcy](https://github.com/peachlcy)
      - [wanghuancoder](https://github.com/wanghuancoder)
      
 
