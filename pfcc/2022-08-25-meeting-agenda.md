@@ -2,9 +2,9 @@
 
 - 本次会议时间：2022-08-25 19：00
 - 本次会议接入方式： 
-  - 腾讯会议：899218044
+  - 腾讯会议：439-487-451
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会](https://meeting.tencent.com/dm/uFp1iq4Bqw06)，或添加至会议列表
+  - [点击链接入会](https://meeting.tencent.com/dm/elWApnAE6NAt)，或添加至会议列表
 - 本次会议主席：任子跻（[OccupyMars2025](https://github.com/OccupyMars2025)）
 - 本次会议副主席：徐晓健 ([Nyakku Shigure](https://github.com/SigureMo))
 - 本次拟参会 Paddle Framework Contributor 列表：
