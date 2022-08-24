@@ -2,7 +2,7 @@
 
 ## 背景
 
-来源于NVIDIA开发者提的 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，NVIDIA开发者每月需要上线一次飞桨到NGC官网，他们会在不同的GPU卡上跑全量单测。使用`np.testing.assert_allclose代替assertTrue(np.allclose(...))`，可以获得更全面的单测报错信息，便于验证不同卡上的Op精度。
+来源于NVIDIA开发者提的 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，NVIDIA开发者每月需要上线一次飞桨到NGC官网，他们会在不同的GPU卡上跑全量单测。使用 `np.testing.assert_allclose` 代替 `assertTrue(np.allclose(...))`，可以获得更全面的单测报错信息，便于验证不同卡上的Op精度。
 
 ```python
 ------ 现有问题 ------
@@ -53,7 +53,7 @@ fi
 ## 项目总结<a id='summary'></a>
 ### 意义
 这是一个从社区中来到社区中去的代表性项目 （成员：SigureMo（组长） 和 Yulv-git）
-- 背景来源于NVIDIA开发者的真实需求 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)：NVIDIA开发者每月需要上线一次飞桨到NGC官网，他们会在不同的GPU卡上跑全量单测。使用`np.testing.assert_allclose代替assertTrue(np.allclose(...))`，可以获得更全面的单测报错信息，便于验证不同卡上的Op精度。
+- 背景来源于NVIDIA开发者的真实需求 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)：NVIDIA开发者每月需要上线一次飞桨到NGC官网，他们会在不同的GPU卡上跑全量单测。使用 `np.testing.assert_allclose` 代替 `assertTrue(np.allclose(...))`，可以获得更全面的单测报错信息，便于验证不同卡上的Op精度。
 - 社区开发者 SigureMo（组长） 和 Yulv-git 帮飞桨和NVIDIA解决了这个问题：使用自己开发的AST解析脚本，存量（批量自动化）共修复了400+文件近2700+处单测的断言函数，增量使用CI检查项阻止新增不合规断言函数的出现，大幅提升了单测的报错信息丰富度。
   - 从8月5日发布计划，8月8日提出RFC文档，8月19日全部完成，开发者的热情和速度都非常感人。
   - 此项目会应用在9月份NGC官网上线中。
