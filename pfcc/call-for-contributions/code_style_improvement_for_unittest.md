@@ -2,8 +2,7 @@
 
 ## 背景
 
-来源于 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，使用`np.testing.assert_allclose代替assertTrue(np.allclose(...))`，
-可以获得更全面的单测报错信息。
+来源于NVIDIA开发者提的 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，NVIDIA开发者每月需要上线一次飞桨到NGC官网，他们会在不同的GPU卡上跑全量单测。使用`np.testing.assert_allclose代替assertTrue(np.allclose(...))`，可以获得更全面的单测报错信息，便于验证不同卡上的Op精度。
 
 ```python
 ------ 现有问题 ------
@@ -51,21 +50,14 @@ check_approval 1 6836917 47554610 22561442
 fi
 ```
 
-## 项目总结
-
-### 总览
-
-- 成员：SigureMo（组长），Yulv-git
-- RFC：[20220805_code_style_improvement_for_unittest.md](https://github.com/PaddlePaddle/community/blob/master/rfcs/CodeStyle/20220805_code_style_improvement_for_unittest.md)
-- PR 情况：
-
-| 提交时间   | 合入时间   | 作者     | 题目                                                                                 | 链接                                              |
-| ---------- | ---------- | -------- | ------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| 8 月 8 日  | 8 月 10 日 | SigureMo | use np.testing.assert_array_equal instead of self.assertTrue(np.array_equal(...))    | https://github.com/PaddlePaddle/Paddle/pull/44947 |
-| 8 月 8 日  | 8 月 17 日 | SigureMo | use np.testing.assert_allclose instead of self.assertTrue(np.allclose(...)) (part 1) | https://github.com/PaddlePaddle/Paddle/pull/44988 |
-| 8 月 14 日 | 8 月 17 日 | Yulv-git | Add CI for self.assertTrue(np.allclose(...))                                         | https://github.com/PaddlePaddle/Paddle/pull/45126 |
-| 8 月 17 日 | 8 月 19 日 | SigureMo | use np.testing.assert_allclose instead of self.assertTrue(np.allclose(...)) (part 2) | https://github.com/PaddlePaddle/Paddle/pull/45213 |
-| 8 月 18 日 | 8 月 19 日 | SigureMo | use np.testing.assert_allclose instead of self.assertTrue(np.allclose(...)) (part 3) | https://github.com/PaddlePaddle/Paddle/pull/45251 |
+## 项目总结<a id='summary'></a>
+### 意义
+这是一个从社区中来到社区中去的代表性项目 （成员：SigureMo（组长） 和 Yulv-git）
+- 背景来源于NVIDIA开发者的真实需求 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)：NVIDIA开发者每月需要上线一次飞桨到NGC官网，他们会在不同的GPU卡上跑全量单测。使用`np.testing.assert_allclose代替assertTrue(np.allclose(...))`，可以获得更全面的单测报错信息，便于验证不同卡上的Op精度。
+- 社区开发者 SigureMo（组长） 和 Yulv-git 帮飞桨和NVIDIA解决了这个问题：使用自己开发的AST解析脚本，存量（批量自动化）共修复了400+文件近2700+处单测的断言函数，增量使用CI检查项阻止新增不合规断言函数的出现，大幅提升了单测的报错信息丰富度。
+  - 从8月5日发布计划，8月8日提出RFC文档，8月19日全部完成，开发者的热情和速度都非常感人。
+  - 此项目会应用在9月份NGC官网上线中。
+  - 如果没有准确性高的AST解析脚本，400+单测文件需要几十个RD手动进行修复，沟通成本和修复时间都会大大增加。
 
 ### 成果概述
 
@@ -78,6 +70,20 @@ fi
 通过一个 PR（[#45126](https://github.com/PaddlePaddle/Paddle/pull/45126)）增加了阻止增量代码中出现 `self.assertTrue(np.allclose(` 前缀的 CI 检查项，并在 [#45184](https://github.com/PaddlePaddle/Paddle/pull/45184) 测试阻止的效果以及 Approve 的效果，两者均有效。
 
 在该 PR 合入后很快就成功地阻止了一个使用 `self.assertTrue(np.allclose(...))` 进行断言的 PR（见 [#45168 (comment)](https://github.com/PaddlePaddle/Paddle/pull/45168#discussion_r948767123)）。成功避免了增量代码中出现新的问题。
+
+#### PR 情况
+
+
+RFC：[20220805_code_style_improvement_for_unittest.md](https://github.com/PaddlePaddle/community/blob/master/rfcs/CodeStyle/20220805_code_style_improvement_for_unittest.md)
+
+
+| 提交时间   | 合入时间   | 作者     | 题目                                                                                 | 链接                                              |
+| ---------- | ---------- | -------- | ------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| 8 月 8 日  | 8 月 10 日 | SigureMo | use np.testing.assert_array_equal instead of self.assertTrue(np.array_equal(...))    | https://github.com/PaddlePaddle/Paddle/pull/44947 |
+| 8 月 8 日  | 8 月 17 日 | SigureMo | use np.testing.assert_allclose instead of self.assertTrue(np.allclose(...)) (part 1) | https://github.com/PaddlePaddle/Paddle/pull/44988 |
+| 8 月 14 日 | 8 月 17 日 | Yulv-git | Add CI for self.assertTrue(np.allclose(...))                                         | https://github.com/PaddlePaddle/Paddle/pull/45126 |
+| 8 月 17 日 | 8 月 19 日 | SigureMo | use np.testing.assert_allclose instead of self.assertTrue(np.allclose(...)) (part 2) | https://github.com/PaddlePaddle/Paddle/pull/45213 |
+| 8 月 18 日 | 8 月 19 日 | SigureMo | use np.testing.assert_allclose instead of self.assertTrue(np.allclose(...)) (part 3) | https://github.com/PaddlePaddle/Paddle/pull/45251 |
 
 ### 遗留问题
 
