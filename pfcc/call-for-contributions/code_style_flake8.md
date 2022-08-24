@@ -24,6 +24,9 @@ trailing whitespace                                 | 5561 | 结尾有多余空�
 pip install flake8==4.0.1
 flake8 path/to/code/to/check.py 或者 flake8 path/to/code/
 ```
+* 有一些用来修复的自动化的工具，比如[autoflake](https://github.com/PyCQA/autoflake)，也可以尝试来使用。
+
+
 ## 可行性分析和规划排期
 1. 因为存量较大，需要进行存量修复的可行性分析（本任务最有难度的地方），并制定如何修复的步骤
    * 将检查工具的检测项逐一打开，并逐步修复对应的存量问题。如可以先解决flake8中结尾有多余空格的问题。
