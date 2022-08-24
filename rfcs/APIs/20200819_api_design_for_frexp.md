@@ -44,9 +44,9 @@ Numpy 中也有对应的 API `numpy.frexp()`，一样通过调用底层c++接口
 ### 实现方法
 
 Pytorch，python，numpy为了追了更快的速度都使用调用c++的方案来实现frexp函数，也找不到相关代码。上google搜了一下类似的实现代码，有一段代码是java实现
-大致过程是对输入数据转换成进行位移操作，减去阶码，判断正负最后输出。但是这一点也不面向对象，有悖python语言的初衷，因此我根据飞桨的api涉及了新的算法。
+大致过程是对输入数据转换成进行位移操作，减去阶码，判断正负最后输出。但是这一点也不面向对象，有悖python语言的初衷，因此我根据飞桨的api设计了新的算法。
 
-```text
+```java
 public class FrexpDemo {
  
 	public static FRexpResult frexp(double value) {
@@ -121,6 +121,7 @@ pytorch和Numpy都支持多维，正负数，0。这里模仿他们的实现逻�
 ## 命名与参数设计
 
 * 函数名称: paddle.frexp(x,dtype=paddle.float32)
+* 功能描述: paddle.frexp(x,dtype=paddle.float32), 主要是用于把一个输入数据x分解为尾数和指数
 * 输入参数
     * x: 任意数值
     * dtype: paddle.float32或paddle.float64
@@ -139,28 +140,52 @@ pytorch和Numpy都支持多维，正负数，0。这里模仿他们的实现逻�
 中tizhou86同学的建议，使用paddle log以及devide组合的方式来实现对应的功能。
 
 **实现细节**
-
 * 大致方法: 使用对输入数据取log2，利用devide广播除对应的数字。
 * 注意点:
-    * 由于paddle.log2只接受paddle.float32, paddle.float64这两个类型，因此输入数据不是paddle.float32,
+    * paddle.log2带来的数据类型问题:
+      ```text
+            paddle.log2(x, name=None)
+            x (Tensor) – 该OP的输入为Tensor。数据类型为float32，float64。
+            name (str，可选) – 该参数供开发人员打印调试信息时使用，具体用法请参见 Name ，默认值为None。
+      ``` 
+      可以看到，paddle.log2只接受paddle.float32, paddle.float64这两个类型，因此输入数据不是paddle.float32,
       paddle.float64这两个类型时，要进行类型转换
     * 输入值含有0元素时，将对应位置的指数值转换为0，防止出现inf的情况
     * 输入数据为负数时，先转换成正数，再进行计算，最后把尾数正负统一
+* api描述见**命名与参数设计**
+* 使用case:
+```text
+input:
+print(paddle.math.frexp([-1, 0, 1, 3.14]))
+
+output:
+(Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True, [-0.50000000,  0.        ,  0.50000000,  0.78500003]), 
+ Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True, [1., 0., 1., 2.]))
+```
+
+
 
 # 六、测试和验收的考量
 
-和numpy结果的数值的一致性
+* 模型使用 paddle 已经实现的api进行组合，因此一下场景无需考虑
+  * 硬件场景
+  * 反向计算
+  * 编程范式场景
 
-test.py中的case如下:
+* 计算精度：
+  * 前向计算：我通过 numpy.frexp 实现的函数的对比结果。
 
-* 小正整数
-* 大正整数
-* 0
-* 小负整数
-* 大负整数
-* 短浮点数
-* 长浮点数
+* 异常测试：需对于参数异常值输入，应该有友好的报错信息及异常反馈。
 
+* 计算例子:
+```python
+    test([-1, 0, 1, 3.14])
+    test([[-1, 0, 1, 3.14], [-1, 0, 1, 3.14]])
+    test([[1.1111111, 1.1111111]])
+    test([[1.1111111, 1.1111111], [1.1111111, 1.1111111]])
+    test([-1111111111111111, 0, 111111111111111111])
+    test([[1.1111111111111111, 122222222222.1111111]])
+```
 # 七、可行性分析及规划排期
 
 实现阶段：实现方案较为简单，可以快速实现
