@@ -51,21 +51,24 @@ Poisson OP性能优化设计文档
  + 可能的性能提升关键在点在于以下几方面：
    + 优化点1: 通过优化grid， block数量寻找更优配置。
    + 优化点2: 将deformable_conv_kernel_impl中计算像素和权重乘积的循环迁移到ModulatedDeformableIm2colGpuKernel中，将col_buffer的并行计算和output_3d的计算整合，减少部分搬运开销
-   + 优化点3: 单独优化deformable_conv_kernel_impl中计算像素和权重乘积的循环；
-   + 优化点4: 优化deformable_conv_functor中ModulatedDeformableIm2colGpuKernel内的两层循环。
+   + 优化点3: 将deformable_conv_kernel_impl中的（batch_size / im2col_step）次循环并行化，目前用循环的方式im2col_step完成后才能进行下一个step，等待时间是无必要的。
+   + 优化点4: 单独优化deformable_conv_kernel_impl中计算像素和权重乘积的循环；
+   + 优化点5: 优化deformable_conv_functor中ModulatedDeformableIm2colGpuKernel内的两层循环。
   
- 根据kernels运行时间分析：65%时间消耗在No.5上，而cuBlas本身的实现难以有较大优化空间，所以单独优化两个kernel较难实现目标
+ 根据kernels运行时间分析：65%时间消耗在No.5上，而cuBlas本身的实现难以有较大优化空间，所以单独优化两个kernel较难实现目标。
 
- 根据CUDA API时间分析：63%时间消耗在同步，26%时间消耗在内存分配。通过减少需要线程同步的次数，降低数据在内存和CUDA间迁移应该可以较大程度优化。故优化点1和优化点2是重点考虑的对象。
+ 根据CUDA API时间分析：63%时间消耗在同步，26%时间消耗在内存分配。通过减少需要线程同步的次数，降低数据在内存和CUDA间迁移应该可以较大程度优化。故优化点1和优化点2是重点考虑的对象。总体来看运行过程是串行的，每个im2col结束后执行gemm，然后再进行下一个im2col，gemm的过程。
 
 ##  2.2 Host / Device 端计算流程
 1. 针对优化点1: 考虑通过paddle已实现的gpu_launch_config.h中GetGpuLaunchConfig1D方法获得较优的参数配置，或手动对BlockSize的不同大小进行性能测试验证（可能有一定优化空间）
    
 2. 针对优化点2: ModulatedDeformableIm2colGpuKernel的Host端多接入两个参数，Device端计算完成col_buffer后继续计算output（可能有较大优化空间）
 
-3. 针对优化点3: 乘积继续使用blas.MatMul实现，循环可以进行展开或实现新的GPU kernel尝试并行（benchmark中循环次数为1，优化空间较小）
+3. 针对优化点3: 将整个im2col_step的过程并行化形成新的kernel，包含im2col和gemm两个步骤(可能有较大优化空间)
 
-4. 针对优化点3: Im2colGpuKernel中的两层循环可以尝试展开或使用实现 Child kernel将循环并行执行。（探索，不确定优化可行性）
+3. 针对优化点4: 乘积继续使用blas.MatMul实现，循环可以进行展开或实现新的GPU kernel尝试并行（benchmark中循环次数为1，优化空间较小）
+
+4. 针对优化点5: Im2colGpuKernel中的两层循环可以尝试展开或使用实现 Child kernel将循环并行执行。（探索，不确定优化可行性）
 
  ## 3 测试和验收的考量
 
@@ -75,7 +78,7 @@ Poisson OP性能优化设计文档
 
 8.23～8.26测试优化点1
 
-8.26～9.15测试优化点2～4
+8.26～9.20测试优化点2～5
 
 
 #  5 影响面
