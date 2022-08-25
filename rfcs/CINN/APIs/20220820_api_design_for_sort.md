@@ -40,7 +40,7 @@ sort( $A$, axis = None, is_ascend=True) 结果为 [[5,2,4], [6,3,9]]，argsort( 
 
 # 三、业内方案调研
 
-- [TVM](https://github.com/apache/tvm/blob/6df070aac6d0e26d1e127095a323c61c2287eb9d/include/tvm/topi/reduction.h)。
+- [TVM](https://github.com/apache/tvm/blob/824772489e514faf06025d7c09ce4dc13dcd7d08/src/runtime/contrib/sort/sort.cc)：主要利用std::stable_sort函数实现。
   
 ```cpp
 template <typename DataType, typename OutType>
@@ -219,6 +219,6 @@ argsort( $A$, axis = 1, is_ascend=False) 结果为 [[1,2,0], [0,2,1]]。
 
 # 附件及参考资料
 
-[TVM文档](https://github.com/apache/tvm/blob/6df070aac6d0e26d1e127095a323c61c2287eb9d/include/tvm/topi/reduction.h)
+[TVM文档](https://github.com/apache/tvm/blob/824772489e514faf06025d7c09ce4dc13dcd7d08/src/runtime/contrib/sort/sort.cc)
 [XLA文档](https://github.com/tensorflow/tensorflow/blob/5e1bc2d8f8a10cf28d36d593a322e7eb4ab11780/tensorflow/compiler/xla/service/cpu/runtime_key_value_sort.cc)
 [CINN文档](https://paddlepaddle.github.io/CINN/)
