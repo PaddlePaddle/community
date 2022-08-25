@@ -10,7 +10,9 @@ Paddle目前使用的代码风格检查工具及hooks版本较低，导致开发
 * 收益：帮助RD更快发现代码语法错误
 * 风险：
   * 根据历史全量检测结果flake8表，可知待修改文件和错误总数很多（2700+）。先用yapf对代码进行格式化，再用flake8检测，总报错数减少很少（45000+–>43000+）。主要原因是yapf和flake8的检查项目和检测力度不完全相同，有些检查项yapf检查的不完整，比如列宽不超过80字符项，若字符串或注释超过该限制，yapf检测不出来；yapf只检测风格，检测代码逻辑。
-   * flake8只检查但不能自动修复，对部分存量较大的问题，需要借助其他自动化工具进行修复。如[PR#44474](https://github.com/PaddlePaddle/Paddle/pull/44474) 可借助precommit自动删除结尾多余空格，但因为存量没有修完，这个PR就没有合入。
+   * flake8只检查但不能自动修复，对部分存量较大的问题，需要借助其他自动化工具进行修复。
+     * 如[PR#44474](https://github.com/PaddlePaddle/Paddle/pull/44474) 可借助precommit自动删除结尾多余空格，但因为存量没有修完，这个PR就没有合入。
+     * 有一些用来修复的自动化的工具，比如[autoflake](https://github.com/PyCQA/autoflake)，也可以尝试来使用。
    * 取数量前三的错误列举如下表：
 
 错误类型  | 数量  | 含义
@@ -24,7 +26,7 @@ trailing whitespace                                 | 5561 | 结尾有多余空�
 pip install flake8==4.0.1
 flake8 path/to/code/to/check.py 或者 flake8 path/to/code/
 ```
-* 有一些用来修复的自动化的工具，比如[autoflake](https://github.com/PyCQA/autoflake)，也可以尝试来使用。
+
 
 
 ## 可行性分析和规划排期
