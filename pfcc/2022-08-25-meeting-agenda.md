@@ -45,6 +45,7 @@
      - [ReganYue](https://github.com/ReganYue)
      - [mrcangye](https://github.com/mrcangye)
      - [peachlcy](https://github.com/peachlcy)
+     - [Rayman96](https://github.com/Rayman96)
      - [wanghuancoder](https://github.com/wanghuancoder)
      
 
