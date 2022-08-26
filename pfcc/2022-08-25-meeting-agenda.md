@@ -45,12 +45,13 @@
      - [ReganYue](https://github.com/ReganYue)
      - [mrcangye](https://github.com/mrcangye)
      - [peachlcy](https://github.com/peachlcy)
+     - [Rayman96](https://github.com/Rayman96)
      - [wanghuancoder](https://github.com/wanghuancoder)
      
 
 # 会议议程
 
-- 新同学 [peachlcy](https://github.com/peachlcy) 自我介绍 (5 minutes)
+- 新同学 [peachlcy](https://github.com/peachlcy) 、[Rayman96](https://github.com/Rayman96) 自我介绍 (5 minutes)
 - [OccupyMars2025](https://github.com/OccupyMars2025) 学习经验分享《关于PaddlePaddle框架和Pytorch框架中python端与C++端如何互动的入门级理解》（15 minutes）
 - 飞桨研发工程师 [wanghuancoder](https://github.com/wanghuancoder) 主题分享《PYTHON_C_API》：https://github.com/PaddlePaddle/Paddle/pull/32524 （15 minutes）
 - [luotao1](https://github.com/luotao1) 发布 [Call for Contributions 任务介绍](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions) （10 minutes）
