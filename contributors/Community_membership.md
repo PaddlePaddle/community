@@ -5,6 +5,7 @@
 | 成员角色    | 社区职责                                               | 获得方式                                                     | 社区权限                                                     |
 | ----------- | ------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Anyone      | 参与飞桨社区的成员。                                   | 无                                                           | 代码仓库的 read 权限。PR 及 ISSUE 的创建与评论。             |
+| Triager     | 管理代码仓库中的PR与ISSUE。                            | 因实际项目的需要，对一部分PR或者ISSUE进行分类、编辑与分派（e.g.：[intel label](https://github.com/PaddlePaddle/Paddle/issues?q=label%3Aintel+)）。流程：请联系项目的接口人。 | 代码仓库的 triage 权限。PR 及 ISSUE 的分派与编辑。           |
 | Contributor | 以 PR 的方式，为飞桨的代码仓库贡献代码或文档。         | 所提交的 PR 被成功合入代码仓库。                             | 如果你有意愿，欢迎加入 [PFCC](https://github.com/PaddlePaddle/community/tree/master/pfcc)，参与飞桨代码仓库贡献的技术讨论。 |
 | Committer   | 为飞桨社区的 PR 贡献提供修改建议，并判断是否可以合入。 | 若干条高质量的已合入 PR，若干条高质量的PR Review (或者Issue），2 名 Committer 的认可。获取流程：在代码仓库下按照 模板 提 Issue，取得 2 名 Committer 的正向评价后，由 Maintainer 开通权限。 | 代码仓库的 write 权限。PR 及 ISSUE 的分派与编辑。            |
 | Maintainer  | 领导飞桨框架的发展方向与技术规划。                     | 在飞桨开源社区内获取广泛且充分的影响力。                     | 同上                                                         |
@@ -20,6 +21,10 @@
 - star & fork 代码仓库，拉取代码到本地并进行使用与修改。
 
 在 [签署了 CLA](https://cla-assistant.io/PaddlePaddle/Paddle) 之后，任何人还可以向代码仓库提交 PR，具体操作欢迎参考 [飞桨官网-代码贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html)。
+
+## Triager
+
+该角色，会获得代码仓库的triage权限，用来管理github当中的实际项目相关的ISSUE或者PR。多用在实际的项目当中，对涉及到的ISSUE或者PR进行分类与指派。请联系相应的项目接口人来获取。
 
 ## Contributor
 
@@ -51,9 +56,10 @@
 
 领导飞桨框架的发展方向与技术规划。
 
+## 附录A
+代码仓库的各项操作权限说明请参考：[Manage access to repositories](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization)。
 
-
-## 附录
+## 附录B
 
 ### Committer 身份申请模板
 
