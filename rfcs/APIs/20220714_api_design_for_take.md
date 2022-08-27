@@ -217,6 +217,7 @@ def take(a, indices, axis=None, out=None, mode='raise'):
     """
     return _wrapfunc(a, 'take', indices, axis=axis, out=out, mode=mode)
 ```
+
 整体逻辑为：
 
 - 当指定 `axis` 的时候，`numpy.take` 执行与 “fancy indexing” 相同的索引操作（使用数组索引数组）；例如 `np.take(arr, indices, axis=3)` 等价于 `arr[:, :, :, indices, ...]`。
@@ -224,6 +225,109 @@ def take(a, indices, axis=None, out=None, mode='raise'):
 - 当不指定 `axis` 的时候，`numpy.take` 默认将输入展平再使用 “fancy indexing”。
 
 - 当提供参数 `out` 的时候，输出的数据将填充到 `out` 中。
+
+numpy.take 的 mode 参数的越界处理的逻辑和核心代码[在这里](https://github.com/numpy/numpy/blob/54c52f13713f3d21795926ca4dbb27e16fada171/numpy/core/src/multiarray/item_selection.c#L34-L134)：
+
+```c++
+// raise 模式，在索引超出最小（大）范围后直接报错
+check_and_adjust_index(npy_intp *index, npy_intp max_item, int axis,
+                       PyThreadState * _save)
+{
+    /* Check that index is valid, taking into account negative indices */
+    if (NPY_UNLIKELY((*index < -max_item) || (*index >= max_item))) {
+        NPY_END_THREADS;
+        /* Try to be as clear as possible about what went wrong. */
+        if (axis >= 0) {
+            PyErr_Format(PyExc_IndexError,
+                         "index %"NPY_INTP_FMT" is out of bounds "
+                         "for axis %d with size %"NPY_INTP_FMT,
+                         *index, axis, max_item);
+        } else {
+            PyErr_Format(PyExc_IndexError,
+                         "index %"NPY_INTP_FMT" is out of bounds "
+                         "for size %"NPY_INTP_FMT, *index, max_item);
+        }
+        return -1;
+    }
+    /* adjust negative indices */
+    if (*index < 0) {
+        *index += max_item;
+    }
+    return 0;
+}
+```
+
+```c++
+npy_fasttake_impl(
+        char *dest, char *src, const npy_intp *indices, ...)
+{
+    NPY_BEGIN_THREADS_DEF;
+    NPY_BEGIN_THREADS_DESCR(dtype);
+    switch (clipmode) {
+        case NPY_RAISE:
+            /**
+            raise 模式，通过上方 check_and_adjust_index 函数判断越界索引
+             */
+            for (npy_intp i = 0; i < n; i++) {
+                for (npy_intp j = 0; j < m; j++) {
+                    npy_intp tmp = indices[j];
+                    if (check_and_adjust_index(&tmp, max_item, axis,
+                                               _save) < 0) {
+                        return -1;
+                    }
+                    ...
+            }
+            break;
+        case NPY_WRAP:
+            /**
+            wrap 模式，将超出范围的索引取余。
+            由于 C 语言异号取余原则与 Python 不同，
+            因此使用循环加减来模拟 Python 取余结果。
+             */
+            for (npy_intp i = 0; i < n; i++) {
+                for (npy_intp j = 0; j < m; j++) {
+                    npy_intp tmp = indices[j];
+                    if (tmp < 0) {
+                        while (tmp < 0) {
+                            tmp += max_item;
+                        }
+                    }
+                    else if (tmp >= max_item) {
+                        while (tmp >= max_item) {
+                            tmp -= max_item;
+                        }
+                    }
+                    ...
+                }
+            }
+            break;
+        case NPY_CLIP:
+            /**
+            clip 模式，将两端超出范围的索引约束到 [0, max_item-1]
+             */
+            for (npy_intp i = 0; i < n; i++) {
+                for (npy_intp j = 0; j < m; j++) {
+                    npy_intp tmp = indices[j];
+                    if (tmp < 0) {
+                        tmp = 0;
+                    }
+                    else if (tmp >= max_item) {
+                        tmp = max_item - 1;
+                    }
+                    ...
+                }
+            }
+            break;
+    }
+    return 0;
+}
+
+```
+综上，mode 索引越界处理方式总结为
+
+- `mode='raise'`，判断索引范围并抛出错误 （默认），不需要调用 API；
+- `mode='wrap'`，通过取余约束越界的 indices，不需要调用 API；
+- `mode='clip'`，将两端超出范围的索引约束到 [0, max_item-1]。
 
 ## TensorFlow
 
@@ -272,9 +376,9 @@ paddle.take(
 1. 通过 `Tensor.flatten()` 将输入 x 和 index 展开成 1D Tensor。
 
 2. 根据 mode 参数对索引进行越界处理：
-    - `mode='raise'`, 直接抛出错误 （默认）；
-    - `mode='wrap'`, 通过取余约束越界的 indices；
-    - `mode='clip'`, 通过 `paddle.clip` 约束两端的索引。
+    - `mode='raise'`，若索引越界，通过最后调用的 `paddle.index_select` 抛出错误 （默认）；
+    - `mode='wrap'`，通过取余约束越界的 indices；
+    - `mode='clip'`，通过 `paddle.clip` 将两端超出范围的索引约束到 [0, max_index-1]。
 
 3. 通过 `Tensor.index_select(index)` 按照 index 中的索引提取对应元素。
     - `numpy.take` 和 `torch.take` 支持负值索引；
@@ -292,9 +396,9 @@ paddle.take(
 - `x` 的数据类型支持 `int32`，`int64`，`float32`，`float64`。
 
 - `index` 索引越界的三种处理方式：
-    - `mode='raise'`, 直接抛出错误 （默认）；
-    - `mode='wrap'`, 通过取余约束越界的 indices；
-    - `mode='clip'`, 通过 `paddle.clip` 约束两端的索引。
+    - `mode='raise'`，若索引越界，通过最后调用的 `paddle.index_select` 抛出错误 （默认）；
+    - `mode='wrap'`，通过取余约束越界的 indices；
+    - `mode='clip'`，通过 `paddle.clip` 将两端超出范围的索引约束到 [0, max_index-1]。
 
 - 在动态图、静态图下，以及 CPU、GPU 下，都能得到正确的结果。
 
