@@ -43,7 +43,7 @@ B_2 = gather( A, dim=1, index=index)
 # [[0.0000, 1.0000, 1.0000],
 # [0.0000, 5.0000, 3.0000]]
 C = zero(4, 3)
-gather( C, dim=0, index=index, src= B_1)
+B_3 = gather( C, dim=0, index=index, src= B_1)
 # [[0.0000, 0.0000, 2.0000],
 # [0.0000, 4.0000, 5.0000],
 # [0.0000, 7.0000, 0.0000],
@@ -51,10 +51,10 @@ gather( C, dim=0, index=index, src= B_1)
 ```
 
 gather_nd的公式表达如下：
-output\[ $(i_0,...,i_{K−2})$\]=x\[index\[(i_0,...,i_{K−2})\]\]
+output\[ $(i_0,...,i_{K−2})$\]=x\[index\[ $(i_0,...,i_{K−2})$\]\]
 
 scatter_nd的公式表达如下：
-output\[index\[(i_0,...,i_{K−2})\]\]=x\[(i_0,...,i_{K−2})\]
+output\[index\[ $(i_0,...,i_{K−2})$\]\]=x\[ $(i_0,...,i_{K−2})$\]
 
 使用python实现代码可见 `五、设计思路与实现方案-底层OP设计`部分。
 
@@ -355,7 +355,7 @@ B_2 = gather( A, dim=1, index=index)
 # [[0.0000, 1.0000, 1.0000],
 # [0.0000, 5.0000, 3.0000]]
 C = zero(4, 3)
-gather( C, dim=0, index=index, src= B_1)
+B_3 = gather( C, dim=0, index=index, src= B_1)
 # [[0.0000, 0.0000, 2.0000],
 # [0.0000, 4.0000, 5.0000],
 # [0.0000, 7.0000, 0.0000],
