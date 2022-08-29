@@ -1,4 +1,4 @@
-# CINN sort 设计文档
+# CINN argsort 和 sort 设计文档
 
 | API名称                                                      | sort                                    |
 | ---------------------------------------------------------- | ------------------------------------------------ |
@@ -6,7 +6,7 @@
 | 提交时间<input type="checkbox" class="rowselector hidden">     | 2022-08-11                                       |
 | 版本号                                                        | V1.0                                             |
 | 依赖CINN版本<input type="checkbox" class="rowselector hidden"> | develop                                          |
-| 文件名                                                        | 20220811_api_design_for_sort.md<br> |
+| 文件名                                                        | 20220811_api_design_for_argsort_and_sort.md |
 
 # 一、概述
 
@@ -182,7 +182,6 @@ TVM 与 XLA 实现方案类似。
 ## 命名与参数设计
 
 - A：输入张量
-- sort：按从大到小或从小到大的顺序排序。
 - axis：指张量的维度。
 - is_ascend：表示增序。
 - name：输出名称.
@@ -190,7 +189,7 @@ TVM 与 XLA 实现方案类似。
 ## 底层OP设计
 
 1. 在 `cinn/hlir/op/contrib/sort.h` 里声明`sort`和`argsort`算子。
-2. 在 `cinn/hlir/op/contrib/argmin.cc` 里实现`sort`和`argsort`算子以及 `strategy`。
+2. 在 `cinn/hlir/op/contrib/sort.cc` 里实现`sort`和`argsort`算子以及 `strategy`。
 1. 在 `cinn/runtime/cpu/host_intrinsics.cc` 里实现所要用到的工具函数。
 
 ## API实现方案
@@ -199,8 +198,8 @@ TVM 与 XLA 实现方案类似。
 sort( $A$, axis = None, is_ascend=True) 结果为 [[5,2,4], [6,3,9]]，
 argsort( $A$, axis = 1, is_ascend=False) 结果为 [[1,2,0], [0,2,1]]。
 
-1. 在 `cinn/frontend/net_build.h` 里声明 `BaseBuilder::ArgSort`和`BaseBuilder::Sort`。
-2. 在 `cinn/frontend/net_build.cc` 里实现 `BaseBuilder::ArgSort`和`BaseBuilder::Sort`。
+1. 在 `cinn/frontend/net_build.h` 里声明 `NetBuilder::ArgSort`和`NetBuilder::Sort`。
+2. 在 `cinn/frontend/net_build.cc` 里实现 `NetBuilder::ArgSort`和`NetBuilder::Sort`。
 
 # 六、测试和验收的考量
 
