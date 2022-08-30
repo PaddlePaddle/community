@@ -35,7 +35,7 @@ for i in range(100):
 ## 2. Python/C API & pybind11 的技术选型
 - Python/C API是Python官方提供的用于编写扩展模块或将 Python解释器嵌入其应用程序中的官方API。但由于过于底层，导致学习成本高，开发难度大，官网不推荐直接使用：
 ![image](https://user-images.githubusercontent.com/6836917/187344269-d1edf148-aef3-4982-8f4a-ac8f1895a547.png)
-- Pybind11 是一个轻量级的 C++ 库，用于将你的 C++ 代码暴露给 Python 调用。在业绩广受好评。
+- Pybind11 是一个轻量级的 C++ 库，用于将你的 C++ 代码暴露给 Python 调用。在业界广受好评。
 
 相较于Python/C API，pybind11非常易用，举例说明：
 
@@ -141,7 +141,7 @@ void BindTensor(pybind11::module &m) {
 ```
 早期 Paddle 主推静态图，因此选用 pybind11 作为 Paddle 内核向 Python 暴露 API 的第三方工具。
 但随着 Paddle 支持了动态图，渐渐的，我们发现 pybind11 成为了动态图 Python & C++ 交互的性能瓶颈。
-因此将高频交互的 API 改用了 Python/C API。而其余低频使用的 API ，扔使用 pybind11 暴露。
+因此将高频交互的 API 改用了 Python/C API。而其余低频使用的 API ，仍使用 pybind11 暴露。
 高频使用的 API 绝大多数是算子类 API ，低频使用的往往是环境配置、初始化类的 API 。
 
 ## 3. pybind11 在 Paddle 中的使用
