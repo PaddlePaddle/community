@@ -19,14 +19,14 @@ PFCC 新成员 [peachlcy](https://github.com/peachlcy) 、[Rayman96](https://git
 - [luotao1](https://github.com/luotao1): 发布 [Call for Contributions 任务介绍](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions) 
 
 ### 提问环节
-[gglin001](https://github.com/gglin001)提问: python C  API和pybind11的性能差距有多少？    
-[wanghuancoder](https://github.com/wanghuancoder)回答：一般几us，但对于elementwise 2*2的算子，这几us的框架开销就很重了。性能差距的主要原因是pybind11用了一个巨大的hashmap来管理从python到C++的映射。
+[gglin001](https://github.com/gglin001) 提问: python C  API和pybind11的性能差距有多少？    
+[wanghuancoder](https://github.com/wanghuancoder) 回答：一般几us，但对于elementwise 2*2的算子，这几us的框架开销就很重了。性能差距的主要原因是 [pybind11用了一个巨大的 hashmap 来管理从 python 到 C++ 的映射](https://github.com/pybind/pybind11/blob/54430436fee2afc4f8443691075a6208f9ea8eba/include/pybind11/detail/internals.h#L99)。
 
-[gglin001](https://github.com/gglin001)提问：legacy_api.yaml 和  api.yaml 的差别是什么？    
-[wanghuancoder](https://github.com/wanghuancoder)回答：legacy_api.yaml  是在 kernel 从fluid转移到 phi的过程中的中间态
+[gglin001](https://github.com/gglin001) 提问：legacy_api.yaml 和  api.yaml 的差别是什么？    
+[wanghuancoder](https://github.com/wanghuancoder) 回答：legacy_api.yaml  是在 kernel 从fluid转移到 phi的过程中的中间态
 
-[OccupyMars2025](https://github.com/OccupyMars2025)提问：动态图和静态图相比，性能差异的主要原因是：动态图在CPU调度时会增加python端与C++端的交互，静态图则没有，请问这是如何实现的    
-[wanghuancoder](https://github.com/wanghuancoder)回答：动态图是一个算子一个算子的执行，无法看到全局情况，执行每个算子时都会来一次python端与C++端的交互。而静态图经过编译把所有的算子组网后，能看到全局情况，编译后再执行时就不再进行python端与C++端的交互
+[OccupyMars2025](https://github.com/OccupyMars2025) 提问：动态图和静态图相比，性能差异的主要原因是：动态图在CPU调度时会增加python端与C++端的交互，静态图则没有，请问这是如何实现的    
+[wanghuancoder](https://github.com/wanghuancoder) 回答：动态图是一个算子一个算子的执行，无法看到全局情况，执行每个算子时都会来一次python端与C++端的交互。而静态图经过编译把所有的算子组网后，能看到全局情况，编译后再执行时就不再进行python端与C++端的交互
 
 ### 下次会议安排
 确定下次会议的时间为两周后的同一个时间段。并确定下次会议的主席为：徐晓健 ([Nyakku Shigure](https://github.com/SigureMo))，副主席待定。

@@ -10,5 +10,4 @@
 * AutoGrad系统
 * 新执行器
 * 算子库
-* Python & C++交互
-
+* [Python & C++ 交互](./cpp_and_python_intersection)
