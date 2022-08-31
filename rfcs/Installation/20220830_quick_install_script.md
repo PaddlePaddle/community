@@ -1,4 +1,4 @@
-# 快速安装脚本设计文档
+# 快速安装脚本功能补充文档
 
 |   |  |
 | --- | --- |
@@ -6,7 +6,7 @@
 |提交时间 | 2022-08-30 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本 | 2.2.2 | 
-|文件名 | 20220830_quick_install_shell.md | 
+|文件名 | 20220830_quick_install_script.md | 
 
 
 # 一、概述
@@ -16,14 +16,14 @@
 
 ## 2、功能目标
 
-在原有[pip 安装](https://www.paddlepaddle.org.cn/documentation/docs/zh/install/pip/linux-pip.html)的基础上, 实现安装前 CUDA 和 cuDNN 或 docker 环境配置
+在原有[快速安装脚本](https://fast-install.bj.bcebos.com/fast_install.sh)的基础上, 实现安装前 CUDA 、 cuDNN 和 docker 环境配置
 
 ## 3、意义
 解决安装PaddlePaddle前的环境配置。
 
 # 二、飞桨现状
 
-飞桨目前仅支持[环境检测](https://www.paddlepaddle.org.cn/documentation/docs/zh/install/pip/linux-pip.html#sanyanzhenganzhuang)。
+飞桨目前支持[环境检测](https://www.paddlepaddle.org.cn/documentation/docs/zh/install/pip/linux-pip.html#sanyanzhenganzhuang)和[快速安装脚本](https://fast-install.bj.bcebos.com/fast_install.sh)。但是并不会帮助用户安装前期的环境配置。
 
 # 三、业内方案调研
 
@@ -48,11 +48,12 @@ PyTorch 社区开发者通过发布 [arch包](https://aur.archlinux.org/packages
 1. 判断用户环境, 如: windows、linux; x86_64、arm64; 是否有GPU
 2. 用户选择安装方式, 如: docker、pip 安装
 3. 用户选择安装CPU版本或GPU版本 (无GPU不提示)
-4. 用户选择 CUDA 和 cuDNN 版本 (无GPU不提示)
-5. 用户选择加速源 (可选的)
-6. 安装 CUDA 和 cuDNN 驱动 (无GPU不安装)
-7. 安装PaddlePaddle
-8. 运行[环境检测](https://www.paddlepaddle.org.cn/documentation/docs/zh/install/pip/linux-pip.html#sanyanzhenganzhuang)
+4. CUDA，cuDNN 检测
+5. 用户选择 CUDA 和 cuDNN 版本 (无GPU不提示)
+6. 用户选择加速源 (可选的)
+7. 安装 CUDA 和 cuDNN 驱动 (无GPU不安装)
+8. 安装PaddlePaddle
+9. 运行[环境检测](https://www.paddlepaddle.org.cn/documentation/docs/zh/install/pip/linux-pip.html#sanyanzhenganzhuang)
 
 ## 实现方案
 
