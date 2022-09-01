@@ -19,4 +19,5 @@
 
 
 ## 证书样例
-![开源贡献证书](https://user-images.githubusercontent.com/39876205/187824120-8360d42e-9329-4694-af30-78711d97a65f.jpeg =500)
+
+<img src="https://user-images.githubusercontent.com/39876205/187824120-8360d42e-9329-4694-af30-78711d97a65f.jpeg" width = "500" alt="开源贡献证书"/>
