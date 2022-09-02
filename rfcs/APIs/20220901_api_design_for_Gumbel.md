@@ -12,13 +12,11 @@
 
 ## 1、相关背景
 
-此任务的目标是在 Paddle 框架中，基于现有概率分布方案进行扩展，新增 Gumbel API， API调用 `paddle.distribution.Gumbel`。
+为了提升飞桨API丰富度，支持概率分布API，Paddle需要扩充`paddle.distribution.Gumbel` API。
 
 ## 2、功能目标
 
-增加 API `paddle.distribution.Gumbel`，Gumbel 用于 Gumbel 分布的概率统计与随机采样。API具体包含如下方法：
-
-功能：`Creates a Gumbel distribution parameterized by loc and scale.`
+增加 API `paddle.distribution.Gumbel`，用于耿贝尔分布的概率统计与随机采样, 包括如下方法：
 
 - `mean`计算均值；
 - `variance`计算方差；
@@ -34,47 +32,18 @@
 为 Paddle 增加用于 Gumbel 分布的概率统计与随机采样函数，丰富 `paddle.distribution` 中的 API。
 
 # 二、飞桨现状
-
-- 目前 飞桨没有 API `paddle.distribution.Gumbel`，但是有API`paddle.distribution.Multinomial`paddle.distribution.Gumbel的开发代码风格主要参考API
-- 通过反馈可以发现，代码需采用飞桨2.0之后的API，故此处不再参考Normal等API的代码风格。
+目前`paddle.distribution` 缺少 Gumbel 分布的实现，
+但已有[paddle.distribution.Normal](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/distribution/normal.py), [paddle.distribution.Uniform](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/distribution/uniform.py), 和 [paddle.distribution.Multinomial](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/distribution/multinomial.py) 等API的实现。
 
 # 三、业内方案调研
 
 ## PyTorch
 
-PyTorch 中包含 API `torch.distributions.gumbel.Gumbel(loc, scale, validate_args=None)`
+PyTorch 中包含 API `torch.distributions.gumbel.Gumbel(loc, scale, validate_args=None)`。 
+其[代码位置](https://pytorch.org/docs/stable/_modules/torch/distributions/gumbel.html#Gumbel).
 
-### 源代码
-
-```
-from numbers import Number
-import math
-import torch
-from torch.distributions import constraints
-from torch.distributions.uniform import Uniform
-from torch.distributions.transformed_distribution import TransformedDistribution
-from torch.distributions.transforms import AffineTransform, ExpTransform
-from torch.distributions.utils import broadcast_all, euler_constant
-
-
-
-[docs]class Gumbel(TransformedDistribution):
-    r"""
-    Samples from a Gumbel Distribution.
-
-    Examples::
-
-        >>> m = Gumbel(torch.tensor([1.0]), torch.tensor([2.0]))
-        >>> m.sample()  # sample from Gumbel distribution with loc=1, scale=2
-        tensor([ 1.0124])
-
-    Args:
-        loc (float or Tensor): Location parameter of the distribution
-        scale (float or Tensor): Scale parameter of the distribution
-    """
-    arg_constraints = {'loc': constraints.real, 'scale': constraints.positive}
-    support = constraints.real
-
+其中核心代码为：
+```python
     def __init__(self, loc, scale, validate_args=None):
         self.loc, self.scale = broadcast_all(loc, scale)
         finfo = torch.finfo(self.loc.dtype)
@@ -87,22 +56,13 @@ from torch.distributions.utils import broadcast_all, euler_constant
                       ExpTransform().inv, AffineTransform(loc=loc, scale=-self.scale)]
         super(Gumbel, self).__init__(base_dist, transforms, validate_args=validate_args)
 
-
-[docs]    def expand(self, batch_shape, _instance=None):
-        new = self._get_checked_instance(Gumbel, _instance)
-        new.loc = self.loc.expand(batch_shape)
-        new.scale = self.scale.expand(batch_shape)
-        return super(Gumbel, self).expand(batch_shape, _instance=new)
-
-
     # Explicitly defining the log probability function for Gumbel due to precision issues
 
-[docs]    def log_prob(self, value):
+    def log_prob(self, value):
         if self._validate_args:
             self._validate_sample(value)
         y = (self.loc - value) / self.scale
         return (y - y.exp()) - self.scale.log()
-
 
     @property
     def mean(self):
@@ -121,17 +81,37 @@ from torch.distributions.utils import broadcast_all, euler_constant
         return self.stddev.pow(2)
 
 
-[docs]    def entropy(self):
+    def entropy(self):
         return self.scale.log() + (1 + euler_constant)
 ```
+主要的实现逻辑为：
+
+- 根据输入`loc`类型(dtype)的数值限制，确认基本分布`base_dist`服从的均匀分布的参数。
+- 然后设置了四个转换分别是 `ExpTransform().inv`, `AffineTransform(loc=0, scale=-torch.ones_like(self.scale))`,`ExpTransform().inv`, `AffineTransform(loc=loc, scale=-self.scale)` 对基本分布`base_dist`进行转换。如下[torch采样代码](https://github.com/pytorch/pytorch/blob/master/torch/distributions/transformed_distribution.py#L108)所示：
+```python
+    def sample(self, sample_shape=torch.Size()):
+        """
+        Generates a sample_shape shaped sample or sample_shape shaped batch of
+        samples if the distribution parameters are batched. Samples first from
+        base distribution and applies `transform()` for every transform in the
+        list.
+        """
+        with torch.no_grad():
+            x = self.base_dist.sample(sample_shape)
+            for transform in self.transforms:
+                x = transform(x)
+            return x
+```
+- 其余的方法如 `mean`,`entropy` 等就是正常的数学运算。
+- 注意 `euler_constant` 为欧拉-马斯切罗尼常数等于0.57721566490153286060。
 
 ## Numpy
 
 Numpy 中有API `numpy.random.gumbel(loc=0.0, scale=1.0, size=None)`
 
 ### 源代码
-核心代码如下:
-```
+[核心代码](https://github.com/numpy/numpy/blob/main/numpy/random/src/distributions/distributions.c#L484)如下:
+```c
 double random_gumbel(bitgen_t *bitgen_state, double loc, double scale) {
   double U;
 
@@ -157,8 +137,9 @@ double random_gumbel(bitgen_t *bitgen_state, double loc, double scale) {
 添加 API
 
 ```python
-paddle.distribution.Gumbel(loc, scale)
+paddle.distribution.Gumbel(loc = 0, scale = 1, name = None)
 ```
+参数类型中, 根据所需API要求的类型对输入参数`loc`, `scale`进行限制。
 
 ## 底层 OP 设计
 
@@ -166,87 +147,26 @@ paddle.distribution.Gumbel(loc, scale)
 
 ## API 实现方案
 
-该 API 实现于 `paddle.distribution.Gumbel`。
-基于`paddle.distribution` API基类进行开发。
-class API 中的具体实现（部分方法已完成开发，故直接使用源代码），该 API 有两个参数：分布的位置参数self.loc 和分布的尺度参数self.scale。包含以下方法：
-
-```
-euler_constant = 0.57721566490153286060  # Euler Mascheroni Constant
-```
-
-- `mean` 计算均值: 
-
-        return self.loc + self.scale*euler_constant
-- `stddev` 计算标准差: 
-        
-        return (math.pi / math.sqrt(6)) * self.scale
-
-- `variance` 计算方差: 
-
-        return self.stddev.pow(2)
-
-- `prob` 概率密度(包含传参value): 
-
-        return paddle.exp(self.log_prob(value))
-
-- `log_prob` 对数概率密度(value): 
-
-        y = (self.loc - value) / self.scale
-        return (y - paddle.exp(y)) - paddle.log(self.scale)
-
-- `entropy` 熵计算: 
-
-        return paddle.log(self.scale) + (1 + euler_constant)
-
-- `sample` 随机采样(参考pytorch的实现):
-
-         x = paddle.uniform(shape=shape, min=tiny, max=1-eps)  # tiny,eps根据dtype决定;
-         transforms = [ExpTransform().inv, 
-                       AffineTransform(loc=0, scale=-paddle.ones_like(self.scale)),
-                       ExpTransform().inv, 
-                       AffineTransform(loc=loc, scale=-self.scale)]
-         for transform in transforms:
-            x = transform(x)
-         return x
-
-- `rsample` 重参数化采样(直接复用sample): 
-
-        self.sample(shape)
+- 该 API 实现于 `paddle.distribution.Gumbel`。基于`paddle.distribution` API基类进行开发。
+- 对于以下方法`mean`,`log_prob`,`stddev`,`variance`,`entropy`,`prob`等方法和pytorch进行对齐。
+- 对于采样方法`sample`,`rsample`参考pytorch通过基本分布结合转换实现，`paddle.distribution.transform` 中有对应的`ExpTransform` 和 `AffineTransform`转换。
 
 
 # 六、测试和验收的考量
 
-根据api类各个方法及特性传参的不同，把单测分成三个部分：测试分布的特性（无需额外参数）。
-
-1. 测试Lapalce分布的特性
-
-- 测试方法：该部分主要测试分布的均值、方差、熵等特征。类TestLaplace继承unittest.TestCase，分别实现方法setUp（初始化），test_mean（mean单测），test_variance（variance单测），test_stddev（stddev单测），test_entropy（entropy单测），test_sample（sample单测）。
-
-  * 均值、方差、标准差通过Numpy计算相应值，对比Gumbel类中相应property的返回值，若一致即正确；
-  
-  * 采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合Gumbel分布。验证策略如下：随机采样30000个Gumbel分布下的样本值，计算采样样本的均值和方差，并比较同分布下`scipy.stats.laplace`返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于Gumbel分布，若计算所得ks值小于0.02，则拒绝不一致假设，两者属于同一分布；
-  
-  * 熵计算通过对比`np.log(scale) + (1+ euler_constant)`的值是否与类方法返回值一致验证结果的正确性。
-
-- 测试用例：单测需要覆盖单一维度的Gumbel分布和多维度分布情况，因此使用两种初始化参数:
-
-  * 'one-dim': `loc=parameterize.xrand((2, )), scale=parameterize.xrand((2, ))`; 
-  * 'multi-dim': `loc=parameterize.xrand((5, 5)), scale=parameterize.xrand((5, 5))`。
+测试考虑的case如下：
+- 满足输入`loc`，`scale`的Gumbel分布的均值，方差，标准差，熵等方法的计算是否与公式一致；
+- `sample`和`rsample`采样结果的均值，方差和标准差是否符合；
+- 输入参数`loc`为不同类型时, 输出的正确性；
+- 检查输入参数`scale`是否满足非负性；
+- 错误检查：输入`scale`为负数时,能否正确抛出错误；
+- 错误检查：输入`loc`和`scale`维度不一致时，能否正确抛出错误；
+- 错误检查：输入`loc`为不支持的类型时，能否正确抛出错误；
 
 # 七、可行性分析及规划排期
 
-具体规划为
-
-- 阶段一：完成API功能开发
-- 阶段二：完成 `paddle.distribution.Gumbel` 单元测试
-- 阶段三：该 API 书写中英文档
+方案主要依赖现有paddle api组合而成，且依赖的`ExpTransform` 和 `AffineTransform` 已经在 Paddle repo 的 python/paddle/distribution/transform.py [目录中](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/distribution/transform.py)。工期上可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 
-增加了一个 `paddle.distribution.Gumbel` API，与飞桨2.0代码风格保持一致
-
-# 名词解释
-
-无
-
-# 附件及参考资料
+为独立新增API，对其他模块没有影响
