@@ -21,8 +21,10 @@
 ## 2、名词解释
 
 - 张量/Tensor：指高维数组。
-- axis：指张量的维度。
-- axes：若干维度。
+- axis/dim：指张量的维度。
+- axes/dims：若干维度。
+- index：索引张量。
+- src：源张量，在scatter中表示取值的张量，相当于gather的计算结果。
 
 ## 3、功能目标
 
@@ -43,7 +45,7 @@ B_2 = gather( A, dim=1, index=index)
 # [[0.0000, 1.0000, 1.0000],
 # [0.0000, 5.0000, 3.0000]]
 C = zero(4, 3)
-B_3 = gather( C, dim=0, index=index, src= B_1)
+B_3 = scatter( C, dim=0, index=index, src= B_1)
 # [[0.0000, 0.0000, 2.0000],
 # [0.0000, 4.0000, 5.0000],
 # [0.0000, 7.0000, 0.0000],
@@ -242,8 +244,10 @@ TVM 与 XLA 实现方案类似。
 ## 命名与参数设计
 
 - input_tensor：输入张量
-- index_tensor：输入张量
+- index_tensor：输入索引张量
 - axis：指定维度
+- axes：指定若干维度
+- src：源张量，在scatter中表示取值的张量，相当于gather的计算结果。
 - name：输出名称
 
 ## 底层OP设计
@@ -355,7 +359,7 @@ B_2 = gather( A, dim=1, index=index)
 # [[0.0000, 1.0000, 1.0000],
 # [0.0000, 5.0000, 3.0000]]
 C = zero(4, 3)
-B_3 = gather( C, dim=0, index=index, src= B_1)
+B_3 = scatter( C, dim=0, index=index, src= B_1)
 # [[0.0000, 0.0000, 2.0000],
 # [0.0000, 4.0000, 5.0000],
 # [0.0000, 7.0000, 0.0000],
