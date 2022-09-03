@@ -134,18 +134,67 @@ Return the next floating-point value after x1 towards x2, element-wise.
 
 ## API实现方案
 
-1. 在 python/paddle/tensor/math.h 里添加 def nextafter(a, b)
-2. 在 python/paddle/tensor/__init__.py 中导入 nextafter
+1. 在 python/paddle/tensor/math.h 里添加 def nextafter(start, direction)
+
+   由于需要进行广播操作，可以借助 `paddle.broadcast_tensors()` 
+
+```python
+def vnextafter(start, direction):
+    """
+    Returns the next representable value after start in the direction of direction.
+
+    Args:
+    	start(Tensor): Base value
+    	direction(Tensor):Value toward which the return value is approximated
+    
+    Returns:
+        Tensor: The next representable value after start in the direction of direction.
+    If both parameters compare equal, the function returns start.
+    
+    Example:
+        .. code-block:: python
+            
+            import paddle
+            
+            # start is a Tensor of shape [2, 1, 3]
+            start = paddle.rand([2, 1, 3])
+            
+            direction = paddle.rand([2, 1, 3])
+            out = paddle.nextafter(start, direction)
+            print(out.shape) # [2, 1, 3]
+            
+            direction = paddle.rand([4, 1])
+            out = paddle.nextafter(start, direction)
+            print(out.shape) # [2, 4, 3]
+            
+            direction = paddle.rand([1, 3])
+            out = paddle.nextafter(start, direction)
+            print(out.shape) # [2, 1, 3]
+    """
+    
+    out_start, out_direction = paddle.broadcast_tensors(input=[start, direction])
+    
+    return nextafter(out_start, out_direction)
+```
+
+2. 在 python/paddle/tensor/\__init__.py 中导入 nextafter
+
 3. 添加 python/paddle/fluid/tests/test_nextafter_api.py 进行测试
 
 # 六、测试和验收的考量
 
 - 模型使用 paddle 已经实现的api进行组合，因此一下场景无需考虑
   - 硬件场景
-  - 反向计算
   - 编程范式场景
-- 计算精度：通过 numpy.nextafter 实现的函数的对比结果。
+- ensor 精度场景
+  - 支持 FP32、FP64
+
+- 计算精度：
+  - 前向计算：通过 numpy.nextafter 实现的函数的对比结果。
+  - 反向计算：无需考虑
+
 - 异常测试：需对于参数异常值输入，应该有友好的报错信息及异常反馈。
+- 参数组合场景：常规覆盖 API 的全部入参，需要对全部入参进行参数有效性和边界值测试，同时可选参数也需有相应的测试覆盖。
 
 # 七、可行性分析及规划排期
 
