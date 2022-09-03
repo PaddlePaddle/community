@@ -29,6 +29,13 @@
 ## 3、功能目标
 
 实现 scatter/gather 功能。
+
+gather_nd的公式表达如下：
+output\[ $(i_0,...,i_{K−2})$\]=x\[index\[ $(i_0,...,i_{K−2})$\]\]
+
+scatter_nd的公式表达如下：
+output\[index\[ $(i_0,...,i_{K−2})$\]\]=src\[ $(i_0,...,i_{K−2})$\]
+
 例如
 
 ```python
@@ -38,25 +45,19 @@ A = range(12).reshape([4, 3])
 # [ 3.0000,  4.0000,  5.0000],
 # [ 6.0000,  7.0000,  8.0000],
 # [ 9.0000, 10.0000, 11.0000]]
-B_1 = gather(A, dim=0, index=index)
+B_1 = gather( A, dim=0, index=index)  # C指为公式中x值
 # [[0.0000, 4.0000, 5.0000],
 # [9.0000, 7.0000, 2.0000]]
-B_2 = gather( A, dim=1, index=index)
+B_2 = gather( A, dim=1, index=index)  # C指为公式中x值
 # [[0.0000, 1.0000, 1.0000],
 # [0.0000, 5.0000, 3.0000]]
 C = zero(4, 3)
-B_3 = scatter( C, dim=0, index=index, src= B_1)
+B_3 = scatter( C, dim=0, index=index, src= B_1)  # C指为公式中output初始值
 # [[0.0000, 0.0000, 2.0000],
 # [0.0000, 4.0000, 5.0000],
 # [0.0000, 7.0000, 0.0000],
 # [9.0000, 0.0000, 0.0000]]
 ```
-
-gather_nd的公式表达如下：
-output\[ $(i_0,...,i_{K−2})$\]=x\[index\[ $(i_0,...,i_{K−2})$\]\]
-
-scatter_nd的公式表达如下：
-output\[index\[ $(i_0,...,i_{K−2})$\]\]=x\[ $(i_0,...,i_{K−2})$\]
 
 使用python实现代码可见 `五、设计思路与实现方案-底层OP设计`部分。
 
@@ -369,15 +370,15 @@ B_3 = scatter( C, dim=0, index=index, src= B_1)
 1. 在 `cinn/frontend/net_build.h` 里声明 `BaseBuilder::Scatter`、`BaseBuilder::Gather`、`BaseBuilder::ScatterNd`和`BaseBuilder::GatherNd`。
 2. 在 `cinn/frontend/net_build.cc` 里实现  `BaseBuilder::Scatter`、`BaseBuilder::Gather`、`BaseBuilder::ScatterNd`和`BaseBuilder::GatherNd`。
 
-通过使用 Builder 类的方法调用 gather（其他类似）。
+通过使用 Builder 类的方法调用 gather, scatter（其他类似）。
 
 ```python
 builder = NetBuilder("test_basic")
 a = builder.create_input(Float(32), (8, 24), "A")
 i = builder.create_input(Int(32), (3, 24), "index")
 b = builder.gather(a, index=i, dim=0)  # shape=(3, 24)
-z = builder.create_input(Float(32), (8, 24), "C")
-z = builder.scatter(z, scr=b, index=i, dim=0) # shape=()
+z = builder.create_input(Float(32), (8, 24), "Z")
+z = builder.scatter(z, index=i, dim=0, scr=b) # shape=(8, 24)
 ```
 
 # 六、测试和验收的考量
