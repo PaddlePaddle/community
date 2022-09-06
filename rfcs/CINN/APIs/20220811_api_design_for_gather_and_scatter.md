@@ -452,6 +452,6 @@ z = builder.scatter(z, index=i, dim=0, scr=b) # shape=(8, 24)
 对其他模块无影响。
 
 # 附件及参考资料
-[TVM文档](https://github.com/apache/tvm/blob/b79f9501fdba5cf286f015277aeae867081b77df/python/tvm/topi/scatter.py)
-[XLA文档](https://github.com/tensorflow/tensorflow/blob/0b6b491d21d6a4eb5fbab1cca565bc1e94ca9543/tensorflow/compiler/tf2xla/kernels/gather_scatter_ops.cc)
-[CINN文档](https://paddlepaddle.github.io/CINN/)
+- [TVM文档](https://github.com/apache/tvm/blob/b79f9501fdba5cf286f015277aeae867081b77df/python/tvm/topi/scatter.py)
+- [XLA文档](https://github.com/tensorflow/tensorflow/blob/0b6b491d21d6a4eb5fbab1cca565bc1e94ca9543/tensorflow/compiler/tf2xla/kernels/gather_scatter_ops.cc)
+- [CINN文档](https://paddlepaddle.github.io/CINN/)
