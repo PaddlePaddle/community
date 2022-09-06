@@ -36,16 +36,105 @@ Tensor reshape(const Tensor& self, IntArrayRef proposed_shape) {
   }
 ```
 
+## scipy
+
+scipy中转换为coo再进行reshape
+
+```python
+def reshape(self, *args, **kwargs):
+    """reshape(self, shape, order='C', copy=False)
+    Gives a new shape to a sparse matrix without changing its data.
+    Parameters
+    ----------
+    shape : length-2 tuple of ints
+        The new shape should be compatible with the original shape.
+    order : {'C', 'F'}, optional
+        Read the elements using this index order. 'C' means to read and
+        write the elements using C-like index order; e.g., read entire first
+        row, then second row, etc. 'F' means to read and write the elements
+        using Fortran-like index order; e.g., read entire first column, then
+        second column, etc.
+    copy : bool, optional
+        Indicates whether or not attributes of self should be copied
+        whenever possible. The degree to which attributes are copied varies
+        depending on the type of sparse matrix being used.
+    Returns
+    -------
+    reshaped_matrix : sparse matrix
+        A sparse matrix with the given `shape`, not necessarily of the same
+        format as the current object.
+    See Also
+    --------
+    numpy.matrix.reshape : NumPy's implementation of 'reshape' for
+                           matrices
+    """
+    # If the shape already matches, don't bother doing an actual reshape
+    # Otherwise, the default is to convert to COO and use its reshape
+    shape = check_shape(args, self.shape)
+    order, copy = check_reshape_kwargs(kwargs)
+    if shape == self.shape:
+        if copy:
+            return self.copy()
+        else:
+            return self
+
+    return self.tocoo(copy=copy).reshape(shape, order=order, copy=False)
+
+```
+
+coo reshape实现如下
+
+```python
+def reshape(self, *args, **kwargs):
+    shape = check_shape(args, self.shape)
+    order, copy = check_reshape_kwargs(kwargs)
+
+    # Return early if reshape is not required
+    if shape == self.shape:
+        if copy:
+            return self.copy()
+        else:
+            return self
+
+    nrows, ncols = self.shape
+
+    if order == 'C':
+        # Upcast to avoid overflows: the coo_matrix constructor
+        # below will downcast the results to a smaller dtype, if
+        # possible.
+        dtype = get_index_dtype(maxval=(ncols * max(0, nrows - 1) + max(0, ncols - 1)))
+
+        flat_indices = np.multiply(ncols, self.row, dtype=dtype) + self.col
+        new_row, new_col = divmod(flat_indices, shape[1])
+    elif order == 'F':
+        dtype = get_index_dtype(maxval=(nrows * max(0, ncols - 1) + max(0, nrows - 1)))
+
+        flat_indices = np.multiply(nrows, self.col, dtype=dtype) + self.row
+        new_col, new_row = divmod(flat_indices, shape[0])
+    else:
+        raise ValueError("'order' must be 'C' or 'F'")
+
+    # Handle copy here rather than passing on to the constructor so that no
+    # copy will be made of new_row and new_col regardless
+    if copy:
+        new_data = self.data.copy()
+    else:
+        new_data = self.data
+
+    return self.__class__((new_data, (new_row, new_col)),
+                          shape=shape, copy=False)
+```
+
 
 ## paddle DenseTensor
 
 1. -1 表示这个维度的值是从x的元素总数和剩余维度推断出来的。因此，有且只有一个维度可以被设置为-1。
 2. 0 表示实际的维数是从x的对应维数中复制出来的，因此shape中0的索引值不能超过x的维度。
 3. 给定一个形状为[2,4,6]的三维张量x，目标形状为[6,8]，则将x变换为形状为[6,8]的2-D张量，且x的数据保持不变。
-4. 给定一个形状为[2,4,6]的三维张量x，目标形状为[2,3,-1,2]，则将x变换为形状为[2,3,4,2]的4-D张量，且x的数据保持不变。在这种情况下，目标形状的一个维度被设置为-1，这个维度的值是从x的元素总数和剩余维度推断出来的。
-5. 给定一个形状为[2,4,6]的三维张量x，目标形状为[-1,0,3,2]，则将x变换为形状为[2,4,3,2]的4-D张量，且x的数据保持不变。在这种情况下，0对应位置的维度值将从x的对应维数中复制,-1对应位置的维度值由x的元素总数和剩余维度推断出来。
-
-### 实现方法
+4. 给定一个形状为[2,4,6]的三维张量x，目标形状为[2,3,-1,2]，则将x变换为形状为[2,3,4,2]
+   的4-D张量，且x的数据保持不变。在这种情况下，目标形状的一个维度被设置为-1，这个维度的值是从x的元素总数和剩余维度推断出来的。
+5. 给定一个形状为[2,4,6]的三维张量x，目标形状为[-1,0,3,2]，则将x变换为形状为[2,4,3,2]
+   的4-D张量，且x的数据保持不变。在这种情况下，0对应位置的维度值将从x的对应维数中复制,-1对应位置的维度值由x的元素总数和剩余维度推断出来。
 
 代码如下
 
@@ -55,6 +144,7 @@ DenseTensor& DenseTensor::Resize(const DDim& dims) {
   return *this;
 }
 ```
+
 但是此处是Dense的，直接使用指针在Sparse中不可行
 
 # 四、对比分析
@@ -69,21 +159,39 @@ DenseTensor& DenseTensor::Resize(const DDim& dims) {
 
 ```    
 template <typename T, typename Context>
-void SparseCooResize(const Context& dev_ctx,
-                    const SparseCooTensor& x,
-                    const DDim& dims,
-                    SparseCooTensor* out) {
+void CooReshapeKernel(const Context& dev_ctx,
+                      const SparseCooTensor& x,
+                      const IntArray& shape,
+                      SparseCooTensor* out) {
 ```
 
-```    
-template <typename T, typename Context>
-void SparseCsrResize(const Context& dev_ctx,
-                    const SparseCsrTensor& x,
-                    const DDim& dims,
-                    SparseCsrTensor* out) {
+```
+template <typename Context>    
+void CooReshapeGradKernel(const Context& dev_ctx,
+                          const DenseTensor& out_grad,
+                          DenseTensor* x_grad)
 ```
 
 并在yaml中新增对应API
+
+```yaml
+- api : reshape
+  args : (Tensor x)
+  output : Tensor(out)
+  kernel :
+    func : reshape_coo{sparse_coo -> sparse_coo}
+    layout : x
+  backward : reshape_grad
+```
+
+```yaml
+- backward_api : reshape_grad
+  forward : reshape(Tensor x) -> Tensor(out)
+  args : (Tensor out_grad)
+  output : Tensor(x_grad)
+  kernel :
+    func : reshape_coo_grad {sparse_coo, sparse_coo -> sparse_coo}
+```
 
 ## 底层OP设计
 
@@ -101,12 +209,12 @@ void SparseCsrResize(const Context& dev_ctx,
 
 测试考虑的case如下：
 
-- 数值正确性
-- 不同 `sparse_dim` 
+- 正确性
+- 不同 `sparse_dim`
 
 # 七、可行性分析及规划排期
 
-方案主要依赖paddle现有op组合而成，并自行实现核心算法
+方案主要自行实现核心算法，并使用paddle现有func
 
 # 八、影响面
 
