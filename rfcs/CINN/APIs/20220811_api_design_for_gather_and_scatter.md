@@ -16,7 +16,7 @@
 `gather_nd`和`scatter_nd`是`gather`和`scatter`的多维扩展，`gather`和`scatter`互为逆运算。
 假设张量 $X$尺寸为 $(16, 16, 3)$，张量 $I$尺寸为 $(16, 16, 3)$中某一维度变为12，每个元素的值均在区间 $[0, 15]$，
 输入算子`gather`可以得到张量 $Y$，在其 $(i_0',i_1',i_2')$位置的值等于 $X$在 $(i_0,i_1,i_2)$位置的值，
-其中 $i_{axis}=I\[(i_0',i_1',i_2')\]$, $i_{j}=i_j',j!=axis$，`axis`参数默认值为 $0$，
+其中 $i_{axis}=I\[(i_0',i_1',i_2')\]$, 当j不等于axis时，$i_{j}=i_j'$，`axis`参数默认值为 $0$，
 此时张量 $I$尺寸为 $(12, 16, 3)$，返回的张量 $Y$与张量 $I$尺寸相同，
 `gather_nd`可以指定多个`axis`，相应的 $i$也要增加1个大小为`axis`个数的维度，若未指定`axis`，
 会根据 $i$的尺寸自定推算`axis`，选取前n维。
@@ -36,21 +36,22 @@ scatter与gather类似，互为逆运算具体公式见功能目标部分。
 实现 scatter/gather 功能。
 
 gather的公式表达如下：
+
 给定index, input, d<br/>
 output_indices = $(i_0,...,i_{K−2})$ <br/>
 index_indices = $(i_0, ..., i_{d-1}, i_{d+1}...,i_{K−2})$ <br/>
 
 output\[ output_indices\]=input\[i_0, ..., i_{d-1}index\[ index_indices\], i_{d+1},...,i_{K-2}\]
 
-gather_nd的公式表达如下：<br/>
+gather_nd的公式表达如下：
+
 给定index, input<br/>
 给定dims = $\[d_0,...,d_{M-1}\]$ <br/>
 dims_set = $\{d_k|k=0, 1, ..., M-1\}$ <br/>
 dims_u_set = ${0, ..., K_2}-dims_set$ <br/>
 
 output_indices = $(i_0,...,i_{K−2})$ <br/>
-index_indices = $(i_{d_0},...i_{d_1},...i_{d_{m-1}}, j)$ <br/>
-index_indices = $(\*dims_u_set, k)$, \*set表示将集合中所有元素取出变为序列<br/>
+index_indices = (\*dims_u_set, $k$), \*set表示将集合中所有元素按定义顺序取出变为序列<br/>
 
 index_set = $\{index\[index_indices\]|k=0, 1, ..., M-1\}$
 input_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
@@ -59,9 +60,11 @@ input_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
 output\[ output_indices\]=input\[input_indices\]
 
 gather 可以用gather_nd表达如下：
+
 gather_nd(dims=\[d\], input=input, index=index.unsqueeze(-1))
 
 scatter的公式表达如下：
+
 output\[index\[ $(i_0,...,i_{K−2})$\]\]=src\[ $(i_0,...,i_{K−2})$\]
 给定index, input, d<br/>
 input_indices = $(i_0,...,i_{K−2})$ <br/>
@@ -70,14 +73,14 @@ index_indices = $(i_0, ..., i_{d-1}, i_{d+1}...,i_{K−2})$ <br/>
 output\[i_0, ..., i_{d-1}index\[ index_indices\], i_{d+1},...,i_{K-2}\]=input\[input_indices\]
 
 scatter_nd的公式表达如下：
+
 给定index, input<br/>
 给定dims = $\[d_0,...,d_{M-1}\]$ <br/>
 dims_set = $\{d_k|k=0, 1, ..., M-1\}$ <br/>
 dims_u_set = ${0, ..., K_2}-dims_set$ <br/>
 
 input_indices = $(i_0,...,i_{K−2})$ <br/>
-index_indices = $(i_{d_0},...i_{d_1},...i_{d_{m-1}}, j)$ <br/>
-index_indices = $(\*dims_u_set, k)$, \*set表示将集合中所有元素取出变为序列<br/>
+index_indices = (\*dims_u_set, $k$), \*set表示将集合中所有元素按定义顺序取出变为序列<br/>
 
 index_set = $\{index\[index_indices\]|k=0, 1, ..., M-1\}$
 output_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
@@ -86,6 +89,7 @@ output_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
 input\[ output_indices\]=src\[input_indices\]
 
 scatter 可以用scatter_nd表达如下：
+
 scatter_nd(dims=\[d\], src=src, input=input, index=index.unsqueeze(-1))
 
 例如
