@@ -53,9 +53,9 @@ dims_u_set = ${0, ..., K_2}-dims_set$ <br/>
 output_indices = $(i_0,...,i_{K−2})$ <br/>
 index_indices = (\*dims_u_set, $k$), \*set表示将集合中所有元素按定义顺序取出变为序列<br/>
 
-index_set = $\{index\[index_indices\]|k=0, 1, ..., M-1\}$
+index_set = \{index\[index_indices\]|$k=0, 1, ..., M-1$\} <br/>
 input_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
-其中 $s_d \in index_set $ <br/>
+其中 $s_d \in  $ index_set<br/>
 
 output\[ output_indices\]=input\[input_indices\]
 
@@ -74,7 +74,7 @@ output\[i_0, ..., i_{d-1}index\[ index_indices\], i_{d+1},...,i_{K-2}\]=input\[i
 
 ### 2.2) scatter_nd的公式表达如下
 
-给定index, input<br/>
+给定index, input，其中此处的input表示输出张量的原始值<br/>
 给定dims = $\[d_0,...,d_{M-1}\]$ <br/>
 dims_set = $\{d_k|k=0, 1, ..., M-1\}$ <br/>
 dims_u_set = ${0, ..., K_2}-dims_set$ <br/>
@@ -82,9 +82,9 @@ dims_u_set = ${0, ..., K_2}-dims_set$ <br/>
 input_indices = $(i_0,...,i_{K−2})$ <br/>
 index_indices = (\*dims_u_set, $k$), \*set表示将集合中所有元素按定义顺序取出变为序列<br/>
 
-index_set = $\{index\[index_indices\]|k=0, 1, ..., M-1\}$
-output_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
-其中 $s_d \in index_set $ <br/>
+index_set = \{index\[index_indices\]|$k=0, 1, ..., M-1$\} <br/>
+output = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
+其中 $s_d \in  $ index_set<br/>
 
 input\[ output_indices\]=src\[input_indices\]
 
