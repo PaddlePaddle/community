@@ -48,7 +48,7 @@ output\[ output_indices\]=input\[ $i_0, ..., i_{d-1}$, index\[ index_indices\], 
 给定index, input<br/>
 给定dims = $\[d_0,...,d_{M-1}\]$ <br/>
 dims_set = \{ $d_k|k=0, 1, ..., M-1$\} <br/>
-dims_u_set = \{ $0, ..., K_2$\}-dims_set <br/>
+dims_u_set = \{ $0, ..., K-2$\}-dims_set <br/>
 
 output_indices = $(i_0,...,i_{K−2})$ <br/>
 index_indices = (\*dims_u_set, $k$), \*set表示将集合中所有元素按定义顺序取出变为序列<br/>
@@ -77,7 +77,7 @@ output\[ $i_0, ..., i_{d-1}$, index\[ index_indices\], $i_{d+1},...,i_{K-2}$\]=i
 给定index, input，其中此处的input表示输出张量的原始值<br/>
 给定dims = $\[d_0,...,d_{M-1}\]$ <br/>
 dims_set = \{ $d_k|k=0, 1, ..., M-1$\} <br/>
-dims_u_set = \{ $0, ..., K_2$\}-dims_set <br/>
+dims_u_set = \{ $0, ..., K-2$\}-dims_set <br/>
 
 input_indices = $(i_0,...,i_{K−2})$ <br/>
 index_indices = (\*dims_u_set, $k$), \*set表示将集合中所有元素按定义顺序取出变为序列<br/>
