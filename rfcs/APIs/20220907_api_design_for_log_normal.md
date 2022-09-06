@@ -334,9 +334,9 @@ class LogNormal(TransformedDistribution):
 
 # 六、测试和验收的考量
 `LogNormal` 类测试以 Numpy 作为基准，验证API的正确性。
-1. 使用 Numpy 实现所有 Log Normal 的API，集成为 `NormalNumpy` 类，用以验证本次任务开发的 API 的正确性。
+1. 使用 Numpy 实现所有 Log Normal 的API，集成为 `LogNormalNumpy` 类，用以验证本次任务开发的 API 的正确性。
 
-2. 使用同样的参数实例化 `LogNormal` 类和 `NormalNumpy` 类，并调用 `mean`、`variance`、`entropy`、`prob`、`kl_divergence`，测试结果是否相等（容许一定误差）。参数 `loc` 和 `scale` 的支持的数据类型需测试详尽。
+2. 使用同样的参数实例化 `LogNormal` 类和 `LogNormalNumpy` 类，并调用 `mean`、`variance`、`entropy`、`prob`、`kl_divergence`，测试结果是否相等（容许一定误差）。参数 `loc` 和 `scale` 的支持的数据类型需测试详尽。
 
 3. 使用 `LogNormal` 类的 `sample` 方法生成6000个样本，测试这些这样的均值和标准差是否正确。
 
