@@ -35,7 +35,7 @@ scatter与gather类似，互为逆运算具体公式见功能目标部分。
 
 实现 scatter/gather 功能。
 
-gather的公式表达如下：
+### 1.1) gather的公式表达如下
 
 给定index, input, d<br/>
 output_indices = $(i_0,...,i_{K−2})$ <br/>
@@ -43,7 +43,7 @@ index_indices = $(i_0, ..., i_{d-1}, i_{d+1}...,i_{K−2})$ <br/>
 
 output\[ output_indices\]=input\[i_0, ..., i_{d-1}index\[ index_indices\], i_{d+1},...,i_{K-2}\]
 
-gather_nd的公式表达如下：
+### 1.2) gather_nd的公式表达如下
 
 给定index, input<br/>
 给定dims = $\[d_0,...,d_{M-1}\]$ <br/>
@@ -59,11 +59,11 @@ input_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
 
 output\[ output_indices\]=input\[input_indices\]
 
-gather 可以用gather_nd表达如下：
+### 1.3) gather 可以用gather_nd表达如下
 
 gather_nd(dims=\[d\], input=input, index=index.unsqueeze(-1))
 
-scatter的公式表达如下：
+### 2.1) scatter的公式表达如下
 
 output\[index\[ $(i_0,...,i_{K−2})$\]\]=src\[ $(i_0,...,i_{K−2})$\]
 给定index, input, d<br/>
@@ -72,7 +72,7 @@ index_indices = $(i_0, ..., i_{d-1}, i_{d+1}...,i_{K−2})$ <br/>
 
 output\[i_0, ..., i_{d-1}index\[ index_indices\], i_{d+1},...,i_{K-2}\]=input\[input_indices\]
 
-scatter_nd的公式表达如下：
+### 2.2) scatter_nd的公式表达如下
 
 给定index, input<br/>
 给定dims = $\[d_0,...,d_{M-1}\]$ <br/>
@@ -88,7 +88,7 @@ output_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−2})$，
 
 input\[ output_indices\]=src\[input_indices\]
 
-scatter 可以用scatter_nd表达如下：
+### 2.3) scatter 可以用scatter_nd表达如下
 
 scatter_nd(dims=\[d\], src=src, input=input, index=index.unsqueeze(-1))
 
