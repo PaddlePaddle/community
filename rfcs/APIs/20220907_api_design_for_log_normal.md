@@ -290,9 +290,9 @@ class LogNormal(TransformedDistribution):
 
 - `sample` 随机采样
 
-继承 `TransformedDistribution` 的 `sample` 方法，将基础分布 Normal 的 `sample` 结果进行变换，得到 Log Normal 分布的 `sample `结果
+继承父类 `TransformedDistribution` 的 `sample` 方法，将基础分布 Normal 的 `sample` 结果进行变换，得到 Log Normal 分布的 `sample `结果。
 
-以下的方法也是通过继承 `TransformedDistribution` 类相应的方法实现。
+以下的方法也是通过继承父类 `TransformedDistribution` 相应的方法实现。
 
 - `rsample` 重参数化采样
 - `prob` 概率密度
@@ -310,7 +310,7 @@ class LogNormal(TransformedDistribution):
 `LogNormal` 类测试以 Numpy 作为基准，验证API的正确性。
 1. 使用 Numpy 实现所有 Log Normal 的API，集成为 `LogNormalNumpy` 类，用以验证本次任务开发的 API 的正确性。
 
-2. 使用同样的参数实例化 `LogNormal` 类和 `LogNormalNumpy` 类，并调用 `mean`、`variance`、`entropy`、`prob`、`kl_divergence`，测试结果是否相等（容许一定误差）。参数 `loc` 和 `scale` 的支持的数据类型需测试详尽。
+2. 使用同样的参数实例化 `LogNormal` 类和 `LogNormalNumpy` 类，并调用 `mean`、`variance`、`entropy`、`prob`、`kl_divergence`方法，测试结果是否相等（容许一定误差）。参数 `loc` 和 `scale` 的支持的数据类型需测试详尽。
 
 3. 使用 `LogNormal` 类的 `sample` 方法生成6000个样本，测试这些这样的均值和标准差是否正确。
 
@@ -355,6 +355,6 @@ $$f(x) = \frac{1}{\sigma x \sqrt{2\pi}}
 
 2. [Pytorch 的 LogNormal 文档](https://pytorch.org/docs/stable/distributions.html#lognormal)
 
-4. [Numpy 的 LogNormal 文档](https://numpy.org/doc/stable/reference/random/generated/numpy.random.lognormal.html)
+3. [Numpy 的 LogNormal 文档](https://numpy.org/doc/stable/reference/random/generated/numpy.random.lognormal.html)
 
-3. [Tensorflow 的 LogNormal 测试代码](https://github.com/tensorflow/probability/blob/main/tensorflow_probability/python/distributions/lognormal_test.py)
+4. [Tensorflow 的 LogNormal 测试代码](https://github.com/tensorflow/probability/blob/main/tensorflow_probability/python/distributions/lognormal_test.py)
