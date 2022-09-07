@@ -305,7 +305,7 @@ class LogNormal(TransformedDistribution):
 
 2. 扩展 `Normal` 类
 
-已有的 Normal 概率分布中无 `rsample` 方法，需要增加。
+在 `Normal` 类中增加 `rsample` 方法，以支持 Normal 概率分布重参数化采样。
 
 3. 扩展 `TransformedDistribution` 类
 
