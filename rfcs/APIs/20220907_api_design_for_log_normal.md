@@ -287,6 +287,7 @@ class LogNormal(TransformedDistribution):
 熵的计算方法：基础分布 Normal 的熵与 $\mu$ 求和。
 
 - `kl_divergence` 相对熵计算
+
 与对应的基础分布Normal的计算逻辑相同，复用即可。
 
 - `sample` 随机采样
