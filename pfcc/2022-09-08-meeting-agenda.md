@@ -54,5 +54,7 @@
 - [Nyakku Shigure](https://github.com/SigureMo) 主题分享《开发者体验提升计划——Python 工具链》（20 minutes）
 - [gglin001](https://github.com/gglin001) 主题分享《使用工具提升 Paddle 开发效率》（10 minutes）
 - [Ligoml](https://github.com/Ligoml) 信息同步《开源社区信息同步》（15 minutes）
+- [jzhang533](https://github.com/jzhang533) 活动预告：GTC 2022  Watch Party，2022-9-21, 14:00-15:30
+  - NVIDIA本地专家主持，以中文讲解，带领您与其他参与者同步观看某一精选演讲并解读和实时答疑。
 - PFCC 成员自由发言讨论（5 minutes）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 minutes）
