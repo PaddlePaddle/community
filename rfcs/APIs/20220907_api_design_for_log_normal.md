@@ -261,11 +261,12 @@ paddle.distribution.LogNormal(loc, scale)
  由于 `paddle.distribution` 中已有 Normal 分布，任务计划通过继承 `TransformedDistribution` 基类实现 `LogNormal` 类 ，将 Normal 分布进行变换得到 Log Normal 分布。
 ```python
 class LogNormal(TransformedDistribution):
-  ...
   def __init__(self, loc, scale):
     base_dist = Normal(loc, scale)
     super(LogNormal, self).__init__(base_dist, [paddle.distribution.ExpTransform()])
+    
     ...
+    
 ```
 1. 增加 `LogNormal` 类
 
