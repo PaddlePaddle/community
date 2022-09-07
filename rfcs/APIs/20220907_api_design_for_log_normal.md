@@ -340,7 +340,7 @@ class LogNormal(TransformedDistribution):
 
 2. `paddle.fluid.tests.unittests.distribution`
 
-新增 test_distribution_log_normal.py 文件。
+新增 test_distribution_log_normal.py 和 test_distribution_log_normal_static.py 文件。
 
 # 名词解释
 - Normal分布
