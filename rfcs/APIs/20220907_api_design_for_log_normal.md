@@ -31,13 +31,6 @@ Paddle 框架内定义了 `Distribution` 抽象基类，通过继承 `Distributi
 # 三、业内方案调研
 PyTorch的实现代码如下：
 ```python
-from torch.distributions import constraints
-from torch.distributions.transforms import ExpTransform
-from torch.distributions.normal import Normal
-from torch.distributions.transformed_distribution import TransformedDistribution
-
-__all__ = ['LogNormal']
-
 class LogNormal(TransformedDistribution):
     r"""
     Creates a log-normal distribution parameterized by
@@ -95,25 +88,6 @@ class LogNormal(TransformedDistribution):
 ```
 tensorflow的实现代码如下：
 ```python
-import numpy as np
-import tensorflow.compat.v2 as tf
-from tensorflow_probability.python.bijectors import exp as exp_bijector
-from tensorflow_probability.python.bijectors import softplus as softplus_bijector
-from tensorflow_probability.python.distributions import kullback_leibler
-from tensorflow_probability.python.distributions import normal
-from tensorflow_probability.python.distributions import transformed_distribution
-from tensorflow_probability.python.internal import assert_util
-from tensorflow_probability.python.internal import dtype_util
-from tensorflow_probability.python.internal import parameter_properties
-from tensorflow_probability.python.internal import tensor_util
-from tensorflow_probability.python.util.deferred_tensor import DeferredTensor
-
-
-__all__ = [
-    'LogNormal',
-]
-
-
 class LogNormal(transformed_distribution.TransformedDistribution):
   """The log-normal distribution."""
 
@@ -284,7 +258,7 @@ paddle.distribution.LogNormal(loc, scale)
 本次任务的设计思路与已有概率分布保持一致，不涉及底层 OP 的开发。
 
 ## API实现方案
- 由于`paddle.distribution` 中已有 Normal 分布，任务计划通过继承 `TransformedDistribution` 基类实现 `LogNormal` 类 ，将 Normal 分布进行变换得到 Log Normal 分布。
+ 由于 `paddle.distribution` 中已有 Normal 分布，任务计划通过继承 `TransformedDistribution` 基类实现 `LogNormal` 类 ，将 Normal 分布进行变换得到 Log Normal 分布。
 ```python
 class LogNormal(TransformedDistribution):
   ...
@@ -357,13 +331,11 @@ class LogNormal(TransformedDistribution):
 本次任务影响的模块如下：
 1. `paddle.distribution` 
 
-新增 log_normal.py 文件，修改 transformed_distribution.py 和 normal.py文件。
+新增 log_normal.py 文件，修改 transformed_distribution.py 和 normal.py 文件。
 
 2. `paddle.fluid.tests.unittests.distribution`
 
-新增 test_distribution_log_normal.py。
-
-对其他模块无影响。
+新增 test_distribution_log_normal.py文件。
 
 # 名词解释
 - Normal分布
@@ -386,4 +358,3 @@ $$f(x) = \frac{1}{\sigma x \sqrt{2\pi}}
 4. [Numpy 的 LogNormal 文档](https://numpy.org/doc/stable/reference/random/generated/numpy.random.lognormal.html)
 
 3. [Tensorflow 的 LogNormal 测试代码](https://github.com/tensorflow/probability/blob/main/tensorflow_probability/python/distributions/lognormal_test.py)
-
