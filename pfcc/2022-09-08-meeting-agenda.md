@@ -47,10 +47,11 @@
   - [peachlcy](https://github.com/peachlcy)
   - [Rayman96](https://github.com/Rayman96)
   - [zrr1999](https://github.com/zrr1999)
+  - [xiaohemaikoo](https://github.com/xiaohemaikoo)
 
 # 会议议程
 
-- 新同学[六个骨头](https://github.com/zrr1999)自我介绍 (5 minutes)
+- 新同学 [六个骨头](https://github.com/zrr1999)、[xiaohemaikoo](https://github.com/xiaohemaikoo) 自我介绍 (5 minutes)
 - [Nyakku Shigure](https://github.com/SigureMo) 主题分享《开发者体验提升计划——Python 工具链》（20 minutes）
 - [gglin001](https://github.com/gglin001) 主题分享《使用工具提升 Paddle 开发效率》（10 minutes）
 - [Ligoml](https://github.com/Ligoml) 信息同步《开源社区信息同步》（15 minutes）
