@@ -252,7 +252,7 @@ paddle.distribution.LogNormal(loc, scale)
 ```
 参数 `loc`, `scale` 分别为基础分布 Normal 的均值和标准差。
 
-例如，随机变量 $X$ 服从 Log Normal 分布，即 $lnX \sim N(\mu, \sigma^2)$ ，对应的参数 $loc=\mu$ ，$scale=\sigma$ 。
+例如，随机变量 $X$ 服从 Log Normal 分布，即 $lnX \sim N(\mu, \sigma^2)$ ，对应的参数 $loc=\mu$ ， $scale=\sigma$ 。
 
 ## 底层OP设计
 本次任务的设计思路与已有概率分布保持一致，不涉及底层 OP 的开发。
@@ -272,7 +272,7 @@ class LogNormal(TransformedDistribution):
 
 `LogNormal` 类的初始化参数有 $loc$ 和 $scale$ ，类包含的方法及实现方案如下：
 
-记参数 $loc=\mu$ ，$scale=\sigma$ 。
+记参数 $loc=\mu$ ， $scale=\sigma$ 。
 
 - `mean` 计算均值
 
@@ -301,7 +301,7 @@ class LogNormal(TransformedDistribution):
 
 2. 扩展 `Normal` 类
 
-已有的 Normal 概率分布中无 rsample 方法，需要增加。
+已有的 Normal 概率分布中无 `rsample` 方法，需要增加。
 
 3. 扩展 `TransformedDistribution` 类
 
@@ -315,12 +315,12 @@ class LogNormal(TransformedDistribution):
 
 3. 使用 `LogNormal` 类的 `sample` 方法生成6000个样本，测试这些这样的均值和标准差是否正确。
 
-`Normal` 类已有 `NormalTest` 测试类，需增加rsample的测试。
+`Normal` 类已有 `NormalTest` 测试类，需增加 `rsample` 的测试。
 
 # 七、可行性分析和排期规划
 - 可行性分析
 
-`paddle.distribution` 内定义了概率分布的基类，并且提供了较多的概率分布方案。参照已有方案的实现方法，可以增加新的概率分布 Log Normal。
+`paddle.distribution` 内定义了概率分布的基类，并且提供了较多的概率分布方案。参照已有方案的实现方法，可以增加新的 Log Normal 概率分布。
 
 - 排期规划
 
@@ -336,20 +336,22 @@ class LogNormal(TransformedDistribution):
 
 2. `paddle.fluid.tests.unittests.distribution`
 
-新增 test_distribution_log_normal.py文件。
+新增 test_distribution_log_normal.py 文件。
 
 # 名词解释
 - Normal分布
 
 若随机变量 $X$ 服从均值为 $\mu$ ，方差为 $\sigma^2$ 的 Normal 分布，则 $X$ 的概率密度函数为
 $$f(x)=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(x-\mu)^2}{2\sigma^{2}}}$$
+
 并记作 $X \sim N(\mu, \sigma^2)$ 。
 - Log Normal分布
 
-对于随机变量 $X$ ，若满足 $lnX\sim N(\mu, \sigma^2)$，则称随机变量 $X$ 服从 Log Normal 分布，$X$ 的概率密度函数为
+对于随机变量 $X$ ，若满足 $lnX\sim N(\mu, \sigma^2)$，则称随机变量 $X$ 服从 Log Normal 分布， $X$ 的概率密度函数为
 
 $$f(x) = \frac{1}{\sigma x \sqrt{2\pi}}
                          e^{(-\frac{(ln(x)-\mu)^2}{2\sigma^2})}$$
+                         
 并记作 $lnX \sim N(\mu, \sigma^2)$ 。
 # 附件及参考资料
 1. [tensorflow 的 LogNormal 文档](https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/LogNormal)
