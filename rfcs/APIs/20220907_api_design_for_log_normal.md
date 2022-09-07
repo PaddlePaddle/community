@@ -259,7 +259,10 @@ paddle.distribution.LogNormal(loc, scale)
 本次任务的设计思路与已有概率分布保持一致，不涉及底层 OP 的开发。
 
 ## API实现方案
- 由于 `paddle.distribution` 中已有 Normal 分布，任务计划通过继承 `TransformedDistribution` 基类实现 `LogNormal` 类 ，将 Normal 分布进行变换得到 Log Normal 分布。
+
+1. 新增 `LogNormal` 类
+
+由于 `paddle.distribution` 中已有 Normal 分布，任务计划通过继承 `TransformedDistribution` 基类实现 `LogNormal` 类 ，将 Normal 分布进行变换得到 Log Normal 分布。
 ```python
 class LogNormal(TransformedDistribution):
   def __init__(self, loc, scale):
@@ -269,7 +272,6 @@ class LogNormal(TransformedDistribution):
     ...
     
 ```
-1. 增加 `LogNormal` 类
 
 `LogNormal` 类的初始化参数有 $loc$ 和 $scale$ ，类包含的方法及实现方案如下：
 
