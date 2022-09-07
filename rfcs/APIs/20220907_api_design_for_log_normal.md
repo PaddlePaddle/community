@@ -243,7 +243,7 @@ def _kl_lognormal_lognormal(a, b, name=None):
 ```
 
 # 四、对比分析
-pytroch 和 tensorflow 实现 Log Normal分布的方式基本相同，都是将 Normal 分布进行变换，得到 LogNormal 分布。tensorflow 实现的方法更丰富，测试更为详细。
+Pytroch 和 Tensorflow 实现 Log Normal分布的方式基本相同，都是将 Normal 分布进行变换，得到 LogNormal 分布。Tensorflow 实现的方法更丰富，测试更为详细。
 
 # 五、设计思路与实现方案
 
@@ -358,7 +358,7 @@ $$f(x) = \frac{1}{\sigma x \sqrt{2\pi}}
                          
 并记作 $lnX \sim N(\mu, \sigma^2)$ 。
 # 附件及参考资料
-1. [tensorflow 的 LogNormal 文档](https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/LogNormal)
+1. [Tensorflow 的 LogNormal 文档](https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/LogNormal)
 
 2. [Pytorch 的 LogNormal 文档](https://pytorch.org/docs/stable/distributions.html#lognormal)
 
