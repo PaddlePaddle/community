@@ -11,9 +11,9 @@
 
 # 一、概述
 ## 1、相关背景
-在当前的 Paddle 框架中，`paddle.distribution` 目录内已经实现了一系列概率分布的 API，为了扩展现有的概率分布方案，本次任务计划实现 LogNormal 分布的 API。
+在当前的 Paddle 框架中，`paddle.distribution` 目录内已经实现了一系列概率分布的 API，为了扩展现有的概率分布方案，本次任务计划实现 Log Normal 分布的 API。
 ## 2、功能目标
-新增 LogNormal API，用于 LogNormal 分布的概率统计与随机采样，包括如下方法：
+新增 LogNormal API，用于 Log Normal 分布的概率统计与随机采样，包括如下方法：
 - `mean` 计算均值
 - `variance` 计算方差
 - `sample` 随机采样
@@ -29,7 +29,7 @@
 Paddle 框架内定义了 `Distribution` 抽象基类，通过继承 `Distribution`，框架实现了 Uniform、Normal 等概率分布。目前 Paddle 中暂无 LogNormal 概率分布，需要单独开发实现，实现思路与其他概率分布的相同。LogNormal API 的具体实现会使用到许多基础 API，如 `paddle.exp`、`paddle.log`。
 
 # 三、业内方案调研
-PyTorch的实现代码如下：
+PyTorch的 `LogNormal` 类是通过继承 `TransformedDistribution` 类实现，将Normal作为基础分布，变换得到Log Normal分布。
 ```python
 class LogNormal(TransformedDistribution):
     r"""
@@ -86,7 +86,8 @@ class LogNormal(TransformedDistribution):
         return self.base_dist.entropy() + self.loc
 
 ```
-tensorflow的实现代码如下：
+
+Tensorflow的 `LogNormal` 类也是通过继承 `transformed_distribution.TransformedDistribution` 类实现，将Normal分布变换得到Log Normal分布。
 ```python
 class LogNormal(transformed_distribution.TransformedDistribution):
   """The log-normal distribution."""
