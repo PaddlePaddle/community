@@ -66,7 +66,14 @@
 - Lecture2：开源项目开发的实践。
 
   - 寻找需要开发的功能
-  - 搭建本地的飞桨开发环境
+    - issue 标签为 [good first issue](https://github.com/PaddlePaddle/Paddle/labels/good%20first%20issue) 或 [PR is welcome](https://github.com/PaddlePaddle/Paddle/labels/PR%20is%20welcome) ：通常是一些小功能的开发或者 bug 的修复，你可以通过完成这个 ISSUE 来踏出贡献代码的第一步。
+    - 开发新的 feature：可以参考 [issue 指南](https://github.com/PaddlePaddle/Paddle/issues/41281) 发起新的 issue，描述新 feature 的背景和特性，发起相关讨论。也可以通过 label 的 issue：[feature-request](https://github.com/PaddlePaddle/Paddle/labels/type%2Ffeature-request) 和 [new-feature](https://github.com/PaddlePaddle/Paddle/labels/type%2Fnew-feature) 来了解其它社区开发者提出的 feature 。
+    - 感兴趣的相关 issue：可以在 issue 页面搜索感兴趣的相关 issue 来改进，可以重点关注 Pinned issues（置顶位的重要议题）。
+    - [报告安全问题](https://github.com/PaddlePaddle/Paddle/blob/develop/SECURITY_cn.md)：特别地，若发现飞桨项目中有任何的安全漏洞（或潜在的安全问题），请第一时间通过 paddle-security@baidu.com 邮箱私下联系我们。在对应代码修复之前，请不要将对应安全问题对外披露，也不鼓励公开提 issue 报告安全问题。
+  - 搭建飞桨开发环境
+    - 本地开发环境：飞桨提供了 Linux/MacOS/Windows 等多种本地环境的源码编译方式，可参考 [文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/install/compile/fromsource.html)。
+    - 线上开发环境：为解决资源和环境等前置难题，百度飞桨 AI Studio 面向社区开发者提供飞桨镜像环境、在线 IDE 与专属 GPU 算力。此功能为专属授权功能，申请使用请通过邮件（ext_paddle_oss@baidu.com）联系管理员，资源有限，请按需申请；
+    - 如果准备就绪，欢迎参与[【热身打卡：开发框架，从编译 paddle 开始】](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_warming_up_cn)小试牛刀！不仅能让你以最快速度上手框架开发，成功打卡还有飞桨周边礼品送出哦～
   - 完成一个具体的功能开发
   - 提交代码，并创建PullRequest
   - 通过Code Review，CI及代码合入
