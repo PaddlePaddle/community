@@ -68,14 +68,22 @@
   - 寻找需要开发的功能
     - issue 标签为 [good first issue](https://github.com/PaddlePaddle/Paddle/labels/good%20first%20issue) 或 [PR is welcome](https://github.com/PaddlePaddle/Paddle/labels/PR%20is%20welcome) ：通常是一些小功能的开发或者 bug 的修复，你可以通过完成这个 ISSUE 来踏出贡献代码的第一步。
     - 开发新的 feature：可以参考 [issue 指南](https://github.com/PaddlePaddle/Paddle/issues/41281) 发起新的 issue，描述新 feature 的背景和特性，发起相关讨论。也可以通过 label 的 issue：[feature-request](https://github.com/PaddlePaddle/Paddle/labels/type%2Ffeature-request) 和 [new-feature](https://github.com/PaddlePaddle/Paddle/labels/type%2Fnew-feature) 来了解其它社区开发者提出的 feature 。
-    - 感兴趣的相关 issue：可以在 issue 页面搜索感兴趣的相关 issue 来改进，可以重点关注 Pinned issues（置顶位的重要议题）。
+    - 感兴趣的相关 issue：可以在 issue 页面搜索感兴趣的相关 issue 来改进，可以重点关注 Pinned issues（置顶位的重要议题），如[飞桨社区活动总览-飞桨黑客松](https://github.com/PaddlePaddle/Paddle/issues/42410)。
+    - [Roadmap](https://github.com/PaddlePaddle/Paddle/issues/42571) 和 [Call-for-Contributions](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/README.md)：为了让大家能深入地了解飞桨、在飞桨收获更多成长、解决更有挑战性的问题，飞桨团队将正在开展的一些重点工作和技术方向陆续发布。每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工。
     - [报告安全问题](https://github.com/PaddlePaddle/Paddle/blob/develop/SECURITY_cn.md)：特别地，若发现飞桨项目中有任何的安全漏洞（或潜在的安全问题），请第一时间通过 paddle-security@baidu.com 邮箱私下联系我们。在对应代码修复之前，请不要将对应安全问题对外披露，也不鼓励公开提 issue 报告安全问题。
   - 搭建飞桨开发环境
     - 本地开发环境：飞桨提供了 Linux/MacOS/Windows 等多种本地环境的源码编译方式，可参考 [文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/install/compile/fromsource.html)。
     - 线上开发环境：为解决资源和环境等前置难题，百度飞桨 AI Studio 面向社区开发者提供飞桨镜像环境、在线 IDE 与专属 GPU 算力。此功能为专属授权功能，申请使用请通过邮件（ext_paddle_oss@baidu.com）联系管理员，资源有限，请按需申请；
     - 如果准备就绪，欢迎参与[【热身打卡：开发框架，从编译 paddle 开始】](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_warming_up_cn)小试牛刀！不仅能让你以最快速度上手框架开发，成功打卡还有飞桨周边礼品送出哦～
   - 完成一个具体的功能开发
+    - 一些方向的功能开发已经有完整的 [贡献流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，如新增 API 开发、算子性能优化、算子数据类型扩展、自定义硬件接入、文档贡献等，请遵守这些贡献流程。
+    - 如果你的 PR 包含非常大的变更，比如模块的重构或者添加新的组件，请**务必先提出相关 issue 发起详细讨论，达成一致后再进行变更**，并为其编写详细的文档来阐述其设计、解决的问题和用途。注意一个 PR 尽量不要过于大，如果的确需要有大的变更，可以将其按功能拆分成多个单独的 PR。
+    - 重要的代码需要有完善的测试用例（单元测试、集成测试），对应的衡量标准是测试覆盖率，飞桨要求 [增量代码需满足行覆盖率大于 90%](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/git_guides/paddle_ci_manual_cn.html#pr-ci-coverage) 。
+    - 代码需要有可读性、易用性和健壮性。重要代码要有详细注释，代码尽量简练、复用度高、有着完善的设计，代码风格要整洁、规范，请参考 [飞桨代码规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/style_guides_cn.html) 和 [代码风格检查指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/git_guides/codestyle_check_guide_cn.html)。
   - 提交代码，并创建PullRequest
+    - 不论是否熟悉 GitHub 相关操作，建议先浏览一遍 [飞桨提交代码的流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html)，以便了解飞桨项目贡献的一些差异点。
+    - 提交 PR 的时候请参考 [PR 模板](https://raw.githubusercontent.com/PaddlePaddle/Paddle/develop/.github/PULL_REQUEST_TEMPLATE.md)。在进行较大的变更的时候请确保 PR 有一个对应的 Issue。若你是初次提交 PR，请先签署 [CLA](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html#cla)（PR 页面会有自动回复指引）。
+    - 每次提交代码时，请遵循 [以下约定](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html#span-id-caution1-pr-span)：包括commit 的数量不要过多，每个 commit 的名称应不能太随意等。
   - 通过Code Review，CI及代码合入
   - 软件版本发布及分发
 
