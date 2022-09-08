@@ -37,18 +37,18 @@ QA 交流环节：
 [gglin001](https://github.com/gglin001) 分享《使用工具提升 Paddle 开发效率》主题内容，主要包含以下几部分内容：
 
 - 在 Linux 上支持 Ninja 编译，大幅提高重编译的效率，详情见 [PR #44210](https://github.com/PaddlePaddle/Paddle/pull/44210)
-- 介绍在修改少量 Python 端代码时提升开发效率的一种方式：开发调试过程中直接修改 Python 源码进行调试（而不是 build 目录下的 Python 代码），需要将 build 目录下的构建产物 copy 到源代码目录，另外重编译时可仅构建 paddle_pybind 这一 target，这样可以节省 copy 源码及重新 packing 一个 wheel 包的时间，提升开发效率
-- 通过简单的方式支持 clang 编译并通过 demo 展示支持 clang 编译后通过 VS Code 中 CodeLLDB 扩展带来的单步调试体验的提升（比 GDB 调试快很多），这个与上一个 demo 中的配置文件可见 [gglin001/Paddle-fork](https://github.com/gglin001/Paddle-fork/tree/pfcc_demo_20220908)
+- 介绍在修改少量 Python 端代码时提升开发效率的一种方式：开发调试过程中直接修改 Python 源码进行调试（而不是 build 目录下的 Python 代码），需要将 build 目录下的构建产物 copy 到源代码目录，另外重编译时可仅构建 `paddle_pybind` 这一 target，这样可以节省 copy 源码及重新 packing 一个 wheel 包的时间，提升开发效率
+- 通过简单的方式支持 Clang 编译并通过 demo 展示支持 Clang 编译后通过 VS Code 中 CodeLLDB 扩展带来的单步调试体验的提升（比 GDB 调试快很多），这个与上一个 demo 中的配置文件可见 [gglin001/Paddle-fork](https://github.com/gglin001/Paddle-fork/tree/pfcc_demo_20220908)
 - 对 Paddle 未来工具使用上的一些期望
   - Linux Clang 编译的支持
-  - 支持更多比较现代化的基础设施（mold linker、最新版本 gcc 等）
-  - 更加优雅的 CMake 配置（目前静态库太多，在仅仅编译单一单测时会因为库的缺失无法执行）
+  - 支持更多比较现代化的基础设施（[mold](https://github.com/rui314/mold) linker [#45761](https://github.com/PaddlePaddle/Paddle/issues/45761)、最新版本 gcc 等）
+  - 更加优雅的 CMake 配置（目前静态库太多，在仅仅编译单一单测时会缺失某一些库）
   - 为 C++ 代码暴露的 API 提供 `.pyi` 文件，以提供更好的 Python 端智能提示和代码补全
   - 官方发布一些开发时的最佳实践文档，为开发者提供参考
 
 QA 交流环节：
 
-- [Nyakku Shigure](https://github.com/SigureMo)：对于为 C++ 代码提供 `.pyi` 文件的话，我刚刚提到的[类型提示项目 paddlepaddle-stubs](https://github.com/cattidea/paddlepaddle-stubs) 是以一个第三方包的形式提供了一个 stub-only 的包，可以为框架的使用者提供更好的类型提示，但对于开发 Paddle 的开发者可能并没有太大帮助。当然我非常希望 Paddle 可以内部直接集成类型提示，不过这可能需要花费很多的时间去做。
+- [Nyakku Shigure](https://github.com/SigureMo)：对于为 C++ 代码提供 `.pyi` 文件的话，我刚刚提到的[类型提示项目 paddlepaddle-stubs](https://github.com/cattidea/paddlepaddle-stubs) 是以一个第三方包的形式提供了一个 [stub-only 的包](https://peps.python.org/pep-0561/#stub-only-packages)，可以为框架的使用者提供更好的类型提示，但对于开发 Paddle 的开发者可能并没有太大帮助。当然我非常希望 Paddle 可以内部直接集成类型提示，不过这可能需要花费很多的时间去做。
 
 ---
 
