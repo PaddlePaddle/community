@@ -191,6 +191,8 @@ tree = ast.parse(code)
 
 print("Before:")
 print(ast.dump(tree, indent=4))
+
+# Before:
 # Module(
 #     body=[
 #         Expr(
@@ -224,6 +226,8 @@ print(ast.dump(tree, indent=4))
 new_tree = ast.fix_missing_locations(TransformAssertTrueAllClose().visit(tree))
 print("After:")
 print(ast.dump(new_tree, indent=4))
+
+# After:
 # Module(
 #     body=[
 #         Expr(
