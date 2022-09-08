@@ -30,7 +30,7 @@ PFCC 新成员 [六个骨头](https://github.com/zrr1999) 进行了自我介绍�
 QA 交流环节：
 
 - [gglin001](https://github.com/gglin001)：Paddle 目前是否有一些文档来介绍一些工具上或者编辑器上的推荐配置吗？
-- [Nyakku Shigure](https://github.com/SigureMo)：目前应该还是没有的，因此在这里我也主要是推荐将来在文档中添加相关的内容
+- [Nyakku Shigure](https://github.com/SigureMo)：目前应该还是没有的，因此在这里我也主要是推荐将来在文档中添加相关的内容。
 
 ### 使用工具提升 Paddle 开发效率
 
@@ -53,23 +53,23 @@ QA 交流环节：
 ---
 
 - [luotao1](https://github.com/luotao1)：Ninja 进行重编译与直接使用 make 编译的速度有进行对比过吗？
-- [gglin001](https://github.com/gglin001)：由于时间的原因没有来得及进行测试，不过这个加速效果在体验上是非常明显的
-- [luotao1](https://github.com/luotao1)：最后提到的《More possible improvements》内容非常有帮助，比如 gcc 版本和静态库太多的问题都是需要解决的，一些其他的更多的问题也可以直接提到 issue 里
+- [gglin001](https://github.com/gglin001)：由于时间的原因没有来得及进行测试，不过这个加速效果在体验上是非常明显的。
+- [luotao1](https://github.com/luotao1)：最后提到的《More possible improvements》内容非常有帮助，比如 gcc 版本和静态库太多的问题都是需要解决的，一些其他的更多的问题也可以直接提到 issue 里。
 
 ### 开源社区信息同步
 
 [Ligoml](https://github.com/Ligoml) 进行了一些信息的同步：
 
-- [飞桨框架代码仓库的角色及权限介绍](https://github.com/PaddlePaddle/community/blob/master/contributors/community-membership.md)
-- AI Studio 新上线的「框架开发任务」功能介绍和展示
+- [飞桨框架代码仓库的角色及权限介绍](https://github.com/PaddlePaddle/community/blob/master/contributors/community-membership.md)。
+- AI Studio 新上线的「框架开发任务」功能介绍和展示。
 
 QA 交流环节：
 
-- [luotao1](https://github.com/luotao1)：AI Studio 上新的「框架开发任务」功能中提供的 VS Code 环境如果有预装某些扩展的需求也是可以提出来的
+- [luotao1](https://github.com/luotao1)：AI Studio 上新的「框架开发任务」功能中提供的 VS Code 环境如果有预装某些扩展的需求也是可以提出来的。
 
 ### GTC 2022 Watch Party 活动预告
 
-[luotao1](https://github.com/luotao1) 介绍了参与 GTC 2022 Watch Party 的方式
+[luotao1](https://github.com/luotao1) 介绍了参与 GTC 2022 Watch Party 的方式。
 
 ### 下次会议安排
 
