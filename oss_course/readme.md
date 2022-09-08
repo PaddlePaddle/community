@@ -91,13 +91,13 @@
   - 软件版本发布及分发
     -  我们使用 develop 分支作为我们的开发分支，这代表它是不稳定的分支。每个版本区间（如 2.1.x）都会创建一个 release 分支（如 release-2.1）作为稳定的发布分支。每发布一个新版本都会将其合并到对应的 release 分支并打上对应的 tag。阅读 [release note](https://github.com/PaddlePaddle/Paddle/releases) 有助于了解每个版本的功能。
     - 代码合入 Paddle develop 分支后的第二天，即可从飞桨官网下载 [develop 版本的编译安装包](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/linux-pip.html)体验此功能。通过测试的代码会被纳入正式版的发版计划。
-    
+    - 跟进据国际主流的惯例，[「版本号」的格式](https://github.com/guobinhit/cg-blog/blob/master/articles/others/version.md)是：`<major>.<minor>.<patch>`。`<major>`即主版本号，俗称大版本升级；`<minor>`即次版本号，俗称小版本升级；`<patch>`即修订号，俗称 bug 修复。飞桨2018年发布核心框架 v1.0版本，2021年发布v2.0版本，即将发布2.4版本。
 
 ##### 课程作业
 
 - 在github上完成PR合入流程：提交一个PR修改到作业的仓库。
-    - 推荐给开源项目的文档进行修改。（例如Paddle的docs仓库的修改）
-- 完成paddle的编译。
-    - 附件项：跑通单测。
+    - 推荐给开源项目的文档进行修改。（例如Paddle的docs仓库的修改，请 @Ligoml 补充）
+- 完成paddle的编译（附加项：跑通单测）
+    - 欢迎参与[【热身打卡：开发框架，从编译 paddle 开始】](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_warming_up_cn)小试牛刀！不仅能让你以最快速度上手框架开发，成功打卡还有飞桨周边礼品送出哦～
 - 在fork出来的paddle仓库里，完成一个fake API的实现，并完成PR提交。
 - 给飞桨做贡献
