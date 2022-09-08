@@ -82,13 +82,16 @@
     - 代码需要有可读性、易用性和健壮性。重要代码要有详细注释，代码尽量简练、复用度高、有着完善的设计，代码风格要整洁、规范，请参考 [飞桨代码规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/style_guides_cn.html) 和 [代码风格检查指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/git_guides/codestyle_check_guide_cn.html)。
   - 提交代码，并创建PullRequest
     - 不论是否熟悉 GitHub 相关操作，建议先浏览一遍 [飞桨提交代码的流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html)，以便了解飞桨项目贡献的一些差异点。
-    - 提交 PR 的时候请参考 [PR 模板](https://raw.githubusercontent.com/PaddlePaddle/Paddle/develop/.github/PULL_REQUEST_TEMPLATE.md)。在进行较大的变更的时候请确保 PR 有一个对应的 Issue。若你是初次提交 PR，请先签署 [CLA](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html#cla)（PR 页面会有自动回复指引）。
-    - 每次提交代码时，请遵循 [以下约定](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html#span-id-caution1-pr-span)：包括commit 的数量不要过多，每个 commit 的名称应不能太随意等。
+    - 提交 PR 的时候请参考 [PR 模板](https://raw.githubusercontent.com/PaddlePaddle/Paddle/develop/.github/PULL_REQUEST_TEMPLATE.md)，同时请遵循 [提交 PR 约定](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html#span-id-caution1-pr-span)。在进行较大的变更的时候请确保 PR 有一个对应的 Issue。
+    - 若你是初次提交 PR，请先签署 [CLA](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html#cla)（PR 页面会有自动回复指引）。
   - 通过Code Review，CI及代码合入
+    - CI: 在提交 PR 后，系统会自动运行持续集成，CI 测试进程一般会在几个小时内完成。请确保所有的 CI 均为 pass 状态（除 PR-CI-APPROVAL 和 PR-CI-Static-Check 这两个 CI 测试项可能需要飞桨相关开发者 approve 才能通过），如果没有通过，请通过报错信息自查代码，详细测试内容可参见 [Paddle CI 测试详解](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/git_guides/paddle_ci_manual_cn.html)。 
+    - Code Review：CI 测试通过后，接下来请等待 Code Review，一般会在三个工作日内回复。但是若 CI 测试不通过，评审人一般不做评审。收到 Code Review 意见后，请参考 [Code Review 注意事项](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html#CodeReview) 回复评审人的意见，并根据意见修改代码。
+    - 代码合入：PR Merge 后本次贡献结束，飞桨团队相关人员会对整个框架功能进行集成测试，集成测试用于模型、API、OP 等的功能和性能测试。如果测试通过，恭喜你贡献流程已经全部完成；如果测试不通过，我们会在 GitHub 发 Issue 联系你进行代码修复，请及时关注 GitHub 上的最新动态。
   - 软件版本发布及分发
-
-
-
+    -  我们使用 develop 分支作为我们的开发分支，这代表它是不稳定的分支。每个版本区间（如 2.1.x）都会创建一个 release 分支（如 release-2.1）作为稳定的发布分支。每发布一个新版本都会将其合并到对应的 release 分支并打上对应的 tag。阅读 [release note](https://github.com/PaddlePaddle/Paddle/releases) 有助于了解每个版本的功能。
+    - 代码合入 Paddle develop 分支后的第二天，即可从飞桨官网下载 [develop 版本的编译安装包](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/linux-pip.html)体验此功能。通过测试的代码会被纳入正式版的发版计划。
+    
 
 ##### 课程作业
 
