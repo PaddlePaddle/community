@@ -20,7 +20,7 @@ axis：轴，指示 tensor 的某个维度。
 ## 3、功能目标
 实现 `repeat` 算子，算子输入包含一个 tensor、以及两个整数 repeats 和 axis。
 
-算子的功能是将重复 tensor 中的元素，参数 repeats 为重复次数，axis 指定操作 tensor 的哪个轴。
+算子的功能是重复 tensor 中的元素，参数 repeats 为重复次数，axis 指定操作 tensor 的哪个轴。
 
 例子如下：
 ```
@@ -139,8 +139,8 @@ Variable NetBuilder::Repeat(const Variable& in,
 
 
 # 六、测试和验收的考量。
-1. 在 `cinn/hlir/op/contrib/repeat_test.cc` 中添加对底层 OP `repeat` 的测试代码，测试代码生产结果是否正确。
-2. 在 `cinn/frontend/net_builder_test.cc` 中添加对前端使用 `repeat` 的测试代码，测试算子的实现是否正确。
+1. 在 `cinn/hlir/op/contrib/repeat_test.cc` 中添加对底层 OP `repeat` 的测试，测试代码生成的结果是否正确。
+2. 在 `cinn/frontend/net_builder_test.cc` 中添加对前端使用 `repeat` 的测试，测试算子的实现是否正确。
 
 # 七、可行性分析和排期规划
 - 可行性分析：CINN已实现 Builder、Expr IR、算子注册等模块，在 CINN 已有的框架基础上能够很好地增加算子功能。
