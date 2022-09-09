@@ -109,9 +109,7 @@ tvm 与 xla 的 `repeat` 算子的输入参数有所不同，tvm 的 `repeat` �
 
 ## 命名与参数设计
 ```c++
-Variable Repeat(const Variable& in,
-                int repeats,
-                int axis)
+Variable Repeat(const Variable& in, int repeats, int axis)
 ```
 `in` 为输入的 tensor
 
@@ -132,9 +130,7 @@ std::vector<ir::Tensor> Repeat(const ir::Tensor &in_tensor,
 ## API实现方案
 在 `cinn/frontend` 中的 `NetBuild` 类中增加 `Repeat` 函数。
 ```c++
-Variable NetBuilder::Repeat(const Variable& in,
-                            int repeats,
-                            int axis)
+Variable NetBuilder::Repeat(const Variable& in, int repeats, int axis)
 ```
 
 
@@ -143,8 +139,11 @@ Variable NetBuilder::Repeat(const Variable& in,
 2. 在 `cinn/frontend/net_builder_test.cc` 中添加对前端使用 `repeat` 的测试，测试算子的实现是否正确。
 
 # 七、可行性分析和排期规划
-- 可行性分析：CINN已实现 Builder、Expr IR、算子注册等模块，在 CINN 已有的框架基础上能够很好地增加算子功能。
-- 排期规划：
+- 可行性分析
+
+CINN已实现 Builder、Expr IR、算子注册等模块，在 CINN 已有的框架基础上能够很好地增加算子功能。
+
+- 排期规划
 
 9月9日 ~ 9月14日完成 API 的开发与调试。
 
