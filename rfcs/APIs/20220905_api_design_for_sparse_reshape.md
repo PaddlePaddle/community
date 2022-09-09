@@ -176,7 +176,7 @@ void CooReshapeGradKernel(const Context& dev_ctx,
 
 ```yaml
 - api : reshape
-  args : (Tensor x)
+  args : (Tensor x, IntArray shape)
   output : Tensor(out)
   kernel :
     func : reshape_coo{sparse_coo -> sparse_coo}
@@ -186,11 +186,11 @@ void CooReshapeGradKernel(const Context& dev_ctx,
 
 ```yaml
 - backward_api : reshape_grad
-  forward : reshape(Tensor x) -> Tensor(out)
+  forward : reshape(Tensor x, IntArray shape) -> Tensor(out)
   args : (Tensor out_grad)
   output : Tensor(x_grad)
   kernel :
-    func : reshape_coo_grad {sparse_coo, sparse_coo -> sparse_coo}
+    func : reshape_coo{sparse_coo -> sparse_coo}
 ```
 
 ## 底层OP设计
@@ -209,12 +209,12 @@ void CooReshapeGradKernel(const Context& dev_ctx,
 
 测试考虑的case如下：
 
-- 正确性
+- 不同shape、维度、0/-1的正确性
 - 不同 `sparse_dim`
 
 # 七、可行性分析及规划排期
 
-方案主要自行实现核心算法，并使用paddle现有func
+方案主要自行实现核心算法，并使用paddle现有func(funcs::sparse::FlattenIndices 和 funcs::sparse::IndexToCoordinate)
 
 # 八、影响面
 
