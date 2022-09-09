@@ -146,7 +146,7 @@ Variable NetBuilder::Repeat(const Variable& in,
 - 可行性分析：CINN已实现 Builder、Expr IR、算子注册等模块，在 CINN 已有的框架基础上能够很好地增加算子功能。
 - 排期规划：
 
-9月9日 ~ 9月14日完成API 的开发与调试。
+9月9日 ~ 9月14日完成 API 的开发与调试。
 
 9月15日 ~ 9月18日完成测试代码的开发。
 
