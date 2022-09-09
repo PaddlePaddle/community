@@ -188,7 +188,6 @@ self.assertTrue(
 )
 """
 tree = ast.parse(code)
-new_tree = ast.fix_missing_locations(TransformAssertTrueAllClose().visit(tree))
 
 print("Before:")
 print(ast.dump(tree, indent=4))
@@ -199,27 +198,32 @@ print(ast.dump(tree, indent=4))
 #         Expr(
 #             value=Call(
 #                 func=Attribute(
-#                     value=Attribute(
-#                         value=Name(id='np', ctx=Load()),
-#                         attr='testing',
-#                         ctx=Load()),
-#                     attr='assert_allclose',
+#                     value=Name(id='self', ctx=Load()),
+#                     attr='assertTrue',
 #                     ctx=Load()),
 #                 args=[
-#                     Subscript(
-#                         value=Name(id='res', ctx=Load()),
-#                         slice=Constant(value=0),
-#                         ctx=Load()),
-#                     Name(id='feed_add', ctx=Load())],
+#                     Call(
+#                         func=Attribute(
+#                             value=Name(id='np', ctx=Load()),
+#                             attr='allclose',
+#                             ctx=Load()),
+#                         args=[
+#                             Subscript(
+#                                 value=Name(id='res', ctx=Load()),
+#                                 slice=Constant(value=0),
+#                                 ctx=Load()),
+#                             Name(id='feed_add', ctx=Load())],
+#                         keywords=[
+#                             keyword(
+#                                 arg='rtol',
+#                                 value=Constant(value=1e-05))])],
 #                 keywords=[
 #                     keyword(
-#                         arg='rtol',
-#                         value=Constant(value=1e-05)),
-#                     keyword(
-#                         arg='err_msg',
+#                         arg='msg',
 #                         value=Constant(value='blabla((((()()((xxxdfdf('))]))],
 #     type_ignores=[])
 
+new_tree = ast.fix_missing_locations(TransformAssertTrueAllClose().visit(tree))
 print("After:")
 print(ast.dump(new_tree, indent=4))
 
