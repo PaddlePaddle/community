@@ -39,7 +39,14 @@ repeat(x, repeats=2, axis=1) = [[1, 1, 2, 2],
 CINN框架暂不支持 `repeat` 算子，需要实现。
 
 # 三、业内方案调研
-1. tvm 实现 `repeat` 的实现方法是先构造新 tensor 的 shape，再用 compute 生成新的 tensor，算子的核心代码如下：
+1. tvm 的`repeat` 算子
+
+算子的输入参数为 x、repeats 和 axis，算子功能是将张量 x 的 axis 轴进行重复，重复次数为 repeats 。
+
+实现 `repeat` 的实现方法是先构造新 tensor 的 shape，再用 compute 生成新的 tensor。
+
+核心代码如下：
+
 ```c++
 inline Tensor repeat(const Tensor& x, int repeats, int axis, std::string name = "T_repeat",
                      std::string tag = kBroadcast) {
@@ -79,7 +86,12 @@ inline Tensor repeat(const Tensor& x, int repeats, int axis, std::string name = 
 }
 ```
 
-2. xla 实现的 `repeat` 核心代码如下，参数 `repeats` 数组指示了 tensor 各维度的重复次数。
+2. xla 的`repeat` 算子
+
+算子的输入参数为 input 和 repeats，算子功能是将张量 input 进行重复，数组 repeats 指示了各个维度上的重复次数。
+
+核心代码如下：
+
 ```c++
 xla::XlaOp BuildRepeat(xla::XlaOp input, absl::Span<const int64_t> repeats) {
   const auto input_sizes = XlaHelpers::SizesOfXlaOp(input);
