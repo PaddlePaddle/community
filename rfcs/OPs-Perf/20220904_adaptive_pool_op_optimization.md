@@ -12,7 +12,7 @@
 
 # 1 背景与意义
 ## 1.1 飞桨现状
-目前Paddle中的Adaptive Pooling OP是和Pooling OP共用一套cuda kernel，且优化策略仅考虑了1维的线程设置，转用2维或者3维的线程配置可能减少计算规模。
+目前Paddle中的Adaptive Pooling OP是和常规Pooling OP共用一套cuda kernel，且优化策略仅考虑了1维的线程设置，转用2维或者3维的线程配置可能减少计算规模。
 
 ## 1.2 业内方案调研
 
@@ -98,13 +98,13 @@
 |---|---|---|
 | 1 | 理清Paddle中OP设计思路，同类产品中最佳设计方案  | 2022-09-04 |
 | 2 | 完成开发文档设计  | 2022-09-10 |
-| 3 | 完成代码开发工作，并通过线程CI测试 | 2022-09-30 |
+| 3 | 完成代码开发工作，并通过线程CI测试([PR45959](https://github.com/PaddlePaddle/Paddle/pull/45959)) | 2022-09-30 |
 
 
 # 5 影响面
-- 对于常规的Pooling OP：目前Paddle中的Adaptive Pooling OP是和Pooling OP共用一套cuda kernel，为了降低影响面，单独将写一个cuda kernel支持Adaptive Pooling OP
-- 对于`output_shape=[1, 1]`时的adaptive average pooling：由于在优化前`output_shape=[1, 1]`paddle已经优于pytorch，且adaptive average pooling运行的时reduce kernel，所以也没有进行修改，不会对这种配置下的op有影响
-- 对于`output_shape=[1, 1]`时的adaptive max pooling：由于在优化前`output_shape=[1, 1]`paddle已经优于pytorch，而这种情况下采用2d线程配置后的发现性能变差了，所以将这种情况也运行原来的逻辑，所以也不会对这种配置下的op有影响
+- 对于常规的Pooling OP：目前Paddle中的Adaptive Pooling OP是和常规Pooling OP共用一套cuda kernel，为了降低影响面，单独写一个cuda kernel支持Adaptive Pooling OP
+- 对于`output_shape=[1, 1]`时的adaptive average pooling：由于在优化前`output_shape=[1, 1]`paddle已经优于pytorch，且adaptive average pooling运行的是reduce kernel，所以也没有进行修改，不会对这种配置下的op有影响
+- 对于`output_shape=[1, 1]`时的adaptive max pooling：由于在优化前`output_shape=[1, 1]`paddle已经优于pytorch，而这种情况下采用2d线程配置后的发现性能变差了，因此这种情况也运行原来的逻辑，不会对这种配置下的op有影响
 
 # 名词解释
 
