@@ -1,7 +1,7 @@
 | API 名称 | paddle.distribution.Gumbel |
 | --- | --- |
-| 提交作者 | 韩凡宇（涵羞草心宇） 王勇森（dasen） 周志峰（AIStudio2509993） |
-| 提交时间 | 2022-09-11 |
+| 提交作者 | 韩凡宇(PureNatural) 王勇森(dasenCoding) 周志峰 |
+| 提交时间 | 2022-09-12 |
 | 版本号 | V1.0.0 |
 | 依赖飞桨版本 | V2.3.0 |
 | 文件名 | 20220908_api_design_for_gumbel.md |
@@ -9,7 +9,7 @@
 # 一、概述
 
 ## 1、相关背景
-GAN广泛应用于计算机视觉领域，相比而言，GAN在NLP领域的应用还是相对较少，这是因为GAN对离散型数据序列的处理显得无能为力，从离散分布中采样的数据时不可导的，在使用梯度下降算法时，无法正常更新模型中参数，Gumbel 分布成功地使 GAN 摆脱了这个困境，为 GAN 在 NLP 领域地发展奠定了基础。
+当前，GAN广泛应用于计算机视觉领域，相比而言，在NLP领域的应用还是相对较少，从离散分布中采样的数据是不可导的，在使用梯度下降算法时，无法正常更新模型中的参数，Gumbel 分布成功地使 GAN 摆脱了这个困境，为 GAN 在 NLP 领域地发展奠定了基础。
 > 参考的原文链接：[https://blog.csdn.net/weixin_45753454/article/details/123694938](https://blog.csdn.net/weixin_45753454/article/details/123694938)
 
 
@@ -29,7 +29,7 @@ GAN广泛应用于计算机视觉领域，相比而言，GAN在NLP领域的应�
 
 ## 3、意义
 
-为 Paddle 增加用于耿贝尔分布的概率统计与随机采样函数，丰富 `paddle.distribution` 中的 API，丰富 paddle 框架。
+为 Paddle 增加用于耿贝尔分布的概率统计与随机采样函数，丰富 `paddle.distribution` 下的 API，丰富 paddle 框架。
 
 # 二、飞桨现状
 
@@ -394,7 +394,7 @@ def gumbel(loc=0.0, scale=1.0, size=None): # real signature unknown; restored fr
 # 四、对比分析
 ## 共同点
 
-1. Pytorch 和 TensorFlow 都包含了Gumbel分布的基本参数 loc 和 scale，同时都在定义中添加了validdadte_args 参数，用来检查真实分布时参数的有效性；
+1. Pytorch 和 TensorFlow 都包含了Gumbel分布的基本参数 loc 和 scale，同时都在定义中添加了validate_args 参数，用来检查真实分布时参数的有效性；
 1. Pytorch 和 TensorFlow 均实现了Gumbel 分布 entropy（熵）、mean（均值）、stddev（标准偏差）、variance（方差）以及计算 value 在给定的 Gumbel 分布中对应的概率的对数：log_prob() ；
 1. 三者均实现了 Gumbel 分布的基本功能，同时所使用的数学原理基本是相同的；
 
@@ -491,19 +491,14 @@ paddle.distribution.Gumbel(loc,scale)
 
 ## API 实现方案
 
-该 API 在 paddle.distribution.Gumbel 中实现，API 的开发主要基于 paddle.distribution 基类进行开发。
-在经过调研对比后，Gumbel API 中设定两个参数：loc 和 scale，其中 loc 为位置参数，scale 为尺度参数；除了 API 调用的基本参数外，paddle.distribution.Gumbel 中实现的方法主要有以下几个：
+该 API 在 `paddle.distribution.Gumbel` 中实现，部分功能继承于`TransformedDistribution`。使用`TransformedDistribution`的`ExpTransform`和`AffineTransform`将`Uniform`分布转换为`Gumbel`分布，`Uniform`分布paddle已经实现。
+在经过调研对比后，Gumbel API 中设定两个参数：loc 和 scale，其中 loc 为位置参数，scale 为尺度参数；除了 API 调用的基本参数外，paddle.distribution.Gumbel 中实现的方法主要如下：
 
 - mean ：均值
 > 注：Gumbel 分布的均值为负欧拉常数：-γ
 
 ```python
--(0.5 + integral.integral(1,1000,precision=1000))
-```
-
-- stddev：标准差
-```python
-math.sqrt(self.variance)
+self.loc + self.scale * np.euler_gamma
 ```
 
 - variance：方差
@@ -511,9 +506,22 @@ math.sqrt(self.variance)
 self.scale.pow(2) * math.pi.pow(2) / 6
 ```
 
-- sample(shape)：随机采样
+- stddev：标准差
+```python
+math.sqrt(self.variance)
+```
 
-- rsample()：重参数化采样
+- sample(shape)：随机采样  
+继承父类 TransformedDistribution 的 sample 方法
+```python
+self.sample(shape)
+```
+
+- rsample()：重参数化采样  
+继承父类 TransformedDistribution 的 rsample 方法
+```python
+self.rsample(shape)
+```
 
 - prob(value)：概率密度函数
 ```python
@@ -526,28 +534,33 @@ np.log(self.probs(value))
 ```
 
 - entropy(scale)：熵
-
-- gumbel_cdf(x, loc=0, beta=1)：累积密度函数
 ```python
-def gumbel_cdf(self, x, loc=0, scale=1):
-    m = (x - self.loc) / self.scale
-    return np.exp(-np.exp(-m)
+self.scale.log() + (1 + np.euler_gamma)
 ```
 
-- gumbel_icdf(y, loc=0, scale=1, eps=le - 20)：逆累积密度函数
-```python
-def gumbel_icdf(self, y, loc=0, scale=1, eps=le - 20):
-    return self.loc - self.scale * np.log(-np.log(y + eps))
-```
 
 
 # 六、测试和验收的考量
+`GumbelTest`继承`unittest.TestCase`类中的方法，参考NormalTest的示例，新增一个`GumbelNumpy`类来验证`Gumbel` API的正确性。
+- 使用相同的参数实例化 `Gumbel` 类和 `GumbelNumpy` 类，分别调用 `mean`、`variance`、`stddev`、`prob`、`log_prob`、`entropy`方法。将输出的结果进行对比，允许有一定的误差。
+- 使用sample方法对多个样本进行测试。
 
 # 七、可行性分析及规划排期
+- 可行性分析
+
+在`paddle`中，`TransformedDistribution`和`Uniform`已实现；同时`paddle` 已实现部分概率分布，可以对其进行参考实现新的 Gumbel 分布；
+
+- 排期规划
+
+9.12-9.15:完成API的开发及测试。  
+9.16-9.17:完成中英文API文档的撰写。
+
 
 # 八、影响面
 
-为 paddle 增加了一个 `paddle.distribution.Gumbel` API，在风格上与飞桨2.0代码保持一致，丰富了 paddle 框架，在处理 Gumbel 分布问题时更加方便高效。
+为 paddle 增加了一个 `paddle.distribution.Gumbel` API，对在风格上与飞桨2.0代码保持一致，丰富了 paddle 框架，在处理 Gumbel 分布问题时更加方便高效。
+- 新增`gumbel.py`,`test_distribution_gumbel.py`文件
+- 在`transformed_distribution.py`中添加rsample方法
 
 # 名词解释
 
