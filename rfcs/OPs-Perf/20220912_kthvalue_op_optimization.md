@@ -1,4 +1,4 @@
-# p_norm_grad OP性能优化设计文档
+# kthvalue OP性能优化设计文档
 
 | 基本信息                 | 内容     |
 | ---- | -------------------------- |
@@ -6,14 +6,14 @@
 | 提交时间<input type="checkbox" class="rowselector hidden"> | 2022-09-12 |                                                
 | 版本号     | V1.0  |                       
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden">| develop|                      
-| 文件名    | 20220912_p_norm_grad_op_optimization.md <br> |
+| 文件名    | 20220912_kthvalue_op_optimization.md <br> |
 
  # 1 背景与意义
 
 ##  1.1 飞桨现状
 
-现状：目前 Paddle 内 p_norm_grad 算子 GPU 计算采用了 CUDA Kernel 与 Eigen 混合的模式，用现有的 Reduce OP 等取代 Eigen 可以提升计算性能，减少数据 HtoD 拷贝等开销；
-目标：请优化计算实现，为 Paddle 优化 p_norm_grad op 在 GPU 上的计算性能，性能平均提升3倍。
+现状：目前 Paddle 内 kthvalue 算子 GPU 计算采用了cub库实现，性能仍有不足；
+目标：请优化计算实现，为 Paddle 优化 kthvalue op 在 GPU 上的计算性能，性能平均提升2.7倍。
 
  ## 1.2 业内方案调研
 
@@ -23,7 +23,7 @@
 
  # 2 设计方案与性能预期
 设计文档：提 PR 至 community repo 的 rfcs/OPs-Perf 目录；
-C++ 及 GPU kernel 实现代码：提 PR 至 paddle/phi/kernels/gpu/p_norm_grad_kernel.cu 目录；
+C++ 及 GPU kernel 实现代码：提 PR 至 paddle/phi/kernels/gpu/kthvalue_kernel.cu 目录；
 在代码 PR 中提交 OP 的性能数据变化表格，代码 PR 格式规范见 示例。
 
  ## 2.1 关键模块与性能提升点
