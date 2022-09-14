@@ -80,7 +80,7 @@ dims_set = \{ $d_k|k=0, 1, ..., M-1$\} <br/>
 dims_u_set = \{ $0, ..., K-1$\}-dims_set <br/>
 
 input_indices = $(i_0,...,i_{K-1})$ <br/>
-index_indices = (\*dims_u_set, $k$), \*set表示将集合中所有元素按定义顺序取出变为序列<br/>
+index_indices = ( $u_1, u_2, ..., k$),  $u_d=i_d, d \in$ dims_u_set<br/>
 
 index_set = \{index\[index_indices\]| $k=0, 1, ..., M-1$\} <br/>
 output = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K−1})$，
