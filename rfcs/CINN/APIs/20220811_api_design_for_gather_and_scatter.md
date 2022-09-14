@@ -51,11 +51,11 @@ dims_set = \{ $d_k|k=0, 1, ..., M-1$\} <br/>
 dims_u_set = \{ $0, ..., K-1$\}-dims_set <br/>
 
 output_indices = $(i_0,...,i_{K-1})$ <br/>
-index_indices = ( $u_1, u_2, ..., k$),  $u_d=i_d, d \in $ dims_u_set<br/>
+index_indices = ( $u_1, u_2, ..., k$),  $u_d=i_d, d \in$ dims_u_set<br/>
 
 index_set = \{index\[index_indices\] | $k=0, 1, ..., M-1$\} <br/>
 input_indices = $(i_0,...,s_{d_0},...s_{d_1},...s_{d_{M-1}},...,i_{K-1})$，
-其中 $s_d \in $ index_set<br/>
+其中 $s_d \in$ index_set<br/>
 
 output\[ output_indices\]=input\[input_indices\]
 
