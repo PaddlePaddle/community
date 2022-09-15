@@ -13,48 +13,49 @@
 - 拥有github账号。
 - 有一些简单的软件开发的基础知识。
 
-## Course1 开源的基础知识和工具
+## Lecture1： 开源的基础知识和工具
 
-介绍通识知识：开源项目基础，git及github的简介。
-- 快速互动：以下哪些是开源软件
-    - linux操作系统
-    - gcc编译器
-    - 飞桨深度学习框架
-    - MySQL数据库
-- 贡献开源的动机
-    - 对于学生：
-        - 提升个人技能
-        - 丰富个人履历（丰富的github记录会是面试时很好的加分项）
-        - 认识更多有趣的人
-        - 获得成就感
-    - 对于工程师
-        - 改进自己的生产工具
-    - 对于公司
-        - 构建基于开源的生态（例：基于安卓的生态）
-        - 形成基于开源的商业模式（例：各类大数据公司）
-- 如何加入开源社区
-    - 从用户到开发者
-    - Star、Fork、PR、Issue、
-    - CLA协议、DCO、Code of Conduct
-    - Communication：maillist、微信群、论坛、等等
-        - public and transparent communication
-- 开源贡献的多种形式
-    - 代码贡献：案例，pull requests of paddle
-    - 社区布道：案例，
-    - code review：案例，
-    - bug report：案例，
-    - issue triage：案例，
-    - 文档修复：案例，
-    - Tutorials：案例，
-    - Case Study: [numpy's call for contributions](https://github.com/numpy/numpy/blob/main/README.md#call-for-contributions)
-- upstream first 原则
-- 贡献开源需要的工具和平台    
-  - git  
-  - github  
-  - 国内的gitee  
-  - 其他方式：提交patch（如linux kernel、gcc）
+- 通识知识：开源项目基础，git及github的简介。
+    - 快速互动：以下哪些是开源软件
+        - linux操作系统
+        - gcc编译器
+        - 飞桨深度学习框架
+        - MySQL数据库
+    - 贡献开源的动机
+        - 对于学生：
+            - 提升个人技能
+            - 丰富个人履历（丰富的github记录会是面试时很好的加分项）
+            - 认识更多有趣的人
+            - 获得成就感
+        - 对于工程师
+            - 改进自己的生产工具
+        - 对于公司
+            - 构建基于开源的生态（例：基于安卓的生态）
+            - 形成基于开源的商业模式（例：各类大数据公司）
+    - 如何加入开源社区
+        - 从用户到开发者
+        - Star、Fork、PR、Issue、
+        - CLA协议、DCO、Code of Conduct
+        - Communication：maillist、微信群、论坛、等等
+            - public and transparent communication
+    - 开源贡献的多种形式
+        - 代码贡献：案例，[飞桨黑客松活动](https://github.com/PaddlePaddle/Paddle/issues/43938)
+        - 社区布道：案例，[飞桨领航团](https://www.paddlepaddle.org.cn/ppdenavigategroup)
+        - code review：案例，[pull requests of paddle](https://github.com/PaddlePaddle/Paddle/pulls)
+        - bug report：案例，[bug report issues of Paddle](https://github.com/PaddlePaddle/Paddle/issues?q=is%3Aissue+is%3Aopen+label%3Atype%2Fbug-report)
+        - issue triage：案例，[needs triage issues of pip](https://github.com/pypa/pip/issues?q=is%3Aissue+is%3Aopen+label%3A%22S%3A+needs+triage%22)
+        - 文档修复：案例，[pull requests of paddle docs](https://github.com/PaddlePaddle/docs/pulls)
+        - Tutorials：案例，[Tutorials of paddle](https://www.paddlepaddle.org.cn/documentation/docs/zh/practices/index_cn.html)
+        - Case Study
+          -  [numpy's call for contributions](https://github.com/numpy/numpy/blob/main/README.md#call-for-contributions)
+          -  [report a bug to pip](https://github.com/pypa/pip/issues/11423)
+    - 贡献开源需要的工具和平台
+      - git的简要介绍
+      - github的简要介绍
+      - 国内的gitee的简要介绍
+      - 其他方式：提交patch（如linux kernel、gcc）
 
-## Course2: 开源项目开发的实践
+## Lecture2: 开源项目开发的实践
 
 #### 寻找需要开发的功能
 - issue 标签为 [good first issue](https://github.com/PaddlePaddle/Paddle/labels/good%20first%20issue) 或 [PR is welcome](https://github.com/PaddlePaddle/Paddle/labels/PR%20is%20welcome) ：通常是一些小功能的开发或者 bug 的修复，你可以通过完成这个 ISSUE 来踏出贡献代码的第一步。
