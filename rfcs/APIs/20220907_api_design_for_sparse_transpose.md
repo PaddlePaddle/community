@@ -136,12 +136,12 @@ shape(y_perm1) = [4,3,2]
 在 paddle/phi/kernels/sparse/impl/unary_kernel_impl.cc 中， kernel设计为
 ```
 template <typename T, typename Context>
-void TransposeCooGradKernel(const Context& dev_ctx,
+void TransposeCooKernel(const Context& dev_ctx,
                             const SparseCooTensor& x,
                             const SparseCooTensor& dout,
                             SparseCooTensor* dx)
 template <typename T, typename Context>
-void TransposeCsrGradKernel(const Context& dev_ctx,
+void TransposeCsrKernel(const Context& dev_ctx,
                             const SparseCooTensor& x,
                             const SparseCooTensor& dout,
                             SparseCooTensor* dx)
@@ -149,19 +149,19 @@ void TransposeCsrGradKernel(const Context& dev_ctx,
 在 paddle/phi/kernels/sparse/impl/unary_grad_kernel_impl.cc 中， kernel设计为
 ```
 template <typename T, typename Context>
-void TransposeCooKernel(const Context& dev_ctx,
+void TransposeCooGradKernel(const Context& dev_ctx,
                         const SparseCsrTensor& x,
                         const std::vector<int>& dims,
                         SparseCsrTensor* out)
                         template <typename T, typename Context>
-void TransposeCsrKernel(const Context& dev_ctx,
+void TransposeCsrGradKernel(const Context& dev_ctx,
                         const SparseCsrTensor& x,
                         const std::vector<int>& dims,
                         SparseCsrTensor* out)
 ```
 并在yaml中新增对应API
 ```yaml
-- api : transpose
+- op : transpose
   args : (Tensor x, int[] dims)
   output : Tensor(out)
   kernel :
@@ -172,7 +172,7 @@ void TransposeCsrKernel(const Context& dev_ctx,
 
 ```
 ```yaml
-- backward_api : transpose_grad
+- backward_op : transpose_grad
   forward : transpose(Tensor x, int[] shape) -> Tensor(out)
   args : (Tensor out, Tensor out_grad)
   output : Tensor(x_grad)
@@ -185,17 +185,138 @@ void TransposeCsrKernel(const Context& dev_ctx,
 对于Coo格式，主要分为两步，第一步操作indices，通过遍历每一行，
 按照指定顺序复制给输出值，第二步使用DDim::transpose改变dims值。
 
-对于Csr格式，通过分类讨论的方式，分别实现2维和3维的功能，
-对于2维只需要确定两个维度是否切换，3维情况也可通过较复杂的判断实现。
+对于Csr格式，通过分类讨论的方式，分别实现2维和3维的功能。
+对于2维情况只需要确定两个维度是否切换，对于不切换直接返回输入张量的副本，
+若转置，需要后文介绍的方法进行转置；3维情况较为复杂，对于`dims`输入[0, 2, 1]，
+可直接参考2维情况，对于`dims`输入[1, 0, 2]，也在后文介绍，对于其他情况，
+均可以通过组合前两种情况得到，例如[1, 2, 0]可视为[1, 0, 2]和[0, 2, 1]的组合。
+梯度可以转化为相应的transpose算子实现，cuda实现只需要对相应的循环进行替换和不断优化即可。
+
+2维情况
+```c++
+for (int i = 0; i < out_dims[0]; ++i) {
+  out_crows_data[i] = 0;
+}
+for (int i = 0; i < x_nnz; ++i) {
+  int j = x_cols_data[i];
+  out_crows_data[j + 1]++;
+}
+out_crows_data[out_dims[0]] = x_nnz;
+for (int i = 1; i < out_dims[0]; ++i) {
+  out_crows_data[i] += out_crows_data[i - 1];
+}
+// compute out_cols_data and out_values_data by out_crows_data and x
+std::unordered_map<int64_t, int> cols_offset;
+for (int i = 0; i < x.dims()[0]; ++i) {
+  int64_t start = x_crows_data[i];
+  int64_t end = x_crows_data[i + 1];
+  for (int64_t j = start; j < end; ++j) {
+    int64_t x_cols_j = x_cols_data[j];
+    int64_t jjj = out_crows_data[x_cols_j];
+    if (cols_offset.count(jjj)) {
+      cols_offset[jjj]++;
+    } else {
+      cols_offset[jjj] = 0;
+    }
+    int64_t jjj_offset = jjj + cols_offset[jjj];
+    out_cols_data[jjj_offset] = i;
+    out_values_data[jjj_offset] = x_values_data[j];
+  }
+}
+```
+`dims`输入[1, 0, 2]的情况
+```c++
+// k 可视为输出的第一个维度索引
+for (int i = 0; i < out_n_rows; ++i) {
+  out_crows_data[i] = 0;
+}
+int x_cols_offset = 0;
+int out_cols_index = 0;
+for (int i = 0; i < x.dims()[0]; ++i) {
+  int x_crows_index = i * (x_n_rows + 1);
+  int start = x_crows_data[x_crows_index + k];
+  int end = x_crows_data[x_crows_index + 1 + k];
+  out_crows_data[i + 1] = end - start;
+  for (int j = start; j < end; ++j) {
+    out_cols_data[out_cols_index] = x_cols_data[x_cols_offset + j];
+    out_values_data[out_cols_index] = x_values_data[x_cols_offset + j];
+    out_cols_index++;
+  }
+  x_cols_offset += x_crows_data[x_crows_index + x_n_rows];
+}
+for (int i = 1; i <= out_n_rows; ++i) {
+  out_crows_data[i] += out_crows_data[i - 1];
+}
+```
 ## API实现方案
 对于SparseCsrTensor和SparseCooTensor有相同的API，
 均只需要给定输入张量和维度转换目标。
+- x: 输入张量
+- dims: 变换的维度，例如[0, 2, 1]表示对后两个维度进行对换，必须保证与输入张量尺寸的长度相等。
 
 # 六、测试和验收的考量
 测试考虑的case如下：
 - 正确性
-- csr对2维和3维测试
-- coo对2维、3维、6维和10维测试
+- csr对2维和3维不同`dims`参数测试
+- coo对2维、3维不同`dims`参数以及6维和10维测试
+具体代码如下
+```python
+class TestTranspose(unittest.TestCase):
+    # x: sparse, out: sparse
+    def check_result(self, x_shape, dims, format):
+        print(x_shape, dims, format)
+        with _test_eager_guard():
+            mask = paddle.randint(0, 2, x_shape).astype("float32")
+            origin_x = paddle.rand(x_shape, dtype='float32') * mask
+            dense_x = origin_x.detach()
+            dense_x.stop_gradient = False
+            dense_out = paddle.transpose(dense_x, dims)
+
+            if format == "coo":
+                sp_x = origin_x.detach().to_sparse_coo(len(x_shape))
+            else:
+                sp_x = origin_x.detach().to_sparse_csr()
+            sp_x.stop_gradient = False
+            sp_out = paddle.incubate.sparse.transpose(sp_x, dims)
+            np.testing.assert_allclose(sp_out.to_dense().numpy(),
+                                       dense_out.numpy(),
+                                       rtol=1e-05)
+            dense_out.backward()
+            sp_out.backward()
+            np.testing.assert_allclose(sp_x.grad.to_dense().numpy(),
+                                       (dense_x.grad * mask).numpy(),
+                                       rtol=1e-05)
+
+    def test_transpose_2d(self):
+        self.check_result([2, 5], [0, 1], 'coo')
+        self.check_result([2, 5], [0, 1], 'csr')
+        self.check_result([2, 5], [1, 0], 'coo')
+        self.check_result([2, 5], [1, 0], 'csr')
+
+    def test_transpose_3d(self):
+        self.check_result([6, 2, 3], [0, 1, 2], 'coo')
+        self.check_result([6, 2, 3], [0, 1, 2], 'csr')
+        self.check_result([6, 2, 3], [0, 2, 1], 'coo')
+        self.check_result([6, 2, 3], [0, 2, 1], 'csr')
+        self.check_result([6, 2, 3], [1, 0, 2], 'coo')
+        self.check_result([6, 2, 3], [1, 0, 2], 'csr')
+        self.check_result([6, 2, 3], [2, 0, 1], 'coo')
+        self.check_result([6, 2, 3], [2, 0, 1], 'csr')
+        self.check_result([6, 2, 3], [2, 1, 0], 'coo')
+        self.check_result([6, 2, 3], [2, 1, 0], 'csr')
+        self.check_result([6, 2, 3], [1, 2, 0], 'coo')
+        self.check_result([6, 2, 3], [1, 2, 0], 'csr')
+
+    @unittest.skipIf(paddle.is_compiled_with_cuda(),
+                     "cuda randint not supported")
+    def test_transpose_nd(self):
+        self.check_result([8, 3, 4, 4, 5, 3], [5, 3, 4, 1, 0, 2], 'coo')
+        # Randint now only supports access to dimension 0 to 9.
+        self.check_result([i % 3 + 2 for i in range(9)],
+                          [(i + 2) % 9 for i in range(9)], 'coo')
+
+```
+
 
 具体样例如下
 ```python
@@ -254,7 +375,7 @@ class TestTranspose(unittest.TestCase):
 ```
 
 # 七、可行性分析及规划排期
-方案主要自行实现核心算法，并使用paddle现有func
+方案主要自行实现核心算法
 # 八、影响面
 为独立新增op，对其他模块没有影响
 # 名词解释
