@@ -544,6 +544,7 @@ self.scale.log() + (1 + np.euler_gamma)
 `GumbelTest`继承`unittest.TestCase`类中的方法，参考NormalTest的示例，新增一个`GumbelNumpy`类来验证`Gumbel` API的正确性。
 - 使用相同的参数实例化 `Gumbel` 类和 `GumbelNumpy` 类，分别调用 `mean`、`variance`、`stddev`、`prob`、`log_prob`、`entropy`方法。将输出的结果进行对比，允许有一定的误差。
 - 使用sample方法对多个样本进行测试。
+- 对生成的样本集通过使用`pyplot`绘制直方图进行初步的检验;再通过调用`scipy.stats.kstest`方法进行KS检验,判断P值是否大于0.05。
 
 # 七、可行性分析及规划排期
 - 可行性分析
