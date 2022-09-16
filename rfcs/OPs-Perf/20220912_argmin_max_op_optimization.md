@@ -16,7 +16,7 @@
 
 ## 1.1 飞桨现状
 
-当前性能如下表(基于ＰaddleＰaddle　develop分支)：
+当前性能如下表(基于PaddlePaddle　develop分支)：
 
 | Case No. | input_shape |　dtype | axis | Paddle Perf(ms) argmin | Paddle Perf(ms) argmmax |
 |---|---|---|---|---|---|
@@ -43,12 +43,14 @@ Pytorch中对argmin_argmax算子的实现基于GPU计算,  整体性能如下(�
 ## 1.3 对比分析
 
 目前Paddle与Pytorch的API设计方案几乎相同, 且底层都使用了Cub库实现。
+不同的是pytorch对除法和取模操作进行优化，而且设计的block设置最大值CAFFE_CUDA_NUM_THREADS。
+PaddlePaddle对block的设计更讲究，按照２的对数取最优的block配置。
 
 # 2 设计方案与性能预期
 
 ## 2.1 关键模块与性能提升点
 
-基于kps:reduce进行改写，进一步提升性能，预计性能平均提升4.5倍。
+基于kps:reduce进行改写，优化grid和block配置以及除法和取模的计算，进一步提升性能，预计性能平均至少提升4.5倍，且优于pytorch的性能。
 
 ## 2.2 Host端计算流程
 
@@ -89,3 +91,4 @@ Pytorch中对argmin_argmax算子的实现基于GPU计算,  整体性能如下(�
 [1]. [OP Benchmark使用指南](https://github.com/PaddlePaddle/benchmark/blob/master/api/README.md)
 
 
+PPYDDDD111
