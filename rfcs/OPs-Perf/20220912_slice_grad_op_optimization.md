@@ -30,7 +30,7 @@ SliceGrad OP性能优化设计文档
 
  ## 1.2 业内方案调研
 
-调研测试pytorch目前计算LerpGard的性能。
+调研测试pytorch目前计算SliceGard的性能。
 | Case No. | device | input_shape | input_type | Pytorch Perf(ms) |
 |---|---|---|---|---|
 | 1 | RTX 3070 | [4, 5, 64, 16, 16] | float32 |  0.175 | 
@@ -70,7 +70,7 @@ SliceGrad OP性能优化设计文档
 
 #  5 影响面
 
-可能会影响到Pad算子的GPU实现。不过初期仅将影响范围先知道Slice_grad 算子中，不会影响到其他算子Eigen对Pad的调用
+可能会影响到Pad算子的GPU实现。不过初期仅将影响范围限制到Slice_grad 算子中，不会影响到其他算子Eigen对Pad的调用
 
 
  附件及参考资料
