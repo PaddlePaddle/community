@@ -133,24 +133,21 @@ shape(y_perm1) = [4,3,2]
 为了适配paddle phi库的设计模式，需自行设计实现方式
 # 五、方案设计
 ## 命名与参数设计
-在 paddle/phi/kernels/sparse/impl/unary_kernel_impl.cc 中， kernel设计为
-```
-template <typename T, typename Context>
-
+在 paddle/phi/kernels/sparse/unary_kernel.h 中， kernel设计为
+```cpp
 template <typename T, typename Context>
 void TransposeCooKernel(const Context& dev_ctx,
                         const SparseCsrTensor& x,
                         const std::vector<int>& perm,
-                        SparseCsrTensor* out)
-                        template <typename T, typename Context>
+                        SparseCsrTensor* out);
+template <typename T, typename Context>
 void TransposeCsrKernel(const Context& dev_ctx,
                         const SparseCsrTensor& x,
                         const std::vector<int>& perm,
-                        SparseCsrTensor* out)
+                        SparseCsrTensor* out);
 ```
-在 paddle/phi/kernels/sparse/impl/unary_grad_kernel_impl.cc 中， kernel设计为
+在 paddle/phi/kernels/sparse/unary_grad_kernel.h 中， kernel设计为
 ```
-
 template <typename T, typename Context>
 void TransposeCooGradKernel(const Context& dev_ctx,
                             const SparseCooTensor& x,
