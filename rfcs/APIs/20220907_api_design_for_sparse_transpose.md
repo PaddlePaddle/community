@@ -136,33 +136,38 @@ shape(y_perm1) = [4,3,2]
 在 paddle/phi/kernels/sparse/impl/unary_kernel_impl.cc 中， kernel设计为
 ```
 template <typename T, typename Context>
-void TransposeCooKernel(const Context& dev_ctx,
-                            const SparseCooTensor& x,
-                            const SparseCooTensor& dout,
-                            SparseCooTensor* dx)
+
 template <typename T, typename Context>
+void TransposeCooKernel(const Context& dev_ctx,
+                        const SparseCsrTensor& x,
+                        const std::vector<int>& perm,
+                        SparseCsrTensor* out)
+                        template <typename T, typename Context>
 void TransposeCsrKernel(const Context& dev_ctx,
-                            const SparseCooTensor& x,
-                            const SparseCooTensor& dout,
-                            SparseCooTensor* dx)
+                        const SparseCsrTensor& x,
+                        const std::vector<int>& perm,
+                        SparseCsrTensor* out)
 ```
 在 paddle/phi/kernels/sparse/impl/unary_grad_kernel_impl.cc 中， kernel设计为
 ```
+
 template <typename T, typename Context>
 void TransposeCooGradKernel(const Context& dev_ctx,
-                        const SparseCsrTensor& x,
-                        const std::vector<int>& dims,
-                        SparseCsrTensor* out)
-                        template <typename T, typename Context>
+                            const SparseCooTensor& x,
+                            const SparseCooTensor& dout,
+                            const std::vector<int>& dims,
+                            SparseCooTensor* dx);
+template <typename T, typename Context>
 void TransposeCsrGradKernel(const Context& dev_ctx,
-                        const SparseCsrTensor& x,
-                        const std::vector<int>& dims,
-                        SparseCsrTensor* out)
+                            const SparseCsrTensor& x,
+                            const SparseCsrTensor& dout,
+                            const std::vector<int>& dims,
+                            SparseCsrTensor* dx);
 ```
 并在yaml中新增对应API
 ```yaml
 - op : transpose
-  args : (Tensor x, int[] dims)
+  args : (Tensor x, int[] perm)
   output : Tensor(out)
   kernel :
     func : transpose_coo{sparse_coo -> sparse_coo},
@@ -187,8 +192,8 @@ void TransposeCsrGradKernel(const Context& dev_ctx,
 
 对于Csr格式，通过分类讨论的方式，分别实现2维和3维的功能。
 对于2维情况只需要确定两个维度是否切换，对于不切换直接返回输入张量的副本，
-若转置，需要后文介绍的方法进行转置；3维情况较为复杂，对于`dims`输入[0, 2, 1]，
-可直接参考2维情况，对于`dims`输入[1, 0, 2]，也在后文介绍，对于其他情况，
+若转置，需要后文介绍的方法进行转置；3维情况较为复杂，对于`perm`输入[0, 2, 1]，
+可直接参考2维情况，对于`perm`输入[1, 0, 2]，也在后文介绍，对于其他情况，
 均可以通过组合前两种情况得到，例如[1, 2, 0]可视为[1, 0, 2]和[0, 2, 1]的组合。
 梯度可以转化为相应的transpose算子实现，cuda实现只需要对相应的循环进行替换和不断优化即可。
 
@@ -224,7 +229,7 @@ for (int i = 0; i < x.dims()[0]; ++i) {
   }
 }
 ```
-`dims`输入[1, 0, 2]的情况
+`perm`输入[1, 0, 2]的情况
 ```c++
 // k 可视为输出的第一个维度索引
 for (int i = 0; i < out_n_rows; ++i) {
@@ -251,33 +256,34 @@ for (int i = 1; i <= out_n_rows; ++i) {
 ## API实现方案
 对于SparseCsrTensor和SparseCooTensor有相同的API，
 均只需要给定输入张量和维度转换目标。
+具体的API为`paddle.incubate.sparse.transpose(x, perm)`
 - x: 输入张量
-- dims: 变换的维度，例如[0, 2, 1]表示对后两个维度进行对换，必须保证与输入张量尺寸的长度相等。
+- perm: 变换的维度，例如[0, 2, 1]表示对后两个维度进行对换，必须保证与输入张量尺寸的长度相等。
 
 # 六、测试和验收的考量
 测试考虑的case如下：
 - 正确性
-- csr对2维和3维不同`dims`参数测试
-- coo对2维、3维不同`dims`参数以及6维和10维测试
-具体代码如下
+- csr对2维和3维不同`perm`参数测试
+- coo对2维、3维不同`perm`参数以及6维和10维测试
+
+具体样例如下
 ```python
 class TestTranspose(unittest.TestCase):
     # x: sparse, out: sparse
-    def check_result(self, x_shape, dims, format):
-        print(x_shape, dims, format)
+    def check_result(self, x_shape, perm, format):
         with _test_eager_guard():
             mask = paddle.randint(0, 2, x_shape).astype("float32")
             origin_x = paddle.rand(x_shape, dtype='float32') * mask
             dense_x = origin_x.detach()
             dense_x.stop_gradient = False
-            dense_out = paddle.transpose(dense_x, dims)
+            dense_out = paddle.transpose(dense_x, perm)
 
             if format == "coo":
                 sp_x = origin_x.detach().to_sparse_coo(len(x_shape))
             else:
                 sp_x = origin_x.detach().to_sparse_csr()
             sp_x.stop_gradient = False
-            sp_out = paddle.incubate.sparse.transpose(sp_x, dims)
+            sp_out = paddle.incubate.sparse.transpose(sp_x, perm)
             np.testing.assert_allclose(sp_out.to_dense().numpy(),
                                        dense_out.numpy(),
                                        rtol=1e-05)
@@ -315,63 +321,6 @@ class TestTranspose(unittest.TestCase):
         self.check_result([i % 3 + 2 for i in range(9)],
                           [(i + 2) % 9 for i in range(9)], 'coo')
 
-```
-
-
-具体样例如下
-```python
-class TestTranspose(unittest.TestCase):
-    # x: sparse, out: sparse
-    def check_result(self, x_shape, dims, format):
-        if len(x_shape) == 3:
-            mask = paddle.randint(0, 2, [x_shape[-2], x_shape[-1]])
-        else:
-            mask = paddle.randint(0, 2, x_shape)
-        origin_x = paddle.rand(x_shape) * mask
-
-        dense_x = origin_x.detach()
-        dense_x.stop_gradient = False
-        dense_out = paddle.transpose(dense_x, dims)
-
-        if format == "coo":
-            sp_x = origin_x.detach().to_sparse_coo(len(x_shape))
-        else:
-            sp_x = origin_x.detach().to_sparse_csr()
-        sp_x.stop_gradient = False
-        sp_out = paddle.incubate.sparse.transpose(sp_x, dims)
-
-        np.testing.assert_allclose(sp_out.numpy(),
-                                   dense_out.numpy(),
-                                   rtol=1e-05)
-        if get_cuda_version() >= 11030:
-            dense_out.backward()
-            sp_out.backward()
-            np.testing.assert_allclose(sp_x.grad.to_dense().numpy(),
-                                       (dense_x.grad * mask).numpy(),
-                                       rtol=1e-05)
-
-    @unittest.skipIf(not paddle.is_compiled_with_cuda()
-                     or get_cuda_version() < 11000, "only support cuda>=11.0")
-    def test_transpose_case1(self):
-        self.check_result([16, 12, 3], [2, 1, 0], 'coo')
-        self.check_result([16, 12, 3], [2, 1, 0], 'csr')
-
-    @unittest.skipIf(not paddle.is_compiled_with_cuda()
-                     or get_cuda_version() < 11070, "only support cuda>=11.7")
-    def test_transpose_case2(self):
-        self.check_result([12, 5], [1, 0], 'coo')
-        self.check_result([12, 5], [1, 0], 'csr')
-
-    @unittest.skipIf(not paddle.is_compiled_with_cuda()
-                     or get_cuda_version() < 11070, "only support cuda>=11.7")
-    def test_transpose_case3(self):
-        self.check_result([8, 16, 12, 4, 2, 12], [2, 3, 4, 1, 0, 2], 'coo')
-
-    @unittest.skipIf(not paddle.is_compiled_with_cuda()
-                     or get_cuda_version() < 11070, "only support cuda>=11.7")
-    def test_transpose_case3(self):
-        self.check_result([i + 2 for i in range(10)],
-                          [(i + 2) % 10 for i in range(10)], 'coo')
 ```
 
 # 七、可行性分析及规划排期
