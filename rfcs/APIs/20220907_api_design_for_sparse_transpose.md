@@ -188,6 +188,7 @@ void TransposeCsrGradKernel(const Context& dev_ctx,
            transpose_csr_grad {sparse_csr, sparse_csr -> sparse_csr}
 
 ```
+以及实现相应的InferMeta函数。
 ## 底层OP设计
 对于Coo格式，主要分为两步，第一步操作indices，通过遍历每一行，
 按照指定顺序复制给输出值，第二步使用DDim::transpose改变dims值。
