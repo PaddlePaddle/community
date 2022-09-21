@@ -166,6 +166,8 @@ void TransposeCsrGradKernel(const Context& dev_ctx,
 - op : transpose
   args : (Tensor x, int[] perm)
   output : Tensor(out)
+  infer_meta :
+    func : TransposeInferMeta
   kernel :
     func : transpose_coo{sparse_coo -> sparse_coo},
            transpose_csr{sparse_csr -> sparse_csr}
@@ -175,9 +177,12 @@ void TransposeCsrGradKernel(const Context& dev_ctx,
 ```
 ```yaml
 - backward_op : transpose_grad
-  forward : transpose(Tensor x, int[] shape) -> Tensor(out)
+  forward : transpose(Tensor x, int[] perm) -> Tensor(out)
   args : (Tensor out, Tensor out_grad)
   output : Tensor(x_grad)
+  infer_meta :
+    func : TransposeGradInferMeta
+    param : [out_grad, dims]
   kernel :
     func : transpose_coo_grad {sparse_coo, sparse_coo -> sparse_coo},
            transpose_csr_grad {sparse_csr, sparse_csr -> sparse_csr}
