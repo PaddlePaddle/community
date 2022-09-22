@@ -1,4 +1,4 @@
-# paddle.tril_indices设计文档
+# paddle.triu_indices设计文档
 
 
 |API名称 | paddle.triu_indices |
@@ -288,11 +288,11 @@ array([[ -1,  -1, -10, -10],
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
-API设计为`paddle.triu_indices(rows, cols, offset,dtype=None)`，产生一个2行x列的二维数组存放指定上三角区域的坐标，第一行为行坐标，第二行为列坐标
+API设计为`paddle.triu_indices(row, col=None, offset=0,dtype='int64')`，产生一个2行x列的二维数组存放指定上三角区域的坐标，第一行为行坐标，第二行为列坐标
 
 参数类型要求：
 
-- `rows`、`cols`、`offset`的类型是`int`
+- `row`、`col`、`offset`的类型是`int`
 - 输出`Tensor`的dtype默认参数为None时使用'int64'，否则以用户输入为准
 
 ## 底层OP设计
@@ -302,8 +302,8 @@ API设计为`paddle.triu_indices(rows, cols, offset,dtype=None)`，产生一个2
 在`paddle/phi/infermeta/nullary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/nullary.cc`中实现。
 
 ```c++
-void TriuIndicesInferMeta(const int& rows,
-                       const int& cols,
+void TriuIndicesInferMeta(const int& row,
+                       const int& col,
                        const int& offset,
                        MetaTensor* out);
 ```
@@ -313,8 +313,8 @@ void TriuIndicesInferMeta(const int& rows,
 ```c++
 template <typename Context>
 void TriuIndicesKernel( const Context& dev_ctx,
-                        const int& rows,
-                        const int& cols,
+                        const int& row,
+                        const int& col,
                         const int& offset,
                         DataType dtype,
                         DenseTensor* out);
@@ -330,9 +330,10 @@ GPU实现逻辑：计算输出数组大小，计算每个block负责的原始行
 在`python/paddle/tensor/creation.py`中增加`triu_indices`函数，并添加英文描述
 
 ```python
-def triu_indices(row, col, offset=0, dtype='int64'):
+def triu_indices(row, col=None, offset=0, dtype='int64'):
     # ...
     # 参数检查
+    # col默认为None, 当col取None时代表输入为正方形，将row值赋给col
     # ...
     # 增加算子
     # ...
