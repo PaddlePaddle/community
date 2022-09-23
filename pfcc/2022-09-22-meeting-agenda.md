@@ -55,7 +55,6 @@
   - [zrr1999](https://github.com/zrr1999)
   - [xiaohemaikoo](https://github.com/xiaohemaikoo)
   - [engineer1109](https://github.com/engineer1109)
-  - [5u13](https://github.com/5u13)
   - [enkilee](https://github.com/enkilee)
   - [Zheng-Bicheng](https://github.com/Zheng-Bicheng)
   - [pangyoki](https://github.com/pangyoki)
@@ -64,7 +63,7 @@
 
 # 会议议程
 
-- 新人介绍 [engineer1109](https://github.com/engineer1109)、[5u13](https://github.com/5u13)、[enkilee](https://github.com/enkilee)、[Zheng-Bicheng](https://github.com/Zheng-Bicheng) (5min)
+- 新人介绍 [engineer1109](https://github.com/engineer1109)、[enkilee](https://github.com/enkilee)、[Zheng-Bicheng](https://github.com/Zheng-Bicheng) (5min)
 - 飞桨研发 [pangyoki](https://github.com/pangyoki) 主题分享《Paddle 的编译构建与优化》(15min)
 - [Li-fAngyU](https://github.com/Li-fAngyU) 主题分享《使用AIStudio完成编译的体验分享》 (10-15minutes)
 - [xiaohemaikoo](https://github.com/xiaohemaikoo) 主题分享《float64类型扩展开发分享》 (10-15minutes)
