@@ -89,5 +89,3 @@ PaddlePaddle对block的设计更讲究，按照２的指数向上取最优的blo
 
 [1]. [OP Benchmark使用指南](https://github.com/PaddlePaddle/benchmark/blob/master/api/README.md)
 
-
-PPYDDDD111
