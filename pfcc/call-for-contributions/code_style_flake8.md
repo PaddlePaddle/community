@@ -40,7 +40,7 @@ flake8 path/to/code/
 1. 因为存量较大，需要进行存量修复的可行性分析（本任务最有难度的地方），并制定如何修复的步骤
    - 将检查工具的检测项逐一打开，并逐步修复对应的存量问题。如可以先解决 flake8 中结尾有多余空格的问题。
    - 部分存量较大的问题，需要有自动化工具进行修复。
-2. 格式检查工具升级和存量修复，可以参考[code format check upgrade](https://github.com/PaddlePaddle/Paddle/search?q=code%20format%20check%20upgrade&type=commits) 已有工作
+2. 格式检查工具升级和存量修复，可以参考 [code format check upgrade](https://github.com/PaddlePaddle/Paddle/search?q=code%20format%20check%20upgrade&type=commits) 已有工作
 3. 仅格式检查工具同步到 release 分支，参考 [PR43732](http://agroup.baidu.com/paddle-ci/md/article/2https://github.com/PaddlePaddle/Paddle/pull/43732)
 4. 将检查工具升级同步到 CI 镜像中，避免重复安装下载，参考 [PR43534](https://github.com/PaddlePaddle/Paddle/pull/43534)
 5. 代码风格检查指南文档，[docs#4933](https://github.com/PaddlePaddle/docs/pull/4933)
