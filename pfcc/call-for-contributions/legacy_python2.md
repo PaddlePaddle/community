@@ -36,8 +36,6 @@ Paddle 镜像 [tools/dockerfile/Dockerfile.ubuntu](https://github.com/PaddlePadd
 
 部分代码中使用 `sys.version_info` 来区分不同 Python 版本，并对不同版本做不同处理，对于 Python2 逻辑分支可以删除。
 
-由于 [Paddle#46477](https://github.com/PaddlePaddle/Paddle/pull/46477) 已经移除了对 Python3.6 的支持，因此可以同时清除所有 <= Python3.6 的逻辑分支。
-
 示例如下：
 
 ```python
@@ -49,20 +47,6 @@ else:
 
 # 其中 Python2 分支可以直接删除
 check_type(name, "name", (str, type(None)), "ParamAttr")
-
-# https://github.com/PaddlePaddle/Paddle/blob/7467221be8cecf137fa3d896f4ab08d3132a2178/python/paddle/vision/transforms/transforms.py#L30
-import collections
-# ...
-if sys.version_info < (3, 3):
-    Sequence = collections.Sequence
-    Iterable = collections.Iterable
-else:
-    Sequence = collections.abc.Sequence
-    Iterable = collections.abc.Iterable
-
-# 其中低于 Python3.3 分支可以直接删除
-# 移除 `import collections`，直接 import 下面的两个抽象基类
-from collections.abc import Sequence, Iterable
 
 # 其他可全局搜索 `sys.version_info` 根据具体情况来处理
 ```
