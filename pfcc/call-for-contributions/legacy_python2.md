@@ -5,6 +5,7 @@ Python 2.7在2020年1月1日终止支持，Paddle从2.1版本（2021年）开始
 * 删除Python 2 子包
 * 删除没有其它功能的 Python 2 模块
 * 删除非必要的环境依赖
+* 清理 Python2 相关逻辑分支
 * 清理文档中涉及到 Python 2 的内容
 
 ## 具体内容
@@ -16,9 +17,9 @@ Python 2.7在2020年1月1日终止支持，Paddle从2.1版本（2021年）开始
 * 有68处from six：涉及使用了six的string_types, zip, range, xrange, cStringIO, cPickle等
 * [python/requirements.txt](https://github.com/PaddlePaddle/Paddle/blob/develop/python/requirements.txt)：移除six库
 #### `__future__`【已完成 by [SigureMo](https://github.com/SigureMo) 】
-Paddle 目前代码里使用的全部是 3.0 及更高版本的内置特性（`generator_stop` 和 `annotations` 未使用），均无需从 `__future__ impor`t。
+Paddle 目前代码里使用的全部是 3.0 及更高版本的内置特性（`generator_stop` 和 `annotations` 未使用），均无需从 `__future__` 模块 import。
 因此可以移除全部 `from __future__ import xxx` 结构。
-* future 详细说明见：https://docs.python.org/3/library/__future__.html 
+* future 详细说明见：<https://docs.python.org/3/library/__future__.html>
 * [Paddle#46411](https://github.com/PaddlePaddle/Paddle/pull/46411) [Paddle#46463](https://github.com/PaddlePaddle/Paddle/pull/46463) 
 移除存量，[Paddle#46466](https://github.com/PaddlePaddle/Paddle/pull/46466) 控制增量
 
@@ -29,7 +30,26 @@ Paddle 目前代码里使用的全部是 3.0 及更高版本的内置特性（`g
 ### 删除非必要的环境依赖
 Paddle 镜像 [tools/dockerfile/Dockerfile.ubuntu](https://github.com/PaddlePaddle/Paddle/blob/develop/tools/dockerfile/Dockerfile.ubuntu#L83) 
 安装了Python 2.7.15，可以进行删除来减少镜像体积大小。
-同时可以删除其中的`pip --no-cache-dir`内容。
+同时可以删除其中的 `pip --no-cache-dir install xxx` 内容。
+
+### 清理 Python2 相关逻辑分支
+
+部分代码中使用 `sys.version_info` 来区分不同 Python 版本，并对不同版本做不同处理，对于 Python2 逻辑分支可以删除。
+
+示例如下：
+
+```python
+# https://github.com/PaddlePaddle/Paddle/blob/7467221be8cecf137fa3d896f4ab08d3132a2178/python/paddle/fluid/param_attr.py#L87
+if sys.version_info.major == 2:
+    check_type(name, "name", (str, type(None), unicode), "ParamAttr")
+else:
+    check_type(name, "name", (str, type(None)), "ParamAttr")
+
+# 其中 Python2 分支可以直接删除
+check_type(name, "name", (str, type(None)), "ParamAttr")
+
+# 其他可全局搜索 `sys.version_info` 根据具体情况来处理
+```
 
 ### 清理文档中涉及到 Python 2 的内容
 在 [docs](https://github.com/PaddlePaddle/docs) 仓库下用`grep -irn python2 . | wc -l`， 可以看到有53条结果。
