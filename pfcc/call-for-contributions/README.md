@@ -7,3 +7,4 @@
 - [编译 warning 的消除](code_style_compiler_warning.md)
 - [flake8 代码风格检查工具的引入](code_style_flake8.md)
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
+- [Python 2.7 相关代码退场](legacy_python2.md)
