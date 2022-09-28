@@ -67,8 +67,8 @@
 - 飞桨研发 [pangyoki](https://github.com/pangyoki) 主题分享《Paddle 的编译构建与优化》(15min)
 - [Li-fAngyU](https://github.com/Li-fAngyU) 主题分享《使用AIStudio完成编译的体验分享》 (10-15minutes)
 - [xiaohemaikoo](https://github.com/xiaohemaikoo) 主题分享《float64类型扩展开发分享》 (10-15minutes)
-- [engineer1109](https://github.com/engineer1109) 主题分享《编译吐槽》 (10-15minutes)
-- [isLinXu](https://github.com/isLinXu) 任务开放 《编译warning消除任务介绍》 (5minutes)
+- 主题分享 (10-15minutes)
+-  (5minutes)
 - PFCC 成员自由发言讨论（5 minutes）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 minutes）
   - 预告：下一期主席为[tizhou86](https://github.com/tizhou86)，副主席为[OuyangChao](https://github.com/OuyangChao)，主题暂定开源相关讨论。
