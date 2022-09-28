@@ -5,7 +5,7 @@ Python 2.7在2020年1月1日终止支持，Paddle从2.1版本（2021年）开始
 * 删除Python 2 子包
 * 删除没有其它功能的 Python 2 模块
 * 删除非必要的环境依赖
-* 清理 Python2.7 相关逻辑分支
+* 清理 Python2 相关逻辑分支
 * 清理文档中涉及到 Python 2 的内容
 
 ## 具体内容
@@ -32,7 +32,7 @@ Paddle 镜像 [tools/dockerfile/Dockerfile.ubuntu](https://github.com/PaddlePadd
 安装了Python 2.7.15，可以进行删除来减少镜像体积大小。
 同时可以删除其中的 `pip --no-cache-dir install xxx` 内容。
 
-### 清理 Python2.7 相关逻辑分支
+### 清理 Python2 相关逻辑分支
 
 部分代码中使用 `sys.version_info` 来区分不同 Python 版本，并对不同版本做不同处理，对于 Python2 逻辑分支可以删除。
 
