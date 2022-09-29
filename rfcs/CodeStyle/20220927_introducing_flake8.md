@@ -4,7 +4,7 @@
 | ------------ | -------------------------------- |
 | 提交作者     | Nyakku Shigure(@SigureMo)        |
 | 提交时间     | 2022-09-27                       |
-| 版本号       | v0.1                             |
+| 版本号       | v1.0                             |
 | 依赖飞桨版本 | develop                          |
 | 文件名       | 20220927_introducing_flake8.md   |
 
@@ -44,21 +44,125 @@ Flake8 的 132 个错误码中有 11 个由于未被广泛认可而默认未启�
 
 对于其余错误码，先在 Flake8 配置文件中排除掉，之后每修复一个错误码的存量问题后在配置中移除该错误码，使 pre-commit 能够阻止该错误码增量。
 
-TODO：扫描统计
+以下是在完成 trailing whitespace（W291、W293）相关修复后的统计
 
-TODO：F401 解决方案
+```text
+Type: E (26468)
+E101    11
+E121    8
+E122    81
+E123    12
+E125    168
+E126    723
+E127    140
+E128    207
+E129    9
+E131    45
+E201    29
+E202    11
+E203    32
+E225    61
+E226    93
+E228    3
+E231    60
+E241    2
+E251    109
+E261    11
+E262    238
+E265    925
+E266    116
+E271    4
+E272    1
+E301    7
+E302    3
+E303    7
+E305    2
+E306    1
+E401    19
+E402    2666
+E501    19252
+E502    400
+E701    108
+E711    166
+E712    340
+E713    22
+E714    4
+E721    8
+E722    149
+E731    62
+E741    153
+
+Type: F (9895)
+F401    6750
+F402    1
+F403    57
+F405    556
+F522    1
+F524    1
+F541    33
+F601    7
+F631    2
+F632    18
+F811    177
+F821    88
+F841    2204
+
+Type: W (1414)
+W191    11
+W503    279
+W504    949
+W601    3
+W605    172
+```
+
+> **Note**
+>
+> - E、W 错误码详情见：[pycodestyle Error Code](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes)
+> - F 错误码详情见：[Flake8 Error Code](https://flake8.pycqa.org/en/latest/user/error-codes.html)
+
+其中 trailing whitespace 相关问题（W291、W293）已经被 pre-commit hook [trailing-whitespace](https://github.com/pre-commit/pre-commit-hooks#trailing-whitespace) 解决，Tabs 相关问题（E101、W191）已经被 pre-commit hook [remove-tabs](https://github.com/Lucas-C/pre-commit-hooks#usage) 解决。
+
+此外存在一个语法错误（E999）已经在之前的 [#45287](https://github.com/PaddlePaddle/Paddle/pull/45287) 解决。
+
+black（Formatter）能自动解决大多数格式上的问题（E 错误码），如果引入 black 则可以解决 E121、E122 等大多数 E 错误码。
+
+其余错误码需要根据情况来处理：
+
+- 存量较少的错误码（低于 30）：手动修复即可
+- 存量较大的错误码：
+  - 可利用 autoflake 修复部分 F 错误码
+  - 可利用 autopep8 修复部分 black 剩余的 E 错误码
+  - 上述两个工具无法修复的且存量较大的错误码需要编写脚本修复或者手动修复
+
+以下是一些错误码的具体修复方案
+
+#### F401
+
+F401 为 import 了未使用的模块，该问题存量非常大，因此使用 autoflake 来进行自动修复
+
+由于在[尝试全量一次性修复](https://github.com/PaddlePaddle/Paddle/pull/45252/)后发生了难以定位的错误，因此该错误码需要逐目录来做，优先修复单测和 tools 这种不会被其他模块 import 的目录，之后逐渐向较为核心的模块进行修复。
+
+以 `python/paddle/fluid/tests/unittests/asp/` 为例，在 Paddle 根目录执行以下命令即可一次性清除该目录下全部 F401 问题
+
+```bash
+autoflake --in-place --remove-all-unused-imports --exclude=__init__.py --recursive ./python/paddle/fluid/tests/unittests/asp/
+```
+
+如果清除后发现 CI 无法通过，需要根据情况判断问题，如果该 import 是必要的，应当在该 import 处添加 `# noqa: F401` 以 disable 该处报错。
 
 ## 三、任务分工和排期规划
 
 由 Flake8 小组自行认领任务，每人负责部分错误码的部分目录。由于任务尚未开始，具体排期尚无法确定。
 
+预计 2022 年底应该能完成绝大多数错误码的修复。
+
 ## 四、其他注意事项及风险评估
 
-TODO
+无。
 
 ## 五、影响面
 
-TODO
+开发人员在后续开发过程中需要遵守 Flake8 的规范，否则无法通过 pre-commit 和 CI，能够极大提高 Paddle Python 代码的质量。
 
 ## 名词解释
 
