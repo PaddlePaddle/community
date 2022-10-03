@@ -156,6 +156,14 @@ autoflake --in-place --remove-all-unused-imports --exclude=__init__.py --recursi
 
 预计 2022 年底应该能完成绝大多数错误码的修复。
 
+目前 Flake8 小组成员如下：
+
+- [Nyakku Shigure](https://github.com/SigureMo)
+- [Shuangchi He](https://github.com/Yulv-git)
+- [Tony Cao](https://github.com/caolonghao)
+- [Zheng_Bicheng](https://github.com/Zheng-Bicheng)
+- [Infinity_lee](https://github.com/enkilee)
+
 ## 四、其他注意事项及风险评估
 
 由于 fluid 预计将会在 Paddle 2.5 中移除，因此 flake8 忽略 `python/paddle/fluid/` 目录下的错误码，但其中的 `python/paddle/fluid/tests/` 目录仍需要进行修复。
