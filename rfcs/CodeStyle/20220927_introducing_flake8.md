@@ -158,7 +158,7 @@ autoflake --in-place --remove-all-unused-imports --exclude=__init__.py --recursi
 
 ## 四、其他注意事项及风险评估
 
-无。
+由于 fluid 预计将会在 Paddle 2.5 中移除，因此 flake8 忽略 `python/paddle/fluid/` 目录下的错误码，但其中的 `python/paddle/fluid/tests/` 目录仍需要进行修复。
 
 ## 五、影响面
 
