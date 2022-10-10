@@ -1,6 +1,6 @@
 # Paddle Framework Contributor Club
 
-Paddle Framework Contributor Club (PFCC) 是一个有兴趣、正在、或者已经为[飞桨开源框架](https://github.com/PaddlePaddle/Paddle/)做开源贡献的贡献者而成立的虚拟组织，在这里，飞桨开源框架的贡献者进行讨论、交流和分享，并为飞桨框架做出持续的贡献。
+Paddle Framework Contributor Club (PFCC) 是一个有兴趣、正在、或者已经为[飞桨开源框架](https://github.com/PaddlePaddle/Paddle/)做开源贡献的贡献者成立的虚拟组织，在这里，飞桨开源框架的贡献者进行讨论、交流和分享，并为飞桨框架做出持续的贡献。
 
 # PFCC的构成
 
@@ -23,7 +23,7 @@ PFCC每两周进行一次例行会议。时间在每隔两周的周四的19点-2
 
 第一次的例会的时间定在2022-4-14 19:00。
 
-每期会议分享材料见：[百度网盘 - PFCC](https://pan.baidu.com/s/139f3HuOsp4EbVNbwAmSkxg)（提取码见微信群公告）
+每期会议分享材料见：[百度网盘 - PFCC](https://pan.baidu.com/s/16vAVoXpCgdrrRK5e_-w7Ig)（提取码见微信群公告）
 
 # 开放交流
 
@@ -31,7 +31,7 @@ PFCC鼓励大家进行开放的交流，所有的沟通和纪要都会记录在�
 
 # Roadmap
 
-为了让大家能深入地了解飞桨、在飞桨收获更多成长、解决更有挑战性的问题，飞桨团队计划将正在开展的一些重点工作和技术方向陆续发布。每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工，希望 PFCC 的成员能逐渐成为方向骨干甚至是带头人，带领更多人一起开发，具体内容可以参考 [【PFCC-Roadmap】总览](https://github.com/PaddlePaddle/Paddle/issues/42571)。
+为了让大家能深入地了解飞桨、在飞桨收获更多成长、解决更有挑战性的问题，飞桨团队计划将正在开展的一些重点工作和技术方向陆续发布。每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工，希望 PFCC 的成员能逐渐成为方向骨干甚至是带头人，带领更多人一起开发，具体内容可以参考 [【PFCC-Roadmap】总览](https://github.com/PaddlePaddle/Paddle/issues/42571) 和 [Call for Contributions](call-for-contributions/README.md)。
 
 # 如何加入
 

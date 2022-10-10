@@ -1,0 +1,61 @@
+# Paddle Framework Contributor Club 第十次会议
+
+- 本次会议时间：2022-09-08 19:00
+- 本次会议接入方式：
+  - 腾讯会议：525-623-151
+  - 会议密码：\*\*\*\*（群内通知）
+  - [点击链接入会](https://meeting.tencent.com/dm/DRnH3aId2Hf4)，或添加至会议列表
+- 本次会议主席：徐晓健（[Nyakku Shigure](https://github.com/SigureMo)）
+- 本次会议副主席：林旭（[isLinXu](https://github.com/isLinXu)）
+- 本次拟参会 Paddle Framework Contributor 列表：
+  - [jzhang533](https://github.com/jzhang533)
+  - [jeff41404](https://github.com/jeff41404)
+  - [luotao1](https://github.com/luotao1)
+  - [Ligoml](https://github.com/Ligoml)
+  - [TCChenlong](https://github.com/TCChenlong)
+  - [guguguzi](https://github.com/guguguzi)
+  - [S-HuaBomb](https://github.com/S-HuaBomb)
+  - [Asthestarsfalll](https://github.com/Asthestarsfalll)
+  - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
+  - [Li-fAngyU](https://github.com/Li-fAngyU)
+  - [liqitong-a](https://github.com/liqitong-a)
+  - [unseenme](https://github.com/unseenme)
+  - [isLinXu](https://github.com/isLinXu)
+  - [greatv](https://github.com/greatv)
+  - [SigureMo](https://github.com/SigureMo)
+  - [jinyouzhi](https://github.com/jinyouzhi)
+  - [gsq7474741](https://github.com/gsq7474741)
+  - [thunder95](https://github.com/thunder95)
+  - [chenyanlann](https://github.com/chenyanlann)
+  - [yangguohao](https://github.com/yangguohao)
+  - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
+  - [Liyulingyue](https://github.com/Liyulingyue)
+  - [GeYuYao-hub](https://github.com/GeYuYao-hub)
+  - [fuqianya](https://github.com/fuqianya)
+  - [liyongchao911](https://github.com/liyongchao911)
+  - [Yulv-git](https://github.com/Yulv-git)
+  - [Patrick-Star125](https://github.com/Patrick-Star125)
+  - [nlp-zn](https://github.com/nlp-zn)
+  - [OccupyMars2025](https://github.com/OccupyMars2025)
+  - [OuyangChao](https://github.com/OuyangChao)
+  - [yang131313](https://github.com/yang131313)
+  - [gglin001](https://github.com/gglin001)
+  - [tizhou86](https://github.com/tizhou86)
+  - [Ainavo](https://github.com/Ainavo)
+  - [ReganYue](https://github.com/ReganYue)
+  - [mrcangye](https://github.com/mrcangye)
+  - [peachlcy](https://github.com/peachlcy)
+  - [Rayman96](https://github.com/Rayman96)
+  - [zrr1999](https://github.com/zrr1999)
+  - [xiaohemaikoo](https://github.com/xiaohemaikoo)
+
+# 会议议程
+
+- 新同学 [六个骨头](https://github.com/zrr1999)、[xiaohemaikoo](https://github.com/xiaohemaikoo) 自我介绍 (5 minutes)
+- [Nyakku Shigure](https://github.com/SigureMo) 主题分享《开发者体验提升计划——Python 工具链》（20 minutes）
+- [gglin001](https://github.com/gglin001) 主题分享《使用工具提升 Paddle 开发效率》（10 minutes）
+- [Ligoml](https://github.com/Ligoml) 信息同步《开源社区信息同步》（15 minutes）
+- [jzhang533](https://github.com/jzhang533) 活动预告：GTC 2022  Watch Party，2022-9-21, 14:00-15:30
+  - NVIDIA本地专家主持，以中文讲解，带领您与其他参与者同步观看某一精选演讲并解读和实时答疑。
+- PFCC 成员自由发言讨论（5 minutes）
+- 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 minutes）

@@ -10,16 +10,13 @@
 - 本次拟参会 Paddle Framework Contributor 列表：
      - [Asthestarsfalll](https://github.com/Asthestarsfalll)
      - [BrilliantYuKaimin](https://github.com/BrilliantYuKaimin)
-     - [GeYuYao-hub](https://github.com/GeYuYao-hub)
      - [Ligoml](https://github.com/Ligoml)
      - [Liyulingyue](https://github.com/Liyulingyue)
      - [Patrick-Star125](https://github.com/Patrick-Star125) 
      - [S-HuaBomb](https://github.com/S-HuaBomb)
      - [SigureMo](https://github.com/SigureMo)
-     - [SmirnovKol](https://github.com/SmirnovKol)
      - [TCChenlong](https://github.com/TCChenlong)
      - [Yulv-git](https://github.com/Yulv-git)
-     - [chenyanlann](https://github.com/chenyanlann)
      - [greatv](https://github.com/greatv)
      - [gsq7474741](https://github.com/gsq7474741)
      - [guguguzi](https://github.com/guguguzi)
@@ -29,16 +26,16 @@
      - [jzhang533](https://github.com/jzhang533)
      - [liqitong-a](https://github.com/liqitong-a)
      - [liyongchao911](https://github.com/liyongchao911)
-     - [Li-fAngyU](https://github.com/Li-fAngyU)（请假一次）
      - [luotao1](https://github.com/luotao1)
      - [thunder95](https://github.com/thunder95)
      - [unseenme](https://github.com/unseenme)
      - [xiaoguoguo626807](https://github.com/xiaoguoguo626807)
      - [yangguohao](https://github.com/yangguohao)
      - [OuyangChao](https://github.com/OuyangChao)
-     - [yang131313](https://github.com/yang131313)
      - [gglin001](https://github.com/gglin001)
      - [tizhou86](https://github.com/tizhou86) 
+     - [yang131313](https://github.com/yang131313)（请假一次）
+     - [Li-fAngyU](https://github.com/Li-fAngyU)（请假一次）
 
 # 会议议程
 

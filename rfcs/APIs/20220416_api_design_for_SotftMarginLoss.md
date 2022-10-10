@@ -25,7 +25,7 @@ $$loss(x,y)= \sum _i
 为paddle增加新的API计算loss
 
 # 二、飞桨现状
-paddle目前没有SoftMarginLoss损失函数并且要搭建CPU以及GPU算子；
+paddle目前没有SoftMarginLoss损失函数；
 
 
 # 三、业内方案调研
@@ -67,84 +67,26 @@ tensorflow没有官方实现。
 
 # 四、对比分析
 两种方案对比：
-- 采用pytorch方法，对算子进行CPU以及GPU设计
+- 采用pytorch方法，但是通过飞桨已有算子对其进行设计。
 
 # 五、设计思路与实现方案
 ## 命名与参数设计
 - paddle.nn.SoftMarginLoss(reduction(str,可选)，name(str，可选)) -> Tensor:
 
-- paddle.nn.functional.soft_margin_loss(input, target, reduction: str = "mean", name:str=None, ) -> Tensor:
+- paddle.nn.functional.soft_margin_loss(input, label, reduction: str = "mean", name:str=None, ) -> Tensor:
     - input:Tensor, 维度为[N,*],其中N是batch_size， `*` 是任意其他维度。数据类型是float32、float64。
     - label:Tensor, 维度与输入 input 相同，数据类型为int32, int64, float32, float64，数值为-1或1。
     - reduction:str，可选，指定应用于输出结果的计算方式，可选值有: ``'none'``, ``'mean'``, ``'sum'`` 。默认为 ``'mean'``，计算 Loss 的均值；设置为 ``'sum'`` 时，计算 Loss 的总和；设置为 ``'none'`` 时，则返回原始Loss。
 
 ## 底层OP设计
-核心部分需要分别完成 softmarginloss.cc softmarginloss.cu 前向计算以及反向传播的算子kernel。
+核心部分现改为用已有的 API 算子进行组合
+主要为以下几个原因：
+- 1. 开发成本比较高，修改代码多
+- 2. 面临多硬件适配的问题，cpu, gpu, xpu, npu都需要写一份算子
+- 3. 和其他生态环境适配的问题，无法和tensorRT和ONNX适配
+- 4. 高阶自动微分的问题，需要在高阶自动微分添加lowering逻辑
+- 5. 编译器对接的问题，需要在编译器添加lowering逻辑
 
-### 前向计算kernel
-```namespace phi {
-
-template <typename T, typename Context>
-void SoftMarginLossKernel(const Context& dev_ctx,
-                   const DenseTensor& input,
-                   const DenseTensor& label,
-                   DenseTensor* out) {
-  auto x_data = input.data<T>();
-  auto label_data = label.data<T>();
-  auto out_data = dev_ctx.template Alloc<T>(out);
-  auto x_numel = input.numel();
-
-  // out = ln(1+exp(-label * x)/(x_numel)
-  for (int64_t i = 0; i < x_numel; ++i) {
-    PADDLE_ENFORCE_GE(
-        x_data[i],
-        static_cast<T>(0),
-        phi::errors::InvalidArgument(
-            "Illegal input, input must be greater than  or equal to 0"));
-    PADDLE_ENFORCE_LE(
-        x_data[i],
-        static_cast<T>(1),
-        phi::errors::InvalidArgument(
-            "Illegal input, input must be less than or equal to 1"));
-    out_data[i] =paddle::operators::real_log(static_cast<T>(1) + std::exp(-label_data[i]* x_data[i]))/x_numel;
-  }
-}
-}  // namespace phi
-PD_REGISTER_KERNEL(
-    soft_margin_loss, CPU, ALL_LAYOUT, phi::SoftMarginLossKernel, float, double) {}```
- 
-### 反向计算kernel
-
-```namespace phi {
-
-template <typename T, typename Context>
-void SoftMarginLossGradKernel(const Context& dev_ctx,
-                       const DenseTensor& input,
-                       const DenseTensor& label,
-                       const DenseTensor& out_grad,
-                       DenseTensor* input_grad) {
-  auto dx_data = dev_ctx.template Alloc<T>(input_grad);
-  auto dout_data = out_grad.data<T>();
-  auto x_data = input.data<T>();
-  auto label_data = label.data<T>();
-
-  int x_numel = input.numel();
-
-  // dx = dout * (-label * exp(-label * x))/(1 + exp(-label * x ))
-  for (int i = 0; i < x_numel; ++i) {
-    dx_data[i] =
-        dout_data[i] * ((- label_data[i]*std::exp(-label_data[i]*x_data[i] )) /
-                        std::max((static_cast<T>(1) + std::exp(-label_data[i]*x_data[i])),
-                                 static_cast<T>(1e-12)));
-  }
-}
-}  // namespace phi
-
-PD_REGISTER_KERNEL(
-    soft_margin_loss_grad, CPU, ALL_LAYOUT, phi::SoftMarginLossGradKernel, float, double) {}
-```
-以及GPU版本的算子kernel。
-同时还需要实现算子的描述及定义，以及InferMeta函数。
 
 ## API实现方案
 
@@ -152,17 +94,18 @@ PD_REGISTER_KERNEL(
 
 - 检查参数
   - 检查 reduction 有效性（同其余 functional loss 中的实现）
-  - 检查输入的 dtype（含 input、target）（同其余 functional loss 中的实现）
-  - 检查输入的input、target维度是否相同
+  - 检查输入的 dtype（含 input、label）（同其余 functional loss 中的实现）
+  - 对 label 的 dtype 进行转换，尽量与 input 一致。
+  - 检查输入的input、label维度是否相同
 - 计算
-  - 调用OP计算loss
+  - 调用 paddle.log 以及 paddle.exp 计算loss
 - 根据 reduction，输出 loss（同其余 functional loss 中的实现）
 
 # 六、测试和验收的考量
-- CPU算子与numpy结果一致
-- GPU算子与numpy结果一致
-- CPU算子与GPU算子结果一致
-- 验证反向传播正确
+- 验证在 CPU 以及 GPU 环境下，计算结果需要与 numpy 一致。
+- 验证 reduction 检查的有效性。
+- 验证输入维度检查的有效性。
+- 验证对 dtype 检查的有效性。
 
 
 
