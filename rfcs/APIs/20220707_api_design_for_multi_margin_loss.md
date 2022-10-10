@@ -146,8 +146,9 @@ tensorflow没有专门的multimarginloss
 - paddle.nn.MultiMarginLoss(
     p:int = 1,
     margin:float=1.0,
-    weight (Tensor,可选), 
-    reduction(str,可选), 
+    weight=None, 
+    reduction='mean', 
+    name=None,
 ) -> None:
 
 ## 底层OP设计
