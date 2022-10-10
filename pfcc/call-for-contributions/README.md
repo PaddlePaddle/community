@@ -8,3 +8,19 @@
 - [flake8 代码风格检查工具的引入](code_style_flake8.md)
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
 - [Python 2.7 相关代码退场](legacy_python2.md)
+
+
+## Project Ideas
+
+一些在社区发现的可以进行贡献的想法，先简单的记录在这里。需要先把这些想法明确成社区的项目描述，来方便开展具体的开源贡献项目。
+
+#### Idea: Support Type Hinting
+
+See [#45979](https://github.com/PaddlePaddle/Paddle/issues/45979)
+
+#### 建设更多的Tutorial
+
+飞桨官网的[应用实践](https://www.paddlepaddle.org.cn/documentation/docs/zh/practices/index_cn.html)栏目是很多人学习和使用飞桨的重要的材料。有不少Tutorial，也是来自于社区的贡献者完成的，请见：[#3833](https://github.com/PaddlePaddle/docs/issues/3833)。飞桨社区期望能开发更多的Tutorial来方便飞桨用户学习和使用飞桨。
+
+
+
