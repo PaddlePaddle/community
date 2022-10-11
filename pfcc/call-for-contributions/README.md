@@ -5,7 +5,7 @@
 
 - [单测报错信息优化](code_style_improvement_for_unittest.md)【已完成】
 - [编译 warning 的消除](code_style_compiler_warning.md)
-- [flake8 代码风格检查工具的引入](code_style_flake8.md)
+- [flake8 代码风格检查工具的引入](code_style_flake8.md)【进行中】
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
 - [Python 2.7 相关代码退场](legacy_python2.md)
 
