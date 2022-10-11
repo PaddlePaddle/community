@@ -15,9 +15,6 @@
 
 一些在社区发现的可以进行贡献的想法，先简单的记录在这里。需要先把这些想法明确成社区的项目描述，来方便开展具体的开源贡献项目。
 
-#### Idea: Support Type Hinting
-
-See [#45979](https://github.com/PaddlePaddle/Paddle/issues/45979)
 
 #### 建设更多的Tutorial
 
