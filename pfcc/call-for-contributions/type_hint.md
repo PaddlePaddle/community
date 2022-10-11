@@ -30,7 +30,7 @@
     * 工作量比较大。
     * 相当于调整了`Tensor`对象的实现方式，存在一定的潜在风险。
 
-> 推荐Paddle主库中的新模块代码都协商类型注释
+推荐Paddle主库中的新模块代码都添加类型注释。
 
 2. stub file in pacakge
 
@@ -54,7 +54,7 @@
     * 对主库不存在任何改动
 * 缺点：
     * 需要安装第三方库才会生效
-    * 需要与主库当中的API保持严格一致，不然IDE会识别不到新特性，此时产生的工作量将是：同是维护两个package。
+    * 需要与主库当中的API保持严格一致，不然IDE会识别不到新特性，此时产生的工作量将是：同时维护两个package。
 
 其中 [@SigureMo](https://github.com/SigureMo)给出了[paddlepaddle-stubs](https://github.com/cattidea/paddlepaddle-stubs)解决方案。
 
