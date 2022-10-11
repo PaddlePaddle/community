@@ -32,7 +32,7 @@
 
 推荐Paddle主库中的新模块代码都添加类型注释。
 
-2. stub file in pacakge
+2. stub file in package
 
 这种方式只需要在需要添加类型注释的module同目录下添加对应的stub file（`.pyi`文件）即可。
 
