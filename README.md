@@ -10,7 +10,6 @@ Welcome to the PaddlePaddle community! This is the starting point for joining an
 ## Contribution
 
 - Roles description regarding codebase management: [community membership](contributors/community-membership.md).
-- [PaddlePaddle contribution guideline](/contributors/README.md) provides detailed instructions on how to make your ideas and bug fixes visible and accepted.
 - RFCs are listed [here](./rfcs), you can also poropose new ideas by creating new RFC.
 - Projects with mentoring program are listed here: [call for contributions](./pfcc/call-for-contributions).
 - Contributor Recognition
