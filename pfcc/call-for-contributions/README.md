@@ -8,15 +8,13 @@
 - [flake8 代码风格检查工具的引入](code_style_flake8.md)【进行中】
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
 - [Python 2.7 相关代码退场](legacy_python2.md)
+- [Type Hint类型注释](type_hint.md)
 
 
 ## Project Ideas
 
 一些在社区发现的可以进行贡献的想法，先简单的记录在这里。需要先把这些想法明确成社区的项目描述，来方便开展具体的开源贡献项目。
 
-#### Idea: Support Type Hinting
-
-See [#45979](https://github.com/PaddlePaddle/Paddle/issues/45979)
 
 #### 建设更多的Tutorial
 
