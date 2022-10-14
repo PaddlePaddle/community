@@ -5,6 +5,8 @@ PaddlePaddle projects have special interest groups operating in their repective 
 ----
 ## PPSIG Docs
 
+_SIG maintainer: [sunzhongkai588](https://github.com/sunzhongkai588)_
+
 **飞桨框架体验评测**是由PPSIG DOCS小组发起，专注于提升飞桨框架开发体验的开源共建活动。自2022年2月活动启动以来，评测小组以飞桨框架文档（包含API文档、使用指南等）为评测重点，覆盖单机训练、部署、硬件、分布式等重点方向，提升飞桨框架开发体验的同时，共同探索通过社区合作共建飞桨框架的开源协作新模式。
 
 往期活动链接：
