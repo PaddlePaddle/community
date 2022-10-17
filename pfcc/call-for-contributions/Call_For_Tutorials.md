@@ -1,19 +1,18 @@
-# [Call for Contribution] Tutorials for PaddlePaddle 2.4
-## 基于飞桨2.4的应用案例：教程建设 
+# [Call for Contribution] Tutorials for PaddlePaddle 
+## 基于飞桨的应用实践：建设 
 ### 第一期任务 🎺
+
+负责人：莫琰 [momozi1996](https://github.com/momozi1996) 
 
 ## 1. 建设目标
 飞桨官网的应用实践栏目是许多人学习及使用飞桨的重要的、基础的材料。
-<br />   <br />
 本期活动的目标是：
 
-- 1）基于 **飞桨框架 2.4** 版本，建设 **5** ~ **10** 个 **tutorial**，呈现在官网的 [应用实践](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.4rc/practices/index_cn.html) 里。
-<br />   <br />
-- 2）新增的应用实践案例，需完美适配于 **PaddlePaddle 2.0** 至 **PaddlePaddle 2.4** 版本。
-<br />   <br />
-- 3）😊 呼吁社区开发者，参与共建飞桨框架的应用案例教程，了解、学习如何使用 **2.4** 开发相关任务。
+- 1）基于 **飞桨框架 2.0及以后** 版本，建设 **5** ~ **10** 个 **tutorial**，呈现在官网的 [应用实践](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.4rc/practices/index_cn.html) 里。
+- 2）新增的应用实践，需完美适配于 **PaddlePaddle 2.0 及以后** 的版本。
+- 3）😊 呼吁社区开发者，参与共建飞桨框架的应用实践，了解、学习如何使用飞桨开发相关任务。
 
-## 2. 教程清单
+## 2. 应用实践清单
 我们从现有及待补充的内容进行了初步评估，现梳理如下：
 ### 【应用场景】
 * <big>**CV (image)**</big>：       使用深度学习网络处理图片类数据。
@@ -23,16 +22,15 @@
 * <big>**时间序列**</big> ：          使用经典的深度学习方法处理时间序列数据。
 * <big>**图数据**</big> ：             使用经典的深度学习方法处理图数据。
 * <big>**NLP**</big> ：                 自然语言处理任务。
-* <big>**Audio （语音）**</big> ：使用深度学习方法处理语音文件。
+* <big>**Audio （语音）**</big> ：       使用深度学习方法处理语音文件。
 * <big>**推荐**</big>：                 使用深度学习方法完成推荐任务。
-* <big>**强化学习**</big> 
+* <big>**强化学习**</big> ：          使用深度学习中的强化学习方法。
 * <big>**GAN**</big> ：                使用深度学习生成对抗网络。
 * <big>**多模态**</big> ：             使用深度学习方法处理多种模态的数据。（图片、音频、文本）
 
 ### 【参与者-选题方式】
 - <u>**方式一**</u>：**列表选题**，见招募列表（提供了选题方向、题目、优秀的对标项目、文章和代码，以供学习）。
-<br />   <br />
-- <u>**方式二**</u>：**自选题目**，对于非参考列表内的题目，可自主命题。
+- <u>**方式二**</u>：**自选题目**，对于非参考列表内的题目，可自主命题，需要与负责人 [momozi1996](https://github.com/momozi1996) 讨论后决定题目。
 
 ## 招募列表（10月20日公开）
 
@@ -79,13 +77,16 @@
  <mark>【注意】招募列表外的，欢迎开发者主动贡献👏 <mark> 
 
 ## 3. 贡献指南
-### 3.1 飞桨框架2.4 版本安装和使用
-- 1. 飞桨（PaddlePaddle）版本统一使用2.4 最新版，安装说明：https://www.paddlepaddle.org.cn/install/quick。
-- 2. 2.4 版本已有应用实践教程：https://www.paddlepaddle.org.cn/documentation/docs/zh/2.4rc/practices/index_cn.html。
+### 3.1 飞桨框架2.0 版本安装和使用
+- 1. 飞桨（PaddlePaddle）版本统一使用2.0及以后的版本，安装说明：https://www.paddlepaddle.org.cn/install/quick。
+- 2. 2.0 以后版本已有应用实践：https://www.paddlepaddle.org.cn/documentation/docs/zh/2.4rc/practices/index_cn.html。
 
 ### 3.2 题目认领
 为避免重复选题、知晓任务状态、方便统计管理，请根据如下操作认领您的题目。
-* 1）方式一（招募列表）：在“招募列表”中选择题目，并在本 Issue 中，回复下列信息：
+
+提交题目:  [Issue](https://github.com/PaddlePaddle/Paddle/issues/47064)  
+
+* 1）方式一（招募列表）：在“招募列表”中选择题目，并在  [Issue](https://github.com/PaddlePaddle/Paddle/issues/47064)  中，回复下列信息：
 ```
 【列表选题】
 编号：XX
@@ -94,7 +95,7 @@
 
 ```
 
-* 2）方式二（自选题目）：自主命题，直接在本 Issue 中，回复下列信息：
+* 2）方式二（自选题目）：自主命题，直接在 [Issue](https://github.com/PaddlePaddle/Paddle/issues/47064) 中，回复下列信息：
 ```
 【自选题目】
 题目：XXXX
@@ -104,31 +105,21 @@
 
 ### 3.3 原则及注意事项 （极其重要）！！
 1. <u>必须</u>使用 **paddle** 的框架, 必须避免使用 **paddle的套件**。
- <br />   <br />
-2. 示例<u>必须适合</u> **2.0~2.4** 版本.
-<br />   <br />
+2. 示例<u>必须适合</u> **2.0及以后** 版本.
 3. <u>数据集</u>：**公开的**、**大小合适** 的示例数据集。（建议用小数据集，测试即可）
-<br />   <br />
 4. <u>单个任务运行时长</u>：**20-30** 分钟可以运行完成
-<br />   <br />
 5. <u>文字描述</u>：统一使用 **中文** 编写，注意概念和描述的清晰度，尽量让大家通俗易懂，如果实在难以解释，可以给出一些能够详细介绍的页面链接。
-<br />   <br />
 6. <u>代码相关</u>：
 - *  使用API编写代码：编写过程中优先使用高层API，无法使用高层API时使用基础API。[高层API使用指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/practices/quick_start/high_level_api.html) ： （注意：避免使用套件）
-<br />   <br />
 - * 易读性好：代码封装得当，易读性好，不用一些随意的变量/类/函数命名。
-<br />   <br />
 - * 注释清晰：不仅说明做了什么，也要说明为什么这么做。
-<br />   <br />
 - * 代码运行自测：做好代码的自测工作，每段代码块需要有运行结果。
-<br />   <br />
 7. <u>任务难度</u>：初级、中级
 
 
-### 3.4 教程编写
-1. 应用案例教程统一使用Notebook格式（.ipynb）来进行编写，可以在本地安装使用Jupyter开发，或使用 [AIStudio](https://aistudio.baidu.com) 。
-<br />   <br />
-2. 为了方便大家进行教程的编写，并统一阅读体验，下面为大家提供了一个简单的撰写框架，大家根据实际任务结合实际场景进行微调。
+### 3.4 应用实践编写
+1. 应用实践统一使用Notebook格式（.ipynb）来进行编写，可以在本地安装使用Jupyter开发，或使用 [AIStudio](https://aistudio.baidu.com) 。
+2. 为了方便大家进行应用实践的编写，并统一阅读体验，下面为大家提供了一个简单的撰写框架，大家根据实际任务结合实际场景进行微调。
 
 如果对模板有一些建议，也可以回复评论。
 
@@ -163,23 +154,20 @@
 ```
 
 
-### 3.5 教程上传
-1. 写好的文档通过向[https://github.com/PaddlePaddle/docs)仓库提交Pull Request的方式来进行教程文档的上传。
-<br />   <br />
+### 3.5 应用实践上传
+1. 写好的文档通过向(https://github.com/PaddlePaddle/docs)仓库提交Pull Request的方式来进行应用实践文档的上传。
 2. 对提交好的PR可以 指定Reviewer 进行内容和代码的评审，通过后会由具有Merge权限的同学进行最终的合入。
 
 
-## 4. 已合入仓库的教程
-目前已经有 **23** 篇基于 **飞桨2.3** 的教程贡献，查看方式：
+## 4. 已合入仓库的应用实践
+目前已经有 **23** 篇基于 **飞桨2.3** 的应用实践贡献，查看方式：
 1. Repo目录查看已经Merge的Notebook源文件：docs/practices。
-<br />   <br />
-2. 查看官网渲染后的页面：应用实践。
+2. 查看官网渲染后的页面：[应用实践](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.4rc/practices/index_cn.html) 。
 
 ## 5. 还有不清楚的问题？
 
-欢迎大家随时在此Issue下提问，飞桨会有专门的管理员进行疑问解答。
+欢迎大家随时在 [Issue](https://github.com/PaddlePaddle/Paddle/issues/47064) 下提问，飞桨会有专门的管理员进行疑问解答。
 
 有任何问题，请联系：飞桨的PM-莫琰 [momozi1996](https://github.com/momozi1996) ! 
 
 非常感谢大家为飞桨贡献！共建飞桨繁荣社区！
-
