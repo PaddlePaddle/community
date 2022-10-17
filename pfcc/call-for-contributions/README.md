@@ -28,11 +28,12 @@ status：[momozi1996](https://github.com/momozi1996) 正在整理材料，并会
 
 Note：如果成为正式项目，需要首先明确项目Scope，这里先记录想法。
 
-#### IDEA：优化飞桨单测环境变量
-
-在执行飞桨代码测试时，都需要进行编译后才能使用ctest进行单元测试，如果想要让其他人进行python test测试，必须要提供整个build目录。希望改进成只有whl包情况就可以进行python test测试，这样可以减少测试成本，需要对python测试代码中的环境变量进行修改。
-
 - 社区中的相关issue：[#46622](https://github.com/PaddlePaddle/Paddle/issues/46622)、[#46554](https://github.com/PaddlePaddle/Paddle/pull/46554#pullrequestreview-1122960171)、[#44857](https://github.com/PaddlePaddle/Paddle/pull/44857)、[45756](https://github.com/PaddlePaddle/Paddle/issues/45756)、[#43610](https://github.com/PaddlePaddle/Paddle/issues/43610)
 
 - 可参考的材料：[pytorch/rfcs/RFC-0026-logging-system.md](https://github.com/pytorch/rfcs/blob/4b75803bf90c16b0120787fa0557bfe79ace1ef3/RFC-0026-logging-system.md)
 - [Paddle报错信息文案书写规范](https://github.com/PaddlePaddle/Paddle/wiki/Paddle-Error-Message-Writing-Specification)
+
+#### IDEA：优化飞桨单测环境变量
+
+在执行飞桨代码测试时，都需要进行编译后才能使用ctest进行单元测试，如果想要让其他人进行python test测试，必须要提供整个build目录。希望改进成只有whl包情况就可以进行python test测试，这样可以减少测试成本，需要对python测试代码中的环境变量进行修改。
+
