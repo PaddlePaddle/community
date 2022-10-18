@@ -8,6 +8,8 @@
 
 这个课程分为两节小课，每一节都可以单独拿来作为插入到本科或者研究生的计算机程序设计或者其他相关的课程当中，用来当做对学校的系统性课程的补充。第一节课程介绍开源的基础知识，和需要用到的工具（git）和平台（github）；第二节课程以参与飞桨框架的研发为例，教学生如何在一个真实的开源项目当中进行实践。
 
+如果需要第二节课程的 PPT ，请发送邮件到 ext_paddle_oss@baidu.com ，说明用途。
+
 ## 课程的前置要求
 
 - 拥有github账号。
@@ -87,9 +89,13 @@
 
 ## 课程作业
 
-- 在github上完成PR合入流程：提交一个PR修改到作业的仓库。
-    - 推荐给开源项目的文档进行修改。（例如Paddle的docs仓库的修改，请 @Ligoml 补充）
-- 完成paddle的编译（附加项：跑通单测）
-    - 欢迎参与[【热身打卡：开发框架，从编译 paddle 开始】](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_warming_up_cn)小试牛刀！不仅能让你以最快速度上手框架开发，成功打卡还有飞桨周边礼品送出哦～
-- 在fork出来的paddle仓库里，完成一个fake API的实现，并完成PR提交。
-- 给飞桨做贡献
+- 文档贡献
+    - [Bug-fix](https://shimo.im/sheets/e1Az48XnO4t6g7qW/akF3x/)：修正至少一组飞桨 API 文档 bug，参考资料：[API 文档书写规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_docs_guidelines_cn.html#id8)
+- 编译打卡
+    - 在本地/线上环境完成 Paddle 编译体验，并输出一份编译报告，参考资料：[热身打卡 issue](https://github.com/PaddlePaddle/Paddle/issues/45347)
+- 开发任务：[call-for-contributions](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions)
+    -  [【编译 warning 的消除】](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/code_style_compiler_warning.md)
+    -  [【flake8 代码风格检查工具的引入】](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/code_style_flake8.md)
+    -  [【Python 2.7 相关代码退场】](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/legacy_python2.md)
+    -  [【Type Hint类型注释】](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/type_hint.md)
+    -  注：此类任务对代码仓库改动比较大，可以拆分成若干子项，完成一个 PR 合入则算完成，有飞桨研发工程师指导
