@@ -124,7 +124,7 @@ W605    172
 
 此外存在一个语法错误（E999）已经在之前的 [#45287](https://github.com/PaddlePaddle/Paddle/pull/45287) 解决。
 
-black（Formatter）能自动解决大多数格式上的问题（E 错误码），如果引入 black 则可以解决 E121、E122 等大多数 E 错误码。
+black（Formatter）能自动解决大多数格式上的问题（E 错误码），[introducion black RFC](./20221018_introducing_black.md) 中详细阐述了使用 black 来替代 yapf 所带来的优势，并将在近期完成使用 black 替代 yapf 的工作。引入 black 可以解决 E121、E122 等大多数 E 错误码。
 
 其余错误码需要根据情况来处理：
 
@@ -206,3 +206,5 @@ autoflake --in-place --remove-all-unused-imports --exclude=__init__.py --ignore-
 
 - [Flake8 Error Code](https://flake8.pycqa.org/en/latest/user/error-codes.html)
 - [pycodestyle Error Code](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes)
+- [Flake8 tracking issue](https://github.com/PaddlePaddle/Paddle/issues/46039)
+- [Flake8 小组协作文档](https://cattidea.github.io/paddle-flake8-project/)
