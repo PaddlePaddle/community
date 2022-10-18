@@ -5,9 +5,9 @@
 
 - [单测报错信息优化](code_style_improvement_for_unittest.md)【已完成】
 - [编译 warning 的消除](code_style_compiler_warning.md)【进行中】
-- [flake8 代码风格检查工具的引入](code_style_flake8.md)【进行中】
+- [flake8 代码风格检查工具的引入](code_style_flake8.md)[【进行中】](https://github.com/PaddlePaddle/Paddle/issues/46039)
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
-- [Python 2.7 相关代码退场](legacy_python2.md)【进行中】
+- [Python 2.7 相关代码退场](legacy_python2.md)[【进行中】](https://github.com/PaddlePaddle/Paddle/issues/46837)
 - [Type Hint类型注释](type_hint.md)【进行中】
 
 
