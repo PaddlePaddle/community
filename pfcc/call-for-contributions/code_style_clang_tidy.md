@@ -1,4 +1,7 @@
 # clang-tidy代码风格检查工具的引入
+
+> This project will be mentored by [@luotao1](http://github.com/luotao1)
+
 ## 背景
 Paddle目前使用的代码风格检查工具及hooks版本较低，导致开发者在提交代码时会碰到一些问题，加强代码规范检查，有利于提高Paddle代码质量，增强代码的可读性。
 
