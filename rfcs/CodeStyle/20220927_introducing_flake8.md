@@ -207,3 +207,4 @@ autoflake --in-place --remove-all-unused-imports --exclude=__init__.py --ignore-
 - [Flake8 Error Code](https://flake8.pycqa.org/en/latest/user/error-codes.html)
 - [pycodestyle Error Code](https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes)
 - [Flake8 tracking issue](https://github.com/PaddlePaddle/Paddle/issues/46039)
+- [Flake8 小组协作文档](https://cattidea.github.io/paddle-flake8-project/)
