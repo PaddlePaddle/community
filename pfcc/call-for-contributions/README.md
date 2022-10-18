@@ -4,11 +4,11 @@
 每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工，希望 PFCC 的成员能逐渐成为方向骨干甚至是带头人，带领更多人一起开发。
 
 - [单测报错信息优化](code_style_improvement_for_unittest.md)【已完成】
-- [编译 warning 的消除](code_style_compiler_warning.md)
+- [编译 warning 的消除](code_style_compiler_warning.md)【进行中】
 - [flake8 代码风格检查工具的引入](code_style_flake8.md)【进行中】
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
-- [Python 2.7 相关代码退场](legacy_python2.md)
-- [Type Hint类型注释](type_hint.md)
+- [Python 2.7 相关代码退场](legacy_python2.md)【进行中】
+- [Type Hint类型注释](type_hint.md)【进行中】
 
 
 ## Project Ideas
@@ -29,6 +29,5 @@ status：[momozi1996](https://github.com/momozi1996) 正在整理材料，并会
 Note：如果成为正式项目，需要首先明确项目Scope，这里先记录想法。
 
 - 社区中的相关issue：[#46622](https://github.com/PaddlePaddle/Paddle/issues/46622)、[#46554](https://github.com/PaddlePaddle/Paddle/pull/46554#pullrequestreview-1122960171)、[#44857](https://github.com/PaddlePaddle/Paddle/pull/44857)、[45756](https://github.com/PaddlePaddle/Paddle/issues/45756)、[#43610](https://github.com/PaddlePaddle/Paddle/issues/43610)
-
 - 可参考的材料：[pytorch/rfcs/RFC-0026-logging-system.md](https://github.com/pytorch/rfcs/blob/4b75803bf90c16b0120787fa0557bfe79ace1ef3/RFC-0026-logging-system.md)
 - [Paddle报错信息文案书写规范](https://github.com/PaddlePaddle/Paddle/wiki/Paddle-Error-Message-Writing-Specification)
