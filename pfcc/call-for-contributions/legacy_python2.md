@@ -1,4 +1,6 @@
 # Python 2.7 相关代码退场
+> This project will be mentored by [@luotao1](http://github.com/luotao1)
+
 ## 一、概要
 ### 1、相关背景
 [Python 2.7在2020年1月1日终止支持](https://www.python.org/doc/sunset-python-2/)，Paddle从2.1版本（2021年）开始不再维护Python 2.7。
@@ -41,6 +43,7 @@ print "hello world"
 #python3
 print("hello world")
 ```
+<img width="945" alt="image" src="https://user-images.githubusercontent.com/6836917/196360783-515444ee-17e7-4e7b-b77a-64196e3742e4.png">
 
 ## 三、业内调研
 
@@ -56,11 +59,16 @@ print("hello world")
 
 Python 2.x 中默认都是经典类，只有显式继承了 `object` 才是新式类函数；Python 3.x 中默认都是新式类，经典类被移除，没必要显式继承 `object` 。见 [why-do-python-classes-inherit-object](https://stackoverflow.com/questions/4015417/why-do-python-classes-inherit-object) ：
 
+<img width="660" alt="image" src="https://user-images.githubusercontent.com/6836917/196360960-56ce8c1c-c081-4f64-a542-b99ae378b764.png">
+<img width="665" alt="image" src="https://user-images.githubusercontent.com/6836917/196361119-6bc76af3-1358-42be-9ad3-70a1a6c81d6f.png">
+
 结论：之前为了兼容性的考虑，保留了显式 `object` 继承，如果 python2.7 退场，可以删除这些显式继承。
 
 **2. 删除 `super()` 函数中不必要的参数**
 
 见 [When do you need to pass arguments to python super()?](https://stackoverflow.com/questions/59538746/when-do-you-need-to-pass-arguments-to-python-super) 和 https://peps.python.org/pep-3135/ 中的解释：
+
+<img width="770" alt="image" src="https://user-images.githubusercontent.com/6836917/196361507-b224bb5a-5f8e-41a0-b788-efdf4f3969eb.png">
 
 ### Tensorflow
 TF 从今年1月份开始逐步清理 python2.7 代码，见[Cleanup legacy Python2 PR 列表](https://github.com/tensorflow/tensorflow/search?p=2&q=python2%20legacy&type=commits)，包含以下内容：
@@ -127,6 +135,8 @@ check_type(name, "name", (str, type(None)), "ParamAttr")
 
 #### 清理文档中涉及到 Python 2 的内容
 在 [docs](https://github.com/PaddlePaddle/docs) 仓库下用`grep -irn python2 . | wc -l`， 可以看到有53条结果。如 [飞桨框架昆仑XPU版安装说明](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/hardware_support/xpu_docs/paddle_install_cn.html)：
+
+<img width="543" alt="image" src="https://user-images.githubusercontent.com/6836917/196361719-1fd6b624-2608-4153-8a20-491ae40d52db.png">
 
 # 五、影响和风险总结
 ## 对用户的影响
