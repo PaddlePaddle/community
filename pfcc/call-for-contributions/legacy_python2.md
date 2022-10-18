@@ -1,5 +1,7 @@
 # Python 2.7 相关代码退场
 > This project will be mentored by [@luotao1](http://github.com/luotao1)
+>
+> Tracking issue: [PaddlePaddle/Paddle#46837](https://github.com/PaddlePaddle/Paddle/issues/46837)
 
 ## 一、概要
 ### 1、相关背景

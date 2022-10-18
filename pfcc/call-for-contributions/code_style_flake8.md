@@ -1,6 +1,8 @@
 # flake8 代码风格检查工具的引入
 
 > This project will be mentored by [@luotao1](http://github.com/luotao1)
+>
+> Tracking issue: [PaddlePaddle/Paddle#46039](https://github.com/PaddlePaddle/Paddle/issues/46039)
 
 ## 背景
 
