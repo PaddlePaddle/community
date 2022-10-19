@@ -1,6 +1,8 @@
 # 编译warning的消除
 
 > This project will be mentored by [@zhiqiu](https://github.com/zhiqiu)
+> 
+> Tracking issue: [PaddlePaddle/Paddle#47143](https://github.com/PaddlePaddle/Paddle/issues/47143)
 ## 目的
 
 作为一个大型的基础设施类开源项目，减少飞桨框架在编译时的warning，可以提升工程质量和整个代码仓库的可维护性，以及减少潜在的bug。
