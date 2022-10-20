@@ -1,5 +1,9 @@
 # Call for Contributions
 
+**[Guide to Call for Contributions](./guide-to-call-for-contribution.md)**
+
+
+
 为了让大家能深入地了解飞桨、在飞桨收获更多成长、解决更有挑战性的问题，飞桨团队计划将正在开展的一些重点工作和技术方向陆续发布。
 每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工，希望 PFCC 的成员能逐渐成为方向骨干甚至是带头人，带领更多人一起开发。
 
