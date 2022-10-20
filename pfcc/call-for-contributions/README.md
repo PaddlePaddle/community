@@ -9,6 +9,7 @@
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
 - [Python 2.7 相关代码退场](legacy_python2.md)
 - [Type Hint类型注释](type_hint.md)
+- [Call for Contribution-Tutorials](Call_For_Tutorials.md)【进行中】
 
 
 ## Project Ideas
@@ -20,8 +21,7 @@
 
 飞桨官网的[应用实践](https://www.paddlepaddle.org.cn/documentation/docs/zh/practices/index_cn.html)栏目是很多人学习和使用飞桨的重要的材料。有不少Tutorial，也是来自于社区的贡献者完成的，请见：[#3833](https://github.com/PaddlePaddle/docs/issues/3833)。飞桨社区期望能开发更多的Tutorial来方便飞桨用户学习和使用飞桨。
 
-status：[momozi1996](https://github.com/momozi1996) 正在整理材料，并会担任mentor。
-
+飞桨鼓励社区开发者参与共建[应用实践](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.4rc/practices/index_cn.html)，详细任务请见 [Call for Contribution-Tutorials](Call_For_Tutorials.md)
 #### IDEA：改进飞桨框架的logging系统
 
 飞桨框架在C++层，python层的多个模块中会产生日志，以进行信息提示，或者告警。这些日志产生的方式（例如，C++层和python层没有统一，有些日志甚至在用`print`打印，在python层甚至有多个`get_logger`的定义）、日志的分级（哪些属于warning，哪些属于information，等）、日志的清晰程度，等多方面都有值得改进的地方。
