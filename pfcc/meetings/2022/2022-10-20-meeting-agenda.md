@@ -69,13 +69,15 @@
   - [dasen](https://github.com/dasen)
   - [PureNatural](https://github.com/PureNatural)
   - [jiamingkong](https://github.com/jiamingkong)
+  - [momozi1996](https://github.com/momozi1996)
 
 
 # 会议议程
 
 - 新人介绍 [zhangyuqin1998](https://github.com/zhangyuqin1998)、[RangeKing](https://github.com/RangeKing)、[kevinng77](https://github.com/kevinng77)、[caolonghao](https://github.com/caolonghao)、[AndPuQing](https://github.com/AndPuQing)、[lileding](https://github.com/lileding)、[wj-Mcat](https://github.com/wj-Mcat)、[parap1uie-s](https://github.com/parap1uie-s)、[jingsongliujing](https://github.com/jingsongliujing)、[dasen](https://github.com/dasen)、[PureNatural](https://github.com/PureNatural) (5min)
-- [tizhou86](https://github.com/tizhou86) 主题分享《基金会构成和开源项目关系》(20min)
+- [tizhou86](https://github.com/tizhou86) 主题分享《如何玩转开源社区》(20min)
 - [wj-Mcat](https://github.com/wj-Mcat)、[jiamingkong](https://github.com/jiamingkong) 主题分享《Solution of Type Hint for Paddle》 (20-25minutes)
+- [momozi1996](https://github.com/momozi1996) 介绍[《[Call for Contribution] Tutorials for PaddlePaddle》](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/Call_For_Tutorials.md)（5min）
 - PFCC 成员自由发言讨论（5 minutes）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 minutes）
   - 预告：下一期主席为[OuyangChao](https://github.com/OuyangChao)，副主席为[Zheng-Bicheng](https://github.com/Zheng-Bicheng)，主题待定。
