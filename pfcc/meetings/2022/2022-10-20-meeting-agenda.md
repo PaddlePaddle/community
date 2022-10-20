@@ -66,7 +66,7 @@
   - [wj-Mcat](https://github.com/wj-Mcat)
   - [parap1uie-s](https://github.com/parap1uie-s)
   - [jingsongliujing](https://github.com/jingsongliujing)
-  - [dasen](https://github.com/dasen)
+  - [dasenCoding](https://github.com/dasenCoding)
   - [PureNatural](https://github.com/PureNatural)
   - [jiamingkong](https://github.com/jiamingkong)
   - [momozi1996](https://github.com/momozi1996)
@@ -74,7 +74,7 @@
 
 # 会议议程
 
-- 新人介绍 [zhangyuqin1998](https://github.com/zhangyuqin1998)、[RangeKing](https://github.com/RangeKing)、[kevinng77](https://github.com/kevinng77)、[caolonghao](https://github.com/caolonghao)、[AndPuQing](https://github.com/AndPuQing)、[lileding](https://github.com/lileding)、[wj-Mcat](https://github.com/wj-Mcat)、[parap1uie-s](https://github.com/parap1uie-s)、[jingsongliujing](https://github.com/jingsongliujing)、[dasen](https://github.com/dasen)、[PureNatural](https://github.com/PureNatural) (5min)
+- 新人介绍 [zhangyuqin1998](https://github.com/zhangyuqin1998)、[RangeKing](https://github.com/RangeKing)、[kevinng77](https://github.com/kevinng77)、[caolonghao](https://github.com/caolonghao)、[AndPuQing](https://github.com/AndPuQing)、[lileding](https://github.com/lileding)、[wj-Mcat](https://github.com/wj-Mcat)、[parap1uie-s](https://github.com/parap1uie-s)、[jingsongliujing](https://github.com/jingsongliujing)、[dasenCoding](https://github.com/dasenCoding)、[PureNatural](https://github.com/PureNatural) (5min)
 - [tizhou86](https://github.com/tizhou86) 主题分享《如何玩转开源社区》(20min)
 - [wj-Mcat](https://github.com/wj-Mcat)、[jiamingkong](https://github.com/jiamingkong) 主题分享《Solution of Type Hint for Paddle》 (20-25minutes)
 - [momozi1996](https://github.com/momozi1996) 介绍[《[Call for Contribution] Tutorials for PaddlePaddle》](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/Call_For_Tutorials.md)（5min）
