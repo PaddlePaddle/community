@@ -129,7 +129,7 @@ def reshape(self, *args, **kwargs):
 ## paddle DenseTensor
 
 1. -1 表示这个维度的值是从x的元素总数和剩余维度推断出来的。因此，有且只有一个维度可以被设置为-1。
-2. 0 表示实际的维数是从x的对应维数中复制出来的，因此shape中0的索引值不能超过x的维度。
+2. 0 表示实际的维数是从x的对应维数中复制出来的，因此shape中0的索引值不能超过x的rank。
 3. 给定一个形状为[2,4,6]的三维张量x，目标形状为[6,8]，则将x变换为形状为[6,8]的2-D张量，且x的数据保持不变。
 4. 给定一个形状为[2,4,6]的三维张量x，目标形状为[2,3,-1,2]，则将x变换为形状为[2,3,4,2]
    的4-D张量，且x的数据保持不变。在这种情况下，目标形状的一个维度被设置为-1，这个维度的值是从x的元素总数和剩余维度推断出来的。
@@ -145,7 +145,7 @@ DenseTensor& DenseTensor::Resize(const DDim& dims) {
 }
 ```
 
-但是此处是Dense的，直接使用指针在Sparse中不可行
+但是此处是DenseTensor的。
 
 # 四、对比分析
 
@@ -155,55 +155,85 @@ DenseTensor& DenseTensor::Resize(const DDim& dims) {
 
 ## 命名与参数设计
 
-在 paddle/phi/kernels/sparse/cpu/sparse_utils_kernel.cc 中， kernel设计为
+在 paddle/phi/kernels/sparse/cpu/reshape_kernel.cc 和 paddle/phi/kernels/sparse/gpu/reshape_kernel.cu 中， kernel设计为
 
 ```    
 template <typename T, typename Context>
-void CooReshapeKernel(const Context& dev_ctx,
+void ReshapeCooKernel(const Context& dev_ctx,
                       const SparseCooTensor& x,
-                      const IntArray& shape,
-                      SparseCooTensor* out) {
+                      const phi::IntArray& shape,
+                      SparseCooTensor* out)
 ```
 
 ```
-template <typename Context>    
-void CooReshapeGradKernel(const Context& dev_ctx,
-                          const DenseTensor& out_grad,
-                          DenseTensor* x_grad)
+template <typename T, typename Context>
+void ReshapeCsrKernel(const Context& dev_ctx,
+                      const SparseCsrTensor& x,
+                      const phi::IntArray& shape,
+                      SparseCsrTensor* out) 
 ```
 
-并在yaml中新增对应API
+
+在 paddle/phi/kernels/sparse/cpu/reshape_grad_kernel.cc 和 paddle/phi/kernels/sparse/gpu/reshape_grad_kernel.cu 中， 反向kernel设计为
+
+```    
+template <typename T, typename Context>
+void ReshapeCooGradKernel(const Context& dev_ctx,
+                          const SparseCooTensor& x,
+                          const SparseCooTensor& dout,
+                          SparseCooTensor* dx)
+```
+
+```
+template <typename T, typename Context>
+void ReshapeCsrGradKernel(const Context& dev_ctx,
+                          const SparseCsrTensor& x,
+                          const SparseCsrTensor& dout,
+                          SparseCsrTensor* dx)
+```
+
+在paddle/phi/api/yaml/sparse_ops.yaml中新增对应API， ReshapeInferMeta 是针对DenseTensor的，这里可以复用。
 
 ```yaml
-- api : reshape
-  args : (Tensor x, IntArray shape)
+- op : reshape
+  args : (Tensor x,  IntArray shape)
   output : Tensor(out)
+  infer_meta :
+    func : ReshapeInferMeta
   kernel :
-    func : reshape_coo{sparse_coo -> sparse_coo}
+    func : reshape_coo{sparse_coo -> sparse_coo},
+           reshape_csr{sparse_csr -> sparse_csr}
     layout : x
   backward : reshape_grad
 ```
 
+在 paddle/phi/api/yaml/sparse_backward.yaml 中新增对应API
+
 ```yaml
-- backward_api : reshape_grad
+- backward_op : reshape_grad
   forward : reshape(Tensor x, IntArray shape) -> Tensor(out)
-  args : (Tensor out_grad)
+  args : (Tensor x, Tensor out_grad)
   output : Tensor(x_grad)
+  infer_meta :
+    func : UnchangedInferMeta
+    param : [x]
   kernel :
-    func : reshape_coo{sparse_coo -> sparse_coo}
+    func : reshape_coo_grad {sparse_coo, sparse_coo -> sparse_coo},
+           reshape_csr_grad {sparse_csr, sparse_csr -> sparse_csr}
 ```
 
 ## 底层OP设计
 
-对于Coo格式，实现对应的 CPU Kernel，使用 FlattenIndices 和 IndexToCoordinate 两个已有 func，将SparseTensor中的非零元素拍成一维后再重整形状
+反向kernel可以使用前向kernel来实现。对于Csr格式，转换成Coo格式再进行处理。
+coo 前向kernel中，想像那些非零值存储在DenseTensor中, 先展平成一维DenseTensor, 计算出非零值的location位置，
+再通过目标形状的DenseTensor的stride计算出非零值在新Tensor中的index。
 
-对于Csr格式，转换成Coo再进行处理
 
 ## API实现方案
 
 对于SparseCsrTensor，将csr格式转换成coo格式再进行运算，然后转换回csr格式输出。
 
-对于SparseCooTensor，直接进行运算。
+对于SparseCooTensor，直接进行运算。目前只支持针对 `sparse_dim` 部分的维度进行reshape。
 
 # 六、测试和验收的考量
 
@@ -214,7 +244,7 @@ void CooReshapeGradKernel(const Context& dev_ctx,
 
 # 七、可行性分析及规划排期
 
-方案主要自行实现核心算法，并使用paddle现有func(funcs::sparse::FlattenIndices 和 funcs::sparse::IndexToCoordinate)
+方案主要自行实现核心算法。可行。
 
 # 八、影响面
 
