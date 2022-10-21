@@ -25,8 +25,10 @@
 
 飞桨框架在C++层，python层的多个模块中会产生日志，以进行信息提示，或者告警。这些日志产生的方式（例如，C++层和python层没有统一，有些日志甚至在用`print`打印，在python层甚至有多个`get_logger`的定义）、日志的分级（哪些属于warning，哪些属于information，等）、日志的清晰程度，等多方面都有值得改进的地方。
 
-Note：如果成为正式项目，需要首先明确项目Scope，这里先记录想法。
-
 - 社区中的相关issue：[#46622](https://github.com/PaddlePaddle/Paddle/issues/46622)、[#46554](https://github.com/PaddlePaddle/Paddle/pull/46554#pullrequestreview-1122960171)、[#44857](https://github.com/PaddlePaddle/Paddle/pull/44857)、[45756](https://github.com/PaddlePaddle/Paddle/issues/45756)、[#43610](https://github.com/PaddlePaddle/Paddle/issues/43610)
 - 可参考的材料：[pytorch/rfcs/RFC-0026-logging-system.md](https://github.com/pytorch/rfcs/blob/4b75803bf90c16b0120787fa0557bfe79ace1ef3/RFC-0026-logging-system.md)
 - [Paddle报错信息文案书写规范](https://github.com/PaddlePaddle/Paddle/wiki/Paddle-Error-Message-Writing-Specification)
+
+#### IDEA：iScan 流水线退场
+
+[PR-CI-iScan-C](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/18485?module=PaddlePaddle/Paddle&pipeline=PR-CI-iScan-C&branch=branches)、[PR-CI-iScan-Python](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/18500?module=PaddlePaddle/Paddle&pipeline=PR-CI-iScan-Python&branch=branches) 是分别用 `cppcheck==1.8.3` 和 `pylint==1.9.4` 两个工具做代码的静态分析和检查。我们近期会 review 一下这两条流水线的必要性和替代这些检查的方式。
