@@ -4,7 +4,7 @@
 
 ### 起草一个项目想法
 
-任何对改进飞桨项目有一些想法，并与多个项目贡献者讨论过的人，请起草一个项目想法（通常是几句话），写到[Project Ideas](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions#project-ideas)里。
+任何对改进飞桨项目有一些想法，并与多个项目贡献者讨论过的人，请起草一个项目想法（通常是几句话），写到 [Project Ideas](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions#project-ideas) 里。
 
 ### 寻找项目导师
 
@@ -16,15 +16,15 @@
 
 ### 明确项目目标
 
-项目导师和团队将共同确定项目范围、目标、非目标和可能的技术方案，以明确项目提案，并记录在 [Call for Contribution](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions)或 [RFC](https://github.com/PaddlePaddle/community/tree/master/rfcs)里。
+项目导师和团队将共同确定项目范围、目标、非目标和可能的技术方案，以明确项目提案，并记录在 [Call for Contribution](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions)或 [RFC](https://github.com/PaddlePaddle/community/tree/master/rfcs) 里。
 
 ### 项目实现
 
-根据项目规模以及对其他飞桨组件的影响，可能需要召开设计评审会议来与其他社区成员进一步讨论该项目，参与评审的Reviewers通常是资深的工程师，并且对飞桨的不同方面具有各自的知识背景。 一旦Reviewers达成共识，导师和团队将开始该项目的实现，在实现过程中欢迎与Reviewers和社区进行任何形式的交流。
+根据项目规模以及对其他飞桨组件的影响，可能需要召开设计评审会议来与其他社区成员进一步讨论该项目，参与评审的 Reviewers 通常是资深的工程师，并且对飞桨的不同方面具有各自的知识背景。 一旦 Reviewers 达成共识，导师和团队将开始该项目的实现，在实现过程中欢迎与 Reviewers 和社区进行任何形式的交流。
 
 ### 合入PR到代码仓库
 
-当 PR 准备好后，请让社区成员Review该PR，尤其是请导师，以及上述设计评审会议的Reviewers来Review PR，来帮助讲该PR合入到代码仓库。
+当 PR 准备好后，请让社区成员 Review 该 PR，尤其是请导师、以及上述设计评审会议的 Reviewers 来 Review PR，来帮助将该 PR 合入到代码仓库。
 
 ### 开源贡献认可
 
@@ -33,4 +33,3 @@
 ### 联系方式
 
 请提交issue或者通过邮件联系：[ext_paddle_oss@baidu.com](mailto:ext_paddle_oss@baidu.com)。
-
