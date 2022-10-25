@@ -104,7 +104,7 @@ You must have one RD (chenwhql, YuanRisheng or zyfncg) approval for the includin
 
 ### 2.2 PHI 独立编译
 
-当头文件的依赖清理完毕，我们可以修改当前 Paddle 的编译方式，将 PHI 作为独立的 Library 对象进行编译，这需要对于编译原理和 CMake 语法比较熟悉的同学先去设计编辑改动方案，经过飞桨团队内部评审之后再推进执行。
+当头文件的依赖清理完毕，我们可以修改当前 Paddle 的编译方式，将 PHI 作为独立的 Library 对象进行编译，这需要对于编译原理和 CMake 语法比较熟悉的同学先设计编译改动方案，经过飞桨研发工程师和社区开发者一起评审后再推进执行。
 
 ### 3. 执行步骤建议
 
