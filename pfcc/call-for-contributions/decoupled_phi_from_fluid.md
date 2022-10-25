@@ -63,7 +63,7 @@
 当前 PHI 和 Fluid仍然是整合编译为 libpaddle.so 的，并没有单独拆分出来。但由于在 PHI 设计初期就有独立编译的计划，因此前期做了很多的基础数据解耦和替换的工作，在建设过程中也相对注重与 Fluid 的依赖关系的解耦，并且也在 CI 中加入了对于 PHI 依赖 Fluid 代码的拦截，现在合入的代码若引入了 PHI 对 Fluid 的反向依赖，会在 PR-CI-APPROVAL 中提示：
 
 ```
-You must have one RD (chenwhql, MingMingShangTian, YuanRisheng or zyfncg) approval for the including paddle/fluid header in paddle/phi files.
+You must have one RD (chenwhql, YuanRisheng or zyfncg) approval for the including paddle/fluid header in paddle/phi files.
 ```
 
 但 Paddle 毕竟是一个数百人协同开发的工程，每个阶段也不止一个目标要完成，由于各种因素中途还是引入了很多 PHI 反向依赖 Fluid 的情况，因此我们需要成立专项去解耦依赖关系，并且最终产出 PHI 独立编译的库 libphi.so 。
