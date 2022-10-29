@@ -718,7 +718,7 @@ paddle.log(self.prob(value))
 具体规划为
 
 - 阶段一：完成API功能开发
-- 阶段二：完成 `paddle.distribution.Laplace` 单元测试
+- 阶段二：完成 `paddle.distribution.multivariate_normal.MultivariateNormal` 单元测试
 - 阶段三：该 API 书写中英文档
 
 # 八、影响面
