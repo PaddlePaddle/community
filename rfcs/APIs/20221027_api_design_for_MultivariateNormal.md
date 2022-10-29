@@ -286,116 +286,124 @@ class MultivariateNormal(Distribution):
 
 ## TensorFlow
 
-TensorFlow 中包含 API `tfp.distributions.MultivariateNormalTriL`。
+TensorFlow 中包含 API `tfp.distributions.MultivariateNormalTriL`、`tfp.distributions.MultivariateNormalFullCovariance`、`tfp.distributions.MultivariateNormalDiagPlusLowRank`等。
+
+其中 `tfp.distributions.MultivariateNormalFullCovariance` 使用的是协方差矩阵，和 pytorch 中使用相同。这里我们介绍 `MultivariateNormalFullCovariance`
 
 主要参数变量包括：
 ```python
-tfp.distributions.MultivariateNormalTriL(
+tfp.distributions.MultivariateNormalFullCovariance(
     loc=None,
-    scale_tril=None,
+    covariance_matrix=None,
     validate_args=False,
     allow_nan_stats=True,
-    experimental_use_kahan_sum=False,
-    name='MultivariateNormalTriL'
+    name='MultivariateNormalFullCovariance'
 )
 ```
 
 ### 源代码
 
 ```python
-import tensorflow.compat.v2 as tf
+class MultivariateNormalFullCovariance(mvn_tril.MultivariateNormalTriL):
+  @deprecation.deprecated(
+      '2019-12-01',
+      '`MultivariateNormalFullCovariance` is deprecated, use '
+      '`MultivariateNormalTriL(loc=loc, '
+      'scale_tril=tf.linalg.cholesky(covariance_matrix))` instead.',
+      warn_once=True)
+  def __init__(self,
+               loc=None,
+               covariance_matrix=None,
+               validate_args=False,
+               allow_nan_stats=True,
+               name='MultivariateNormalFullCovariance'):
+    """Construct Multivariate Normal distribution on `R^k`.
+    The `batch_shape` is the broadcast shape between `loc` and
+    `covariance_matrix` arguments.
+    The `event_shape` is given by last dimension of the matrix implied by
+    `covariance_matrix`. The last dimension of `loc` (if provided) must
+    broadcast with this.
+    A non-batch `covariance_matrix` matrix is a `k x k` symmetric positive
+    definite matrix.  In other words it is (real) symmetric with all eigenvalues
+    strictly positive.
+    Additional leading dimensions (if any) will index batches.
+    Args:
+      loc: Floating-point `Tensor`. If this is set to `None`, `loc` is
+        implicitly `0`. When specified, may have shape `[B1, ..., Bb, k]` where
+        `b >= 0` and `k` is the event size.
+      covariance_matrix: Floating-point, symmetric positive definite `Tensor` of
+        same `dtype` as `loc`.  The strict upper triangle of `covariance_matrix`
+        is ignored, so if `covariance_matrix` is not symmetric no error will be
+        raised (unless `validate_args is True`).  `covariance_matrix` has shape
+        `[B1, ..., Bb, k, k]` where `b >= 0` and `k` is the event size.
+      validate_args: Python `bool`, default `False`. When `True` distribution
+        parameters are checked for validity despite possibly degrading runtime
+        performance. When `False` invalid inputs may silently render incorrect
+        outputs.
+      allow_nan_stats: Python `bool`, default `True`. When `True`,
+        statistics (e.g., mean, mode, variance) use the value '`NaN`' to
+        indicate the result is undefined. When `False`, an exception is raised
+        if one or more of the statistic's batch members are undefined.
+      name: Python `str` name prefixed to Ops created by this class.
+    Raises:
+      ValueError: if neither `loc` nor `covariance_matrix` are specified.
+    """
+    parameters = dict(locals())
 
-from tensorflow_probability.python import stats as tfp_stats
-from tensorflow_probability.python.bijectors import fill_scale_tril as fill_scale_tril_bijector
-from tensorflow_probability.python.distributions import mvn_linear_operator
-from tensorflow_probability.python.internal import distribution_util
-from tensorflow_probability.python.internal import dtype_util
-from tensorflow_probability.python.internal import parameter_properties
-from tensorflow_probability.python.internal import prefer_static as ps
-from tensorflow_probability.python.internal import tensor_util
-from tensorflow_probability.python.math import generic
+    # Convert the covariance_matrix up to a scale_tril and call MVNTriL.
+    with tf.name_scope(name) as name:
+      with tf.name_scope('init'):
+        dtype = dtype_util.common_dtype([loc, covariance_matrix], tf.float32)
+        loc = loc if loc is None else tf.convert_to_tensor(
+            loc, name='loc', dtype=dtype)
+        if covariance_matrix is None:
+          scale_tril = None
+        else:
+          covariance_matrix = tf.convert_to_tensor(
+              covariance_matrix, name='covariance_matrix', dtype=dtype)
+          if validate_args:
+            covariance_matrix = distribution_util.with_dependencies([
+                assert_util.assert_near(
+                    covariance_matrix,
+                    tf.linalg.matrix_transpose(covariance_matrix),
+                    message='Matrix was not symmetric')
+            ], covariance_matrix)
+          # No need to validate that covariance_matrix is non-singular.
+          # LinearOperatorLowerTriangular has an assert_non_singular method that
+          # is called by the Bijector.
+          # However, cholesky() ignores the upper triangular part, so we do need
+          # to separately assert symmetric.
+          scale_tril = tf.linalg.cholesky(covariance_matrix)
+        super(MultivariateNormalFullCovariance, self).__init__(
+            loc=loc,
+            scale_tril=scale_tril,
+            validate_args=validate_args,
+            allow_nan_stats=allow_nan_stats,
+            name=name)
+    self._parameters = parameters
 
-from tensorflow.python.ops.linalg import linear_operator  # pylint: disable=g-direct-tensorflow-import
+  @classmethod
+  def _maximum_likelihood_parameters(cls, value):
+    return {'loc': tf.reduce_mean(value, axis=0),
+            'covariance_matrix': tfp_stats.covariance(value,
+                                                      sample_axis=0,
+                                                      event_axis=-1)}
 
-__all__ = [
-    'MultivariateNormalTriL',
-]
-
-
-@linear_operator.make_composite_tensor
-class KahanLogDetLinOpTriL(tf.linalg.LinearOperatorLowerTriangular):
-  """Override `LinearOperatorLowerTriangular` logdet to use Kahan summation."""
-
-  def _log_abs_determinant(self):
-    return generic.reduce_kahan_sum(
-        tf.math.log(tf.math.abs(self._get_diag())), axis=[-1]).total
-
-class MultivariateNormalTriL(mvn_linear_operator.MultivariateNormalLinearOperator):
-      def __init__(self,
-                   loc=None,
-                   scale_tril=None,
-                   validate_args=False,
-                   allow_nan_stats=True,
-                   experimental_use_kahan_sum=False,
-                   name='MultivariateNormalTriL'):
-            parameters = dict(locals())
-            if loc is None and scale_tril is None:
-              raise ValueError('Must specify one or both of `loc`, `scale_tril`.')
-            with tf.name_scope(name) as name:
-              dtype = dtype_util.common_dtype([loc, scale_tril], tf.float32)
-              loc = tensor_util.convert_nonref_to_tensor(loc, name='loc', dtype=dtype)
-              scale_tril = tensor_util.convert_nonref_to_tensor(
-                  scale_tril, name='scale_tril', dtype=dtype)
-              self._scale_tril = scale_tril
-              if scale_tril is None:
-                scale = tf.linalg.LinearOperatorIdentity(
-                    num_rows=distribution_util.dimension_size(loc, -1),
-                    dtype=loc.dtype,
-                    is_self_adjoint=True,
-                    is_positive_definite=True,
-                    assert_proper_shapes=validate_args)
-              else:
-                # No need to validate that scale_tril is non-singular.
-                # LinearOperatorLowerTriangular has an assert_non_singular
-                # method that is called by the Bijector.
-                linop_cls = (KahanLogDetLinOpTriL if experimental_use_kahan_sum else
-                             tf.linalg.LinearOperatorLowerTriangular)
-                scale = linop_cls(
-                    scale_tril,
-                    is_non_singular=True,
-                    is_self_adjoint=False,
-                    is_positive_definite=False)
-              super(MultivariateNormalTriL, self).__init__(
-                  loc=loc,
-                  scale=scale,
-                  validate_args=validate_args,
-                  allow_nan_stats=allow_nan_stats,
-                  experimental_use_kahan_sum=experimental_use_kahan_sum,
-                  name=name)
-              self._parameters = parameters
-    
-      @classmethod
-      def _parameter_properties(cls, dtype, num_classes=None):
-        # pylint: disable=g-long-lambda
-        return dict(
-            loc=parameter_properties.ParameterProperties(event_ndims=1),
-            scale_tril=parameter_properties.ParameterProperties(
-                event_ndims=2,
-                shape_fn=lambda sample_shape: ps.concat(
-                    [sample_shape, sample_shape[-1:]], axis=0),
-                default_constraining_bijector_fn=lambda: fill_scale_tril_bijector.
-                FillScaleTriL(diag_shift=dtype_util.eps(dtype))))
-        # pylint: enable=g-long-lambda
-    
-      @classmethod
-      def _maximum_likelihood_parameters(cls, value):
-        return {'loc': tf.reduce_mean(value, axis=0),
-                'scale_tril': tf.linalg.cholesky(
-                    tfp_stats.covariance(value, sample_axis=0, event_axis=-1))}
-    
-      @property
-      def scale_tril(self):
-        return self._scale_tril
+  @classmethod
+  def _parameter_properties(cls, dtype, num_classes=None):
+    # pylint: disable=g-long-lambda
+    return dict(
+        loc=parameter_properties.ParameterProperties(event_ndims=1),
+        covariance_matrix=parameter_properties.ParameterProperties(
+            event_ndims=2,
+            shape_fn=lambda sample_shape: ps.concat(
+                [sample_shape, sample_shape[-1:]], axis=0),
+            default_constraining_bijector_fn=(lambda: chain_bijector.Chain([
+                cholesky_outer_product_bijector.CholeskyOuterProduct(),
+                fill_scale_tril_bijector.FillScaleTriL(
+                    diag_shift=dtype_util.eps(dtype))
+            ]))))
+    # pylint: enable=g-long-lambda
 ```
 
 ## Numpy
@@ -542,22 +550,204 @@ def multivariate_normal(mean, cov, size=None, check_valid='warn', tol=1, *args, 
 # 四、对比分析
 对第三部分调研的方案进行对比**评价**和**对比分析**，论述各种方案的优劣势。
 
+## 共同点
+
+1. 三者均实现了 MultivariateNormal 分布功能，同时数学原理保持一致，仅是各自实现的方式不同。
+2. 三者进行 MultivariateNormal 初始化时，均可使用位置向量 loc 以及协方差矩阵 covariance_matrix 进行初始化，且要求协方差矩阵为正定矩阵。
+3. pytorch和tensorflow均实现了包括均值（mean），方差（variance），熵（entropy），对数概率密度（log_prob），模式（mode），累积分布密度函数（cdf），以及取样（sample）等方法和属性。
+4. 三者均实现了对输入参数的检查，虽然各自所实现的方式不同，但总体的功能是类似的。
+
+## 不同点
+
+1. 初始化参数种类不同：pytorch 还可以使用 scale_tril、precision_matrix等参数替代 covariance_matrix 进行初始化，而 tensorflow 中并不能通过传入不同参数的方式来对分布进行初始化，仅能通过更换
+API 接口来进行不同矩阵的初始化，为此 tensorflow 中提供了诸如：`tfp.distributions.MultivariateNormalTriL`、`tfp.distributions.MultivariateNormalFullCovariance`、`tfp.distributions.MultivariateNormalDiagPlusLowRank`等不同的初始化 API。
+2. tensorflow 中提供了更多的方法属性，包括但不限于下面：
+```python
+cross_entropy(
+    other, name='cross_entropy'
+)
+
+log_cdf(
+    value, name='log_cdf', **kwargs
+)
+
+stddev(
+    name='stddev', **kwargs
+)
+
+kl_divergence(
+    other, name='kl_divergence'
+)
+```
+
+3. numpy 不同于 pytorch 与 tensorflow，其仅提供了初始化参数需要的条件要求，没有提供MultivariateNormal的众多属性方法，仅是完成在给定 mean 与 covariance 下的分布表示。
+4. 三种方式得到的 MultivariateNormal 的表示不同。比如 numpy 使用 ndarray 进行表示，pytorch 使用 tensor进行表示。
+5. pytorch 支持重参数采样，numpy 与 tensorflow 中仅支持sample，如：
+```python
+rsample(sample_shape=torch.Size([]))
+```
+6. numpy 中 MultivariateNormal 的 mean 与 pytorch / tensorflow 的均值不同，如：
+```python
+# numpy
+mean=(1,2)
+cov = [[1,0],[0,1]]
+x = np.random.multivariate_normal(mean,cov,(3,3))
+x.mean() # 结果为：1.2373516168707248
+
+#pytorch
+from torch.distributions.multivariate_normal import MultivariateNormal as MN
+x = MN(torch.tensor([1,2]),torch.tensor(cov))
+x.mean # 结果为：tensor([1, 2])
+```
+7. numpy 中的 MultivariateNormal 仅是一个方法，并不是一个单独的类，因此没有定义属性和其他和前面两者类似的方法。在使用时，只需要指定 MultivariateNormal 需要的参数即可得到对应的分布，同时也可以再借助 Matplotlib 来展示 Gumbel 分布。
+
+## 方案优点
+
+**pytorch:**
+1. 集成的接口比较轻盈，同时实现了 MultivarianceNormal 的核心功能。
+2. 源码以及实现思路清晰易懂，api 的使用较为方便。
+
+**tensorflow:**
+1. 集成的功能众多，几乎囊括了关于 MultivarianceNormal 的各个方面。
+
+**numpy:**
+1. numpy 更多是将 Multivariance 当作一种工具，需要使用时可以直接使用，没有再为其封装繁琐的方法和属性。
+
+## 方案缺点
+1. tensorflow 因集成的功能众多，所以在使用起来比较麻烦，需要花费更多的时间去学习使用。
+2. numpy 则因其缺乏 MultivariateNormal 的其他属性方法，比如 prob / cdf / variance 等，可能会在使用时有缺陷。
+3. pytorch 虽然整体简洁轻便，集成了 tensorflow 与 numpy 的各自优势，但是还缺乏一定的额外方法，比如：kl_divergence / log_cdf 等。
+
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
-参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html)
+直接使用 MultivariateNormal 分布的名称作为此 API 的名称，参数保持 MultivariateNormal 分布最原生的参数即：
+
+- loc：分布的均值
+- covariance_matrix：正定协方差矩阵
+
+预期 paddle 调用 MultivariateNormal API 的形式为：
+```python
+#loc: mean of the distribution
+#covariance_matrix：positive-definite covariance matrix
+
+paddle.distribution.multivariate_normal.MultivariateNormal(loc,covariance_matrix)
+```
 ## 底层OP设计
+
+使用 paddle 中现存的 API 进行实现，不考虑再令设计底层 OP。
+
 ## API实现方案
 
+该 API 在 `paddle.distribution.multivariate_normal` 中实现，部分功能继承父类`Distribution`。
+在经过调研对比后，MultivariateNormal API 中设定两个参数：loc 和 covariance_matrix，其中 loc 为分布均值，covariance_matrix 为协方差矩阵。
+
+除了 API 调用的基本参数外，`paddle.distribution.multivariate_normal.MultivariateNormal` 中实现的属性、方法主要如下：
+
+### 属性：
+- mean ：分布均值
+> 注：MultivariateNormal 分布的均值为 loc
+
+- variance：方差
+```python
+matrix_decompos = paddle.linalg.cholesky(self.covariance_matrix).pow(2).sum(-1)
+variance = paddle.expand(matrix_decompos,[self._batch_shape + self._event_shape])
+```
+
+- stddev：标准差
+```python
+paddle.sqrt(self.variance)
+```
+
+### 方法
+- sample(shape)：随机采样  
+在方法内部直接调用本类中的 rsample  方法。(参考pytorch复用重参数化采样结果):
+```python
+sample(shape)
+```
+
+- rsample(value)：重参数化采样
+```python
+rsample(value)
+```
+
+- prob(value)：概率密度函数
+
+其中要求：covariance_matrix 为非奇异正定矩阵。
+```python
+x = paddle.pow(2 * math.pi,-value.shape.pop(1) / 2) * paddle.pow(paddle.linalg.det(self.covariance_matrix), -1/2)
+y = paddle.exp(-1/2 * paddle.t(value - self.loc) * paddle.inverse(self.covariance_matrix) * (value - self.loc))
+return x * y;
+```
+
+- log_prob(value)：对数概率密度函数
+```python
+paddle.log(self.prob(value))
+```
+
+- entropy(value)：熵
+
+```python
+1 / 2 * paddle.log(paddle.pow(2 * math.pi * math.e, value.shpe.pop(1)) * paddle.linalg.det(self.convariance_matrix))
+```
+
 # 六、测试和验收的考量
-参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
+
+`test_distribution_multivariate_normal`继承`unittest.TestCase`类中的方法，参考NormalTest的示例，新增一个`MultivariateNormalNumpy`类来验证`Gumbel` API的正确性。
+- 使用相同的参数实例化 `Gumbel` 类和 `MultivariateNormalNumpy` 类，分别调用 `mean`、`variance`、`stddev`、`prob`、`log_prob`、`entropy`方法。将输出的结果进行对比，允许有一定的误差。
+- 使用sample方法对多个样本进行测试。
+
+1. 测试MultivariateNormal分布的特性
+
+- 测试方法：该部分主要测试分布的均值、方差、熵等特征。类TestMultivariateNormal继承unittest.TestCase，分别实现方法setUp（初始化），test_mean（mean单测），test_variance（variance单测），test_stddev（stddev单测），test_entropy（entropy单测），test_sample（sample单测）。
+
+  * 均值、方差、标准差通过Numpy计算相应值，对比MultivariateNormal类中相应property的返回值，若一致即正确；
+  
+  * 采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合MultivariateNormal分布。验证策略如下：随机采样30000个laplace分布下的样本值，计算采样样本的均值和方差，并比较同分布下`scipy.stats.multivariate_normal`返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于multivariate_normal分布，若计算所得ks值小于0.1，则拒绝不一致假设，两者属于同一分布；
+  
+  * 熵计算通过对比`scipy.stats.multivariate_normal.entropy`的值是否与类方法返回值一致验证结果的正确性。
+
+2. 测试MultivariateNormal分布的概率密度函数
+
+- 测试方法：该部分主要测试分布各种概率密度函数。类TestMultivariateNormalPDF继承unittest.TestCase，分别实现方法setUp（初始化），test_prob（prob单测），test_log_prob（log_prob单测），test_cdf（cdf）。
+
+> 参考：community\rfcs\APIs\20220712_api_design_for_Laplace.md
 
 # 七、可行性分析和排期规划
-时间和开发排期规划，主要milestone
+
+具体规划为
+
+- 阶段一：完成API功能开发
+- 阶段二：完成 `paddle.distribution.Laplace` 单元测试
+- 阶段三：该 API 书写中英文档
 
 # 八、影响面
-需要进一步讨论的问题，开放性问题，有争议问题；对其他模块是否有影响
+
+增加了一个 `paddle.distribution.multivariate_normal.MultivariateNormal` API，与飞桨2.0代码风格保持一致
 
 # 名词解释
 
+##多元正态分布：MulitivariateNormal
+多变量正态分布亦称为多变量高斯分布。它是单维正态分布向多维的推广。它同矩阵正态分布有紧密的联系。
+
+矩阵常态分配（matrix normal distribution） 是一种几率分布，属于常态分配的之一。
+
+> 参考：https://zh.wikipedia.org/wiki/%E5%A4%9A%E5%85%83%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83 （中文维基百科）
+
 # 附件及参考资料
+
+## PyTorch
+
+[torch.distributions.multivariate_normal.MultivariateNormal](https://pytorch.org/docs/stable/_modules/torch/distributions/multivariate_normal.html#MultivariateNormal)
+
+## TensorFLow
+
+[tfp.distributions.MultivariateNormalFullCovariance](https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/MultivariateNormalFullCovariance)
+
+## Paddle
+
+[paddle.distribution.Normal](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.4rc/api/paddle/distribution/Normal_cn.html#normal)
+
+## Numpy
+
+[numpy.random.multivariate_normal](https://numpy.org/doc/stable/reference/random/generated/numpy.random.multivariate_normal.html?highlight=multivariate_normal#numpy.random.multivariate_normal)
