@@ -1,19 +1,23 @@
 # CINN基础算子开发
 
-> This project will be mentored by [@zhhsplendid](https://github.com/zhhsplendid) and [@wzzju](https://github.com/wzzju)
+> This project will be mentored by [@zhhsplendid](https://github.com/zhhsplendid) and [@thisjiang](https://github.com/thisjiang)
 
 ## 背景
 
+[CINN](https://github.com/PaddlePaddle/CINN)是一种在不改变源码的条件下加速Paddle模型运行速度的深度学习编译器。CINN致力于构造以训推一体自动调优、分布式为特色的科研界工业界亮点，吸引内外注意力影响力。
 
+不同于深度学习框架算子，在算子融合和自动调优技术的加持，深度学习编译器算子的粒度更细，算子数目也更少。在对接上层框架时，编译器会将上层的框架算子进一步拆分为若干基础算子，这样做的目的一方面是为了减少算子开发的工作量，通过仅实现有限的基础算子来组合出大量的上层框架算子；另一方面通过算子融合技术使得编译器可以跨算子融合，减少最终执行时的kernel数目，而自动调优技术使得编译器可以自动优化融合后的kernel，提升kernel性能。
+
+以`batch_norm + elementwise_add`算子为例，首先，`batch_norm`算子可以被拆分为32个基础算子，而后这些基础算子又可与`elementwise_add`相融合，最终可融合为两个kernel，测试结果表明，融合后的kernel在大部分配置下性能均能优于Paddle原生。
+
+![CINN overview](images/cinn_batchnorm_decomposer.png)
 
 ## 主要工作
-不同于深度学习框架算子，由于深度学习编译器有算子融合和自动调优技术的加持，其算子粒度更细。在对接时，编译器会将上层的框架算子进一步拆分为若干基础算子，这样做的目的一方面是为了减少算子开发的工作量，通过仅实现有限的基础算子来组合出大量的上层框架算子；另一方面通过算子融合技术使得编译器可以跨算子融合，减少最终执行时的kernel数目，而自动调优技术使得编译器可以自动优化融合后的kernel，提升kernel性能。
+在经过充分的调研和讨论后，CINN梳理出了大概113个基础算子，其中已实现64个，再进一步排除掉涉及控制流、动态shape、复数等需要框架本身支持的算子外，仍有11个算子空缺，从开发难度上划分，由易至难分别为`negate`（取相反数）、`reciprocal`（取倒数）、`cbrt`（立方根）、`logical_right_shift`（逻辑右移）、`clz`、`popc`、`atan2`、`bitcast_convert`、`resize`、`cholesky`、`triangular_solve`。
 
-在经过充分的调研和讨论后，CINN梳理出了大概113个基础算子，其中已实现64个，排除掉是涉及控制流、动态shape、复数等需要框架本身支持的算子外，仍有11个算子空缺，从开发难度上划分，由易至难分别为`negate`（取相反数）、`reciprocal`（取倒数）、`cbrt`（立方根）、`logical_right_shift`（逻辑右移）、`clz`、`popc`、`atan2`、`bitcast_convert`、`resize`、`cholesky`、`triangular_solve`。
+算子开发示例情况可参考PR1018：https://github.com/PaddlePaddle/CINN/pull/1018 ，该PR从自定义函数实现及注册、算子实现、API接口、Python单测等多个维度示例了如何规范开发CINN算子。如若想详细了解CINN设计思路及算子开发介绍，可观看视频课程：[深度学习编译器算子应用与开发介绍](https://aistudio.baidu.com/aistudio/education/lessonvideo/3186683)。
 
-算子开发示例情况可参考PR1018：https://github.com/PaddlePaddle/CINN/pull/1018 ，该PR从自定义函数实现及注册、算子实现、API接口、Python单测等多个维度示例了如何规范开发CINN算子。如若想详细了解[CINN](https://github.com/PaddlePaddle/CINN)设计思路及算子开发介绍，可观看视频课程：[深度学习编译器算子应用与开发介绍](https://aistudio.baidu.com/aistudio/education/lessonvideo/3186683)。
-
-## 算子介绍
+## 算子语义描述
 ### negate
 **描述：**
 对输入张量逐元素取相反数，并将各个位置的输出元素保存到返回结果中。
