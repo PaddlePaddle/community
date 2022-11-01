@@ -77,4 +77,4 @@ def flip(x, axis, name=None):
     """
 ```
 
-这里需要将 `od LoDTensor` 的描述从文档中移除，仅保留 Tensor 的介绍。此类问题需要统一搜索并逐一修改。
+这里需要将 `or LoDTensor` 的描述从文档中移除，仅保留 Tensor 的介绍。此类问题需要统一搜索并逐一修改。
