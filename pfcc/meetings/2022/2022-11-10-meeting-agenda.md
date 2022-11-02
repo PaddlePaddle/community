@@ -78,7 +78,7 @@
 # 会议议程
 
 - 新人介绍 [zzk0](https://github.com/zzk0)、[gouzil](https://github.com/gouzil)、[yiakwy](https://github.com/yiakwy)、[VigiZhang](https://github.com/VigiZhang)（5min）
-- [zhangting2020](https://github.com/zhangting2020) 飞浆研发工程师模型性能优化方法论介绍（10-15min）
+- [zhangting2020](https://github.com/zhangting2020) 飞桨研发工程师模型性能优化方法论介绍（10-15min）
 - [Rayman96](https://github.com/rayman96) 黑客松算子优化经验分享（10-15min）
 - [OuyangChao](https://github.com/ouyangchao) 算子优化相关贡献经验分享（5-10min）
 - [yiakwy](https://github.com/yiakwy) 基于大SRAM和分布式内存的图编译优化（10-15min）
