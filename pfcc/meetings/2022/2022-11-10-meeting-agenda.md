@@ -10,7 +10,7 @@
 
 - 本次会议主席：欧阳超（[OuyangChao](https://github.com/OuyangChao)）
 
-- 本次会议副主席：xxx([xxx](https://github.com/xxx))
+- 本次会议副主席：郑必城（[Zheng-Bicheng](https://github.com/Zheng-Bicheng)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 
@@ -68,16 +68,20 @@
   - [jingsongliujing](https://github.com/jingsongliujing)
   - [dasenCoding](https://github.com/dasenCoding)
   - [PureNatural](https://github.com/PureNatural)
+  - [zzk0](https://github.com/zzk0)
+  - [gouzil](https://github.com/gouzil)
+  - [yiakwy](https://github.com/yiakwy)
+  - [VigiZhang](https://github.com/VigiZhang)
   - [jiamingkong](https://github.com/jiamingkong)
-  - [momozi1996](https://github.com/momozi1996)
 
 
 # 会议议程
 
+- 新人介绍 [zzk0](https://github.com/zzk0)、[gouzil](https://github.com/gouzil)、[yiakwy](https://github.com/yiakwy)、[VigiZhang](https://github.com/VigiZhang)（5min）
 - [zhangting2020](https://github.com/zhangting2020) 飞浆研发工程师模型性能优化方法论介绍（10-15min）
 - [Rayman96](https://github.com/rayman96) 黑客松算子优化经验分享（10-15min）
 - [OuyangChao](https://github.com/ouyangchao) 算子优化相关贡献经验分享（5-10min）
 - [yiakwy](https://github.com/yiakwy) 基于大SRAM和分布式内存的图编译优化（10-15min）
-- PFCC 成员自由发言讨论（5 minutes）
-- 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 minutes）
-  - 预告：下一期主席为[xxx](https://github.com/xxx)，副主席为[xxx](https://github.com/xxx)，主题待定。
+- PFCC 成员自由发言讨论（5 min）
+- 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
+  - 预告：下一期主席为郑必城（[Zheng-Bicheng](https://github.com/Zheng-Bicheng)），副主席待定，主题待定。
