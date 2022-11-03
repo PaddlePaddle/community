@@ -33,7 +33,7 @@
 # 二、飞桨现状
 
 - 目前 飞桨没有 API `paddle.distribution.MultivariateNormal`
-- API `paddle.distribution.Normal`的代码开发风格可以作为`paddle.distribution.MultivariateNormal` 的主要参考。
+- API `paddle.distribution.Multinomial`的代码开发风格可以作为`paddle.distribution.MultivariateNormal` 的主要参考。
 
 
 # 三、业内方案调研
@@ -599,7 +599,7 @@ from torch.distributions.multivariate_normal import MultivariateNormal as MN
 x = MN(torch.tensor([1,2]),torch.tensor(cov))
 x.mean # 结果为：tensor([1, 2])
 ```
-7. numpy 中的 MultivariateNormal 仅是一个方法，并不是一个单独的类，因此没有定义属性和其他和前面两者类似的方法。在使用时，只需要指定 MultivariateNormal 需要的参数即可得到对应的分布，同时也可以再借助 Matplotlib 来展示 Gumbel 分布。
+7. numpy 中的 MultivariateNormal 仅是一个方法，并不是一个单独的类，因此没有定义属性和其他和前面两者类似的方法。在使用时，只需要指定 MultivariateNormal 需要的参数即可得到对应的分布，同时也可以再借助 Matplotlib 来展示 MultivariateNormal 分布。
 
 ## 方案优点
 
@@ -693,8 +693,8 @@ paddle.log(self.prob(value))
 
 # 六、测试和验收的考量
 
-`test_distribution_multivariate_normal`继承`unittest.TestCase`类中的方法，参考NormalTest的示例，新增一个`MultivariateNormalNumpy`类来验证`Gumbel` API的正确性。
-- 使用相同的参数实例化 `Gumbel` 类和 `MultivariateNormalNumpy` 类，分别调用 `mean`、`variance`、`stddev`、`prob`、`log_prob`、`entropy`方法。将输出的结果进行对比，允许有一定的误差。
+`test_distribution_multivariate_normal`继承`unittest.TestCase`类中的方法，参考NormalTest的示例，新增一个`MultivariateNormalNumpy`类来验证`MultivariateNormal` API的正确性。
+- 使用相同的参数实例化 `MultivariateNormal` 类和 `MultivariateNormalNumpy` 类，分别调用 `mean`、`variance`、`stddev`、`prob`、`log_prob`、`entropy`方法。将输出的结果进行对比，允许有一定的误差。
 - 使用sample方法对多个样本进行测试。
 
 1. 测试MultivariateNormal分布的特性
@@ -703,7 +703,7 @@ paddle.log(self.prob(value))
 
   * 均值、方差、标准差通过Numpy计算相应值，对比MultivariateNormal类中相应property的返回值，若一致即正确；
   
-  * 采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合MultivariateNormal分布。验证策略如下：随机采样30000个laplace分布下的样本值，计算采样样本的均值和方差，并比较同分布下`scipy.stats.multivariate_normal`返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于multivariate_normal分布，若计算所得ks值小于0.1，则拒绝不一致假设，两者属于同一分布；
+  * 采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合MultivariateNormal分布。验证策略如下：随机采样30000个multivariate_normal分布下的样本值，计算采样样本的均值和方差，并比较同分布下`scipy.stats.multivariate_normal`返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于multivariate_normal分布，若计算所得ks值小于0.1，则拒绝不一致假设，两者属于同一分布；
   
   * 熵计算通过对比`scipy.stats.multivariate_normal.entropy`的值是否与类方法返回值一致验证结果的正确性。
 
