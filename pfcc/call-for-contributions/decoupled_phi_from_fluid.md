@@ -2,6 +2,8 @@
 
 > This project will be mentored by [@chenwhql](http://github.com/chenwhql), [@YuanRisheng](https://github.com/YuanRisheng) and [@zyfncg](https://github.com/zyfncg)
 
+> Tracking Issue: [Issue#47615](https://github.com/PaddlePaddle/Paddle/issues/47615)
+
 ## 1. 背景与目标
 
 ### 1.1 为什么需要 PHI ？
