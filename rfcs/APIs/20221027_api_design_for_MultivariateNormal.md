@@ -663,33 +663,62 @@ paddle.sqrt(self.variance)
 - sample(shape)：随机采样  
 在方法内部直接调用本类中的 rsample  方法。(参考pytorch复用重参数化采样结果):
 ```python
-sample(shape)
+def sample(self, shape):
+    sample(shape)
 ```
 
-- rsample(value)：重参数化采样
+- rsample(shape)：重参数化采样
+
 ```python
-rsample(value)
+def _batch_mv(bmat, bvec):
+    bvec_unsqueeze = paddle.unsqueeze(bvec,1)
+    bvec = paddle.squeeze(bvec_unsqueeze)
+    return paddle.matmul(bmat,bvec)
+
+def rsample(self, shape):
+    shape = self._extend_shape(shape)
+    eps = paddle.standard_normal(shape, dtype=None, name=None)
+    unbroadcasted_scale_tril = paddle.linalg.cholesky(self.covariance_matrix)
+  
+    return self.loc + _batch_mv(unbroadcasted_scale_tril,eps)
 ```
+
 
 - prob(value)：概率密度函数
 
 其中要求：covariance_matrix 为非奇异正定矩阵。
 ```python
-x = paddle.pow(2 * math.pi,-value.shape.pop(1) / 2) * paddle.pow(paddle.linalg.det(self.covariance_matrix), -1/2)
-y = paddle.exp(-1/2 * paddle.t(value - self.loc) * paddle.inverse(self.covariance_matrix) * (value - self.loc))
-return x * y;
+def prob(self, value):
+    x = paddle.pow(2 * math.pi,-value.shape.pop(1) / 2) * paddle.pow(paddle.linalg.det(self.covariance_matrix), -1/2)
+    y = paddle.exp(-1/2 * paddle.t(value - self.loc) * paddle.inverse(self.covariance_matrix) * (value - self.loc))
+    return x * y
 ```
 
 - log_prob(value)：对数概率密度函数
 ```python
-paddle.log(self.prob(value))
+def log_prob(self, value):
+    return paddle.log(self.prob(value))
 ```
 
 - entropy(value)：熵
 
 ```python
-1 / 2 * paddle.log(paddle.pow(2 * math.pi * math.e, value.shpe.pop(1)) * paddle.linalg.det(self.convariance_matrix))
+def entropy(self, value):
+    sigma = paddle.linalg.det(self.convariance_matrix)
+    return 1 / 2 * paddle.log(paddle.pow(2 * math.pi * math.e, value.shpe.pop(1)) * sigma)
 ```
+
+- kl_divergence 两个MultivariateNormal分布之间的kl散度(other--MultivariateNormal类的一个实例):
+
+```python
+def kl_divergence(self, other):
+  sector_1 = paddle.t(self.loc - other.loc) * paddle.inverse(other.convariance_matrix) * (self.loc - other.loc)
+  sector_2 = paddle.log(paddle.linalg.det(paddle.inverse(other.convariance_matrix) * self.convariance_matrix))
+  sector_3 = paddle.trace(paddle.inverse(other.convariance_matrix) * self.convariance_matrix)
+  n = self.loc.shape.pop(1)
+  return 0.5 * (sector_1 - sector_2 + sector_3 - n)
+```
+在`paddle/distribution/kl.py` 中注册`_kl_multivariatenormal_multivariatenormal`函数，使用时可直接调用`kl_divergence`计算`MultivariateNormal`分布之间的kl散度。
 
 # 六、测试和验收的考量
 
@@ -703,13 +732,11 @@ paddle.log(self.prob(value))
 
   * 均值、方差、标准差通过Numpy计算相应值，对比MultivariateNormal类中相应property的返回值，若一致即正确；
   
-  * 采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合MultivariateNormal分布。验证策略如下：随机采样30000个multivariate_normal分布下的样本值，计算采样样本的均值和方差，并比较同分布下`scipy.stats.multivariate_normal`返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于multivariate_normal分布，若计算所得ks值小于0.1，则拒绝不一致假设，两者属于同一分布；
-  
-  * 熵计算通过对比`scipy.stats.multivariate_normal.entropy`的值是否与类方法返回值一致验证结果的正确性。
+  * 采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合MultivariateNormal分布。验证策略如下：随机采样30000个multivariate_normal分布下的样本值，计算采样样本的均值和方差，并比较同分布下`scipy.stats.qmc.MultivariateNormalQMC`返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于multivariate_normal分布，若计算所得ks值小于0.1，则拒绝不一致假设，两者属于同一分布；
 
 2. 测试MultivariateNormal分布的概率密度函数
 
-- 测试方法：该部分主要测试分布各种概率密度函数。类TestMultivariateNormalPDF继承unittest.TestCase，分别实现方法setUp（初始化），test_prob（prob单测），test_log_prob（log_prob单测），test_cdf（cdf）。
+- 测试方法：该部分主要测试分布各种概率密度函数。类TestMultivariateNormalPDF继承unittest.TestCase，分别实现方法setUp（初始化），test_prob（prob单测），test_log_prob（log_prob单测）。
 
 > 参考：community\rfcs\APIs\20220712_api_design_for_Laplace.md
 
