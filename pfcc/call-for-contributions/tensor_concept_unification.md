@@ -1,7 +1,7 @@
 # 飞桨 DenseTensor 概念统一
 
 
-> This project will be mentored by [@chenwhql](http://github.com/chenwhql)
+> This project will be mentored by [@chenwhql](http://github.com/chenwhql) and [@Ligoml](https://github.com/ligoml)
 
 ## 1. 背景与意义
 
