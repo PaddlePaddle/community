@@ -25,7 +25,7 @@ AI Studio是基于百度深度学习开源平台飞桨的人工智能学习与�
 <img width="500" alt="image" src="https://user-images.githubusercontent.com/39876205/201044617-2dbcb752-42c1-40f7-b634-2e4c776b55f9.png">
 
 申请方式：
-发邮件到 ext_paddle_oss@baidu.com，附上 GitHub username，AI Studio uid，说明用途。
+发邮件到 ext_paddle_oss@baidu.com，附上 GitHub username 和 AI Studio uid 并说明用途。
 
 传送门：https://aistudio.baidu.com/aistudio/index
 
