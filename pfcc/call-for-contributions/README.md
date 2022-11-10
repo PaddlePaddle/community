@@ -14,7 +14,7 @@
 - [Type Hint类型注释](type_hint.md)【进行中】
 - [建设更多的Tutorial](Call_For_Tutorials.md)【进行中】
 - [API文档体验优化](docs_optim_for_API.md)【进行中】
-- [PHI算子库独立编译](decoupled_phi_from_fluid.md)
+- [PHI算子库独立编译](decoupled_phi_from_fluid.md)【进行中】
 - [DenseTensor 概念统一](tensor_concept_unification.md)
 - [CINN基础算子开发](CINN_base_operator.md)
 
@@ -43,5 +43,7 @@ AI Studio是基于百度深度学习开源平台飞桨的人工智能学习与�
 - [Paddle报错信息文案书写规范](https://github.com/PaddlePaddle/Paddle/wiki/Paddle-Error-Message-Writing-Specification)
 
 #### IDEA：iScan 流水线退场
+
+Status：2022-11-02 已经下线这两条流水线。
 
 [PR-CI-iScan-C](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/18485?module=PaddlePaddle/Paddle&pipeline=PR-CI-iScan-C&branch=branches)、[PR-CI-iScan-Python](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/18500?module=PaddlePaddle/Paddle&pipeline=PR-CI-iScan-Python&branch=branches) 是分别用 `cppcheck==1.8.3` 和 `pylint==1.9.4` 两个工具做代码的静态分析和检查。我们近期会 review 一下这两条流水线的必要性和替代这些检查的方式。
