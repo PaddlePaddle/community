@@ -1,6 +1,6 @@
 # API文档体验优化
 
-> This project will be mentored by [@Ligoml](https://github.com/ligoml)
+> This project will be mentored by [@Ligoml](https://github.com/ligoml) and [@momozi1996](https://github.com/momozi1996) 
 
 ## 1. 背景与意义
 
