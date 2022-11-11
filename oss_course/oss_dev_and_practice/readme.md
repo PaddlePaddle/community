@@ -1,8 +1,13 @@
-
-
 # 开源软件开发及实践课程
 
 这是一个给学生介绍开源的基础知识，和基本开发流程的课程，我们希望能够通过这个课程促进学生了解开源软件开发，并加入到自己感兴趣的开源社区。
+
+We have offered this course in:
+- 2022-9-28， 北京大学， [第4次课](https://github.com/osslab-pku/OSSDevelopment/blob/main/Syllabus.md), offered by [jzhang533](https://github.com/jzhang533)
+- 2022-10-20， 浙江大学AI研究生院， offered by [luotao1](https://github.com/luotao1)
+- 2022-11-9 北京航空航天大学， offered by  [jzhang533](https://github.com/jzhang533)
+
+[Ligoml](https://github.com/Ligoml) kindly served as TA in these offerings.
 
 ## 课程的应用场景
 
