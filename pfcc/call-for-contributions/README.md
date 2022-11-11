@@ -13,9 +13,27 @@
 - [Python 2.7 相关代码退场](legacy_python2.md)【进行中】
 - [Type Hint类型注释](type_hint.md)【进行中】
 - [建设更多的Tutorial](Call_For_Tutorials.md)【进行中】
-- [PHI算子库独立编译](decoupled_phi_from_fluid.md)
+- [API文档体验优化](docs_optim_for_API.md)【进行中】
+- [PHI算子库独立编译](decoupled_phi_from_fluid.md)【进行中】
 - [DenseTensor 概念统一](tensor_concept_unification.md)
 - [CINN基础算子开发](CINN_base_operator.md)
+
+## 飞桨线上开发环境——AI Studio
+AI Studio是基于百度深度学习开源平台飞桨的人工智能学习与实训社区，为开发者免费提供功能强大的线上训练环境、云端超强GPU算力及存储资源。云集200万AI开发者共同学习、交流、竞技与成长。每日提供8小时免费GPU算力供飞桨开发者学习实践。
+
+为支持开发者完成框架开发任务，AI Studio推出「框架开发任务」，为开发者提供飞桨镜像环境、在线 IDE 与专属 GPU 算力。你可以在这里便捷地从 GitHub 拉取代码、基于飞桨框架开发并参与开源共建，飞桨团队愿与你一起执桨破浪，让深度学习技术的创新与应用更简单。
+<img width="500" alt="image" src="https://user-images.githubusercontent.com/39876205/201044617-2dbcb752-42c1-40f7-b634-2e4c776b55f9.png">
+
+一个使用case：[利用 AI Studio 完成 Paddle 编译](https://aistudio.baidu.com/aistudio/projectdetail/4572885)
+
+申请方式：
+发邮件到 ext_paddle_oss@baidu.com，附上 GitHub username 和 AI Studio uid 并说明用途。
+
+AI Studio uid 参考：
+<img width="453" alt="image" src="https://user-images.githubusercontent.com/39876205/201087539-4f1cecb1-8261-46e6-b425-13d21cceb45b.png">
+
+传送门：https://aistudio.baidu.com/aistudio/index
+
 
 ## Project Ideas
 
@@ -30,5 +48,7 @@
 - [Paddle报错信息文案书写规范](https://github.com/PaddlePaddle/Paddle/wiki/Paddle-Error-Message-Writing-Specification)
 
 #### IDEA：iScan 流水线退场
+
+Status：2022-11-02 已经下线这两条流水线。
 
 [PR-CI-iScan-C](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/18485?module=PaddlePaddle/Paddle&pipeline=PR-CI-iScan-C&branch=branches)、[PR-CI-iScan-Python](https://xly.bce.baidu.com/paddlepaddle/paddle/newipipe/builds/18500?module=PaddlePaddle/Paddle&pipeline=PR-CI-iScan-Python&branch=branches) 是分别用 `cppcheck==1.8.3` 和 `pylint==1.9.4` 两个工具做代码的静态分析和检查。我们近期会 review 一下这两条流水线的必要性和替代这些检查的方式。
