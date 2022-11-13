@@ -12,7 +12,7 @@
 
 ## 1、相关背景
 
-Paddle 在近期已经连续引入了 Flake8、black 工具，Python 端代码风格已经得到了极大的改善，在可读性和可维护性上都有了很大的提升。
+Paddle 在近期已经连续引入了 Flake8、Black 工具，Python 端代码风格已经得到了极大的改善，在可读性和可维护性上都有了很大的提升。
 
 但是目前 Paddle 的 import 区域的代码仍然不是很规范，虽然在 [Flake8 引入计划](https://github.com/PaddlePaddle/Paddle/issues/46039)过程中 F401 已经将大量未使用的 import 都移除了，但 import 部分仍然存在顺序不规范的问题，这需要我们引入新的修复工具来实现这一点。
 
@@ -26,7 +26,7 @@ Paddle 在近期已经连续引入了 Flake8、black 工具，Python 端代码�
 
 可以极大改善 imports 部分的代码风格，使得开发人员更容易了解模块之间的依赖关系，且能够自动去除 imports 部分重复的导入
 
-此外，isort [对 black 有着非常好的支持](https://pycqa.github.io/isort/docs/configuration/black_compatibility.html)，我们已经在 [PaddlePaddle/Paddle#46014](https://github.com/PaddlePaddle/Paddle/pull/46014) 引入了 black 并对全量代码格式化，因此我们可以在此基础上引入 isort 来对 import 区域进行重排。
+此外，isort [对 Black 有着非常好的支持](https://pycqa.github.io/isort/docs/configuration/black_compatibility.html)，我们已经在 [PaddlePaddle/Paddle#46014](https://github.com/PaddlePaddle/Paddle/pull/46014) 引入了 Black 并对全量代码格式化，因此我们可以在此基础上引入 isort 来对 import 区域进行重排。
 
 下面是一个文件使用 isort 重排前后的对比：
 
@@ -47,7 +47,7 @@ Paddle 在近期已经连续引入了 Flake8、black 工具，Python 端代码�
 
 在 C++ 端，Paddle 已经有 clang-format 同时对代码进行格式化和对头文件进行排序。
 
-在 Python 端，Paddle 目前已经引入了 Flake8、black 两个工具，isort 作为最受欢迎的三大工具之一，目前尚未引入。
+在 Python 端，Paddle 目前已经引入了 Flake8、Black 两个工具，isort 作为最受欢迎的三大工具之一，目前尚未引入。
 
 # 三、业内方案调研
 
@@ -64,15 +64,15 @@ isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub �
 
 由于 Paddle 在此之前并没有对 import 区域进行排序过，因此所有的文件都是开发者自觉手动排序的，真正符合规范的文件非常少，基本上所有 Python 文件都需要重排（3000+ 文件）。
 
-对于近乎全量文件的格式化，我们已经有了两次经验，其一是 Flake8 F401 错误码的存量修复，通过 33 个 PR，对逐步细分的各个目录进行修复，细分的原因是 F401 问题很容易导致 API 变动等问题，一次性修复很难排查问题。其二是 black 的全量格式化，通过 1 个 PR，对全量代码进行格式化，由于 black 的格式化可以保证代码运行时语义不变，除部分依赖于格式的代码外（动转静、读取 docstring 等）不会产生任何问题，因此可以一次性修复，但 black 引入过程中遇到了[一次性改动文件过多导致的 PR-CI-Coverage 流水线崩溃在参数传递处](https://github.com/PaddlePaddle/Paddle/pull/46014#issuecomment-1288005788)，因此需要暂时修改流水线的问题。
+对于近乎全量文件的格式化，我们已经有了两次经验，其一是 Flake8 F401 错误码的存量修复，通过 33 个 PR，对逐步细分的各个目录进行修复，细分的原因是 F401 问题很容易导致 API 变动等问题，一次性修复很难排查问题。其二是 Black 的全量格式化，通过 1 个 PR，对全量代码进行格式化，由于 Black 的格式化可以保证代码运行时语义不变，除部分依赖于格式的代码外（动转静、读取 docstring 等）不会产生任何问题，因此可以一次性修复，但 Black 引入过程中遇到了[一次性改动文件过多导致的 PR-CI-Coverage 流水线崩溃在参数传递处](https://github.com/PaddlePaddle/Paddle/pull/46014#issuecomment-1288005788)，因此需要暂时修改流水线的问题。
 
-对于 isort，既与 Flake8 F401 问题不同，不会因为排序而频繁出问题，又不像 black 那样可以保证一次性修复完全不出问题，因为在少数依赖于 import 顺序的情况下是可能出问题的（如前一个 import 修改了全局状态，后一个 import 依赖于这个全局状态，则会出问题）
+对于 isort，既与 Flake8 F401 问题不同，不会因为排序而频繁出问题，又不像 Black 那样可以保证一次性修复完全不出问题，因为在少数依赖于 import 顺序的情况下是可能出问题的（如前一个 import 修改了全局状态，后一个 import 依赖于这个全局状态，则会出问题）
 
 因此，isort 的引入采取两者的折衷，即分目录来做，但不必像 F401 那样分的过于细致，这样主要是有以下考量：
 
 1. 避免频繁冲突
-2. 避免像 black 引入时需要临时修改 PR-CI-Coverage 流水线
-3. 由于仅仅格式化 imports 部分，不会像 black 那样造成很大的影响，不需要专门找时间来 merge
+2. 避免像 Black 引入时需要临时修改 PR-CI-Coverage 流水线
+3. 由于仅仅格式化 imports 部分，不会像 Black 那样造成很大的影响，不需要专门找时间来 merge
 
 具体实施步骤如下：
 
@@ -117,7 +117,7 @@ isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub �
 > **Note**
 >
 > - 类似 Flake8 的 F401 引入，先在配置中 ignore 一部分，之后逐步移除 ignore 部分并修复
-> - `profile`、`line_length` 选项用于兼容 black
+> - `profile`、`line_length` 选项用于兼容 Black
 > - `known_first_party` 选项可以让 isort 在排序时将 `paddle` 识别为第一方模块而不是第三方模块
 
 - 「全量」格式化
