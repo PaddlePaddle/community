@@ -28,6 +28,10 @@ Paddle 在近期已经连续引入了 Flake8、black 工具，Python 端代码�
 
 此外，isort [对 black 有着非常好的支持](https://pycqa.github.io/isort/docs/configuration/black_compatibility.html)，我们已经在 [PaddlePaddle/Paddle#46014](https://github.com/PaddlePaddle/Paddle/pull/46014) 引入了 black 并对全量代码格式化，因此我们可以在此基础上引入 isort 来对 import 区域进行重排。
 
+下面是一个文件使用 isort 重排前后的对比：
+
+![python/paddle/fluid/tests/unittests/asp/test_fleet_with_asp_sharding.py diff view](https://user-images.githubusercontent.com/38436475/201512682-33e9111d-ac36-41b4-bc25-cceba940b1a3.png)
+
 ## 2、功能目标
 
 引入 isort 工具，对 Paddle 的 import 区域进行重排。
@@ -87,6 +91,7 @@ isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub �
   [tool.isort]
   profile = "black"
   line_length = 80
+  known_first_party = ["paddle"]
   skip = ["build", "__init__.py"]
   extend_skip_glob = [
       # These files do not need to be formatted,
@@ -109,7 +114,11 @@ isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub �
   ]
   ```
 
-类似 Flake8 的 F401 引入，先在配置中 ignore 一部分，之后逐步移除 ignore 部分并修复
+> **Note**
+>
+> - 类似 Flake8 的 F401 引入，先在配置中 ignore 一部分，之后逐步移除 ignore 部分并修复
+> - `profile`、`line_length` 选项用于兼容 black
+> - `known_first_party` 选项可以让 isort 在排序时将 `paddle` 识别为第一方模块而不是第三方模块
 
 - 「全量」格式化
 
@@ -169,7 +178,7 @@ isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub �
 
 # 七、排期规划
 
-预计 1～2 周内完成，预计在 10 个以内 PR 即可完成。
+预计 1 ～ 2 周内完成，预计在 10 个以内 PR 即可完成。
 
 # 名词解释
 
