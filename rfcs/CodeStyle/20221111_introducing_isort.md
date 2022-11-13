@@ -24,7 +24,7 @@ Paddle 在近期已经连续引入了 Flake8、Black 工具，Python 端代码�
 > 2. Related third party imports.
 > 3. Local application/library specific imports.
 
-可以极大改善 imports 部分的代码风格，使得开发人员更容易了解模块之间的依赖关系，且能够自动去除 imports 部分重复的导入
+这可以极大改善 imports 部分的代码风格，使得开发人员更容易了解模块之间的依赖关系，且能够自动去除 imports 部分重复的导入。
 
 此外，isort [对 Black 有着非常好的支持](https://pycqa.github.io/isort/docs/configuration/black_compatibility.html)，我们已经在 [PaddlePaddle/Paddle#46014](https://github.com/PaddlePaddle/Paddle/pull/46014) 引入了 Black 并对全量代码格式化，因此我们可以在此基础上引入 isort 来对 import 区域进行重排。
 
