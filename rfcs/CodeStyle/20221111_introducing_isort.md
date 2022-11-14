@@ -51,10 +51,12 @@ Paddle 在近期已经连续引入了 Flake8、Black 工具，Python 端代码�
 
 # 三、业内方案调研
 
-其他社区使用 isort 的例子：
+Black、Flake8、isort 是目前 Python 社区最受欢迎的三个工具，深度学习社区也不例外，PyTorch、Keras 均使用了这三个工具：
 
 - [PyTorch - `.isort.cfg`](https://github.com/pytorch/pytorch/blob/master/.isort.cfg)
 - [Keras - `shell/format.sh`](https://github.com/keras-team/keras/blob/master/shell/format.sh)
+
+TensorFlow 并没有使用这些工具，目前主要是推荐手动格式化，见 [how to auto format python code~](https://github.com/tensorflow/tensorflow/issues/50304)
 
 isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub 上 Star 数 5.3k，两倍于 Flake8 2.4k，使用数（Used by）为 280k，高于 Flake8 253K。
 
@@ -64,15 +66,15 @@ isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub �
 
 由于 Paddle 在此之前并没有对 import 区域进行排序过，因此所有的文件都是开发者自觉手动排序的，真正符合规范的文件非常少，基本上所有 Python 文件都需要重排（3000+ 文件）。
 
-对于近乎全量文件的格式化，我们已经有了两次经验，其一是 Flake8 F401 错误码的存量修复，通过 33 个 PR，对逐步细分的各个目录进行修复，细分的原因是 F401 问题很容易导致 API 变动等问题，一次性修复很难排查问题。其二是 Black 的全量格式化，通过 1 个 PR，对全量代码进行格式化，由于 Black 的格式化可以保证代码运行时语义不变，除部分依赖于格式的代码外（动转静、读取 docstring 等）不会产生任何问题，因此可以一次性修复，但 Black 引入过程中遇到了[一次性改动文件过多导致的 PR-CI-Coverage 流水线崩溃在参数传递处](https://github.com/PaddlePaddle/Paddle/pull/46014#issuecomment-1288005788)，因此需要暂时修改流水线的问题。
+对于近乎全量文件的格式化，我们已经有了两次经验，一次是 Flake8 F401 错误码的存量修复，另一次是引入 Black 时的全量格式化，下面对比两者所使用的方案的原因以及 isort 所需采取的折衷方案：
 
-对于 isort，既与 Flake8 F401 问题不同，不会因为排序而频繁出问题，又不像 Black 那样可以保证一次性修复完全不出问题，因为在少数依赖于 import 顺序的情况下是可能出问题的（如前一个 import 修改了全局状态，后一个 import 依赖于这个全局状态，则会出问题）
+| 影响一次性修复的原因 | Flake8 F401 | Black | isort |
+| - | - | - | - |
+| CI 错误不容易排查 | 存在，修复 F401 问题很容易导致 API 变动等问题，一次性修复很难排查问题 | 几乎不存在，Black 的格式化可以保证代码运行时语义不变，除部分依赖于格式的代码外（动转静、读取 docstring 等）不会产生任何问题 | 存在但较少，少数依赖于 import 顺序的情况是可能产生问题的（如前一个 import 修改了全局状态，后一个 import 依赖于这个全局状态） |
+| 一次性改动文件过多导致的 PR-CI-Coverage 流水线崩溃在参数传递处 | 不存在，通过 33 个 PR，对逐步细分的各个目录进行修复，每个 PR 改动文件都比较少 | 存在，因为一次性修改了 3000+ 文件，文件改动数过多 | 可通过拆分成 5 个以内低于 1000 个文件的 PR 避免本问题 |
+| 影响面很大，需要专门找时间来 merge | 不存在，一方面每个 PR 改动文件都比较少，另一方面改动仅仅涉及 import 区域 | 存在，Black 格式化基本将所有文件都进行了改动，而且改动区域遍布于整个代码文件 | 同 F401，改动仅涉及 import 区域，影响较小 |
 
-因此，isort 的引入采取两者的折衷，即分目录来做，但不必像 F401 那样分的过于细致，这样主要是有以下考量：
-
-1. 避免频繁冲突
-2. 避免像 Black 引入时需要临时修改 PR-CI-Coverage 流水线
-3. 由于仅仅格式化 imports 部分，不会像 Black 那样造成很大的影响，不需要专门找时间来 merge
+也就是说，isort 的引入采取两者的折衷，即分目录来做，但不必像 F401 那样分的过于细致，每个 PR 保持在修改 1000 左右数量的文件。
 
 具体实施步骤如下：
 
@@ -132,15 +134,17 @@ isort 在开源社区非常受欢迎，截止至 2022.11.12，isort 在 GitHub �
 
 ### 可行性验证
 
-[PaddlePaddle/Paddle#46475](https://github.com/PaddlePaddle/Paddle/pull/46475) 已经尝试了对第一步 900+ 文件进行格式化，能够通过全部单测，并且冲突概率并不高，比较容易合入。
+[PaddlePaddle/Paddle#46475](https://github.com/PaddlePaddle/Paddle/pull/46475) 已经尝试了对第一步 900+ 文件进行格式化，能够通过全部单测。
 
 ### 推进方式
 
-第一个 PR（即 [PaddlePaddle/Paddle#46475](https://github.com/PaddlePaddle/Paddle/pull/46475)）添加配置并修复部分文件，之后每个 PR 修复一部分文件（尽可能保持在 1000 左右），利用大概 5 个以内 PR 修复绝大多数文件格式，之后利用一些 PR 专注于解决需要手动解决的问题。
+第一个 PR（即 [PaddlePaddle/Paddle#46475](https://github.com/PaddlePaddle/Paddle/pull/46475)）添加配置并修复部分文件，之后每个 PR 修复一部分文件（尽可能保持在 1000 左右，以避免 PR-CI-Coverage 流水线崩溃在参数传递处），利用大概 5 个以内 PR 修复绝大多数文件格式，之后利用一些 PR 专注于解决需要手动解决的问题。
 
 对于直接格式化会出错的文件，需要通过添加[适当的注释](https://pycqa.github.io/isort/docs/configuration/action_comments.html)（如 `isort: skip`、`isort: skip-file`）来跳过格式化。
 
 由于 fluid 目录预计在 release/2.5 中移除，目前也已经有很多 PR 在推进，因此该目录同 Flake8 采取相同方案，除单测外不进行修复。此外，NPU、MLU 目录也因为相同理由不进行修复。
+
+由于 isort 的影响范围较小（仅仅为代码 import 区域），因此针对 release/2.4 分支无需将配置 Cherry-pick 过去，也不需要进行全量修复。
 
 ## 3、主要影响的模块接口变化
 
