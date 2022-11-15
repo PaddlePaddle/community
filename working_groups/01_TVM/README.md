@@ -1,6 +1,6 @@
 # PaddlePaddle Working Group on TVM
 
-PaddlePaddle Working Group on TVM (PPWG-TVM) 的使命是通过生态合作建设飞桨 TVM 代码仓库 ( https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py )。
+PaddlePaddle Working Group on TVM (PPWG-TVM) 的使命是通过生态合作建设[飞桨 TVM 代码仓库]( https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py)。
 
 # PPWG-TVM 的角色
 PPWG-TVM 负责在各类活动：品牌活动、会议等，宣传飞桨 TVM 代码仓库代表的 TVM 适配技术路线。
@@ -22,20 +22,20 @@ NOTE - 虽然本WG的角色偏向于市场推广，因而可能更适合企业�
 PPWG-TVM 每季度进行一次例行会议。时间在每季度的第三个周四的19点-20点。会议主要以线上方式召开。
 会议的议程，包括并不限于以下环节：
 
-- WG 主席分享飞桨 TVM 代码仓库上一季度建设进展 （5 minutes）
-- WG 副主席分享下一季度飞桨内部社区 TVM 相关活动规划，并向企业成员确认参与意愿（15 minutes）
-- WG 主席主持讨论 PPWG-TVM 下一季度在飞桨社区之外的活动规划。（ 15 minutes ）
-- 自由发言，可以提想法、提问和讨论。（10minutes）
+- WG 主席分享飞桨 TVM 代码仓库上一季度建设进展； （5 minutes）
+- WG 副主席分享下一季度飞桨内部社区 TVM 相关活动规划，并向企业成员确认参与意愿；（15 minutes）
+- WG 主席主持讨论 PPWG-TVM 下一季度在飞桨社区之外的活动规划；（15 minutes）
+- 自由发言，可以提想法、提问和讨论；（10minutes）
 - 确定下次季度会议的时间，以及如果因为活动需要的 interim 会议的时间。（5 minutes）
 
 第一次的例会的时间定在2023-2-23 19:00，
 - 贡献统计周期从2021-01-01至2023-02-01，请各成员于2023-02-02将其贡献给飞桨TVM代码仓库的算子数量（算子实现计数0.5，测试用例技术0.5）
 - 企业贡献量可以统计其：
--- a.员工贡献量
--- b.其赞助的活动中外部开发者的贡献量
+  - a.员工贡献量
+  - b.其赞助的活动中外部开发者的贡献量
 - 个人贡献量
 
-每期会议材料见：[百度网盘 - PPWG-TVM]( https://pan.baidu.com/s/1rA4a-3Qzrts6d8gKSIAaag ）（提取码见微信群公告）
+每期会议材料见：[百度网盘 - PPWG-TVM](https://pan.baidu.com/s/1rA4a-3Qzrts6d8gKSIAaag)（提取码见微信群公告）
 
 # 开放交流
 
@@ -43,7 +43,7 @@ PPWG-TVM 鼓励大家进行开放的交流，对外披露会议时间与参会�
 
 # Roadmap
 
-Paddle-TVM 代码仓库的建设需要更多的生态贡献。希望各合作伙伴积极贡献，其contribution 将以其他各种形式的鼓励认可，包括但不限于 各类飞桨生态活动中，与TVM相关的资源将会优先提供给合作伙伴。
+Paddle-TVM 代码仓库的建设需要更多的生态贡献。希望各合作伙伴积极贡献，其 contribution 将以其他各种形式的鼓励认可，包括但不限于 各类飞桨生态活动中，与TVM相关的资源将会优先提供给合作伙伴。
 
 # 如何加入
 
