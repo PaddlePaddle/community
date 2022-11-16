@@ -11,7 +11,7 @@
 飞将框架动转静模块旧接口退场，规范核心代码逻辑，扩展动转静 Transformer 和 API 功能。
 
 ### 3.方案要点
-![to_static_princinple](images/to_static_princinple.png)
+![to_static_princinple](images/to_static_pricinple.png)
 #### 3.1 开发原则
 飞桨作为深度学习开源框架，每年会有节奏地发布新版本，因此在开发规范上有如下两点要求：
 + **版本兼容性**：对于核心功能扩展，需要注意新版本功能能够兼容旧版本；
