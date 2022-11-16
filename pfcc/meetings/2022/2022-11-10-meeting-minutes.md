@@ -41,4 +41,6 @@ PFCC成员[yiakwy](https://github.com/yiakwy) 主题分享《基于大SRAM和分
 
 ### 下次会议安排
 
-确定下次会议的时间为两周后的同一个时间段。并确定下一期主席为[Zheng-Bicheng](https://github.com/Zheng-Bicheng)，副主席为[VigiZhang](https://github.com/VigiZhang)，主题待定。
+确定下次会议的时间为两周后的同一个时间段。并确定下一期主席为[Zheng-Bicheng](https://github.com/Zheng-Bicheng)，副主席为[VigiZhang](https://github.com/VigiZhang)，主题为部署。
+
+预告：下一期邀请印度小哥 [manangoel99](https://github.com/manangoel99) 分享他给 paddle 的贡献 [Paddle#46918](https://github.com/PaddlePaddle/Paddle/pull/46918)。
