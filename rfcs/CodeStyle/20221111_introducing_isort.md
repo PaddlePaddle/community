@@ -36,6 +36,13 @@ Paddle 在近期已经连续引入了 Flake8、Black 工具，Python 端代码�
 
 引入 isort 工具，对 Paddle 的 import 区域进行重排。
 
+isort 格式化文件范围为 Paddle 全量 Python 代码，但排除以下目录：
+
+- `python/paddle/fluid` 目录，但不包含其中的单测文件（即单测文件仍然需要格式化）
+- 第三方库
+- 自动生成的文件
+- NPU、MLU 相关即将移动到 [PaddleCustomDevice](https://github.com/PaddlePaddle/PaddleCustomDevice) 的代码
+
 ## 3、意义
 
 - 保证 import 区域的顺序规范，提高代码可读性
