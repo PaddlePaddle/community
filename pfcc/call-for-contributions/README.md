@@ -17,6 +17,8 @@
 - [PHI算子库独立编译](decoupled_phi_from_fluid.md)【进行中】
 - [DenseTensor 概念统一](tensor_concept_unification.md)
 - [CINN基础算子开发](CINN_base_operator.md)
+- [动转静功能扩展和旧接口退场](to_static_function_extension.md)【进行中】
+- [飞桨 API 动静行为统一](unify_api_behavior.md)【进行中】
 
 ## 飞桨线上开发环境——AI Studio
 AI Studio是基于百度深度学习开源平台飞桨的人工智能学习与实训社区，为开发者免费提供功能强大的线上训练环境、云端超强GPU算力及存储资源。云集200万AI开发者共同学习、交流、竞技与成长。每日提供8小时免费GPU算力供飞桨开发者学习实践。
