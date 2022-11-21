@@ -17,6 +17,7 @@
 - [PHI算子库独立编译](decoupled_phi_from_fluid.md)【进行中】
 - [DenseTensor 概念统一](tensor_concept_unification.md)
 - [CINN基础算子开发](CINN_base_operator.md)
+- [Paddle-TensorRT算子开发](paddle_trt_optimization.md)
 - [动转静功能扩展和旧接口退场](to_static_function_extension.md)【进行中】
 - [飞桨 API 动静行为统一](unify_api_behavior.md)【进行中】
 
