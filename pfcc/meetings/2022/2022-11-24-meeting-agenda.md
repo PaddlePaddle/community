@@ -74,15 +74,14 @@
   - [VigiZhang](https://github.com/VigiZhang)
   - [huangjiyi](https://github.com/huangjiyi)
   - [supercodebull](https://github.com/supercodebull)
-  - [jiamingkong](https://github.com/jiamingkong)
+
 
 
 # 会议议程
 
-- 新人介绍 
-- [manangoel99](https://github.com/manangoel99) 
-- []() Paddle Lite 硬件接入方案 NNAdapter（10-15min）
+- [manangoel99](https://github.com/manangoel99) （30min）
+- [yingshengBD](https://github.com/yingshengBD) Paddle Lite 硬件接入方案 NNAdapter（10-15min）
 - [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 为FastDeploy接入RKNPU2引擎（5-10min）
 - PFCC 成员自由发言讨论（5 min）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
-  - 预告：下一期主席待定，主题待定。
+  - 预告：下一期主席 张雅琨[VigiZhang](https://github.com/VigiZhang)，主题 飞桨安全与漏洞修复。
