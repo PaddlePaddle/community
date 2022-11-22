@@ -1,14 +1,17 @@
 # Paddle-TensorRT 算子开发
+
+> This project will be mentored by [@zhangjun](https://github.com/zhangjun)
+
 ## 1、背景与意义
 TensorRT 是一个针对 NVIDIA GPU 及 Jetson 系列硬件的高性能机器学习推理 SDK，可以使得深度学习模型在这些硬件上的部署获得更好的性能。Paddle Inference 以子图方式集成了 TensorRT，将可用 TensorRT 加速的算子组成子图供给 TensorRT，以获取 TensorRT 加速的同时，保留 PaddlePaddle 即训即推的能力。
 
 当模型被 Paddle Inference 加载后，神经网络被表示为由变量和运算节点组成的计算图。在图分析阶段，Paddle Inference 会对模型进行分析同时发现图中可以使用 TensorRT 优化的子图，并使用 TensorRT 节点替换它们(如下图)。在模型的推理期间，如果开启TensorRT开关，遇到 TensorRT 节点，Paddle Inference 会调用 TensorRT 对该节点进行执行，其它节点调用 GPU 原生推理，充分利用TensorRT性能优化。
 
-![trt engine](images/trt_engine.png)
+![trt_engine](https://user-images.githubusercontent.com/1312389/203226862-a3cbc221-dc51-4a31-8108-5dd1c31ffca5.png)
 
 NVIDIA TensorRT提供了42类Layer，包括91+个算子。Paddle-TensorRT 已经支持其中大部分Layer和算子，并且由于NVIDIA TensorRT新版本在持续更新迭代，仍然存在缺失的情形，如控制流算子支持、TensorRT v8.5版本新增IOneHotLayer、INMSLayer。目前Paddle主要通过三种机制对TensorRT进行支持：（1）Tensor Layer映射；（2）通用plugin机制（文档参见 [General plugin mechanism](https://github.com/PaddlePaddle/Paddle/pull/45355)）；（3）TensorRT OSS plugin映射。
 
-![paddle trt](images/paddle_trt.png)
+![paddle_trt](https://user-images.githubusercontent.com/1312389/203226961-2d934d10-1c72-4c4c-96e9-8b1ac7814e85.png)
 
 ## 2、目标
 完成 Paddle-TensorRT 算子开发及映射工作；通过通用plugin机制基于Phi算子库，完成对 Paddle-TensorRT 不支持的算子添加。
@@ -31,5 +34,3 @@ NVIDIA TensorRT提供了42类Layer，包括91+个算子。Paddle-TensorRT 已经
 
 参考链接：
 * [飞桨官网-贡献指南-代码贡献流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html)
-
-## 4、总结与收益
