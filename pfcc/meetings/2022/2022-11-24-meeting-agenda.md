@@ -74,14 +74,16 @@
   - [VigiZhang](https://github.com/VigiZhang)
   - [huangjiyi](https://github.com/huangjiyi)
   - [supercodebull](https://github.com/supercodebull)
+  - [onecatcn](https://github.com/onecatcn)
+  - [leiqing1](https://github.com/leiqing1)
 
 
 
 # 会议议程
 
-- [manangoel99](https://github.com/manangoel99) PaddlePaddle and W&B：From the perspective of ML communities（30min）
+- [manangoel99](https://github.com/manangoel99) PaddlePaddle and W&B：From the perspective of ML communities（20min）
 - [yingshengBD](https://github.com/yingshengBD) Paddle Lite 硬件接入方案 NNAdapter（10-15min）
-- [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 为FastDeploy接入RKNPU2引擎（5-10min）
+- [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 为 FastDeploy 接入 RKNPU2 引擎（10-15min）
 - PFCC 成员自由发言讨论（5 min）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
-  - 预告：下一期主席 张雅琨[VigiZhang](https://github.com/VigiZhang)，主题 飞桨安全与漏洞修复。
+  - 预告：下一期主席 张雅琨 [VigiZhang](https://github.com/VigiZhang)，主题 飞桨安全与漏洞修复。
