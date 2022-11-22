@@ -1,4 +1,8 @@
 # 编译warning的消除
+
+> This project will be mentored by [@zhiqiu](https://github.com/zhiqiu) and [@luotao1](https://github.com/luotao1)
+> 
+> Tracking issue: [PaddlePaddle/Paddle#47143](https://github.com/PaddlePaddle/Paddle/issues/47143)
 ## 目的
 
 作为一个大型的基础设施类开源项目，减少飞桨框架在编译时的warning，可以提升工程质量和整个代码仓库的可维护性，以及减少潜在的bug。
@@ -54,6 +58,31 @@ grep warning: b.txt |grep "\[\-W" |grep -v party | awk '{print $NF}'|sort|uniq -
 grep warning c.txt |wc -l 
 # 8
 ```
+### 第三方库引入的warning情况
+历史上为了兼容第三方库的编译，在cmake中加了一些warning选项。当第三方库发生变化（移除或更新）时，这些warning选项也需要同步更新。
+
+#### 由Boost库引入的warning
+Boost库作为C++标准库的“预备军”，一直以来在飞桨框架开发中充当C++扩展库的角色，便于开发者使用一些C++标准库未实现或只在较高版本C++中有实现的功能。Boost库虽使用方便，但其中存在大量宏展开以及声明和实现未做分离的数据类型，整个库体积庞大，在飞桨代码中导入Boost相关的文件对源码编译速度和build目录体积都会产生较大的负面影响。经过近期针对Boost库使用的集中整治，飞桨代码中已有的所有Boost相关代码均已被替换和移除，其中一些C++ 14标准已支持的功能替换成了标准库中的对应实现，另一些标准库中未支持的功能在paddle/utils目录下实现了功能相同的轻量化版本。
+
+目前飞桨代码已不依赖Boost库，因此`flags.cmake`中为了兼容boost库引入的warning选项都可以去掉，可避免出现 [PR#47254](https://github.com/PaddlePaddle/Paddle/pull/47254) 中的问题。如全局[flags.cmake](https://github.com/PaddlePaddle/Paddle/blob/2d0bb2c3961c7bb06746051732b460829e2450dd/cmake/flags.cmake#L170)中就有针对boost库的warning选项：
+```CMake
+if(NOT APPLE)
+    if((${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER 8.0) OR (WITH_ROCM))
+      set(COMMON_FLAGS
+          ${COMMON_FLAGS}
+          -Wno-format-truncation # Warning in boost gcc 8.2
+          -Wno-error=parentheses # Warning in boost gcc 8.2
+          -Wno-error=catch-value # Warning in boost gcc 8.2
+          -Wno-error=nonnull-compare # Warning in boost gcc 8.2
+          -Wno-error=address # Warning in boost gcc 8.2
+          -Wno-ignored-qualifiers # Warning in boost gcc 8.2
+          -Wno-ignored-attributes # Warning in Eigen gcc 8.3
+          -Wno-parentheses # Warning in Eigen gcc 8.3
+      )
+    endif()
+  endif()
+```
+
 ### 未打开的warning情况（非常多，几十万+）
 在cmake中还有些手动修改了warning选项的，因此不会统计出来。目前GCC选项：指定了一些-Wno-error，可以在修复一类后，把这些都去掉即可。
 ```
