@@ -11,6 +11,7 @@
 - [flake8 代码风格检查工具的引入](code_style_flake8.md)【进行中】
 - [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
 - [Python 2.7 相关代码退场](legacy_python2.md)【进行中】
+- [Python 3.5/3.6 相关代码退场](legacy_python36minus.md)【进行中】
 - [Type Hint类型注释](type_hint.md)【进行中】
 - [建设更多的Tutorial](Call_For_Tutorials.md)【进行中】
 - [API文档体验优化](docs_optim_for_API.md)【进行中】
