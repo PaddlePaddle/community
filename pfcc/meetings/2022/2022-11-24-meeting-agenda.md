@@ -79,7 +79,7 @@
 
 # 会议议程
 
-- [manangoel99](https://github.com/manangoel99) （30min）
+- [manangoel99](https://github.com/manangoel99) PaddlePaddle and W&B：From the perspective of ML communities（30min）
 - [yingshengBD](https://github.com/yingshengBD) Paddle Lite 硬件接入方案 NNAdapter（10-15min）
 - [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 为FastDeploy接入RKNPU2引擎（5-10min）
 - PFCC 成员自由发言讨论（5 min）
