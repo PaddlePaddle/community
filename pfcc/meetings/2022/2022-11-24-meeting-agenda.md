@@ -74,6 +74,9 @@
   - [VigiZhang](https://github.com/VigiZhang)
   - [huangjiyi](https://github.com/huangjiyi)
   - [supercodebull](https://github.com/supercodebull)
+  - [longranger2](https://github.com/longranger2)
+  - [taixiurong](https://github.com/taixiurong)
+  - [FisherWY](https://github.com/FisherWY)
   - [onecatcn](https://github.com/onecatcn)
   - [leiqing1](https://github.com/leiqing1)
 
