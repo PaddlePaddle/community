@@ -889,14 +889,3 @@ kernel选择分发体系的最终目标是，统一静态图/老动态图/新动
 Paddle 目前在kernel选择分发时，遵循着如下的选择优先级：phi kernel > fluid kernel；Xpu kernel > CPU kernel（此处的Xpu指除了CPU以外的所有硬件）fallback指的是在kernel选择时，如果没有找到Xpu的kernel，则会fallback到CPU的kernel，保障代码的正常运行。
 
 然而并不是所有的Xpu都可以fallback到CPU中，特例是GPU的kernel不会fallback到CPU，如果GPU的kernel没有找到，则会直接报错。从代码调试的角度出发，如果支持GPU fallback 到CPU，那么当模型的性能下降时，会很难排查，需要确定有没有找到对应kernel，还是其他的问题。
-
-
-
-
-
-
-
-
-
-
-
