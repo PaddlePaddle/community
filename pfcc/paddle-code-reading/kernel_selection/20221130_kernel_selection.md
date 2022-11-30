@@ -890,32 +890,6 @@ Paddle 目前在kernel选择分发时，遵循着如下的选择优先级：phi 
 
 然而并不是所有的Xpu都可以fallback到CPU中，特例是GPU的kernel不会fallback到CPU，如果GPU的kernel没有找到，则会直接报错。从代码调试的角度出发，如果支持GPU fallback 到CPU，那么当模型的性能下降时，会很难排查，需要确定有没有找到对应kernel，还是其他的问题。
 
-- torch dispatch key和我们对比的优劣？structured kernel的了解？
-
-torch 的选择分发机制和 paddle 的选择分发对比，有下列的优点：
-
-1. 可复用性高，torch 把选择分发提升到了一个更加全局的角度。torch 相当于把 autograd、Trace这些更上层的函数，和 kernel 放到了同一层次，也仅有这一层次，所有函数都可以相互复用；而paddle的调用层次有三层：dygraph层、api层和kernel层，不同层次的函数间无法相互调用，因此对于paddle来说，如何决定函数在那一层复用，是未来需要着重注意的问题，否则容易造成框架不同层次的耦合。
-
-2. torch的这套选择分发机制，蕴含了很多trick在里面。例如dispatchKey的enum class不仅利用了枚举值，还利用枚举值的大小蕴含了优先级的概念，优先级也可以理解为调度顺序。paddle对于mkldnn处理时，将mkldnn硬编码嵌入到各个层次，而pytorch就可以把mkldnn的实现都放到一个dispatchKey上，可扩展性更强。
-
-缺点也很明显：
-
-1. 所有函数调用的时候都要走一遍dispatch逻辑，当调用栈较深时，dispatch的选择开销过重，影响框架性能。
-
-2. dispatch内的概念相对来说更混乱，糅合了autograd、kernel、backend等等信息，对外部开发者不友好。
-
-structured kernel可能是torch解决dispatch性能的一种思路，对我个人而言，还没有开发场景需要了解torch的structured kernel机制，因此还没有深入了解过structured kernel，未来可能会深入调研。
-
-- torch在dispatch时怎么解决多kernel选择问题？dispatch 怎么选择BLD三元组？pytorch注册时候的用时为什么短？
-
-首先torch中的layout概念与paddle是不同的，paddle的layout包括sparse/dense、NCHW/NHWC这两类信息，实际上这两类不应该放到一起组织；torch中的layout仅指sparse/dense，因此layout的数量远小于paddle。
-
-1. torch在dispatch时，将backend和layout组合成一个DispatchKey，例如有DenseCPU、DenseGPU、SparseCPU等，当选择到对应的DispatchKey时，则会执行对应backend和layout的kernel
-
-2. torch在dispatch时，仅选择了backend和layout，选择datatype的逻辑封装在kernel中，相当于kernel内部用switch-case语句来判断，执行哪个特化逻辑。
-
-3. 当运行import paddle或者import pytorch时，执行框架注册kernel的逻辑，pytorch注册用时短，可能是因为torch注册的kernel数量少。因为torch只需要注册 backend * layout 个kernel，而paddle需要注册 backend * layout * datatype 个kernel。paddle现有的注册方式有历史原因在里面。
-
 
 
 
