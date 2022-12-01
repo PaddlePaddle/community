@@ -1,4 +1,7 @@
 # clang-tidy代码风格检查工具的引入
+
+> This project will be mentored by [@luotao1](http://github.com/luotao1)
+
 ## 背景
 Paddle目前使用的代码风格检查工具及hooks版本较低，导致开发者在提交代码时会碰到一些问题，加强代码规范检查，有利于提高Paddle代码质量，增强代码的可读性。
 
@@ -37,7 +40,7 @@ cppcoreguidelines-init-variables  | 12471 | 变量未初始化
 
 ## 可行性分析和规划排期
 1. 因为存量较大，需要进行存量修复的可行性分析（本任务最有难度的地方），并制定如何修复的步骤
-   * 将检查工具的检测项逐一打开，并逐步修复对应的存量问题。如可以先解决flake8中结尾有多余空格的问题。
+   * 将检查工具的检测项逐一打开，并逐步修复对应的存量问题。
    * 部分存量较大的问题，需要有自动化工具进行修复。
 2. 格式检查工具升级和存量修复，可以参考[code format check upgrade](https://github.com/PaddlePaddle/Paddle/search?q=code%20format%20check%20upgrade&type=commits) 已有工作
 3. 仅格式检查工具同步到release分支，参考 [PR43732](http://agroup.baidu.com/paddle-ci/md/article/2https://github.com/PaddlePaddle/Paddle/pull/43732)
