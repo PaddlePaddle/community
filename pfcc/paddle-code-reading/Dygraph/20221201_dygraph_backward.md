@@ -37,11 +37,11 @@ return RunBackward(tensors,grad_tensors,retain_graph,create_graph,inputs,allow_u
 前向过程执行结束后，反向节点Grad_node创建，其中包含反向输入tensor信息 bwd_in_meta_，反向输出信息 bwd_out_meta_
 GradSlotMeta中包含 adj_edge_
 Edge中包含 in_slot_id ,in_rank, grad_node 
-![image](image/7.jpg)
+![image](image/7.png)
 ### 反向执行过程及执行中数据结构：
 反向计算过程通过run_backward函数遍历整个反向图，其中借助数据结构queue 存放所有需要执行的反向节点；node_input_buffers_dict存放反向节点和输入tensor数据的对应关系；node_in_degree_map存放反向节点和其入度的对应关系，其中入度是指输入tensor没有准备好的个数，为0时代表该节点可以执行。
 整个函数中分为准备和执行两个阶段，准备阶段将反向图的拓扑图第一层的节点放入queue中，更新该节点的node_inout_buffers_dict。同时遍历整个图更新node_in_degree_map。执行阶段遍历queue中的节点执行，执行后更新其他节点的node_inout_buffers_dict，node_in_degree_map， 当入度为0时加入queue中，直到所有节点执行结束。
-![image](image/8.jpg)
+![image](image/8.png)
 
 ### 代码分析
 #### 1> 准备阶段：
@@ -299,7 +299,7 @@ Hook执行
 
 #### 基础数据结构：
 general_grad数据结构是为grad()接口设计的类，全局只有一个实例
-![image](image/9.jpg)
+![image](image/9.png)
 
 backward中处理逻辑
 grad 接口与 backward 接口共用run_backward()函数，以下省略共用逻辑，分析general_grad特殊处理逻辑
@@ -388,7 +388,7 @@ std::vector<paddle::experimental::Tensor> RunBackward(
 ```
 
 以上图为例，假设需要计算y对x的梯度，不需要节点2的贡献，则调用形式为grad(x, y, grad_tensors=y_g, no_grad_vars=x_2)，在调用此接口时全局已经存在backward需要执行的全流程反向图。
-![image](image/10.jpg)
+![image](image/10.png)
 
 #### 调用函数分析
 复制节点（深拷贝）
@@ -411,7 +411,7 @@ std::unordered_set<GradNodeBase*>* GetPotentialStartupNodes() {
   }
 ```
 调用以上函数后，general_grad的变量分别更新为下图，orig_queue存放拓扑图第一层节点，queue中存放复制的子图的第一层节点，orig_to_copied_node_map存放原图节点和复制后节点的对应关系。
-![image](image/11.jpg)
+![image](image/11.png)
 
 准备general_grad的相关数据结构
 ```c++
@@ -446,7 +446,7 @@ void PreparedForGeneralGrad() {
 }
 ```
 遍历orig_queue中的节点，从orig_to_copied_node_map_中查找复制的节点对，逐步复制后续的反向图。
-![image](image/12.jpg)
+![image](image/12.png)
 ```c++
 void CopyBackwardGraph(const std::deque<GradNodeBase*>& orig_init_queue) {
     //只有拓扑图中第一层的节点
@@ -503,7 +503,7 @@ void CopyBackwardGraph(const std::deque<GradNodeBase*>& orig_init_queue) {
 ```
 
 GetTargetNodesInfo 获取 no_grad_vars 和 inputs 的反向节点和节点对应的输入meta信息，更新xxx_nodes_inputmeta_map_，复制后的反向节点和原始反向节点的输入tensor的AutoGradMeta信息对应关系。
-![image](image/13.jpg)
+![image](image/13.png)
 ```c++
 void GetTargetNodesInfo(
       const std::vector<paddle::experimental::Tensor>& inputs,
@@ -564,7 +564,7 @@ PurifyPotentialStartUpNodes 删除potential_startup_nodes_中输入tensor的反�
   }
 ```
 GetGraphInfoBetweenTargets 获取输入到输出的图信息由下至上更新depending_nodes_（子图节点和前续节点对应关系）
-![image](image/14.jpg)
+![image](image/14.png)
 ```c++
 void GetGraphInfoBetweenTargets(const std::deque<GradNodeBase*>& init_queue) {
     VLOG(6) << "Runing In GetGraphInfoBetweenTargets";
@@ -603,7 +603,7 @@ void GetGraphInfoBetweenTargets(const std::deque<GradNodeBase*>& init_queue) {
   }
   ```
 UpdateGraphInfo 从上向下遍历图，确定反向开始的节点startup_ops和结束的节点ending_nodes, 以及需要计算的节点 needs_nodes, potential_startup_nodes中只剩此次计算路径上的初始节点.
-![image](image/15.jpg)
+![image](image/15.png)
 ```c++
 void UpdateGraphInfo() {
     std::unordered_set<GradNodeBase*> startup_ops;
@@ -697,7 +697,7 @@ void SetResultForInputTargetVar(const std::unordered_map<GradNodeBase*,
   }
 ```
 对结束节点设置AccumulationNode，遍历节点的输出Meta设置no_grad_var的stopGradient为True
-![image](image/16.jpg)
+![image](image/16.png)
 ```c++
 void ModifyBackwardGraph(std::deque<GradNodeBase*>* queue) {
     std::deque<GradNodeBase*> queue_ = *queue;
