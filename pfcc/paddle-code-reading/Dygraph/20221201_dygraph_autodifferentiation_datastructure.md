@@ -8,15 +8,6 @@
 | 依赖飞桨版本 | develop                                         |
 | 文件名       | 20221201_dygraph_sutodifferentiation_datastructure.md |
 
-<<<<<<< HEAD
-=======
-## 旧动态图问题
-动态图当初为了复用静态图带来了性能损失：
-1.使用op体系，将函数的多种信息包装在context结构体中：硬件信息，输入输出数据type，layout，等导致对这些结构体的创建和拆解耗时很大，同时运行前会对op进行大量的数据类型，大小等检查。在静态图情况下此过程只需进行一次，而动态图在每次调用时都需要进行，耗时很多。
-改进点：根据输入输出直接判断kernel，将内核函数地址传给接口。不需要在运行时调用operatorwithkernel的choose kernel函数进行选择。同时反向算子不需要使用opgradmaker，每个opkernel都有相对应的gradkernel可以直接调用。
-2.原有varbase基于静态图的variable使用组合方式将自动微分所需要的反向信息和数据信息组合存放，导致对varbase的拷贝量加大，且无意义。
-改进点：数据结构改造，，动态图和静态图需要共用Tensor数据结构，在Tensor数据结构中使用AutoGradMeta记录反向相关信息，AutoGradMeta使用智能指针，不会扩大数据的存储空间。
->>>>>>> 0e54ec4... add three dygraph docs
 
 ## 一. Tensor相关类
 
@@ -107,11 +98,7 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
      - RetainGrads(); SetRetainGrads(bool value)
 
           至此，我们通过下图描述上述结构如何在实际运行中存在，如图所示，在执行op时，需要a, b两个输入tensor, b tensor是last_op的输出,op的输出为c tensor, 其中a, b，c使用tensor 数据结构存储。如果这个op不需要反向计算，tensor中的autogradmeta 为 AbstractAutogradMeta类型，如果需要反向计算，则为AutogradMeta类型。对呀tensor c , AutoGradMeta中主要包含梯度tensor c_G；反向节点op_G,；c作为op的输出对应的位置out_slot, out_rank， slot 代表c是op第几个输出，rank代码c是op第slot个输出的第几个向量；已经stop_gradient信息，记录此tensor是否需要进行反向计算。
-<<<<<<< HEAD
           ![image](image/1.png)
-=======
-          ![](media/16591681678582/16698691183369.jpg)
->>>>>>> 0e54ec4... add three dygraph docs
 
 
 ### 2.3 GradNodeBase
@@ -152,13 +139,8 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
 接下来，我们分析op对应的反向算子op_,其需要前向的输入tensor a, b ，有时也需要前向输出的tensor c, 如果此时仍使用tensor数据结构，会导致 op_G 持有 c tensor, c tensor 持有op_G 形成循环依赖，导致数据无法析构，因此我们设计TensorWrapper数据结构，作为反向算子持有的前向算子输入输出tensor结构，该结构中使用弱指针引用AutogradMeta，（反向算子使用前向输入输出只需要其meta信息或data信息，不需要其反向信息），由于有时反向算子不需要data信息，因此tensorwrapper中也设置no_need_buffer_ 变量，当不需要data时减少数据存储开销。Tensorwrapper会作为GradNodeBase的成员变量记录。
        当我们执行反向图时，需要通过op_G获得 last_op_G的信息，而这个连接信息将通过 GradNodeBase中的 bwd_out_meta结构存储，该结构存储了反向算子所有的输出meta信息。
  
-<<<<<<< HEAD
 ![image](image/2.png)
 ![image](image/3.png)
-=======
-![](media/16591681678582/16698691392777.jpg)
-![](media/16591681678582/16698691454460.jpg)
->>>>>>> 0e54ec4... add three dygraph docs
 
 
 2.4 GradSlotMeta 
@@ -200,11 +182,7 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
      
       GradNodeBase 结构中的bwd_out_meta 和 bwd_in_meta 是 GradSlotMeta结构的vector， GradslotMeta中包含了stop_gradient 变量记录该输出是否会进行梯度计算，TensorMeta 变量记录该输出的大小信息，以根据此信息创建梯度的buffer; edge变量记录反向计算下一个节点的信息；
       Eage结构中包含in_slot, in_rank记录该边是下一个反向节点第几个输入；GradNodeBase记录下一个节点next_op_G信息
-<<<<<<< HEAD
 ![image](image/4.png)
-=======
-![](media/16591681678582/16698691454460.jpg)
->>>>>>> 0e54ec4... add three dygraph docs
 
 
 ### 2.6 GradTensorHolder
