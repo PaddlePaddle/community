@@ -97,7 +97,7 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
      - Persistable() ; SetPersistable(bool persistable)
      - RetainGrads(); SetRetainGrads(bool value)
 
-          至此，我们通过下图描述上述结构如何在实际运行中存在，如图所示，在执行op时，需要a, b两个输入tensor, b tensor是last_op的输出,op的输出为c tensor, 其中a, b，c使用tensor 数据结构存储。如果这个op不需要反向计算，tensor中的autogradmeta 为 AbstractAutogradMeta类型，如果需要反向计算，则为AutogradMeta类型。对于tensor c , AutoGradMeta中主要包含梯度tensor c_G；反向节点op_G,；c作为op的输出对应的位置out_slot, out_rank， slot 代表c是op第几个输出，rank代码c是op第slot个输出的第几个向量；已经stop_gradient信息，记录此tensor是否需要进行反向计算。
+          至此，我们通过下图描述上述结构如何在实际运行中存在，如图所示，在执行op时，需要a, b两个输入tensor, b tensor是last_op的输出,op的输出为c tensor, 其中a, b，c使用tensor 数据结构存储。如果这个op不需要反向计算，tensor中的autogradmeta 为 AbstractAutogradMeta类型，如果需要反向计算，则为AutogradMeta类型。对于tensor c , AutoGradMeta中主要包含梯度tensor c_G；反向节点op_G,；c作为op的输出对应的位置out_slot, out_rank， slot 代表c是op第几个输出，rank代码c是op第slot个输出的第几个向量；以及stop_gradient信息，记录此tensor是否需要进行反向计算。
           ![image](image/1.png)
 
 
@@ -137,7 +137,7 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
   std::shared_ptr<UnPackHookBase> unpack_hook_;
 
 接下来，我们分析op对应的反向算子op_,其需要前向的输入tensor a, b ，有时也需要前向输出的tensor c, 如果此时仍使用tensor数据结构，会导致 op_G 持有 c tensor, c tensor 持有op_G 形成循环依赖，导致数据无法析构，因此我们设计TensorWrapper数据结构，作为反向算子持有的前向算子输入输出tensor结构，该结构中使用弱指针引用AutogradMeta，（反向算子使用前向输入输出只需要其meta信息或data信息，不需要其自动微分信息），由于有时反向算子不需要data信息，因此tensorwrapper中也设置no_need_buffer_ 变量，当不需要data时减少数据存储开销。Tensorwrapper会作为GradNodeBase的成员变量记录。
-       当我们执行反向图时，需要通过op_G获得 last_op_G的信息，而这个连接信息将通过 GradNodeBase中的 bwd_out_meta结构存储，该结构存储了反向算子所有的输出meta信息。
+当我们执行反向图时，需要通过op_G获得 last_op_G的信息，而这个连接信息将通过 GradNodeBase中的 bwd_out_meta结构存储，该结构存储了反向算子所有的输出meta信息。
  
 ![image](image/2.png)
 ![image](image/3.png)
