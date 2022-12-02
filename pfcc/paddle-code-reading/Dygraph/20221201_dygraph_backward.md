@@ -9,9 +9,9 @@
 | 文件名       | 20221201_dygraph_backward.md |
 
 ## 一：用户端到框架层调用路径
-python API      ->    python-c (eager_function.cc )               ->    c++ (backward.cc)
-loss.backward() ->    run_backward <-> eager_api_run_backward     ->    Backward(){Runbackward()}
-paddle.grad() ->                                                  -> Grad(){Runbackward}
+｜python API      ｜    python-c (eager_function.cc )               ｜   c++ (backward.cc)｜
+｜loss.backward() ｜    run_backward <-> eager_api_run_backward     ｜    Backward(){Runbackward()}｜
+｜paddle.grad() ｜                                                ｜ Grad(){Runbackward}｜
 
 ## 二. Backward() / Grad()接口
 ```c++
