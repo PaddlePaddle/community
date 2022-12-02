@@ -24,23 +24,26 @@ std::vector<paddle::experimental::Tensor> Grad(
     const std::vector<paddle::experimental::Tensor>& tensors,  // 前向输出tensor
     const std::vector<paddle::experimental::Tensor>& inputs,  //前向输入tensor，作为反向的输入
     const std::vector<paddle::experimental::Tensor>& grad_tensors, //前向输出tensor初始梯度
-    bool retain_graph,bool create_graph,bool only_inputs,bool allow_unused,
-    const std::vector<paddle::experimental::Tensor>& no_grad_vars){
+    bool retain_graph,//是否保留计算梯度的前向图。若值为 True，则前向图会保留，用户可对同一张图求两次反向。若值为 False，则前向图会释放。默认值为 None，表示值与 create_graph 相等。
+    bool create_graph,//是否创建计算过程中的反向图。若值为 True，则可支持计算高阶导数。若值为 False，则计算过程中的反向图会释放。默认值为 False
+    bool only_inputs,//是否只计算 inputs 的梯度。若值为 False，则图中所有叶节点变量的梯度均会计算，并进行累加。若值为 True，则只会计算 inputs 的梯度。默认值为 True。only_inputs=False 功能正在开发中，目前尚不支持。
+    bool allow_unused,//决定当某些 inputs 变量不在计算图中时抛出错误还是返回 None。若某些 inputs 变量不在计算图中（即它们的梯度为 None），则当 allowed_unused=False 时会抛出错误，当 allow_unused=True 时会返回 None 作为这些变量的梯度。默认值为 False。
+    const std::vector<paddle::experimental::Tensor>& no_grad_vars//指定不计算梯度的变量){
 DuplicateCheck(inputs, true /* is_input */); //检查是否有重复的tensor
 DuplicateCheck(tensors, false /* is_input */);
 return RunBackward(tensors,grad_tensors,retain_graph,create_graph,inputs,allow_unused,no_grad_vars);
 }
 ```
 ## 三. backward反向流程
-###前向执行后数据结构图：
-动态图反向相关类的解析文档：  20221201_dygraph_sutodifferentiation_datastructure.md
-前向过程执行结束后，反向节点Grad_node创建，其中包含反向输入tensor信息 bwd_in_meta_，反向输出信息 bwd_out_meta_
-GradSlotMeta中包含 adj_edge_
-Edge中包含 in_slot_id ,in_rank, grad_node 
+### 前向执行后数据结构图：
+动态图反向相关类的解析文档：  20221201_dygraph_sutodifferentiation_datastructure.md  
+前向过程执行结束后，反向节点Grad_node创建，其中包含反向输入tensor信息 bwd_in_meta_，反向输出信息 bwd_out_meta_  
+GradSlotMeta中包含 adj_edge_  
+Edge中包含 in_slot_id ,in_rank, grad_node   
 ![image](image/7.png)
 ### 反向执行过程及执行中数据结构：
-反向计算过程通过run_backward函数遍历整个反向图，其中借助数据结构queue 存放所有需要执行的反向节点；node_input_buffers_dict存放反向节点和输入tensor数据的对应关系；node_in_degree_map存放反向节点和其入度的对应关系，其中入度是指输入tensor没有准备好的个数，为0时代表该节点可以执行。
-整个函数中分为准备和执行两个阶段，准备阶段将反向图的拓扑图第一层的节点放入queue中，更新该节点的node_inout_buffers_dict。同时遍历整个图更新node_in_degree_map。执行阶段遍历queue中的节点执行，执行后更新其他节点的node_inout_buffers_dict，node_in_degree_map， 当入度为0时加入queue中，直到所有节点执行结束。
+反向计算过程通过run_backward函数遍历整个反向图，其中借助数据结构queue 存放所有需要执行的反向节点；node_input_buffers_dict存放反向节点和输入tensor数据的对应关系；node_in_degree_map存放反向节点和其入度的对应关系，其中入度是指输入tensor没有准备好的个数，为0时代表该节点可以执行。  
+整个函数中分为准备和执行两个阶段：  准备阶段将反向图的拓扑图第一层的节点放入queue中，更新该节点的node_inout_buffers_dict。同时遍历整个图更新node_in_degree_map。  执行阶段遍历queue中的节点执行，执行后更新其他节点的node_inout_buffers_dict，node_in_degree_map， 当入度为0时加入queue中，直到所有节点执行结束。
 ![image](image/8.png)
 
 ### 代码分析
@@ -387,7 +390,7 @@ std::vector<paddle::experimental::Tensor> RunBackward(
 }
 ```
 
-以上图为例，假设需要计算y对x的梯度，不需要节点2的贡献，则调用形式为grad(x, y, grad_tensors=y_g, no_grad_vars=x_2)，在调用此接口时全局已经存在backward需要执行的全流程反向图。
+以下图为例，假设需要计算y对x的梯度，不需要节点2的贡献，则调用形式为grad(x, y, grad_tensors=y_g, no_grad_vars=x_2)，在调用此接口时全局已经存在backward需要执行的全流程反向图。
 ![image](image/10.png)
 
 #### 调用函数分析

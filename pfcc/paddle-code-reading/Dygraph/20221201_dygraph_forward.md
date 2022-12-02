@@ -11,21 +11,21 @@
 
 
 ## 一. 新动态图前向调用栈
-目前在新动态图模式下，用户调用paddle 的api 接口后执行前向的调用栈如下图所示：分为用户端；python框架端；python-c映射层；dygraph_function层；c++api层；c++kernel层。
-       在paddle框架端实现的api接口中会分三个执行模式：新动态图；老动态图；静态图；其中老动态图路径中包含新动态图中间态，中间态的出现是由于新动态图的执行依赖算子库的重构，而重构过程中，由于人力和算子本身特点的限制，部分算子没有被迁移的phi算子库中，因此这些算子新动态图的执行路径没有打通（在dygraph_function中无法使用新动态图的反向图建立体系，仍复用了老动态图的trace_op执行逻辑）。老动态图和中间态会随框架迭代逐渐被废弃，因此不做更多解释。
-       新动态图的执行路径中：python-c映射层，dygraph_function层；c++api层都依赖于代码自动生成，图中分别展示了各个层级中函数代码位置和生成这些函数的生成代码位置。
+目前在新动态图模式下，用户调用paddle 的api 接口后执行前向的调用栈如下图所示：分为用户端；python框架端；python-c映射层；dygraph_function层；c++api层；c++kernel层。  
+在paddle框架端实现的api接口中会分三个执行模式：新动态图；老动态图；静态图；其中老动态图路径中包含新动态图中间态，中间态的出现是由于新动态图的执行依赖算子库的重构，而重构过程中，由于人力和算子本身特点的限制，部分算子没有被迁移的phi算子库中，因此这些算子新动态图的执行路径没有打通（在dygraph_function中无法使用新动态图的反向图建立体系，仍复用了老动态图的trace_op执行逻辑）。老动态图和中间态会随框架迭代逐渐被废弃，因此不做更多解释。  
+新动态图的执行路径中：python-c映射层，dygraph_function层；c++api层都依赖于代码自动生成，图中分别展示了各个层级中函数代码位置和生成这些函数的生成代码位置。  
  
 ![image](image/5.png)
-流程图
+
 
 ## 二. 新动态图执行路径代码详解
 首先我们从整体功能上对新动态图各层级进行介绍：
-    1.PythonAPI+pybind映射 ：用户调用接口和内部实现的接口映射关系 
-    2.Python-c 接口：准备input,attr,place， 将python 实例转换为 c++实例
-    3.Dygraph_function接口： AMP相关处理， 反向图数据结构实例化
-    4.C++API 接口：根据输入tensor参数选择Kernel，准备数据，执行kernel
-其中3中进行反向图数据结构实例化时，需要用到反向结点类和反向执行函数，因此我们设置
-    5.matmul反向代码解析：创建反向图相关数据结构，连接反向算子的执行逻辑
+- 1.PythonAPI+pybind映射 ：用户调用接口和内部实现的接口映射关系 
+- 2.Python-c 接口：准备input,attr,place， 将python 实例转换为 c++实例
+- 3.Dygraph_function接口： AMP相关处理， 反向图数据结构实例化
+- 4.C++API 接口：根据输入tensor参数选择Kernel，准备数据，执行kernel
+其中3中进行反向图数据结构实例化时，需要用到反向结点类和反向执行函数，因此我们增加
+- 5.matmul反向代码解析：创建反向图相关数据结构，连接反向算子的执行逻辑
 
 下面以matmul的python_c代码为示例，分析实现各APIpython_c接口需要的函数及功能
 ### 2.1 PythonAPI+pybind映射 
@@ -467,14 +467,14 @@ egr::EagerUtils::ComputeRequireGrad(trace_backward,x_autograd_meta,y_autograd_me
   基于以上数据结构，反向图的建立过程本质上是数据结构的实例化，其中7个调用函数对应在数据结构上的构造关系如下图所示：
   ![image](image/6.png)
 
-图中以c_op节点的反向图结构建立为例。在执行C_OP代码后首先1创建C_G_OP反向节点；2,3设置其中attribute,tensorwrapper变量；4设置输出的meta信息。
-5对输出的tensor设置autogradMeta信息，绑定反向op,6设置meta中edge的下一结点，7设置输入的meta信息。 具体的代码分析在后面详细介绍。
+- 图中以C_OP节点的反向图结构建立为例。在执行C_OP代码后首先1创建C_G_OP反向节点；2,3设置其中attribute,tensorwrapper变量；4设置输出的meta信息。
+5对输出的tensor设置autogradMeta信息，绑定反向节点,6设置meta中edge的下一结点，7设置输入的meta信息。 具体的代码分析在后面详细介绍。
 
-反向节点：
-1> 调用PassStopGradient函数，遍历输出tensor的AutoGradMeta设置stop_gradient参数为false
-2> 创建grad_node，先new一个反向函数类的实例，参数为此反向函数的输入参数个数和输出参数个数：new XXXGradNodeCompat(1, 3)，再使用shared_ptr创建grad_node，指向此反向函数的实例。
-3> 调用grad_node的SetAttributetranspose_x() 函数设置attributes，
-4> 调用grad_node的SetTensorWrapperX()，SetTensorWrapperY()函数设置反向函数中的TensorWrapper变量，（当前向输入的Tensor作为反向的输入时，不需要记录自己的反向信息，因此使用TensorWrapper,只对AutoGradMeta信息进行弱引用）参数是对应的输入tensor。
+- 反向节点：
+ * 1> 调用PassStopGradient函数，遍历输出tensor的AutoGradMeta设置stop_gradient参数为false
+ * 2> 创建grad_node，先new一个反向函数类的实例，参数为此反向函数的输入参数个数和输出参数个数：new XXXGradNodeCompat(1, 3)，再使用shared_ptr创建grad_node，指向此反向函数的实例。
+ * 3> 调用grad_node的SetAttributetranspose_x() 函数设置attributes，
+ * 4> 调用grad_node的SetTensorWrapperX()，SetTensorWrapperY()函数设置反向函数中的TensorWrapper变量，（当前向输入的Tensor作为反向的输入时，不需要记录自己的反向信息，因此使用TensorWrapper,只对AutoGradMeta信息进行弱引用）参数是对应的输入tensor。
 ```c++
 void SetTensorWrapperx(const paddle::experimental::Tensor& x) {
     x_ = egr::TensorWrapper(x, false);
@@ -549,7 +549,7 @@ void SetTensorWrapperx(const paddle::experimental::Tensor& x) {
     }
   }
 ```
-5> 调用grad_node的SetGradOutMeta（）函数分别设置反向各个输出tensor的信息，参数分别为前向输入tensor,和此输入tensor是前向算子的第几个输入。（前向的输入tensor的梯度将会成为反向的输出tensor，且顺序一致，此函数中会对前向输入tensor的autogradmeta信息进行设置)
+* 5> 调用grad_node的SetGradOutMeta（）函数分别设置反向各个输出tensor的信息，参数分别为前向输入tensor,和此输入tensor是前向算子的第几个输入。（前向的输入tensor的梯度将会成为反向的输出tensor，且顺序一致，此函数中会对前向输入tensor的autogradmeta信息进行设置)
 ``` c++
 void GradNodeBase::SetGradOutMeta(const paddle::experimental::Tensor& fwd_in,
                                   size_t slot_rank) {
@@ -611,9 +611,9 @@ void GradNodeBase::SetGradOutMeta(const paddle::experimental::Tensor& fwd_in,
   }
 }
 ```
-注：3，4中调用的函数在反向节点的类中实现，每个参数和输入,输出都有对应的Set函数, 5中调用的函数在反向节点的基类中实现。
-反向图：
-6> 调用egr::EagerUtils::SetOutRankWithSlot对前向输出tensor的autogradmeta信息进行标记，参数分别为第4步中创建的输出梯度p_autograd_Out，及此输出是前向第几个输出信息。
+- 注：3，4中调用的函数在反向节点的类中实现，每个参数和输入,输出都有对应的Set函数, 5中调用的函数在反向节点的基类中实现。
+- 反向图：
+ * 6> 调用egr::EagerUtils::SetOutRankWithSlot对前向输出tensor的autogradmeta信息进行标记，参数分别为第4步中创建的输出梯度p_autograd_Out，及此输出是前向第几个输出信息。
 ```c++
 void EagerUtils::SetOutRankWithSlot(AutogradMeta* target, size_t slot_id) {
   target->SetSingleOutRankWithSlot(slot_id, 0);
@@ -625,7 +625,7 @@ void SetSingleOutRankWithSlot(size_t slot_id, size_t rank) {
     out_rank_ = rank;
   }
 ```
-7> 调用egr::EagerUtils::SetHistory绑定前向输出tensor的autogradmeta和此反向节点grad_node，参数分别为第4步中创建的输出梯度p_autograd_Out,及第6.3>步中创建的grad_node。
+- 7> 调用egr::EagerUtils::SetHistory绑定前向输出tensor的autogradmeta和此反向节点grad_node，参数分别为第4步中创建的输出梯度p_autograd_Out,及第6.3>步中创建的grad_node。
 ```c++
 void EagerUtils::SetHistory(AutogradMeta* autograd_meta,
                             const std::shared_ptr<GradNodeBase>& grad_node) {
@@ -638,7 +638,7 @@ void EagerUtils::SetHistory(AutogradMeta* autograd_meta,
   autograd_meta->SetGradNode(grad_node);
 }
 ```
-8> 调用grad_node的SetGradInMeta（）函数分别设置反向各个输入tensor（梯度)的信息，参数为前向输出tensor,和此输出tensor是前向算子的第几个输出。
+- 8> 调用grad_node的SetGradInMeta（）函数分别设置反向各个输入tensor（梯度)的信息，参数为前向输出tensor,和此输出tensor是前向算子的第几个输出。
 ```c++
 void GradNodeBase::SetGradInMeta(const paddle::experimental::Tensor& fwd_out,
                                  size_t slot_rank) {
@@ -700,7 +700,7 @@ void GradNodeBase::SetGradInMeta(const paddle::experimental::Tensor& fwd_out,
   }
 }
 ```
-9> 调用egr::EagerUtils::CheckAndRetainGrad（）设置是否保留前向输出tensor的梯度信息，参数是前向输出tensor。（当此tensor是叶子tensor时默认会保留，否则根据用户设置判断是否保留，同时设置hook。
+- 9> 调用egr::EagerUtils::CheckAndRetainGrad（）设置是否保留前向输出tensor的梯度信息，参数是前向输出tensor。（当此tensor是叶子tensor时默认会保留，否则根据用户设置判断是否保留，同时设置hook。
 ```c++
 void EagerUtils::CheckAndRetainGrad(
     const std::vector<paddle::experimental::Tensor*>& tensors) {

@@ -24,12 +24,12 @@
 
 ### 1.2 phi - Tensor
 * Tensor类不可被继承，是final类，异构的tensor需要继承tensorbase类实现
-* 私有成员：    std::shared_ptr<phi::TensorBase> impl_{nullptr};//描述数据   此处使用TensorBase的抽象类是为了统一不同情况下的Tensor，例如不同大小，不同硬件情况。   std::shared_ptr<AbstractAutogradMeta> autograd_meta_{nullptr};//描述反向相关信息   std::string name_{""};tensor的名称用于调试
+* 私有成员：    std::shared_ptr<phi::TensorBase> impl_{nullptr};//描述数据   此处使用TensorBase的抽象类是为了统一不同情况下的Tensor，例如不同大小，不同硬件情况。   std::shared_ptr<AbstractAutogradMeta> autograd_meta_{nullptr};//描述自动微分信息，使用AbstractAutogradMeta纯虚类型进行编译隔离，保证phi不依赖动态图相关信息。   std::string name_{""};tensor的名称用于调试
 * 公有成员
   * 构造函数；复制构造函数；移动构造函数；tensor_impl指针构造函数（显式）；硬件，指定大小构造函数；tensor_imp指针+name；name构造函数（显式）；
   * 取值函数：size();dims();shape();reshape();dtype();type();layout();palce();name();
-AbstractAutogradMeta* get_autograd_meta() const;返回反向信息指针
-const std::shared_ptr& mutable_autograd_meta() const;返回反向信息shared_ptr
+AbstractAutogradMeta* get_autograd_meta() const;返回自动微分信息指针
+const std::shared_ptr& mutable_autograd_meta() const;返回自动微分信息shared_ptr
 T* mutable_data();获取特殊数据类型的指针（cpu/gpu)一般用于对输出tensor的获得。
 T* mutable_data(const Place& place);
 const T* data() const;T* data();直接获得数据指针
@@ -65,11 +65,11 @@ AutogradMeta的基类，只有一个虚析构函数，不可以建立对象
 
 
 ### 2.2 AutogradMeta :public AbstractAutogradMeta
-动态图模式下用于记录反向信息，当前向执行结束后仍可从此类中得到反向信息
-grad_op:前向op对应的反向op
-grad:前向tensor的梯度tensor（只有叶子tensor可以有，非叶子tensor需要设置retain_grad为true
+动态图模式下用于记录自动微分信息，当前向执行结束后仍可从此类中得到自动微分信息
+grad_node:前向op对应的反向节点
+grad:前向tensor的梯度tensor（只有叶子tensor默认有，非叶子tensor需要设置retain_grad为true
 * 私有成员：
-  * std::shared_ptrpaddle::experimental::Tensor grad_{std::make_sharedpaddle::experimental::Tensor()};
+  * std::shared_ptr paddle::experimental::Tensor grad_{std::make_shared paddle::experimental::Tensor()};
 tensor的梯度信息，构造一个shared_ptr指向tensor，grad_指向此tensor
   * std::shared_ptr grad_node_ = nullptr;
 shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此tensor)
@@ -97,7 +97,7 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
      - Persistable() ; SetPersistable(bool persistable)
      - RetainGrads(); SetRetainGrads(bool value)
 
-          至此，我们通过下图描述上述结构如何在实际运行中存在，如图所示，在执行op时，需要a, b两个输入tensor, b tensor是last_op的输出,op的输出为c tensor, 其中a, b，c使用tensor 数据结构存储。如果这个op不需要反向计算，tensor中的autogradmeta 为 AbstractAutogradMeta类型，如果需要反向计算，则为AutogradMeta类型。对呀tensor c , AutoGradMeta中主要包含梯度tensor c_G；反向节点op_G,；c作为op的输出对应的位置out_slot, out_rank， slot 代表c是op第几个输出，rank代码c是op第slot个输出的第几个向量；已经stop_gradient信息，记录此tensor是否需要进行反向计算。
+          至此，我们通过下图描述上述结构如何在实际运行中存在，如图所示，在执行op时，需要a, b两个输入tensor, b tensor是last_op的输出,op的输出为c tensor, 其中a, b，c使用tensor 数据结构存储。如果这个op不需要反向计算，tensor中的autogradmeta 为 AbstractAutogradMeta类型，如果需要反向计算，则为AutogradMeta类型。对于tensor c , AutoGradMeta中主要包含梯度tensor c_G；反向节点op_G,；c作为op的输出对应的位置out_slot, out_rank， slot 代表c是op第几个输出，rank代码c是op第slot个输出的第几个向量；已经stop_gradient信息，记录此tensor是否需要进行反向计算。
           ![image](image/1.png)
 
 
@@ -136,7 +136,7 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
   PyObject* packed_value_{nullptr};
   std::shared_ptr<UnPackHookBase> unpack_hook_;
 
-接下来，我们分析op对应的反向算子op_,其需要前向的输入tensor a, b ，有时也需要前向输出的tensor c, 如果此时仍使用tensor数据结构，会导致 op_G 持有 c tensor, c tensor 持有op_G 形成循环依赖，导致数据无法析构，因此我们设计TensorWrapper数据结构，作为反向算子持有的前向算子输入输出tensor结构，该结构中使用弱指针引用AutogradMeta，（反向算子使用前向输入输出只需要其meta信息或data信息，不需要其反向信息），由于有时反向算子不需要data信息，因此tensorwrapper中也设置no_need_buffer_ 变量，当不需要data时减少数据存储开销。Tensorwrapper会作为GradNodeBase的成员变量记录。
+接下来，我们分析op对应的反向算子op_,其需要前向的输入tensor a, b ，有时也需要前向输出的tensor c, 如果此时仍使用tensor数据结构，会导致 op_G 持有 c tensor, c tensor 持有op_G 形成循环依赖，导致数据无法析构，因此我们设计TensorWrapper数据结构，作为反向算子持有的前向算子输入输出tensor结构，该结构中使用弱指针引用AutogradMeta，（反向算子使用前向输入输出只需要其meta信息或data信息，不需要其自动微分信息），由于有时反向算子不需要data信息，因此tensorwrapper中也设置no_need_buffer_ 变量，当不需要data时减少数据存储开销。Tensorwrapper会作为GradNodeBase的成员变量记录。
        当我们执行反向图时，需要通过op_G获得 last_op_G的信息，而这个连接信息将通过 GradNodeBase中的 bwd_out_meta结构存储，该结构存储了反向算子所有的输出meta信息。
  
 ![image](image/2.png)
@@ -164,15 +164,15 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
 2.5 Edge
 反向过程中每个tensor在反向图中以边的形式存在
 * 私有成员：
-       - in_slot_id:  此输入tensor是第几个输入
+       - in_slot_id:  此输入tensor是下一个节点第几个输入
        - in_rank_:  记录一个输入tensor可能内部包含多个子向量的个数
-       - std::shared_ptr<GradNodeBase> grad_node_{nullptr}:  此tensor作为输入的反向算子节点
+       - std::shared_ptr<GradNodeBase> grad_node_{nullptr}:  此tensor作为输入的反向节点
 * 公有成员：
        - 初始化构造函数，
        - 全参数构造函数1（const std::shared_ptr<GradNodeBase> grad_node_，in_slot_id，in_rank_
-       -全参数构造函数2 (const std::shared_ptr& grad_node,const std::pair</* slot_id / size_t, / rank */ size_t>& rank_info)
+       - 全参数构造函数2 (const std::shared_ptr& grad_node,const std::pair</* slot_id / size_t, / rank */ size_t>& rank_info)
        - GetGradNode() 返回grad_node的值
-       - GetMutableGradNode() 返回grad_node的shared_ptr
+       - GetMutableGradNode() 返回grad_node的shared_ptr，可修改grad_node
        - SetGradNode(const std::shared_ptr<GradNodeBase>& node) 设置反向节点
        - std::pair<size_t, size_t> GetEdgeRankInfo() 返回rank_info pair 对
        - SetEdgeRankInfo(size_t slot_id, size_t in_rank)；
@@ -180,8 +180,8 @@ shared_ptr指向此tensor来源的反向算子（该反向算子的输出是此t
        - IsInitialized() 返回grad_nodez是否有值
        - Clear（）重置edge
      
-      GradNodeBase 结构中的bwd_out_meta 和 bwd_in_meta 是 GradSlotMeta结构的vector， GradslotMeta中包含了stop_gradient 变量记录该输出是否会进行梯度计算，TensorMeta 变量记录该输出的大小信息，以根据此信息创建梯度的buffer; edge变量记录反向计算下一个节点的信息；
-      Eage结构中包含in_slot, in_rank记录该边是下一个反向节点第几个输入；GradNodeBase记录下一个节点next_op_G信息
+GradNodeBase 结构中的bwd_out_meta 和 bwd_in_meta 是 GradSlotMeta结构的vector， GradslotMeta中包含了stop_gradient 变量记录该输出是否会进行梯度计算，TensorMeta 变量记录该输出的大小信息，以根据此信息创建梯度的buffer;  edge变量记录反向计算下一个节点的信息；
+Eage结构中包含in_slot, in_rank记录该边是下一个反向节点第几个输入；GradNodeBase记录下一个节点next_op_G信息
 ![image](image/4.png)
 
 
