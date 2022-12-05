@@ -25,6 +25,7 @@
 - `rsample` 重参数化采样；
 - `prob` 概率密度；
 - `log_prob`对数概率密度；
+- `cdf`累积分布函数；
 - `entropy` 熵计算；
 
 ## 3、意义
@@ -531,6 +532,11 @@ exp(-(value - self.loc) / self.scale - exp(-(value - self.loc) / self.scale)) / 
 - log_prob(value)：对数概率密度函数
 ```python
 np.log(self.probs(value))
+```
+
+- cdf(value)：累积分布函数
+```python
+paddle.exp(-paddle.exp(-(value - self.loc) / self.scale))
 ```
 
 - entropy(scale)：熵

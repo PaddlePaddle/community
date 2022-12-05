@@ -1,5 +1,7 @@
 # 框架易用性提升——单测报错信息优化
 
+> This project will be mentored by [@luotao1](http://github.com/luotao1)
+
 ## 背景
 
 来源于NVIDIA开发者提的 [issue#44641](https://github.com/PaddlePaddle/Paddle/issues/44641)，NVIDIA开发者每月需要上线一次飞桨到NGC官网，他们会在不同的GPU卡上跑全量单测。使用 `np.testing.assert_allclose` 代替 `assertTrue(np.allclose(...))`，可以获得更全面的单测报错信息，便于验证不同卡上的Op精度。

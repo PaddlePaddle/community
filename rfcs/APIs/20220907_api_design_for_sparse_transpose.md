@@ -137,9 +137,9 @@ shape(y_perm1) = [4,3,2]
 ```cpp
 template <typename T, typename Context>
 void TransposeCooKernel(const Context& dev_ctx,
-                        const SparseCsrTensor& x,
+                        const SparseCooTensor& x,
                         const std::vector<int>& perm,
-                        SparseCsrTensor* out);
+                        SparseCooTensor* out);
 template <typename T, typename Context>
 void TransposeCsrKernel(const Context& dev_ctx,
                         const SparseCsrTensor& x,
@@ -150,13 +150,11 @@ void TransposeCsrKernel(const Context& dev_ctx,
 ```
 template <typename T, typename Context>
 void TransposeCooGradKernel(const Context& dev_ctx,
-                            const SparseCooTensor& x,
                             const SparseCooTensor& dout,
                             const std::vector<int>& perm,
                             SparseCooTensor* dx);
 template <typename T, typename Context>
 void TransposeCsrGradKernel(const Context& dev_ctx,
-                            const SparseCsrTensor& x,
                             const SparseCsrTensor& dout,
                             const std::vector<int>& perm,
                             SparseCsrTensor* dx);
