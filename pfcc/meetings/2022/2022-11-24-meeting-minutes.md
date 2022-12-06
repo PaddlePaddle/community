@@ -21,14 +21,14 @@ Paddle贡献者[manangoel99](https://github.com/manangoel99) 主题分享《Padd
 
 交流环节：
 
-Q：为什么会选择 Paddle、PaddleDetection、PaddleOCR 这三个项目做贡献？
-A：因为这是目前代码仓库中最受欢迎的项目，且响应很快，pr能被尽快merge。希望paddle的用户能更多的使用wanDB，两个社区可以一起繁荣。wanDB的用户也很喜欢这三个项目。
+- Q：为什么会选择 Paddle、PaddleDetection、PaddleOCR 这三个项目做贡献？
+- A：因为这是目前代码仓库中最受欢迎的项目，且响应很快，pr能被尽快merge。希望paddle的用户能更多的使用wanDB，两个社区可以一起繁荣。wanDB的用户也很喜欢这三个项目。
 
-Q：什么时候开始接触PaddlePaddle？
-A：大概六个月前，当时寻找合适的社区做贡献，其实大部分外网开发者还是更加熟悉pytorch，但是我们调研后选择了PaddlePaddle，也希望PaddlePaddle可以在全世界更加流行。PaddlePaddle拥有很多好用的模型，这一点是pytorch没有的。
+- Q：什么时候开始接触PaddlePaddle？
+- A：大概六个月前，当时寻找合适的社区做贡献，其实大部分外网开发者还是更加熟悉pytorch，但是我们调研后选择了PaddlePaddle，也希望PaddlePaddle可以在全世界更加流行。PaddlePaddle拥有很多好用的模型，这一点是pytorch没有的。
 
-Q：贡献内容包括双语文档，是谁在写中文文档呢？
-A：团队中有专人在负责翻译，事实上不仅是中文，还包括日语、韩语、法语等8种语言的文档。详细文档可以在官网查看：https://wandb.ai/site
+- Q：贡献内容包括双语文档，是谁在写中文文档呢？
+- A：团队中有专人在负责翻译，事实上不仅是中文，还包括日语、韩语、法语等8种语言的文档。详细文档可以在官网查看：https://wandb.ai/site
 
 
 ### 2、Paddle Lite 硬件接入方案 NNAdapter介绍
