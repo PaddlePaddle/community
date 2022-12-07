@@ -6,7 +6,7 @@
 
   - 腾讯会议：
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会]()，或添加至会议列表
+  - [点击链接入会](https://meeting.tencent.com/dm/xWAlkv4APBFv)，或添加至会议列表
 
 - 本次会议主席：张雅琨（[VigiZhang](https://github.com/VigiZhang)）
 
