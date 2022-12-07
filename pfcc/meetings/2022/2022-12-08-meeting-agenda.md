@@ -6,7 +6,7 @@
 
   - 腾讯会议：
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会](https://meeting.tencent.com/dm/6mrHAxalelpU)，或添加至会议列表
+  - [点击链接入会]()，或添加至会议列表
 
 - 本次会议主席：张雅琨（[VigiZhang](https://github.com/VigiZhang)）
 
@@ -77,18 +77,20 @@
   - [longranger2](https://github.com/longranger2)
   - [taixiurong](https://github.com/taixiurong)
   - [FisherWY](https://github.com/FisherWY)
-  - [onecatcn](https://github.com/onecatcn)
-  - [leiqing1](https://github.com/leiqing1)
-
+  - [Atlantisming](https://github.com/Atlantisming)
+  - [Lemon-er](https://github.com/Lemon-er)
+  - [lizechng](https://github.com/lizechng)
+  - [ccsuzzh](https://github.com/ccsuzzh)
+  - [DrRyanHuang](https://github.com/DrRyanHuang)
+  - [RedContritio](https://github.com/RedContritio)
 
 
 # 会议议程
 
-- 新人介绍 （10min）
+- 新人介绍 [longranger2](https://github.com/longranger2)、[taixiurong](https://github.com/taixiurong)、[FisherWY](https://github.com/FisherWY)、[Atlantisming](https://github.com/Atlantisming)、[Lemon-er](https://github.com/Lemon-er)、[lizechng](https://github.com/lizechng)、[ccsuzzh](https://github.com/ccsuzzh)、[DrRyanHuang](https://github.com/DrRyanHuang)、[RedContritio](https://github.com/RedContritio)（10min）
 - [VigiZhang](https://github.com/VigiZhang) 飞桨代码安全与Fuzzing（20min）
-- 贾宏宇 Kernel选择分发体系梳理与优化（25min）
-- 黄济懿 PHI 算子库依赖解耦经验分享（5-10min）
-- 李梦柳 飞桨快乐开源活动进度同步（5 min）
+- [jiahy0825](https://github.com/jiahy0825) Kernel选择分发体系梳理与优化（25min）
+- [huangjiyi](https://github.com/huangjiyi) PHI 算子库依赖解耦经验分享（5-10min）
+- [Ligoml](https://github.com/Ligoml) 飞桨快乐开源活动进度同步（5 min）
 - PFCC 成员自由发言讨论（5 min）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
-  - 预告：下一期主席 ，主题 。
