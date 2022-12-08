@@ -1,4 +1,4 @@
-# Type Hinting for Paddle
+# Type Hinting for Tensor of Paddle
 
 ## 2.4., 孔嘉明 & 吴京京，2022.11.19
 
