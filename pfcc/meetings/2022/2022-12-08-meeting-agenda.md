@@ -32,7 +32,7 @@
 
 # 会议议程
 
-- 新人介绍 [longranger2](https://github.com/longranger2)、[taixiurong](https://github.com/taixiurong)、[FisherWY](https://github.com/FisherWY)、[Atlantisming](https://github.com/Atlantisming)、[Lemon-er](https://github.com/Lemon-er)、[lizechng](https://github.com/lizechng)、[ccsuzzh](https://github.com/ccsuzzh)、[DrRyanHuang](https://github.com/DrRyanHuang)、[RedContritio](https://github.com/RedContritio)（10min）
+- 新人介绍 [longranger2](https://github.com/longranger2)、[taixiurong](https://github.com/taixiurong)、[FisherWY](https://github.com/FisherWY)、[Atlantisming](https://github.com/Atlantisming)、[Lemon-er](https://github.com/Lemon-er)、[lizechng](https://github.com/lizechng)、[ccsuzzh](https://github.com/ccsuzzh)、[DrRyanHuang](https://github.com/DrRyanHuang)、[RedContritio](https://github.com/RedContritio)、[Lyutoon](https://github.com/Lyutoon) （10min）
 - [VigiZhang](https://github.com/VigiZhang) 飞桨代码安全与Fuzzing（20min）
 - [jiahy0825](https://github.com/jiahy0825) Kernel选择分发体系梳理与优化（25min）
 - [huangjiyi](https://github.com/huangjiyi) PHI 算子库依赖解耦经验分享（5-10min）
