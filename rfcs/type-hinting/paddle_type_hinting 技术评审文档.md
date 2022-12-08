@@ -173,15 +173,45 @@
 
 ### 传入参数类型的获得：
 
-传入参数的获得是通过inspect 模块加上一定的规则匹配完成的。
+我们总结了Tensor类中方法的来源，主要有如下三种情况：
 
-TODO
+- 定义在ops.yaml / legacy_ops.yaml中的算子函数（包括相应的 parsed.yaml，是通过飞桨相应脚本进行了预处理的yaml文件）
+
+  - 每个函数都有对应的yaml定义，我们可以通过自动化的方法将yaml定义改写成函数签名：
+
+    例如`tensor.trace()`函数：
+
+    ```yaml
+    - op : trace
+      args : (Tensor x, int offset = 0, int axis1 = 0, int axis2 = 1)
+      output : Tensor
+      infer_meta :
+        func : TraceInferMeta
+      kernel :
+        func : trace
+      backward : trace_grad
+    ```
+
+    我们可以通过一定的字符串操作将其签名写出：
+
+    ```python
+    class Tensor:
+    	def trace(self, offset:int=0, axis1:int=0, axis2:int=1, name: Optional[str] = None) -> None:
+            pass
+    ```
+    
+- 通过inspect 模块加上一定的规则匹配完成的。
+
+- 一定的规则补充
+
+  - 有一些函数名称以"\_"结束，表明其是inplace操作的函数，例如`tensor.zero_()`，我们默认返回值是None
+  - 有一些函数会以"is\_"开始，表明其是判断函数，我们默认其返回值是bool。
 
 ### 返回值类型的获得：
 
-我们总结了Tensor类中方法的来源，主要有如下三种情况：
+我们总结了Tensor类中方法的来源，主要有如下四种情况：
 
-- 定义在ops.yaml / legacy_ops.yaml中的算子函数
+- 定义在ops.yaml / legacy_ops.yaml中的算子函数（包括相应的 parsed.yaml，是通过飞桨相应脚本进行了预处理的yaml文件）
 
   - 每个函数都有对应的yaml定义，我们可以通过自动化的方法将yaml定义改写成函数签名：
 
@@ -216,7 +246,7 @@ TODO
   - 有一些函数名称以"\_"结束，表明其是inplace操作的函数，例如`tensor.zero_()`，我们默认返回值是None
   - 有一些函数会以"is\_"开始，表明其是判断函数，我们默认其返回值是bool。
 
-
+- 通过inspect 模块加上一定的规则匹配完成的。
 
 
 ## 3、主要影响的模块接口变化
