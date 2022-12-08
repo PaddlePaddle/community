@@ -6,7 +6,7 @@
 
 ## 1、相关背景
 
-在深度学习代码中充斥着各种`Tensor`，可是Python是一门动态编程语言，如果不给变量添加类型，IDE将无法进行智能提示，故Type Annotation（类型注释）对于提升编程体验至关重要。然而，在Paddle框架当中的Tensor对象直接是通过`pybind11`将C++`Tensor`类型暴露给外部开发者，并没有对应的类型信息，故无法进行静态类型推断或动态stub file等操作。
+在深度学习代码中充斥着各种`Tensor`，可是Python是一门动态编程语言，如果不给变量添加类型，IDE将无法进行智能提示，故Type Annotation（类型注释）对于提升编程体验至关重要。然而，在Paddle框架当中的Tensor类直接是通过`pybind11`将C++`Tensor`类型暴露给外部开发者，并没有对应的类型信息，故无法进行静态类型推断或动态stub file等操作。
 
 为了给Paddle的Tensor添加类型注释的功能，可使用stub-file相关技术来实现此功能。
 
@@ -46,7 +46,7 @@
 
 ### 整体全貌
 
-在 Paddle 框架当中，`Tensor`是通过Pybind11/PyObject将 C++的 Tensor 类暴露给Python端，所以在paddle安装好的框架内，paddle/tensor/tensor.py 是一个空文件，这也是IDE无法完成类型推理和提示的原因。此方案设计了一个新的tensor类，并配合了typing.TYPE_CHECKING的环境变量，仅在代码开发阶段对tensor类进行替换，替换后的tensor类是一个所有属性和方法都带有type hinting信息的类，改善代码开发阶段。
+在 Paddle 框架当中，`Tensor`类是通过Pybind11/PyObject将 C++的 Tensor 类暴露给Python端，所以在paddle安装好的框架内，paddle/tensor/tensor.py 是一个空文件，这也是IDE无法完成类型推理和提示的原因。此方案设计了一个新的`Tensor`类，并配合了typing.TYPE_CHECKING的环境变量，仅在代码开发阶段对`Tensor`类进行替换，替换后的`Tensor`类是一个所有属性和方法都带有type hinting信息的类，改善代码开发阶段。
 
 在实际代码执行的时候，参与计算的仍然是C++的Tensor类。
 
@@ -87,7 +87,7 @@
 其中TYPE_CHECKING是一个环境变量，在第三方静态类型检查工具、IDE中被设定为True，而在python运行时中设定为False。所以在IDE写代码到实际运行的过程中，系统发生的实际行为是：
 
 - 在IDE写代码的过程中，paddle会导入`tensor_proxy.py`中定义的类，这个类的所有方法签名都具备了类型提示的信息和内嵌文档。IDE能自动识别这类信息并加以应用。
-- 在实际运行的时候，paddle会导入正常的tensor类，从而不影响运行时的安全和效率。
+- 在实际运行的时候，paddle会导入正常的`Tensor`类，从而不影响运行时的安全和效率。
 
 
 
@@ -111,7 +111,7 @@
     * IDE 友好型，天然支持类型提示
 * 缺点：
     * 工作量比较大。
-    * 相当于调整了`Tensor`对象的实现方式，存在一定的潜在风险。
+    * 相当于调整了`Tensor` 类的实现方式，存在一定的潜在风险。
 
 推荐Paddle主库中的新模块代码都添加类型注释。
 
