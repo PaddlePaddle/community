@@ -94,7 +94,7 @@
       from .tensor.tensor_proxy import Tensor as Tensor
   ```
 
-其中TYPE_CHECKING是一个环境变量，在第三方静态类型检查工具、IDE中被设定为True，而在python运行时中设定为False。所以在IDE写代码到实际运行的过程中，系统发生的实际行为是：
+其中TYPE_CHECKING是一个魔法常量，在第三方静态类型检查工具和IDE中被视为True，而在python运行时被视为False。所以在IDE写代码到实际运行的过程中，系统发生的实际行为是：
 
 - 在IDE写代码的过程中，paddle会导入`tensor_proxy.py`中定义的类，这个类的所有方法签名都具备了类型提示的信息和内嵌文档。IDE能自动识别这类信息并加以应用。
 - 在实际运行的时候，paddle会导入正常的`Tensor`类，从而不影响运行时的安全和效率。
