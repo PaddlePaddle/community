@@ -113,19 +113,21 @@
 
 1. inline type annotation
 
-使用带有类型提示的python代码重新实现整个`paddle/tensor/tensor.py`，
+使用带有类型提示的python代码实现整个`paddle/tensor/tensor.py`，以及对`paddle/tensor`目录下文件中的方法进行标注，利用TYPE_CHECKING变量让Paddle库加载不同的Tensor定义以避免风险。
 
 * 优点：
     * 使用最佳推荐方法
     * 代码的可阅读性也最好
     * IDE 友好型，天然支持类型提示
+    * 解决存量代码的改写后，不需要额外脚本维护
 * 缺点：
-    * 工作量比较大。
-    * 相当于调整了`Tensor` 类的实现方式，存在一定的潜在风险。
+    * 存量代码工作量比较大。
+    * 后期需要每个新算子都需要开发者额外添加类型注释。
+    * 相当于调整了`Tensor` 类的实现方式，存在一定的潜在风险。（利用TYPE_CHECKING变量让Paddle库加载不同的Tensor定义以避免风险）
 
 推荐Paddle主库中的新模块代码都添加类型注释。
 
-2. stub file in package
+1. stub file in package
 
 这种方式只需要在需要添加类型注释的module同目录下添加对应的stub file（`.pyi`文件）即可。
 
@@ -153,18 +155,9 @@
 
 其中 [@SigureMo](https://github.com/SigureMo)给出了[paddlepaddle-stubs](https://github.com/cattidea/paddlepaddle-stubs)解决方案。
 
-4. 利用TYPE_CHECKING变量让Paddle库加载不同的Tensor定义
-
-此方法即本文提出的方法，通过不同的Tensor类型定义，我们可以实现IDE和运行时的不同行为，实现类型提示。
-
-- 优点：
-  - 可以实现Docstring
-- 缺点：
-  - 会改动主库
-
 ***
 
-综合考虑以上三种解决方案，推荐使用**第四种。**
+综合考虑以上三种解决方案，推荐使用**第一种。**
 
 
 ## 2、关键技术点/子模块设计与实现方案
