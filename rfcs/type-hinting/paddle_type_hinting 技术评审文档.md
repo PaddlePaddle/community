@@ -52,7 +52,7 @@
 
 ### 主体设计具体描述
 
-对paddle主库代码的改动分为两大部分：
+对paddle主库代码的改动分为三大部分：
 
 - `paddle/tensor/tensor_proxy.py` 的实现
 
@@ -71,7 +71,17 @@
           pass
   ```
 
-  
+- `paddle/tensor` 路径文件下函数的类型注解
+
+  相关内容可见 [[Type Hints] 为python/tensor目录下的函数添加类型注解](https://github.com/PaddlePaddle/Paddle/pull/48632)，主要方法是替换函数定义行，例如将如下代码
+
+  ```python
+  def abs(self, name= None):
+  ```
+  替换为如下代码
+  ```python
+  def abs(self, name: str｜None = None) -> Tensor:
+  ```
 
 - `paddle/__init__.py`的改动
 
