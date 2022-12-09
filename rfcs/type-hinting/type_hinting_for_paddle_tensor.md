@@ -167,6 +167,12 @@ class Tensor:
 
 由于 Tensor 相关数学函数众多（根据 [PaddlePaddle/Paddle#48632](https://github.com/PaddlePaddle/Paddle/pull/48632) 统计有 246 个），完全由手动标注将会非常耗时，因此我们采用了自动生成 + 手动修改维护的方式来进行标注。下面罗列一些可能的自动标注方案：
 
+<!--
+
+需要确认一下这里的 246，因为 https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/__init__.py#L293 只有 234 个
+
+-->
+
 1. 从文档（DocString）中提取类型信息
 
     即根据文档中已有的类型信息来自动生成标注信息，如 lerp 的文档中已有的类型信息如下：
@@ -314,7 +320,7 @@ setup.py 应该正在取代 [python/setup.py.in](https://github.com/PaddlePaddle
 
 ## 名词解释
 
-无。
+- Tensor 相关数学函数：指定义在 [python/paddle/tensor](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/tensor) 目录中的用于操作 Tensor 的数学函数，其中[部分函数](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/__init__.py#L293)通过 monkey patch 注入到了 Tensor 类上，这里指注入的这些函数
 
 ## 附件及参考资料
 
