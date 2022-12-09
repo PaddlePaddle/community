@@ -1,11 +1,11 @@
 # Type Hinting for Tensor of Paddle
 
-| 任务名称 | Type Hinting for Tensor of Paddle | 
+| 任务名称 | Type Hinting for Tensor of Paddle |
 |---|---|
-| 提交作者 | wj-Mcat、jiamingkong、zrr1999、SigureMo | 
-| 提交时间 | 2022-12-10 | 
-| 版本号 | v0.1 | 
-| 依赖飞桨版本 | develop | 
+| 提交作者 | wj-Mcat、jiamingkong、zrr1999、SigureMo |
+| 提交时间 | 2022-12-10 |
+| 版本号 | v0.1 |
+| 依赖飞桨版本 | develop |
 | 文件名 | type_hinting_for_paddle_tensor.md |
 
 ## 一、概述
@@ -69,11 +69,11 @@ TensorFlow 尚未提供包内的类型提示信息（即第一、第二种），
 
 <!-- 这里需要确定下 Tensor 概念是包含静态图的 Variable 的，否则整个方案还需要调整下，对于同时支持 Tensor 和 Varibale 的 API 的类型应当是 `Tensor | Variable` 了（注意 monkey patch 到 Tensor 上的或者 Variable 上的可以保证类型单一） -->
 
-Paddle 目前的 Tensor 是动静态图 `VarBase`/`eager.Tensor` 和 `Variable` 概念的统一，它们都是在 C++ 端实现并通过 pybind11 暴露到 Python 端过 Python 端 monkey patch 注入了一些额外的方法与属性。Paddle 在 2.0 API 设计之初重新组织了代码库结构（[PaddlePaddle/Paddle#23151](https://github.com/PaddlePaddle/Paddle/pull/23151)），其中包含了 [`python/paddle/tensor/tensor.py`](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/tensor.py) 文件，根据注释该文件原准备定义 Tensor 类，但到现在也没有实现，目前只是一个空文件。
+Paddle 目前的 Tensor 是动静态图 `VarBase`/`eager.Tensor` 和 `Variable` 概念的统一，它们都是在 C++ 端实现并通过 pybind11 暴露到 Python 端，并在 Python 端通过 monkey patch 注入了一些额外的方法与属性。Paddle 在 2.0 API 设计之初重新组织了代码库结构（[PaddlePaddle/Paddle#23151](https://github.com/PaddlePaddle/Paddle/pull/23151)），其中包含了 [`python/paddle/tensor/tensor.py`](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/tensor.py) 文件，根据注释该文件原准备定义 Tensor 类，但到现在也没有实现，目前只是一个空文件。
 
 Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护的 stub-only 的包，如 [@SigureMo](https://github.com/SigureMo) 发布的 [paddlepaddle-stubs](https://github.com/cattidea/paddlepaddle-stubs)。该包首先通过自动生成的方式来为 Paddle Python 端代码自动生成了 `.pyi` stub file，并添加了了一些[常用类型集合](https://github.com/cattidea/paddlepaddle-stubs/tree/main/paddle-stubs/_typing)，之后通过手工维护的方式为部分函数、类添加详细的类型信息，不过由于作者的时间与精力有限，因此尚未为 Tensor 类及相关函数提供类型提示信息。
 
-此外 [@wj-Mcat](https://github.com/wj-Mcat) 发布了 [types-paddle](https://github.com/wj-Mcat/types-paddle) 通过自动生成的方式在用户已经安装的 PaddlePaddle 包里注入 Tensor 类型信息，提供了 Tensor 类型信息。
+此外 [@wj-Mcat](https://github.com/wj-Mcat) 发布了 [types-paddle](https://github.com/wj-Mcat/types-paddle) 利用 inspect 模块在运行时分析 Tensor 的成员，并通过自动生成的方式在用户已经安装的 PaddlePaddle 包里注入 Tensor 类型信息，提供了 Tensor 类型信息。
 
 整体来说，这两种社区方案都是权宜之计，前者需要社区来额外维护一个包，需要额外的维护成本，且与上游代码库很容易出现不一致；后者则是在用户已经安装的包里注入新的信息，如果 Paddle 本身支持 Tensor 类型提示的话，就不再需要这样的操作了，这也是本 RFC 的初衷，即对后者方案进行优化并集成到 Paddle 主代码库中。
 
@@ -216,7 +216,7 @@ class Tensor:
 
     ```python
     class Tensor:
-    	  def trace(self, offset: int = 0, axis1: int = 0, axis2: int = 1, name: str | None = None) -> None:
+        def trace(self, offset: int = 0, axis1: int = 0, axis2: int = 1, name: str | None = None) -> None:
             pass
     ```
 
@@ -262,7 +262,7 @@ setup.py 应该正在取代 [python/setup.py.in](https://github.com/PaddlePaddle
 
 -->
 
-由于我们的类型提示信息是完全基于 PEP 561 中第一种方案 Inline type annotation 的，因此需要在 wheel 包中包含一个空白的 `py.typed` 文件，以表明我们的包支持类型提示。
+由于我们的类型提示信息是完全基于 PEP 561[^2] 中第一种方案 Inline type annotation 的，因此需要在 wheel 包中包含一个空白的 `py.typed` 文件，以表明我们的包支持类型提示。
 
 ### 3、主要影响的模块接口变化
 
