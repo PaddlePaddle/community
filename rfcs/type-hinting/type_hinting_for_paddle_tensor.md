@@ -12,7 +12,7 @@
 
 ### 1、相关背景
 
-Python 是一门动态语言，静态类型分析工具很难直接从代码中获得完善的类型信息，这也使得 IDE / Editor 也很难通过它来提供准确的智能提示功能，导致开发体验普遍较差。为了改善这一问题，Python 在 PEP 484 中提出了 Type Hints[^1]，允许以一种规范的语法来为 Python 代码提供类型注释，这也得到了大多数静态类型检查工具的支持。这一语法在 Python 3.5 中正式引入，并在之后的众多版本中快速迭代与完善，目前已经普遍应用于众多的 Python 代码库中。
+Python 是一门动态语言，静态类型分析工具很难直接从代码中获得完善的类型信息，这也使得 IDE / Editor 也很难通过它来提供准确的智能提示功能，导致开发体验普遍较差。为了改善这一问题，Python 在 PEP 484 中提出了 Type Hints[^1]，允许以一种规范的语法来为 Python 代码提供类型注释，这也得到了大多数静态类型检查工具的支持。这一语法在 Python 3.5 中正式引入，并在之后的几个版本中快速迭代与完善，目前已经普遍应用于众多的 Python 代码库中。
 
 Tensor 是深度学习中的最基础的概念之一，开发者在编写深度学习代码时不可避免地会频繁使用 Tensor 并调用其相关方法与属性。然而目前 Paddle 的 Tensor 情况较为复杂，不仅动态图和静态图下的表示不一致，而且它们都是通过 pybind11 在 C++ 端实现的，这就导致静态类型分析工具无法通过分析 Python 源码的方式来获取类型信息，使得在使用 Tensor 时无法从 IDE / Editor 中获得准确的类型提示，影响开发者的开发效率及体验。
 
@@ -51,7 +51,7 @@ Python 在 PEP 561[^2] 中提出了类型提示信息的分发与打包方式，
 
 #### PyTorch
 
-PyTorch 在大多数原生 `.py` 文件直接使用了内联类型提示，部分 C++ 扩展 API 则是使用自动生成 `.pyi` stub file 的方式提供类型提示信息。PyTorch 的 Tensor 主体（`torch._C.TensorBase`）是在 C++ 端实现的，通过继承的方式实现了一个新的 [`Tensor`](https://github.com/pytorch/pytorch/blob/master/torch/_tensor.py#L81)（`torch.Tensor`），因为最终暴露的 `torch.Tensor` 是在 Python 端实现的，且包含了完整的类型提示信息，且继承自 `torch._C.TensorBase` 的属性方法也通过 [pyi 文件](https://github.com/pytorch/pytorch/blob/master/torch/_C/__init__.pyi.in#L1146)提供了完整的类型提示信息。
+PyTorch 在大多数原生 `.py` 文件直接使用了内联类型提示，部分 C++ 扩展 API 则是使用自动生成 `.pyi` stub file 的方式提供类型提示信息。PyTorch 的 Tensor 主体（`torch._C.TensorBase`）是在 C++ 端实现的，通过继承的方式实现了一个新的 [`Tensor`](https://github.com/pytorch/pytorch/blob/master/torch/_tensor.py#L81)（`torch.Tensor`），因为最终暴露的 `torch.Tensor` 是在 Python 端实现的，其包含了完整的类型提示信息，且继承自 `torch._C.TensorBase` 的属性方法也通过 [pyi 文件](https://github.com/pytorch/pytorch/blob/master/torch/_C/__init__.pyi.in#L1146)提供了完整的类型提示信息。
 
 #### NumPy
 
