@@ -22,14 +22,14 @@ Tensor 是深度学习中的最基础的概念之一，开发者在编写深度�
 
 ### 2、功能目标
 
-由于 Paddle 中 Tensor 操作函数（如 `paddle.randn()`），以及常用的 `paddle.Tensor` 类的方法和属性均没有类型提示信息，在 IDE 中写代码开发体验较差，此提案旨在为 Tensor 提供类型提示信息以解决 Tensor 的智能提示的问题。
+由于 Paddle 中 Tensor 相关数学函数（如 `paddle.randn`），以及常用的 `paddle.Tensor` 类的方法和属性均没有类型提示信息，在 IDE 中写代码开发体验较差，此提案旨在为 Tensor 提供类型提示信息以解决 Tensor 的智能提示的问题。
 
 ### 3、意义
 
 在 PaddlePaddle 内添加类型提示的主要意义有：
 
 - 添加类型提示有助于优化 IDE 的智能提示，提高开发体验与开发效率，无论是框架开发者还是框架用户都能从中受益；
-- 类型提示信息相比于 DocString 中的类型信息更加直观，而且有着严格的语法，可以提高代码的可读性。
+- 类型提示信息相比于 Docstring 中的类型信息更加直观，而且有着严格的语法，可以提高代码的可读性。
 
 ## 二、业内方案调研
 
@@ -43,9 +43,9 @@ Python 在 PEP 561[^2] 中提出了类型提示信息的分发与打包方式，
 
 第一种方式是最为推荐的方式，因为与 Python 代码结合紧密，有着较高的可读性和可维护性，第二种方式常常用于一些 C/C++ 扩展模块，在一些大型 Python + C/C++ 混合代码库中，往往是使用第一、第二种方式混合的实现。比如 [PyTorch](https://github.com/pytorch/pytorch) 在大多数代码 Python 代码中直接使用内联的方式添加了类型提示，而通过解析 [YAML](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/native_functions.yaml) 的方式来自动生成 C++ 扩展 API 的 stub file，生成脚本见 [tools/pyi/gen_pyi.py](https://github.com/pytorch/pytorch/blob/master/tools/pyi/gen_pyi.py)。
 
-第三种方式主要是由社区维护一份 stub-only 的包并发布到 PyPI 中，用户可以按需安装以获取类型提示效果，目前有一些较为大的代码库使用该方式，如 [django-stubs](https://github.com/typeddjango/django-stubs) 是由社区维护的 [Django](https://github.com/django/django) stub-only 包。Python 社区也维护了一些常用包的 stub only 的类型提示信息存储在 [typeshed](https://github.com/python/typeshed)。
+第三种方式主要是由社区维护一份 stub-only 的包并发布到 PyPI 中，用户可以按需安装以获取类型提示效果，目前有一些较为大的代码库使用该方式，如 [django-stubs](https://github.com/typeddjango/django-stubs) 是由社区维护的 [Django](https://github.com/django/django) stub-only 包。Python 社区也维护了一些常用包的 stub-only 的类型提示信息存储在 [typeshed](https://github.com/python/typeshed)。
 
-目前也有一些曾经使用第三种方式方式先做一些探索，后来将相关经验应用于主代码库的成功案例，比如 [NumPy](https://github.com/numpy/numpy) 首先在 [numpy-stubs](https://github.com/numpy/numpy-stubs) 进行了尝试，目前已经将其吸纳入了主代码库中。
+此外也有一些曾经使用第三种方式先做一些探索，后来将相关经验应用于主代码库的成功案例，比如 [NumPy](https://github.com/numpy/numpy) 首先在 [numpy-stubs](https://github.com/numpy/numpy-stubs) 进行了尝试，目前已经将其吸纳入了主代码库中。
 
 ### 深度学习框架 Tensor / Array 类型信息分发方式调研
 
@@ -73,7 +73,7 @@ Paddle 目前的 Tensor 是动静态图 `VarBase`/`eager.Tensor` 和 `Variable` 
 
 Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护的 stub-only 的包，如 [@SigureMo](https://github.com/SigureMo) 发布的 [paddlepaddle-stubs](https://github.com/cattidea/paddlepaddle-stubs)。该包首先通过自动生成的方式来为 Paddle Python 端代码自动生成了 `.pyi` stub file，并添加了了一些[常用类型集合](https://github.com/cattidea/paddlepaddle-stubs/tree/main/paddle-stubs/_typing)，之后通过手工维护的方式为部分函数、类添加详细的类型信息，不过由于作者的时间与精力有限，因此尚未为 Tensor 类及相关函数提供类型提示信息。
 
-此外 [@wj-Mcat](https://github.com/wj-Mcat) 发布了 [types-paddle](https://github.com/wj-Mcat/types-paddle) 利用 inspect 模块在运行时分析 Tensor 的成员，并通过自动生成的方式在用户已经安装的 PaddlePaddle 包里注入 Tensor 类型信息，提供了 Tensor 类型信息。
+此外 [@wj-Mcat](https://github.com/wj-Mcat) 发布了 [types-paddle](https://github.com/wj-Mcat/types-paddle) 利用 inspect 模块在运行时分析 Tensor 的成员，并通过自动生成的方式在用户已经安装的 PaddlePaddle 包里注入 Tensor 类型信息。
 
 整体来说，这两种社区方案都是权宜之计，前者需要社区来额外维护一个包，需要额外的维护成本，且与上游代码库很容易出现不一致；后者则是在用户已经安装的包里注入新的信息，如果 Paddle 本身支持 Tensor 类型提示的话，就不再需要这样的操作了，这也是本 RFC 的初衷，即对后者方案进行优化并集成到 Paddle 主代码库中。
 
@@ -86,10 +86,10 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 | Tensor 类型提示信息分发方式 | Inline type annotation + Stub files in package | Stub files in package | Distributed stub files | Inline type annotation |
 | 是否需要额外安装包 | ❌ | ❌ | ✅ | ❌ |
 | 对主代码库影响 | 较大，甚至可能造成一定的性能影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 |
-| 支持 DocString | ✅ | ❌ | ❌ | ✅ |
+| 支持 Docstring | ✅ | ❌ | ❌ | ✅ |
 | 维护成本 | 高，任何在 C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 适中，大多数 Tensor 方法可利用 tensor 目录已经标注的函数自动生成，少数方法和属性也可以考虑部分从源码自动生成 + 少数手动维护的方案 |
 
-这里第四种方案是指利用 Python typing 模块的特殊常量 `TYPE_CHECKING` 来区别运行时和静态检查阶段，在静态检查阶段为 Tensor 提供一个代理类，以提供完整的 DocString 和类型提示信息，并且保证在运行时不会有任何性能影响。该方案也是本 RFC 着重介绍的具体实施方案。
+这里第四种方案是指利用 Python typing 模块的特殊常量 `TYPE_CHECKING` 来区别运行时和静态检查阶段，在静态检查阶段为 Tensor 提供一个代理类，以提供完整的 Docstring 和类型提示信息，并且保证在运行时不会有任何性能影响。该方案也是本 RFC 着重介绍的具体实施方案。
 
 ## 五、设计思路与实现方案
 
@@ -99,7 +99,7 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 #### 整体全貌
 
-本方案的核心设计为增加一个代理 Tensor 类（于 `.py` 文件），该类并不会包含任何代码实现的细节，在运行时也不会访问该类，避免造成任何性能影响，且能够提供完整的 DocString 以及类型提示信息。
+本方案的核心设计为增加一个代理 Tensor 类（于 `.py` 文件），该类并不会包含任何代码实现的细节，在运行时也不会访问该类，避免造成任何性能影响，且能够提供完整的 Docstring 以及类型提示信息。
 
 为了在静态分析阶段暴露该类，需要修改 [`python/paddle/__init__.py`](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/__init__.py#L58-L61)，利用特殊常量 `typing.TYPE_CHECKING` 在仅静态分析阶段暴露该代理 Tensor 类。
 
@@ -173,7 +173,7 @@ class Tensor:
 
 -->
 
-1. 从文档（DocString）中提取类型信息
+1. 从文档（Docstring）中提取类型信息
 
     即根据文档中已有的类型信息来自动生成标注信息，如 lerp 的文档中已有的类型信息如下：
 
