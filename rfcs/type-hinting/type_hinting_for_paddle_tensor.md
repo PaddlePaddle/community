@@ -4,9 +4,14 @@
 |---|---|
 | 提交作者 | wj-Mcat、jiamingkong、zrr1999、SigureMo |
 | 提交时间 | 2022-12-10 |
-| 版本号 | v0.1 |
+| 版本号 | v0.2 |
 | 依赖飞桨版本 | develop |
 | 文件名 | type_hinting_for_paddle_tensor.md |
+
+> **Warning**
+>
+> - 所有 Warning 会在终稿前删除
+> - 部分 suggession 还未修改
 
 ## 一、概述
 
@@ -29,6 +34,8 @@ IDE 类型提示示例效果如下：
 > **Warning** TODO
 >
 > 增加演示图，注意不要出现 Copilot 补全效果，否则容易混淆本 RFC 最终效果和 Copilot 补全效果
+>
+> 感觉 Before / After 的智能提示对比图各一张就可以了
 
 ### 3、意义
 
@@ -109,63 +116,79 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 本方案的核心设计为增加一个代理 Tensor 类（于 `.py` 文件），该类并不会包含任何代码实现的细节，在运行时也不会访问该类，避免造成任何性能影响，且能够提供完整的 Docstring 以及类型提示信息。
 
-为了在静态分析阶段暴露该类，需要修改 [`python/paddle/__init__.py`](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/__init__.py#L58-L61)，利用特殊常量 `typing.TYPE_CHECKING` 在仅静态分析阶段暴露该代理 Tensor 类。
+本方案对 Paddle 主代码库主要修改有以下三处：
 
-```diff
-  if fluid.framework._in_eager_mode_:
-      Tensor = framework.core.eager.Tensor
-  else:
-      from .framework import VarBase as Tensor  # noqa: F401
-+ if typing.TYPE_CHECKING:
-+     from .tensor.tensor_proxy import Tensor
-```
+1. 为了在静态分析阶段暴露该代理 Tensor 类，需要修改 [`python/paddle/__init__.py`](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/__init__.py#L58-L61)，利用特殊常量 `typing.TYPE_CHECKING` 在仅静态分析阶段暴露该代理 Tensor 类。
 
-> **Note**
->
-> `typing.TYPE_CHECKING` 在静态分析阶段值为 `True` 而在运行时为 `False`，这就可以保证运行时没有任何改变，而在静态分析阶段，类型检查工具将会访问代理的 Tensor 类，得到更好的提示效果。
+    ```diff
+      if fluid.framework._in_eager_mode_:
+          Tensor = framework.core.eager.Tensor
+      else:
+          from .framework import VarBase as Tensor  # noqa: F401
+    + if typing.TYPE_CHECKING:
+    +     from .tensor.tensor_proxy import Tensor
+    ```
 
-该代理 Tensor 类将会在 `python/paddle/tensor/tensor_proxy.py` 中基于自动生成的方式实现。该文件最终效果如下：
+    > **Note**
+    >
+    > `typing.TYPE_CHECKING` 在静态分析阶段值为 `True` 而在运行时为 `False`，这就可以保证运行时没有任何改变，而在静态分析阶段，类型检查工具将会访问代理的 Tensor 类，得到更好的提示效果。
 
-```python
-from __future__ import annotations
+2. 该代理 Tensor 类将会在 `python/paddle/tensor/tensor_proxy.py` 中基于自动生成的方式实现。该文件最终效果如下：
 
-class Tensor:
-    def abs(self, name: str | None = None) -> Tensor:
-        """
-        This operator is used to perform elementwise abs for Tensor
-        Args:
-            name (str, optional) – Name for the operation (optional, default is None)
-        Returns:
-            Tensor, The output tensor of abs op.
-        """
-        pass
+    ```python
+    from __future__ import annotations
 
-    # ... 其他属性及方法
-```
+    class Tensor:
+        def abs(self, name: str | None = None) -> Tensor:
+            """
+            This operator is used to perform elementwise abs for Tensor
+            Args:
+                name (str, optional) – Name for the operation (optional, default is None)
+            Returns:
+                Tensor, The output tensor of abs op.
+            """
+            pass
 
-此外还会对 Tensor 相关的操作函数（`python/paddle/tensor/` 目录下的函数）进行修改，在其中内联类型信息，如：
+        # ... 其他属性及方法
+    ```
 
-```diff
-- def lerp(x, y, weight, name=None):
-+ def lerp(x: Tensor, y: Tensor, weight: float | Tensor, name: str | None = None) -> Tensor:
-```
+3. 此外还会对 Tensor 相关数学函数（`python/paddle/tensor/` 目录下的函数）进行修改，在其中内联类型信息，如：
 
-以上三处便是本方案需要对 Paddle 代码库修改的主要三处地方。
+    ```diff
+    - def lerp(x, y, weight, name=None):
+    + def lerp(x: Tensor, y: Tensor, weight: float | Tensor, name: str | None = None) -> Tensor:
+    ```
+
+在整个方案的实施过程中，除去第一处修改暴露代理 Tensor 类实施起来较为简单外，第二处修改代理 Tensor 类的自动生成与第三处修改 Tensor 相关数学函数的标注的实施顺序与具体方案都是非常值得商榷的。
+
+#### 主体设计选型考量
+
+关于 Tensor 相关数学函数的标注方案，我们选定了先利用解析文档、解析算子 YAML 文件等方式来自动标注，之后对剩余无法自动标注部分进行手动修正的方案。
+
+但是关于代理 Tensor 类的自动生成，我们考虑过如下三个方案：
+
+1. 方案一是同 Tensor 相关数学函数的标注方案一致，通过解析文档、算子 YAML 文件等方式先自动生成后，将其存储在代码库，并手动对错误的部分进行修正；
+2. 方案二是完全基于解析文档、解析算子 YAML 文件加之以解析 C++ 源码、运行时获取签名等方式以尽可能地自动生成正确的代理 Tensor 类，该类完全依赖于自动生成；
+3. 方案三是基于已经修正好的 Tensor 相关数学函数来生成代理 Tensor 类，该代理 Tensor 类同样完全依赖于自动生成。
+
+两者对比如下：
+
+| 方案 | 方案一 | 方案二 | 方案三 |
+| - | - | - | - |
+| 实现成本 | 高，两者各自需要拟定一套生成方案且方案之间相互割裂 | 高，原因同左 | 低，标注后的 Tensor 相关数学函数可以以较低成本直接生成代理 Tensor 类，需要额外处理的只有少数 Tensor 类专有属性和方法 |
+| 准确性 | 高，由于存储在代码库中，其准确性在维护后是有保障的 | 低，基于各种方法的自动生成方案准确率没有保障 | 高，标注后的 Tensor 相关数学函数会直接存储在源码中，其准确性有着保障 |
+| 维护成本 | 高，Tensor 相关数学函数修改后需要同步修改，两处需要时刻保持一致 | 高，自动生成方案里的各种边界情况很难处理 | 低，Tensor 相关数学函数由于在源码里很容易维护 |
+
+三种方案中，由于方案一需要额外存储大量自动生成的重复代码而最先被否决，而最后提出的方案三由于其实现成本、准确性、维护成本都明显优于方案二，因此我们将方案三作为最终实施方案。即先为 Tensor 相关数学函数进行标注，并基于标注好的 Tensor 相关数学函数来生成代理 Tensor 类。这样不仅实现起来更加简单，而且维护成本也较低（额外手动维护的只有部分 Tensor 专有的属性、方法）。
 
 #### 主体设计具体描述
 
-本方案中，代理 Tensor 类的自动生成和 Tensor 相关数学函数的标注都是比较有挑战性的问题，在经过讨论后决定使用如下方案来进行推进：
+基于上述讨论，我们决定使用如下顺序来进行推进：
 
 1. 首先定义一个空的 Tensor 类，这个 Tensor 类不会作为公开 API 暴露，只是作为临时的方便标注的占位符；
 2. 为 Tensor 相关数学函数（`python/paddle/tensor/` 目录下的函数）添加类型注解，在需要 Tensor 类时引用步骤一定义的 Tensor 类，这一步可以通过多人协作、自动或手动的方式逐步推进；
 3. 基于完全标注的 Tensor 相关数学函数来拟定代理 Tensor 类的自动生成方式，由于 Tensor 相关数学函数占据了 Tensor 中方法的绝大一部分（约在 90% 以上），这一部分方法可以通过非常简单的方式就可以生成，剩余极少量的 Tensor 下专有的方法、属性则可以通过从 C++ 代码中解析 + 在生成脚本手动维护的方式完成；
 4. 代理 Tensor 类完成时，可以移除 Tensor 相关数学函数引用的步骤一中临时的占位 Tensor，改为直接引用代理 Tensor 类。
-
-#### 主体设计选型考量
-
-无论是代理 Tensor 类的自动生成还是 Tensor 相关数学函数的标注都非常具有挑战，我们曾经有分别使用自动生成方案为两者分别标注的方案，但这样的问题是要为两者各设计一套生成方案，且两者设计方案完全割裂，不利于维护。而且 Tensor 相关数学函数的标注信息由于直接存储在源码中，尚且可以在生成一次后可以手动调整维护，而代理 Tensor 类如果完全依赖自动生成的话，很容易出错，而若如果直接存储在代码库中并和 Tensor 相关数学函数一样后续手动维护的话，则会增加额外的维护成本，很容易造成版本的不一致。
-
-因此我们最终选定了先为 Tensor 相关数学函数进行标注，并基于标注好的 Tensor 相关数学函数来生成代理 Tensor 类，不仅实现起来更加简单，而且维护成本也较低（额外手动维护的只有部分 Tensor 专有的属性、方法）。
 
 ### 2、关键技术点/子模块设计与实现方案
 
@@ -175,9 +198,11 @@ class Tensor:
 
 由于 Tensor 相关数学函数众多（根据 [PaddlePaddle/Paddle#48632](https://github.com/PaddlePaddle/Paddle/pull/48632) 统计有 246 个），完全由手动标注将会非常耗时，因此我们采用了自动生成 + 手动修改维护的方式来进行标注。下面罗列一些可能的自动标注方案：
 
-> **Warning** 临时注释
+> **Warning** TODO
 >
 > 需要确认一下这里的 246，因为 https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/__init__.py#L293 只有 234 个
+>
+> 另外需要分别统计下下面的每个自动标注方案能大概解决多少个函数，以及剩余需要手动修改的函数还有多少
 
 1. 从文档（Docstring）中提取类型信息
 
@@ -250,13 +275,19 @@ class Tensor:
 
 在上一步我们已经为 Tensor 相关数学函数进行了完整的标注，本方案将是基于标注好的类型信息完备且准确的 Tensor 相关数学函数进行自动生成代理 Tensor 类。
 
-Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通过 pybind11 暴露的 API（以动态图为例，如 [eager_math_op_patch.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_math_op_patch.cc#L1841)、[eager_method.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_method.cc#L1944)、[eager_properties.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_properties.cc#L282)），又包含了在 Python 端通过 monkey patch 注入的一些属性和方法（同样以动态图为例，如 [math_op_patch.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py) 和 [varbase_patch_methods.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/varbase_patch_methods.py)），其中 Tensor 相关数学函数也是[通过这种方式](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py#L527)注入到 Tensor 类中的。
+Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通过 pybind11 暴露的 API（以动态图为例，如 [eager_math_op_patch.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_math_op_patch.cc#L1841)、[eager_method.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_method.cc#L1945)、[eager_properties.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_properties.cc#L282)），又包含了在 Python 端通过 monkey patch 注入的一些属性和方法（同样以动态图为例，如 [math_op_patch.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py) 和 [varbase_patch_methods.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/varbase_patch_methods.py)），其中 Tensor 相关数学函数也是[通过这种方式](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py#L527)注入到 Tensor 类中的。
 
 我们最终实现的代理 Tensor 类需要覆盖全部的类型提示信息，也就是包含 Tensor 下的全部成员。由于 Tensor 相关数学函数的类型提示信息已经在上一步标注好了，因此这一部分可以直接通过对源码裁剪掉具体实现的方式得到。这一部分 API 占比较高，且实现较为简单，大大降低了整个方案的实现难度。
 
 对于剩余的一些 Tensor 类下特有的属性和方法，一方面可以考虑从源码中解析部分签名，另一方面可以考虑在生成脚本中维护一份列表，不过应当在相应的源码中做出提示，在修改源码时应当及时修改这部分手动维护的提示信息。也可以在 CI 中添加相应的检查条件，在更新相关方法签名时提示需要同时修改这一部分。这部分属性和方法较少，维护成本也较低。
 
 关于该自动生成脚本，可以存放在 [tools](https://github.com/PaddlePaddle/Paddle/tree/develop/tools) 目录中。
+
+> **Warning** TODO
+>
+> 源码裁剪实现方式 demo（FunctionDef.body = Expr(value=Constant(value=Ellipsis))]），注意保留 Docstring
+>
+> 移除源码解析方案，目测源码解析不是很合适，直接维护即可
 
 #### 类型信息打包方案
 
