@@ -16,13 +16,19 @@ Python 是一门动态语言，静态类型分析工具很难直接从代码中�
 
 Tensor 是深度学习中的最基础的概念之一，开发者在编写深度学习代码时不可避免地会频繁使用 Tensor 并调用其相关方法与属性。然而目前 Paddle 的 Tensor 情况较为复杂，不仅动态图和静态图下的表示不一致，而且它们都是通过 pybind11 在 C++ 端实现的，这就导致静态类型分析工具无法通过分析 Python 源码的方式来获取类型信息，使得在使用 Tensor 时无法从 IDE / Editor 中获得准确的类型提示，影响开发者的开发效率及体验。
 
-为了解决这一问题，本 RFC 旨在对 Paddle 代码库造成较小影响的情况下通过为 Tensor 类添加类型注解来为开发者提供更好的开发体验。
-
-社区中前置讨论见：[PaddlePaddle/Paddle#45979](https://github.com/PaddlePaddle/Paddle/issues/45979)
+关于 Paddle 的 Tensor 类型提示问题，社区中也有些前置讨论[^2]，为了解决这一问题，本 RFC 旨在通过为 Tensor 类添加类型注解来为开发者提供更好的开发体验。
 
 ### 2、功能目标
 
-由于 Paddle 中 Tensor 相关数学函数（如 `paddle.randn`），以及常用的 `paddle.Tensor` 类的方法和属性均没有类型提示信息，在 IDE 中写代码开发体验较差，此提案旨在为 Tensor 提供类型提示信息以解决 Tensor 的智能提示的问题。
+由于 Paddle 中 Tensor 相关数学函数（如 `paddle.randn`），以及常用的 `paddle.Tensor` 类的方法和属性均没有类型提示信息，为了提高在 IDE 中的开发体验，此提案旨在为 Tensor 提供类型提示信息以解决 Tensor 的智能提示的问题。
+
+此提案方案满足 PEP 484 中所述语法和 PEP 561 中所述分发方式，可以保证包括但不限于 VS Code、PyCharm 等的常规 IDE 均可支持本方案。
+
+IDE 类型提示示例效果如下：
+
+> **Warning** TODO
+>
+> 增加演示图，注意不要出现 Copilot 补全效果，否则容易混淆本 RFC 最终效果和 Copilot 补全效果
 
 ### 3、意义
 
@@ -35,7 +41,7 @@ Tensor 是深度学习中的最基础的概念之一，开发者在编写深度�
 
 ### 类型提示信息分发方式调研
 
-Python 在 PEP 561[^2] 中提出了类型提示信息的分发与打包方式，主要包含以下三种方式：
+Python 在 PEP 561[^3] 中提出了类型提示信息的分发与打包方式，主要包含以下三种方式：
 
 1. Inline type annotation - 即直接在源码中添加类型提示信息，内联于 `.py` 代码中，有着较高的可读性和可维护性；
 2. Stub files in package - 即在包内添加额外的 stub files（`.pyi` 文件），为包中的模块提供类型提示信息；
@@ -67,7 +73,9 @@ TensorFlow 尚未提供包内的类型提示信息（即第一、第二种），
 
 ## 三、飞桨现状
 
-<!-- 这里需要确定下 Tensor 概念是包含静态图的 Variable 的，否则整个方案还需要调整下，对于同时支持 Tensor 和 Varibale 的 API 的类型应当是 `Tensor | Variable` 了（注意 monkey patch 到 Tensor 上的或者 Variable 上的可以保证类型单一） -->
+> **Warning** 临时注释
+>
+> 这里需要确定下 Tensor 概念是包含静态图的 Variable 的，否则整个方案还需要调整下，对于同时支持 Tensor 和 Varibale 的 API 的类型应当是 `Tensor | Variable` 了（注意 monkey patch 到 Tensor 上的或者 Variable 上的可以保证类型单一）
 
 Paddle 目前的 Tensor 是动静态图 `VarBase`/`eager.Tensor` 和 `Variable` 概念的统一，它们都是在 C++ 端实现并通过 pybind11 暴露到 Python 端，并在 Python 端通过 monkey patch 注入了一些额外的方法与属性。Paddle 在 2.0 API 设计之初重新组织了代码库结构（[PaddlePaddle/Paddle#23151](https://github.com/PaddlePaddle/Paddle/pull/23151)），其中包含了 [`python/paddle/tensor/tensor.py`](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/tensor.py) 文件，根据注释该文件原准备定义 Tensor 类，但到现在也没有实现，目前只是一个空文件。
 
@@ -84,7 +92,7 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 | 方案 | 类似 PyTorch 在 Python 端实现一个 Tensor | 类似 NumPy 在 Python 端仅仅添加 stub file| 类似 TensorFlow 完全由社区维护 stub-only 包 | 增加类型信息专用代理文件（自动生成） |
 | - | - | - | - | - |
 | Tensor 类型提示信息分发方式 | Inline type annotation + Stub files in package | Stub files in package | Distributed stub files | Inline type annotation |
-| 是否需要额外安装包 | ❌ | ❌ | ✅ | ❌ |
+| 不需要额外安装包 | ✅ | ✅ | ❌ | ✅ |
 | 对主代码库影响 | 较大，甚至可能造成一定的性能影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 |
 | 支持 Docstring | ✅ | ❌ | ❌ | ✅ |
 | 维护成本 | 高，任何在 C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 适中，大多数 Tensor 方法可利用 tensor 目录已经标注的函数自动生成，少数方法和属性也可以考虑部分从源码自动生成 + 少数手动维护的方案 |
@@ -167,11 +175,9 @@ class Tensor:
 
 由于 Tensor 相关数学函数众多（根据 [PaddlePaddle/Paddle#48632](https://github.com/PaddlePaddle/Paddle/pull/48632) 统计有 246 个），完全由手动标注将会非常耗时，因此我们采用了自动生成 + 手动修改维护的方式来进行标注。下面罗列一些可能的自动标注方案：
 
-<!--
-
-需要确认一下这里的 246，因为 https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/__init__.py#L293 只有 234 个
-
--->
+> **Warning** 临时注释
+>
+> 需要确认一下这里的 246，因为 https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/__init__.py#L293 只有 234 个
 
 1. 从文档（Docstring）中提取类型信息
 
@@ -234,15 +240,9 @@ class Tensor:
 
     这是一个非常简单的策略，仅仅针对基于前两种方案无法得到返回值的情形，如根据命名规范，以 `is_`、`has_` 为前缀的函数可以推断其返回值类型为 `bool`。
 
-<!--
-
-> **Note**
+> **Warning** 临时注释
 >
 > 我们无法将 inplace 函数推断为返回 None，目前已知的 inplace 明显都是有返回值的，如 [reshape_](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/manipulation.py#L3705)、[unsqueeze_](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/manipulation.py#L2691)、[zero_](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/manipulation.py#L857)
-
-这只是一个提示，用于说明原来草稿中的问题，这里的注释将会在之后移除
-
--->
 
 对于这些自动标注方案无法涵盖的类型信息，只需要根据文档和源码进行手动标注即可。
 
@@ -262,13 +262,11 @@ Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通
 
 由于代理 Tensor 类完全自动生成，因此不需要存储到代码库中，只需要在代码打包成 wheel 包时自动生成并打包进去即可，关于 wheel 打包可参考 [setup.py](https://github.com/PaddlePaddle/Paddle/blob/develop/setup.py)。
 
-<!--
+> **Warning** 临时注释
+>
+> setup.py 应该正在取代 [python/setup.py.in](https://github.com/PaddlePaddle/Paddle/blob/develop/python/setup.py.in)，但目前还不是全部 CI 流水线都替换掉了，只是一部分
 
-setup.py 应该正在取代 [python/setup.py.in](https://github.com/PaddlePaddle/Paddle/blob/develop/python/setup.py.in)，但目前还不是全部 CI 流水线都替换掉了，只是一部分
-
--->
-
-由于我们的类型提示信息是完全基于 PEP 561[^2] 中第一种方案 Inline type annotation 的，因此需要在 wheel 包中包含一个空白的 `py.typed` 文件，以表明我们的包支持类型提示。
+由于我们的类型提示信息是完全基于 PEP 561[^3] 中第一种方案 Inline type annotation 的，因此需要在 wheel 包中包含一个空白的 `py.typed` 文件，以表明我们的包支持类型提示。
 
 ### 3、主要影响的模块接口变化
 
@@ -325,4 +323,5 @@ setup.py 应该正在取代 [python/setup.py.in](https://github.com/PaddlePaddle
 ## 附件及参考资料
 
 [^1]: [PEP 484 – Type Hints](https://peps.python.org/pep-0484/)
-[^2]: [PEP 561 – Distributing and Packaging Type Information](https://peps.python.org/pep-0561/)
+[^2]: [社区讨论 - support Tensor type hinting](https://github.com/PaddlePaddle/Paddle/issues/45979)
+[^3]: [PEP 561 – Distributing and Packaging Type Information](https://peps.python.org/pep-0561/)
