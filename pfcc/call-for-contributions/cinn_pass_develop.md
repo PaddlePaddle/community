@@ -11,6 +11,8 @@ CINN中端Pass主要是对CINN中端表示的图进行优化，CINN前端接入�
     auto D = net_builder.Reshape(C, {32, 32, 1024});
     auto E = net_builder.ReduceSum(D, {2}, false);
 
+![CINN Graph](images/cinn_graph_case.png)
+
 ## 中端Graph的实现
 CINN中graph的实现参考下面头文件
 
