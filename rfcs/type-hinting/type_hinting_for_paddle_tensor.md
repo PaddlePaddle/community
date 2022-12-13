@@ -11,7 +11,7 @@
 > **Warning**
 >
 > - 所有 Warning 会在终稿前删除
-> - 部分 suggession 还未修改
+> - 部分 suggestion 还未修改
 
 ## 一、概述
 
@@ -27,7 +27,7 @@ Tensor 是深度学习中的最基础的概念之一，开发者在编写深度�
 
 由于 Paddle 中 Tensor 相关数学函数（如 `paddle.randn`），以及常用的 `paddle.Tensor` 类的方法和属性均没有类型提示信息，为了提高在 IDE 中的开发体验，此提案旨在为 Tensor 提供类型提示信息以解决 Tensor 的智能提示的问题。
 
-此提案方案满足 PEP 484 中所述语法和 PEP 561 中所述分发方式，可以保证包括但不限于 VS Code、PyCharm 等的常规 IDE 均可支持本方案。
+需要满足 PEP 484 中所述语法和 PEP 561 中所述分发方式，这样才可以保证包括但不限于 VS Code、PyCharm 等的常规 IDE 均可支持本方案。
 
 IDE 类型提示示例效果如下：
 
