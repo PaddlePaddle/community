@@ -9,18 +9,20 @@
 - [单测报错信息优化](code_style_improvement_for_unittest.md)【已完成】
 - [编译 warning 的消除](code_style_compiler_warning.md)【进行中】
 - [flake8 代码风格检查工具的引入](code_style_flake8.md)【进行中】
-- [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
 - [Python 2.7 相关代码退场](legacy_python2.md)【进行中】
 - [Python 3.5/3.6 相关代码退场](legacy_python36minus.md)【进行中】
 - [Type Hint类型注释](type_hint.md)【进行中】
 - [建设更多的Tutorial](Call_For_Tutorials.md)【进行中】
 - [API文档体验优化](docs_optim_for_API.md)【进行中】
 - [PHI算子库独立编译](decoupled_phi_from_fluid.md)【进行中】
-- [DenseTensor 概念统一](tensor_concept_unification.md)
-- [CINN基础算子开发](CINN_base_operator.md)
-- [Paddle-TensorRT算子开发](paddle_trt_optimization.md)
+- [DenseTensor 概念统一](tensor_concept_unification.md)【进行中】
+- [CINN基础算子开发](CINN_base_operator.md)【进行中】
+- [Paddle-TensorRT算子开发](paddle_trt_optimization.md)【进行中】
 - [动转静功能扩展和旧接口退场](to_static_function_extension.md)【进行中】
 - [飞桨 API 动静行为统一](unify_api_behavior.md)【进行中】
+- [clang-tidy 代码风格检查工具的引入](code_style_clang_tidy.md)
+
+详细项目进展请见：https://github.com/orgs/PaddlePaddle/projects/7
 
 ## 飞桨线上开发环境——AI Studio
 AI Studio是基于百度深度学习开源平台飞桨的人工智能学习与实训社区，为开发者免费提供功能强大的线上训练环境、云端超强GPU算力及存储资源。云集200万AI开发者共同学习、交流、竞技与成长。每日提供8小时免费GPU算力供飞桨开发者学习实践。
