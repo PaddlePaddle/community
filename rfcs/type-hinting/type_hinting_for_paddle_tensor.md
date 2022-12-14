@@ -31,11 +31,10 @@ Tensor 是深度学习中的最基础的概念之一，开发者在编写深度�
 
 IDE 类型提示示例效果如下：
 
-> **Warning** TODO
->
-> 增加演示图，注意不要出现 Copilot 补全效果，否则容易混淆本 RFC 最终效果和 Copilot 补全效果
->
-> 感觉 Before / After 的智能提示对比图各一张就可以了
+| | Before | After |
+| - | - | - |
+| 截图 | <img width="500" alt="before" src="https://user-images.githubusercontent.com/38436475/207600884-80cda03b-36e3-4184-961c-87efafef2ccc.png"> | <img width="500" alt="after" src="https://user-images.githubusercontent.com/38436475/207600718-f48dc1f3-e2eb-4a95-aa4c-2631d5b8596c.png"> |
+| 效果说明 | 即便明确说明返回值是 Tensor，仍无法智能提示 | 变量类型可自动推导（蓝色 `Tensor` 为自动推导的 inlay hints），智能提示信息全面（含类型提示信息、文档等） |
 
 ### 3、意义
 
@@ -52,9 +51,9 @@ Python 在 PEP 561[^3] 中提出了类型提示信息的分发与打包方式，
 
 | 方式 | 方式介绍 | 方式优势 | 主要应用项目 |
 | - | - | - | - |
-| Inline type annotation | 直接在源码中添加类型提示信息，内联于 `.py` 代码中 | 有着较高的可读性和可维护性 | PyTorch，FastAPI，Typer |
-| Stub files in package   | 即在包内添加额外的 stub files（`.pyi` 文件），为包中的模块提供类型提示信息| 不需要修改现有源码 | PyTorch，Numpy |
-| Distributed stub files  | 不将类型提示信息打包到包中，而是将类型提示信息以第三方库的形式单独发布 | 无任何运行时影响，单独维护 | TensorFlow，django-stubs |
+| Inline type annotation | 直接在源码中添加类型提示信息，内联于 `.py` 代码中 | 有着较高的可读性和可维护性 | PyTorch、FastAPI、Typer |
+| Stub files in package   | 即在包内添加额外的 stub files（`.pyi` 文件），为包中的模块提供类型提示信息| 不需要修改现有源码 | PyTorch、Numpy |
+| Distributed stub files  | 不将类型提示信息打包到包中，而是将类型提示信息以第三方库的形式单独发布 | 无任何运行时影响，单独维护 | TensorFlow、django-stubs |
 
 第一种方式是最为推荐的方式，因为与 Python 代码结合紧密，有着较高的可读性和可维护性，第二种方式常常用于一些 C/C++ 扩展模块，在一些大型 Python + C/C++ 混合代码库中，往往是使用第一、第二种方式混合的实现。比如 [PyTorch](https://github.com/pytorch/pytorch) 在大多数代码 Python 代码中直接使用内联的方式添加了类型提示，而通过解析 [YAML](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/native_functions.yaml) 的方式来自动生成 C++ 扩展 API 的 stub file，生成脚本见 [tools/pyi/gen_pyi.py](https://github.com/pytorch/pytorch/blob/master/tools/pyi/gen_pyi.py)。
 
