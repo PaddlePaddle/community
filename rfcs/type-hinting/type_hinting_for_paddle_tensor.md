@@ -97,7 +97,7 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 经过「二、业内方案调研」和「三、飞桨现状」的调研，我们已经了解到了目前 Python 所支持的三种类型提示信息分发方式以及各大框架的现状，和 PaddlePaddle 社区中所做出的一些尝试。下面针对这些方案在 Paddle 中可能的实现方法进行对比：
 
-| 方案 | 类似 PyTorch 在 Python 端实现一个 Tensor | 类似 NumPy 在 Python 端仅仅添加 stub file| 类似 TensorFlow 完全由社区维护 stub-only 包 | 增加类型信息专用代理文件（自动生成） |
+| 方案 | 类似 PyTorch 在 Python 端实现一个 Tensor | 类似 NumPy 在 Python 端仅仅添加 stub file| 类似 TensorFlow 完全由社区维护 stub-only 包 | 增加类型信息专用代理文件（自动生成）✅ |
 | - | - | - | - | - |
 | Tensor 类型提示信息分发方式 | Inline type annotation + Stub files in package | Stub files in package | Distributed stub files | Inline type annotation |
 | 不需要额外安装包 | ✅ | ✅ | ❌ | ✅ |
@@ -174,7 +174,7 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 两者对比如下：
 
-| 方案 | 方案一 | 方案二 | 方案三 |
+| 方案 | 方案一 | 方案二 | 方案三✅ |
 | - | - | - | - |
 | 实现成本 | 高，两者各自需要拟定一套生成方案且方案之间相互割裂 | 高，原因同左 | 低，标注后的 Tensor 相关数学函数可以以较低成本直接生成代理 Tensor 类，需要额外处理的只有少数 Tensor 类专有属性和方法 |
 | 准确性 | 高，由于存储在代码库中，其准确性在维护后是有保障的 | 低，基于各种方法的自动生成方案准确率没有保障 | 高，标注后的 Tensor 相关数学函数会直接存储在源码中，其准确性有着保障 |
@@ -293,6 +293,10 @@ Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通
 > setup.py 应该正在取代 [python/setup.py.in](https://github.com/PaddlePaddle/Paddle/blob/develop/python/setup.py.in)，但目前还不是全部 CI 流水线都替换掉了，只是一部分
 
 由于我们的类型提示信息是完全基于 PEP 561[^3] 中第一种方案 Inline type annotation 的，因此需要在 wheel 包中包含一个空白的 `py.typed` 文件，以表明我们的包支持类型提示。
+
+#### API 签名更新方案
+1. 存量
+2. 增量
 
 ### 3、主要影响的模块接口变化
 
