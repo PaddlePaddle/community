@@ -33,8 +33,14 @@ IDE 类型提示示例效果如下：
 
 | | Before | After |
 | - | - | - |
-| 截图 | <img width="500" alt="before" src="https://user-images.githubusercontent.com/38436475/207600884-80cda03b-36e3-4184-961c-87efafef2ccc.png"> | <img width="500" alt="after" src="https://user-images.githubusercontent.com/38436475/207600718-f48dc1f3-e2eb-4a95-aa4c-2631d5b8596c.png"> |
-| 效果说明 | 即便明确说明返回值是 Tensor，仍无法智能提示 | 变量类型可自动推导（蓝色 `Tensor` 为自动推导的 inlay hints），智能提示信息全面（含类型提示信息、文档等） |
+| 截图 | <img width="500" alt="image" src="https://user-images.githubusercontent.com/38436475/207819538-89f902af-e212-4856-9490-5d4bf153e9f2.png"> |<img width="500" alt="image" src="https://user-images.githubusercontent.com/38436475/207818934-3706a1e3-46ee-4303-92a2-d4d16e6b6bf0.png"> |
+| 可连续推导 | ❌ | ✅ |
+| 可智能提示 | ❌ | ✅ |
+| 效果说明 | 即便明确说明返回值是 Tensor，仍无法智能提示 | 变量类型可自动推导，智能提示信息全面（含类型提示信息、文档等） |
+
+> **Note**
+>
+> 图中蓝底字为自动推导出的类型提示信息，依托于 IDE / Editor 的 Inlay Hints 特性显示在源码中，但并不是源码的一部分。
 
 ### 3、意义
 
@@ -52,12 +58,12 @@ Python 在 PEP 561[^3] 中提出了类型提示信息的分发与打包方式，
 | 方式 | 方式介绍 | 方式优势 | 主要应用项目 |
 | - | - | - | - |
 | Inline type annotation | 直接在源码中添加类型提示信息，内联于 `.py` 代码中 | 有着较高的可读性和可维护性 | PyTorch、FastAPI、Typer |
-| Stub files in package   | 即在包内添加额外的 stub files（`.pyi` 文件），为包中的模块提供类型提示信息| 不需要修改现有源码 | PyTorch、Numpy |
+| Stub files in package   | 即在包内添加额外的 stub files（`.pyi` 文件），为包中的模块提供类型提示信息| 不需要修改现有源码 | PyTorch、NumPy |
 | Distributed stub files  | 不将类型提示信息打包到包中，而是将类型提示信息以第三方库的形式单独发布 | 无任何运行时影响，单独维护 | TensorFlow、django-stubs |
 
 第一种方式是最为推荐的方式，因为与 Python 代码结合紧密，有着较高的可读性和可维护性，第二种方式常常用于一些 C/C++ 扩展模块，在一些大型 Python + C/C++ 混合代码库中，往往是使用第一、第二种方式混合的实现。比如 [PyTorch](https://github.com/pytorch/pytorch) 在大多数代码 Python 代码中直接使用内联的方式添加了类型提示，而通过解析 [YAML](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/native_functions.yaml) 的方式来自动生成 C++ 扩展 API 的 stub file，生成脚本见 [tools/pyi/gen_pyi.py](https://github.com/pytorch/pytorch/blob/master/tools/pyi/gen_pyi.py)。
 
-第三种方式主要是由社区维护一份 stub-only 的包并发布到 PyPI 中，用户可以按需安装以获取类型提示效果，目前有一些较为大的代码库使用该方式，如 [django-stubs](https://github.com/typeddjango/django-stubs) 是由社区维护的 [Django](https://github.com/django/django) stub-only 包。Python 社区也维护了一些常用包的 stub-only 的类型提示信息存储在 [typeshed](https://github.com/python/typeshed)。
+第三种方式主要是由社区维护一份 stub-only 的包并发布到 PyPI 中，用户可以按需安装以获取类型提示效果，目前有一些由于历史原因难以迁移的大型代码库使用该方式，如 [django-stubs](https://github.com/typeddjango/django-stubs) 是由社区维护的 [Django](https://github.com/django/django) stub-only 包。Python 社区也维护了一些常用包的 stub-only 的类型提示信息存储在 [typeshed](https://github.com/python/typeshed)。
 
 此外也有一些曾经使用第三种方式先做一些探索，后来将相关经验应用于主代码库的成功案例，比如 [NumPy](https://github.com/numpy/numpy) 首先在 [numpy-stubs](https://github.com/numpy/numpy-stubs) 进行了尝试，目前已经将其吸纳入了主代码库中。
 
@@ -103,7 +109,7 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 | 不需要额外安装包 | ✅ | ✅ | ❌ | ✅ |
 | 对主代码库影响 | 较大，甚至可能造成一定的性能影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 |
 | 支持 Docstring | ✅ | ❌ | ❌ | ✅ |
-| 维护成本 | 高，任何在 C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 适中，大多数 Tensor 方法可利用 tensor 目录已经标注的函数自动生成，少数方法和属性也可以考虑部分从源码自动生成 + 少数手动维护的方案 |
+| 维护成本 | 高，任何在 C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 适中，大多数 Tensor 方法可利用 tensor 目录已经标注的函数自动生成，少数方法和属性可以考虑手动维护的方案 |
 
 这里第四种方案是指利用 Python typing 模块的特殊常量 `TYPE_CHECKING` 来区别运行时和静态检查阶段，在静态检查阶段为 Tensor 提供一个代理类，以提供完整的 Docstring 和类型提示信息，并且保证在运行时不会有任何性能影响。该方案也是本 RFC 着重介绍的具体实施方案。
 
@@ -172,9 +178,9 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 2. 方案二是完全基于解析文档、解析算子 YAML 文件加之以解析 C++ 源码、运行时获取签名等方式以尽可能地自动生成正确的代理 Tensor 类，该类完全依赖于自动生成；
 3. 方案三是基于已经修正好的 Tensor 相关数学函数来生成代理 Tensor 类，该代理 Tensor 类同样完全依赖于自动生成。
 
-两者对比如下：
+三者对比如下：
 
-| 方案 | 方案一 | 方案二 | 方案三✅ |
+| 方案 | 方案一 | 方案二 | 方案三 ✅ |
 | - | - | - | - |
 | 实现成本 | 高，两者各自需要拟定一套生成方案且方案之间相互割裂 | 高，原因同左 | 低，标注后的 Tensor 相关数学函数可以以较低成本直接生成代理 Tensor 类，需要额外处理的只有少数 Tensor 类专有属性和方法 |
 | 准确性 | 高，由于存储在代码库中，其准确性在维护后是有保障的 | 低，基于各种方法的自动生成方案准确率没有保障 | 高，标注后的 Tensor 相关数学函数会直接存储在源码中，其准确性有着保障 |
@@ -286,13 +292,15 @@ Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通
 
 #### 类型信息打包方案
 
-由于代理 Tensor 类完全自动生成，因此不需要存储到代码库中，只需要在代码打包成 wheel 包时自动生成并打包进去即可，关于 wheel 打包可参考 [setup.py](https://github.com/PaddlePaddle/Paddle/blob/develop/setup.py)。
+由于代理 Tensor 类完全自动生成，因此不需要存储到代码库中，只需要在代码打包成 wheel 包时自动生成并打包进去即可。这样可以避免同时维护两套内容一致的代码，且不会影响最终的效果。
+
+由于我们的类型提示信息是完全基于 PEP 561[^3] 中第一种方案 Inline type annotation 的，因此需要在 wheel 包中包含一个空白的 `py.typed` 文件，以表明我们的包支持类型提示。
+
+关于 wheel 打包可参考 [setup.py](https://github.com/PaddlePaddle/Paddle/blob/develop/setup.py)。
 
 > **Warning** 临时注释
 >
 > setup.py 应该正在取代 [python/setup.py.in](https://github.com/PaddlePaddle/Paddle/blob/develop/python/setup.py.in)，但目前还不是全部 CI 流水线都替换掉了，只是一部分
-
-由于我们的类型提示信息是完全基于 PEP 561[^3] 中第一种方案 Inline type annotation 的，因此需要在 wheel 包中包含一个空白的 `py.typed` 文件，以表明我们的包支持类型提示。
 
 #### API 签名更新方案
 1. 存量
