@@ -114,7 +114,7 @@ ScheduleBlock(B)
 
 ```
 std::vector<int> candidates = {1, 2, 3};
-std::vecror<Expr> probs = {Expr(1.0), Expr(2.0), Expr(3.0)};
+std::vecror<float> probs = {1.0, 2.0, 3.0};
 Expr result;
 for (int i = 0; i < 6; ++i) {
   result = ir_schedule.SampleCategorical(candidates, probs);
@@ -129,8 +129,8 @@ for (int i = 0; i < 6; ++i) {
 | 类别   | 类型         | 实际节点类型 | 名称       | 描述                 |
 | ------ | ------------ | ------------ | ---------- | -------------------- |
 | 参数   | vector<int>  | int          | candidates | 候选整数集           |
-| 参数   | vector<Expr> | FloatImm     | probs      | 候选整数集的概率分布 |
-| 返回值 | Expr         | IntImm       |            | 随机变量对应的Expr   |
+| 参数   | vector<float> | float       | probs      | 候选整数集的概率分布   |
+| 返回值 | int          |              |            | 采样到的随机变量      |
 
 
 
@@ -161,7 +161,7 @@ serial for (i, 0, 1024)
 | 参数   | Expr         | For          | loop                 | 要进行分裂的Loop               |
 | 参数   | int          | int          | n                    | 要分裂的循环层数               |
 | 参数   | int          | int          | max_innermost_factor | 最内层循环的次数限制           |
-| 返回值 | vector<Expr> | IntImm       |                      | 由IntImm表示的tile size         |
+| 返回值 | vector<int>  | int           |                      | 采样到的tile size           |
 
 #### **5.ReverseComputeInline**
 
