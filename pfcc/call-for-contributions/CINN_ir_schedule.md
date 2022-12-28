@@ -161,7 +161,7 @@ serial for (i, 0, 1024)
 | 参数   | Expr         | For          | loop                 | 要进行分裂的Loop               |
 | 参数   | int          | int          | n                    | 要分裂的循环层数               |
 | 参数   | int          | int          | max_innermost_factor | 最内层循环的次数限制           |
-| 返回值 | vector<Expr> | IntImm       |                      | 所有子ScheduleBlockRealize节点 |
+| 返回值 | vector<Expr> | IntImm       |                      | 由IntImm表示的tile size         |
 
 #### **5.ReverseComputeInline**
 
