@@ -5,6 +5,7 @@
 
 为了让大家能深入地了解飞桨、在飞桨收获更多成长、解决更有挑战性的问题，飞桨团队计划将正在开展的一些重点工作和技术方向陆续发布。
 每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工，希望 PFCC 的成员能逐渐成为方向骨干甚至是带头人，带领更多人一起开发。
+详细项目进展请见：https://github.com/orgs/PaddlePaddle/projects/7
 
 - [优化文档体验](./docs)
   - [建设更多的Tutorial](./docs/Call_For_Tutorials.md)【进行中】
@@ -27,8 +28,6 @@
 - [动转静](./Dy2St)
   - [动转静功能扩展和旧接口退场](./Dy2St/to_static_function_extension.md)【进行中】
   - [飞桨 API 动静行为统一](./Dy2St/unify_api_behavior.md)【进行中】
-
-详细项目进展请见：https://github.com/orgs/PaddlePaddle/projects/7
 
 ## 飞桨线上开发环境——AI Studio
 AI Studio是基于百度深度学习开源平台飞桨的人工智能学习与实训社区，为开发者免费提供功能强大的线上训练环境、云端超强GPU算力及存储资源。云集200万AI开发者共同学习、交流、竞技与成长。每日提供8小时免费GPU算力供飞桨开发者学习实践。
