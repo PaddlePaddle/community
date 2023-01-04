@@ -8,20 +8,6 @@
 | 依赖飞桨版本  | Paddle2.4.1            |
 | 文件名       | 20221230_static_graph_execution.md |
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-1wig{font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-mqr5{color:#4F54D6;font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-3m3u{background-color:#FFE14D;text-align:center;vertical-align:top}
-.tg .tg-nmfv{background-color:#E1E4FF;color:#0DAE2F;text-align:center;vertical-align:top}
-.tg .tg-fymr{border-color:inherit;font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-.tg .tg-23nc{background-color:#51C56F;text-align:center;vertical-align:top}
-</style>
 
 ## 代码示例
 ```python
