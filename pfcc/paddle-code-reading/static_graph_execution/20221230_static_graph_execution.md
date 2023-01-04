@@ -8,6 +8,21 @@
 | 依赖飞桨版本  | Paddle2.4.1            |
 | 文件名       | 20221230_static_graph_execution.md |
 
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-1wig{font-weight:bold;text-align:left;vertical-align:top}
+.tg .tg-mqr5{color:#4F54D6;font-weight:bold;text-align:left;vertical-align:top}
+.tg .tg-3m3u{background-color:#FFE14D;text-align:center;vertical-align:top}
+.tg .tg-nmfv{background-color:#E1E4FF;color:#0DAE2F;text-align:center;vertical-align:top}
+.tg .tg-fymr{border-color:inherit;font-weight:bold;text-align:left;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+.tg .tg-23nc{background-color:#51C56F;text-align:center;vertical-align:top}
+</style>
+
 ## 代码示例
 ```python
 paddle.enable_static()
@@ -180,10 +195,10 @@ class Operator(object):
 总结：总的来说，Program的基本表示为OpDesc和VarDesc，分别代表运算逻辑和参与运算的数据，BlockDesc是基础的组织结构，通过 Block Desc的组织来实现控制流(if、while、recurrent等)，ProgramDesc是整体表示，也是用户使用静态图的接口。他们都是C++对象，被封装到Python侧的类中方便调用。
 
 将main_program打印如下：
-![main_program](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=f13d982f2259403b897f6ec663c7aea5&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..uBhIQph7QY_jkeMN.q_F9Nriw6kaRmq5Gvhv9uVpZHeJPpjbtaLgj7Vwz_ZYBOwE-un5YAb9UPCvbO1PKXEaDDfGa2_nig8vzdRvy9wk2hnBxxGGgwHHjPU6wSNH7eHUhH4zhsknhHpP0nbNFiqlOPh4QJkMuY3gKIBtXGY7z5NtbYHzk3Eic6w_RE9CjII1LMNA9NEAKL_1_TvPgjAynZtmPqyLNSd21kDE3ef65_w.ueM6FxRZ3OlSdTjxV8eiEQ)
+![main_program](img/graph.png)
 
 startup_program打印如下：
-![startup_program](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=1723de8101ce423eb0259a8bff73b4f8&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..uBhIQph7QY_jkeMN.q_F9Nriw6kaRmq5Gvhv9uVpZHeJPpjbtaLgj7Vwz_ZYBOwE-un5YAb9UPCvbO1PKXEaDDfGa2_nig8vzdRvy9wk2hnBxxGGgwHHjPU6wSNH7eHUhH4zhsknhHpP0nbNFiqlOPh4QJkMuY3gKIBtXGY7z5NtbYHzk3Eic6w_RE9CjII1LMNA9NEAKL_1_TvPgjAynZtmPqyLNSd21kDE3ef65_w.ueM6FxRZ3OlSdTjxV8eiEQ)
+![startup_program](img/graph%20(1).png)
 
 ### 1.2 Program如何构建？
 
@@ -268,8 +283,8 @@ self.ops.append(op)
     <td>minimize后</td>
   </tr>
   <tr>
-    <td><img src="https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=f13d982f2259403b897f6ec663c7aea5&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw " ></td>
-    <td><img src="https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=dbcc74f849264e2d95baf4b5f514aa02&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw" ></td>
+    <td><img src="img/graph.png" ></td>
+    <td><img src="img/graph (3).png" ></td>
   </tr>
  </table>
 
@@ -459,15 +474,6 @@ private:
 StandaloneExecutor首先尝试从interpretercores_中查询是否已经存在相应的核心，如果没有就新建一个，否则返回已存在的核心。并在run方法中调用该核心执行program，因此新执行器的核心类其实是InterpreterCore，StandaloneExecutor本身的作用很小。
 
 InterpreterCore的主要成员变量如下：
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
-.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
-</style>
 <table class="tg">
 <thead>
   <tr>
@@ -642,7 +648,7 @@ Convert(&op_func_nodes);
 
 ### 当前需要处理的Program
 
-![](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=38f77ace50f04e979c8146b17821ef91&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw)
+![](img/dag_before.jpg)
 
 ### 3.1 BuildVariableScope
 ```cpp
@@ -675,8 +681,7 @@ class Scope {
 ```
 scope的底层数据结构是一个多叉树，树根这层用于保存Parameter，也就是可训练的参数，第二层用于保存中间变量。一般执行器会默认传入的是树根这层，在树根的基础上自己创建一个local_scope并将运行期间产生的变量保存在local_scope中。
 
-![](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=cf8e3453f8894182b9b19ddbe1db78ce&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw)
-
+![](img/scope.jpg)
 
 
 ### 3.2 BuildOpFuncList
@@ -976,7 +981,7 @@ const std::map<int, std::set<int>>& DependencyBuilder::Build(
 ```
 此时依然要保证A在B前面执行，因为中间的op读取值不应该是B写入的值。
 此时得到的依赖关系为：
-![](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=845151a626d8436bb9c821a535811a0a&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw)
+![](img/dag_build.jpg)
 在根据上面的原则建立了Op的依赖图后，还需要消去多余依赖。
 主要考虑这样的情况，a -> b -> c，此时c依赖a b，但是只要保证它在b后面执行即可，不需要额外保证在a后面执行。因此保留依赖a->b和b->c，去掉a->c。
 
@@ -1012,7 +1017,7 @@ for (size_t i = 0; i < op_num_; ++i) {
 >
 >  当它们存在依赖关系又可能异步执行的时候，比如 A writes x, B reads x 这种关系的时候。这时候需要保证B执行的时候A已经执行完了。
 
-![](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=c7f81b12e1484431a3981f60de63474d&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw)
+![](img/dag.jpg)
 
 新执行器会按下面的分类把Op分为三类，后续调度时的逻辑略有不同。(来自PR35866的描述)
 1. direct_run：串行情况，表示可以在当前线程直接拉起，不需要切换线程。目前包含如下 4 种情况：
@@ -1077,7 +1082,7 @@ InputEvent和OutputEvent有什么作用？
 2. InputEvent -> CudaEventWait，在op执行前调用，检测依赖op是否完成
       OutputEvent -> cudaEventRecord，在op执行完后调用，告诉后继op执行完成
 
-![](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=a7ad18dfd18744809875f743356f11aa&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw)      
+![](img/dag_with_event.jpg)      
 
 #### 3.3.2 变量的生命周期
 1. last_live_ops_的作用
@@ -1167,16 +1172,6 @@ vec_meta_info[i].var_ref_count_ = last_live_ops_[i].size();
 ```
 这里消去的逻辑同shrinkDownStream类似，考虑 a -> b，这样的依赖关系，假定他们都使用了同一个变量，那么只需要在b结束后检测即可，不需要在a、b执行结束都检测变量的引用计数。将下面的表反过来就是Op执行结束后需要检查的变量表了。
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-crlc{color:#E61300;text-align:left;vertical-align:top}
-.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
 <table class="tg">
 <thead>
   <tr>
@@ -1434,7 +1429,7 @@ void InterpreterCore::RunNextInstructions(
 1. 当前线程执行的是异步Op，那么后续该线程也应该执行Event/Direct类型的后继，否则该线程就阻塞了。将Sync类型的后继通过AddTask 分配给其他线程。
 2. 当前线程执行的是同步Op，那么后续该线程也应该执行Sync或Direct型后继都是可以的，但是只能执行一个，将剩下的和异步Op都分配给其他线程。
 
-![](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=f32498a4ed81413d8992d5e2059c83dc&docGuid=OdVpEKyLaV0iM_&sign=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiYXBwSWQiOjEsInVpZCI6Im42aDVCa21DbEYiLCJkb2NJZCI6Ik9kVnBFS3lMYVYwaU1fIn0..FOh4VK1IaYnXpmlI.WRtkM6uahKEWf7_Uvxa8Hq0YigsMsiV0TWVUR_7ekjlYC3UB519Hw96Ot6A61iUxZtxtgI3sGEKmjD9N50UbTPigFD00UHYRdeIitaFAVC1-FeQCcLJGolZfhQx9noEsuhzogIQhfeOm1phy8xvXSCCP93zIkwDC0qV7b5-UD1SNAkurabbVPVWroXS7JmIGnl8MrJYW3KbOIgqCorL3XWZqrg.W8HGsTOlpa2eMA6L-EQPJw)
+![](img/execution.jpg)
 
 
 ### 4.2 单个Op的执行过程
@@ -1454,6 +1449,7 @@ CheckGC(instr_node);// 回收变量
 interpreter::RecordEvent(instr_node, place_); //记录表明Op已经完成
 ```
 首先分析主体部分
+```
 //1. 执行infer_shape，注意不需要准备InnerInferShapeContext
 if (!(op_with_kernel->HasAttr(kAllKernelsMustComputeRuntimeShape) &&
     op_with_kernel->Attr<bool>(kAllKernelsMustComputeRuntimeShape))) {
@@ -1487,7 +1483,7 @@ if (op_with_kernel == nullptr) {
     instr_node.KernelFunc()(*instr_node.InnerExecutionContext().get());
   }
 }
-
+```
 可以看到新执行器在Op运行时少了很多准备工作，这里主要是Context的准备和数据转换相关逻辑。
 接下来分析GC部分。
 ```cpp
@@ -1588,19 +1584,6 @@ B: M = f(Y)
 C: N = f(Y)
 ```
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-rkaz{background-color:#E1E4FF;text-align:center;vertical-align:top}
-.tg .tg-3m3u{background-color:#FFE14D;text-align:center;vertical-align:top}
-.tg .tg-fymr{border-color:inherit;font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
-.tg .tg-if56{background-color:#51C56F;text-align:left;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
 <table class="tg">
 <thead>
   <tr>
@@ -1629,19 +1612,6 @@ C: N = f(Y)
 
 ##### 2.不同stream直接FastGC引起的冲突
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-1wig{font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-3m3u{background-color:#FFE14D;text-align:center;vertical-align:top}
-.tg .tg-ncih{background-color:#E1E4FF;text-align:left;vertical-align:top}
-.tg .tg-fymr{border-color:inherit;font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-.tg .tg-23nc{background-color:#51C56F;text-align:center;vertical-align:top}
-</style>
 <table class="tg">
 <thead>
   <tr>
@@ -1678,21 +1648,6 @@ C: N = f(Y)
 注意到上面的例子中有个问题，M = fc(Y)在 Y=fc(X)未执行完之前就开始执行了，这种情况下调度的正确性是由之前的stream_ananlyser来保证的。
 举例来说，这里检测到Y和M有依赖关系，而它们的stream又不是同一个，就会插入cudaEvent进行同步。
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-1wig{font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-3m3u{background-color:#FFE14D;text-align:center;vertical-align:top}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-ncih{background-color:#E1E4FF;text-align:left;vertical-align:top}
-.tg .tg-nmfv{background-color:#E1E4FF;color:#0DAE2F;text-align:center;vertical-align:top}
-.tg .tg-fymr{border-color:inherit;font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-.tg .tg-23nc{background-color:#51C56F;text-align:center;vertical-align:top}
-</style>
 <table class="tg">
 <thead>
   <tr>
@@ -1727,20 +1682,7 @@ C: N = f(Y)
 </table>
 
 ##### 4. A->B、A->C RecordStreamGC插入同步事件的逻辑
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-1wig{font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-mqr5{color:#4F54D6;font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-3m3u{background-color:#FFE14D;text-align:center;vertical-align:top}
-.tg .tg-nmfv{background-color:#E1E4FF;color:#0DAE2F;text-align:center;vertical-align:top}
-.tg .tg-fymr{border-color:inherit;font-weight:bold;text-align:left;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-.tg .tg-23nc{background-color:#51C56F;text-align:center;vertical-align:top}
-</style>
+
 <table class="tg">
 <thead>
   <tr>
