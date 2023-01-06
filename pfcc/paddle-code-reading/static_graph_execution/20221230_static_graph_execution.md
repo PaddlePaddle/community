@@ -10,7 +10,29 @@
 
 
 ## 代码示例
+
+> [飞桨声明式编程（静态图）与命令式编程（动态图）](https://www.paddlepaddle.org.cn/tutorials/projectdetail/4047189#anchor-4)
+>
+>    从深度学习模型构建方式上看，飞桨支持声明式编程（静态图/Declarative programming）和命令式编程（动态图/Imperative programming两种方式。二者的区别是：
+>
+>    静态图采用先编译后执行的方式。用户需预先定义完整的网络结构，再对网络结构进行编译优化后，才能执行获得计算结果。
+>
+>    动态图采用解析式的执行方式。用户无需预先定义完整的网络结构，每执行一行代码就可以获得代码的输出结果。
+>
+>    在飞桨设计上，把一个神经网络定义成一段类似程序的描述，就是在用户写程序的过程中，就定义了模型表达及计算。
+    举例来说，假设用户写了一行代码：y=x+1。在静态图模式下，运行此代码只会往计算图中插入一个Tensor加1的Operator，此时Operator并未真正执行，无法获得y的计算结果。但在动态图模式下，所有Operator均是即时执行的，运行完代码后Operator已经执行完毕，用户可直接获得y的计算结果。
+
+飞桨支持静态图与动态图两种训练方式。对于静态图而言，执行网络的前向过程只会将相应的Operator加入到计算图中，需要通过执行器来实际调用计算逻辑。
+以下面的代码为例，可以看到静态图的训练代码可以大致分为两部分：组网和执行。这篇分享主要讲解飞桨使用静态图训练网络中执行器的执行细节，同时也会简单说明静态图的组网过程。
+
+
 ```python
+import numpy as np
+
+import paddle
+from paddle.static import Program, program_guard, Executor
+from paddle.optimizer import Adam
+
 paddle.enable_static()
 
 #组网过程
@@ -71,12 +93,11 @@ class ProgramDesc {
 }
 ```
 
-**proto::ProgramDesc**是Program的protobuf对象，可以理解为一种program的二进制存储，它会被用于
+**proto::ProgramDesc**是Program的protobuf对象，可以理解为一种Program的二进制存储，它会被用于
 1. 在python侧和C++侧同步op的定义(get_all_op_protos)
-2. 分布式通信时使用
-3. 保存和加载模型
+2. 保存和加载模型
 
-**cached_hash_str_**是Program的签名，同样的Program应该具有同样的签名，用于program缓存的时候作为key。
+**cached_hash_str_** 是Program的签名，同样的Program应该具有同样的签名，用于Program缓存的时候作为key。
 
 最重要的成员变量是**vector\<BlockDesc\>**，一个Program可以有多个Block，但是至少会有一个，其中的第一个被称做global_block，也就是在Python侧Program初始化的时候加入的Block0。当Program中包含控制流Op的时候，才会含有多个Block。
 
@@ -341,8 +362,8 @@ def apply_gradients(self, params_grads):
 总的来说，Python侧的静态图组网过程是这样的：
 1. 用户调用组建网络相关接口，如paddle.nn.Linear
 2. 框架将Linear相关的Op和变量添加到main_program和startup_program中
-3. main_program和startup_program在不特殊设置的情况下是两个全局变量，一般通过program_guard包裹使用用户指定的program
-4. 执行器执行program
+3. main_program和startup_program在不特殊设置的情况下是两个全局变量，一般通过program_guard包裹使用用户指定的Program
+4. 执行器执行Program
 
 ## 二、执行过程
 ### 2.1 Python侧入口
@@ -381,9 +402,9 @@ if return_merged and self._enable_interpreter_core and _can_use_interpreter_core
     return new_exe.run(scope, list(feed.keys()), fetch_list,
                        return_numpy)
 ```
-对于Program和Executor，是存在cache机制的，对于同一个program，我们会缓存它的执行器，缓存的key结构如下：
+对于Program和Executor，是存在cache机制的，对于同一个Program，我们会缓存它的执行器，缓存的key结构如下：
 program.desc.cached_hash_str() + _get_program_cache_key(feed, fetch_list)
-这里key分为两部分，第一部分是programDesc中cached_hash_str字段
+这里key分为两部分，第一部分是ProgramDesc中cached_hash_str字段
 ```cpp
 desc_.SerializePartialToString(&serialize_str); //这里是ProgramDesc的protobuf序列化得到的字符串
 cached_hash_str_ = std::to_string(XXH64(serialize_str.c_str(), serialize_str.size(), 1));
@@ -457,7 +478,7 @@ private:
 其中place是指定的运算设备，prog_是新执行器需要执行的Program，InterpreterCore是调度的核心。
 这里的interpretercores_类型是std::unordered_map<std::string, std::shared_ptr\<InterpreterCore\>\>，用于缓存InterpreterCore。缓存的key的结构是feed:$feed,fetch:$fetch,scope:$scope。
 
-StandaloneExecutor首先尝试从interpretercores_中查询是否已经存在相应的核心，如果没有就新建一个，否则返回已存在的核心。并在run方法中调用该核心执行program，因此新执行器的核心类其实是InterpreterCore，StandaloneExecutor本身的作用很小。
+StandaloneExecutor首先尝试从interpretercores_中查询是否已经存在相应的核心，如果没有就新建一个，否则返回已存在的核心。并在run方法中调用该核心执行Program，因此新执行器的核心类其实是InterpreterCore，StandaloneExecutor本身的作用很小。
 
 InterpreterCore的主要成员变量如下：
 <table class="tg">
@@ -1435,7 +1456,7 @@ CheckGC(instr_node);// 回收变量
 interpreter::RecordEvent(instr_node, place_); //记录表明Op已经完成
 ```
 首先分析主体部分
-```
+```cpp
 //1. 执行infer_shape，注意不需要准备InnerInferShapeContext
 if (!(op_with_kernel->HasAttr(kAllKernelsMustComputeRuntimeShape) &&
     op_with_kernel->Attr<bool>(kAllKernelsMustComputeRuntimeShape))) {
