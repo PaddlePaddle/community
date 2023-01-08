@@ -40,7 +40,7 @@ IDE 类型提示示例效果如下：
 
 > **Note**
 >
-> 图中蓝底字为自动推导出的类型提示信息，依托于 IDE / Editor 的 Inlay Hints 特性显示在源码中，但并不是源码的一部分。
+> 图中蓝底字为自动推导出的类型提示信息，依托于 IDE / Editor 的 [Inlay Hints](https://code.visualstudio.com/docs/editor/editingevolved#_inlay-hints) 特性显示在源码中，但并不是源码的一部分。
 
 ### 3、意义
 
@@ -99,19 +99,23 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 经过「二、业内方案调研」和「三、飞桨现状」的调研，我们已经了解到了目前 Python 所支持的三种类型提示信息分发方式以及各大框架的现状，和 PaddlePaddle 社区中所做出的一些尝试。下面针对这些方案在 Paddle 中可能的实现方法进行对比：
 
-| 方案 | 类似 PyTorch 在 Python 端实现一个 Tensor | 类似 NumPy 在 Python 端仅仅添加 stub file| 类似 TensorFlow 完全由社区维护 stub-only 包 | 增加类型信息专用代理文件（自动生成）✅ |
-| - | - | - | - | - |
-| Tensor 类型提示信息分发方式 | Inline type annotation + Stub files in package | Stub files in package | Distributed stub files | Inline type annotation |
-| 不需要额外安装包 | ✅ | ✅ | ❌ | ✅ |
-| 对主代码库影响 | 较大，甚至可能造成一定的性能影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 |
-| 支持 Docstring | ✅ | ❌ | ❌ | ✅ |
-| 维护成本 | 高，任何在 C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 适中，大多数 Tensor 方法可利用 tensor 目录已经标注的函数自动生成，少数方法和属性可以考虑手动维护的方案 |
+| 方案 | 类似 PyTorch 在 Python 端实现一个 Tensor | 类似 NumPy 在 Python 端仅仅添加 stub   file | 类似 TensorFlow 完全由社区维护 stub-only   包 | 增加类型信息专用代理文件（自动生成） | 解析 Tensor 元信息并生成代理文件（自动生成）✅ |
+|---|---|---|---|---|---|
+| Tensor   类型提示信息分发方式 | Inline type   annotation + Stub files in package | Stub files in package | Distributed stub   files | Inline type   annotation | Inline type   annotation |
+| 不需要额外安装包 | ✅ | ✅ | ❌ | ✅ | ✅ |
+| 对主代码库影响 | 较大，甚至可能造成一定的性能影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 |
+| 支持 Docstring | ✅ | ❌ | ❌ | ✅ | ✅ |
+| 维护成本 | 高，任何在   C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 适中，大多数   Tensor 方法可利用 Tensor 目录已经标注的函数自动生成；eager_method 和 eager_properties   采用手动维护解决方案；且官网上的 Tensor 文档无法实现自动同步，需人工维护； | 低，所有的   Tensor 信息都采用解析Tensor元信息并生成格式化数据的方法，此时可将此信息自动同步至代理文件和官网文档之中。 |
 
-这里第四种方案是指利用 Python typing 模块的特殊常量 `TYPE_CHECKING` 来区别运行时和静态检查阶段，在静态检查阶段为 Tensor 提供一个代理类，以提供完整的 Docstring 和类型提示信息，并且保证在运行时不会有任何性能影响。该方案也是本 RFC 着重介绍的具体实施方案。
+> **Note**
+>
+> `元信息` 在此 RFC 中主要包含函数列表和属性列表等信息，其中函数列表信息包含函数名称、函数参数列表、参数列表类型信息、返回值类型以及 docstring 等信息，属性列表信息包含属性名称、返回值类型以及 docstring 等信息。
+
+这里第四和第五种方案是指利用 Python typing 模块的特殊常量 `TYPE_CHECKING` 来区别运行时和静态检查阶段，在静态检查阶段为 Tensor 提供一个代理类，以提供完整的 Docstring 和类型提示信息，并且保证在运行时不会有任何性能影响。该方案也是本 RFC 着重介绍的具体实施方案。
 
 ## 五、设计思路与实现方案
 
-在「四、对比分析」中我们已经介绍了四种可行方案，第四种方案在各方面明显优于其他方案，本章节将会展开说明该方案的实现步骤以及细节。
+在「四、对比分析」中我们已经介绍了五种可行方案，第五种方案在各方面明显优于其他方案，本章节将会展开说明该方案的实现步骤以及细节。
 
 ### 1、主体设计思路与折衷
 
@@ -162,27 +166,62 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
     + def lerp(x: Tensor, y: Tensor, weight: float | Tensor, name: str | None = None) -> Tensor:
     ```
 
-在整个方案的实施过程中，除去第一处修改暴露代理 Tensor 类实施起来较为简单外，第二处修改代理 Tensor 类的自动生成与第三处修改 Tensor 相关数学函数的标注的实施顺序与具体方案都是非常值得商榷的。
+4. 由于当前Python C API的实现中缺乏 docstring 的相关实现，导致在 python 端无法获取到[`eager_method`](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_method.cc)和[`eager_properties`](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_properties.cc)的相关元信息，此时只需要完善[PyMethodDef](https://github.com/PaddlePaddle/Paddle/blob/67fc8e9384188d49c3e5d2829e145b737b633e53/paddle/fluid/pybind/eager_method.cc#L1946-L1950)中的 `doc` 实参即可，修改如下所示：
+
+    ```diff
+    PyMethodDef variable_methods[] = {
+        {"numpy",
+        (PyCFunction)(void (*)(void))tensor_method_numpy,
+        METH_VARARGS | METH_KEYWORDS,
+    -   NULL},
+    +   "Returns a numpy array shows the value of current tensor
+    +   ""
+    +   "Returns:"
+    +   "    ndarray: The numpy value of current tensor object"
+    +   ""
+    +   "Examples:"
+    +   "    .. code-block:: python"
+    +   "
+    +   "        import paddle"
+    +   "
+    +   "        tensor = paddle.randn([2,3])"
+    +   "        # Tensor(shape=[2, 3], dtype=float32, place=Place(cpu), stop_gradient=True,"
+    +   "        #        [[-0.43208161,  0.61182195,  1.04432261],"
+    +   "        #         [ 0.92133152, -0.91787916,  1.00561225]])"
+    +   "        numpy_value = tensor.numpy()"
+    +   "        #    [[-0.43208161,  0.61182195,  1.04432261],"
+    +   "        #    [ 0.92133152, -0.91787916,  1.00561225]])"
+    ```
+
+5. 解析 C++ eager 端的元信息，并与 Python 端的元信息融合成为整体 Tensor 结构化信息， 基于此信息可生成官网 [Tensor 页面](https://www.paddlepaddle.org.cn/documentation/docs/en/2.2/api/paddle/Tensor_en.html#tensor)以及代理 Tensor 文件（tensor_proxy.py）。
+
+此解决方案从类型信息源头开始解决：完善 Python 端 inline-annotation 信息以及 Python C API 端 docstring 注释信息，从而可使用解析工具分别抽取出 Tensor 对象下的所有有效元信息，最后基于解析后的结构化信息生成代理 Tensor 文件。
 
 #### 主体设计选型考量
 
-关于 Tensor 相关数学函数的标注方案，我们选定了先利用解析文档、解析算子 YAML 文件等方式来自动标注，之后对剩余无法自动标注部分进行手动修正的方案。
+此解决方案主要分为两部分：在代码中完善类型注释信息以及解析代码生成代理 Tensor 文件。
 
-但是关于代理 Tensor 类的自动生成，我们考虑过如下三个方案：
+针对于第一部分，由于 Tensor 函数和属性分为 Python 端注释和 Python C API Bind 端注释，前者可直接通过[`inspect`](https://docs.python.org/3/library/inspect.html)来获取 Python 端相关元信息，后者可通过获取[PyMethodDef](https://docs.python.org/3/c-api/structures.html#c.PyMethodDef)这种的 `ml_doc` 信息从而获取eager 模式下的元信息。
+
+有了 Tensor 对象所有函数和属性的结构化元信息，可基于此实现第二部分的功能：生成代理 Tensor 文件，并在打包时将此代理文件编译到paddlepaddle 包中。
+
+在实现以上解决方案过程中，还考虑过利用解析文档、解析算子 YAML 文件等方式来自动标注，之后对剩余无法自动标注部分进行手动修正并生成代理 Tensor 类的方法，方案如下：
 
 1. 方案一是同 Tensor 相关数学函数的标注方案一致，通过解析文档、算子 YAML 文件等方式先自动生成后，将其存储在代码库，并手动对错误的部分进行修正；
 2. 方案二是完全基于解析文档、解析算子 YAML 文件加之以解析 C++ 源码、运行时获取签名等方式以尽可能地自动生成正确的代理 Tensor 类，该类完全依赖于自动生成；
-3. 方案三是基于已经修正好的 Tensor 相关数学函数来生成代理 Tensor 类，该代理 Tensor 类同样完全依赖于自动生成。
+3. 方案三是基于已经修正好的 Tensor 相关数学函数来生成代理 Tensor 类，该代理 Tensor 类同样完全依赖于自动生成，可是 eager 模式下的函数和属性是需要手动维护。
+4. 方案四是直接从类型注释源头出发，完善Python 端函数和 Python C API Bind 端的类型注释信息，直接生成代理 Tensor 类，此外官网Tensor 文档也会同步自动更新。
 
-三者对比如下：
+方案对比如下：
 
-| 方案 | 方案一 | 方案二 | 方案三 ✅ |
-| - | - | - | - |
-| 实现成本 | 高，两者各自需要拟定一套生成方案且方案之间相互割裂 | 高，原因同左 | 低，标注后的 Tensor 相关数学函数可以以较低成本直接生成代理 Tensor 类，需要额外处理的只有少数 Tensor 类专有属性和方法 |
-| 准确性 | 高，由于存储在代码库中，其准确性在维护后是有保障的 | 低，基于各种方法的自动生成方案准确率没有保障 | 高，标注后的 Tensor 相关数学函数会直接存储在源码中，其准确性有着保障 |
-| 维护成本 | 高，Tensor 相关数学函数修改后需要同步修改，两处需要时刻保持一致 | 高，自动生成方案里的各种边界情况很难处理 | 低，Tensor 相关数学函数由于在源码里很容易维护 |
+| 方案 | 方案一 | 方案二 | 方案三  | 方案四 ✅ |
+|---|---|---|---|---|
+| 实现成本 | 高，两者各自需要拟定一套生成方案且方案之间相互割裂 | 高，原因同左 | 低，标注后的 Tensor   相关数学函数可以以较低成本直接生成代理 Tensor 类，需要额外处理的只有少数 Tensor 类专有属性和方法 | 低，标注后的 Tensor 相关数学函数可以以较低成本直接生成代理 Tensor 类，没有额外处理的 Tensor 类属性和方法 |
+| 准确性 | 高，由于存储在代码库中，其准确性在维护后是有保障的 | 低，基于各种方法的自动生成方案准确率没有保障 | 高，标注后的   Tensor 相关数学函数会直接存储在源码中，其准确性有着保障 | 高，标注后的   Tensor 相关数学函数会直接存储在源码中，其准确性有着保障 |
+| 维护成本 | 高，Tensor   相关数学函数修改后需要同步修改，两处需要时刻保持一致 | 高，自动生成方案里的各种边界情况很难处理 | 低，Tensor   相关数学函数由于在源码里很容易维护 | 低，Tensor   相关数学函数由于在源码里很容易维护 |
+| 是否包含全量方法和属性 | 否 | 否 | 否 | 是 |
 
-三种方案中，由于方案一需要额外存储大量自动生成的重复代码而最先被否决，而最后提出的方案三由于其实现成本、准确性、维护成本都明显优于方案二，因此我们将方案三作为最终实施方案。即先为 Tensor 相关数学函数进行标注，并基于标注好的 Tensor 相关数学函数来生成代理 Tensor 类。这样不仅实现起来更加简单，而且维护成本也较低（额外手动维护的只有部分 Tensor 专有的属性、方法）。
+以上四种方案中，由于方案一需要额外存储大量自动生成的重复代码而最先被否决，而后提出的方案三虽然其实现成本、准确性、维护成本都明显优于方案二，可是并不能包含全量方法和属性，方案四和方案三相比，唯一的区别在于[eager_method]()和[eager_properties]()的处理上，方案三是手工维护，可是方案四是直接通过Python C API反射方法自动抽取eager相关元信息，此外此方案完成后还可自动同步官网中的[Tensor页面](https://www.paddlepaddle.org.cn/documentation/docs/en/2.2/api/paddle/Tensor_en.html#tensor)信息，这样不仅实现起来更加简单，而且维护成本也较低（不需要任何手动维护的 Tensor 专有属性、方法），故最后选用此方案作为最优解决方案。
 
 #### 主体设计具体描述
 
@@ -190,8 +229,9 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 1. 首先定义一个空的 Tensor 类，这个 Tensor 类不会作为公开 API 暴露，只是作为临时的方便标注的占位符；
 2. 为 Tensor 相关数学函数（`python/paddle/tensor/` 目录下的函数）添加类型注解，在需要 Tensor 类时引用步骤一定义的 Tensor 类，这一步可以通过多人协作、自动或手动的方式逐步推进；
-3. 基于完全标注的 Tensor 相关数学函数来拟定代理 Tensor 类的自动生成方式，由于 Tensor 相关数学函数占据了 Tensor 中方法的绝大一部分（约在 90% 以上），这一部分方法可以通过非常简单的方式就可以生成，剩余极少量的 Tensor 下专有的方法、属性则可以通过从 C++ 代码中解析 + 在生成脚本手动维护的方式完成；
-4. 代理 Tensor 类完成时，可以移除 Tensor 相关数学函数引用的步骤一中临时的占位 Tensor，改为直接引用代理 Tensor 类。
+3. 完善`eager_method.cc`和`eager_properties.cc`中公开方法中的docstring，此部分可直接从其他模块中引用即可。
+4. 基于完全标注的 Tensor 相关数学函数来拟定代理 Tensor 类的自动生成方式，由于 Tensor 相关数学函数占据了 Tensor 中方法的绝大一部分（约在 90% 以上），这一部分方法可以通过非常简单的方式就可以生成大部分的函数属性元信息，剩余极少量的 eager 方法和属性可直接通过Python C API反射获取元信息，最后融以上两者元信息即可生成包含所有函数和属性的代理 Tensor 类。
+5. 代理 Tensor 类完成时，可以移除 Tensor 相关数学函数引用的步骤一中临时的占位 Tensor，改为直接引用代理 Tensor 类。
 
 ### 2、关键技术点/子模块设计与实现方案
 
@@ -278,7 +318,7 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 在上一步我们已经为 Tensor 相关数学函数进行了完整的标注，本方案将是基于标注好的类型信息完备且准确的 Tensor 相关数学函数进行自动生成代理 Tensor 类。
 
-Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通过 Python C API 暴露的 API（以新动态图为例，如 [eager_math_op_patch.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_math_op_patch.cc#L1841)、[eager_method.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_method.cc#L1945)、[eager_properties.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_properties.cc#L282)），又包含了在 Python 端通过 monkey patch 注入的一些属性和方法（同样以动态图为例，如 [math_op_patch.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py) 和 [varbase_patch_methods.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/varbase_patch_methods.py)），其中 Tensor 相关数学函数也是[通过这种方式](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py#L519)注入到 Tensor 类中的。
+Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通过 Python C API 暴露的 API（以新动态图为例，如 [eager_math_op_patch.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_math_op_patch.cc#L1841)、[eager_method.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_method.cc#L1945)、[eager_properties.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_properties.cc#L282)），又包含了在 Python 端通过 monkey patch 注入的一些属性和方法（同样以动态图为例，如 [math_op_patch.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py) 和 [varbase_patch_methods.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/varbase_patch_methods.py)），其中 Tensor 相关数学函数也是[通过setattr 的方式](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py#L519)注入到 Tensor 类中的。
 
 我们最终实现的代理 Tensor 类需要覆盖全部的类型提示信息，也就是包含 Tensor 下的全部成员。由于 Tensor 相关数学函数的类型提示信息已经在上一步标注好了，因此这一部分可以直接通过对源码裁剪掉具体实现的方式得到。这一部分 API 占比较高，且实现较为简单，大大降低了整个方案的实现难度。
 
