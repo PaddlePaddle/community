@@ -99,13 +99,13 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 经过「二、业内方案调研」和「三、飞桨现状」的调研，我们已经了解到了目前 Python 所支持的三种类型提示信息分发方式以及各大框架的现状，和 PaddlePaddle 社区中所做出的一些尝试。下面针对这些方案在 Paddle 中可能的实现方法进行对比：
 
-| 方案 | 类似 PyTorch 在 Python 端实现一个 Tensor | 类似 NumPy 在 Python 端仅仅添加 stub   file | 类似 TensorFlow 完全由社区维护 stub-only   包 | 增加类型信息专用代理文件（自动生成） | 解析 Tensor 元信息并生成代理文件（自动生成）✅ |
-|---|---|---|---|---|---|
-| Tensor   类型提示信息分发方式 | Inline type   annotation + Stub files in package | Stub files in package | Distributed stub   files | Inline type   annotation | Inline type   annotation |
-| 不需要额外安装包 | ✅ | ✅ | ❌ | ✅ | ✅ |
-| 对主代码库影响 | 较大，甚至可能造成一定的性能影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 |
-| 支持 Docstring | ✅ | ❌ | ❌ | ✅ | ✅ |
-| 维护成本 | 高，任何在   C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 适中，大多数   Tensor 方法可利用 Tensor 目录已经标注的函数自动生成；eager_method 和 eager_properties   采用手动维护解决方案；且官网上的 Tensor 文档无法实现自动同步，需人工维护； | 低，所有的   Tensor 信息都采用解析Tensor元信息并生成格式化数据的方法，此时可将此信息自动同步至代理文件和官网文档之中。 |
+| 方案 | 类似 PyTorch 在 Python 端实现一个 Tensor | 类似 NumPy 在 Python 端仅仅添加 stub   file | 类似 TensorFlow 完全由社区维护 stub-only   包 | 增加类型信息专用代理文件（自动生成） |
+|---|---|---|---|---|
+| Tensor 类型提示信息分发方式 | Inline type annotation + Stub files in package | Stub files in package | Distributed stub files | Inline type annotation |
+| 不需要额外安装包 | ✅ | ✅ | ❌ | ✅ |
+| 对主代码库影响 | 较大，甚至可能造成一定的性能影响 | 无任何运行时影响 | 无任何运行时影响 | 无任何运行时影响 |
+| 支持 Docstring | ✅ | ❌ | ❌ | ✅ |
+| 维护成本 | 高，任何在 C++ 中的参数修改的同时都应该及时 stub file 进行修改 | 高，原因同左 | 高，需要与主代码库保持一致 | 低，所有的 tensor 信息都采用解析Tensor元信息并生成格式化数据的方法，此时可将此信息自动同步至代理文件和官网文档之中。 |
 
 > **Note**
 >
@@ -318,7 +318,7 @@ Paddle 代码库内目前尚未提供类型提示信息，但有由社区维护�
 
 在上一步我们已经为 Tensor 相关数学函数进行了完整的标注，本方案将是基于标注好的类型信息完备且准确的 Tensor 相关数学函数进行自动生成代理 Tensor 类。
 
-Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通过 Python C API 暴露的 API（以新动态图为例，如 [eager_math_op_patch.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_math_op_patch.cc#L1841)、[eager_method.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_method.cc#L1945)、[eager_properties.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_properties.cc#L282)），又包含了在 Python 端通过 monkey patch 注入的一些属性和方法（同样以动态图为例，如 [math_op_patch.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py) 和 [varbase_patch_methods.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/varbase_patch_methods.py)），其中 Tensor 相关数学函数也是[通过setattr 的方式](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py#L519)注入到 Tensor 类中的。
+Paddle 的 Tensor 类的成员来源非常复杂，既包含来自于 C++ 端通过 Python C API 暴露的 API（以新动态图为例，如 [eager_math_op_patch.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_math_op_patch.cc#L1841)、[eager_method.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_method.cc#L1945)、[eager_properties.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/eager_properties.cc#L282)），又包含了在 Python 端通过 monkey patch 注入的一些属性和方法（同样以动态图为例，如 [math_op_patch.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py) 和 [varbase_patch_methods.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/varbase_patch_methods.py)），其中 Tensor 相关数学函数也是[通过 monkey patch 的方式](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/dygraph/math_op_patch.py#L519)注入到 Tensor 类中的。
 
 我们最终实现的代理 Tensor 类需要覆盖全部的类型提示信息，也就是包含 Tensor 下的全部成员。由于 Tensor 相关数学函数的类型提示信息已经在上一步标注好了，因此这一部分可以直接通过对源码裁剪掉具体实现的方式得到。这一部分 API 占比较高，且实现较为简单，大大降低了整个方案的实现难度。
 
