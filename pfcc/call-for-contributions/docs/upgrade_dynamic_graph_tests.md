@@ -5,11 +5,20 @@
 
 ## 一、概要
 ### 1.背景
- 自2022年7月1日以来，新动态图切换为默认模式以来，在CPU和GPU多场景、多维度经过充分验证，确保了2.4及预后版本的稳定性和安全性，为了进一步降低框架的维护成本和提升Python端的简洁性，已于2022年12月20日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图。
+ 自2022年7月1日以来，新动态图切换为默认模式，在CPU和GPU多场景、多维度经过充分验证，确保了2.4及预后版本的稳定性和安全性。为了进一步降低框架的维护成本和提升 Python 端的简洁性，已于2022年12月20日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图，以下简称为动态图测试迁移工作。
 
- 此次动态图测试的算子可能会有以下两种形式：中间态和最终态，中间态即通过 paddle._legacy_C_ops 调用，比如paddle._legacy_C_ops.slice,最终态通过 paddle._C_ops 调用，如 paddle._C_ops.slice。两者的功能相同，但参数准备上存在一些差别，当前的动态图测迁移优先在最终态中查找相关算子进行适配，其次在中间态中查找。
+为了更加清晰地参与开发工作，现补充下算子背景算子：当前 Paddle框架算子主要有两种实现，静态图实现和动态图实现。动态图实现又分为中间态实现和最终态实现。算子中间态通过 paddle._legacy_C_ops 调用，最终态通过 paddle._C_ops 调用，两者功能相同，但参数的传入方式不通，差异对比如下：
+
+```python
+  # 中间态调用形式，tensor 类可直接传入，非tensor的参数需要通过key-value形式传入
+  paddle._legacy_C_ops.matmul_v2(x, weight, 'trans_x', False, 'trans_y', False)
+  # 最终态调用形式，可直接传入参数
+  paddle._C_ops.matmul(x, y，transpose_x, transpose_y)
+
+```
+当前的动态图测迁移优先在最终态中查找相关算子进行适配，其次在中间态中查找。
 ### 2.功能目标
-对 Paddle 现有的[算子单元测试](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests)进行老动态图到新动态迁移，迁移的内容主要包括进行新动态图适配、修复算子，确保老动态图能通过的测试新动态图测试通过。
+对 Paddle 现有的[算子单元测试](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests)进行动态图迁移，迁移的内容主要包括进行新动态图适配、修复算子，确保老动态图能通过的测试新动态图测试通过。
 
 ### 3.方案要点
 测试迁移工作主要分为三个阶段：
@@ -25,7 +34,7 @@
 
 1.尚未适配新动态图测试，即测试代码中尚未添加 python_api，需要用户写对应的适配代码
 
-2.已经适配了新动态图测试，即已经添加了 python_api,但尚有新动态图不支持的场景，需要修复
+2.已经适配了新动态图测试，即已经添加了 python_api，但尚有新动态图不支持的场景，需要修复
     
 
 ##### 老动态图测试迁移至新动态图的迁移规则：
@@ -40,9 +49,8 @@
 ## 二、主要工作
 
 需要将尚未迁移的算子进行迁移,算子列表另外公布。
-本次任务可以参考以下PR：[PR4987](https://github.com/PaddlePaddle/Paddle/pull/49877) [PR49895](https://github.com/PaddlePaddle/Paddle/pull/49895) [PR50061](https://github.com/PaddlePaddle/Paddle/pull/50061) [PR50077](https://github.com/PaddlePaddle/Paddle/pull/50077) [PR50094](https://github.com/PaddlePaddle/Paddle/pull/50093)
 
-本次工作主要需要社区开发者进行动态图测试迁移，因为当前的工作主要是当打开了新动态图开关后因为尚未适配新动态图测试接口 `python_api` 或者因为参数列表不一致
+本次工作主要需要社区开发者进行动态图测试迁移，主要内容为为测试算子添加 `python_api` 并确保测试通过，工作可以分为以下几个步骤。
 
 ### 2.1 把新动态图测试开关打开，分析报错算子
 按照以下方式进行代码修改
@@ -53,15 +61,15 @@
   # 改为
   from eager_op_test import OpTest
 ```
-并将 `check_eager` 全局替换为 `check_dygraph` 并设置为  `True`，运行 python path/to/test/file, 复现报错场景
-比如：
+如果代码中有 `check_eager` 需要全局替换为 `check_dygraph` 并设置为  `True`，运行 python path/to/test/file， 复现报错场景
+，如：
 ```python
 python  python/paddle/fluid/tests/unittests/test_eig_op.py 
   AssertionError: Detect there is KernelSignature for `eig` op, please set the `self.python_api` if you set check_dygraph = True
 ```
-此时报错提示需要进行 `eig` 算子的   `python_api` 适配
-### 2.2 根据算子测试文件的算子名称(op_type)查找相关算子
-比如[test_slice.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/tests/unittests/test_slice_op.py) 代码中定义的`op_type='slice'` 即为需要测试 slice 算子。此时开发者可以在 Paddle 代码库中进行以下三种方式搜索；
+此时报错提示需要为 `eig` 算子设置 `python_api` , `python_api` 为可调用函数，形如 `paddle.sum`
+### 2.2 根据算子测试文件的算子名称查找相关算子
+根据2.1中的报错信息查找相关算子。比如[test_slice.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/tests/unittests/test_slice_op.py) 代码中定义的`op_type='slice'` 即为需要测试 slice 算子。此时开发者可以在 Paddle 代码库中采用以下三种方式搜索；
    
 1. 【优先】全局搜索 op_type，看是否有定义 python 接口
 
@@ -70,9 +78,69 @@ python  python/paddle/fluid/tests/unittests/test_eig_op.py
 
 如果以上三种方法均找不到算子实现，则可以联系[@yjjiang11](https://github.com/yjjiang11) 寻求帮助
 
-### 2.3 根据算子参数列表进行适配
-一般情况下，无法通过直接添加 python_api 即可调通测试
-测试代码是以静态图的实现为基准进行的参数准备，因此可能存在已写的参数无法直接传给动态图算子的情况，此时就需要进行函数适配
+### 2.3 添加 python_api
+在测试类中的setUp函数添加 python_api.
+
+1. 当 paddle 中能找到python接口并且参数列表和测试中已写的参数一致，可以尝试将 python_api 设置为找到的接口，然后进行测试验证。比如为 tile 算子添加 python_api样例如下：
+
+```python
+
+# 只摘取部分代码
+from eager_op_test import OpTest
+
+@@ -29,6 +29,7 @@
+class TestTileOpRank1(OpTest):
+    def setUp(self):
+        self.op_type = "tile"
+        # 添加 python_api = paddle.tile
+        # tile 为 paddle 可直接调用的接口
+        self.python_api = paddle.tile
+        ....
+
+    def test_check_output(self):
+        self.check_output()
+
+```
+具体可以参考 [PR49877](https://github.com/PaddlePaddle/Paddle/pull/49877)
+
+2. 一般情况下，无法通过为 python_api 设置当前 paddle 中可调用的函数即可调通测试。主要原因在于当前的测试代码是以静态图算子为基准进行的参数准备，参数列表和 paddle 接口、算子最终态、算子中间态不完全一致。此时需要进行函数适配。现以 normalize 为例
+
+```python
+from eager_op_test import OpTest
+import paddle.nn.functional as F
+
+def norm_wrapper(x, axis=1, epsilon=1e-12, is_test=False):
+    # F.normalize 不需要 is_test 参数
+    return F.normalize(x, axis=axis, epsilon=epsilon)
+
+class TestNormTestOp(OpTest):
+    def setUp(self):
+        self.op_type = "norm"
+        # 添加适配函数 norm_wrapper
+        self.python_api = norm_wrapper
+        self.init_test_case()
+        x = np.random.random(self.shape).astype("float64")
+        y, norm = l2_norm(x, self.axis, self.epsilon)
+        self.inputs = {'X': x}
+        self.attrs = {
+            'epsilon': self.epsilon,
+            'axis': self.axis,
+            'axis': int(self.axis),
+            'is_test': True,
+        }
+        # NOTICE：该 normalize 算子为多输出，目前测试框架需要需要添加python_out_sig来进行封装
+        self.python_out_sig = ["out"]
+```
+
+
+目前已经做了部分算子迁移，开发者可以参考以下PR：[PR4987](https://github.com/PaddlePaddle/Paddle/pull/49877) [PR49895](https://github.com/PaddlePaddle/Paddle/pull/49895) [PR50061](https://github.com/PaddlePaddle/Paddle/pull/50061) [PR50077](https://github.com/PaddlePaddle/Paddle/pull/50077) [PR50094](https://github.com/PaddlePaddle/Paddle/pull/50093)
+
+补充： 当测试报 `AssertionError: Don't support multi-output with multi-tensor output. (May be you can use set `python_out_sig`, see `test_squeeze2_op` as a example.)` 表示已有的测试框架不支持多输出表示，可以在 `setUp` 函数中添加 `self.python_out_sig = ['Out']
+
+
+### 2.4 BUG 调试
+如果完成以上步骤，发现测试过程中报错，错误主要分为算子正确性问题和是算子本身计算崩溃，则需要仔细分析原因然后修复。
+
 
 
 
