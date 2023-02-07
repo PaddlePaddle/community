@@ -135,7 +135,7 @@ class TestNormTestOp(OpTest):
 
 目前已经做了部分算子迁移，开发者可以参考以下PR：[PR4987](https://github.com/PaddlePaddle/Paddle/pull/49877) [PR49895](https://github.com/PaddlePaddle/Paddle/pull/49895) [PR50061](https://github.com/PaddlePaddle/Paddle/pull/50061) [PR50077](https://github.com/PaddlePaddle/Paddle/pull/50077) [PR50094](https://github.com/PaddlePaddle/Paddle/pull/50093)
 
-补充： 当测试报 `AssertionError: Don't support multi-output with multi-tensor output. (May be you can use set `python_out_sig`, see `test_squeeze2_op` as a example.)` 表示已有的测试框架不支持多输出表示，可以在 `setUp` 函数中添加 `self.python_out_sig = ['Out']
+补充： 当测试报 `AssertionError: Don't support multi-output with multi-tensor output. (May be you can use set python_out_sig, see test_squeeze2_op as a example.)` 表示已有的测试框架不支持多输出表示，可以在 `setUp` 函数中添加 `self.python_out_sig = ['Out']`
 
 
 ### 2.4 BUG 调试
