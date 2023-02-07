@@ -72,57 +72,5 @@
 
 ## 二、主要工作
 
-目前有如下算子/算子族需要进行迁移（可以在[unitests](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests) 中找一下算子测试文件，一般形如test_opName_op.py,比如accuracy，对应的测试文件test_accuracy_op.py)
-
-可以参考[PR4987](https://github.com/PaddlePaddle/Paddle/pull/49877) [PR49895](https://github.com/PaddlePaddle/Paddle/pull/49895) [PR50061](https://github.com/PaddlePaddle/Paddle/pull/50061) [PR50077](https://github.com/PaddlePaddle/Paddle/pull/50077) [PR50094](https://github.com/PaddlePaddle/Paddle/pull/50093)
-
-* accuracy
-* activation
-* 优化器类：adadelta、adam、adamax、adamw、momentum
-* arange
-* assign_value
-* auc_op、auc_single_pred
-* bce_loss、huber_loss、sigmoid_cross_entropy_with_logits
-* bilinear_interp、linear_interp_v2、nearest_interp_op、trilinear_interp
-* bitwise
-* box_coder、box_coder_and_assign
-* cast
-* channel_shuffle
-* cholesky_solve
-* chunk_eval
-* conv2d、conv2d_op_depthwise_conv、conv2d_transpose、conv2d_transpose_depthwise_conv、conv2d_transpose_part2
-* conv3d、conv3d_transpose
-* ctc_align
-* data_norm
-* distribute_fpn_proposals
-* detection_map
-* dropout_nd
-* eig、eigh、einsum
-* elementwise_max、elementwise_pow、mul
-* expand
-* exponential
-* fake_quantize
-* fc
-* fill_any
-* generate_proposal_labels、generate_proposal_v2
-* group_norm
-* gru_rnn、gru_unit、rnn、simple_rnn
-* im2sequence
-* lamb
-* logcumsumexp
-* marker
-* meshgrid
-* mine_hard_example
-* minus
-* pad、pad2d_op
-* pool_max、pool2d、pool3d
-* positive_negative_pair
-* precision_recall
-* prelu
-* reduce
-* reshapernn
-* sequence_conv
-* slice_op
-* target_assign
-* unbind
-* unique
+需要将尚未迁移的算子进行迁移,算子列表另外公布。
+本次任务可以参考以下PR：[PR4987](https://github.com/PaddlePaddle/Paddle/pull/49877) [PR49895](https://github.com/PaddlePaddle/Paddle/pull/49895) [PR50061](https://github.com/PaddlePaddle/Paddle/pull/50061) [PR50077](https://github.com/PaddlePaddle/Paddle/pull/50077) [PR50094](https://github.com/PaddlePaddle/Paddle/pull/50093)
