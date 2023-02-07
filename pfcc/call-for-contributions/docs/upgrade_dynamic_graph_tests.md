@@ -6,6 +6,8 @@
 ## 一、概要
 ### 1.背景
  自2022年7月1日以来，新动态图切换为默认模式以来，在CPU和GPU多场景、多维度经过充分验证，确保了2.4及预后版本的稳定性和安全性，为了进一步降低框架的维护成本和提升Python端的简洁性，已于2022年12月20日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图。
+
+ 此次动态图测试的算子可能会有以下两种形式：中间态和最终态，中间态即通过 paddle._legacy_C_ops 调用，比如paddle._legacy_C_ops.slice,最终态通过 paddle._C_ops 调用，如 paddle._C_ops.slice。两者的功能相同，但参数准备上存在一些差别，当前的动态图测迁移优先在最终态中查找相关算子进行适配，其次在中间态中查找。
 ### 2.功能目标
 对 Paddle 现有的[算子单元测试](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests)进行老动态图到新动态迁移，迁移的内容主要包括进行新动态图适配、修复算子，确保老动态图能通过的测试新动态图测试通过。
 
@@ -32,45 +34,6 @@
         2. 测试代码中有 check_eager=True,则表示此前已支持新动态图测试，可以直接删除check_eager=True
         3. 测试代码中有check_dygraph=False，则表示此前不支持老动态图测试, 新动态图也不要求测试，可以将check_dygraph=False
         4.测试代码中尚不设置check_eager 和 check_dygraph，则表示此前仅支持测试老动态图，需要添加 python_api，调通测试
-    
-##### 迁移样例：
-```python
-    # 导入方式变化
-    # original: from op_test import OpTest
-    from eager_op_test import OpTest
-    
-    # case1: 此前没有新动态图适配，此时测试会报错说没有添加 python_api
-    #        Paddle 有可以直接调用的接口
-    class TestCase1(OpTest):
-        def setUp(self):
-            self.op_type = "add"
-            # add python_api
-            self.python_api = Paddle.add
-    
-    # case2: 此前没有新动态图适配，此时测试会报错说没有添加 python_api
-    #        Paddle 无可以直接调用的接口或者参数列表不一致，需要写适配函数
-     def caseOp_wrapper(*args, **kwargs):
-          # 对部分参数进行处理
-          return paddle._legacy_C_ops.case_op(*args, **kwargs)
-
-     class TestCase2(OpTest):
-        def setUp(self):
-            self.op_type = "case2Op"
-            # add python_api
-            self.python_api = caseOp_wrapper
-    
-    # case3: 此前适配了新动态图，添加了 python_api
-    #        需要删除 check_eager 调通测试
-    class TestCase3(OpTest):
-        def setUp(self):
-            self.op_type = "case3Op"
-            # add python_api
-            self.python_api = caseOp_wrapper
-
-        def test_output(self):
-            # original:self.check_output(check_eager=False)
-            self.check_output()
-```
 
 #### 3.3 第三阶段：老动态图测试代码完全移除（这部分工作暂不需要社区参与）
 
@@ -78,3 +41,38 @@
 
 需要将尚未迁移的算子进行迁移,算子列表另外公布。
 本次任务可以参考以下PR：[PR4987](https://github.com/PaddlePaddle/Paddle/pull/49877) [PR49895](https://github.com/PaddlePaddle/Paddle/pull/49895) [PR50061](https://github.com/PaddlePaddle/Paddle/pull/50061) [PR50077](https://github.com/PaddlePaddle/Paddle/pull/50077) [PR50094](https://github.com/PaddlePaddle/Paddle/pull/50093)
+
+本次工作主要需要社区开发者进行动态图测试迁移，因为当前的工作主要是当打开了新动态图开关后因为尚未适配新动态图测试接口 `python_api` 或者因为参数列表不一致
+
+### 2.1 把新动态图测试开关打开，分析报错算子
+按照以下方式进行代码修改
+```python
+  # 将
+  from op_test import OpTest
+  
+  # 改为
+  from eager_op_test import OpTest
+```
+并将 `check_eager` 全局替换为 `check_dygraph` 并设置为  `True`，运行 python path/to/test/file, 复现报错场景
+比如：
+```python
+python  python/paddle/fluid/tests/unittests/test_eig_op.py 
+  AssertionError: Detect there is KernelSignature for `eig` op, please set the `self.python_api` if you set check_dygraph = True
+```
+此时报错提示需要进行 `eig` 算子的   `python_api` 适配
+### 2.2 根据算子测试文件的算子名称(op_type)查找相关算子
+比如[test_slice.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/tests/unittests/test_slice_op.py) 代码中定义的`op_type='slice'` 即为需要测试 slice 算子。此时开发者可以在 Paddle 代码库中进行以下三种方式搜索；
+   
+1. 【优先】全局搜索 op_type，看是否有定义 python 接口
+
+2. 【优先】在最终态库中查找 op_type，看是否有相关实现，可以通过python 终端 `python -c "import paddle; getattr(paddle._C_ops， op_type)` 查看是否有相关实现
+3. 在中间态算子库中查找 op_type, 看是否有相关实现，可以用过 python 终端 `python -c "import paddle; getattr(paddle._legacy_C_ops, op_type)`
+
+如果以上三种方法均找不到算子实现，则可以联系[@yjjiang11](https://github.com/yjjiang11) 寻求帮助
+
+### 2.3 根据算子参数列表进行适配
+一般情况下，无法通过直接添加 python_api 即可调通测试
+测试代码是以静态图的实现为基准进行的参数准备，因此可能存在已写的参数无法直接传给动态图算子的情况，此时就需要进行函数适配
+
+
+
