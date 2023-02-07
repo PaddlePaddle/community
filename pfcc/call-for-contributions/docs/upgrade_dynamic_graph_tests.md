@@ -7,7 +7,7 @@
 ### 1.背景
  自2022年7月1日以来，新动态图切换为默认模式，在CPU和GPU多场景、多维度经过充分验证，确保了2.4及预后版本的稳定性和安全性。为了进一步降低框架的维护成本和提升 Python 端的简洁性，已于2022年12月20日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图，以下简称为动态图测试迁移工作。
 
-为了更加清晰地参与开发工作，现补充下算子背景算子：当前 Paddle框架算子主要有两种实现，静态图实现和动态图实现。动态图实现又分为中间态实现和最终态实现。算子中间态通过 paddle._legacy_C_ops 调用，最终态通过 paddle._C_ops 调用，两者功能相同，但参数的传入方式不通，差异对比如下：
+为了更加清晰地参与开发工作，现补充下背景算子：当前 Paddle框架算子主要有两种实现，静态图实现和动态图实现。动态图实现又分为中间态实现和最终态实现。动态图算子中间态通过 paddle._legacy_C_ops 调用，最终态通过 paddle._C_ops 调用，两者功能相同，但参数的传入方式不同，差异对比如下：
 
 ```python
   # 中间态调用形式，tensor 类可直接传入，非tensor的参数需要通过key-value形式传入
@@ -32,7 +32,7 @@
 
 在完成第一阶段的工作后发现有不少算子测试失败，失败原因主要为：
 
-1.尚未适配新动态图测试，即测试代码中尚未添加 python_api，需要用户写对应的适配代码
+1.尚未适配新动态图测试，即测试代码中尚未添加 python_api，python_api为可直接调用函数，需要用户写对应的适配代码
 
 2.已经适配了新动态图测试，即已经添加了 python_api，但尚有新动态图不支持的场景，需要修复
     
@@ -48,7 +48,7 @@
 
 ## 二、主要工作
 
-需要将尚未迁移的算子进行迁移,算子列表另外公布。
+需要将尚未迁移的算子进行迁移，算子列表另外公布。
 
 本次工作主要需要社区开发者进行动态图测试迁移，主要内容为为测试算子添加 `python_api` 并确保测试通过，工作可以分为以下几个步骤。
 
@@ -68,7 +68,7 @@ python  python/paddle/fluid/tests/unittests/test_eig_op.py
   AssertionError: Detect there is KernelSignature for `eig` op, please set the `self.python_api` if you set check_dygraph = True
 ```
 此时报错提示需要为 `eig` 算子设置 `python_api` , `python_api` 为可调用函数，形如 `paddle.sum`
-### 2.2 根据算子测试文件的算子名称查找相关算子
+### 2.2 根据测试文件的算子类型 op_type 查找相关算子
 根据2.1中的报错信息查找相关算子。比如[test_slice.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/tests/unittests/test_slice_op.py) 代码中定义的`op_type='slice'` 即为需要测试 slice 算子。此时开发者可以在 Paddle 代码库中采用以下三种方式搜索；
    
 1. 【优先】全局搜索 op_type，看是否有定义 python 接口
@@ -79,7 +79,7 @@ python  python/paddle/fluid/tests/unittests/test_eig_op.py
 如果以上三种方法均找不到算子实现，则可以联系[@yjjiang11](https://github.com/yjjiang11) 寻求帮助
 
 ### 2.3 添加 python_api
-在测试类中的setUp函数添加 python_api.
+在测试类中的setUp函数添加 python_api。
 
 1. 当 paddle 中能找到python接口并且参数列表和测试中已写的参数一致，可以尝试将 python_api 设置为找到的接口，然后进行测试验证。比如为 tile 算子添加 python_api样例如下：
 
@@ -103,7 +103,7 @@ class TestTileOpRank1(OpTest):
 ```
 具体可以参考 [PR49877](https://github.com/PaddlePaddle/Paddle/pull/49877)
 
-2. 一般情况下，无法通过为 python_api 设置当前 paddle 中可调用的函数即可调通测试。主要原因在于当前的测试代码是以静态图算子为基准进行的参数准备，参数列表和 paddle 接口、算子最终态、算子中间态不完全一致。此时需要进行函数适配。现以 normalize 为例
+2. 一般情况下，无法通过为 python_api 设置当前 paddle 接口即可调通测试。主要原因在于当前的测试代码是以静态图算子为基准进行的参数准备，参数列表和 paddle 接口、算子最终态、中间态可能并不一致。如果参数不一致，则需要进行函数适配。现以 normalize 为例
 
 ```python
 from eager_op_test import OpTest
