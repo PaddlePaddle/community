@@ -17,7 +17,7 @@
 
 目前这部分工作已完成，见[PR49877](https://github.com/PaddlePaddle/Paddle/pull/49877)
 
-#### 3.2 第二阶段：老动态图测试开迁移至新动态图（社区重点参与）
+#### 3.2 第二阶段：老动态图测试迁移至新动态图（社区重点参与）
 
 在完成第一阶段的工作后发现有不少算子测试失败，失败原因主要为：
 
@@ -30,7 +30,7 @@
 
         1. 测试代码中有 check_eager=False，则表示此前不支持新动态图测试，分析原因调通测试
         2. 测试代码中有 check_eager=True,则表示此前已支持新动态图测试，可以直接删除check_eager=True
-        3. 测试代码中有check_dygraph=False，则表示此前不支持老动态图测试，分析原因调通测试
+        3. 测试代码中有check_dygraph=False，则表示此前不支持老动态图测试, 新动态图也不要求测试，可以将check_dygraph=False
         4.测试代码中尚不设置check_eager 和 check_dygraph，则表示此前仅支持测试老动态图，需要添加 python_api，调通测试
     
 ##### 迁移样例：
@@ -47,9 +47,13 @@
             # add python_api
             self.python_api = Paddle.add
     
-    # case1: 此前没有新动态图适配，此时测试会报错说没有添加 python_api
+    # case2: 此前没有新动态图适配，此时测试会报错说没有添加 python_api
     #        Paddle 无可以直接调用的接口或者参数列表不一致，需要写适配函数
-    class TestCase2(OpTest):
+     def caseOp_wrapper(*args, **kwargs):
+          # 对部分参数进行处理
+          return paddle._legacy_C_ops.case_op(*args, **kwargs)
+
+     class TestCase2(OpTest):
         def setUp(self):
             self.op_type = "case2Op"
             # add python_api
