@@ -26,7 +26,7 @@ yj/dygraph_test_upgrade# 飞桨老动态图测试迁移至新动态图
 #### 3.1 第一阶段：动态图测试接口统一
 此前测试动态图分为老动态图测试和新动态图测试，控制开关分别为 check_dygraph 和 check_eager。随着老动态图下线 ，代表老动态图测试开关语义的 check_dygraph 失效。现将开关进行统一仅保留 check_dygraph 作为新动态图测试开关，默认打开，去除原来的的老动态图测试代码。
 
-目前这部分工作已完成，见[PR49877](https://github.com/PaddlePaddle/Paddle/pull/49877)
+目前这部分工作已完成，见 [PR49877](https://github.com/PaddlePaddle/Paddle/pull/49877)
 
 #### 3.2 第二阶段：老动态图测试迁移至新动态图（社区重点参与）
 
@@ -53,7 +53,7 @@ yj/dygraph_test_upgrade# 飞桨老动态图测试迁移至新动态图
 本次工作主要需要社区开发者进行动态图测试迁移，主要内容为为测试算子添加 `python_api` 并确保测试通过，工作可以分为以下几个步骤。
 
 ### 2.1 把新动态图测试开关打开，分析报错算子
-按照以下方式进行代码修改
+按照以下方式在测试文件中进行代码修改
 ```python
   # 将
   from op_test import OpTest
@@ -64,10 +64,10 @@ yj/dygraph_test_upgrade# 飞桨老动态图测试迁移至新动态图
 如果代码中有 `check_eager` 需要全局替换为 `check_dygraph` 并设置为  `True`，运行 python path/to/test/file， 复现报错场景
 ，如：
 ```python
-python  python/paddle/fluid/tests/unittests/test_eig_op.py 
-  AssertionError: Detect there is KernelSignature for `eig` op, please set the `self.python_api` if you set check_dygraph = True
+python  python/paddle/fluid/tests/unittests/test_slice_op.py 
+  AssertionError: Detect there is KernelSignature for `slice` op, please set the `self.python_api` if you set check_dygraph = True
 ```
-此时报错提示需要为 `eig` 算子设置 `python_api` , `python_api` 为可调用函数，形如 `paddle.sum`
+此时报错提示需要为 `slice` 算子设置 `python_api` , `python_api` 为可调用函数，形如 `paddle.slice`
 ### 2.2 根据测试文件的算子类型 op_type 查找相关算子
 根据2.1中的报错信息查找相关算子。比如[test_slice.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/fluid/tests/unittests/test_slice_op.py) 代码中定义的`op_type='slice'` 即为需要测试 slice 算子。此时开发者可以在 Paddle 代码库中采用以下三种方式搜索；
    
@@ -79,9 +79,9 @@ python  python/paddle/fluid/tests/unittests/test_eig_op.py
 如果以上三种方法均找不到算子实现，则可以联系[@yjjiang11](https://github.com/yjjiang11) 寻求帮助
 
 ### 2.3 添加 python_api
-在测试类中的 setUp 函数中添加 python_api。
+在测试类中的 `setUp` 函数中添加 `python_api`。
 
-1. 当 paddle 中能找到 python 接口并且参数列表和测试中已写的参数一致，可以尝试将 python_api 设置为找到的接口，然后进行测试验证。比如为 tile 算子添加 python_api 样例如下：
+1. 当 paddle 中能找到 python 接口并且参数列表和测试代码中参数一致，可以尝试将 python_api 设置为找到的接口，然后进行测试验证。比如为 tile 算子添加 python_api 样例如下：
 
 ```python
 
