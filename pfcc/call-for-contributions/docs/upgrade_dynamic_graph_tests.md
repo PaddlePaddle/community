@@ -5,18 +5,18 @@ yj/dygraph_test_upgrade# 飞桨老动态图测试迁移至新动态图
 
 ## 一、概要
 ### 1.背景
- 自 2022 年 7 月 1 日以来，新动态图切换为默认模式，在 CPU 和 GPU多 场景、多维度经过充分验证，确保了 2.4 及预后版本的稳定性和安全性。为了进一步降低框架的维护成本和提升 Python 端的简洁性，已于2022 年 12 月 20 日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图，以下简称为动态图测试迁移工作。
+ 自 2022 年 7 月 1 日以来，新动态图切换为默认模式，在 CPU 和 GPU 多场景、多维度经过充分验证，确保了 2.4 及预后版本的稳定性和安全性。为了进一步降低框架的维护成本和提升 Python 端的简洁性，已于 2022 年 12 月 20 日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图，以下简称为动态图测试迁移工作。
 
 为了更加清晰地参与开发工作，现补充下背景算子：当前 Paddle 框架算子主要有两种实现，静态图实现和动态图实现。动态图实现又分为中间态实现和最终态实现。动态图算子中间态通过 paddle._legacy_C_ops 调用，最终态通过 paddle._C_ops 调用，两者功能相同，但参数的传入方式不同，差异对比如下：
 
 ```python
-  # 中间态调用形式，tensor 类可直接传入，非tensor的参数需要通过key-value形式传入
+  # 中间态调用形式，tensor类可直接传入，非tensor的参数需要通过key-value形式传入
   paddle._legacy_C_ops.matmul_v2(x, weight, 'trans_x', False, 'trans_y', False)
   # 最终态调用形式，可直接传入参数
   paddle._C_ops.matmul(x, y，transpose_x, transpose_y)
 
 ```
-当前的动态图测迁移优先在最终态中查找相关算子进行适配，其次在中间态中查找。
+当前的动态图测试迁移优先在最终态中查找相关算子进行适配，其次在中间态中查找。
 ### 2.功能目标
 对 Paddle 现有的[算子单元测试](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests)进行动态图迁移，迁移的内容主要包括进行新动态图适配、修复算子，确保老动态图能通过的测试新动态图测试通过。
 
@@ -25,14 +25,14 @@ yj/dygraph_test_upgrade# 飞桨老动态图测试迁移至新动态图
 测试迁移工作主要分为三个阶段：
 
 #### 3.1 第一阶段：动态图测试接口统一
-此前测试动态图分为老动态图测试和新动态图测试，控制开关分别为 check_dygraph 和 check_eager。随着老动态图下线 ，代表老动态图测试开关语义的 check_dygraph 失效。现将开关进行统一仅保留 check_dygraph 作为新动态图测试开关，默认打开，去除原来的的老动态图测试代码。
+此前测试动态图分为老动态图测试和新动态图测试，控制开关分别为 check_dygraph 和 check_eager。随着老动态图下线，现将开关进行统一，仅保留 check_dygraph 作为新动态图测试开关，默认打开，去除原来的的老动态图测试代码。
 
 目前这部分工作已完成，见 [PR49877](https://github.com/PaddlePaddle/Paddle/pull/49877)
 
 #### 3.2 第二阶段：老动态图测试迁移至新动态图（社区重点参与）
 
 
-python_api 背景介绍：当前的算子测试体系沿用老动态图时期的风格，参数形式为(inputs, outputs, attrs),而新动态图则直接调用paddle._C_ops，可直接传入参数，其函数签名是通过 op_type_sig.cc 映射出来的(比如slice新动态图的函数签名可以在slice_sig.cc中找到)。其映射出来的参数列表可能和paddle.xxx、paddle._C_ops.xxx都不匹配，因此需要定义一个转接函数来实现从op_type_sig.cc参数到测试代码中提供的参数实现映射，这里定一个函数为 python_api。python_api 可以为 paddle.xxx, paddle._C_ops.xxx,或者自定义的函数。
+python_api 背景介绍：当前的算子测试体系沿用老动态图时期的风格，参数形式为 (inputs, outputs, attrs)，而新动态图则直接调用 paddle._C_ops，可直接传入参数，其函数签名是通过 op_type_sig.cc 映射出来的（比如 slice 新动态图的函数签名可以在 slice_sig.cc 中找到)。其映射出来的参数列表可能和 paddle.xxx、paddle._C_ops.xxx 都不匹配，因此需要定义一个转接函数来实现从 op_type_sig.cc 参数到测试代码中提供的参数实现映射，这里定一个函数为 python_api。python_api 可以为 paddle.xxx, paddle._C_ops.xxx 或者自定义的函数。
 
 
 在完成第一阶段的工作后发现有不少算子测试失败，失败原因主要为：
@@ -45,9 +45,9 @@ python_api 背景介绍：当前的算子测试体系沿用老动态图时期的
 ##### 老动态图测试迁移至新动态图的迁移规则：
 
         1. 测试代码中有 check_eager=False，则表示此前不支持新动态图测试，分析原因调通测试
-        2. 测试代码中有 check_eager=True,则表示此前已支持新动态图测试，可以直接删除check_eager=True
-        3. 测试代码中有check_dygraph=False，则表示此前不支持老动态图测试, 新动态图也不要求测试，可以将check_dygraph=False
-        4.测试代码中尚不设置check_eager 和 check_dygraph，则表示此前仅支持测试老动态图，需要添加 python_api，调通测试
+        2. 测试代码中有 check_eager=True，则表示此前已支持新动态图测试，可以直接删除 check_eager=True
+        3. 测试代码中有 check_dygraph=False，则表示此前不支持老动态图测试, 新动态图也不要求测试，可以将 check_dygraph=False
+        4. 测试代码中尚不设置 check_eager 和 check_dygraph，则表示此前仅支持老动态图测试，需要添加 python_api，调通测试
 
 #### 3.3 第三阶段：老动态图测试代码完全移除（这部分工作暂不需要社区参与）
 
@@ -66,13 +66,14 @@ python_api 背景介绍：当前的算子测试体系沿用老动态图时期的
   # 改为
   from eager_op_test import OpTest
 ```
-如果代码中有 `check_eager` 需要全局替换为 `check_dygraph` 并设置为  `True`，运行 python path/to/test/file， 复现报错场景
+如果代码中有 `check_eager` 需要全局替换为 `check_dygraph` 并设置为 `True`，运行 `python path/to/test/file`，复现报错场景
 ，如：
 ```python
 python  python/paddle/fluid/tests/unittests/test_slice_op.py 
   AssertionError: Detect there is KernelSignature for `slice` op, please set the `self.python_api` if you set check_dygraph = True
 ```
 此时报错提示需要为 `slice` 算子设置 `python_api` , `python_api` 为可调用函数，形如 `paddle.slice`
+
 ### 2.2 根据测试文件的算子类型 op_type 查找相关算子，在 `setUp` 函数中添加 `python_api`
 
 1. 搜索 op_type_sig.cc，推倒出正确的参数列表。
@@ -104,7 +105,7 @@ class TestTileOpRank1(OpTest):
 
 3. 否则在 paddle._C_ops 查找相关接口是否满足需求，如果满足则可以设置 self.python_api = paddle._C_ops.xxx
 
-4. 否则在需要写 op_type_wrapper 函数，用于处理测试代码中的参数。在 op_type_wrapper 中调用 paddle._C_ops.xxx 或者 paddle.xxx, 然后设置 self.python_api = op_type_wrapper
+4. 否则需要写 op_type_wrapper 函数，用于处理测试代码中的参数。在 op_type_wrapper 中调用 paddle._C_ops.xxx 或者 paddle.xxx, 然后设置 self.python_api = op_type_wrapper
 
 ```python
 from eager_op_test import OpTest
