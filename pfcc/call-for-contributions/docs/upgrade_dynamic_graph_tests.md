@@ -31,9 +31,8 @@ yj/dygraph_test_upgrade# 飞桨老动态图测试迁移至新动态图
 
 #### 3.2 第二阶段：老动态图测试迁移至新动态图（社区重点参与）
 
-python_api 背景介绍：
-      
-    当前的算子测试体系沿用老动态图时期的风格，参数形式为(inputs, outputs, attrs),而新动态图则直接调用paddle._C_ops，可直接传入参数，其函数签名是通过 op_type_sig.cc 映射出来的(比如slice新动态图的函数签名可以在slice_sig.cc中找到)。其映射出来的参数列表可能和paddle.xxx、paddle._C_ops.xxx都不匹配，因此需要定义一个转接函数来实现从op_type_sig.cc参数到测试代码中提供的参数实现映射，这里定一个函数为 python_api。python_api 可以为 paddle.xxx, paddle._C_ops.xxx,或者自定义的函数。
+
+python_api 背景介绍：当前的算子测试体系沿用老动态图时期的风格，参数形式为(inputs, outputs, attrs),而新动态图则直接调用paddle._C_ops，可直接传入参数，其函数签名是通过 op_type_sig.cc 映射出来的(比如slice新动态图的函数签名可以在slice_sig.cc中找到)。其映射出来的参数列表可能和paddle.xxx、paddle._C_ops.xxx都不匹配，因此需要定义一个转接函数来实现从op_type_sig.cc参数到测试代码中提供的参数实现映射，这里定一个函数为 python_api。python_api 可以为 paddle.xxx, paddle._C_ops.xxx,或者自定义的函数。
 
 
 在完成第一阶段的工作后发现有不少算子测试失败，失败原因主要为：
