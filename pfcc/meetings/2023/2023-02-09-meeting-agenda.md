@@ -36,7 +36,7 @@
 - 飞桨研发 [liuruyan](https://github.com/liuruyan) 低精度算子开发与优化经验分享（10-15min）
 - [DrRyanHuang](https://github.com/DrRyanHuang) 飞桨 API 动静行为统一经验分享（5 min）
 - [RedContritio](https://github.com/RedContritio) 春节开源经历分享（5-10 min）
-- [engineer1109](https://github.com/engineer1109) "改进飞桨框架的logging系统"志愿者征集
-- 飞桨产品 [Ligoml](https://github.com/Ligoml) 社区信息同步：介绍两大开源活动（快乐开源+黑客松），收集贡献指南和框架开发需求（10-15min）
+- [engineer1109](https://github.com/engineer1109) "改进飞桨框架的logging系统"志愿者征集（5-10 min）
+- 飞桨产品 [Ligoml](https://github.com/Ligoml) 社区信息同步：介绍两大开源活动（快乐开源+黑客松），收集贡献指南和框架开发需求（10min）
 - PFCC 成员自由发言讨论（5 min）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
