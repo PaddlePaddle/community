@@ -5,9 +5,9 @@ yj/dygraph_test_upgrade# 飞桨老动态图测试迁移至新动态图
 
 ## 一、概要
 ### 1.背景
- 自 2022 年 7 月 1 日以来，新动态图切换为默认模式，在 CPU 和 GPU多 场景、多维度经过充分验证，确保了 2.4 及预后版本的稳定性和安全性。为了进一步降低框架的维护成本和提升 Python 端的简洁性，已于2022 年 12 月 20 日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图，以下简称为动态图测试迁移工作。
+ 自 2022 年 7 月 1 日以来，新动态图切换为默认模式，在 CPU 和 GPU 多场景、多维度经过充分验证，确保了 2.4 及预后版本的稳定性和安全性。为了进一步降低框架的维护成本和提升 Python 端的简洁性，已于 2022 年 12 月 20 日正式下线老动态图功能。作为老动态图下线延续工作，现需要集中进行部分老动态图测试迁移至新动态图，以下简称为动态图测试迁移工作。
 
-为了更加清晰地参与开发工作，现补充下背景算子：当前 Paddle 框架算子主要有两种实现，静态图实现和动态图实现。动态图实现又分为中间态实现和最终态实现。动态图算子中间态通过 paddle._legacy_C_ops 调用，最终态通过 paddle._C_ops 调用，两者功能相同，但参数的传入方式不同，差异对比如下：
+为了更加清晰地参与开发工作，现补充下背景算子:当前 Paddle 框架算子主要有两种实现，静态图实现和动态图实现。动态图实现又分为中间态实现和最终态实现。动态图算子中间态通过 paddle._legacy_C_ops 调用，最终态通过 paddle._C_ops 调用，两者功能相同，但参数的传入方式不同，差异对比如下：
 
 ```python
   # 中间态调用形式，tensor 类可直接传入，非tensor的参数需要通过key-value形式传入
@@ -87,7 +87,7 @@ python  python/paddle/fluid/tests/unittests/test_slice_op.py
 from eager_op_test import OpTest
 
 @@ -29,6 +29,7 @@
-class TestTileOpRank1(OpTest):
+class TestTileOp(OpTest):
     def setUp(self):
         self.op_type = "tile"
         # 添加 python_api = paddle.tile
@@ -102,9 +102,29 @@ class TestTileOpRank1(OpTest):
    
   具体可以参考 [PR49877](https://github.com/PaddlePaddle/Paddle/pull/49877)
 
-3. 否则在 paddle._C_ops 查找相关接口是否满足需求，如果满足则可以设置 self.python_api = paddle._C_ops.xxx
+3. 如果第二点不满足，可以在 paddle._C_ops 查找相关接口是否满足需求，如果满足则可以设置 self.python_api = paddle._C_ops.xxx
 
-4. 否则在需要写 op_type_wrapper 函数，用于处理测试代码中的参数。在 op_type_wrapper 中调用 paddle._C_ops.xxx 或者 paddle.xxx, 然后设置 self.python_api = op_type_wrapper
+```python
+
+# 只摘取部分代码
+# op_type 为 split，paddle._C_ops 有可调用的 split 函数
+# paddle.tile 和 tile_sig.cc 参数列表一致
+from eager_op_test import OpTest
+
+@@ -29,6 +29,7 @@
+class TestSpltOp(OpTest):
+    def setUp(self):
+        self.op_type = "split"
+        # 添加 python_api = paddle._C_ops.split
+        # tile 为 paddle 可直接调用的接口
+        self.python_api = paddle._C_ops.split
+        ....
+
+    def test_check_output(self):
+        self.check_output()
+
+```
+4. 如果第二点和第三点仍然无法满足接口需求，需要写 op_type_wrapper 函数，用于处理测试代码中的参数。在 op_type_wrapper 中调用 paddle._C_ops.xxx 或者 paddle.xxx, 然后设置 self.python_api = op_type_wrapper
 
 ```python
 from eager_op_test import OpTest
