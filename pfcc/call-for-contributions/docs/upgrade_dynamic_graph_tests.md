@@ -84,7 +84,6 @@ python  python/paddle/fluid/tests/unittests/test_slice_op.py
 
 # 只摘取部分代码
 # op_type 为 tile，在 paddle 中有可直接调用的接口 tile
-# paddle.tile 和 tile_sig.cc 参数列表一致
 from eager_op_test import OpTest
 
 @@ -29,6 +29,7 @@
