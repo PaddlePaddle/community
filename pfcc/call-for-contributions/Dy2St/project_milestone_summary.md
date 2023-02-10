@@ -46,6 +46,5 @@
 
 最后，诚挚地感谢社区开发者 [@DrRyanHuang](https://github.com/DrRyanHuang)、[@Liyulingyue](https://github.com/Liyulingyue)、[@SigureMo](https://github.com/SigureMo)、[@Tomoko-hjf](https://github.com/Tomoko-hjf) 对飞桨框架的积极贡献！
 
-感谢 [@2742195759](https://github.com/2742195759)、[@0x45f](https://github.com/0x45f) 作为任务 Mentor 对 PR 的 Review 和合入；
 
 其他对动转静此次飞桨开源社区任务提供建议和帮助的同学，在此无法一一列全。感谢大家持续支持飞桨开源社区的共建工作！
