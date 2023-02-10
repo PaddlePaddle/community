@@ -2,7 +2,7 @@
 
 **Hi all：**
 
-自2022年11月中旬PM联动框架启动《飞桨快乐开源活动》以来，单机框架动转静方向参与公布了2个任务，已经被飞桨开源社区开发者全部认领、并贡献完成。现向各位汇报这2个任务的总体进展成果和后续计划。
+自2022年11月中旬 PM 联动框架启动《[飞桨快乐开源活动](https://github.com/PaddlePaddle/Paddle/issues/48019)》以来，单机框架动转静方向参与公布了2个任务，已经被飞桨开源社区开发者全部认领、并贡献完成。现向各位汇报这2个任务的总体进展成果和后续计划。
 
 * 飞桨API动静统一：[任务描述](./unify_api_behavior.md)、[Tracking Issue](https://github.com/PaddlePaddle/Paddle/issues/48612)
 * 动转静功能扩展和接口退场：[任务描述](./to_static_function_extension.md)、[Tracking Issue](https://github.com/PaddlePaddle/Paddle/issues/48334)
@@ -13,14 +13,14 @@
 **《动转静功能扩展和旧接口退场》任务：**
 
 * 11月24日， Tracking Issue 正式建立，完成子任务拆分；
-* 11月25日，收到并合入了第一个社区贡献PR（来自@SigureMo）
+* 11月25日，收到并合入了第一个社区贡献 PR（来自 @SigureMo）
 * 2月5日，9个子任务全部被贡献完成，Issue 正式Closed；
 
 **《飞桨API动静行为统一》任务：**
 
 * 12月1日， Tracking Issue 正式建立，完成不统一API任务发布；
-* 12月13日， 收到并合入了第一个社区贡献PR（来自@DrRyanHuang）
-* 1月9日，7个子任务全部被贡献完成，Issue 正式Closed；
+* 12月13日， 收到并合入了第一个社区贡献PR（来自 @DrRyanHuang）
+* 1月9日，7个子任务全部被贡献完成，Issue 正式 Closed；
 
 ## 二、项目成果
 
@@ -46,10 +46,10 @@
 
 最后，诚挚地感谢社区开发者 [@DrRyanHuang](https://github.com/DrRyanHuang)、[@Liyulingyue](https://github.com/Liyulingyue)、[@SigureMo](https://github.com/SigureMo)、[@Tomoko-hjf](https://github.com/Tomoko-hjf) 对飞桨框架的积极贡献！
 
-感谢飞桨动转静方向[@2742195759](https://github.com/2742195759)、[@0x45f](https://github.com/0x45f)作为任务 Mentor 对 PR 的 Review 和合入；
-特别感谢[@luotao1](https://github.com/luotao1)、[@Ligoml](https://github.com/Ligoml)、[@krystalxxf](https://github.com/krystalxxf)对动转静任务社区开发者的鼓励和引导；
-感谢[@XiaoguangHu01](https://github.com/XiaoguangHu01)、[@chenwhql](https://github.com/chenwhql)、[@zhiqiu](https://github.com/zhiqiu)等同学对PR重要代码改动的 Review；
+感谢飞桨动转静方向 [@2742195759](https://github.com/2742195759)、[@0x45f](https://github.com/0x45f) 作为任务 Mentor 对 PR 的 Review 和合入；
+特别感谢 [@luotao1](https://github.com/luotao1)、[@Ligoml](https://github.com/Ligoml)、[@krystalxxf](https://github.com/krystalxxf)对动转静任务社区开发者的鼓励和引导；
+感谢 [@XiaoguangHu01](https://github.com/XiaoguangHu01)、[@chenwhql](https://github.com/chenwhql)、[@zhiqiu](https://github.com/zhiqiu)等同学对PR重要代码改动的 Review；
 
-感谢[@biran1983](https://github.com/biran1983)、[@zhangjun25](https://github.com/biran1983)、以及各位PM同学举办的此次快乐开源活动，提供此次参与的机会；
+感谢 [@biran1983](https://github.com/biran1983)、[@zhangjun25](https://github.com/biran1983)、以及各位 PM 同学举办的此次快乐开源活动，提供此次参与的机会；
 
 其他对动转静此次飞桨开源社区任务提供建议和帮助的同学，在此无法一一列全。感谢大家持续支持飞桨开源社区的共建工作！
