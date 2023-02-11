@@ -32,12 +32,12 @@
 PFCC成员[DrRyanHuang](https://github.com/DrRyanHuang) 进行飞桨 API 动静行为统一经验分享。
 
 
-### 3、PHI 算子库依赖解耦经验分享
+### 3、春节开源经历分享
 
 PFCC成员[RedContritio](https://github.com/RedContritio) 进行春节开源经历分享。
 
 
-### 4、PHI 算子库依赖解耦经验分享
+### 4、"改进飞桨框架的logging系统"志愿者征集
 
 PFCC成员[engineer1109](https://github.com/engineer1109) 进行 "改进飞桨框架的logging系统" 的志愿者征集。
 
