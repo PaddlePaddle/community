@@ -2,18 +2,18 @@
 
 Hi all：
 
-自2022年8月启动《[开发者联合项目 Call-for-Contribution](https://github.com/PaddlePaddle/community/tree/master/pfcc/call-for-contributions)》以来，Flake8 代码风格检查工具的引入任务已经被飞桨开源社区开发者全部认领、并贡献完成。
+自2022年8月启动《[开发者联合项目 Call-for-Contribution](../)》以来，Flake8 代码风格检查工具的引入任务已经被飞桨开源社区开发者全部认领、并贡献完成。
 现向各位汇报这个任务的总体进展成果和后续计划。
 
 ## 一、项目背景
 
 在大家平时的工作中，经常会有很多很好的想法，但由于缺乏足够的人力、时间、资源或其他原因，其中许多想法尚未实现。 开发者联合项目） 计划，
-会号召一批热爱飞桨、热爱开源的开发者，帮飞桨社区将大家的这些想法变成实现（参考 [Call For Contribution 指引]([../call-for-contributions/guide-to-call-for-contribution_cn.md](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/guide-to-call-for-contribution_cn.md))）。
+会号召一批热爱飞桨、热爱开源的开发者，帮飞桨社区将大家的这些想法变成实现（参考 [Call For Contribution 指引](../guide-to-call-for-contribution_cn.md)）。
 
 Paddle 内部在2022年6月底完成了 pre-commit、pylint、remove-crlf、cpplint、cmake-format、yapf、cmakelint、cmake-format 8 大检查工具的升级，
 还剩下两大检查工具 clang-tidy 和 Flake8 还未引入。其中Flake8 是一个被广泛使用的 Python Linter，它利用插件系统集成了多个 Linter 工具，
 默认的插件包含了 pycodestyle、pyflakes、mccabe 三个工具，分别用于检查代码风格、语法问题和循环复杂度。此外 Flake8 还支持安装第三方插件，
-以对代码进行更全面的检查。因此，在这个背景下发布了《[Flake8 代码风格检查工具的引入](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/code_style/code_style_flake8.md)》任务，期望借助社区开发者的力量帮助飞桨规范代码风格，
+以对代码进行更全面的检查。因此，在这个背景下发布了《[Flake8 代码风格检查工具的引入](code_style_flake8.md)》任务，期望借助社区开发者的力量帮助飞桨规范代码风格，
 提高代码质量，并使开发者能够在开发时发现一些潜在的逻辑问题。
 
 ## 二、项目历程
