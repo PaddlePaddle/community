@@ -43,8 +43,8 @@ Flake8 代码风格检查工具的引入，是一个了解飞桨框架 Python �
 * 代码风格检查机制完善：
   * 额外修复 cpplint hook / Remove-CRLF / Detect Private Key hook 在 CI 不生效的问题
 
-### 2. 业内情况对比
-Flake8 代码风格检查工具的引入，提升了飞桨 Python代码的质量和可读性，由落后 Pytorch 到部分超越 Pytorch，同时超越 tensorflow。
+### 2. 业内情况参考
+Flake8 代码风格检查工具的引入，提升了飞桨 Python代码的质量和可读性。
 * pytorch 的 python 代码检查工具为：flake8==3.8.2（飞桨版本4.0.1更新且剩余的错误子项更少，飞桨共 ignore 10个子项，Pytorch ignore 16个子项）, black==22.3.0（飞桨版本22.8.0更新）, mypy==0.950，isort。
 * tensorflow 没有使用 flake8、yapf 、black 和 isort，只是推荐手动 yapf 格式化。见issue： [how to auto format python code](https://github.com/tensorflow/tensorflow/issues/50304)，
 [Some check that we have enabled in .pylintrc are silently not executed anymore](https://github.com/tensorflow/tensorflow/issues/55442)。

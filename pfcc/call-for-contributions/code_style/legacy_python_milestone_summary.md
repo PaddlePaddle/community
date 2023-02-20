@@ -33,26 +33,24 @@ Paddle 从 2.1 版本（2021年）开始不再维护 Python 2.7和3.5，计划�
 ## 三、项目成果
 ### 1. 难度适中，吸引开发者踊跃贡献
 Python 旧版本退场，是一个了解飞桨框架 Python 工程实现和 Python 各版本语法特点的非常好的切入点，对于新手非常友好。累计收到了4个社区开发者32个贡献PR，修复代码行数8500+，顺利完成任务结项，其中：
-* Python 2.7 相关代码退场，退场了Python 2 子包（__future__、six）、没有其它功能的 Python 2 模块（类中不必要的显式 object 继承、
+* Python 2.7 相关代码退场，退场了Python 2 子包（`__future__`、`six`）、没有其它功能的 Python 2 模块（类中不必要的显式 object 继承、
 super() 函数中不必要的参数、compat.py文件）、Python2 相关逻辑分支、非必要的环境依赖、文档中涉及 Python 2 的内容共5大项8个子项，修复代码行数8000+，
 提升开发者阅读的便利性。同时，开发者可以直接使用python 3 新特性，无需考虑和 python 2 的兼容性，更专注于编写代码逻辑。
 * Python 3.5/3.6 相关代码退场，在Python 2.7 退场基础上，退场了低于 Python3.7 相关逻辑分支、非必要的环境依赖、文档中涉及 Python 3.5/3.6 的内容共3个子项，
 修复代码行数500+，提升开发者阅读和开发源码的便利性。
 
-### 2. 业内情况对比
-Python 2.7/3.5/3.6 的退场，使得飞桨框架的代码仓库更加简洁和易维护，也使得飞桨框架跟python编程语言有了更进一步的对齐。以下也列出了业内的对比情况，供参考。
+### 2. 业内情况参考
+Python 2.7/3.5/3.6 的退场，使得飞桨框架的代码仓库更加简洁和易维护，也使得飞桨框架跟python编程语言有了更进一步的对齐。以下也列出了业内的情况，供参考。
 * Python 2.7 退场：
   * Pytorch 从2020年8月开始逐步清理 Python2.7 代码，见 [Legacy Python2 and early Python3 leftovers](https://github.com/pytorch/pytorch/issues/42919)，
-包括删除six子包、删除__future子包，共2项。
+  包括删除six子包、删除`__future__`子包，共2项。
   * Tensorflow 从2022年1月份开始逐步清理 Python 2.7 代码，见 [Cleanup legacy Python2 PR](https://github.com/tensorflow/tensorflow/search?p=2&q=python2%20legacy&type=commits) 列表，
-包含删除six子包、删除__future子包、删除显式object继承、删除super()函数中不必要的参数，共4项。
-  * 结论：飞桨共清理了8个子项，覆盖了 Pytorch/Tensorflow 清理内容。
+  包含删除six子包、删除__future子包、删除显式object继承、删除super()函数中不必要的参数，共4项。
 * Python 3.5/3.6 退场：
   * Pytorch 在1.11版本（2022年3月11日）开始不再维护 Python 3.6，见 [Deprecating Python 3.6 support](https://github.com/pytorch/pytorch/issues/66462)。
-包括下线 Python 3.6 版本的 CI 流水线、不发 Python 3.6 版本的包，但没有看到相关代码退场的 PR。
+  包括下线 Python 3.6 版本的 CI 流水线、不发 Python 3.6 版本的包，但没有看到相关代码退场的 PR。
   * Tensorflow 在2.7.0版本（2021年11月5日）开始不再维护 Python 3.6，见 [tensorflow_tested_build_configurations](https://www.tensorflow.org/install/source#tested_build_configurations)，
-但没有看到 Python 3.5/3.6 代码退场的 PR。
-  * 结论：Pytorch/Tensorflow 尚未完成 Python 3.5/3.6 代码退场，而飞桨已经完成。
+  但没有看到 Python 3.5/3.6 代码退场的 PR。
 
 ### 下一步计划
 后续会考虑和社区开发者一起引入 [pyupgrade](https://github.com/asottile/pyupgrade) （将 python 代码自动化升级到更新版本的工具）或 
