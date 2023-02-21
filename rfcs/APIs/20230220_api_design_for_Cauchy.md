@@ -418,17 +418,18 @@ class API 中的具体实现（部分方法已完成开发，故直接使用源�
 
 # 六、测试和验收的考量
 
-测试考虑的 case 如下：
+测试考虑的 case 如下(参考pytorch中的单测代码)：
 
 根据api类各个方法及特性传参的不同，把单测分成三个部分：测试分布的特性（无需额外参数）、测试分布的概率密度函数（需要传值）以及测试KL散度（需要传入一个实例）。
 
 测试Cauchy分布的特性
+
 测试方法：该部分主要测试分布的均值、方差、熵等特征。类TestLaplace继承unittest.TestCase，分别实现方法setUp（初始化），test_mean（mean单测），test_variance（variance单测），test_stddev（stddev单测），test_entropy（entropy单测），test_sample（sample单测）。
 
-均值、方差、标准差通过Numpy计算相应值，对比Laplace类中相应property的返回值，若一致即正确；
+考虑到柯西分布的特殊性：数学期望与方差均不存在
+均值、方差等通过Numpy计算相应值（inf，nan），对比Laplace类中相应property的返回值，若一致即正确；
 
-采样方法除验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合Cauchy分布。验证策略如下：随机采样30000个Cauchy分布下的样本值，计算采样样本的均值和方差，并比较同分布下scipy.stats.Cauchy返回的均值与方差，检查是否在合理误差范围内；同时通过Kolmogorov-Smirnov test进一步验证采样是否属于Cauchy分布，若计算所得ks值小于0.02，则拒绝不一致假设，两者属于同一分布；
-
+采样方法 验证其返回的数据类型及数据形状是否合法外，还需证明采样结果符合Cauchy分布。验证策略如下：随机采样30000个Cauchy分布下的样本值，并比较同分布下numpy返回值，检查是否在合理误差范围内
 熵计算通过对比scipy.stats.Cauchy.entropy的值是否与类方法返回值一致验证结果的正确性。
 
 测试用例：单测需要覆盖单一维度的Cauchy分布和多维度分布情况，因此使用两种初始化参数
@@ -472,7 +473,7 @@ class API 中的具体实现（部分方法已完成开发，故直接使用源�
 
 [torch.distributions.Cauchy](https://pytorch.org/docs/stable/distributions.html#Cauchy)
 
-
+[Pytorch柯西分布单测文件](https://github.com/pytorch/pytorch/blob/master/test/distributions/test_distributions.py#L1602)
 
 ## TensorFlow
 
