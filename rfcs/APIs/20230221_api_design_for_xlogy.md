@@ -2,7 +2,7 @@
 
 | API名称                                                      | Paddle.xlogy                               |
 | ------------------------------------------------------------ | ----------------------------------------- |
-| 提交作者<input type="checkbox" class="rowselector hidden">   | paddle.xlogy                         |
+| 提交作者<input type="checkbox" class="rowselector hidden">   | Li-fAngyU                         |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-02-21                                |
 | 版本号                                                       | V1.0                                      |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | Develop                                   |
