@@ -113,44 +113,6 @@ Tensor polar(const Tensor& abs, const Tensor& angle) {
 - angle：复数张量的角度。数据类型必须与abs相同。
 - out：如果输入为 torch.float32，则必须为 torch.complex64。如果输入为 torch.float64，则必须为 torch.complex128。
 
-## SciPy
-
-实现方法上，Scipy 是通过 Python API 的方式组合实现的，[代码位置](https://github.com/scipy/scipy/blob/v1.10.1/scipy/linalg/_decomp_polar.py#L8-L111)
-
-代码实现：
-```python
-def polar(a, side="right"):
-    if side not in ['right', 'left']:
-        raise ValueError("`side` must be either 'right' or 'left'")
-    a = np.asarray(a)
-    if a.ndim != 2:
-        raise ValueError("`a` must be a 2-D array.")
-
-    w, s, vh = svd(a, full_matrices=False)
-    u = w.dot(vh)
-    if side == 'right':
-        # a = up
-        p = (vh.T.conj() * s).dot(vh)
-    else:
-        # a = pu
-        p = (w * s).dot(w.T.conj())
-    return u, p
-```
-
-参数表：
-
-- Parameters:
-    - a: (m, n) array_like
-        The array to be factored.
-    - side: {‘left’, ‘right’}, optional
-        Determines whether a right or left polar decomposition is computed. If side is “right”, then a = up. If side is “left”, then a = pu. The default is “right”.
-
-- Returns:
-    - u: (m, n) ndarray
-        If a is square, then u is unitary. If m > n, then the columns of a are orthonormal, and if m < n, then the rows of u are orthonormal.
-    - p: ndarray
-        p is Hermitian positive semidefinite. If a is nonsingular, p is positive definite. The shape of p is (n, n) or (m, m), depending on whether side is “right” or “left”, respectively.
-
 # 四、对比分析
 
 ## 共同点
@@ -160,8 +122,6 @@ def polar(a, side="right"):
 ## 不同点
 
 - PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
-- Scipy 则是通过 Python API 直接实现其对应的功能。
-- Tensorflow 有 `a`、`side` 等参数的设置，可调整的程度更高。
 
 # 五、设计思路与实现方案
 
@@ -201,13 +161,13 @@ $$
 
 测试需要考虑的 case 如下：
 
-- 输出数值结果的一致性和数据类型是否正确，使用 pytorch 或 scipy 作为参考标准
+- 输出数值结果的一致性和数据类型是否正确，使用 pytorch 作为参考标准
 - 参数 `abs` 的数据类型准确性判断
 - 参数 `angle` 的数据类型准确性判断、
 
 # 七、可行性分析和排期规划
 
-方案主要依赖现有 Paddle API 组合而成，且依赖的 `paddle.complex` 已经在 Paddle repo 的 [python/paddle/tensor/search.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/creation.py#L2160-L2209)。工期上可以满足在当前版本周期内开发完成。
+方案主要依赖现有 Paddle API 组合而成，且依赖的 `paddle.complex` 已经在 Paddle repo 的 [python/paddle/tensor/creation.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/creation.py#L2160-L2209)。工期上可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 
