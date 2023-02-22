@@ -1,4 +1,4 @@
-# xlogy 设计文档
+# GaussianNLLLoss 设计文档
 
 | API名称                                                      | GaussianNLLLoss                                |
 | ------------------------------------------------------------ |------------------------------------------------|
@@ -14,6 +14,12 @@
 ## 1、相关背景
 
 paddle.nn.GaussianNLLLoss 和 paddle.nn.functional.gaussian_nll_loss API 用于高斯负对数似然函数的计算。
+该函数计算公式为：
+$$
+\text{loss} = \frac{1}{2}\left(\log\left(\text{max}\left(\text{var},
+        \ \text{eps}\right)\right) + \frac{\left(\text{input} - \text{target}\right)^2}
+        {\text{max}\left(\text{var}, \ \text{eps}\right)}\right) + \text{const.}
+$$
 
 ## 2、功能目标
 
@@ -121,12 +127,12 @@ def gaussian_nll_loss(
     reduction: str="mean",
     name:str=None,
 ) -> Tensor:`
- - Input(Tensor): `(N, *)` 或 `(*)` 其中 `*`表示任何数量的额外维度
- - Target(Tensor):`(N, *)` 或 `(*)`，与输入的形状相同， 
+ - Input(Tensor): 期望服从高斯分布的输入，形状为`(N, *)` 或 `(*)` 其中 `*`表示任何数量的额外维度。
+ - Target(Tensor):为高斯分布的采样值，形状为`(N, *)` 或 `(*)`，与输入的形状相同， 
 或与输入的形状相同但有一个维度等于1（允许广播）。
- - Var(Tensor): `(N, *)` 或 `(*)`，与输入的形状相同，或与输入的形状相同但有
+ - Var(Tensor): 正方差张量，即数值均大于等于0的方差张量，形状为`(N, *)` 或 `(*)`，与输入的形状相同，或与输入的形状相同但有
 一个维度等于1，或与输入的形状相同但少一个维度（允许广播）。
- - Output(Tensor): 如果还原是 “mean”（默认）或 “sum”，则为标量。如果还原是’无’，
+ - Output(Tensor): 输出衡量Input与Target差距的损失函数结果，如果‘reduction’是 “mean”（默认）或 “sum”，则为标量。如果‘reduction’是’none’，
 则是`(N, *)`，与输入的形状相同。
 
 和
@@ -169,9 +175,12 @@ numpy没有gaussian_nll_loss的实现，所以由自己生成的函数进行前�
 3. 各reduction下计算一致
 4. 各参数输入有效。
 
+# 七、可行性分析和排期规划
+函数均为python代码实现，已经基本实现，待该设计文档通过验收后可在短时间内提交。
+
 # 八、影响面
 
-对其它模块没有影响。
+在paddle.nn.functional.loss 文件中import math
 
 # 名词解释
 
