@@ -1,6 +1,6 @@
-# paddle.distribution.Laplace 设计文档
+# paddle.distribution.Cauchy 设计文档
 
-| API 名称     | paddle.distribution.Laplace        |
+| API 名称     | paddle.distribution.Cauchy        |
 | ------------ | ---------------------------------- |
 | 提交作者     | 李文博（李长安）倪浩（TUDelftHao） |
 | 提交时间     | 2023-02-20                         |
