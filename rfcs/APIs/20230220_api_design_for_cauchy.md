@@ -513,6 +513,7 @@ def sample(self, shape):
 - rsample(shape)：重参数化采样
 
 ```python
+import paddle
 def rsample(self, shape):
     shape = self._extend_shape(shape)
     eps = paddle.standard_normal(shape, dtype=None, name=None)
@@ -524,6 +525,7 @@ def rsample(self, shape):
 - prob(value)：概率密度函数
 
 ```python
+import paddle
 def prob(self, value):
     x = paddle.pow(2 * math.pi,-value.shape.pop(1) / 2) * paddle.pow(paddle.linalg.det(self.scale), -1/2)
     y = paddle.exp(-1/2 * paddle.t(value - self.loc) * paddle.inverse(self.scale) * (value - self.loc))
@@ -532,6 +534,7 @@ def prob(self, value):
 
 - log_prob(value)：对数概率密度函数
 ```python
+import paddle
 def log_prob(self, value):
     return paddle.log(self.prob(value))
 ```
@@ -539,6 +542,7 @@ def log_prob(self, value):
 - entropy(value)：熵
 
 ```python
+import paddle
 def entropy(self, value):
     sigma = paddle.linalg.det(self.sclae)
     return 1 / 2 * paddle.log(paddle.pow(2 * math.pi * math.e, value.shpe.pop(1)) * sigma)
@@ -547,6 +551,7 @@ def entropy(self, value):
 - kl_divergence 两个Cauchy分布之间的kl散度(other--Cauchy类的一个实例):
 
 ```python
+import paddle
 def kl_divergence(self, other):
     sector_1 = paddle.t(self.loc - other.loc) * paddle.inverse(other.sclae) * (self.loc - other.loc)
     sector_2 = paddle.log(paddle.linalg.det(paddle.inverse(other.sclae) * self.sclae))
