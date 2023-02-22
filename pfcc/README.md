@@ -29,6 +29,13 @@ PFCC每两周进行一次例行会议。时间在每隔两周的周四的19点-2
 
 PFCC鼓励大家进行开放的交流，所有的沟通和纪要都会记录在本目录下。
 
+# good first issue
+
+通常是一些小功能的开发、bug 的修复或之前开发者未完成的功能，你可以通过完成这个 ISSUE/PR 来踏出贡献代码的第一步。
+- Paddle Repo：[good first issue](https://github.com/PaddlePaddle/Paddle/labels/good%20first%20issue) 
+- Docs Repo：[good first issue](https://github.com/PaddlePaddle/docs/labels/good%20first%20issue)
+- CINN Repo：[good first issue](https://github.com/PaddlePaddle/CINN/labels/good%20first%20issue)
+
 # Roadmap
 
 为了让大家能深入地了解飞桨、在飞桨收获更多成长、解决更有挑战性的问题，飞桨团队计划将正在开展的一些重点工作和技术方向陆续发布。每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工，希望 PFCC 的成员能逐渐成为方向骨干甚至是带头人，带领更多人一起开发，具体内容可以参考 [【PFCC-Roadmap】总览](https://github.com/PaddlePaddle/Paddle/issues/42571) 和 [Call for Contributions](call-for-contributions/README.md)。
