@@ -18,7 +18,7 @@
 
 `Cauchy distribution`的一个重要的特性是其均值和方差都不存在，并且没有高阶矩阵，正是这样的特性，使柯西分布常用于数据分析和贝叶斯统计学中非对称参数分布的情况。
 
-目前 Paddle 框架中没有继承 Cauchy 分布。所以此任务的目标是在 Paddle 框架中，基于现有概率分布方案，在其基础上进行扩展，新增 Cauchy API，API 的调用路径为： `paddle.distribution.Cauchy`。
+目前 Paddle 框架中没有实现 Cauchy 分布。所以此任务的目标是在 Paddle 框架中，基于现有概率分布方案，在其基础上进行扩展，新增 Cauchy API，API 的调用路径为： `paddle.distribution.Cauchy`。
 ## 2、功能目标
 
 为 paddle 框架增加 API  `paddle.distribution.Cauchy`，Cauchy 表示柯西分布，用于柯西分布的概率统计与随机采样。API中包括了如下方法：
@@ -35,19 +35,6 @@
 
 上述方法可能无法全部支持，需要设计中说明不支持原因，抛出NotImplementedError异常即可。
 
-> Cauchy 分布的 mean(期望)、variance(方差) 不存在，不存在的原因[1]：
-> 
-> 1 柯西分布不是一个符合标准正态分布的正态变量;
-> 
-> 2 柯西分布的概率密度函数无限延申，因此均值和方差无法确定;
-> 
-> 3 对于柯西分布来说其偏度(skewness)是正的，也就是存在一个右偏分布，导致其分布中的所有值都大于均值,但是偏度度量和均值计算不相关;
-> 
-> 4 柯西分布属于长尾分布，表示其头尾有极端值，而这些极端值会导致数值求和，当分布倾斜时，极端值会影响期望的计算，所以不存在均值和方差。
-
-> 注：参考资料
-> 
-> [1] 百度文库：柯西分布期望不存在
 
 ## 3、意义
 
@@ -495,19 +482,45 @@ paddle.distribution.cauchy.Cauchy(loc, scale)
 
 ### 属性：
 - mean ：分布均值
-> 注：Cauchy 分布不存在均值
+```python
+raise NotImplementedError("Cauchy distribution has no mean")
+```
+
 - variance：方差
-> 注：Cauchy 分布不存在方差
+```python
+raise NotImplementedError("Cauchy distribution has no variance")
+```
 
 - stddev：标准差
-> 注：Cauchy 分布不存在标准差
+```python
+raise NotImplementedError("Cauchy distribution has no stddev")
+```
+
+> 注：Cauchy 分布的 mean(期望)、variance(方差) 不存在，不存在的原因[1]：
+> 
+> 1 柯西分布不是一个符合标准正态分布的正态变量;
+> 
+> 2 柯西分布的概率密度函数无限延申，因此均值和方差无法确定;
+> 
+> 3 对于柯西分布来说其偏度(skewness)是正的，也就是存在一个右偏分布，导致其分布中的所有值都大于均值,但是偏度度量和均值计算不相关;
+> 
+> 4 柯西分布属于长尾分布，表示其头尾有极端值，而这些极端值会导致数值求和，当分布倾斜时，极端值会影响期望的计算，所以不存在均值和方差。
+> 
+> 注：Paddle 为此采取的处理方式：`raise NotImplementedError`, 并阐述原因。
+
+
+> 参考资料
+> 
+> [1] 百度文库：柯西分布期望不存在
+> 
+
 
 ### 方法
 - sample(shape)：随机采样  
 在方法内部直接调用本类中的 rsample  方法。(参考pytorch复用重参数化采样结果):
 ```python
 def sample(self, shape):
-    sample(shape)
+    rsample(shape)
 ```
 
 - rsample(shape)：重参数化采样
