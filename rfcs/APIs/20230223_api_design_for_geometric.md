@@ -14,7 +14,7 @@
 
 `Geometric distribution` 应用条件：进行一系列独立试验，每一次试验活成功或失败，每一次试验的成功概率相同，即：为了取得第一次成功，需要进行多少次试验。
 
-目前 Paddle 框架中没有继承 Geometric 分布。所以此任务的目标是在 Paddle 框架中，基于现有概率分布方案，在其基础上进行扩展，新增 Geometric API，API 的调用路径为： `paddle.distribution.Geometric`。
+目前 Paddle 框架中没有实现 Geometric 分布。所以此任务的目标是在 Paddle 框架中，基于现有概率分布方案，在其基础上进行扩展，新增 Geometric API，API 的调用路径为： `paddle.distribution.Geometric`。
 > 参考资料
 > 
 > [1]：百度百科 https://baike.baidu.com/item/%E5%87%A0%E4%BD%95%E5%88%86%E5%B8%83/10676983?fr=aladdin
@@ -616,14 +616,13 @@ def sample(self, sample_shape=torch.Size()):
 直接使用 Geometric 分布的名称作为此 API 的名称，参数保持 Geometric 分布最原生的参数即：
 
 - probs：伯努利实验成功概率
-- logits：采样的对数概率
 
 预期 paddle 调用 Geometric API 的形式为：
 ```python
 #probs: the probability of sampling 1. Must be in range (0, 1]
-#logits：the log-odds of sampling 1.
-paddle.distribution.geometric.Geometric(probs, logits)
+paddle.distribution.geometric.Geometric(probs)
 ```
+> 注：Paddle 框架目前只需要支持 probs 所以此次只传递该参数，对于 logits 后期可以尝试针对所有的分布进行同一的支持。
 ## 底层OP设计
 
 使用 paddle 中现存的 API 进行实现，不考虑再令设计底层 OP。
@@ -631,7 +630,7 @@ paddle.distribution.geometric.Geometric(probs, logits)
 ## API实现方案
 
 该 API 在 `paddle.distribution.geometric` 中实现，部分功能继承父类`Distribution`。
-在经过调研对比后，Geometric API 中设定两个参数：probs 和 logits，probs 为伯努利实验的成功概率，logits 为采样的对数概率。
+在经过调研对比后，Geometric API 中设定一个参数：probs ，probs 为伯努利实验的成功概率。
 
 除了 API 调用的基本参数外，`paddle.distribution.geometric.Geometric` 中实现的属性、方法主要如下：
 
