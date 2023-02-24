@@ -25,11 +25,139 @@
 CINN框架暂不支持`bitcast_convert`算子，需要实现。
 
 # 三、业内方案调研
+`tensorflow` 中有bitcast算子实现，核心代码如下：
+```c++
+static void BitcastOp_Compute(void* kernel, TF_OpKernelContext* ctx) {
+  auto* k = static_cast<BitcastOp*>(kernel);
+  int dim_count = 0;
 
+  TF_Tensor* tensor;
+  TF_Status* status = TF_NewStatus();
+  TF_GetInput(ctx, 0, &tensor, status);
+  if (TF_GetCode(status) == TF_OK) {
+    dim_count = TF_NumDims(tensor);
+    if (!(k->in_size >= k->out_size ||
+          (dim_count > 0 &&
+           TF_Dim(tensor, dim_count - 1) == k->out_size / k->in_size))) {
+      std::ostringstream err;
+      err << "Cannot bitcast from " << k->input_data_type << " to "
+          << k->output_data_type;
+      TF_SetStatus(status, TF_INVALID_ARGUMENT, err.str().c_str());
+    }
+  }
 
+  if (TF_GetCode(status) == TF_OK) {
+    auto* dims = new int64_t[dim_count + 1];
+    int new_dim_count = dim_count;
+    for (int dim = 0; dim < dim_count; ++dim) {
+      dims[dim] = TF_Dim(tensor, dim);
+    }
+    if (k->out_size < k->in_size) {
+      dims[new_dim_count++] = static_cast<int64_t>(k->in_size / k->out_size);
+    } else if (k->out_size > k->in_size) {
+      --new_dim_count;
+    }
+
+    TF_Tensor* output = TF_AllocateTensor(k->output_data_type, dims, 0,
+                                          TF_DataTypeSize(k->output_data_type));
+    TF_TensorBitcastFrom(tensor, k->output_data_type, output, dims,
+                         new_dim_count, status);
+    if (TF_GetCode(status) == TF_OK) {
+      TF_SetOutput(ctx, 0, output, status);
+    }
+    delete[] dims;
+    TF_DeleteTensor(output);
+  }
+
+  if (TF_GetCode(status) != TF_OK) {
+    TF_OpKernelContext_Failure(ctx, status);
+  }
+  TF_DeleteStatus(status);
+  TF_DeleteTensor(tensor);
+}
+```
+`xla` 中有详细实现，核心代码如下：
+获取处理后的shape
+
+```c++
+/* static */ StatusOr<Shape> ShapeInference::InferBitcastConvertShape(
+    const Shape& operand_shape, PrimitiveType new_element_type) {
+  auto old_element_type = operand_shape.element_type();
+  if (primitive_util::IsComplexType(old_element_type) !=
+      primitive_util::IsComplexType(new_element_type)) {
+    return InvalidArgument("Conversion between complex and real type %s => %s.",
+                           ShapeUtil::HumanString(operand_shape),
+                           PrimitiveType_Name(new_element_type));
+  }
+  if (!operand_shape.IsArray() ||
+      !primitive_util::IsArrayType(new_element_type)) {
+    // Note: we may want to support tuple conversions via this operation in the
+    // future, by recursing into the tuple elements to check all sub-conversions
+    // are valid. For now we just reject them, though.
+    return InvalidArgument(
+        "Cannot convert from or to tuple type; requested conversion: %s => %s.",
+        ShapeUtil::HumanString(operand_shape),
+        PrimitiveType_Name(new_element_type));
+  }
+
+  int input_bitwidth = primitive_util::BitWidth(old_element_type);
+  int output_bitwidth = primitive_util::BitWidth(new_element_type);
+  if (std::max(input_bitwidth, output_bitwidth) %
+          std::min(input_bitwidth, output_bitwidth) !=
+      0) {
+    return InvalidArgument(
+        "Cannot bitcast types with undivisible bit-widths: %s => %s.",
+        PrimitiveType_Name(old_element_type),
+        PrimitiveType_Name(new_element_type));
+  }
+  int ratio = std::max(output_bitwidth, input_bitwidth) /
+              std::min(output_bitwidth, input_bitwidth);
+
+  Shape new_shape = operand_shape;
+  new_shape.set_element_type(new_element_type);
+  if (input_bitwidth > output_bitwidth) {
+    ShapeUtil::AppendMinorDimension(ratio, &new_shape);
+  } else if (input_bitwidth < output_bitwidth) {
+    int last_dimension_idx = operand_shape.dimensions_size() - 1;
+    if (operand_shape.dimensions_size() < 1 ||
+        operand_shape.dimensions(last_dimension_idx) != ratio) {
+      return InvalidArgument(
+          "Last dimension of input shape=%d is not equal to ratio of "
+          "bit-widths=%d "
+          "for bitcast-convert from %s to %s",
+          operand_shape.dimensions(last_dimension_idx), ratio,
+          ShapeUtil::HumanString(operand_shape),
+          PrimitiveType_Name(new_element_type));
+    }
+    new_shape.DeleteDimension(last_dimension_idx);
+  }
+  return new_shape;
+}
+```
+
+转换
+```c++
+XlaOp XlaBuilder::BitcastConvertType(XlaOp operand,
+                                     PrimitiveType new_element_type) {
+  return ReportErrorOrReturn([&]() -> StatusOr<XlaOp> {
+    TF_ASSIGN_OR_RETURN(const Shape* operand_shape, GetShapePtr(operand));
+    TF_ASSIGN_OR_RETURN(Shape shape, ShapeInference::InferBitcastConvertShape(
+                                         *operand_shape, new_element_type));
+    return BitcastConvertTypeInternal(shape, operand);
+  });
+}
+
+StatusOr<XlaOp> XlaBuilder::BitcastConvertTypeInternal(const Shape& shape,
+                                                       XlaOp operand) {
+  HloInstructionProto instr;
+  *instr.mutable_shape() = shape.ToProto();
+  return AddInstruction(std::move(instr), HloOpcode::kBitcastConvert,
+                        {operand});
+}
+```
 
 # 四、对比分析
-
+`xla` 的实现很详细，可以借鉴xla的实现。
 
 
 # 五、设计思路与实现方案
