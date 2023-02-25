@@ -59,13 +59,13 @@ Pytorch 中有 `torch.cumulative_trapezoid(y, x=None, dx=None, dim= -1)` API，�
 
 官方文档链接为：https://pytorch.org/docs/stable/generated/torch.cumulative_trapezoid.html?highlight=cumulative_trapezoid#torch.cumulative_trapezoid
 
-## Tensorflow && Numpy
+## TensorFlow && NumPy
 
-Tensorflow 和 Numpy 中均没有 cumulative_trapezoid API 的直接实现，但是有 trapezoid 的相关实现，而 cumulative_trapezoid 和 trapezoid 最大的区别是所用的求和 API 不同。
+TensorFlow 和 NumPy 中均没有 cumulative_trapezoid API 的直接实现，但是有 trapezoid 的相关实现，而 cumulative_trapezoid 和 trapezoid 最大的区别是所用的求和 API 不同。
 
-## Scipy
+## SciPy
 
-Scipy 库中有 `scipy.integrate.cumulative_trapezoid(y, x=None, dx=1.0, axis=-1, initial=None)` 的实现，使用 trapezoid rule 对 y(x)进行累计积分。
+SciPy 库中有 `scipy.integrate.cumulative_trapezoid(y, x=None, dx=1.0, axis=-1, initial=None)` 的实现，使用 trapezoid rule 对 y(x)进行累计积分。
 
 Parameters：
 
@@ -133,13 +133,13 @@ Tensor do_cumulative_trapezoid(const Tensor& y, double dx, int64_t dim) {
 }
 ```
 
-## Tensorflow && Numpy
+## TensorFlow && NumPy
 
-Tensorflow 和 Numpy 中没有对 cumulative_trapezoid API 的直接实现，Numpy 中可以调用 scipy.integrate.cumulative_trapezoid，Tensorflow 中可以用组合 API 的形式实现。
+TensorFlow 和 NumPy 中没有对 cumulative_trapezoid API 的直接实现，NumPy 可利用 SciPy 的 scipy.integrate.cumulative_trapezoid API 来对 NumPy 的数据进行计算，TensorFlow 中可以用组合 API 的形式实现。
 
-## Scipy
+## SciPy
 
-Scipy 中的 scipy.integrate.cumulative_trapezoid 是通过 [python 代码](https://github.com/scipy/scipy/blob/v1.10.1/scipy/integrate/_quadrature.py#L395-L485)实现的，具体如下：
+SciPy 中的 scipy.integrate.cumulative_trapezoid 是通过 [python 代码](https://github.com/scipy/scipy/blob/v1.10.1/scipy/integrate/_quadrature.py#L395-L485)实现的，具体如下：
 
 ```Python
 def cumulative_trapezoid(y, x=None, dx=1.0, axis=-1, initial=None):
@@ -229,57 +229,52 @@ def cumulative_trapezoid(y, x=None, dx=1.0, axis=-1, initial=None):
     return res
 
 def tupleset(t, i, value):
-  l = list(t)
-  l[i] = value
-  return tuple(l)
+    l = list(t)
+    l[i] = value
+    return tuple(l)
 ```
 
 # 四、对比分析
 
 **主要分析 cumulative_trapezoid API 和 trapezoid API 在具体实现上的差异：**
 
-Pytorch 中的有 `torch.trapezoid(y, x=None, dx=None, dim= -1)` 和 `torch.cumulative_trapezoid(y, x=None, dx=None, dim= -1)` API 的实现。
+PyTorch 中的有 `torch.trapezoid(y, x=None, dx=None, dim= -1)` 和 `torch.cumulative_trapezoid(y, x=None, dx=None, dim= -1)` API 的实现。
 
 - 从功能上分析：两者都是在指定维度上使用 trapezoid rule 算法，区别是：trapezoid 使用 sum 函数求和，cumulative_trapezoid 使用 cumsum 函数求和。
 - 从参数上分析：两个 API 的参数表对应相同。
 - 从代码实现上分析：两个 API 最大的区别在于计算加和的 API 不一样：trapezoid 使用的是 sum API，而 cumulative_trapezoid 使用的是 cumsum API。除此之外，其余逻辑一致。
 
-[Pytorch trapezoid 代码实现](https://github.com/pytorch/pytorch/blob/92e03cd583c027a4100a13682cf65771b80569da/aten/src/ATen/native/Integration.cpp#L86)
+[PyTorch trapezoid 代码实现](https://github.com/pytorch/pytorch/blob/92e03cd583c027a4100a13682cf65771b80569da/aten/src/ATen/native/Integration.cpp#L86)
 
-[Pytorch cumulative_trapezoid 代码实现](https://github.com/pytorch/pytorch/blob/92e03cd583c027a4100a13682cf65771b80569da/aten/src/ATen/native/Integration.cpp#L86)
+[PyTorch cumulative_trapezoid 代码实现](https://github.com/pytorch/pytorch/blob/92e03cd583c027a4100a13682cf65771b80569da/aten/src/ATen/native/Integration.cpp#L86)
 
-Numpy 和 Scpiy 中分别有 `numpy.trapz(y, x=None, dx=1.0, axis=-1)` 和`scipy.integrate.cumulative_trapezoid(y, x=None, dx=1.0, axis=-1, initial=None)` API 的实现。
+NumPy 和 Scpiy 中分别有 `numpy.trapz(y, x=None, dx=1.0, axis=-1)` 和`scipy.integrate.cumulative_trapezoid(y, x=None, dx=1.0, axis=-1, initial=None)` API 的实现。
 
 - 从功能上分析：两者都是在指定维度上使用 trapezoid rule 算法，区别是 trapez API 使用 sum 函数求和，cumulative_trapezoid API 使用 cumsum 函数求和。此外，scipy.integrate.cumulative_trapezoid 可以实现结果前插值的功能。
 - 从参数上分析：Scpiy 中的 cumulative_trapezoid 的参数多了 `initial`，在返回结果的指定维度前插值，通常是 0，默认值是 None，即表示不进行插值操作。
-- 从代码实现上分析：Numpy 中 trapz 和 Scipy 中 cumulative_trapezoid 两点较大的区别在于使用的求和 API 不同，前者是 sum API，后者是 cumsum API；cumulative API 相比于 trapz API 多了一个结果插值的功能。而其余逻辑实现基本保持一致。
+- 从代码实现上分析：NumPy 中 trapz 和 SciPy 中 cumulative_trapezoid 两点较大的区别在于使用的求和 API 不同，前者是 sum API，后者是 cumsum API；cumulative API 相比于 trapz API 多了一个结果插值的功能。而其余逻辑实现基本保持一致。
 
-[Numpy trapezoid 代码实现](https://github.com/numpy/numpy/blob/8cec82012694571156e8d7696307c848a7603b4e/numpy/lib/function_base.py#L4773-L4884)
+[NumPy trapezoid 代码实现](https://github.com/numpy/numpy/blob/8cec82012694571156e8d7696307c848a7603b4e/numpy/lib/function_base.py#L4773-L4884)
 
-[Scipy cumulative_trapezoid 代码实现](https://github.com/scipy/scipy/blob/v1.10.1/scipy/integrate/_quadrature.py#L395-L485)
+[SciPy cumulative_trapezoid 代码实现](https://github.com/scipy/scipy/blob/v1.10.1/scipy/integrate/_quadrature.py#L395-L485)
 
 # 五、设计思路与实现方案
 
-**paddle.cumulative_trapezoid 的设计思路，还是主要参考 tensorflow 中 trapezoid API 的设计，其中把求和函数改为 cumsum 即可。**
+**paddle.cumulative_trapezoid 的设计思路，主要还是参考 TensorFlow 中 trapezoid API 的设计，其中把求和函数改为 cumsum 即可。**
 
 ## 命名与参数设计
 
 `paddle.cumulative_trapezoid(y, x=None, dx=None, axis=-1)` 参数说明如下：
 
 - **y** (Tensor) – 要积分的张量。
-
 - **x** (Tensor) – 可选，**y** 中数值对应的点的浮点数所组成的 Tensor；**x** 的形状应与 **y** 的形状相匹配；如果 **x** 为 None，则假定采样点均匀分布 **dx**。
-
 - **dx** (float) - 相邻采样点之间的常数间隔；当**x**和**dx**均未指定时，**dx**默认为 1.0。
-
 - **axis** (int) – 计算  trapezoidal rule 时 **y** 的维度。默认值-1。
 
 `Tensor.cumulative_trapezoid(x=None, dx=None, axis=-1)` 参数说明如下：
 
 - **x** (Tensor) – 可选，`Tensor` 中数值对应的点的浮点数所组成的 Tensor；**x** 的形状应与 **y** 的形状相匹配；如果 **x** 为 None，则假定采样点均匀分布 **dx**。
-
 - **dx** (float) - 相邻采样点之间的常数间隔；当**x**和**dx**均未指定时，**dx**默认为 1.0。
-
 - **axis** (int) – 计算  trapezoidal rule 时 **y** 的维度。
 
 输出是一个 Tensor，其形状与 **y** 的形状与用于计算  trapezoidal rule 时的维度有关。
@@ -342,7 +337,7 @@ Numpy 和 Scpiy 中分别有 `numpy.trapz(y, x=None, dx=1.0, axis=-1)` 和`scipy
 
 # 七、可行性分析和排期规划
 
-方案主要依赖现有 paddle api 组合而成，可以满足在当前版本周期内开发完成。
+方案主要依赖现有 paddle API 组合而成，可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 
@@ -355,5 +350,5 @@ Numpy 和 Scpiy 中分别有 `numpy.trapz(y, x=None, dx=1.0, axis=-1)` 和`scipy
 # 附件及参考资料
 
 [[Hackathon 4th No.3]为 paddle 新增 paddle.trapezoid API](https://github.com/PaddlePaddle/community/pull/373)  
-[Pytorch 官方文档](https://pytorch.org/docs/stable/generated/torch.cumulative_trapezoid.html?highlight=cumulative_trapezoid#torch.cumulative_trapezoid)  
-[Scipy 官方文档](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.cumulative_trapezoid.html#scipy.integrate.cumulative_trapezoid)
+[PyTorch 官方文档](https://pytorch.org/docs/stable/generated/torch.cumulative_trapezoid.html?highlight=cumulative_trapezoid#torch.cumulative_trapezoid)  
+[SciPy 官方文档](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.cumulative_trapezoid.html#scipy.integrate.cumulative_trapezoid)
