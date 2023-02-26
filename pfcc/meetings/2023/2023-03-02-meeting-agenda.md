@@ -28,11 +28,11 @@
 | [zzk0](https://github.com/zzk0)                   | [gouzil](https://github.com/gouzil)                   | [yiakwy](https://github.com/yiakwy)                       | [VigiZhang](https://github.com/VigiZhang)             | [huangjiyi](https://github.com/huangjiyi)           | [supercodebull](https://github.com/supercodebull) |
 | [longranger2](https://github.com/longranger2)     | [taixiurong](https://github.com/taixiurong)           | [FisherWY](https://github.com/FisherWY)                   | [Atlantisming](https://github.com/Atlantisming)       | [Lemon-er](https://github.com/Lemon-er)             | [lizechng](https://github.com/lizechng)           |
 | [ccsuzzh](https://github.com/ccsuzzh)             | [DrRyanHuang](https://github.com/DrRyanHuang)         | [RedContritio](https://github.com/RedContritio)           |   [Lyutoon](https://github.com/Lyutoon)                                                    |                [PommesPeter](https://github.com/PommesPeter)                                      |  [tianxingxia-cn](https://github.com/tianxingxia-cn)                                                 |
-| [sanbuphy](https://github.com/sanbuphy)             | [jjyaoao](https://github.com/jjyaoao)         | [kk-2000](https://github.com/kk-2000)           |   [Tomoko-hjf](https://github.com/Tomoko-hjf)                                                    |                [edencfc](https://github.com/edencfc)                                      |         [chengyuma](https://github.com/chengyuma)                                       |         [edencfc](https://github.com/edencfc)    |           |
+| [sanbuphy](https://github.com/sanbuphy)             | [jjyaoao](https://github.com/jjyaoao)         | [kk-2000](https://github.com/kk-2000)           |   [Tomoko-hjf](https://github.com/Tomoko-hjf)                                                    |                [edencfc](https://github.com/edencfc)                                      |         [CollaborativeFiltering](https://github.com/CollaborativeFiltering)                                      |        [cloud2009](https://github.com/cloud2009)   |           |
 
 # 会议议程
 
-- 新人介绍 [CollaborativeFiltering](https://github.com/CollaborativeFiltering)、[edencfc](https://github.com/edencfc) （5 min）
+- 新人介绍 [CollaborativeFiltering](https://github.com/CollaborativeFiltering)、[edencfc](https://github.com/edencfc) 、[cloud2009](https://github.com/cloud2009)（5 min）
 - 飞桨研发 [zhangjun](https://github.com/zhangjun) 飞桨 TRT 开发分享（10-15min）
 - [sanbuphy](https://github.com/sanbuphy) 飞桨 TRT 算子映射开发经验分享（5 min）
 - [jzhang533](https://github.com/jzhang533) 飞桨 Python IR 构建实验介绍（10 min）
