@@ -23,7 +23,9 @@
 | Case No. | device | input_shape | input_type | weight_type | Paddle Perf(ms) |
 |---|---|---|---|---|---|
 | 1 | RTX 2070s | [8L, 1024L, 3072L] | float32 | [1L] | 0.8584 | 
-| 2 | RTX 2070s | [8L, 1024L, 3072L] | float64 | [1024L] | 1.1135 | 
+| 2 | RTX 2070s | [8L, 1024L, 3072L] | float32 | [1024L] | 1.1135 |
+| 3 | RTX 2070s | [8L, 1024L, 3072L] | float16 | [1L] | 0.62442 |
+| 4 | RTX 2070s | [8L, 1024L, 3072L] | float16 | [1024L] | 0.87672 |
 
 API文档 https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/PReLU_cn.html#prelu
 
@@ -33,9 +35,11 @@ Pytorch中对Prelu算子的实现基于GPU计算,  forward整体性能如下(基
 
 | Case No. | device | input_shape | input_type | weight_type | Pytorch Perf(ms) |
 |---|---|---|---|---|---|
-| 1 | RTX 2070s | [8L, 1024L, 3072L] | float32 | [1L] | 0.64366 | 
-| 2 | RTX 2070s | [8L, 1024L, 3072L] | float64 | [1024L] | 0.8148 | 
-
+| 1 | RTX 2070s | [8L, 1024L, 3072L] | float32 | [1L] | 0.64366 |
+| 2 | RTX 2070s | [8L, 1024L, 3072L] | float32 | [1024L] | 0.83144 |
+| 3 | RTX 2070s | [8L, 1024L, 3072L] | float16 | [1L] | 0.31887 |
+| 4 | RTX 2070s | [8L, 1024L, 3072L] | float16 | [1024L] | 0.84326 |
+ 
 ## 1.3 对比分析
 
 目前Paddle与Pytorch的API设计方案相似，两种case下测试pytorch性能更优，理论上可以通过线程配置，或向量化读取和写入等手段进行优化，进一步提升算子性能。
