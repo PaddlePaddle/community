@@ -13,7 +13,7 @@
 将 PaddleOCR 模型库中的文本检测模型 (Text Detection Model) 部署在 Arm Cortex-M55 处理器上并使用 Arm 虚拟硬件 Corstone-300 平台进行验证。
 [https://github.com/PaddlePaddle/Paddle/issues/50632#task214](https://github.com/PaddlePaddle/Paddle/issues/50632#task214)
 ## 2、功能目标
-将PPOCR中的文本检测模型通过TVM编译后，在ARM虚拟硬件上运行，并输出推理结果。
+使用Arm虚拟硬件完成文本检测应用的结果验证。
 ## 3、意义
 为PPOCR套件提供边缘计算方案。
 
@@ -22,11 +22,19 @@
 目前PPOCR支持英文检测模型在ARM虚拟硬件上的运行。
 
 # 三、业内方案调研
-通过检索没有找到完整的pytorch与tensorflow的虚拟ARM部署方案。
+
+* [语音识别](https://arm-software.github.io/AVH/main/examples/html/MicroSpeech.html)
+    
+    该项目识别两个关键字Yes和No。使用Tensorflow Lite来实现识别模型，可以运行在ARM虚拟硬件上。
+
+
+* [行人检测](https://github.com/apache/tvm/tree/main/apps/microtvm/cmsisnn)
+
+    该项目使用TVM对TensorFlow Lite导出的模型文件进行编译，然后基于CMSIS-NN运行在Cortex(R)-M55 CPU上。
 
 # 四、对比分析
 
-Paddle-examples-for-AVH中的例子可以在虚拟ARM上跑通全流程，但在本次调研中也发现了文档中一些不详细的地方，遇到一些问题，通过查阅资料解决，会在该项目中进行完善文档。
+以上方案均基于TensorFlow Lite实现，本方案将使用飞桨导出的静态图模型，使用TVM量化编译后再ARM虚拟硬件上运行，并输出具有可读性的运行结果。
 
 
 # 五、设计思路与实现方案
@@ -34,12 +42,17 @@ Paddle-examples-for-AVH中的例子可以在虚拟ARM上跑通全流程，但在
 ## 1、主体设计思路与折衷
 参考实例代码跑通环境部署、TVM安装、模型量化、模型编译、应用程序编写与测试等部署。
 ### 主体设计具体描述
-1.通过Docker镜像部署环境。
-2.在镜像中安装TVM工具。
-3.量化并编译模型。
-4.编写基于CMSIS-NN的应用程序。
-5.在本地FVP环境中运行测试。
-6.在远程AMI环境运行测试。
+1. 选择模型。
+
+2. 量化模型
+
+3. 编译模型(tvmc)
+
+4. 应用程序编写(前后端处理)
+
+5. 使用Arm虚拟硬件运行应用
+
+6. 验证运行结果。
 
 ### 主体设计选型考量
 选择ch_ppocr_mobile_v2.0_det模型主要原因，
@@ -48,13 +61,13 @@ Paddle-examples-for-AVH中的例子可以在虚拟ARM上跑通全流程，但在
 
 
 ## 2、关键技术点/子模块设计与实现方案
-模型量化与编译是本项目重点内容，可参考PPOCR中的模型量化与裁剪方法。
+模型量化与编译是本项目重点内容，学习研究TVM中的量化方法。
 
 ## 3、主要影响的模块接口变化
 单独的demo项目不影响飞桨框架。
 
 # 六、测试和验收的考量
-通过本地FVP和远程AMI运行程序，可使用中文图片正常运行并检测结果正确。
+使用Arm虚拟硬件平台验证文本检测应用运行结果, 检测结果正常并具有可读性。
 
 # 七、影响面
 
@@ -73,14 +86,12 @@ Paddle-examples-for-AVH中的例子可以在虚拟ARM上跑通全流程，但在
 
 # 八、排期规划
 * 环境搭建并跑通参考项目（已完成）
-* 量化与编译模型（2023-2-22至2023-2-28）
-* 应用程序编写(2023-3-1至2023-3-3)
-* FVP环境测试(2023-3-1至2023-3-3)
-* AMI环境测试(2023-3-3至2023-3-5)
-* 提交PR(2023-3-6)
+* 量化与编译模型（2023-2-28至2023-3-5）
+* 应用程序编写(2023-3-5至2023-3-6)
+* AMI环境测试(2023-3-6至2023-3-8)
+* 提交PR(2023-3-9)
 
 # 名词解释
-FVP:ARM的固定虚拟平台
-
+AVH： Arm虚拟硬件（Arm Virtual Hardware)
 
 # 附件及参考资料
