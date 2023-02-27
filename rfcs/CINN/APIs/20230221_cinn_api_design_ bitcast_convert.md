@@ -176,7 +176,7 @@ StatusOr<XlaOp> XlaBuilder::BitcastConvertTypeInternal(const Shape& shape,
 1. 在 `cinn/frontend/net_build.h` 里声明 `NetBuilder::Bitcast_convert`。
 2. 在 `cinn/frontend/net_build.cc` 里实现 `NetBuilder::Bitcast_convert`。
 3. 在 `cinn/pybind/frontend` 对 Python 类 `NetBuilder` 添加 `bitcast_convert` 接口，并绑定到 `NetBuilder::Bitcast_convert`。
-4. 上层 `load_paddle_model` 调用提交到 `cinn/frontend/paddle_model_to_program.h` 和 `.cc` 文件下。
+4. 在 `cinn/python/tests` 中添加 `test_bitcast_convert_op.py` 单测。
 
 python通过Builder类的方法调用`bitcast_convert`。
 ```python
@@ -186,13 +186,12 @@ b = builder.bitcast_convert([10], "float32")
 
 # 六、测试和验收的考量
 1. 提供基础的 demo 文件。
-2. 在`cinn/hlir/op/contrib/bitcast_convert_test.cc`中添加对底层OP进行测试的代码。
-3. 在`cinn/frontend/net_builder_test.cc`中添加对前端的测试。
-4. 提交 API 说明到相应的文档中。
+2. 在 `cinn/python/tests` 中添加 `test_bitcast_convert_op.py` 单测。单测要求测试对各种类型的转换，至少包括`float32->float32`、`float32->int32`、`float32->float64`、`float64->float32`、`int64->bool`、`bool->int64`等。shape同样需要考虑至少一维、二维、四维等，数据数目应考虑1、1024 、2048等各类常见大小
+3. 提交 API 说明到相应的文档中。
 
 # 七、可行性分析和排期规划
 - 可行性分析：CINN已实现Builder、Expr IR、算子注册等模块，在CINN已有的框架基础上能够很好地增加算子功能。
-- 排期规划：预计3月1日前完成算子实现、功能测试以及文档
+- 排期规划：预计3月10日前完成算子实现、功能测试以及文档
 
 # 八、影响面
 对其他模块无影响。
