@@ -55,7 +55,7 @@ Expr MakeResize2D(Expr data, Expr size, Expr roi, String layout, String method,
 
 
 # 四、对比分析
-TVM 的 `resize2d` 算子实现详细，可作为参考。本次任务计划使用 custom call 实现 `resize` 算子，参考 [cholesky 算子的实现](https://github.com/PaddlePaddle/CINN/pull/1133)。
+TVM 的 `resize2d` 算子实现详细，可作为参考。本次任务计划以 extern call 的方式实现 `resize` 算子，使用 CINN IR 实现 Compute。
 
 # 五、设计思路与实现方案
 
@@ -66,12 +66,12 @@ TVM 的 `resize2d` 算子实现详细，可作为参考。本次任务计划使�
 | :-------: | :---------: | :-------: | :------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------: |
 |   Input   | Tensor\<T\> |     x     |  [N, C, in_H, in_W]  |                                                                           输入张量                                                                            |
 | Attribute | vector<int> | out_shape |    [out_H, out_W]    |                                                         调整后的张量大小，只需指定H、W两个维度上的值                                                          |
-| Attribute |   string    |   mode    |          -           | 指定插值方法，可选项包括：<br>**NEAREST**(最近邻插值，选取H和W维上最近的值);<br>**BILINEAR**(双线性插值，选取H和W维上相邻四个点做线性插值).<br>默认值BILINEAR |
+| Attribute |   string    |   mode    |          -           | 指定插值方法，可选项包括：<br>**nearest**(最近邻插值，选取H和W维上最近的值);<br>**bilinear**(双线性插值，选取H和W维上相邻四个点做线性插值);<br>**bicubic**(二次立方插值).<br>默认值bilinear |
 |  Output   | Tensor\<T\> |    out    | [N, C, out_H, out_W] |                                                              输出张量，数据类型与输入张量相同同                                                               |
 
 **支持的数据类型:**
  
-`int32`、`float32`
+`uint8`、`int32`
 
 ## 底层OP设计
 在 `cinn/hlir/op/contrib` 中新增 `resize` 算子。
@@ -94,7 +94,7 @@ ir::Tensor Resize(const ir::Tensor &x,
 
 
 # 六、测试和验收的考量。
-在 `python/tests/ops/test_example_op.py` 中添加 `resize` 算子的测试。测试内容覆盖所有 resize 模式，数据类型。 
+在 `python/tests/ops/test_resize_op.py` 中添加 `resize` 算子的测试。测试内容覆盖所有 resize 模式，所有支持的数据类型，以及常见的 shape。 
 
 # 七、可行性分析和排期规划
 - 可行性分析
