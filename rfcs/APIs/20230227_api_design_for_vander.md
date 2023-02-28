@@ -159,3 +159,5 @@ def vander(x, N=None, increasing=False, name=None):
 
 # 附件及参考资料
 [numpy实现](https://github.com/numpy/numpy/blob/v1.24.0/numpy/lib/twodim_base.py#L546-L634)
+
+该RFC参考了@Rayman96 所撰写的[paddle.triu_indices设计文档](https://github.com/PaddlePaddle/community/blob/master/rfcs/APIs/20220813_api_design_for_triu_indices.md)
