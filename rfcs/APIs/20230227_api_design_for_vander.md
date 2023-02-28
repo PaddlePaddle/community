@@ -119,7 +119,7 @@ paddle.vander(x, N=None, increasing=False, name=None)
 参数与文档要求进行对齐。
 
 ## 底层OP设计
-在`paddle/fluid/operators/vander_op.cc`添加vander算子的描述。
+在`paddle/phi/api/yaml/ops.yaml`添加vander算子的描述。
 
 在`paddle/phi/infermeta/unary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/unary.cc`中实现。
 
