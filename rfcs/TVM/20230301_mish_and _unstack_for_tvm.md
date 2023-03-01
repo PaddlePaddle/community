@@ -71,7 +71,15 @@ def unstack(x, axis, num):
 > 
 > 若 axis < 0 则 axis = axis + len(shape)
 
+## 单测设计
 
+### mish
+
+随机输入一个 shape 为 [3，4] 的 tensor，将其输入到 mish 中，得到输出 tensor，然后将输出 tensor 与 paddle 中的结果进行比较。
+
+### unstack
+
+随机输入一个 shape 为 [3，4] 的 tensor，将其输入到 unstack 中，得到输出 tensor，然后将输出 tensor 与 paddle 中的结果进行比较。并分别测试 axis 为 -1，1的情况，以及 num 为 None 和 2 的情况。
 ## PR
 
 [【PaddlePaddle Hackathon 4】add unstack and mish op for paddle frontend](https://github.com/apache/tvm/pull/14159)
