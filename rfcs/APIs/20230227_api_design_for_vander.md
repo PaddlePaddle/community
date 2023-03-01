@@ -25,7 +25,48 @@ Paddle目前没有paddle.vander API的实现。该API用于构造范德蒙矩阵
 
 # 二、飞桨现状
 
-飞桨中还没有 vander 的实现，但可以利用已有的API组合进行实现。
+飞桨中还没有 vander 的实现，但可以利用已有的 paddle.cumprod API进行实现。
+
+vander python实现代码：
+```python
+import paddle
+import numpy as np
+
+def vander(x, N=None, increasing=False):
+    if x.dim() != 1:
+        raise ValueError(
+                "The input of x is expected to be a 1-D Tensor."
+                "But now the dims of Input(X) is %d."
+                % x.dim())
+    
+    if N < 0:
+        raise ValueError("N must be non-negative.")
+
+    if N is None:
+        N = len(x)
+    
+    tmp = paddle.empty([len(x), N], dtype=x.dtype)
+
+    if N > 0:
+        tmp[:, 0] = 1
+    if N > 1:
+        tmp[:, 1:] = x[:, None]
+        tmp[:, 1:] = paddle.cumprod(tmp[:, 1:], dim=-1)
+    tmp = tmp[:, ::-1] if not increasing else tmp
+    return tmp
+
+def test():
+    x = np.array([1., 2., 3.])
+    a = paddle.to_tensor(x)
+    N = [0,1,2,3,4,5]
+    for n in N:
+        np.isclose(vander(a, n).numpy(), np.vander(x, n))
+        np.isclose(vander(a, n, increasing=True).numpy(), np.vander(x, n, increasing=True))
+    print('test success!')
+
+test()
+# test success!
+```
 
 # 三、业内方案调研
 
@@ -67,6 +108,22 @@ Tensor linalg_vander(
 * 检查输入 `N` 是否满足大于1。
 * 通过`cumpord`构建vander矩阵的前`N-1`列，最后通过`cat`将幂为0的那一列添加到矩阵的左边。
 
+经测试，torch.vander并不支持反向计算梯度，测试代码如下：
+```python
+import torch
+a = torch.Tensor([1.,2.,3.])
+a.requires_grad = True
+b = torch.vander(a,3)
+b.sum().backward()
+# 报错信息：
+# RuntimeError                              Traceback (most recent call last)
+# /tmp/ipykernel_3602051/2253650649.py in 
+#      3 a.requires_grad = True
+#      4 b = torch.vander(a,3)
+# ----> 5 b.sum().backward()
+# RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation: [torch.FloatTensor [3, 2]], which is output 0 of SliceBackward, is at version 3; expected version 2 instead. Hint: enable anomaly detection to find the operation that failed to compute its gradient, with torch.autograd.set_detect_anomaly(True)。
+```
+
 Numpy： Numpy也有`numpy.vander(x, N=None, increasing=False)` API，其输入参数与`torch.vander`一致，核心代码如下：
 ```python
 x = asarray(x)
@@ -103,6 +160,7 @@ Tensorflow： Tensorflow可以通过调用tensorflow.experimental.numpy.vander�
 通过上述分析可以发现，`numpy.vander`和`torch.linalg.vander`的核心实现都是依据累乘API来实现的，且`numpy.vander`和`torch.vander`的输入参数和返回值除类型分别为`numpy.nparray`和`torch.Tensor`之外基本一致。但是`torch.vander`仅能支持输入`x`为Tensor，不像`numpy.vander`能够额外支持`list和tuple`。
 
 # 五、设计思路与实现方案
+经测试,`paddle.vander`可以利用已有的API组合实现，因此不需要写C++算子。
 
 ## 命名与参数设计
 
@@ -118,38 +176,47 @@ paddle.vander(x, N=None, increasing=False, name=None)
 
 参数与文档要求进行对齐。
 
-## 底层OP设计
-在`paddle/phi/api/yaml/ops.yaml`添加vander算子的描述。
-
-在`paddle/phi/infermeta/unary.h`中声明形状推断的函数原型，在`paddle/phi/infermeta/unary.cc`中实现。
-
-在`paddle/phi/kernels/vander_kernel.h`中声明核函数的原型。
-
-分别在 `paddle/phi/kernels/cpu/vander_kernel.cc` 和`paddle/phi/kernels/gpu/vander_kernel.cu`注册和实现核函数  
-
 ## API实现方案
 
 在`python/paddle/tensor/math.py`中增加`vander`函数，并添加英文描述
 ```python
 def vander(x, N=None, increasing=False, name=None):
-    # ...
-    # 参数检查
-    # ...
-    # 增加算子
-    # ...
-    return out
+    if isinstance(x, (list, tuple, np.ndarray)):
+        x = paddle.to_tensor(x)
+    if x.dim() != 1:
+        raise ValueError(
+                "The input of x is expected to be a 1-D tensor, array, list or tuple."
+                "But now the dims of Input(X) is %d."
+                % x.dim())
+    
+    if N < 0:
+        raise ValueError("N must be non-negative.")
+
+    if N is None:
+        N = len(x)
+    
+    res = paddle.empty([len(x), N], dtype=x.dtype)
+
+    if N > 0:
+        res[:, 0] = 1
+    if N > 1:
+        res[:, 1:] = x[:, None]
+        res[:, 1:] = paddle.cumprod(res[:, 1:], dim=-1)
+    res = res[:, ::-1] if not increasing else res
+    return res
 ```
+
 ## 单测及文档填写
-在` python/paddle/fluid/tests/unittests/`中添加`test_vander_op.py`文件进行单测,测试代码使用numpy计算结果后对比，与numpy对齐。
+在` python/paddle/fluid/tests/unittests/`中添加`test_vander_op.py`文件进行单测, 测试代码使用numpy计算结果后对比，与numpy对齐。测试代码中包含静态图/动态图下的测试。
 
 在` docs/api/paddle/`中添加中文API文档。
-
 
 # 六、测试和验收的考量
 
 * 输入合法性及有效性检验。
 * 与numpy对比结果是否一致。
 * CPU、GPU测试。
+* 静态图/动态图测试。
 
 # 八、影响面
 
