@@ -16,7 +16,10 @@
 
 根据参数 repeat_times 对输入 x 的各维度进行复制。平铺后，输出的第 i 个维度的值等于 x.shape[i]*repeat_times[i] 。
 
-> 注意：其中 repeat_times 可以是一个list|tuple，也可以是一个一维 Tensor，且长度必须和输入 x 的维度相同。
+> 注意：其中 repeat_times 有三种情况：
+> 1. repeat_times 是一个list|tuple，元素为整数 (attr.repeat_times)
+> 2. repeat_times 是一个一维 Tensor，元素为整数 (input.RepeatTimes)
+> 3. repeat_times 是一个list|tuple，元素为一维 Tensor (input.repeat_times_tensor)
 
 在tvm 中，tile 已经有了实现，见[tile](https://tvm.apache.org/docs/reference/api/python/relay/index.html?highlight=tile)，但是 paddle 中的 tile 算子的参数 repeat_times 可以是一个一维 Tensor，所以需要进行判断转换。
 
