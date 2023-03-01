@@ -1,12 +1,12 @@
-# paddle.Tensor.quantile 设计文档
+# paddle.frexp 设计文档
 
-|API名称 | paddle.frexp                        | 
-|---|-------------------------------------|
-|提交作者<input type="checkbox" class="rowselector hidden"> | 郑必城                                 | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-08-19                          | 
-|版本号 | V1.0                                | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.0                              | 
-|文件名 | 20200819_api_design_for_frexp.md<br> | 
+| API名称                                                    | paddle.frexp                         | 
+|----------------------------------------------------------|--------------------------------------|
+| 提交作者<input type="checkbox" class="rowselector hidden">   | 郑必城                                  | 
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-08-19                           | 
+| 版本号                                                      | V1.0                                 | 
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | v2.2.0                               | 
+| 文件名                                                      | 20200819_api_design_for_frexp.md<br> | 
 
 # 一、概述
 
@@ -120,11 +120,11 @@ pytorch和Numpy都支持多维，正负数，0。这里模仿他们的实现逻�
 
 ## 命名与参数设计
 
-* 函数名称: paddle.frexp(x,dtype=paddle.float32)
-* 功能描述: paddle.frexp(x,dtype=paddle.float32), 主要是用于把一个输入数据x分解为尾数和指数
+* 函数名称: paddle.frexp(x,name=None)
+* 功能描述: paddle.frexp(x,name=None), 主要是用于把一个输入数据x分解为尾数和指数
 * 输入参数
     * x: 任意数值
-    * dtype: paddle.float32或paddle.float64
+    * name: name是为了与paddle其他API保持一致性，不影响实际功能使用。
 * 返回值:
     * 返回位于开区间 (-1, 1) 的尾数张量**mantissa**
     * 返回位于指数张量 **exponent**
