@@ -25,48 +25,7 @@ Paddle目前没有paddle.vander API的实现。该API用于构造范德蒙矩阵
 
 # 二、飞桨现状
 
-飞桨中还没有 vander 的实现，但可以利用已有的 paddle.cumprod API进行实现。
-
-vander python实现代码：
-```python
-import paddle
-import numpy as np
-
-def vander(x, N=None, increasing=False):
-    if x.dim() != 1:
-        raise ValueError(
-                "The input of x is expected to be a 1-D Tensor."
-                "But now the dims of Input(X) is %d."
-                % x.dim())
-    
-    if N < 0:
-        raise ValueError("N must be non-negative.")
-
-    if N is None:
-        N = len(x)
-    
-    tmp = paddle.empty([len(x), N], dtype=x.dtype)
-
-    if N > 0:
-        tmp[:, 0] = 1
-    if N > 1:
-        tmp[:, 1:] = x[:, None]
-        tmp[:, 1:] = paddle.cumprod(tmp[:, 1:], dim=-1)
-    tmp = tmp[:, ::-1] if not increasing else tmp
-    return tmp
-
-def test():
-    x = np.array([1., 2., 3.])
-    a = paddle.to_tensor(x)
-    N = [0,1,2,3,4,5]
-    for n in N:
-        np.isclose(vander(a, n).numpy(), np.vander(x, n))
-        np.isclose(vander(a, n, increasing=True).numpy(), np.vander(x, n, increasing=True))
-    print('test success!')
-
-test()
-# test success!
-```
+飞桨中还没有 vander 的实现，但可以利用已有的 paddle.cumprod API进行实现，可参考下面的API实现方案。
 
 # 三、业内方案调研
 
@@ -160,7 +119,7 @@ Tensorflow： Tensorflow可以通过调用tensorflow.experimental.numpy.vander�
 通过上述分析可以发现，`numpy.vander`和`torch.linalg.vander`的核心实现都是依据累乘API来实现的，且`numpy.vander`和`torch.vander`的输入参数和返回值除类型分别为`numpy.nparray`和`torch.Tensor`之外基本一致。但是`torch.vander`仅能支持输入`x`为Tensor，不像`numpy.vander`能够额外支持`list和tuple`。
 
 # 五、设计思路与实现方案
-经测试,`paddle.vander`可以利用已有的API组合实现，因此不需要写C++算子。
+经测试,`paddle.vander`可以利用已有的API组合实现，因此不需要写C++算子，且该 API 没有反向（与torch保持一致）。
 
 ## 命名与参数设计
 
@@ -170,7 +129,7 @@ paddle.vander(x, N=None, increasing=False, name=None)
 
 参数类型要求：
 
-* 输入`x`支持List, tulple, Tensor等类型（但仅限一维）。
+* 输入`x`的类型为 1-D Tensor。
 * 输入`N`的类型为int。
 * 输入`increasing`的类型为bool。
 
@@ -181,17 +140,14 @@ paddle.vander(x, N=None, increasing=False, name=None)
 在`python/paddle/tensor/math.py`中增加`vander`函数，并添加英文描述
 ```python
 def vander(x, N=None, increasing=False, name=None):
-    if isinstance(x, (list, tuple, np.ndarray)):
-        x = paddle.to_tensor(x)
     if x.dim() != 1:
         raise ValueError(
-                "The input of x is expected to be a 1-D tensor, array, list or tuple."
+                "The input of x is expected to be a 1-D Tensor."
                 "But now the dims of Input(X) is %d."
                 % x.dim())
     
     if N < 0:
         raise ValueError("N must be non-negative.")
-
     if N is None:
         N = len(x)
     
