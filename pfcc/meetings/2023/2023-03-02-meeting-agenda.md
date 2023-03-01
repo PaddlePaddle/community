@@ -32,7 +32,7 @@
 
 # 会议议程
 
-- 新人介绍 [chengyuma](https://github.com/chengyuma)、[edencfc](https://github.com/edencfc) （5 min）
+- 新人介绍 [CollaborativeFiltering](https://github.com/CollaborativeFiltering)、[edencfc](https://github.com/edencfc) （5 min）
 - 飞桨研发 [zhangjun](https://github.com/zhangjun) 飞桨 TRT 开发分享（10-15min）
 - [sanbuphy](https://github.com/sanbuphy) 飞桨 TRT 算子映射开发经验分享（5 min）
 - [jzhang533](https://github.com/jzhang533) 飞桨 Python IR 构建实验介绍（10 min）
