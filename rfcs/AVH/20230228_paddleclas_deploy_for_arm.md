@@ -3,7 +3,7 @@
 |任务名称 | Arm 虚拟硬件上完成 PaddleClas 模型的部署与优化 | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | Boomerl | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-2-28 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-3-1 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
 |文件名 | 20230228_paddleclas_deploy_for_arm.md<br> | 
@@ -11,7 +11,7 @@
 # 一、概述
 
 ## 1、相关背景
-模型的训练和部署是AI的核心。百度和Arm达成合作，针对Arm Cortex-M处理器的深度学习应用场景，完成了PaddlePaddle模型在Cortex-M硬件上的适配。本任务将会从PaddleClas模型库中选取合适的模型，将其部署在Arm Cortex-M55处理器上，并使用Arm虚拟硬件Corstone-300平台完成验证。
+模型的训练和部署是AI的核心。百度和Arm达成合作，针对Arm Cortex-M处理器的深度学习应用场景，完成了PaddlePaddle模型在Cortex-M硬件上的适配。本任务将会从PaddleClas模型库中选取合适的模型，将其部署在Arm Cortex-M55（No.216）和Arm Cortex-M85处理器（No.217）上，并使用Arm虚拟硬件Corstone-300（No.216）和Corstone-310（No.217）平台完成验证。
 [https://github.com/PaddlePaddle/Paddle/issues/50632#task217](https://github.com/PaddlePaddle/Paddle/issues/50632#task217)
 
 
@@ -39,35 +39,39 @@
 # 五、设计思路与实现方案
 
 ## 1、主体设计思路
-参考飞桨官网AVH部署教程完成环境部署、TVM安装、模型压缩、模型编译、应用程序编写与测试等工作。
+参考飞桨官网AVH部署教程完成环境部署、TVM安装、模型压缩（No.217要求）、模型编译、应用程序编写与测试等工作。
 
 ### 主体设计具体描述
-1. 选择并加载PaddleClas中的预训练模型并微调。
-2. 安装TVM和相关依赖，并完成环境测试。
-3. 模型压缩和编译。
-4. 编写应用程序。
-5. AVH实例中部署与测试。
-6. 验证运行结果。
+1. 加载PaddleClas中的预训练模型并微调
+2. 安装TVM和相关依赖，并完成环境测试
+3. 模型压缩（No.217要求）
+4. TVM编译模型
+5. 编写应用程序
+6. AVH实例中部署和测试
+7. 验证运行结果
 ### 主体设计选型
-选择mobilenet_v2模型，
-- mobilenet_v2是移动视觉领域的经典模型，参数量小。
-- 推理框架对mobilenet_v2的算子优化好，便于部署。
+1. No.216选择mobilenet_v2模型，
+   - mobilenet_v2是移动视觉领域的经典模型，参数量小。
+   - 推理框架对mobilenet_v2的算子优化好，便于部署。
+2. No.217选择PPLCNet模型，
+   - PPLCNet是百度针对Intel CPU设计的轻量化模型，通过部署在Arm芯片上测试其在不同架构芯片上的性能差异。
 
 ## 2、关键模块设计与实现方案
-模型压缩（例如量化）是本任务的重点，可以采取PTQ或QAT两种方案得到量化模型，再通过TVM编译部署到Arm虚拟硬件上。
+模型压缩（No.217要求）是本任务的重点，可以采取PTQ或QAT两种方案得到量化模型，再通过TVM编译部署到Arm虚拟硬件上。
 
 
 # 六、测试与验收的考量
-通过远程连接AVH实例运行应用程序，输入为一张彩色图片，输出为分类结果以及推理时延等。
+通过AVH部署并运行应用程序，输入为一张彩色图片，输出为分类结果以及推理时延等。
 
 
 # 七、可行性分析和排期规划
-- 环境搭建并跑通教程案例（2023-3-1）
-- 模型训练与量化（2023-3-2至2023-3-5）
-- TVM编译模型（2023-3-6至2023-3-7）
-- 应用程序编写（2023-3-8至2023-3-10）
-- AVH部署和测试（2023-3-11至2023-3-12）
-- 提交PR（2023-3-13）
+任务No.216和No.217同步进行，No.216相比No.217少了量化压缩的步骤。
+   - 环境搭建并跑通教程案例（2023-3-1至2023-3-3）
+   - 模型训练与量化（2023-3-4至2023-3-20）
+   - TVM编译模型（2023-3-21至2023-3-23）
+   - 应用程序编写（2023-3-24至2023-4-10）
+   - AVH部署和测试（2023-4-11至2023-4-13）
+   - 提交PR（2023-4-14）
 
 
 # 八、影响面
@@ -87,7 +91,9 @@
 
 
 # 名词解释
-
+AVH：Arm Virtual Hardware，Arm虚拟硬件
+PTQ：训练后量化
+QAT：量化感知训练
 
 # 附件及参考资料
 [AVH动手实践(二) | 在Arm虚拟硬件上部署PP-OCR模型](https://www.paddlepaddle.org.cn/support/news?action=detail&id=3062)
