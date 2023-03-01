@@ -36,7 +36,7 @@
 - 飞桨研发 [zhangjun](https://github.com/zhangjun) 飞桨 TRT 开发分享（10-15min）
 - [sanbuphy](https://github.com/sanbuphy) 飞桨 TRT 算子映射开发经验分享（5 min）
 - [jzhang533](https://github.com/jzhang533) 飞桨 Python IR 构建实验介绍（10 min）
-- [luotao1](https://github.com/luotao1) 飞桨框架实习相关介绍（5-10 min）
-- 飞桨产品 [Krystalxxf](https://github.com/Krystalxxf) 社区信息同步：介绍两大开源活动（快乐开源+黑客松），收集贡献指南和框架开发需求（10min）
+- [luotao1](https://github.com/luotao1) paddle inference对于非cuda-like平台的gpu适配指南（10 min）
+- 飞桨产品 [Krystalxxf](https://github.com/Krystalxxf) 社区信息同步：介绍开源活动——飞桨黑客松第四期（5-10min）
 - PFCC 成员自由发言讨论（5 min）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
