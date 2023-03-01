@@ -10,7 +10,7 @@
 
 - 本次会议主席：卢雨畋（[sanbuphy](https://github.com/sanbuphy)）
 
-- 本次会议副主席：
+- 本次会议副主席：田川 （[gouzil](https://github.com/gouzil)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 
