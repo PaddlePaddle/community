@@ -1,6 +1,6 @@
 # Arm 虚拟硬件上完成 PP-OCR 方向检测 模型的部署
 
-| 任务名称                                                     | Arm 虚拟硬件上完成 PaddleClas 模型的部署             | 
+| 任务名称                                                     | Arm 虚拟硬件上完成 PP-OCR 方向检测 模型的部署            | 
 |----------------------------------------------------------|------------------------------------------|
 | 提交作者<input type="checkbox" class="rowselector hidden">   | ZhengBicheng                             | 
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-02-28                               | 
