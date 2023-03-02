@@ -6,7 +6,7 @@
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-2-22 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
-|文件名 | 20230222_ppocr_deploy_for_arm.md<br> | 
+|文件名 | 20230222_ppocr_det_deploy_for_arm.md<br> | 
 
 # 一、概述
 ## 1、相关背景
