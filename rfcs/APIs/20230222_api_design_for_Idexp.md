@@ -140,7 +140,7 @@ paddle.ldexp(
 该 API 实现于 python/paddle/tensor/math.py，计算公式为：
 
 $$
- input * 2^(other)
+ input * 2^{other}
 $$
 
 通过调研发现，Paddle 本身已实现 paddle.pow 可以计算2的整数次幂函数，可利用paddle.pow API 与 input 相乘实现 paddl.lexp。
