@@ -2,11 +2,11 @@
 
 | API名称                                                      | paddle.finfo                     |
 | ------------------------------------------------------------ | -------------------------------- |
-| 提交作者<input type="checkbox" class="rowselector hidden">   | 林旭(isLinXu)                     |
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-04-12                       |
-| 版本号                                                       | V2.0                             |
+| 提交作者<input type="checkbox" class="rowselector hidden">    | lisamhy                     |
+| 提交时间<input type="checkbox" class="rowselector hidden">    | 2022-03-30                       |
+| 版本号                                                        | V2.0                             |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                          |
-| 文件名                                                       | 20220330_api-design_for_finfo.md |
+| 文件名                                                        | 20220330_api-design_for_finfo.md |
 
 # 一、概述
 
