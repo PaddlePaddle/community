@@ -2,7 +2,7 @@
 
 | API名称                                                      | paddle.finfo                     |
 | ------------------------------------------------------------ | -------------------------------- |
-| 提交作者<input type="checkbox" class="rowselector hidden">   | 林旭(isLinXu)                    |
+| 提交作者<input type="checkbox" class="rowselector hidden">   | 林旭(isLinXu)                     |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2022-04-12                       |
 | 版本号                                                       | V2.0                             |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                          |
@@ -466,7 +466,7 @@ API设计为`paddle.finfo(dtype)`，根据选择计算方法(比如eps、max、m
 
 参数类型要求：
 
-- input：dtype，dtype包含uint8、int8、int16、int32、int64、float32、float64、bfloat16、complex64、complex128、bool等数据类型
+- input：dtype，dtype包含 float16、float32、float64、bfloat16、complex64 和 complex128 数据类型
 
 其他说明：
 
