@@ -1,6 +1,6 @@
 # paddle.ldexp 设计文档
 
-|API名称 | paddle.Idexp                     | 
+|API名称 | paddle.ldexp                     | 
 |---|----------------------------------|
 |提交作者<input type="checkbox" class="rowselector hidden"> | longranger2                      | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-02-22                       | 
@@ -14,20 +14,17 @@
 任务 Issue: [No.6：为 Paddle 新增 ldexp API](https://github.com/PaddlePaddle/Paddle/issues/50630#task6)
 
 ## 2、功能目标
-增加API `paddle.ldexp` 和 `paddle.Tensor.ldexp`，实现 `ldexp(double x, int exponent)`函数，函数返回 x 乘以 2 的 exponent 次幂
+增加API `paddle.ldexp` 和 `paddle.Tensor.ldexp`，实现 `ldexp(input, other)`函数，函数返回 x 乘以 2 的 other 次幂
 
 ## 3、意义
 飞桨将支持 `paddle.ldexp` API
 
 # 二、飞桨现状
 
-API方面，已有类似功能的API，`paddle.exp`, 在Paddle中是一个由多个其他API组合成的API，没有实现自己的OP，其主要实现逻辑为：
+API方面，已有类似功能的API，`paddle.pow`, 在Paddle中是一个由多个其他API组合成的API，没有实现自己的OP，其主要实现逻辑为：
 
-1. 使用`paddle.exp`对输入exponent，进行以自然数 e 为底指数运算
-2. 将步骤1得到的值乘以x即可
-
-但在实际实现时，不能完全直接复用上述方案，理由如下：
-1. `paddle.exp` 的输入为多维 Tensor。数据类型为 float32、float64，而`paddle.ldexp` 要求的为指数为整数
+1. 使用`paddle.pow`对输入other，进行以 2 为底数的指数运算
+2. 将步骤1得到的值乘以 input 即可
 
 
 # 三、业内方案调研
@@ -117,11 +114,8 @@ math_ldexp_impl(PyObject *module, double x, PyObject *i)
 ```
 
 # 四、对比分析
-## 共同点
-- 都是输入两个参数来进行计算
 ## 不同点
-- `pytorch` 调用现有`API`实现的，而 `numpy` 是通过 `C++` 实现的
-
+- `pytorch` 调用现有的 `API` 实现的，而 `numpy` 是通过 `C++` 实现的
 
 # 五、设计思路与实现方案
 
@@ -129,8 +123,8 @@ math_ldexp_impl(PyObject *module, double x, PyObject *i)
 添加 API
 ```python
 paddle.ldexp(
-    input: Tensor,
-    other: Tensor
+    input: 多纬Tensor，数据类型为 float16 、 float32 、 float64 、 int32 或 int64 
+    other: 多维Tensor，数据类型为 float16 、 float32 、 float64 、 int32 或 int64 
 )
 ```
 ## 底层OP设计
@@ -144,7 +138,7 @@ $$
 $$
 
 通过调研发现，Paddle 本身已实现 paddle.pow 可以计算2的整数次幂函数，可利用paddle.pow API 与 input 相乘实现 paddl.lexp。
-随后，Paddle 中已有 paddle.pow API 的具体实现逻辑，位于 python/paddle/tensor/math.py 下的 pow 函数中。
+而 Paddle 中已有 paddle.pow API 的具体实现逻辑，位于 python/paddle/tensor/math.py 下的 pow 函数中。
 
 # 六、测试和验收的考量
 参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
@@ -155,7 +149,7 @@ $$
 
 ## 七、可行性分析及规划排期
 具体规划：
-- 阶段一：完成API功能开放
+- 阶段一：完成API功能开发
 - 阶段二：完成 `paddle.ldexp` 和 `paddle.Tensor.ldexp` 的单元测试
 - 阶段三：该API书写中英文档
 
