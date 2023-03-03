@@ -72,4 +72,4 @@ paddle框架中`tile`、`stack`、`mish`、`unstack`、`silu`、`softshrink`、`
 
 # 五、项目提交时间计划
 
-3-1日已完成代码，通过单测并提交pr。
+3-1日已完成代码，通过单测并提交到tvm [pr地址](https://github.com/apache/tvm/pull/14160)
