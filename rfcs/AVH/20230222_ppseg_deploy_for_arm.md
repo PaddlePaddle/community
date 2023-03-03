@@ -12,7 +12,6 @@
 ## 1、相关背景
 
 将 PaddleSeg 模型库中的目标分割模型 (Segmentation Model) 部署在 Arm Cortex-M55 处理器上并使用 Arm 虚拟硬件 Corstone-300 平台进行验证。
-[https://github.com/PaddlePaddle/Paddle/issues/50632#task214](https://github.com/PaddlePaddle/Paddle/issues/50632#task214)
 
 ## 2、功能目标
 
