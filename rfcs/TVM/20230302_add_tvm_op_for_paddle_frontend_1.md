@@ -72,4 +72,4 @@ paddle框架中`thresholded_relu`、`index_select`、`eye`、`linspace`、`take_
 
 # 五、项目提交时间计划
 
-3-2日已完成代码，通过单测并提交pr。
+3-2日已完成代码，通过单测并提交到tvm [pr地址](https://github.com/apache/tvm/pull/14172)
