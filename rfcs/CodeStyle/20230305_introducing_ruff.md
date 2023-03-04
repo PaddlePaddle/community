@@ -107,7 +107,7 @@ select = []
         args: [--fix, --exit-non-zero-on-fix, --no-cache]
 ```
 
-测试 PR 见：[[Don't merge][CodeStyle] initialize ruff config](https://github.com/PaddlePaddle/Paddle/pull/51201)
+测试 PR 见：[[CodeStyle] initialize ruff config](https://github.com/PaddlePaddle/Paddle/pull/51201)
 
 #### 确定需要引入的 rules
 
@@ -241,7 +241,7 @@ $ ruff --select B . --statistics
 
 #### 可行性验证
 
-[[Don't merge][CodeStyle][pyupgrade] automatically rewrite code with ruff](https://github.com/PaddlePaddle/Paddle/pull/50477) 已经尝试了引入 Ruff 的全部 pyupgrade rules（UP），可以通过全量单测。
+[[CodeStyle][pyupgrade] automatically rewrite code with ruff](https://github.com/PaddlePaddle/Paddle/pull/50477) 已经尝试了引入 Ruff 的全部 pyupgrade rules（UP），可以通过全量单测。
 
 #### 推进方式
 
@@ -321,7 +321,7 @@ Ruff 本身还处于早期阶段，因此部分选项和 rule 的作用可能会
 
 ### 直接引入 pyupgrade
 
-我们已经对引入 pyupgrade 进行了测试（见 [[Don't merge][CodeStyle][pyupgrade] automatically rewrite code with pyupgrade](https://github.com/PaddlePaddle/Paddle/pull/48140)），但 pyupgrade 不提供选项来禁用某一个或多个 rule，这意味着只能全盘接受或者不使用，而部分 rule 对于代码风格并不是提升，因此不会选择，另外 PyTorch 社区因为同样的原因没有选择引入 pyupgrade（见 [Option to disable `Unpacking list comprehensions`](https://github.com/asottile/pyupgrade/issues/794)），因此也在考虑利用 Ruff 来引入 pyupgrade 的 rules。
+我们已经对引入 pyupgrade 进行了测试（见 [[CodeStyle][pyupgrade] automatically rewrite code with pyupgrade](https://github.com/PaddlePaddle/Paddle/pull/48140)），但 pyupgrade 不提供选项来禁用某一个或多个 rule，这意味着只能全盘接受或者不使用，而部分 rule 对于代码风格并不是提升，因此不会选择，另外 PyTorch 社区因为同样的原因没有选择引入 pyupgrade（见 [Option to disable `Unpacking list comprehensions`](https://github.com/asottile/pyupgrade/issues/794)），因此也在考虑利用 Ruff 来引入 pyupgrade 的 rules。
 
 ### 直接引入 flake8-bugbear、flake8-comprehensions 等 Flake8 插件
 
