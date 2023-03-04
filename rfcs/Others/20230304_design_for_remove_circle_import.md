@@ -42,6 +42,20 @@
 ## 2、实施计划
 考虑到import行为的复杂性，以及对外部（如fluid等非jit目录下模块）的引入，实施过程中，应当按照逐个文件，逐个功能点，先内部再外部的方式进行解耦。
 
+不同文件的更新内容如下
+
+| 文件名                                               | 函数中import语句                                                                                                                                                                                                                                                                                   | 说明                                                                                |
+|---------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| python\paddle\jit\api.py                          | from paddle.fluid.io import save_inference_model                                                                                                                                                                                                                                              | 参考https://github.com/PaddlePaddle/Paddle/pull/50677 直接解决                          |
+| python\paddle\jit\dy2static\call_transformer.py   | from paddle.jit.dy2static.convert_call_func import is_builtin                                                                                                                                                                                                                                 | is_builtin作为公用函数移动到utils                                                          |
+| python\paddle\jit\dy2static\convert_call_func.py  | import six</br>from paddle.nn import Sequential</br>paddle.jit.dy2static.program_translator import()                                                                                                                                                                                          | 第一个import无需修改；第二个import暂时挂起；将program_translator对本文件的import内容移动到program_translator |
+| python\paddle\jit\dy2static\convert_operators.py  | from paddle.fluid.dygraph.base import in_declarative_mode</br>from paddle.static.nn.control_flow import Assert                                                                                                                                                                                | 暂时挂起                                                                              |
+| python\paddle\jit\dy2static\partial_program.py    | from paddle.incubate.autograd.primapi import to_prim</br>from paddle.amp.auto_cast import _in_amp_guard, _in_pure_fp16_guard                                                                                                                                                                  | 暂时挂起                                                                              |
+| python\paddle\jit\dy2static\program_translator.py | from paddle.static import InputSpec</br>from paddle.incubate.autograd.primapi import to_prim</br>from paddle.fluid.dygraph.base import _switch_declarative_mode_guard_</br>from paddle.jit.dy2static.program_translator import ProgramTranslator                                              | 前两条暂时挂起，最后一条直接删除import即可                                                          |
+| python\paddle\jit\dy2static\utils.py              | from paddle.jit.dy2static.return_transformer import</br> import paddle, fluid ...</br>import numpy as np</br>from .static_analysis import StaticAnalysisVisitor</br>from paddle.jit.dy2static.static_analysis import NodeVarType</br>from paddle.jit.dy2static.ifelse_transformer import</br>from paddle.jit.dy2static.loop_transformer import |jit内的circle import统一将实现移动到utils内|
+
+处理完毕后按照引用情况查找对应的fluid文件调整circle import。
+
 # 三、测试和验收的考量
 PR通过CI即可
 
