@@ -67,7 +67,7 @@ Paddle 的 unique 算子可用 tvm 的 reshape 和 unique 算子组合适配。
 
 
 # 方案运行效果
-参考[单测代码](https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py)，设计并通过各个算子的单测。
+完成上述算子的映射，并且参考[单测代码](https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py)，设计各个算子的单测。
 
 
 # 项目提交时间计划
