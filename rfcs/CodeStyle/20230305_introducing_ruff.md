@@ -4,15 +4,9 @@
 | ------------ | ---------------------------------------------- |
 | 提交作者     | @SigureMo                                      |
 | 提交时间     | 2023-03-05                                     |
-| 版本号       | v0.1                                           |
+| 版本号       | v0.2                                           |
 | 依赖飞桨版本 | develop                                        |
 | 文件名       | 20230305_introducing_ruff.md                  |
-
-> **Warning** TODOs
->
-> - 做测试 demo
-> - 统计
-> - QA部分
 
 ## 一、概述
 
@@ -67,7 +61,7 @@ Ruff 的目标是成为 Python 语言的全能型 Linter，因此 Ruff 实现了
 
 Ruff 虽然目前不支持插件，但 Ruff 现有的内置 rules 基本可以覆盖所有常见的需求。
 
-此外，Ruff 对于用户来说拥有统一的配置和 Cli 选项，不必同时学习多个工具，使用一个工具即可完成多个工具的工作。
+此外，Ruff 对于用户来说拥有统一的配置和 CLI 选项，不必同时学习多个工具，使用一个工具即可完成多个工具的工作。
 
 ### 社区使用情况调研
 
@@ -98,6 +92,7 @@ exclude = [
     "./python/paddle/fluid/tests/unittests/mlu/**",
 ]
 target-version = "py37"
+select = []
 ```
 
 并添加相应的 pre-commit hook：
@@ -106,11 +101,13 @@ target-version = "py37"
 
 ```yaml
 -   repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.247
+    rev: v0.0.254
     hooks:
     -   id: ruff
         args: [--fix, --exit-non-zero-on-fix, --no-cache]
 ```
+
+测试 PR 见：[[Don't merge][CodeStyle] initialize ruff config](https://github.com/PaddlePaddle/Paddle/pull/51201)
 
 #### 确定需要引入的 rules
 
@@ -139,13 +136,114 @@ target-version = "py37"
 - 在引入 F401 自动修复功能后可以从 `.pre-commit-config.yaml` 移除 autoflake，引入 PR 见 [[Tools]Add autoflake pre-commit hook to remove unused-imports/var](https://github.com/PaddlePaddle/Paddle/pull/47455)；
 - 在引入 UP010 rule 后可以从 `tools/check_file_diff_approvals.sh` 移除相关检查项，引入 PR 见 [[CodeStyle] add CI script to prevent future import](https://github.com/PaddlePaddle/Paddle/pull/46466)
 
+#### 存量统计
+
+pyupgrade（UP）- 16 条：
+
+```
+$ ruff --select UP . --statistics                
+  14    UP004   [*] Class `Event` inherits from `object`
+   6    UP005   [*] `assertEquals` is deprecated, use `assertEqual`
+   1    UP006   [*] Use `list` instead of `List` for type annotations
+  80    UP008   [*] Use `super()` instead of `super(__class__, self)`
+  16    UP009   [*] UTF-8 encoding declaration is unnecessary
+   3    UP010   [*] Unnecessary `__future__` import `print_function` for target Python version
+   2    UP012   [*] Unnecessary call to `encode` as UTF-8
+ 151    UP015   [*] Unnecessary open mode parameters
+  51    UP018   [*] Unnecessary call to `str`
+   9    UP024   [*] Replace aliased errors with `OSError`
+  10    UP027   [*] Replace unpacked list comprehension with a generator expression
+  14    UP028   [*] Replace `yield` over `for` loop with `yield from`
+ 279    UP030   [*] Use implicit references for positional format fields
+ 162    UP031   [*] Use format specifiers instead of percent format
+1335    UP032   [*] Use f-string instead of `format` call
+ 225    UP034   [*] Avoid extraneous parentheses
+```
+
+Pylint（PL）- 17 条：
+
+```
+$ ruff --select PL . --statistics
+ 215    PLR5501 [ ] Consider using `elif` instead of `else` then `if` to remove one indentation level
+  13    PLC0414 [*] Import alias does not rename original package
+   6    PLC3002 [ ] Lambda expression called directly. Execute the expression inline instead.
+   2    PLR0206 [ ] Cannot have defined parameters for properties
+2113    PLR0402 [*] Use `from paddle import nn` in lieu of alias
+   5    PLR0133 [ ] Two constants compared in a comparison, consider replacing `10 > 5`
+  80    PLR1701 [ ] Merge these isinstance calls: `isinstance(norm, (float, int))`
+  41    PLR1722 [*] Use `sys.exit()` instead of `exit`
+2182    PLR2004 [ ] Magic value used in comparison, consider replacing 3 with a constant variable
+ 177    PLW0603 [ ] Using the global statement to update `_g_amp_state_` is discouraged
+  83    PLW0602 [ ] Using global for `_g_amp_state_` but no assignment is done
+  46    PLR0911 [ ] Too many return statements (8/6)
+1446    PLR0913 [ ] Too many arguments to function call (8/5)
+ 469    PLR0912 [ ] Too many branches (20/12)
+ 469    PLR0915 [ ] Too many statements (51/50)
+ 336    PLW2901 [ ] Outer for loop variable `pair` overwritten by inner assignment target
+   1    PLE1205 [ ] Too many arguments for `logging` format string
+```
+
+NumPy-specific rules（NPY001）- 1 条：
+
+```
+$ ruff --select NPY001 . --statistics
+2       NPY001  [*] Type alias `np.bool` is deprecated, replace with builtin type
+```
+
+pyflakes（F401）：无存量
+
+flake8-comprehensions（C4）- 14 条：
+
+```
+$ ruff --select C4 . --statistics
+ 19     C400    [*] Unnecessary generator (rewrite as a `list` comprehension)
+  5     C401    [*] Unnecessary generator (rewrite as a `set` comprehension)
+  4     C402    [*] Unnecessary generator (rewrite as a `dict` comprehension)
+ 22     C403    [*] Unnecessary `list` comprehension (rewrite as a `set` comprehension)
+  2     C404    [*] Unnecessary `list` comprehension (rewrite as a `dict` comprehension)
+172     C405    [*] Unnecessary `list` literal (rewrite as a `set` literal)
+355     C408    [*] Unnecessary `tuple` call (rewrite as a literal)
+  3     C409    [*] Unnecessary `list` literal passed to `tuple()` (rewrite as a `tuple` literal)
+  8     C410    [*] Unnecessary `list` literal passed to `list()` (remove the outer call to `list()`)
+  6     C411    [*] Unnecessary `list` call (remove the outer call to `list()`)
+  1     C413    [*] Unnecessary `reversed` call around `sorted()`
+ 17     C414    [*] Unnecessary `list` call within `sorted()`
+104     C416    [*] Unnecessary `list` comprehension (rewrite using `list()`)
+ 32     C417    [*] Unnecessary `map` usage (rewrite using a `list` comprehension)
+```
+
+flake8-bugbear（B）- 17 条：
+
+```
+$ ruff --select B . --statistics
+  1     B004    [ ] Using `hasattr(x, '__call__')` to test if x is callable is unreliable. Use `callable(x)` for consistent results.
+  9     B005    [ ] Using `.strip()` with multi-character strings is misleading the reader
+196     B006    [ ] Do not use mutable data structures for argument defaults
+801     B007    [*] Loop control variable `atype` not used within loop body
+ 24     B008    [ ] Do not perform function call `fluid.global_scope` in argument defaults
+ 59     B009    [*] Do not call `getattr` with a constant attribute value. It is not any safer than normal property access.
+ 29     B010    [*] Do not call `setattr` with a constant attribute value. It is not any safer than normal property access.
+ 34     B011    [*] Do not `assert False` (`python -O` removes these calls), raise `AssertionError()`
+  7     B015    [ ] Pointless comparison. This comparison does nothing but waste CPU instructions. Either prepend `assert` or remove it.
+  1     B016    [ ] Cannot raise a literal. Did you intend to return it or raise an Exception?
+ 14     B017    [ ] `assertRaises(Exception)` should be considered evil
+  7     B020    [ ] Loop control variable `data` overrides iterable it iterates
+113     B023    [ ] Function definition does not bind loop variable `opt_step`
+  1     B024    [ ] `FLClientBase` is an abstract base class, but it has no abstract methods
+  9     B026    [ ] Star-arg unpacking after a keyword argument is strongly discouraged
+  3     B027    [ ] `AlgorithmBase.collect_model_info` is an empty method in an abstract base class, but has no abstract decorator
+ 65     B904    [ ] Within an except clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+```
+
+其中标记有 `[*]` 的表示 Ruff 提供自动修复功能
+
 ### 2、关键技术点/子模块设计与实现方案
 
 #### 可行性验证
 
 [[Don't merge][CodeStyle][pyupgrade] automatically rewrite code with ruff](https://github.com/PaddlePaddle/Paddle/pull/50477) 已经尝试了引入 Ruff 的全部 pyupgrade rules（UP），可以通过全量单测。
 
-### 推进方式
+#### 推进方式
 
 第一个 PR 会修改配置，引入部分没有存量的 rule，之后由外部开发者提交 PR 来逐步引入有存量的 rule。具体实施步骤如下：
 
@@ -174,7 +272,7 @@ target-version = "py37"
 
 建议使用单独的 PR 来修改配置，以避免 PR 频繁冲突。但可以将多个 rule 的配置 PR 合并成为一个。
 
-## 3、主要影响的模块接口变化
+### 3、主要影响的模块接口变化
 
 不会对模块接口产生影响。
 
@@ -182,48 +280,67 @@ target-version = "py37"
 
 确保不会引起性能倒退，确保不会引起代码风格倒退，通过 CI 各条流水线。
 
-# 六、影响面
+## 六、影响面
 
-## 对用户的影响
+### 对用户的影响
 
 用户对于框架内部代码风格的变动不会有任何感知，不会有任何影响。
 
-## 对二次开发用户的影响
+### 对二次开发用户的影响
 
 可以提高 Paddle 代码风格，极大提高开发体验。
 
-## 对框架架构的影响
+### 对框架架构的影响
 
 在 pre-commit 工作流中引入 Ruff，因此在该 hook 引入后开发者首次 commit 需要稍微等一段时间用于初始化 Ruff 环境，后续提交代码不受影响。
 
-## 对性能的影响
+### 对性能的影响
 
 在确保 Rule 是安全的情况下，对性能不会产生任何影响，部分 Rule 可能会提高性能。
 
-## 对比业内深度学习框架的差距与优势的影响
+### 对比业内深度学习框架的差距与优势的影响
 
 引入 Ruff 的 flake8-bugbear、flake8-comprehensions rules 可以对齐 PyTorch 的代码风格，引入 Ruff 的 Pylint rules 可以对齐 TensorFlow 的代码风格。在完成本 RFC 中所述的全部 rules 后，Paddle 的代码风格管控将会超越 TensorFlow 和 PyTorch。
 
-## 其他风险
+### 其他风险
 
-无。
+Ruff 本身还处于早期阶段，因此部分选项和 rule 的作用可能会在未来变动，但在锁版本的情况下不存在该问题（pre-commit 配置中强制锁版本），并在更新版本的时候仔细阅读 Release Note 来确定升级方案即可。
 
-# 七、排期规划
+## 七、排期规划
 
 - NumPy-specific rules（NPY001）
 - pyupgrade（UP）
 - pyflakes（F401）
 - flake8-comprehensions（C4）
 - flake8-bugbear（B）
+- Pylint（PL）
 
 上表以优先级排序，不代表实际完成顺序，可并行进行。具体执行将会由 SigureMo 和外部开发者一起完成。
 
-# 名词解释
+## 八、替代方案
 
-无。
+### 直接引入 pyupgrade
 
-# 附件及参考资料
+pyupgrade 不提供选项来禁用某一个或多个 rule，这意味着只能全盘接受或者不使用，而部分 rule 对于代码风格并不是提升，因此不会选择，另外 PyTorch 社区因为同样的原因没有选择引入 pyupgrade（见 [Option to disable `Unpacking list comprehensions`](https://github.com/asottile/pyupgrade/issues/794)），因此也在考虑利用 Ruff 来引入 pyupgrade 的 rules。
+
+### 直接引入 flake8-bugbear、flake8-comprehensions 等 Flake8 插件
+
+Flake8 不提供自动修复功能，而 Ruff 可以尽可能地提供自动修复功能，可以同时减少引入时存量修复的工作量和之后开发者引入增量时修复的工作量。
+
+### 利用 Ruff 取代现有 Flake8 中内置的 pycodestyle、pyflakes、mccabe 插件
+
+目前 Ruff 实现的功能尚不能完全完成这三个插件的功能，部分社区在直接使用 Ruff 替换掉原有的 Flake8 后引起了代码风格回归的问题，见 [ENH: Added analytical formula for truncnorm entropy - discussion](https://github.com/scipy/scipy/pull/17874#discussion_r1103885021)，因此在 Ruff 完全实现 Flake8 内置插件全部 rules 且功能稳定之前，不会考虑直接使用 Ruff 替代这三个内置插件。
+
+### 利用 Ruff 取代现有的 isort 和 black
+
+Ruff 目前同样实现了 isort 和 black 的功能，但这些功能实现尚处于早期，甚至还在持续开发中，因此现阶段不会考虑引入，日后如果 Ruff 的这两项功能稳定，且成为 Python 社区的主流解决方案之后，将会考虑使用 Ruff 直接替代这两项功能。
+
+## 名词解释
+
+- rule：规则，即对应于某一类错误的检查项，如 `UP010` 检查不必要的 future import。
+
+## 附件及参考资料
 
 1. [关于引入 Ruff 的前期调研](https://github.com/PaddlePaddle/Paddle/pull/50458#issuecomment-1431280278)
 2. [Ruff documentation](https://beta.ruff.rs/docs/)
-3. 测试 PR TODO
+3. [引入 Ruff 初始化配置 PR](https://github.com/PaddlePaddle/Paddle/pull/51201)
