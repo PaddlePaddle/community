@@ -227,7 +227,7 @@ sparse_backward_ops.yaml
 ```yaml
 - backward_op : sum_grad
   forward : sum(Tensor x, IntArray axis={}, DataType dtype=DataType::UNDEFINED, bool keepdim=false) -> Tensor(out)
-  args : (Tensor x, Tensor out_grad, IntArray axis={}, DataType dtype=DataType::UNDEFINED, bool keepdim=false)
+  args : (Tensor x, Tensor out_grad, IntArray axis={}, bool keepdim=false)
   output : Tensor(x_grad)
   infer_meta :
     func : UnchangedInferMeta
