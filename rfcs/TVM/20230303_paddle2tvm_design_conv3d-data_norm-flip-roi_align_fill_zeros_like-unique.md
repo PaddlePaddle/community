@@ -74,11 +74,3 @@ Paddle 的 unique 算子可用 tvm 的 reshape 和 unique 算子组合适配。
 3月3日 ~ 3月10日完成算子适配
 
 3月11日 ~ 3月18日完成算子适配的单测
-
-# 个人介绍及以往项目经历
-
-我对深度学习编译器比较感兴趣，参加过 CINN 基础算子的开发。
-
-- https://github.com/PaddlePaddle/CINN/pull/919
-- https://github.com/PaddlePaddle/CINN/pull/963
-- https://github.com/PaddlePaddle/CINN/pull/949
