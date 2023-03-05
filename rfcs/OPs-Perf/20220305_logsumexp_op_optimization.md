@@ -54,7 +54,7 @@ $$
 
 logsumexp的计算图如下:
 
-![](./da.png)
+![](./logsumexp_computing_graph.png)
 
 由于logsumexp与softmax类似，可以参考softmax，转换其输入为(num_rows, num_cols)。
 
