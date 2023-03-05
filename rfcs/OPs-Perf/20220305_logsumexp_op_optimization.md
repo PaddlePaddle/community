@@ -28,7 +28,7 @@ OneFlow中使用了ReduceKernel+ElementwiseKernel组合的方式，代码见[此
 
 ## 1.3 对比分析
 
-二者与paddle中实现思路基本一致，值得一提的是OneFlow的实现方式中有对输入数据含Inf的处理。
+二者与paddle中实现思路基本一致，值得一提的是OneFlow的实现方式将输入数据中含有的`Inf`替换为0，不确定是否为期望的行为。
 
 # 2 设计方案与性能预期
 
