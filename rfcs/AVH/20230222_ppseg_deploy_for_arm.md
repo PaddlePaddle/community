@@ -1,12 +1,12 @@
 # [Hackathon No.218] Arm 虚拟硬件上完成 PaddleSeg模型的部署与优化设计文档
 
-| 任务名称                                                     | Arm 虚拟硬件上完成 PaddleSeg模型的部署与优化        | 
-|----------------------------------------------------------|--------------------------------------|
-| 提交作者<input type="checkbox" class="rowselector hidden">   | ZhengBicheng                         | 
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-03-02                           | 
-| 版本号                                                      | V1.0                                 | 
-| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                              | 
-| 文件名                                                      | 20230222_ppseg_deploy_for_arm.md<br> | 
+| 任务名称                                                     | [Hackathon No.218] Arm 虚拟硬件上完成 PaddleSeg模型的部署与优化 | 
+|----------------------------------------------------------|--------------------------------------------------|
+| 提交作者<input type="checkbox" class="rowselector hidden">   | ZhengBicheng                                     | 
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-03-02                                       | 
+| 版本号                                                      | V1.0                                             | 
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                          | 
+| 文件名                                                      | 20230222_ppseg_deploy_for_arm.md<br>             | 
 
 # 一、概述
 ## 1、相关背景
