@@ -54,7 +54,7 @@ Keyword Arguments
 
 ### 实现方法
 
-在实现方法上, PyTorch 通用实现采用的遍历，[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L638)，CUDA 采用的[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L17)。
+在实现方法上, PyTorch采用的CPU实现为：循环遍历赋值[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L769)，而CUDA实现则是调用pytorch自己实现的scan_with_indices函数[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L45)。
 核心代码为：
 CPU:
 
@@ -257,7 +257,39 @@ API设计为`paddle.cummax(x, axis , dtype, name)`以及`paddle.Tensor.cummax(ax
 
 ## 底层OP设计
 
-参考 paddle.cumsum 实现。
+cpu：
+前向计算，可调用cumsum算子所实现的ScanKernel作为核心，增加一些细节处理即可
+后向计算，定义CumminGradKernel函数实现cummin函数subgradient计算，或者参考其它不可导函数的subgradient计算方法
+
+gpu：
+前向计算，可调用cumsum算子所实现的BlockScanKernel作为核心，增加一些细节处理即可
+后向计算，定义CumminGradKernel函数实现cummin函数subgradient计算，或者参考其它不可导函数的subgradient计算方法
+
+前向函数签名
+
+~~~cpp
+KernelSignature CummaxOpArgumentMapping(
+    const ArgumentMappingContext& ctx) {
+  return KernelSignature("cummax",
+                         {"X"},
+                         {"axis", "flatten", "exclusive", "reverse"},
+                         {"Out"});
+}
+PD_REGISTER_ARG_MAPPING_FN(cummax, phi::CummaxOpArgumentMapping);
+~~~
+
+后向函数签名
+
+~~~cpp
+KernelSignature CummaxGradOpArgumentMapping(
+    const ArgumentMappingContext& ctx) {
+  return KernelSignature("cummax_grad",
+                         {"X", "Out", "Out@GRAD"},
+                         {"axis", "flatten", "exclusive", "reverse"},
+                         {"X@GRAD"});
+}
+PD_REGISTER_ARG_MAPPING_FN(cummax_grad, phi::CummaxGradOpArgumentMapping);
+~~~
 
 ## API实现方案
 
