@@ -32,7 +32,9 @@
   - <a href='#paddleindustry'>基于PaddleDetection的无人机航拍图像检测</a>
 
 
-**重要通知**：任务描述链接失效，请直接打开具体任务对应的markdown文件。
+- **重要通知**：任务描述链接失效，请直接打开具体任务对应的markdown文件。
+- **重要通知**：任务描述链接失效，请直接打开具体任务对应的markdown文件。
+- **重要通知**：任务描述链接失效，请直接打开具体任务对应的markdown文件。
 
 
 大家好，非常高兴地告诉大家，第四期 [PaddlePaddle Hackathon](https://www.paddlepaddle.org.cn/PaddlePaddleHackathon-2023-2?fr=paddleg) 开始了。PaddlePaddle Hackathon 是面向全球开发者的深度学习领域编程活动，鼓励开发者了解与参与 PaddlePaddle 开源社区。本次共有四个赛道：核心框架开源贡献、模型套件开源贡献、生态伙伴开源贡献、产业合作开源贡献，二十四个大方向：API开发、算子性能优化、数据类型扩展、图像分类开发套件、3D任务开发套件、飞桨科学计算套件、OpenVINO项目、ARM项目、数字电表示数识别等，共计 200+个任务供大家认领。详细信息可以参考 [PaddlePaddle Hackathon 说明](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_cn)。大家是否已经迫不及待了呢~
