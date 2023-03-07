@@ -48,15 +48,15 @@ Parameters
 Keyword Arguments
  - out (tuple, optional) – the result tuple of two output tensors (values, indices)
 ```
-即输入参数为 Tensor 和指定的维，两个值和索引的切片。
+输入数据Tensor和cummax操作的维度dim，输出一个tuple包含计算结果values和索引indices
 
 相关联的 PR [Cumulative Maximum · Issue #20240 · pytorch/pytorch (github.com)](https://github.com/pytorch/pytorch/issues/20240)，其中提及`logcumsumexp` 依赖于 `cummax` 功能。
 
 ### 实现方法
 
-在实现方法上, PyTorch采用的CPU实现为：循环遍历赋值[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L769)，而CUDA实现则是调用pytorch自己实现的scan_with_indices函数[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L45)。
+在实现方法上, PyTorch采用的CPU实现为：循环遍历赋值，而CUDA实现则是调用pytorch自己实现的scan_with_indices函数。
 核心代码为：
-CPU:
+[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L769):
 
 ```cpp
 template<typename T1, typename T2, typename Operation>
@@ -111,7 +111,8 @@ std::tuple<Tensor, Tensor> cummax(const Tensor& self, int64_t dim) {
   return std::make_tuple(values, indices);
 }
 ```
-GPU:
+[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L28):
+
 ```cpp
 void cummax_helper_cuda(const Tensor& self, Tensor& values, Tensor& indices, int64_t dim) {
   TensorArg output_arg{ values, "output", 1 };
@@ -157,6 +158,24 @@ void scan_dim_with_indices(const TensorBase& self, const TensorBase& values, con
 ~~~
 
 其中函数`scan_innermost_dim_with_indices`和`scan_outer_dim_with_indices`的相关代码较长，它们的功能是在不同维度上对输入进行并行的累积操作，其中关于并行扫描部分实现的代码值得参考。
+
+CPU/GPU反向计算
+
+~~~cpp
+Tensor cummaxmin_backward(const Tensor& grad, const Tensor& input, const Tensor& indices, int64_t dim) {
+  if (input.numel() == 0) {
+    return input;
+  }
+  auto result = at::zeros(input.sizes(), input.options());
+
+  // for composite compliance, use out-of-place variant of
+  // `scatter_add` if `indices` or `grad` is a Tensor Subclass.
+  if (areAnyTensorSubclassLike({indices, grad})) {
+    return result.scatter_add(dim, indices, grad);
+  }
+  return result.scatter_add_(dim, indices, grad);
+}
+~~~
 
 ## NumPy
 
@@ -249,21 +268,20 @@ PyTorch 还提供了基于 CUDA 的算子实现。
 
 ## 命名与参数设计
 
-API设计为`paddle.cummax(x, axis , dtype, name)`以及`paddle.Tensor.cummax(axis, dtype, name)`。参数设计参考`paddle.cumsum`。
+API设计为`paddle.cummax(x, axis, name)`以及`paddle.Tensor.cummax(axis, name)`。参数设计参考`paddle.cumsum`。
 - x (Tensor) - 需要进行累积最大值统计的 Tensor。
 - axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累加计算。
-- dtype (str，可选) - 输出Tensor的数据类型，支持int32、int64、float32、float64. 如果指定了，那么在执行操作之前，输入张量将被转换为dtype. 这对于防止数据类型溢出非常有用。默认为：None。
 - name  (str，可选) - 操作的名称（可选，默认值为None）。
 
 ## 底层OP设计
 
 cpu：
-前向计算，可调用cumsum算子所实现的ScanKernel作为核心，增加一些细节处理即可
-后向计算，定义CumminGradKernel函数实现cummin函数subgradient计算，或者参考其它不可导函数的subgradient计算方法
+前向计算，需要计算cummin结果Out和对应的index，没有在paddle内部找到可以直接计算index的API可供调用，因此需要实现一个能够同时计算cmmin和index的函数ScanWithIndexKernel
+后向计算，调用cpu_scatter_add函数在index指定位置分配grad值，具体可以查看上面的pytorch实现
 
 gpu：
-前向计算，可调用cumsum算子所实现的BlockScanKernel作为核心，增加一些细节处理即可
-后向计算，定义CumminGradKernel函数实现cummin函数subgradient计算，或者参考其它不可导函数的subgradient计算方法
+前向计算，大体过程与cumsum类似，但是在计算部分需要实现一个能够同时计算cmmin和index的函数ScanWithIndexKernel
+后向计算，调用gpu_scatter_add函数在index指定位置分配grad值，具体可以查看上面的pytorch实现
 
 前向函数签名
 
@@ -272,8 +290,8 @@ KernelSignature CummaxOpArgumentMapping(
     const ArgumentMappingContext& ctx) {
   return KernelSignature("cummax",
                          {"X"},
-                         {"axis", "flatten", "exclusive", "reverse"},
-                         {"Out"});
+                         {"axis", "flatten"},
+                         {"Out", "Index"});
 }
 PD_REGISTER_ARG_MAPPING_FN(cummax, phi::CummaxOpArgumentMapping);
 ~~~
@@ -284,8 +302,8 @@ PD_REGISTER_ARG_MAPPING_FN(cummax, phi::CummaxOpArgumentMapping);
 KernelSignature CummaxGradOpArgumentMapping(
     const ArgumentMappingContext& ctx) {
   return KernelSignature("cummax_grad",
-                         {"X", "Out", "Out@GRAD"},
-                         {"axis", "flatten", "exclusive", "reverse"},
+                         {"X", "Index", "Out", "Out@GRAD"},
+                         {"axis", "flatten"},
                          {"X@GRAD"});
 }
 PD_REGISTER_ARG_MAPPING_FN(cummax_grad, phi::CummaxGradOpArgumentMapping);
