@@ -124,7 +124,7 @@ math_ldexp_impl(PyObject *module, double x, PyObject *i)
 ```python
 paddle.ldexp(
     input: 多纬Tensor，数据类型为 float16 、 float32 、 float64 、 int32 或 int64 
-    other: 多维Tensor，数据类型为 float16 、 float32 、 float64 、 int32 或 int64 
+    other: 多维Tensor，数据类型为 int32 或 int64 
 )
 ```
 ## 底层OP设计
