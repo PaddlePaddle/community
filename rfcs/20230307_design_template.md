@@ -4,18 +4,22 @@
 
 # 标题
 
-|任务名称 | xxx | 
+|任务名称 | 154 论文复现：YOLOv6 v3.0: A Full-Scale Reloading | 
 |---|---|
-|提交作者<input type="checkbox" class="rowselector hidden"> | 李强、张明 | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-10-21 | 
+|提交作者<input type="checkbox" class="rowselector hidden"> | 德尔塔大雨淋 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-3-7 | 
 |版本号 | 此设计文档的版本号，如V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | 如无特殊情况，都应基于develop版本开发 | 
-|文件名 | 提交的markdown设计文档文件名称，如：20221021_design_template.md<br> | 
+|文件名 | 提交的markdown设计文档文件名称，如：20230307_design_template.md<br> | 
 
 # 一、概述
 ## 1、相关背景
-填写此任务的开发背景，如果有相关issue，请将issue链接填写至此。
+
+参考repo https://github.com/meituan/YOLOv6
+
 ## 2、功能目标
+- s版本COCO数据集精度37.5mAP
+- 完成复现后合入PaddleYOLO
 
 ## 3、意义
 - 集中阐述本次升级的作用和意义。
