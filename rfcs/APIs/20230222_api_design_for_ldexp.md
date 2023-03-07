@@ -14,7 +14,7 @@
 任务 Issue: [No.6：为 Paddle 新增 ldexp API](https://github.com/PaddlePaddle/Paddle/issues/50630#task6)
 
 ## 2、功能目标
-增加API `paddle.ldexp` 和 `paddle.Tensor.ldexp`，实现 `ldexp(input, other)`函数，函数返回 x 乘以 2 的 other 次幂
+增加API `paddle.ldexp` 和 `paddle.Tensor.ldexp`，实现 `ldexp(input, other)`函数，函数返回 input 乘以 2 的 other 次方，因为 other 为整数，所以 2 的 other 次方为整数幂。
 
 ## 3、意义
 飞桨将支持 `paddle.ldexp` API
@@ -23,7 +23,7 @@
 
 API方面，已有类似功能的API，`paddle.pow`, 在Paddle中是一个由多个其他API组合成的API，没有实现自己的OP，其主要实现逻辑为：
 
-1. 使用`paddle.pow`对输入other，进行以 2 为底数的指数运算
+1. 使用`paddle.pow`对输入other，进行以 2 为底数的指数运算，得到整数幂
 2. 将步骤1得到的值乘以 input 即可
 
 
@@ -123,8 +123,8 @@ math_ldexp_impl(PyObject *module, double x, PyObject *i)
 添加 API
 ```python
 paddle.ldexp(
-    input: 多纬Tensor，数据类型为 float32 、 float64 、 int32 或 int64 
-    other: 多维Tensor，数据类型为 int32 或 int64 
+    input: 多纬Tensor，数据类型为 float32、float64、int32 或 int64 
+    other: int|多维Tensor，若为Tensor，数据类型为 int32 或 int64 
 )
 ```
 ## 底层OP设计
@@ -137,7 +137,7 @@ $$
  input * 2^{other}
 $$
 
-通过调研发现，Paddle 本身已实现 paddle.pow 可以计算2的整数次幂函数，可利用paddle.pow API 与 input 相乘实现 paddl.lexp。
+通过调研发现，Paddle 本身已实现 paddle.pow 可以计算2的整数次幂函数，可利用paddle.pow API 与 input 相乘实现 paddl.ldexp。
 而 Paddle 中已有 paddle.pow API 的具体实现逻辑，位于 python/paddle/tensor/math.py 下的 pow 函数中。
 
 # 六、测试和验收的考量
