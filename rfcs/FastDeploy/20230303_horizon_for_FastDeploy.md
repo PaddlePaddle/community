@@ -2,9 +2,9 @@
 
 | 领域                                                       | 飞桨文档体验方案                                  | 
 |----------------------------------------------------------|-------------------------------------------|
-| 提交作者<input type="checkbox" class="rowselector hidden">   | 晴天                             | 
+| 提交作者<input type="checkbox" class="rowselector hidden">   | seyosum                             | 
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-03-04                                | 
-| 版本号                                                      | V0.0                                      | 
+| 版本号                                                      | V1.0                                      | 
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | paddlepaddle-gpu==0.0                     | 
 | 文件名                                                      | 20230304_horizon_for_FastDeploy.md<br> | 
 
@@ -15,9 +15,9 @@
 [https://github.com/PaddlePaddle/Paddle/issues/50631#task180](https://github.com/PaddlePaddle/Paddle/issues/50631#task180)
 
 ## 2、功能目标
-将地平线推理引擎接入FastDeploy，开发HorizonBackends部分，同时针对PP-YOLOE开发对应的前后处理部分。
+将地平线推理引擎接入FastDeploy，开发HorizonBackends部分。
 ## 3、意义
-为地平线芯片模型推理提供成熟API，提高开发者开发效率。
+FastDeploy增添地平线推理引擎，提高开发者开发效率。
 
 # 二、地平线芯片开发现状
 
@@ -47,9 +47,7 @@
 
 5. 分类模型验证正确性
 
-6. 编写PP-YOLOE前后处理
-
-7. 验证PP-YOLOE正确性
+6. 验证PP-YOLOE正确性
 
 
 
@@ -82,8 +80,7 @@
 * backends编写（2023-3-10至2023-3-20）
 * FastDeploy集成(2023-3-20至2023-3-22)
 * 分类模型测试(2023-3-22至2023-3-23)
-* 编写PP-YOLOE前后处理（2023-3-23至2023-3-25）
-* 测试PP-YOLOE模型的正确性，检查有无内存泄露（2023-3-25至2023-3-30）
+* 测试PP-YOLOE模型的正确性，检查有无内存泄露（2023-3-23至2023-3-30）
 * 提交PR(2023-3-30)
 
 # 名词解释
