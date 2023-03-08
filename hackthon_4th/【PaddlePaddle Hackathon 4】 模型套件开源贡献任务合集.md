@@ -1782,10 +1782,11 @@
 * 任务难度：进阶⭐️⭐️
 * 详细描述:
   * 需要完成昇腾AI推理引擎CANN接入Fastdeploy工作，并完成高性能文本分类服务ERNIE-3.0，测试模型运行正确，并与Paddle Lite后端对比性能数据。
-  * 后端接入建议：可通过ONNX接入地平线AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+  * 后端接入建议：可通过ONNX接入昇腾AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
 * 提交内容：
   * pr：提交适配代码，及对应的中英文文档。
   * pr：交ERNIE3.0在CANN上的部署示例。
+  * 将验证通过的模型，按照昇腾模型库repo要求，提交到昇腾模型库：https://gitee.com/ascend
   * 邮件：提交benchmark测试数据及精度对齐数据。
 * 技术要求：
   * 熟练掌握C++开发
