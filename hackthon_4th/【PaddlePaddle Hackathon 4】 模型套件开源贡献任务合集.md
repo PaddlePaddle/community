@@ -1071,7 +1071,7 @@
 - **任务难度：基础**⭐️
 - **详细描述：**
   - ps2.0数据集，precision 99.56%
-  - 参考repo https://github.com/Jiaolong/gcn-parking-slot
+  - 参考repo https://github.com/Turoad/CLRNet
 - **提交内容：**
   - 代码、模型、训练日志，合入PaddleDetection套件
 - **技术要求：**
@@ -1084,7 +1084,7 @@
 - **任务难度：基础**️⭐️
 - **详细描述：**
   - CULane数据集，backbone RestNet18版本，mF1指标达到55.23
-  - 参考repo https://github.com/Turoad/CLRNet
+  - 参考repo https://github.com/Jiaolong/gcn-parking-slot
 - **提交内容：**
   - 代码、模型、训练日志，合入PaddleDetection套件
 - **技术要求：**
