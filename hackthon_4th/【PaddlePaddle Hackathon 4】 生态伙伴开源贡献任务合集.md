@@ -1,6 +1,6 @@
 # 【PaddlePaddle Hackathon 4】生态伙伴开源贡献任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
 注：为飞桨框架新增一系列 API，提交流程请参考 [新增API 开发&提交流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_contributing_guides_cn.html)，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，任务列表如下，其他说明事项在任务列表后：
 
@@ -1001,45 +1001,1101 @@
 - 技术要求：
   - 熟练掌握Python, 了解AI部署
 
-### No.226：TVM项目1 <a name='task226'></a>
+### No.226：TVM项目1--为Paddle框架新增TVM算子（进阶题）<a name='task231'></a>
 
-待发布
+**背景：**
 
-### No.227：TVM项目2 <a name='task227'></a>
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
 
-待发布
+目前TVM中的PaddlePaddle Frontend覆盖算子不够全面，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend补充算子。
 
-### No.228：TVM项目3 <a name='task228'></a>
 
-待发布
+**目标：**
 
-### No.229：TVM项目4 <a name='task229'></a>
+为PaddlePaddle框架新增以下TVM算子，并通过单测测试；
 
-待发布
+**任务难度：进阶题**
 
-### No.230：TVM项目5 <a name='task230'></a>
+将以下6个算子做适配并完成单算子测试。
 
-待发布
+| TVM                   | 队伍 |
+| --------------------- | ---- |
+| multiclass_nms3       |      |
+| set_value             |      |
+| pool3d                |      |
+| max_pool2d_with_index |      |
+| tanh_shrink           |      |
+| max_pool3d_with_index |      |
 
-### No.231：TVM项目6 <a name='task231'></a>
+【提示】：
 
-待发布
+1.在提交PR前需通过RFC提交自己要算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）
 
-### No.232：TVM项目7 <a name='task232'></a>
+2.优先提交代码的团队会被优先review
 
-待发布
+3.优先通过算子单测的团队视为完成任务，且此算子不会被作为比赛任务继续适配
 
-### No.233：TVM项目8 <a name='task233'></a>
+**算子任务提交：**
 
-待发布
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
 
-### No.234：TVM项目9 <a name='task234'></a>
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
 
-待发布
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
 
-### No.235：TVM项目10 <a name='task235'></a>
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
 
-待发布
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+2. 完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3. 注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4. OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.227：TVM项目2-为Paddle框架新增TVM算子（基础题） <a name='task227'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend覆盖算子不够全面，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend补充算子。
+
+
+**目标：**
+
+为PaddlePaddle框架新增以下TVM算子，并通过单测测试；
+
+**任务难度：新增TVM算子基础题**
+
+从下表中选取题目类型为 **“基础题”** 的任意6个算子做适配并完成单算子测试。
+
+| TVM                        | 队伍 |
+| -------------------------- | ---- |
+| affine_channel             |      |
+| conv3d                     |      |
+| data_norm                  |      |
+| dist                       |      |
+| eye                        |      |
+| fill_zeros_like            |      |
+| gaussian_random            |      |
+| grid_sampler               |      |
+| index_select               |      |
+| mish                       |      |
+| flip                       |      |
+| p_norm                     |      |
+| roi_align                  |      |
+| share_data                 |      |
+| silu                       |      |
+| softmax_with_cross_entropy |      |
+| softshrink                 |      |
+| linspace                   |      |
+| take_along_axis            |      |
+| thresholded_relu           |      |
+| tile                       |      |
+| unique                     |      |
+| unstack                    |      |
+| where                      |      |
+
+【提示】：
+
+1.在提交PR前需通过RFC提交自己要算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）
+
+2.优先提交代码的团队会被优先review
+
+3.优先通过算子单测的团队视为完成任务，且此算子不会被作为比赛任务继续适配
+
+
+
+**算子任务提交：**
+
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+ 2.完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3.注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4.OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.228：TVM项目3 -为Paddle框架新增TVM算子（基础题）<a name='task228'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend覆盖算子不够全面，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend补充算子。
+
+
+**目标：**
+
+为PaddlePaddle框架新增以下TVM算子，并通过单测测试；
+
+**任务难度：新增TVM算子基础题**
+
+从下表中选取题目类型为 **“基础题”** 的任意6个算子做适配并完成单算子测试。
+
+| TVM                        | 队伍 |
+| -------------------------- | ---- |
+| affine_channel             |      |
+| conv3d                     |      |
+| data_norm                  |      |
+| dist                       |      |
+| eye                        |      |
+| fill_zeros_like            |      |
+| gaussian_random            |      |
+| grid_sampler               |      |
+| index_select               |      |
+| mish                       |      |
+| flip                       |      |
+| p_norm                     |      |
+| roi_align                  |      |
+| share_data                 |      |
+| silu                       |      |
+| softmax_with_cross_entropy |      |
+| softshrink                 |      |
+| linspace                   |      |
+| take_along_axis            |      |
+| thresholded_relu           |      |
+| tile                       |      |
+| unique                     |      |
+| unstack                    |      |
+| where                      |      |
+
+【提示】：
+
+1.在提交PR前需通过RFC提交自己要算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）
+
+2.优先提交代码的团队会被优先review
+
+3.优先通过算子单测的团队视为完成任务，且此算子不会被作为比赛任务继续适配
+
+
+
+**算子任务提交：**
+
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+ 2.完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3.注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4.OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.229：TVM项目4 -为Paddle框架新增TVM算子（基础题）<a name='task229'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend覆盖算子不够全面，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend补充算子。
+
+
+**目标：**
+
+为PaddlePaddle框架新增以下TVM算子，并通过单测测试；
+
+**任务难度：新增TVM算子基础题**
+
+从下表中选取题目类型为 **“基础题”** 的任意6个算子做适配并完成单算子测试。
+
+| TVM                        | 队伍 |
+| -------------------------- | ---- |
+| affine_channel             |      |
+| conv3d                     |      |
+| data_norm                  |      |
+| dist                       |      |
+| eye                        |      |
+| fill_zeros_like            |      |
+| gaussian_random            |      |
+| grid_sampler               |      |
+| index_select               |      |
+| mish                       |      |
+| flip                       |      |
+| p_norm                     |      |
+| roi_align                  |      |
+| share_data                 |      |
+| silu                       |      |
+| softmax_with_cross_entropy |      |
+| softshrink                 |      |
+| linspace                   |      |
+| take_along_axis            |      |
+| thresholded_relu           |      |
+| tile                       |      |
+| unique                     |      |
+| unstack                    |      |
+| where                      |      |
+
+【提示】：
+
+1.在提交PR前需通过RFC提交自己要算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）
+
+2.优先提交代码的团队会被优先review
+
+3.优先通过算子单测的团队视为完成任务，且此算子不会被作为比赛任务继续适配
+
+
+
+**算子任务提交：**
+
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+ 2.完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3.注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4.OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.230：TVM项目5-为Paddle框架新增TVM算子（基础题） <a name='task230'></a>
+
+1. **背景：**
+
+   TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+   目前TVM中的PaddlePaddle Frontend覆盖算子不够全面，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend补充算子。
+
+   **目标：**
+
+   为PaddlePaddle框架新增以下TVM算子，并通过单测测试；
+
+   **任务难度：新增TVM算子基础题**
+
+   从下表中选取题目类型为 **“基础题”** 的任意6个算子做适配并完成单算子测试。
+
+   | TVM                        | 队伍 |
+   | -------------------------- | ---- |
+   | affine_channel             |      |
+   | conv3d                     |      |
+   | data_norm                  |      |
+   | dist                       |      |
+   | eye                        |      |
+   | fill_zeros_like            |      |
+   | gaussian_random            |      |
+   | grid_sampler               |      |
+   | index_select               |      |
+   | mish                       |      |
+   | flip                       |      |
+   | p_norm                     |      |
+   | roi_align                  |      |
+   | share_data                 |      |
+   | silu                       |      |
+   | softmax_with_cross_entropy |      |
+   | softshrink                 |      |
+   | linspace                   |      |
+   | take_along_axis            |      |
+   | thresholded_relu           |      |
+   | tile                       |      |
+   | unique                     |      |
+   | unstack                    |      |
+   | where                      |      |
+
+   【提示】：
+
+   1.在提交PR前需通过RFC提交自己要算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）
+
+   2.优先提交代码的团队会被优先review
+
+   3.优先通过算子单测的团队视为完成任务，且此算子不会被作为比赛任务继续适配
+
+   
+
+   **算子任务提交：**
+
+   1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+   整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+   ```bash
+   def convert_leaky_relu(g, op, block):
+       """Operator converter for leaky_relu."""
+   
+       alpha = op.attr("alpha")
+       x = g.get_node(op.input("X")[0])
+       out = _op.nn.leaky_relu(x, alpha=alpha)
+       g.add_node(op.output("Out")[0], out)
+   ```
+
+   更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+    2.完成TVM算子实现代码，并添加单测且验证通过
+
+   用户需要做两件事：
+
+   - 定义组网结构
+   - 制定输入shape以及输入类型
+
+   通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+   ```bash
+   @tvm.testing.uses_gpu
+   def test_forward_leaky_relu():
+       @paddle.jit.to_static
+       def leaky_relu(inputs):
+           return nn.functional.leaky_relu(inputs)
+   
+       input_shape = [1, 3, 10, 10]
+       input_data = paddle.rand(input_shape, dtype="float32")
+       verify_model(leaky_relu, input_data=input_data)
+   ```
+
+   更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+   3.注意代码风格问题
+
+   TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+   4.OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+   
+
+   **RFC内容提交（必须项）**
+
+   开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+   参考模板：
+
+   Solution name 方案名称
+
+   Description 方案描述
+
+   Workflow 方案流程
+
+   Results visualizing 方案运行效果 
+
+   Project Timeline 项目提交时间计划
+
+   Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+   
+
+   **算子参考文档：**
+
+   1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+   2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.231：TVM项目6 -为TVM PaddlePaddle前端完善算子支持程度或修复问题（基础题） <a name='task232'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend已经支持100+算子，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，但由于在实现后由于Paddle框架/TVM框架的升级，部分算子可能存在没支持全（某些属性，或某些输入情况没覆盖）/TVM OP/API存在兼容问题。 我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend完善或修复现有Frontend中算子支持程度和问题。
+
+
+**目标：（开放题）**
+
+为TVM PaddlePaddle前端完善TVM算子支持程度或修复问题，并补充相应单测；对于TVM算子是否支持全（某些属性，或某些输入情况没覆盖），可参考Paddle对算子的定义，或者Paddle2ONNX的实现
+
+1. TVM Paddle前端代码：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+2. Paddle算子定义：https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/fluid/operators
+3. Paddle2ONNX实现：https://github.com/PaddlePaddle/Paddle2ONNX/tree/develop/paddle2onnx/mapper
+
+**任务难度：基础题**
+
+完善或修复4个以上算子支持程度或问题
+
+【提示】：
+
+1.优先提交代码的团队会被优先review
+
+2.优先通过单测并合入的团队视为完成任务
+
+3.在提交PR前需通过RFC提交自己要修复的算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）；如有选手重复，优先通过RFC的选手有效。
+
+4.如提交的代码已经被合入的PR覆盖，例如修复的4个算子，其中已经有2个被合入的修复，则视为这2个无效
+
+**任务提交：**
+
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+2. 完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3. 注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4. OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+
+
+### No.232：TVM项目7-为TVM PaddlePaddle前端完善算子支持程度或修复问题（基础题） <a name='task232'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend已经支持100+算子，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，但由于在实现后由于Paddle框架/TVM框架的升级，部分算子可能存在没支持全（某些属性，或某些输入情况没覆盖）/TVM OP/API存在兼容问题。 我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend完善或修复现有Frontend中算子支持程度和问题。
+
+
+**目标：（开放题）**
+
+为TVM PaddlePaddle前端完善TVM算子支持程度或修复问题，并补充相应单测；对于TVM算子是否支持全（某些属性，或某些输入情况没覆盖），可参考Paddle对算子的定义，或者Paddle2ONNX的实现
+
+1. TVM Paddle前端代码：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+2. Paddle算子定义：https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/fluid/operators
+3. Paddle2ONNX实现：https://github.com/PaddlePaddle/Paddle2ONNX/tree/develop/paddle2onnx/mapper
+
+**任务难度：基础题**
+
+完善或修复4个以上算子支持程度或问题
+
+【提示】：
+
+1.优先提交代码的团队会被优先review
+
+2.优先通过单测并合入的团队视为完成任务
+
+3.在提交PR前需通过RFC提交自己要修复的算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）；如有选手重复，优先通过RFC的选手有效。
+
+4.如提交的代码已经被合入的PR覆盖，例如修复的4个算子，其中已经有2个被合入的修复，则视为这2个无效
+
+**任务提交：**
+
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+2. 完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3. 注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4. OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.233：TVM项目8-为TVM PaddlePaddle前端完善算子支持程度或修复问题（基础题） <a name='task233'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend已经支持100+算子，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，但由于在实现后由于Paddle框架/TVM框架的升级，部分算子可能存在没支持全（某些属性，或某些输入情况没覆盖）/TVM OP/API存在兼容问题。 我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend完善或修复现有Frontend中算子支持程度和问题。
+
+
+**目标：（开放题）**
+
+为TVM PaddlePaddle前端完善TVM算子支持程度或修复问题，并补充相应单测；对于TVM算子是否支持全（某些属性，或某些输入情况没覆盖），可参考Paddle对算子的定义，或者Paddle2ONNX的实现
+
+1. TVM Paddle前端代码：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+2. Paddle算子定义：https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/fluid/operators
+3. Paddle2ONNX实现：https://github.com/PaddlePaddle/Paddle2ONNX/tree/develop/paddle2onnx/mapper
+
+**任务难度：基础题**
+
+完善或修复4个以上算子支持程度或问题
+
+【提示】：
+
+1.优先提交代码的团队会被优先review
+
+2.优先通过单测并合入的团队视为完成任务
+
+3.在提交PR前需通过RFC提交自己要修复的算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）；如有选手重复，优先通过RFC的选手有效。
+
+4.如提交的代码已经被合入的PR覆盖，例如修复的4个算子，其中已经有2个被合入的修复，则视为这2个无效
+
+**任务提交：**
+
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+2. 完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3. 注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4. OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.234：TVM项目9 -为TVM PaddlePaddle前端完善算子支持程度或修复问题（进阶题）<a name='task234'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend已经支持100+算子，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，但由于在实现后由于Paddle框架/TVM框架的升级，部分算子可能存在没支持全（某些属性，或某些输入情况没覆盖）/TVM OP/API存在兼容问题。 我们希望通过此次黑客松活动为TVM中的PaddlePaddle Frontend完善或修复现有Frontend中算子支持程度和问题。
+
+
+**目标：（开放题）**
+
+为TVM PaddlePaddle前端完善TVM算子支持程度或修复问题，并补充相应单测；对于TVM算子是否支持全（某些属性，或某些输入情况没覆盖），可参考Paddle对算子的定义，或者Paddle2ONNX的实现
+
+1. TVM Paddle前端代码：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+2. Paddle算子定义：https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/fluid/operators
+3. Paddle2ONNX实现：https://github.com/PaddlePaddle/Paddle2ONNX/tree/develop/paddle2onnx/mapper
+
+**任务难度：进阶题**
+
+完善或修复8个以上算子支持程度或问题
+
+【提示】：
+
+1.优先提交代码的团队会被优先review
+
+2.优先通过单测并合入的团队视为完成任务
+
+3.在提交PR前需通过RFC提交自己要修复的算子列表。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）；如有选手重复，优先通过RFC的选手有效。
+
+4.如提交的代码已经被合入的PR覆盖，例如修复的8个算子，其中已经有2个被合入的修复，则视为这2个无效？
+
+**任务提交：**
+
+1. 完成TVM算子映射，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle OP，可通过一对一或者多对一去组合实现，以下面Leaky_relu为例，可直接通过_op.nn.leaky_relu去表示PaddlePaddle的leaky_relu op
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+2. 完成TVM算子实现代码，并添加单测且验证通过
+
+用户需要做两件事：
+
+- 定义组网结构
+- 制定输入shape以及输入类型
+
+通过定义PaddlePaddle 动态图 api 进行组网，指定输入数据的shape以及类型，调用verify_model函数自动进行Relay IR转换以及精度验证工作
+
+```bash
+@tvm.testing.uses_gpu
+def test_forward_leaky_relu():
+    @paddle.jit.to_static
+    def leaky_relu(inputs):
+        return nn.functional.leaky_relu(inputs)
+
+    input_shape = [1, 3, 10, 10]
+    input_data = paddle.rand(input_shape, dtype="float32")
+    verify_model(leaky_relu, input_data=input_data)
+```
+
+更多单测实现以及添加在：https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py
+
+3. 注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+4. OP代码以及单测实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
+
+**算子参考文档：**
+
+1. Paddle算子文档：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/index_cn.html
+2. TVM Relay API文档：https://tvm.apache.org/docs/reference/api/python/relay/index.html
+
+### No.235：TVM项目10-为TVM PaddlePaddle前端增加PaddleSlim量化模型的支持（进阶题） <a name='task235'></a>
+
+**背景：**
+
+TVM是一款开源的、端到端的深度学习模型编译框架，用于优化深度学习模型在CPU、GPU、ARM等任意目标环境下的推理运行速度，TVM采用编译器思想，前端接收各个深度学习框架保存的模型格式，通过中间件Relay IR翻译之后，通过一系列优化（子图融合等），编译为特定后端可以识别的机器码完成模型推理。目前TVM支持PaddlePaddle/Pytorch/TensorFlow/Caffe/MxNet 等，同时也支持一些模型的中间格式如 ONNX、CoreML。
+
+目前TVM中的PaddlePaddle Frontend已经支持100+算子，覆盖度仅包含各个套间(PaddleOCR/PaddleDetection等)的部分模型，但目前仍未支持PaddleSlim量化模型，此题期望开发者增加TVM对PaddleSlim模型的支持，并验证量化的性能提升情况。
+
+**目标：**
+
+为TVM PaddlePaddle前端增加PaddleSlim量化模型的支持。 PaddleSlim量化模型与普通Paddle模型差异在于，模型中各OP前后通过`linear_quantize`和`dequantize_linear`来表达量化信息(算子与ONNX的DequantizeLinear/QuantizeLinear类似)，与ONNX量化模型原理类似。开发者在开发时，可参考TVM中其它深度学习框架前端对量化模型的支持方式来实现。
+
+开发者可使用下面的量化模型进行正确性验证和性能测试
+
+1. ResNet50_vd: https://bj.bcebos.com/paddlehub/fastdeploy/resnet50_vd_ptq.tar
+2. MobileNetV1: https://bj.bcebos.com/paddlehub/fastdeploy/mobilenetv1_ssld_ptq.tar
+3. PP-LiteSeg: https://bj.bcebos.com/paddlehub/fastdeploy/PP_LiteSeg_T_STDC1_cityscapes_without_argmax_infer_QAT_new.tar
+
+**代码参考链接**
+
+1. TVM Paddle前端代码：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+2. TVM ONNX前端代码: https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/onnx.py
+3. Paddle 量化算子定义：https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/operators/quantize_linear_op.cc
+4. ONNX 量化算子定义：https://github.com/onnx/onnx/blob/main/docs/Operators.md
+
+【提示】：
+
+1.优先提交代码的团队会被优先review
+
+2.优先通过单测并合入的团队视为完成任务
+
+3.在提交PR前需通过RFC提交自己方案。RFC提交后，不可随意修改（如确实必要，与运营人员沟通）
+
+**任务提交：**
+
+1. 完成TVM量化支持，与量化性能验证数据，并提交 PR；提交PR时需在PR标题加上【PaddlePaddle Hackathon 4】字样
+
+整体思想通过TVM Relay IR去表示对应PaddlePaddle 量化OP，并进行量化的支持。具体实现方案可参考TVM中的onnx前端实现
+
+```bash
+def convert_leaky_relu(g, op, block):
+    """Operator converter for leaky_relu."""
+
+    alpha = op.attr("alpha")
+    x = g.get_node(op.input("X")[0])
+    out = _op.nn.leaky_relu(x, alpha=alpha)
+    g.add_node(op.output("Out")[0], out)
+```
+
+更多算子代码实现以及添加在：https://github.com/apache/tvm/blob/main/python/tvm/relay/frontend/paddlepaddle.py
+
+2. 注意代码风格问题
+
+TVM的PR会有代码风格检查，python代码检查工具基于black，更多细节可参考：[https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code%20style#python-code-styles](https://tvm.apache.org/docs/contribute/code_guide.html?highlight=code style#python-code-styles)
+
+3. 代码实现之后，@jiangjiajun进行code review以及代码修改，修改完成后即可代码合入
+
+**RFC内容提交（必须项）**
+
+开发者需要提供一份RFC，用来描述本次任务的设计方案；
+
+参考模板：
+
+Solution name 方案名称
+
+Description 方案描述
+
+Workflow 方案流程
+
+Results visualizing 方案运行效果 
+
+Project Timeline 项目提交时间计划
+
+Your experience in ML and DL (optional) 个人介绍及以往项目经历（可选）
 
 
 ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
