@@ -32,7 +32,7 @@ PFCC成员[jzhang533](https://github.com/jzhang533) 进行了 Python IR 构建�
 具体项目：https://github.com/PFCCLab/paddlefx
 简介：https://github.com/PFCCLab/paddlefx/discussions/12
 
-### 5、"改进飞桨框架的logging系统"志愿者征集
+### 5、飞桨 inference 对于非cuda-like平台的gpu适配方法
 
 PFCC成员[engineer1109](https://github.com/engineer1109) 讲解了有关飞桨 inference 对于非cuda-like平台的gpu适配方法，主要涉及到 Paddle Inference 完成适配需要的接口、OpenCL内存池模型、OpenCL SVM共享虚拟内存、Vulkan、OpenGL等方案。
 
