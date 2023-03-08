@@ -138,7 +138,7 @@ select = []
 
 #### 存量统计
 
-pyupgrade（UP）- 16 条：
+pyupgrade（UP）- 16 条、2358 处：
 
 ```
 $ ruff --select UP . --statistics                
@@ -160,7 +160,7 @@ $ ruff --select UP . --statistics
  225    UP034   [*] Avoid extraneous parentheses
 ```
 
-Pylint（PL）- 17 条：
+Pylint（PL）- 17 条、7684 处：
 
 ```
 $ ruff --select PL . --statistics
@@ -183,7 +183,7 @@ $ ruff --select PL . --statistics
    1    PLE1205 [ ] Too many arguments for `logging` format string
 ```
 
-NumPy-specific rules（NPY001）- 1 条：
+NumPy-specific rules（NPY001）- 1 条、2 处：
 
 ```
 $ ruff --select NPY001 . --statistics
@@ -192,7 +192,7 @@ $ ruff --select NPY001 . --statistics
 
 pyflakes（F401）：无存量
 
-flake8-comprehensions（C4）- 14 条：
+flake8-comprehensions（C4）- 14 条、750 处：
 
 ```
 $ ruff --select C4 . --statistics
@@ -212,7 +212,7 @@ $ ruff --select C4 . --statistics
  32     C417    [*] Unnecessary `map` usage (rewrite using a `list` comprehension)
 ```
 
-flake8-bugbear（B）- 17 条：
+flake8-bugbear（B）- 17 条、1373 处：
 
 ```
 $ ruff --select B . --statistics
@@ -308,12 +308,13 @@ Ruff 本身还处于早期阶段，因此部分选项和 rule 的作用可能会
 
 ## 七、排期规划
 
-- NumPy-specific rules（NPY001）
-- pyupgrade（UP）
-- pyflakes（F401）
-- flake8-comprehensions（C4）
-- flake8-bugbear（B）
-- Pylint（PL）
+- Ruff 配置初始化（[@SigureMo](https://github.com/SigureMo) [PR #51201](https://github.com/PaddlePaddle/Paddle/pull/51201)）
+- NumPy-specific rules（NPY001）- 1 条、2 处
+- pyupgrade（UP）- 16 条、2358 处（测试 PR 见 [PR #50477](https://github.com/PaddlePaddle/Paddle/pull/50477)，实际合入拆分成多个 PR 以便 review）
+- pyflakes（F401）- 14 条、750 处
+- flake8-comprehensions（C4）- 14 条、750 处
+- flake8-bugbear（B）- 17 条、1373 处
+- Pylint（PL）- 17 条、7684 处
 
 上表以优先级排序，不代表实际完成顺序，可并行进行。具体执行将会由 SigureMo 和外部开发者一起完成。
 
