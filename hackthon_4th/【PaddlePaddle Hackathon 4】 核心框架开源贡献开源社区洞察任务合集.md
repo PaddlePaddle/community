@@ -1,6 +1,6 @@
 # 【PaddlePaddle Hackathon 4】核心框架开源贡献开源社区洞察任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
 **注：报名参与开源社区洞察任务的同学可以向 paddle-hack@baidu.com 发邮件，我们会邀请你加入社群参与讨论~**
 
