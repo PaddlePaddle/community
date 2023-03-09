@@ -1,8 +1,8 @@
-# paddle.incubate.sparse.sum 设计文档
+# paddlesparse.sum 设计文档
 
   
 
-| API名称 | paddle.incubate.sparse.sum |
+| API名称 | paddle.sparse.sum |
 |----------------------------------------------------------|-----------------------------------------------|
 | 提交作者<input type="checkbox" class="rowselector hidden"> | 六个骨头 |
 | 提交时间<input type="checkbox" class="rowselector hidden"> | 2023-02-22 |
@@ -13,7 +13,7 @@
 # 一、概述
 ## 1、相关背景
 为了提升飞桨 API 丰富度，针对 Paddle 的两种稀疏 Tensor 格式 COO 与 CSR ，都需新增 sum 的计算逻辑，
-一共需要新增 2 个 kernel 的前向与反向，其中 COO 格式的 axis 支持任意维度，CSR 格式的 axis 可只支持-1，即按行读取。另外当 axis=None 时所有元素相加。
+一共需要新增 2 个 kernel 的前向与反向，其中 COO 格式的 axis 支持任意维度，CSR 格式的 axis 可只支持-1，None，即按行读取。另外当 axis=None 时所有元素相加。
 
 ## 3、意义
 支持稀疏 tensor 的 sum 操作，丰富基础功能，提升稀疏 tensor 的 API 完整度。
@@ -162,8 +162,53 @@ out6 = paddle.sum(y, axis=[0, 1]) # [16, 20]
 
 ## 命名与参数设计
 
-在 paddle/phi/kernels/sparse/unary_kernel.h 中， kernel设计为
+在 paddle/phi/kernels/sparse/unary_kernel.h 中，
+API设计为
+```cpp
+template <typename T, typename Context>
+SparseCooTensor SumCoo(const Context& dev_ctx,
+                       const SparseCooTensor& x,
+                       const IntArray& axis,
+                       DataType dtype,
+                       bool keep_dim) {
+  PADDLE_ENFORCE_EQ(
+      dtype,
+      phi::DataType::UNDEFINED,
+      phi::errors::Unimplemented("`dtype` of SumCsrKernel is not supported."));
+  unsigned int n_dim = axis.size();
+  PADDLE_ENFORCE_LE(n_dim,
+                    2,
+                    phi::errors::Unimplemented(
+                        "`axis` of SumCsrKernel only support None or int now."
+                        "It will support list in the future."));
+  SparseCooTensor coo;
+  SumCooKernel<T, Context>(dev_ctx, x, axis, dtype, keep_dim, &coo);
+  return coo;
+}
 
+template <typename T, typename Context>
+SparseCsrTensor SumCsr(const Context& dev_ctx,
+                       const SparseCsrTensor& x,
+                       const IntArray& axis,
+                       DataType dtype,
+                       bool keep_dim) {
+  unsigned int n_dim = axis.size();
+  PADDLE_ENFORCE_EQ(
+      dtype,
+      phi::DataType::UNDEFINED,
+      phi::errors::Unimplemented("`dtype` of SumCsrKernel is not supported."));
+  PADDLE_ENFORCE_LE(n_dim,
+                    2,
+                    phi::errors::Unimplemented(
+                        "`axis` of SumCsrKernel only support None or int now."
+                        "It will support list in the future."));
+  SparseCsrTensor csr;
+  SumCsrKernel<T, Context>(dev_ctx, x, axis, dtype, keep_dim, &csr);
+  return csr;
+}
+```
+
+ kernel设计为
 ```cpp
 
 template <typename T, typename Context>
@@ -239,7 +284,7 @@ sparse_backward_ops.yaml
 相应的InferMeta函数可以复用稠密矩阵的函数。
 
 ## 底层OP设计
-对于axis=None的简单情况，只需要把value值求和，并对相应的位置参数进行修改即可。
+对于COO格式和CSR格式axis=None的简单情况，只需要把value值求和，并对相应的位置参数进行修改即可。
 
 对于COO格式的其他情况，主要分为两步，
 第一步构建索引（排除掉axis维度）到序号的映射，
@@ -325,7 +370,7 @@ value则取决于dout的相应位置值。
 
 均只需要给定输入张量和维度转换目标。
 
-具体的API为`paddle.incubate.sparse.sum(x, axis=None, dtype=None, keepdim=False)`
+具体的API为`paddle.sparse.sum(x, axis=None, dtype=None, keepdim=False)`
 
 - x: 输入张量
 - axis: 求和的维度，例如-1表示最后一个维度求和。
@@ -338,7 +383,7 @@ value则取决于dout的相应位置值。
 测试考虑的case如下：
 
 - 正确性
-- csr对2维和3维不同`axis`参数测试
+- csr对2维和3维`axis`=1及None参数测试
 - coo对1维、2维、3维、6维和10维不同`axis`参数测试
 - coo、csr分别对dtype缺省和特定值测试
 - 分别对每个测试样本分成keepdim为真或假
