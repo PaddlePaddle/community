@@ -1,11 +1,19 @@
-> 1. 原则上请使用中文。
-> 2. 侧重阐述设计思路而不只是实现方案细节，体现对方案选型的利弊考量（必要的需要有预调研实验数据支撑），特别是对框架和用户两个维度的影响。
-> 3. 多利用图表来阐述设计思路。
-# 标题
+No.154：论文复现：YOLOv6 v3.0: A Full-Scale Reloading
+技术标签：Python、深度学习
+任务难度：基础⭐️
+详细描述：
+s版本COCO数据集精度37.5mAP
+完成复现后合入PaddleYOLO
+参考repo https://github.com/meituan/YOLOv6
+提交内容：
+代码、模型、训练日志，合入PaddleYOLO套件
+技术要求：
+熟练掌握Python、PaddlePaddle和目标检测算法
+参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx paddle-lwfx@baidu.com报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
 |任务名称 | xxx | 
 |---|---|
-|提交作者<input type="checkbox" class="rowselector hidden"> | 李强、张明 | 
+|提交作者<input type="checkbox" class="rowselector hidden"> | 德尔塔大雨淋| 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2022-10-21 | 
 |版本号 | 此设计文档的版本号，如V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | 如无特殊情况，都应基于develop版本开发 | 
@@ -17,6 +25,7 @@
 ## 2、功能目标
 
 ## 3、意义
+
 - 集中阐述本次升级的作用和意义。
 - 对于需要预调研数据支撑的需要依据预调研结论给出量化预估。
 
