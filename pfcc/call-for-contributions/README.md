@@ -59,5 +59,5 @@ Status：2022-11-02 已经下线这两条流水线。
   - [Python 2.7/3.5/3.6 相关代码退场](./code_style/legacy_python_milestone_summary.md)【已结项】
 - [CINN 开发：基础算子 & 中端 pass & 调度原语](https://github.com/PaddlePaddle/CINN/issues/1115)【即将结项】
 - [PHI算子库独立编译](https://github.com/PaddlePaddle/Paddle/issues/47615)【即将结项】
-- [Paddle-TensorRT算子开发](https://github.com/PaddlePaddle/Paddle/issues/48292)【待发结项小结】
+- [Paddle-TensorRT算子开发](paddle_trt_optimization_milestone_summary.md)【已结项】
 - [动转静功能扩展和旧接口退场 & API 动静行为统一](./Dy2St/project_milestone_summary.md)【已结项】
