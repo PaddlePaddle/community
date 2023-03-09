@@ -304,17 +304,23 @@ $ ruff --select B . --statistics
 
 ### 其他风险
 
-Ruff 本身还处于早期阶段，因此部分选项和 rule 的作用可能会在未来变动，但在锁版本的情况下不存在该问题（pre-commit 配置中强制锁版本），并在更新版本的时候仔细阅读 Release Note 来确定升级方案即可。
+Ruff 本身还处于早期阶段，因此部分选项和 rule 的作用可能会在未来变动，但在锁版本的情况下不存在该问题（pre-commit 配置中强制锁版本）。
+
+关于用于更新 Ruff 版本的成本，只需要偶尔更新即可（比如一个月），并在更新版本的时候仔细阅读 Release Note 来确定升级方案，不需要频繁更新，维护成本并不高。
+
+> 相关链接：Ruff 作者关于 stable 版本的回复 [Open Version 1 road map, or whatever you decide to call “stable”… (comment)](https://github.com/charliermarsh/ruff/issues/1992#issuecomment-1405497643)
 
 ## 七、排期规划
 
-- Ruff 配置初始化（[@SigureMo](https://github.com/SigureMo) [PR #51201](https://github.com/PaddlePaddle/Paddle/pull/51201)），预计 1 天即可完成
-- NumPy-specific rules（NPY001）- 存量 1 条、2 处，预计 1 天即可完成
-- pyupgrade（UP）- 存量 16 条、2358 处，预计 1 周完成（测试 PR 见 [PR #50477](https://github.com/PaddlePaddle/Paddle/pull/50477)，实际合入拆分成多个 PR 以便 review）
-- pyflakes（F401）- 存量 14 条、750 处，预计 1 天即可完成
-- flake8-comprehensions（C4）- 存量 14 条、750 处，预计 1 周完成
-- flake8-bugbear（B）- 存量 17 条、1373 处，预计 2 周完成
-- Pylint（PL）- 存量 17 条、7684 处，预计 2 周完成
+| 任务 | 存量 | 预计完成时间 | 备注 |
+| - | - | - | - |
+| Ruff 配置初始化 | - | 1 人 1 天 | [@SigureMo](https://github.com/SigureMo) [PR #51201](https://github.com/PaddlePaddle/Paddle/pull/51201) |
+| NumPy-specific rules（NPY001）| 存量 1 条、2 处 | 1 人 1 天 | |
+| pyupgrade（UP）| 存量 16 条、2358 处 | 1 人 1 周 |（测试 PR 见 [PR #50477](https://github.com/PaddlePaddle/Paddle/pull/50477)，实际合入拆分成多个 PR 以便 review）|
+| pyflakes（F401）| 存量 14 条、750 处 | 1 人 1 天 | |
+| flake8-comprehensions（C4）| 存量 14 条、750 处 | 1 人 1 周 | |
+| flake8-bugbear（B）| 存量 17 条、1373 处 | 1 人 2 周 | |
+| Pylint（PL）| 存量 17 条、7684 处 | 2 周 | |
 
 上表以优先级排序，不代表实际完成顺序，可并行进行。具体执行将会由 SigureMo 和外部开发者一起完成。
 
