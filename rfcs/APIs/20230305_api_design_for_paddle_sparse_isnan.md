@@ -53,6 +53,10 @@ Tensorflow, Scipy虽然对于稠密张量支持is_nan操作，但都没有直接
 ## 命名与参数设计
 
 sparse is_nan 这个稀疏张量上的方法的命名和参数不需要额外设计，由于在判断isnan时，此处不可导，所以不考虑反向算子的实现。在 paddle/phi/api/yaml 下新增注册该算子的前向。
+
+API命名为paddle.sparse.is_nan, 接口参数支持两个参数，x (Tensor) - 输入的 Tensor，数据类型为：float16、float32、float64、int32、int64。
+name (str，可选) - 具体用法请参见 Name，一般无需设置，默认值为 None。
+
 ```    yaml
   - op : isnan
   args : (Tensor x)
