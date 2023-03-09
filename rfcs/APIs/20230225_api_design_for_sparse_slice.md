@@ -221,8 +221,6 @@ void SliceCooKernel(const Context& dev_ctx,
                     const std::vector<int64_t>& axes,
                     const phi::IntArray& starts,
                     const phi::IntArray& ends,
-                    const std::vector<int64_t>& infer_flags,
-                    const std::vector<int64_t>& decrease_axis,
                     SparseCooTensor* out);
 ```
 ```c++
@@ -232,8 +230,6 @@ void SliceCsrKernel(const Context& dev_ctx,
                     const std::vector<int64_t>& axes,
                     const phi::IntArray& starts,
                     const phi::IntArray& ends,
-                    const std::vector<int64_t>& infer_flags,
-                    const std::vector<int64_t>& decrease_axis,
                     SparseCsrTensor* out);
 ```
 
@@ -259,13 +255,14 @@ void SliceCsrGradKernel(const Context& dev_ctx,
                         SparseCsrTensor* x_grad);
 ```
 
-在 `paddle/phi/api/yaml/sparse_ops.yaml` 中新增对应 API，SliceRawInferMeta 是针对 DenseTensor 的，这里我们可以复用。
+在 `paddle/phi/api/yaml/sparse_ops.yaml` 中新增对应 API：
 ```yaml
 - op : slice
   args : (Tensor x, int64_t[] axes, IntArray starts, IntArray ends, int64_t[] infer_flags, int64_t[] decrease_axis)
   output : Tensor(out)
   infer_meta :
-    func : SliceRawInferMeta
+    func : UnchangedInferMeta
+    param: [x]
   kernel :
     func : slice_coo{sparse_coo -> sparse_coo},
            slice_csr{sparse_csr -> sparse_csr}
@@ -309,16 +306,14 @@ paddle.sparse.slice(x, axes, starts, ends)
 
 # 六、测试和验收的考量
 
-检查 **axes**, **starts** 和 **ends** 的合法性，包括
-- 它们的长度是否相等
-- **axes** 中有重复元素的情况
-- 它们的元素中有负数的情况
-- 它们的元素中有超出边界的情况
-- 对于 CSR 格式的稀疏 Tensor，它们的长度是否合法
+测试考虑的 case 以及验收标准如下：
 
-针对 COO 格式，还需要验证在各维度数下 slice 操作的正确性。
-
-对于结果正确性的判定，可以与对应的 DenseTensor 进行比较。
+| case | 验收标准|
+|------|-------|
+|axes, starts 和 ends 长度对比 | 对长度不相等的情况能进行报错，相等的情况能返回正确结果|
+|axes, starts 和 ends 对边界的处理 | 对超出边界的情况能进行报错，未超出边界的情况能返回正确结果|
+|axes, starts 和 ends 对负数的处理 | 能返回正确结果|
+|不同 shape, axes, starts 和 ends 下结果的正确性 | 能返回正确结果|
 
 # 七、可行性分析和排期规划
 
