@@ -308,13 +308,13 @@ Ruff 本身还处于早期阶段，因此部分选项和 rule 的作用可能会
 
 ## 七、排期规划
 
-- Ruff 配置初始化（[@SigureMo](https://github.com/SigureMo) [PR #51201](https://github.com/PaddlePaddle/Paddle/pull/51201)）
-- NumPy-specific rules（NPY001）- 存量 1 条、2 处
-- pyupgrade（UP）- 存量 16 条、2358 处（测试 PR 见 [PR #50477](https://github.com/PaddlePaddle/Paddle/pull/50477)，实际合入拆分成多个 PR 以便 review）
-- pyflakes（F401）- 存量 14 条、750 处
-- flake8-comprehensions（C4）- 存量 14 条、750 处
-- flake8-bugbear（B）- 存量 17 条、1373 处
-- Pylint（PL）- 存量 17 条、7684 处
+- Ruff 配置初始化（[@SigureMo](https://github.com/SigureMo) [PR #51201](https://github.com/PaddlePaddle/Paddle/pull/51201)），预计 1 天即可完成
+- NumPy-specific rules（NPY001）- 存量 1 条、2 处，预计 1 天即可完成
+- pyupgrade（UP）- 存量 16 条、2358 处，预计 1 周完成（测试 PR 见 [PR #50477](https://github.com/PaddlePaddle/Paddle/pull/50477)，实际合入拆分成多个 PR 以便 review）
+- pyflakes（F401）- 存量 14 条、750 处，预计 1 天即可完成
+- flake8-comprehensions（C4）- 存量 14 条、750 处，预计 1 周完成
+- flake8-bugbear（B）- 存量 17 条、1373 处，预计 2 周完成
+- Pylint（PL）- 存量 17 条、7684 处，预计 2 周完成
 
 上表以优先级排序，不代表实际完成顺序，可并行进行。具体执行将会由 SigureMo 和外部开发者一起完成。
 
