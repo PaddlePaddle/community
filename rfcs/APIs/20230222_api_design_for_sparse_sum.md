@@ -1,8 +1,8 @@
-# paddle. incubate. sparse. transpose 设计文档
+# paddle.incubate.sparse.sum 设计文档
 
   
 
-| API名称 | paddle.incubate.sparse.transpose |
+| API名称 | paddle.incubate.sparse.sum |
 |----------------------------------------------------------|-----------------------------------------------|
 | 提交作者<input type="checkbox" class="rowselector hidden"> | 六个骨头 |
 | 提交时间<input type="checkbox" class="rowselector hidden"> | 2023-02-22 |
@@ -192,7 +192,6 @@ void SumCooGradKernel(const Context& dev_ctx,
                       const SparseCooTensor& x,
                       const SparseCooTensor& dout,
                       const IntArray& axis,
-                      DataType dtype,
                       bool keep_dim,
                       SparseCooTensor* dx);
 
@@ -201,7 +200,6 @@ void SumCsrGradKernel(const Context& dev_ctx,
                       const SparseCsrTensor& x,
                       const SparseCsrTensor& dout,
                       const IntArray& axis,
-                      DataType dtype,
                       bool keep_dim,
                       SparseCsrTensor* dx);
 ```
@@ -315,7 +313,6 @@ void SumCsrKernel(const Context& dev_ctx,
   }
   out->SetMember(out_crows, out_cols, out_values, out_dims);
 }
-
 ```
 对于3维情况，按层考虑即可。
 
@@ -342,30 +339,29 @@ value则取决于dout的相应位置值。
 
 - 正确性
 - csr对2维和3维不同`axis`参数测试
-- coo对2维、3维不同`axis`参数以及6维和10维测试
+- coo对1维、2维、3维、6维和10维不同`axis`参数测试
 - coo、csr分别对dtype缺省和特定值测试
-- coo、csr分别对6维测试keepdim为真或假
+- 分别对每个测试样本分成keepdim为真或假
 
 具体样例如下
 
 ```python
 class TestSum(unittest.TestCase):
     # x: sparse, out: sparse
-    def check_result(self, x_shape, dims, keepdim, format):
+    def check_result(self, x_shape, dims, keepdim, format, dtype=None):
         mask = paddle.randint(0, 2, x_shape).astype("float32")
         # "+ 1" to make sure that all zero elements in "origin_x" is caused by multiplying by "mask",
         # or the backward checks may fail.
         origin_x = (paddle.rand(x_shape, dtype='float32') + 1) * mask
         dense_x = origin_x.detach()
         dense_x.stop_gradient = False
-        dense_out = paddle.sum(dense_x, dims, keepdim=keepdim)
-
+        dense_out = paddle.sum(dense_x, dims, keepdim=keepdim, dtype=dtype)
         if format == "coo":
             sp_x = origin_x.detach().to_sparse_coo(len(x_shape))
         else:
             sp_x = origin_x.detach().to_sparse_csr()
         sp_x.stop_gradient = False
-        sp_out = paddle.sparse.sum(sp_x, dims, keepdim=keepdim)
+        sp_out = paddle.sparse.sum(sp_x, dims, keepdim=keepdim, dtype=dtype)
 
         np.testing.assert_allclose(
             sp_out.to_dense().numpy(), dense_out.numpy(), rtol=1e-05
@@ -378,32 +374,35 @@ class TestSum(unittest.TestCase):
             rtol=1e-05,
         )
 
+    def test_sum_1d(self):
+        self.check_result([5], None, False, 'coo')
+        self.check_result([5], None, True, 'coo')
+        self.check_result([5], 0, True, 'coo')
+        self.check_result([5], 0, False, 'coo')
+
     def test_sum_2d(self):
-        self.check_result([2, 5], [0, 1], False, 'coo')
-        self.check_result([2, 5], [0, 1], False, 'csr')
-        self.check_result([2, 5], [1, 0], False, 'coo')
-        self.check_result([2, 5], [1, 0], False, 'csr')
+        self.check_result([2, 5], None, False, 'coo')
+        self.check_result([2, 5], None, True, 'coo')
+        self.check_result([2, 5], 0, True, 'coo')
+        self.check_result([2, 5], 0, False, 'coo')
+        self.check_result([2, 5], 1, False, 'coo')
+        self.check_result([2, 5], None, True, 'csr')
+        self.check_result([2, 5], -1, True, 'csr')
+        self.check_result([2, 5], 0, False, 'coo', dtype="int32")
+        self.check_result([2, 5], -1, True, 'csr', dtype="int32")
 
     def test_sum_3d(self):
-        self.check_result([6, 2, 3], [0, 1, 2], False, 'coo')
-        self.check_result([6, 2, 3], [0, 1, 2], False, 'csr')
-        self.check_result([6, 2, 3], [0, 2, 1], False, 'coo')
-        self.check_result([6, 2, 3], [0, 2, 1], False, 'csr')
-        self.check_result([6, 2, 3], [1, 0, 2], False, 'coo')
-        self.check_result([6, 2, 3], [1, 0, 2], False, 'csr')
-        self.check_result([6, 2, 3], [2, 0, 1], False, 'coo')
-        self.check_result([6, 2, 3], [2, 0, 1], False, 'csr')
-        self.check_result([6, 2, 3], [2, 1, 0], False, 'coo')
-        self.check_result([6, 2, 3], [2, 1, 0], False, 'csr')
-        self.check_result([6, 2, 3], [1, 2, 0], False, 'coo')
-        self.check_result([6, 2, 3], [1, 2, 0], False, 'csr')
+        self.check_result([6, 2, 3], -1, True, 'csr')
+        for i in [0, 1, -2, None]:
+            self.check_result([6, 2, 3], i, False, 'coo')
+            self.check_result([6, 2, 3], i, True, 'coo')
 
     def test_sum_nd(self):
-        self.check_result([8, 3, 4, 4, 5, 3], [5, 3, 4, 1, 0, 2],False, 'coo')
-        # Randint now only supports access to dimension 0 to 9.
-        self.check_result(
-            [2, 3, 4, 2, 3, 4, 2, 3, 4], [2, 3, 4, 5, 6, 7, 8, 0, 1], False , 'coo'
-        )
+        for i in range(6):
+            self.check_result([8, 3, 4, 4, 5, 3], i, False, 'coo')
+            self.check_result([8, 3, 4, 4, 5, 3], i, True, 'coo')
+            # Randint now only supports access to dimension 0 to 9.
+            self.check_result([2, 3, 4, 2, 3, 4, 2, 3, 4], i, False, 'coo')
 
 ```
 
@@ -411,10 +410,10 @@ class TestSum(unittest.TestCase):
 # 七、可行性分析及规划排期
 
 方案主要自行实现核心算法
-预计3.6号前完成cpu部分的正向算子实现和测试
-预计3.10号前完成cpu部分反向算子的实现和测试
-预计3.15号前完成gpu部分正向算子的实现和测试
-预计3.31号前完成gpu部分反向算子的实现和测试
+预计3.10号前完成cpu部分的实现和测试
+预计3.10号前完成gpu部分的实现和测试
+预计3.15号前完成各种参数的实现和测试
+预计3.20号前完成文档
 
 # 八、影响面
 
