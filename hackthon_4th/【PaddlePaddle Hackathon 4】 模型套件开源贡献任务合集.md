@@ -736,7 +736,7 @@
   - 熟练掌握Python、PaddlePaddle
   - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
-### No.137：论文题目：Learning Transferable Visual Models From Natural Language Supervision(CLIP)论文题目：BEIT V2: Masked Image Modeling with Vector-Quantized Visual Tokenizers <a name='task137'></a>
+### No.137：论文题目：Improved baselines with momentum contrastive learning(MoCov2)论文题目：BEIT V2: Masked Image Modeling with Vector-Quantized Visual Tokenizers <a name='task137'></a>
 
 - **技术标签：Python、深度学习**
 - **任务难度：基础**️⭐️
@@ -780,7 +780,7 @@
   - 熟练掌握Python、PaddlePaddle，熟悉PaddleClas代码
   - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
-### No.140：论文题目：Improved baselines with momentum contrastive learning(MoCov2)论文题目：Bootstrap your own latent: A new approach to self-supervised learning（BYOL）论文题目：Unsupervised Learning of Visual Features by Contrasting Cluster Assignments （SwAV） <a name='task140'></a>
+### No.140：论文题目：Bootstrap your own latent: A new approach to self-supervised learning（BYOL）论文题目：Unsupervised Learning of Visual Features by Contrasting Cluster Assignments （SwAV） <a name='task140'></a>
 
 - **技术标签：Python、深度学习**
 - **任务难度：基础**️⭐️
