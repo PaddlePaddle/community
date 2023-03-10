@@ -17,7 +17,7 @@ paddle.nn.GaussianNLLLoss 和 paddle.nn.functional.gaussian_nll_loss API 用于�
 该函数计算公式为：
 $$
 \text{loss} = \frac{1}{2}\left(\log\left(\text{max}\left(\text{var},
-        \ \text{eps}\right)\right) + \frac{\left(\text{input} - \text{target}\right)^2}
+        \ \text{eps}\right)\right) + \frac{\left(\text{input} - \text{label}\right)^2}
         {\text{max}\left(\text{var}, \ \text{eps}\right)}\right) + \text{const.}
 $$
 
@@ -120,7 +120,7 @@ def gaussian_nll_loss(
 共添加以下两个 API：
 
 `paddle.nn.functional.gaussian_nll_loss(input,
-    target,
+    label,
     var,
     full=False,
     eps=1e-6,
@@ -128,11 +128,11 @@ def gaussian_nll_loss(
     name:str=None,
 ) -> Tensor:`
  - Input(Tensor): 期望服从高斯分布的输入，形状为`(N, *)` 或 `(*)` 其中 `*`表示任何数量的额外维度。
- - Target(Tensor):为高斯分布的采样值，形状为`(N, *)` 或 `(*)`，与输入的形状相同， 
+ - Label(Tensor):为高斯分布的采样值，形状为`(N, *)` 或 `(*)`，与输入的形状相同， 
 或与输入的形状相同但有一个维度等于1（允许广播）。
  - Var(Tensor): 正方差张量，即数值均大于等于0的方差张量，形状为`(N, *)` 或 `(*)`，与输入的形状相同，或与输入的形状相同但有
 一个维度等于1，或与输入的形状相同但少一个维度（允许广播）。
- - Output(Tensor): 输出衡量Input与Target差距的损失函数结果，如果‘reduction’是 “mean”（默认）或 “sum”，则为标量。如果‘reduction’是’none’，
+ - Output(Tensor): 输出衡量Input与Label差距的损失函数结果，如果‘reduction’是 “mean”（默认）或 “sum”，则为标量。如果‘reduction’是’none’，
 则是`(N, *)`，与输入的形状相同。
 
 和
@@ -154,8 +154,8 @@ def gaussian_nll_loss(
 1. 检查参数
   
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
-   2. 检查输入的 size（含 `input`、`target`、`var`）（同其余 functional loss 中的实现）
-   3. 检查输入的`input`、`target`、`weight`是否可以广播
+   2. 检查输入的 size（含 `input`、`label`、`var`）（同其余 functional loss 中的实现）
+   3. 检查输入的`input`、`label`、`weight`是否可以广播
 
 2. 计算
 
