@@ -2,8 +2,6 @@
 
 > This project will be mentored by [@From00](http://github.com/from00)
 
-[TOC]
-
 ## 1. 背景及计划
 为了解决飞桨原Fluid算子体系存在的规范性、一致性、易用性、可维护性等诸多问题，我们设计开发了新的PHI算子体系，并在2022年进行了三期规模化迁移，将关联Python API的必要kernel从Fluid迁移至PHI。
 
@@ -723,11 +721,10 @@ REGISTER_OPERATOR(trace, ops::TraceOp, ops::TraceOpMaker,
 > 如果遇到文档中未收录的问题，可直接添加到文档中（备注添加人）。
 
  1. 问题描述：移除原Op下`REGISTER_OP_CPU_KERNEL`或`REGISTER_OP_CUDA_KERNEL`出现类似`undefined reference to 'TouchOpKernelRegistrar_xxx_CUDA_DEFAULT_TYPE()'`的报错提示
-   - 问题原因：由于在某些地方使用了该Kernel的注册符号，删除后找不到对应的注册符号便会报错。
-   - 解决办法：
-	   - 全局搜索`USE_OP(op_name)`，并替换为`USE_OP_ITSELF(op_name)`
-   - 添加人：@zyfncg
- 
+  - 问题原因：由于在某些地方使用了该Kernel的注册符号，删除后找不到对应的注册符号便会报错。
+  - 解决办法：
+	- 全局搜索`USE_OP(op_name)`，并替换为`USE_OP_ITSELF(op_name)`
+  - 添加人：@zyfncg
 	- 补充：除`USE_OP`宏外，`USE_OP_DEVICE_KERNEL`宏也会导致此错误，若搜索到`USE_OP_DEVICE_KERNEL(op_name,`，可直接删除。另外，如果旧OP的`REGISTER_OP_CPU_KERNEL`和`REGISTER_OP_GPU_KERNEL`注册宏没有直接删除，而是直接注释掉，因Pybind模块编译时会在代码文本中扫描注册宏并自动生成USE_OP代码，亦会导致此错误 @From00
  
  2. 问题描述：把`T* out_data = out->mutable_data<T>(dev_ctx.GetPlace());`改成了`T* out_data = dev_ctx.Alloc<T>(out);`后编译报错。
@@ -737,10 +734,10 @@ REGISTER_OPERATOR(trace, ops::TraceOp, ops::TraceOpMaker,
 	- 补充原因：按照C++语言标准，当`.`和`->`操作符后接显式模板化的模板类成员（Alloc<T>）时，需要用`template`关键字显式指定，否则编译器将直接假定Alloc不是模板类成员，见[标准](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4296.pdf)P337 14.2节 @From00
 
  3. 问题描述：按照新的命名规范，op命名需要和Python API名字保持一致，如果需要迁移的算子是V2版本(例如expand_v2)，在与原来的OpMaker进行关联、注册新的phi Kernel时需要注意什么地方？
- - 由于迁移过来，将`expend_v2`规范化为`expend`，会和原先已有的`expend` op产生冲突，这里原先的op一般是deprecated的版本，这种情况需要额外在`phi/core/compat/op_utils.h`中进行标记
+  - 由于迁移过来，将`expend_v2`规范化为`expend`，会和原先已有的`expend` op产生冲突，这里原先的op一般是deprecated的版本，这种情况需要额外在`phi/core/compat/op_utils.h`中进行标记
   
-4.  问题描述：Scalar和ScalarArray什么时候使用？
- - 当原先Op有动态Attribute时需要使用，比如同时有`shape` attr和`ShapeTensor` input，或者同时有`axis` attr和`AxisTensor` input，可以参考reshape、scale、full等已有kernel的写法以及相应的映射函数。
+ 4. 问题描述：Scalar和ScalarArray什么时候使用？
+  - 当原先Op有动态Attribute时需要使用，比如同时有`shape` attr和`ShapeTensor` input，或者同时有`axis` attr和`AxisTensor` input，可以参考reshape、scale、full等已有kernel的写法以及相应的映射函数。
  
-5. 问题描述：带有optional的参数什么时候使用？
- - 当原先Op的OpMaker中，输入输出标记有AsDispensable()时候使用，可以参考dropout、elementwise_multiply_grad等已有kernel的写法。
+ 5. 问题描述：带有optional的参数什么时候使用？
+  - 当原先Op的OpMaker中，输入输出标记有AsDispensable()时候使用，可以参考dropout、elementwise_multiply_grad等已有kernel的写法。
