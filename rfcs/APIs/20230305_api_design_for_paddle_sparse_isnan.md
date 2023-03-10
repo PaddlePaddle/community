@@ -1,6 +1,6 @@
-# paddle.sparse.is_nan 设计文档
+# paddle.sparse.isnan 设计文档
 
-| API名称                                                      | paddle.sparse.is_nan                                   |
+| API名称                                                      | paddle.sparse.isnan                                   |
 | ------------------------------------------------------------ | ------------------------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | thunder95                               |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-03-05                                        |
@@ -13,25 +13,25 @@
 
 ## 1、相关背景
 
-is_nan 检查输入Tensor  的每一个值是否为 +/-NaN, 并返回布尔型结果。目前在 PaddlePaddle 中，对于稀疏Ｔensor还没有支持isnan的API。
+isnan 检查输入Tensor  的每一个值是否为 +/-NaN, 并返回布尔型结果。目前在 PaddlePaddle 中，对于稀疏Ｔensor还没有支持isnan的API。
 针对 Paddle 的两种稀疏 Tensor 格式 COO 与 CSR ，都需新增 isnan 的计算逻辑，一共需要新增 2个 kernel 的前向。
 
 ## 2、功能目标
 
-在飞桨中增加 paddle.sparse.is_nan API。
+在飞桨中增加 paddle.sparse.isnan API。
 
 ## 3、意义
 
-飞桨将支持 paddle.sparse.is_nan API。
+飞桨将支持 paddle.sparse.isnan API。
 
 # 二、飞桨现状
 
-目前飞桨还没有稀疏张量的 is_nan 操作。
+目前飞桨还没有稀疏张量的 isnan 操作。
 
 
 # 三、业内方案调研
 
-Tensorflow, Scipy都没有直接实现对稀疏张量的 is_nan　的一元操作。
+Tensorflow, Scipy都没有直接实现对稀疏张量的 isnan　的一元操作。
 
 Pytorch对于很多zero-preserving unary function支持COO/CSR/CSC/BSR/CSR等多种数据格式的稀疏张量计算，其中也包括isnan，可直接使用dense　tensor中的torch.isnan API。
 
@@ -44,7 +44,7 @@ torch.isnan(x)
 
 # 四、对比分析
 
-Tensorflow, Scipy虽然对于稠密张量支持is_nan操作，但都没有直接实现对稀疏张量的 is_nan　的一元操作。
+Tensorflow, Scipy虽然对于稠密张量支持isnan操作，但都没有直接实现对稀疏张量的 isnan　的一元操作。
 在　PaddlePaddle　中可以参考Ｐytorch将对这个算子操作进行支持。
 
 
@@ -52,9 +52,9 @@ Tensorflow, Scipy虽然对于稠密张量支持is_nan操作，但都没有直接
 
 ## 命名与参数设计
 
-sparse is_nan 这个稀疏张量上的方法的命名和参数不需要额外设计，由于在判断isnan时，此处不可导，所以不考虑反向算子的实现。在 paddle/phi/api/yaml 下新增注册该算子的前向。
+sparse isnan 这个稀疏张量上的方法的命名和参数不需要额外设计，由于在判断isnan时，此处不可导，所以不考虑反向算子的实现。在 paddle/phi/api/yaml 下新增注册该算子的前向。
 
-API命名为paddle.sparse.is_nan, 接口参数支持两个参数，x (Tensor) - 输入的 Tensor，数据类型为：float16、float32、float64、int32、int64。
+API命名为paddle.sparse.isnan, 接口参数支持两个参数，x (Tensor) - 输入的 Tensor，数据类型为：float16、float32、float64、int32、int64。
 name (str，可选) - 具体用法请参见 Name，一般无需设置，默认值为 None。
 
 ```    yaml
@@ -62,13 +62,12 @@ name (str，可选) - 具体用法请参见 Name，一般无需设置，默认�
   args : (Tensor x)
   output : Tensor(out)
   infer_meta :
-    func : IsfiniteInferMeta
+    func : UnchangedInferMeta
     param: [x]
   kernel :
     func : isnan_coo{sparse_coo -> sparse_coo},
       isnan_csr{sparse_csr -> sparse_csr}
     layout : x
-  backward : null
 ```
 
 ## 底层OP设计
@@ -85,7 +84,7 @@ IsnanCsrKernel(const Context& dev_ctx,
                    SparseCsrTensor* out)
 ```
 
-在前向推理中，一元操作的实现较简单，取出 DenseTensor 类型的 non_zero_elements() 后，逐元素进行 is_nan 操作，并创建新的稀疏张量即可。
+在前向推理中，一元操作的实现较简单，取出 DenseTensor 类型的 non_zero_elements() 后，逐元素进行 isnan 操作，并创建新的稀疏张量即可。
 
 
 
@@ -96,13 +95,13 @@ IsnanCsrKernel(const Context& dev_ctx,
 在 Paddle repo 的 python/paddle/sparse/unary.py 文件中新增api, 支持静态图和动态图:
 
 ```cpp
-def is_nan(x, name=None):
-    return _C_ops.sparse_is_nan(x)
+def isnan(x, name=None):
+    return _C_ops.sparse_isnan(x)
 ```
 
 # 六、测试和验收的考量
 
-新增单测代码　python/paddle/fluid/tests/unittests/test_sparse_is_nan.py, 测试考虑的case如下：
+新增单测代码　python/paddle/fluid/tests/unittests/test_sparse_isnan.py, 测试考虑的case如下：
 
 - 数值正确性
 - COO和CSR数据格式
