@@ -536,7 +536,7 @@
     $ cd bin/intel64/Release
     $ ./paddle_tests --gtest_filter=PaddleFuzzyOpTest/FrontEndFuzzyOpTest.testOpFuzzy/*
 
-### No.212：为 OpenVINO 实现 Paddle 算子 mean 转换 <a name='task212'></a>
+### No.212：为 OpenVINO 实现 Paddle 算子 grid_sampler 转换 <a name='task212'></a>
 
 - 技术标签：深度学习框架，C++，Python，OpenVINO
 
@@ -544,7 +544,7 @@
 
 - 详细描述：每个框架都有自己的模型和算子表达。OpenVINO对PaddlePaddle的支持需要从Paddle的算子映射转换到OpenVINO的算子。在这个过程中，我们将熟悉深度学习神经网络的算子表达和计算。
 
-  在这个任务中，你需要为OpenVINO实现Paddle算子 mean转换，该OP用于沿参数 axis 计算 x 的平均值。具体做法请参考https://github.com/openvinotoolkit/openvino/pull/11731
+在这个任务中，你需要为OpenVINO实现Paddle算子 grid_sampler转换，该OP基于 flow field 网格的对输入 X 进行双线性插值采样。具体做法请参考https://github.com/openvinotoolkit/openvino/pull/11731
 
 - 提交内容**：**
 
@@ -1001,7 +1001,7 @@
 - 技术要求：
   - 熟练掌握Python, 了解AI部署
 
-### No.226：TVM项目1--为Paddle框架新增TVM算子（进阶题）<a name='task231'></a>
+### No.226：TVM项目1--为Paddle框架新增TVM算子（进阶题）<a name='task226'></a>
 
 **背景：**
 

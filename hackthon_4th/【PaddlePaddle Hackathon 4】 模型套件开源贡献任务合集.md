@@ -56,7 +56,7 @@
     - 为模型增加单测, 并且做到单测通过，详情见[范例PR](https://github.com/PaddlePaddle/PaddleNLP/pull/4575)
   - 每个模型算单独的子任务，**每升级3个模型算完成一个基础任务**, 总共待升级的模型为
     - [prophetnet](https://github.com/PaddlePaddle/PaddleNLP/blame/develop/paddlenlp/transformers/prophetnet)
-    - [artist](https://github.com/PaddlePaddle/PaddleNLP/blame/develop/paddlenlp/transformers/artist)
+    - [rembert](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/paddlenlp/transformers/rembert)
     - [luke](https://github.com/PaddlePaddle/PaddleNLP/blame/develop/paddlenlp/transformers/luke)
   - 开发流程和环境配置请参考 [CONTRIBUTING.md](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/CONTRIBUTING.md)
 
@@ -140,35 +140,33 @@
 
 ### No.105：基于PaddleNLP PPDiffusers 训练 AIGC 趣味模型 <a name='task105'></a>
 
-- **技术标签：**Python、NLP、扩散模型
+- **技术标签：** Python、NLP、扩散模型
 - **奖励设置：**
-  - 创意奖：一等奖奖金3k（1名），二等奖奖金1k（5名）；三等奖 面值 200 元京东卡（10名）
-  - 参与奖：证书荣誉、飞桨周边礼品、 HF store 代金券、 HF pro 账号等
-- **详细描述：**结合 [PPDiffusers](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers) 最新版本，基于自己的数据集，训练并开源趣味模型。可参考[模型训练 QuickStart](https://aistudio.baidu.com/aistudio/projectdetail/5513258)
-  - 基于 [DreamBooth + LoRA](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/dreambooth) 使用自己的图片 Fine-tune 模型；当然你也可以使用 PPDiffusers 中 Textual Inversion 等更多玩法，等你探索！
-  - 主题推荐：
-    - 流量地球
-    - 三体
-    - 表情包
-    - 家乡景观
-    - 动物萌宠
-    - 家居设计
-    - 无限想象（主题不限）
-- **提交内容：**
-  - 【必需】提交1个AI studio项目，遵从[模板](https://aistudio.baidu.com/aistudio/projectdetail/5519383)规范
-  - 【必需】将模型文件上传到Hugging Face，在模型卡片中介绍模型，并上传由模型生成的图片（以及相应Prompt，至少3组）
-  - 【可选】在Hugging Face Space搭建应用中心、跑通Inference API
-- **提交流程：**
-  - 在 [该Issue](https://github.com/PaddlePaddle/PaddleNLP/issues/4775) 下按如下模板回复，提交自己的趣味创意
+   * 创意奖：一等奖奖金3k（2名），二等奖奖金1k（5名）；三等奖 面值 200 元京东卡（10名）。创意奖获奖队伍还可获得 50 美元 HuggingFace store 代金券一张
+  * 参与奖：证书荣誉、飞桨周边礼品
 
+- **详细描述：** 结合 [PPDiffusers](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers) 最新版本，基于自己的数据集，训练并开源趣味模型。可参考 **[模型训练  QuickStart](https://aistudio.baidu.com/aistudio/projectdetail/5513258)**（需注册、登录AI Studio）
+  - 基于 [DreamBooth + LoRA](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/dreambooth) 、[Text-to-Image+LoRA](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/text_to_image) 等技术，  使用自己的图片 Fine-tune 模型；当然你也可以使用 PPDiffusers 中  [Textual Inversion](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/textual_inversion) 等更多玩法，等你探索！
+  - 主题推荐：
+      - 流浪地球
+      - 三体
+      - 表情包
+      - 家乡景观
+      - 动物萌宠
+      - 家居设计
+      - 无限想象（主题不限）
+- **提交内容：**
+  - 【必需】提交1个AI studio项目，遵从 **[模板](https://aistudio.baidu.com/aistudio/projectdetail/5519383)** 规范（需注册、登录AI Studio）
+  - 【必需】将模型文件上传到Hugging Face，在模型卡片中介绍模型，并上传由模型生成的图片（以及相应Prompt，至少3组）
+  - 【必需】在AI Studio 搭建应用中心，可参考 **[ QuickStart](https://aistudio.baidu.com/aistudio/projectdetail/5513258)**
+- **提交流程：**
+  - 在 **[该Issue](https://github.com/PaddlePaddle/PaddleNLP/issues/4775)** 下按如下模板回复，提交自己的趣味创意
 ```plain
 【队名】：一个让人印象深刻的名字
 【模型简介】：一句话描述自己模型的特色
 【模型链接】：Hugging Face 地址
-【AI Studio 项目地址】：xxx 
-【可选】【Hugging Face 应用中心】：xxx
+【AI Studio 项目+应用中心地址】：xxx 
 ```
-
 - **评奖：**
   - AI Studio 项目like数 + Fork数/100 + Hugging Face like数，结合AI Studio项目质量（实现思路、创意、项目作为教程的易读易用性）综合评选
   - 每支队伍可以提交多个模型，选择最好成绩作为队伍最终成绩
@@ -352,17 +350,17 @@
   - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
 
-### No.115：论文复现：TPSNet: Reverse Thinking of Thin Plate Splines for Arbitrary Shape Scene Text Representation <a name='task115'></a>
+### No.115：论文复现：SPTS: Single-Point Text Spotting <a name='task115'></a>
 
 - **技术标签：Python、深度学习**
 - **任务难度：基础**️⭐️
 - **详细描述：**
-  - 论文：https://arxiv.org/pdf/2110.12826.pdf
-  - 参考repo：https://github.com/Wei-ucas/TPSNet
+  - 论文：https://arxiv.org/abs/2112.07917
+  - 参考repo：https://github.com/shannanyinxiang/SPTS
   - 验收标准：
-    - ICDAR2015上：hmean=89.1，fps=11.6
-    - CTW1500上：hmean=87.5，fps=17.9
-    - Total-Text上：hmean=88.5，fps=14.3
+      -  ICDAR2015，指标对齐论文中Table 5 
+     - Total-Text上，指标对齐论文中Table 6
+      - CTW1500上，指标对齐论文中Table 7
 - **提交内容：**
   - 代码、模型、训练日志
   - 提交代码和中英文文档PR到PaddleOCR，[参考](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/algorithm_overview.md)
@@ -460,6 +458,21 @@
   - 有基本的模型训练和debug能力。
   - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
+### No.246：论文复现：Learning Enriched Features for Fast Image Restoration and Enhancement <a name='task246'></a>
+
+- **技术标签：Python、深度学习**
+- **任务难度：进阶**⭐️
+- **详细描述：**
+  - 论文：https://arxiv.org/pdf/2205.01649
+  - 参考repo：https://github.com/swz30/MIRNetv2
+  - 验收标准：指标对齐论文中Table2～Table5。
+- **提交内容：**
+  - 代码、模型、训练日志
+  - 提交代码和中英文文档PR到PaddleOCR，[参考](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/algorithm_overview.md)
+- **技术要求：**
+  - 熟悉OCR领域相关算法，最好有PaddleOCR使用经验。
+  - 有基本的模型训练和debug能力。
+  - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
 ### No.121：PaddleOCR js部署 <a name='task121'></a>
 
@@ -1782,10 +1795,11 @@
 * 任务难度：进阶⭐️⭐️
 * 详细描述:
   * 需要完成昇腾AI推理引擎CANN接入Fastdeploy工作，并完成高性能文本分类服务ERNIE-3.0，测试模型运行正确，并与Paddle Lite后端对比性能数据。
-  * 后端接入建议：可通过ONNX接入地平线AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+  * 后端接入建议：可通过ONNX接入昇腾AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
 * 提交内容：
   * pr：提交适配代码，及对应的中英文文档。
   * pr：交ERNIE3.0在CANN上的部署示例。
+  * 将验证通过的模型，按照昇腾模型库repo要求，提交到昇腾模型库：https://gitee.com/ascend
   * 邮件：提交benchmark测试数据及精度对齐数据。
 * 技术要求：
   * 熟练掌握C++开发
