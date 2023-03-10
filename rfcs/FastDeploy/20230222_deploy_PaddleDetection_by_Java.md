@@ -1,15 +1,9 @@
-<!--
- * @Author: hjf
- * @Date: 2023-02-23 09:20:48
- * @LastEditTime: 2023-03-05 18:02:20
- * @Description:  
--->
 # 使用java完成PaddleDetection部署设计文档
 |属性 | 内容 |
 |-|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | Tomoko-hjf |
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-05 |
-|版本号 | V0.1 |
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-10 |
+|版本号 | V0.2 |
 |文件名 | 20230222_deploy_PaddleDetection_by_Java.md<br> |
 
 
@@ -20,7 +14,7 @@
 在`FastDeploy`中使用`java`完成`PaddleDetection`中`PP-YOLOE`, `PaddleYOLOv8`, `PaddleYOLOv5`等模型的部署。
 
 ## 3、意义
-可以使用`Java`部署`PP-YOLOE`, `PaddleYOLOv8`, `PaddleYOLOv5`等目标检测模型。
+可以更加方便地使用`Java`部署`PP-YOLOE`, `PaddleYOLOv8`, `PaddleYOLOv5`等目标检测模型，丰富`FastDeploy`在`Java部署`方面的功能。
 
 # 二、飞桨现状
 在`使用Java部署目标检测模型`方面，`FastDeploy`目前缺乏其他的目标检测模型。
