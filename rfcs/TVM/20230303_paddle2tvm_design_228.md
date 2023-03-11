@@ -19,13 +19,13 @@
 
 Paddle 的 grid_sampler 算子可用 tvm 的 transpose 和 grid_sampler 算子组合适配。
 
-[Paddle的 grid_sampler 文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/sparse/nn/Conv3D_cn.html#conv3d)
+[Paddle的 grid_sampler 文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/functional/grid_sample_cn.html#grid-sample)
 
 **2. gaussian_random**
 
 Paddle 的 gaussian_random 算子可用 tvm 的 normal 算子适配。
 
-[Paddle的 gaussian_random 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/en/api/paddle/static/nn/data_norm_en.html)
+[Paddle的 gaussian_random 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/normal_cn.html#normal)
 
 **3. flip 算子**
 
