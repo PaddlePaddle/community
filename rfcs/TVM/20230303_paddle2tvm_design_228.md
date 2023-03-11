@@ -1,7 +1,7 @@
 ## 方案名称
-为 PaddlePaddle 框架新增 conv3d/data_norm/flip/roi_align/fill_zeros_like/unique 的 TVM 算子映射设计文档。
+为 PaddlePaddle 框架新增 grid_sampler/gaussian_random/flip/roi_align/fill_zeros_like/unique 的 TVM 算子映射设计文档。
 
-| API名称 | conv3d/data_norm/flip/roi_align/fill_zeros_like/unique | 
+| API名称 | grid_sampler/gaussian_random/flip/roi_align/fill_zeros_like/unique | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | MayYouBeProsperous | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-03 | 
@@ -15,17 +15,17 @@
 
 # 方案流程
 
-**1. conv3d算子**
+**1. grid_sampler**
 
-Paddle 的 conv3d 算子可用 tvm 的 bias_add 和 conv3d 算子组合适配。
+Paddle 的 grid_sampler 算子可用 tvm 的 transpose 和 grid_sampler 算子组合适配。
 
-[Paddle的 conv3d 文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/sparse/nn/Conv3D_cn.html#conv3d)
+[Paddle的 grid_sampler 文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/sparse/nn/Conv3D_cn.html#conv3d)
 
-**2. data_norm算子**
+**2. gaussian_random**
 
-Paddle 的 data_norm 算子可用 tvm 的 layer_norm 算子适配。
+Paddle 的 gaussian_random 算子可用 tvm 的 normal 算子适配。
 
-[Paddle的 data_norm 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/en/api/paddle/static/nn/data_norm_en.html)
+[Paddle的 gaussian_random 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/en/api/paddle/static/nn/data_norm_en.html)
 
 **3. flip 算子**
 
