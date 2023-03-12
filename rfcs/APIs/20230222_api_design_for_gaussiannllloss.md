@@ -122,7 +122,7 @@ def gaussian_nll_loss(
 `paddle.nn.functional.gaussian_nll_loss(input,
     target,
     var,
-    full=None,
+    full=False,
     eps=1e-6,
     reduction: str="mean",
     name:str=None,
