@@ -123,7 +123,7 @@ __global__ void ReduceTensorCUDAKernel(
 
 ## 1.3 对比分析
 
-除了Paddle框架以外，[OP Benchmark](https://github.com/PaddlePaddle/benchmark/tree/master/api/tests_v2)中还有针对Tensorflow的静态图测试脚本，下表给出的是Tensorflow框架下ExpandA
+除了Paddle框架以外，[OP Benchmark](https://github.com/PaddlePaddle/benchmark/tree/master/api/tests_v2)中还有针对Tensorflow的静态图测试脚本，下表给出的是Tensorflow框架下ExpandAs算子在各类case中的性能：
 
 | Case | Device   | Data type | src_shape    | dst_shape      | Tensorflow forward (ms) | Tensorflow backward (ms) |
 | ---- | -------- | --------- | ------------ | -------------- | ----------------------- | ------------------------ |
