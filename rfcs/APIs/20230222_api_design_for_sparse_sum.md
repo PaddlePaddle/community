@@ -281,7 +281,7 @@ sparse_backward_ops.yaml
   
 ```
 
-相应的InferMeta函数可以复用稠密矩阵的函数。
+SumInferMeta函数 将优先根据dtype。
 
 ## 底层OP设计
 对于COO格式和CSR格式axis=None的简单情况，只需要把value值求和，并对相应的位置参数进行修改即可。
@@ -457,8 +457,8 @@ class TestSum(unittest.TestCase):
 方案主要自行实现核心算法
 预计3.10号前完成cpu部分的实现和测试
 预计3.10号前完成gpu部分的实现和测试
-预计3.15号前完成各种参数的实现和测试
-预计3.20号前完成文档
+预计3.18号前完成各种参数的实现和测试
+预计3.25号前完成文档
 
 # 八、影响面
 
