@@ -24,6 +24,9 @@
 |---|---|---|---|---|---|
 | 1 | RTX 2070s | [16L, 10000L] | float32 | 5 | 0.29134 | 
 | 2 | RTX 2070s | [16L, 3000L] | float32 | 1 | 0.13398 |
+| 3 | RTX 2070s | [16L, 10000L] | float16 | 5 | 0.1502 |
+| 4 | RTX 2070s | [16L, 3000L] | float16 | 1 | 0.06901 |
+
 
 API文档 https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/kthvalue_cn.html
 
@@ -35,6 +38,8 @@ Pytorch中对kthvalue算子基于GPU计算实现,  forward整体性能如下(基
 |---|---|---|---|---|---|
 | 1 | RTX 2070s | [16L, 10000L] | float32 | 5 | 0.08037 | 
 | 2 | RTX 2070s | [16L, 3000L] | float32 | 1 | 0.041758 |
+| 3 | RTX 2070s | [16L, 10000L] | float16 | 5 | 0.070236 |
+| 4 | RTX 2070s | [16L, 3000L] | float16 | 1 | 0.027326 |
 
 ## 1.3 对比分析
 
