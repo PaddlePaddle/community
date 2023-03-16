@@ -156,7 +156,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 参数说明如下：
 
 - **x** (Tensor) – 要进行扩展的张量。
-- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`input.shape[dim]`。
+- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`x.shape[dim]`。
 - **axis** (int) – 需要扩展张量的维度。
 
 返回的是一个在axis维度扩展成sizes形状的tensor
@@ -165,7 +165,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 参数说明如下：
 
-- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`input.shape[dim]`。
+- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`x.shape[dim]`。
 - **axis** (int) – 需要扩展张量的维度。
 
 返回的是一个在axis维度扩展成sizes形状的tensor
@@ -174,7 +174,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 参数说明如下：
 
-- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`input.shape[dim]`。
+- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`x.shape[dim]`。
 - **axis** (int) – 需要扩展张量的维度。
 
 ## 底层 OP 设计
@@ -209,18 +209,18 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 3. 单元测试:
 
    - 数据类型检验:
-     - input 要求为 paddle.Tensor
+     - x 要求为 paddle.Tensor
      - sizes 要求为 *Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* 或者 *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* 
      - axis 要求为 int
    - 具体数值检验:
      - 对于 sizes, 则要求里面最多只有一个 -1
-     - 对于 axis , 则要求 input存在该维度
+     - 对于 axis , 则要求 x 存在该维度
    - 正常情况：给定合法的输入参数，检查输出张量是否符合预期的形状
-     - 例如，给定input为一个形状为(2, 4, 4)的张量，axis为1，sizes为(2, -1)，则输出张量应该是一个形状为(2, 2, 2, 4)的张量
+     - 例如，给定x为一个形状为(2, 4, 4)的张量，axis为1，sizes为(2, -1)，则输出张量应该是一个形状为(2, 2, 2, 4)的张量
    - 异常情况：给定不合法的输入参数，检查是否抛出相应的异常，并检查异常信息是否正确
-     - 例如，给定input为一个字符串"hello"，axis为1，sizes为(2, -1)，则应该抛出TypeError异常，并提示`Invalid input type: <class ‘str’>. Expected paddle.Tensor`
+     - 例如，给定x为一个字符串"hello"，axis为1，sizes为(2, -1)，则应该抛出TypeError异常，并提示`Invalid input type: <class ‘str’>. Expected paddle.Tensor`
    - 边界情况：给定一些特殊或极端的输入参数，检查输出张量是否符合预期的形状
-     - 例如，给定input为一个形状为(2, 4, 4)的张量，axis为0，sizes为(-1,)，则输出张量应该是一个形状为(2, 8)的张量
+     - 例如，给定x为一个形状为(2, 4, 4)的张量，axis为0，sizes为(-1,)，则输出张量应该是一个形状为(2, 8)的张量
 
 # 七、可行性分析和排期规划
 
