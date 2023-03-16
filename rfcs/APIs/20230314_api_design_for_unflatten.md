@@ -30,7 +30,7 @@ Paddle 需要扩充 API：paddle.unflatten，Tensor.unflatten，paddle.nn.Unflat
 
 `paddle.flatten`: 将 Tensor 展平成一维。
 
-目前，飞桨暂时没有直接将 Tensor 某一个维度展开成多个维度的 API。如果需要展开某一维度，可以先计算展开后的shape，然后使用 `paddle.reshape` 展开。
+目前，飞桨暂时没有直接将 Tensor 某一个维度展开成多个维度的 API。如果需要展开某一维度，可以先s计算展开后的shape，然后使用 `paddle.reshape` 展开。
 
 # 三、业内方案调研
 
@@ -38,7 +38,7 @@ Paddle 需要扩充 API：paddle.unflatten，Tensor.unflatten，paddle.nn.Unflat
 
 Pytorch 中相关的API如下：
 
-1.`torch.unflatten(input, dim, sizes)`
+`torch.unflatten(input, dim, sizes)`
 
 支持在多个维度上展开输入张量的维度。
 
@@ -56,7 +56,7 @@ A View of input with the specified dimension unflattened.
 
 
 
-2.`torch.nn.Unflatten(dim, unflattened_size)`
+`torch.nn.Unflatten(dim, unflattened_size)`
 
 展开一个张量，将其扩展到所需的形状。用于Sequential。
 
@@ -67,14 +67,14 @@ Parameters:
 
 Shape:
 
-- Input: (∗,$$S_{dim}$$,∗) where $$S_{dim}$$ is the size at dimension `dim` and ∗ means any number of dimensions including none.
-- Output: (∗,$$U_{1}$$,...,$$U_{n}$$,∗), where *U* = `unflattened_size` and $$   \prod_{i=1}^{n} U_i=S_{dim} $$
+- Input: (∗,$S_{dim}$,∗) where $S_{dim}$ is the size at dimension `dim` and ∗ means any number of dimensions including none.
+- Output: (∗,$U_{1}$,...,$U_{n}$,∗), where *U* = `unflattened_size` and $   \prod_{i=1}^{n} U_i=S_{dim} $
 
 官方文档链接：[Unflatten — PyTorch 2.0 documentation](https://pytorch.org/docs/2.0/generated/torch.nn.Unflatten.html?highlight=unflatten#torch.nn.Unflatten)
 
 
 
-3.`Tensor.unflatten(dim, sizes)`
+`Tensor.unflatten(dim, sizes)`
 
 同`torch.unflatten(input, dim, sizes)`
 
@@ -216,7 +216,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
      - 对于 sizes, 则要求里面最多只有一个 -1
      - 对于 axis , 则要求 input存在该维度
    - 正常情况：给定合法的输入参数，检查输出张量是否符合预期的形状
-     - 例如，给定input为一个形状为(2, 4, 4)的张量，axis为1，sizes为(2, -1)，则输出张量应该是一个形状为(2, 2, 2,4)的张量
+     - 例如，给定input为一个形状为(2, 4, 4)的张量，axis为1，sizes为(2, -1)，则输出张量应该是一个形状为(2, 2, 2, 4)的张量
    - 异常情况：给定不合法的输入参数，检查是否抛出相应的异常，并检查异常信息是否正确
      - 例如，给定input为一个字符串"hello"，axis为1，sizes为(2, -1)，则应该抛出TypeError异常，并提示`Invalid input type: <class ‘str’>. Expected paddle.Tensor`
    - 边界情况：给定一些特殊或极端的输入参数，检查输出张量是否符合预期的形状
