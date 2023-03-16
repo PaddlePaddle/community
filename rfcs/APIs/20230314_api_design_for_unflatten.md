@@ -24,13 +24,23 @@ Paddle 需要扩充 API：paddle.unflatten，Tensor.unflatten，paddle.nn.Unflat
 
 # 二、飞桨现状
 
-飞桨内暂时无直接将Tensor某一个维度展开成多个维度的 API。
+飞桨中提供了多种形状变换的 API，包括但不限于：
+
+`paddle.reshape`: 改变 Tensor 的形状，可以将 Tensor 展平成一维或将一维 Tensor 展开成多维。
+
+`paddle.flatten`: 将 Tensor 展平成一维。
+
+目前，飞桨暂时没有直接将 Tensor 某一个维度展开成多个维度的 API。如果需要展开某一维度，可以先计算展开后的shape，然后使用 `paddle.reshape` 展开。
 
 # 三、业内方案调研
 
 ## Pytorch
 
-Pytorch 中有 `torch.unflatten(input, dim, sizes)` API，支持在多个维度上展开输入张量的维度。
+Pytorch 中相关的API如下：
+
+1.`torch.unflatten(input, dim, sizes)`
+
+支持在多个维度上展开输入张量的维度。
 
 Parameters:
 
@@ -44,15 +54,45 @@ A View of input with the specified dimension unflattened.
 
 官方文档链接为：[torch.unflatten — PyTorch 2.0 documentation](https://pytorch.org/docs/2.0/generated/torch.unflatten.html?highlight=unflatten#torch.unflatten)
 
+
+
+2.`torch.nn.Unflatten(dim, unflattened_size)`
+
+展开一个张量，将其扩展到所需的形状。用于Sequential。
+
+Parameters:
+
+- **dim** (*Union* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*,* [*str*](https://docs.python.org/3/library/stdtypes.html#str)*]*) – Dimension to be unflattened
+- **unflattened_size** (*Union**[**torch.Size,* *Tuple*, *List*]) – New shape of the unflattened dimension
+
+Shape:
+
+- Input: (∗,$$S_{dim}$$,∗) where $$S_{dim}$$ is the size at dimension `dim` and ∗ means any number of dimensions including none.
+- Output: (∗,$$U_{1}$$,...,$$U_{n}$$,∗), where *U* = `unflattened_size` and $$   \prod_{i=1}^{n} U_i=S_{dim} $$
+
+官方文档链接：[Unflatten — PyTorch 2.0 documentation](https://pytorch.org/docs/2.0/generated/torch.nn.Unflatten.html?highlight=unflatten#torch.nn.Unflatten)
+
+
+
+3.`Tensor.unflatten(dim, sizes)`
+
+同`torch.unflatten(input, dim, sizes)`
+
+官方文档链接：[torch.Tensor.unflatten — PyTorch 2.0 documentation](https://pytorch.org/docs/2.0/generated/torch.Tensor.unflatten.html?highlight=unflatten#torch.Tensor.unflatten)
+
 #### Tensorflow
 
 Tensorflow没有直接api，但是可以使用reshape达到相同的效果。
+
+#### Numpy
+
+Numpy没有直接api，但是可以使用reshape达到相同的效果。
 
 # 实现方法
 
 ## Pytorch
 
-PyTorch 中实现 unflatten 使用 C++ 代码实现：
+PyTorch 中实现 unflatten 使用 C++ 代码实现，[实现代码](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/TensorShape.cpp#L3418) 如下：
 
 ```c++
 Tensor unflatten_impl(const Tensor& self, int64_t dim, SymIntArrayRef sizes, c10::optional<DimnameList> names) {
@@ -111,19 +151,35 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 ## 命名与参数设计
 
-`paddle.unflatten(input, sizes, axis)` 
+`paddle.unflatten(x, sizes, axis)` 
 
 参数说明如下：
 
-- **input** (Tensor) – 要进行扩展的张量。
+- **x** (Tensor) – 要进行扩展的张量。
 - **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`input.shape[dim]`。
-- **axis** (int) – 需要扩展的维度。
+- **axis** (int) – 需要扩展张量的维度。
 
 返回的是一个在axis维度扩展成sizes形状的tensor
 
+`Tensor.unflatten(sizes, axis)` 
+
+参数说明如下：
+
+- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`input.shape[dim]`。
+- **axis** (int) – 需要扩展张量的维度。
+
+返回的是一个在axis维度扩展成sizes形状的tensor
+
+`paddle.nn.Unflatten(sizes, axis)`
+
+参数说明如下：
+
+- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`input.shape[dim]`。
+- **axis** (int) – 需要扩展张量的维度。
+
 ## 底层 OP 设计
 
-使用 paddle现有 API 进行设计。
+使用 paddle现有 API 进行设计，不涉及底层OP新增与开发。
 
 ## API 实现方案
 这个方法的目的是将一个张量（tensor）在指定的轴（axis）上展开为指定的形状（sizes）
@@ -157,14 +213,14 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
      - sizes 要求为 *Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* 或者 *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* 
      - axis 要求为 int
    - 具体数值检验:
-     - 若 sizes 有输入, 则要求里面最多只有一个 -1
-     - 若 axis 有输入, 则要求 input存在该维度
+     - 对于 sizes, 则要求里面最多只有一个 -1
+     - 对于 axis , 则要求 input存在该维度
    - 正常情况：给定合法的输入参数，检查输出张量是否符合预期的形状
-     - 例如，给定input为一个形状为(2, 3, 4)的张量，axis为1，sizes为(2, -1)，则输出张量应该是一个形状为(2, 2, 6)的张量
+     - 例如，给定input为一个形状为(2, 4, 4)的张量，axis为1，sizes为(2, -1)，则输出张量应该是一个形状为(2, 2, 2,4)的张量
    - 异常情况：给定不合法的输入参数，检查是否抛出相应的异常，并检查异常信息是否正确
      - 例如，给定input为一个字符串"hello"，axis为1，sizes为(2, -1)，则应该抛出TypeError异常，并提示`Invalid input type: <class ‘str’>. Expected paddle.Tensor`
    - 边界情况：给定一些特殊或极端的输入参数，检查输出张量是否符合预期的形状
-     - 例如，给定input为一个形状为(2, 3, 4)的张量，axis为0，sizes为(-1,)，则输出张量应该是一个形状为(24,)的张量
+     - 例如，给定input为一个形状为(2, 4, 4)的张量，axis为0，sizes为(-1,)，则输出张量应该是一个形状为(2, 8)的张量
 
 # 七、可行性分析和排期规划
 
