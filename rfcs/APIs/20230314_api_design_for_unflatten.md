@@ -67,8 +67,8 @@ Parameters:
 
 Shape:
 
-- Input: (∗,$S_{dim}$,∗) where $S_{dim}$ is the size at dimension `dim` and ∗ means any number of dimensions including none.
-- Output: (∗,$U_{1}$,...,$U_{n}$,∗), where *U* = `unflattened_size` and $   \prod_{i=1}^{n} U_i=S_{dim} $
+- Input: (∗, $S_{dim}$ ,∗) where $S_{dim}$ is the size at dimension `dim` and ∗ means any number of dimensions including none.
+- Output: (∗, $U_{1}$ ,..., $U_{n}$ ,∗), where $U$ = `unflattened_size` and $\prod_{i=1}^{n} U_i=S_{dim}$
 
 官方文档链接：[Unflatten — PyTorch 2.0 documentation](https://pytorch.org/docs/2.0/generated/torch.nn.Unflatten.html?highlight=unflatten#torch.nn.Unflatten)
 
