@@ -1,12 +1,12 @@
 # 标题
 
 标题如：Transpose OP性能优化设计文档
-| 基本信息                                                     | 内容                                                         |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 基本信息                                                   | 内容                                                         |
+| ---------------------------------------------------------  | ------------------------------------------------------------ |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | [Timber-Ye](https://github.com/Timber-Ye)、[BrianQian1999](https://github.com/BrianQian1999)                                               |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-03-05                                                   |
-| 版本号                                                       | V1.0                                   |
-| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | 基于PaddleDevelop版本开发                      |
+| 版本号                                                      | V1.0                                   |
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden">| 基于PaddleDevelop版本开发                      |
 | 文件名                                                       | 20230305_expand_as_op_optimization.md<br> |
 
 
@@ -33,13 +33,16 @@ out.device(dev) =
 ```
 首先对被扩展后的高维张量进行reshape，以便后续在指定维度上进行求和，最后再将结果reshape到希望输出的形状，以此达到约归降维的目的。
 
-下表列出了paddle框架的expand_as算子在[OP Benchmark](https://github.com/PaddlePaddle/benchmark/tree/master/api/tests_v2)中各种case场景下的OP性能数据。
+下表列出了paddle框架的expand_as算子在[OP Benchmark](https://github.com/PaddlePaddle/benchmark/tree/master/api/tests_v2)中各种case场景下的OP性能数据（测试环境：Tesla V100-32G, CUDA 11.2）。
 
-| Case | Device   | Data type | src_shape    | dst_shape      | Paddle Forward (ms) |  Paddle Backward (ms) |
-| ---- | -------- | --------- | ------------ | -------------- | ---------------------------- | ----------------------------- |
-| 0    | V100 32G | Float32   | [1785, 1]    | [1785, 128]    | 0.074236                   | 0.172566                    |
-| 1    | V100 32G | Float32   | [5, 1, 1]    | [5, 128, 128]  | 0.082833                  | 3.594770                    |
-| 2    | V100 32G | Float32   | [32, 807, 1] | [32, 807, 807] | 0.427489                   | 1.107112                    |
+| Case | Data type | src_shape    | dst_shape      | Paddle Forward (ms) |  Paddle Backward (ms) |   Total(ms)  |
+| ---- | --------- | ------------ | -------------- | ----------          | ----------------------|--------------|
+| 0    | float32   | [1785, 1]    | [1785, 128]    | 0.074236            | 0.172566              | 0.246802     |
+| 1    | float32   | [5, 1, 1]    | [5, 128, 128]  | 0.082833            | 3.594770              | 3.677603     |
+| 2    | float32   | [32, 807, 1] | [32, 807, 807] | 0.427489            | 1.107112              | 1.532601     |
+| 3    | float16   | [1785, 1]    | [1785, 128]    | 0.049622            | 0.147476              | 0.197098     |
+| 4    | float16   | [5, 1, 1]    | [5, 128, 128]  | 0.051206            | 3.039735              | 3.090941     |
+| 5    | float16   | [32, 807, 1] | [32, 807, 807] | 0.407556            | 0.980826              | 1.388382     |
 
 ## 1.2 业内方案调研
 
@@ -123,24 +126,27 @@ __global__ void ReduceTensorCUDAKernel(
 
 ## 1.3 对比分析
 
-除了Paddle框架以外，[OP Benchmark](https://github.com/PaddlePaddle/benchmark/tree/master/api/tests_v2)中还有针对Tensorflow的静态图测试脚本，下表给出的是Tensorflow框架下ExpandAs算子在各类case中的性能：
+除了Paddle框架以外，[OP Benchmark](https://github.com/PaddlePaddle/benchmark/tree/master/api/tests_v2)中还有针对Tensorflow的静态图测试脚本，下表给出的是Tensorflow框架下ExpandAs算子在各类case中的性能（测试环境：Tesla V100-32G, CUDA 11.2）：
 
-| Case | Device   | Data type | src_shape    | dst_shape      | Tensorflow forward (ms) | Tensorflow backward (ms) |
-| ---- | -------- | --------- | ------------ | -------------- | ----------------------- | ------------------------ |
-| 0    | V100 32G | Float32   | [1785, 1]    | [1785, 128]    | 0.150479               | 0.159827                |
-| 1    | V100 32G | Float32   | [5, 1, 1]    | [5, 128, 128]  | 0.104476              | 0.108868               |
-| 2    | V100 32G | Float32   | [32, 807, 1] | [32, 807, 807] | 9.223847              | 9.212913               |
+| Case | Data type | src_shape    | dst_shape      | Tensorflow forward (ms) | Tensorflow backward (ms) | Total(ms)                |
+| ---- | --------  | ---------    | ------------   | --------------          | -----------------------  | ------------------------ |
+| 0    | float32   | [1785, 1]    | [1785, 128]    | 0.150479                | 0.159827                 | 0.310306                 |
+| 1    | float32   | [5, 1, 1]    | [5, 128, 128]  | 0.104476                | 0.108868                 | 0.213345                 |
+| 2    | float32   | [32, 807, 1] | [32, 807, 807] | 9.223847                | 9.212913                 | 18.436761                |
+| 3    | float16   | [1785, 1]    | [1785, 128]    | 0.042221                | 0.044698                 | 0.086919                 |
+| 4    | float16   | [5, 1, 1]    | [5, 128, 128]  | 0.024973                | 0.031283                 | 0.056257                 |
+| 5    | float16   | [32, 807, 1] | [32, 807, 807] | 5.511609                | 5.298775                 | 10.810385                |
 
-在3个op benchmark case中，Paddle现有的前向算子表现都要优于Tensorflow，并且在case 2中比Tensorflow快20倍以上；
+在case 2和case 5当中，Paddle比Tensorflow快近10倍；而在case 1和case 4中，Tensorflow的性能又有显著优势。另外，当数据类型从`float32`变为`float16`后，Tensorflow算子的性能有明显的提升，而相比之下，数据类型对Paddle算子性能的影响不大。
 
-然而在后向算子中，除case 2外Paddle的性能都要弱于Tensorflow，特别是在case 1中，Tensorflow比Paddle快30倍以上。针对Paddle框架后向算子在case 1中的不佳表现，我们进行了进一步测试：
+特别值得注意的是，在case 1中Tensorflow后向算子比Paddle快30倍以上，case 4则更是快了近100倍。针对Paddle框架后向算子在这两个case中的不佳表现，我们进行了进一步测试（测试环境：Tesla V100-32G, CUDA 11.2）：
 
-| Case | Device   | Data type | src_shape    | dst_shape      | Paddle forward (ms) | Paddle backward (ms) |
-| ---- | -------- | --------- | ------------ | -------------- | ----------------------- | ------------------------ |
-| 3    | V100 32G | Float32   | [16, 1, 1]    | [16, 807, 807]    | 0.271686               | 254.208616                |
-| 4    | V100 32G | Float32   | [32, 1, 1]    | [32, 256, 256]  | 0.097565              | 18.539683               |
+| Case | Data type | src_shape    | dst_shape      | Paddle forward (ms) | Paddle backward (ms) | Total(ms)        |
+| ---- | --------- | ------------ | -------------- | --------------------| ---------------------| -----------------|
+| 6    | float32   | [16, 1, 1]   | [16, 807, 807] | 0.271686            | 254.208616           | 254.480303       |
+| 7    | float32   | [32, 1, 1]   | [32, 256, 256] | 0.097565            | 18.539683            | 18.637249        |
 
-综上可见，在整体上Paddle的前向算子性能更优，后向算子的表现各有优劣。另外，Tensorflow中前向后向算子的性能差距不大，而在Paddle中，前向算子的性能要远好于后向算子，也就是说**后向算子有很大的优化空间**。而所降维数空间越大，进行约归求和的数据量也就越大，这应该是导致Paddle后向算子性能存在如此差异的主要原因。
+综上可见，无论前向还是后向算子，Paddle与Tensorflow相比较均各有优劣。但是，Tensorflow中前向后向算子的性能差距不大，而在Paddle中，前向算子的性能通常要明显好于后向算子，也就是说**Paddle的后向算子有很大的优化空间**。所降维数空间越大，进行约归求和的数据量也就越大，这应该是导致Paddle后向算子性能存在如此差异的主要原因。
 
 # 2 设计方案与性能预期
 
