@@ -1,6 +1,6 @@
 # 【PaddlePaddle Hackathon 4】核心框架开源贡献 PHI 算子库独立编译任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
 注：为飞桨框架 PHI 算子库解耦头文件依赖，**3月6日前完成 PR 提交，3月13日前完成 PR 合入**，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，任务列表如下，其他说明事项在任务列表后：
 
