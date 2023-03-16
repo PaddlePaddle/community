@@ -1,5 +1,5 @@
-# CINN resize 设计文档
-|API名称 | resize | 
+# CINN ReverseComputeInline 设计文档
+|API名称 | ReverseComputeInline | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | zrr1999 |
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-16 |
@@ -34,7 +34,7 @@ CINN框架暂不支持 `ReverseComputeInline` 原语，需要实现。
 # 三、业内方案调研
 **TVM 的 `ReverseComputeInline` 原语**
 
-在 TVM 中，与本次任务将要实现的算子对应的是 `resize2d` 算子，核心代码如下：
+在 TVM 中，核心代码如下：
 ```c++
 class ReverseComputeInliner : public BaseInliner {
   class Substituter : public StmtExprMutator {
@@ -288,73 +288,52 @@ class ReverseComputeInliner : public BaseInliner {
   const IRModule& mod_;
 };
 ```
-代码在 C++ 侧通过 Call 调用 python 侧的 `resize2d` 实现，python 侧已经以 te 形式实现了算子。
 
-[resize2d compute的核心代码](https://github.com/apache/tvm/blob/5e652c1a7aa173cec6f9e68207b410ad06b2fcec/python/tvm/topi/image/resize.py#L531)
-
+[ReverseComputeInline的核心代码](https://github.com/apache/tvm/blob/422ca2855a74bf0d0d88f1aa66343015f4326ac1/src/tir/schedule/primitive/compute_inline.cc)
 
 # 四、对比分析
-TVM 的 `resize2d` 算子实现详细，可作为参考。本次任务计划以 extern call 的方式实现 `resize` 算子，使用 CINN IR 实现 Compute。
+TVM 的 `ReverseComputeInline` 原语实现较为简单，可作为参考。本次任务计划参考已有的 ComputeInline 操作和 CINN 调度原语开发说明文档，实现 ReverseComputeInline
 
 # 五、设计思路与实现方案
 
-## 命名与参数设计
-**算子参数：**
-
-|   类别    |    类型     |   名称    |        Shape         |                                                                             描述                                                                              |
-| :-------: | :---------: | :-------: | :------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|   Input   | Tensor\<T\> |     x     |  [N, C, in_H, in_W]  |                                                                           输入张量                                                                            |
-| Attribute | vector<int> | out_shape |    [out_H, out_W]    |                                                         调整后的张量大小，只需指定H、W两个维度上的值                                                          |
-| Attribute |   string    |   mode    |          -           | 指定插值方法，可选项包括：<br>**nearest**(最近邻插值，选取H和W维上最近的值);<br>**bilinear**(双线性插值，选取H和W维上相邻四个点做线性插值);<br>**bicubic**(二次立方插值).<br>默认值bilinear |
-|  Output   | Tensor\<T\> |    out    | [N, C, out_H, out_W] |                                                              输出张量，数据类型与输入张量相同同                                                               |
-
-**支持的数据类型:**
- 
-`uint8`、`int32`
-
-## 底层OP设计
-在 `cinn/hlir/op/contrib` 中新增 `resize` 算子。
+## 原语API设计
+在 `cinn/ir/ir_schedule.h` 中新增 `ReverseComputeInline` 原语。
 ```c++
-ir::Tensor Resize(const ir::Tensor &x,
-                  vector out_shape,
-                  std::string mode, 
-                  std::string &output_name)
+  /**
+   * \brief Mark a previously inlined schedule block as no longer inlined. This function undoes the effects of
+   * ComputeInline on the given schedule block.
+   * @param schedule_block the previously inlined schedule block.
+   */
+  void ReverseComputeInline(const Expr& schedule_block);
 ```
-实现 `resize` 的 strategy：`StrategyForResize`、`InferDtypeForResize` 和 `InferShapeForResize`，并注册算子。
 
 ## API实现方案
-- c++ 接口
-  
-在 `cinn/frontend` 中的 `NetBuild` 类中增加 `Resize` 函数。
-
-- python 接口
-  
-在 `cinn/pybind/frontend.cc` 中增加 `resize` 算子的接口。
-
+ComputeInline 原语：分别添加接口及实现至 cinn/ir/ir_schedule.h、cinn/ir/ir_schedule.cc
+支持新增原语 Trace 重放：在 cinn/ir/schedule_desc.cc 中使用CINN_BUILD_STEP_KIND 注册 ComputeInline 原语的重放函数
 
 # 六、测试和验收的考量。
-在 `python/tests/ops/test_resize_op.py` 中添加 `resize` 算子的测试。测试内容覆盖所有 resize 模式，所有支持的数据类型，以及常见的 shape。 
+ComputeInline 原语单测添加至 cinn/backends/ir_schedule_test.cc
+新增原语 Trace 重放单测添加至 cinn/ir/schedule_desc_test.cc
 
 # 七、可行性分析和排期规划
 - 可行性分析
 
-CINN中已经实现了大量的基础算子，在现有的框架基础上能够很好地增加算子功能。
+CINN中已经实现了许多其他原语，在现有的框架基础上能够很好地添加其他原语功能。
 
 - 排期规划
 
-2月27日 ~ 3月11日完成 API 的开发与调试。
+3月17日 ~ 3月21日完成基本开发。
 
-3月12日 ~ 3月19日完成测试代码的开发。
+3月21日 ~ 3月31日完成调试和测试代码的编写。
 
 # 八、影响面
 本次任务影响模块如下，
 
-`cinn\backends`，`cinn\frontend`，`cinn\hlir`，`cinn\pybind`，`cinn\runtime`。
+`cinn\backends`，`cinn\ir`，`cinn\hlir`。
 
 均是在原模块内增加代码，不影响原模块的已有功能。
 
 # 附件及参考资料
 1. [CINN项目贡献指南](https://github.com/PaddlePaddle/CINN/pull/810)  
 2. [CINN IR抽象语法树](https://github.com/PaddlePaddle/CINN/pull/775)  
-3. [CINN IR DSL在C++的matmul写法例子](https://github.com/PaddlePaddle/CINN/blob/develop/tutorials/matmul.cc) 
-4. [CINN算子开发示例：pool2d_grad算子](https://github.com/PaddlePaddle/CINN/pull/858)  
+3. [CINN调度原语开发](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/CINN/CINN_ir_schedule.md) 
