@@ -1,6 +1,6 @@
 # 建设更多的tutorials任务顺利结项
 
-Hi all：
+**Hi all：**
 
 自2022年11月启动 [[Call for Contribution] 建设更多的Tutorials](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/docs/Call_For_Tutorials.md) 以来，社区开发者总共贡献了11篇应用实践案例，涵盖CV（图片&点云）、NLP、强化学习等使用场景，并均已上线官网。现向各位汇报这个任务的总体进展成果和后续计划。
 
@@ -12,7 +12,7 @@ Hi all：
 
 ## 二、项目历程
 
-整体进展关键时间点如下：
+**整体进展关键时间点如下：**
 
 * 2022年10月20日，任务发布并公开招募列表；
 * 2022年12月20日，收到并合入了第一个社区贡献PR（来自[@lzzzzzm](https://github.com/lzzzzzm)）；
@@ -41,7 +41,7 @@ Hi all：
 
 祝好！
 
-孙钟恺
+飞桨开源社区
 
 2023/03/15
 

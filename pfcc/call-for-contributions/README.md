@@ -9,7 +9,7 @@
 详细项目进展请见：https://github.com/orgs/PaddlePaddle/projects/7 ，已结项 & 即将结项的内容见[文末](#done)，下面是进行中的项目。
 
 - [优化文档体验](./docs)
-  - [建设更多的Tutorial](./docs/Call_For_Tutorials.md)【进行中】
+  - [建设更多的Tutorial](./docs/Call_For_Tutorials.md)【已结项】
 - [代码风格统一](./code_style)
   - [编译 warning 的消除](./code_style/code_style_compiler_warning.md)【进行中】
   - [clang-tidy 代码风格检查工具的引入](./code_style/code_style_clang_tidy.md)
