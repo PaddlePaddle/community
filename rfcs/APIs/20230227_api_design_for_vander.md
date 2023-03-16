@@ -124,13 +124,13 @@ Tensorflow： Tensorflow可以通过调用tensorflow.experimental.numpy.vander�
 ## 命名与参数设计
 
 ```python
-paddle.vander(x, N=None, increasing=False, name=None)
+paddle.vander(x, n=None, increasing=False, name=None)
 ```
 
 参数类型要求：
 
 * 输入`x`的类型为 1-D Tensor。
-* 输入`N`的类型为int。
+* 输入`n`的类型为int。
 * 输入`increasing`的类型为bool。
 
 参数与文档要求进行对齐。
@@ -139,23 +139,23 @@ paddle.vander(x, N=None, increasing=False, name=None)
 
 在`python/paddle/tensor/math.py`中增加`vander`函数，并添加英文描述
 ```python
-def vander(x, N=None, increasing=False, name=None):
+def vander(x, n=None, increasing=False, name=None):
     if x.dim() != 1:
         raise ValueError(
                 "The input of x is expected to be a 1-D Tensor."
                 "But now the dims of Input(X) is %d."
                 % x.dim())
     
-    if N < 0:
+    if n < 0:
         raise ValueError("N must be non-negative.")
-    if N is None:
-        N = len(x)
+    if n is None:
+        n = len(x)
     
-    res = paddle.empty([len(x), N], dtype=x.dtype)
+    res = paddle.empty([len(x), n], dtype=x.dtype)
 
-    if N > 0:
+    if n > 0:
         res[:, 0] = 1
-    if N > 1:
+    if n > 1:
         res[:, 1:] = x[:, None]
         res[:, 1:] = paddle.cumprod(res[:, 1:], dim=-1)
     res = res[:, ::-1] if not increasing else res
