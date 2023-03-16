@@ -1,4 +1,6 @@
 ## 问题描述
+> This project will be mentored by [@heavyrain-lzy](https://github.com/heavyrain-lzy)
+
 大家好，目前飞桨的算子已十分丰富，能够满足众多用户需求，但另一方面，繁多的算子给框架的维护和开发带来了困难。为了规范静态图算子的定义方式加快算子开发流程，飞桨建立了一套自动代码生成体系。但目前并没有将所有的算子清理完毕，这里筛选出部分简单的算子，欢迎大家一起提交清理。任务目标是将`legacy_ops.yaml` `legacy_backward.yaml`中的OP的配置移动到`ops.yaml` `backward.yaml`，在`op_compat.yaml`进行参数名字映射设置(详见附录),如果有version信息还需要在`op_version.yaml`中配置version信息(详见附录)，**并将原始手写的算子实现进行删除,也就是删除对应的`xxx_op.cc`和`xxx_sig.cc`文件或者文件的一部分**。
 为了完成这些静态图算子的清理，建议按照如下步骤进行：
 ### 预备知识
