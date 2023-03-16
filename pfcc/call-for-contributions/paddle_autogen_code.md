@@ -33,10 +33,7 @@
     d. 有些算子在`legacy_ops.yaml legacy_backward.yaml`中的配置并不完整，通常出现在`kernel`下缺少`data_type`配置，而对应的静态图ops的`GetExpectedKernelType`是含有`data_type`类型推导，所以在你移动yaml配置时，需要补充这个配置，可以参见[PR48977](https://github.com/PaddlePaddle/Paddle/pull/48977)
 2. 有些算子的修改可能涉及到API说明文档，如果遇到这种情况，需要将C++端的comment拷贝到Python接口，可以参考[PR50611](https://github.com/PaddlePaddle/Paddle/pull/50611)
 3. 建议完成开发任务时，对照已存在的yaml配置，执行CMake，观察yaml配置对应的生成代码，能够快速帮你熟悉yaml配置原则。
-4. 这些任务时间：PR截止提交时间3月26，截止合入时间3月29
-5. 这些任务难度不大，可以加深对框架的熟悉程度，增强代码调试能力，欢迎参与
-6. [历史上的goog issue](https://github.com/PaddlePaddle/community/tree/master/pfcc#good-first-issue)也欢迎来提 PR 解决~
-
+4. 这些任务难度不大，可以加深对框架的熟悉程度，增强代码调试能力，欢迎参与
 ### 任务列表（整体进度1/52）
 |任务序号|算子名      |算子注意事项    | 需要修改ops.yaml/backward.yaml | 需要修改static_ops.yaml/static_backward.yaml | 需要修改op_compat.yaml | 需要修改op_version.yaml | 需要删除算子同名xxx_sig.cc |
 |----|-------------|-----------------|--------|--------|-----| ---|-----|
