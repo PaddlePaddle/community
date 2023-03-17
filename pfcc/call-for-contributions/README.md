@@ -8,8 +8,6 @@
 
 详细项目进展请见：https://github.com/orgs/PaddlePaddle/projects/7 ，已结项 & 即将结项的内容见[文末](#done)，下面是进行中的项目。
 
-- [优化文档体验](./docs)
-  - [建设更多的Tutorial](./docs/Call_For_Tutorials.md)【进行中】
 - [代码风格统一](./code_style)
   - [编译 warning 的消除](./code_style/code_style_compiler_warning.md)【进行中】
   - [clang-tidy 代码风格检查工具的引入](./code_style/code_style_clang_tidy.md)
@@ -53,6 +51,7 @@ Status：2022-11-02 已经下线这两条流水线。
 ## 已结项 & 即将结项
 - [优化文档体验](./docs)
   - [API文档体验优化 & DenseTensor 概念统一](https://github.com/PaddlePaddle/Paddle/issues/48047)【待发结项小结】
+  - [建设更多的Tutorial](./docs/Call_For_Tutorials.md)【已结项】
 - [代码风格统一](./code_style)
   - [单测报错信息优化](./code_style/code_style_improvement_for_unittest.md)【已结项】
   - [flake8 代码风格检查工具的引入](./code_style/code_style_flake8_milestone_summary.md)【已结项】
