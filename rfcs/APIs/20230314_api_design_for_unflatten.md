@@ -30,7 +30,7 @@ Paddle 需要扩充 API：paddle.unflatten，Tensor.unflatten，paddle.nn.Unflat
 
 `paddle.flatten`: 将 Tensor 展平成一维。
 
-目前，飞桨暂时没有直接将 Tensor 某一个维度展开成多个维度的 API。如果需要展开某一维度，可以先s计算展开后的shape，然后使用 `paddle.reshape` 展开。
+目前，飞桨暂时没有直接将 Tensor 某一个维度展开成多个维度的 API。如果需要展开某一维度，可以先计算展开后的shape，然后使用 `paddle.reshape` 展开。
 
 # 三、业内方案调研
 
@@ -151,38 +151,53 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 ## 命名与参数设计
 
-`paddle.unflatten(x, sizes, axis)` 
+`paddle.unflatten(x, shape, axis, name=None)` 
 
 参数说明如下：
 
-- **x** (Tensor) – 要进行扩展的张量。
-- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`x.shape[dim]`。
-- **axis** (int) – 需要扩展张量的维度。
+- **x** (Tensor) – 要进行扩展的张量，数据类型支持`float32`,`float64`, `int32`, `int64`数据类型。
+- **shape** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* |Tensor) – 扩展后张量的新形状，元素不能为空即`len(shape)!=0`，最多只能有一个维度为-1。
+  - 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
+  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`int32`。
+  - 如果`shape`元素不包含-1，`shape`元素内积必须等于`x.shape[axis]`。
+- **axis** (int) – 需要扩展张量的维度，可以为负数，范围为`[-len(x.shape),len(x.shape)-1]`。
+- **name** (str,optional) –  操作的名称，更多信息请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)。
 
-返回的是一个在axis维度扩展成sizes形状的tensor
+返回：在axis维度扩展成shape形状的tensor
 
-`Tensor.unflatten(sizes, axis)` 
-
-参数说明如下：
-
-- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`x.shape[dim]`。
-- **axis** (int) – 需要扩展张量的维度。
-
-返回的是一个在axis维度扩展成sizes形状的tensor
-
-`paddle.nn.Unflatten(sizes, axis)`
+`Tensor.unflatten(shape, axis, name=None)` 
 
 参数说明如下：
 
-- **sizes** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* ) – 扩展后张量的新形状。其中一个元素可以是-1，在这种情况下，将推断相应的输出维度。否则，`sizes`的乘积必须等于`x.shape[dim]`。
-- **axis** (int) – 需要扩展张量的维度。
+- **shape** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* |Tensor) – 扩展后张量的新形状，元素不能为空即`len(shape)!=0`，最多只能有一个维度为-1。
+  - 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
+  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`int32`。
+  - 如果`shape`元素不包含-1，`shape`元素内积必须等于`x.shape[axis]`。
+- **axis** (int) – 需要扩展张量的维度，可以为负数，范围为`[-len(tensor.shape),len(tensor.shape)-1]`。
+- **name** (str,optional) –  操作的名称，更多信息请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)。
+
+返回：在axis维度扩展成shape形状的tensor
+
+`paddle.nn.Unflatten(shape, axis, name=None)`
+
+参数说明如下：
+
+- **shape** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* |Tensor) – 扩展后张量的新形状，元素不能为空即`len(shape)!=0`，最多只能有一个维度为-1。
+  - 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
+  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`int32`。
+  - 如果`shape`元素不包含-1，`shape`元素内积必须等于`x.shape[axis]`。
+
+- **axis** (int) – 需要扩展张量的维度，可以为负数，范围为`[-len(tensor.shape),len(tensor.shape)-1]`。
+- **name** (str,optional) –  操作的名称，更多信息请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)。
+
+返回：`None`
 
 ## 底层 OP 设计
 
 使用 paddle现有 API 进行设计，不涉及底层OP新增与开发。
 
 ## API 实现方案
-这个方法的目的是将一个张量（tensor）在指定的轴（axis）上展开为指定的形状（sizes）
+这个方法的目的是将一个张量（tensor）在指定的轴（axis）上展开为指定的形状（shape）
 
 - 检查输入参数是否合法，如果不合法，抛出相应的异常
 
@@ -204,23 +219,51 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
    - 这个函数的测试和验收的目标是确保它能正确地将输入张量在指定轴上展开为指定形状，并且能处理各种异常情况。
    - 前向计算: `paddle.unflatten`计算结果与 `torch.unflatten` 计算结果一致。
-- 反向计算:由 Python 组合新增 API 无需验证反向计算。
+   
+   - 反向计算:由 Python 组合新增 API 无需验证反向计算。
 2. 硬件场景: 在 CPU 和 GPU 硬件条件下的运行结果一致。
-3. 单元测试:
-
-   - 数据类型检验:
-     - x 要求为 paddle.Tensor
-     - sizes 要求为 *Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* 或者 *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* 
-     - axis 要求为 int
-   - 具体数值检验:
-     - 对于 sizes, 则要求里面最多只有一个 -1
-     - 对于 axis , 则要求 x 存在该维度
-   - 正常情况：给定合法的输入参数，检查输出张量是否符合预期的形状
-     - 例如，给定x为一个形状为(2, 4, 4)的张量，axis为1，sizes为(2, -1)，则输出张量应该是一个形状为(2, 2, 2, 4)的张量
-   - 异常情况：给定不合法的输入参数，检查是否抛出相应的异常，并检查异常信息是否正确
-     - 例如，给定x为一个字符串"hello"，axis为1，sizes为(2, -1)，则应该抛出TypeError异常，并提示`Invalid input type: <class ‘str’>. Expected paddle.Tensor`
-   - 边界情况：给定一些特殊或极端的输入参数，检查输出张量是否符合预期的形状
-     - 例如，给定x为一个形状为(2, 4, 4)的张量，axis为0，sizes为(-1,)，则输出张量应该是一个形状为(2, 8)的张量
+3. 异常测试：
+   * 类型检查
+     * x 要求为 `paddle.Tensor` 类型。
+       * x 为一个字符串`"hello"` (异常)
+       * x 为`paddle.Tensor` 类型
+     * shape 要求为 `tuple`|`list`|`paddle.Tensor `类型。
+       * shape 为一个字符串`"hello" `(异常)
+       * shape 为 `list` 类型，例如：`[1,2,3]`
+       * shape 为 `tuple` 类型，例如：`(1,2,3)`
+       * shape 为 `paddle.Tensor` 类型，例如: `paddle.to_tensor([1.0, 2.0])`
+     * axis 要求为 `int` 类型。
+       * axis 为一个字符串`"hello" `(异常)
+       * axis 为int类型，例如 `2`
+     * name 若有输入，要求为 `str` 类型。
+   * 数据类型检查
+     * x 数据类型要求为 `float32`｜`float64`｜ `int32`｜`int64`（上面为`paddle.reshape` 支持的[类型]([reshape-API Document-PaddlePaddle Deep Learning Platform](https://www.paddlepaddle.org.cn/documentation/docs/en/api/paddle/reshape_en.html#reshape))）
+       * x为 `int8` 类型(异常)
+       * x为 `float32`
+       * x为 `float64`
+       * x为 `int32`
+       * x为 `int64`
+     * shape 
+       * 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
+         * shape 为`[1,'2','3']`(异常)
+         * shape 为`(1,'2','3')`(异常)
+         * shape 为`[1,2,3]`
+         * shape 为`(1,2,3)`
+       * 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型应为`int32`。
+         * shape 为 `paddle.randn([4, 4])`(异常)
+         * shape 为 `paddle.to_tensor([1,2,3],dtype=paddle.dtype.int32)`
+   * 具体数值检查
+     * shape的不能为空
+       * shpae 为 `[]` 或者 `()` 或者 `paddle.to_tensor([])`(异常)
+     * shape 最多只能有一个元素为 -1
+       * shape有2个-1：shape 为 `[-1,-1,2]`(异常)
+       * shape有1个-1：shape 为 `[-1,2,2]`
+       * shape没有-1：shape 为 `[2,2,2]`
+     * axis 的数值应在`[-len(x.shape), len(x.shape)-1]`范围内
+       * axis为正数，在范围外：`x=paddle.randn([2,4,5])`, `axis=3`(异常)
+       * axis为负数，在范围外：`x=paddle.randn([2,4,5])`, `axis=-4`(异常)
+       * axis为负数，在范围内：`x=paddle.randn([2,4,5])`, `axis=-2`
+       * axis为正数，在范围内：`x=paddle.randn([2,4,5])`, `axis=1`
 
 # 七、可行性分析和排期规划
 
