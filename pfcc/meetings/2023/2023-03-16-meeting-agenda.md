@@ -29,12 +29,12 @@
 | [longranger2](https://github.com/longranger2)     | [taixiurong](https://github.com/taixiurong)           | [FisherWY](https://github.com/FisherWY)                   | [Atlantisming](https://github.com/Atlantisming)       | [Lemon-er](https://github.com/Lemon-er)             | [lizechng](https://github.com/lizechng)           |
 | [ccsuzzh](https://github.com/ccsuzzh)             | [DrRyanHuang](https://github.com/DrRyanHuang)         | [RedContritio](https://github.com/RedContritio)           |   [Lyutoon](https://github.com/Lyutoon)                                                    |                [PommesPeter](https://github.com/PommesPeter)                                      |  [tianxingxia-cn](https://github.com/tianxingxia-cn)                                                 |
 | [sanbuphy](https://github.com/sanbuphy)             | [jjyaoao](https://github.com/jjyaoao)         | [kk-2000](https://github.com/kk-2000)           |   [Tomoko-hjf](https://github.com/Tomoko-hjf)                                                    |                [edencfc](https://github.com/edencfc)                                      |         [CollaborativeFiltering](https://github.com/CollaborativeFiltering)                                      |        [cloud2009](https://github.com/cloud2009)   |           |
-| [hh-qiao](https://github.com/hh-qiao)             |  [AndSonder](https://github.com/AndSonder)  |
+| [hh-qiao](https://github.com/hh-qiao)             |  [AndSonder](https://github.com/AndSonder)  | [JuiceHub](https://github.com/JuiceHub) |
 
 
 # 会议议程
 
-- 新人介绍 [hh-qiao](https://github.com/hh-qiao)、 [AndSonder](https://github.com/AndSonder) （5 min）
+- 新人介绍 [hh-qiao](https://github.com/hh-qiao)、 [AndSonder](https://github.com/AndSonder)、[JuiceHub](https://github.com/JuiceHub) （5 min）
 - [From00](https://github.com/From00)  全静态选kernel方案介绍 (15min)
 - [yiakwy](https://github.com/yiakwy) 低精度计算 Mini Float 分享（10 min）
 - [sanbuphy](https://github.com/sanbuphy) 快速安装脚本开发经验分享（5-10 min）
