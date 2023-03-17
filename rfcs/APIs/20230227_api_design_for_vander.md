@@ -118,6 +118,8 @@ Tensorflow： Tensorflow可以通过调用tensorflow.experimental.numpy.vander�
 
 通过上述分析可以发现，`numpy.vander`和`torch.linalg.vander`的核心实现都是依据累乘API来实现的，且`numpy.vander`和`torch.vander`的输入参数和返回值除类型分别为`numpy.nparray`和`torch.Tensor`之外基本一致。但是`torch.vander`仅能支持输入`x`为Tensor，不像`numpy.vander`能够额外支持`list和tuple`。
 
+经测试，当 `N` 为 0 时，`numpy.vander`以及`torch.vander`都能够正常输出维度为 `(len(x),0)` 的空 `ndarray` 或 `Tensor`。
+
 # 五、设计思路与实现方案
 经测试,`paddle.vander`可以利用已有的API组合实现，因此不需要写C++算子，且该 API 没有反向（与torch保持一致）。
 
@@ -129,11 +131,11 @@ paddle.vander(x, n=None, increasing=False, name=None)
 
 参数类型要求：
 
-* 输入`x`的类型为 1-D Tensor。
+* 输入`x`为 1-D Tensor, 数据类型支持 int32、int64、float32、float64、complex64、complex128。
 * 输入`n`的类型为int。
 * 输入`increasing`的类型为bool。
 
-参数与文档要求进行对齐。
+参数与文档要求进行对齐。并与`numpy.vander`和`torch.vander`对齐，当 `n` 为0时，输出维度为 `(len(x),0)` 的空`Tensor`。
 
 ## API实现方案
 
@@ -173,6 +175,7 @@ def vander(x, n=None, increasing=False, name=None):
 * 与numpy对比结果是否一致。
 * CPU、GPU测试。
 * 静态图/动态图测试。
+* n 为0时与numpy是否一致。
 
 # 八、影响面
 
