@@ -337,7 +337,7 @@ class _DistributionMeta(abc.ABCMeta):
 # 五、设计思路与实现方案
 ## 命名与参数设计
 - 类名: `Bernoulli`
-- API: `class paddle.distribution.Bernoulli(probs=None, logits=None)`
+- API: `class paddle.distribution.Bernoulli(probs)`
 
 **注意区分**: `probs` 表示概率，`prob` 表示概率密度。
 
@@ -347,19 +347,18 @@ class _DistributionMeta(abc.ABCMeta):
 不涉及
 
 ## API实现方案
-### 继承父类: [Distribution](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/distribution/distribution.py#L33)
+### 继承父类: [ExponentialFamily](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/distribution/exponential_family.py#L20)
 
-`class paddle.distribution.Bernoulli(probs=None, logits=None)`
+`class paddle.distribution.Bernoulli(probs)`
 
 ### 初始化参数:
 - `probs` 概率
-- `logits`
 
     `核心代码`
     ``` python
-    def __init__(self, probs, logits):
-        self.probs = probs or self._logits_to_probs(logits, is_binary=True)
-        self.logits = logits or self._probs_to_logits(probs, is_binary=True)
+    def __init__(self, probs):
+        self.probs = probs
+        self.logits = self._probs_to_logits(probs, is_binary=True)
 
     ```
 
@@ -655,8 +654,6 @@ class _DistributionMeta(abc.ABCMeta):
 测试类：`BernoulliTestFeature(BernoulliTest)`
 
 需要覆盖接口：
-- 通过 `probs` 初始化后的 `logits` 与预期一致。
-- 通过 `logits` 初始化后的 `probs` 与预期一致。
 - `mean` 计算均值，预期与 `BernoulliNumpy.mean` 一致。
 - `variance` 计算方差，预期与 `BernoulliNumpy.variance` 一致。
 - `sample` 随机采样，利用 `Kolmogorov-Smirnov test` 预期与 `BernoulliNumpy.sample` 的分布一致。
@@ -707,7 +704,6 @@ class _DistributionMeta(abc.ABCMeta):
     - `Tensor`
     - `variable`
 - 初始化取值错误。
-    - `probs` 与 `logits` 取其一
     - 等于 `0` 错误
     - 等于 `1` 错误
     - 小于 `0` 错误
