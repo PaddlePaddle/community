@@ -1,4 +1,4 @@
-# paddle.[Tensor.]cummax 设计文档
+# paddle.[tensor.]cummax 设计文档
 
 | API名称                                                      | paddle.[Tensor.]cummax               |
 | ------------------------------------------------------------ | ----------------------------------- |
@@ -268,45 +268,54 @@ PyTorch 还提供了基于 CUDA 的算子实现。
 
 ## 命名与参数设计
 
-API设计为`paddle.cummax(x, axis, name)`以及`paddle.Tensor.cummax(axis, name)`。参数设计参考`paddle.cumsum`。
-- x (Tensor) - 需要进行累积最大值统计的 Tensor。
+API设计为`paddle.cummax(x, axis, name)`以及`paddle.tensor.cummax(axis, name)`。
+
+paddle.cummax
+----------------------
+参数
+:::::::::
+- x (Tensor) - 累积最大值的输入，需要进行累积最大值操作的 Tensor。
 - axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累加计算。
-- name  (str，可选) - 操作的名称（可选，默认值为None）。
+- name  (str，可选) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
+返回
+:::::::::
+- Out (tuple) - 返回累积最大值结果和对应的索引信息。结果的数据类型和输入`x`一致。索引的数据类型是 int64。
+
+paddle.tensor.cummax指向paddle.cummax，两者是相同的API
 
 ## 底层OP设计
 
 cpu：
-前向计算，需要计算cummin结果Out和对应的index，没有在paddle内部找到可以直接计算index的API可供调用，因此需要实现一个能够同时计算cmmin和index的函数ScanWithIndexKernel
-后向计算，调用cpu_scatter_add函数在index指定位置分配grad值，具体可以查看上面的pytorch实现
+前向计算，需要计算cummax结果Out和对应的Indices，没有在paddle内部找到可以直接计算Indices的API可供调用，因此需要实现一个能够同时计算cmmin和Indices的函数ScanWithIndicesKernel
+后向计算，调用cpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
 
 gpu：
-前向计算，大体过程与cumsum类似，但是在计算部分需要实现一个能够同时计算cmmin和index的函数ScanWithIndexKernel
-后向计算，调用gpu_scatter_add函数在index指定位置分配grad值，具体可以查看上面的pytorch实现
+前向计算，大体过程与cumsum类似，但是在计算部分需要实现一个能够同时计算cummax和Indices的函数ScanWithIndicesKernel
+后向计算，调用gpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
 
 前向函数签名
 
 ~~~cpp
-KernelSignature CummaxOpArgumentMapping(
-    const ArgumentMappingContext& ctx) {
-  return KernelSignature("cummax",
-                         {"X"},
-                         {"axis", "flatten"},
-                         {"Out", "Index"});
-}
-PD_REGISTER_ARG_MAPPING_FN(cummax, phi::CummaxOpArgumentMapping);
+template <typename T, typename Context>
+void CummaxKernel(const Context& dev_ctx,
+                  const DenseTensor& x,
+                  const Scalar& axis,
+                  bool flatten,
+                  DenseTensor* out,
+                  DenseTensor* indices);
 ~~~
 
 后向函数签名
 
 ~~~cpp
-KernelSignature CummaxGradOpArgumentMapping(
-    const ArgumentMappingContext& ctx) {
-  return KernelSignature("cummax_grad",
-                         {"X", "Index", "Out", "Out@GRAD"},
-                         {"axis", "flatten"},
-                         {"X@GRAD"});
-}
-PD_REGISTER_ARG_MAPPING_FN(cummax_grad, phi::CummaxGradOpArgumentMapping);
+template <typename T, typename Context>
+void CummaxGradKernel(const Context& dev_ctx,
+                      const DenseTensor& x,
+                      const DenseTensor& indices,
+                      const DenseTensor& out_grad,
+                      const Scalar& axis,
+                      bool flatten,
+                      DenseTensor* x_grad);
 ~~~
 
 ## API实现方案
@@ -320,8 +329,9 @@ Python 接口实现位置为`paddle/tesnor/math.py`。
 
 - 正确性验证：可以与 NumPy 的结果对齐；
   - 不同 shape；
+  - 前向计算和反向计算；
   - axis 维度：0，1，默认（None），-1等；
-  - dtype 类型：验证 `float64`，`int32`等。
+  - dtype 类型：验证 `float64`，`int32`等；
 
 - 边界情况：对 NaN 等异常值的处理，参考 `paddle.cumsum` 的测试，这里选择与 NumPy 保持一致，即遇到 NaN 结果也为 NaN；
   - 含有 NaN 的用例；
