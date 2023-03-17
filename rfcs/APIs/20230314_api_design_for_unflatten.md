@@ -253,8 +253,6 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
          * shape 为 `paddle.randn([4, 4])`(异常)
          * shape 为 `paddle.to_tensor([1,2,3],dtype=paddle.dtype.int32)`
    * 具体数值检查
-     * shape的不能为空
-       * shpae 为 `[]` 或者 `()` 或者 `paddle.to_tensor([])`(异常)
      * shape 最多只能有一个元素为 -1
        * shape有2个-1：shape 为 `[-1,-1,2]`(异常)
        * shape有1个-1：shape 为 `[-1,2,2]`
@@ -264,6 +262,11 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
        * axis为负数，在范围外：`x=paddle.randn([2,4,5])`, `axis=-4`(异常)
        * axis为负数，在范围内：`x=paddle.randn([2,4,5])`, `axis=-2`
        * axis为正数，在范围内：`x=paddle.randn([2,4,5])`, `axis=1`
+4. 边界测试：
+   * x 是一个空的Tensor，即x.shape = (0,)
+   * shape 是一个空的tuple或list，即shape = ()
+   * shape 包含了0作为元素，例如shape = (2, 0, 3)
+   * shape 包含了负数作为元素（除了-1），例如shape = (-2, 4)
 
 # 七、可行性分析和排期规划
 
