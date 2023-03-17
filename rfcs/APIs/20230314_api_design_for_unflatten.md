@@ -155,10 +155,10 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 参数说明如下：
 
-- **x** (Tensor) – 要进行扩展的张量，数据类型支持`float32`,`float64`, `int32`, `int64`数据类型。
+- **x** (Tensor) – 要进行扩展的张量，数据类型支持`uint8` `int8` `int16` `int32` `int64` `float32` `float64` `float16` `bfloat16` `complex64` `complex128` `bool` 数据类型。
 - **shape** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* |Tensor) – 扩展后张量的新形状，元素不能为空即`len(shape)!=0`，最多只能有一个维度为-1。
   - 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
-  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`int32`。
+  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`uint8` `int8` `int16` `int32` `int64`。
   - 如果`shape`元素不包含-1，`shape`元素内积必须等于`x.shape[axis]`。
 - **axis** (int) – 需要扩展张量的维度，可以为负数，范围为`[-len(x.shape),len(x.shape)-1]`。
 - **name** (str,optional) –  操作的名称，更多信息请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)。
@@ -190,7 +190,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 - **axis** (int) – 需要扩展张量的维度，可以为负数，范围为`[-len(tensor.shape),len(tensor.shape)-1]`。
 - **name** (str,optional) –  操作的名称，更多信息请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)。
 
-返回：`None`
+返回：`Layer object`
 
 ## 底层 OP 设计
 
@@ -237,12 +237,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
        * axis 为int类型，例如 `2`
      * name 若有输入，要求为 `str` 类型。
    * 数据类型检查
-     * x 数据类型要求为 `float32`｜`float64`｜ `int32`｜`int64`（上面为`paddle.reshape` 支持的[类型]([reshape-API Document-PaddlePaddle Deep Learning Platform](https://www.paddlepaddle.org.cn/documentation/docs/en/api/paddle/reshape_en.html#reshape))）
-       * x为 `int8` 类型(异常)
-       * x为 `float32`
-       * x为 `float64`
-       * x为 `int32`
-       * x为 `int64`
+     * x 数据类型要求为 `uint8` `int8` `int16` `int32` `int64` `float32` `float64` `float16` `bfloat16` `complex64` `complex128` `bool`（几乎都支持）
      * shape 
        * 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
          * shape 为`[1,'2','3']`(异常)
@@ -251,7 +246,8 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
          * shape 为`(1,2,3)`
        * 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型应为`int32`。
          * shape 为 `paddle.randn([4, 4])`(异常)
-         * shape 为 `paddle.to_tensor([1,2,3],dtype=paddle.dtype.int32)`
+         * shape 的类型不能为`float32` `float64` `float16` `bfloat16` `complex64` `complex128` `bool` 
+         * `paddle.to_tensor([1,2,3],dtype="bool")`(异常)
    * 具体数值检查
      * shape 最多只能有一个元素为 -1
        * shape有2个-1：shape 为 `[-1,-1,2]`(异常)
