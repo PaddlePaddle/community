@@ -1,5 +1,6 @@
+# 算子定义生成体系建设--静态图算子自动生成
 ## 问题描述
-> This project will be mentored by [@heavyrain-lzy](https://github.com/heavyrain-lzy)
+> This project will be mentored by [@heavyrain-lzy](https://github.com/heavyrain-lzy)，[@zyfncg](https://github.com/zyfncg)
 
 大家好，目前飞桨的算子已十分丰富，能够满足众多用户需求，但另一方面，繁多的算子给框架的维护和开发带来了困难。为了规范静态图算子的定义方式加快算子开发流程，飞桨建立了一套自动代码生成体系。但目前并没有将所有的算子清理完毕，这里筛选出部分简单的算子，欢迎大家一起提交清理。任务目标是将`legacy_ops.yaml` `legacy_backward.yaml`中的OP的配置移动到`ops.yaml` `backward.yaml`，在`op_compat.yaml`进行参数名字映射设置(详见附录),如果有version信息还需要在`op_version.yaml`中配置version信息(详见附录)，**并将原始手写的算子实现进行删除,也就是删除对应的`xxx_op.cc`和`xxx_sig.cc`文件或者文件的一部分**。
 为了完成这些静态图算子的清理，建议按照如下步骤进行：
@@ -36,7 +37,7 @@
 2. 有些算子的修改可能涉及到API说明文档，如果遇到这种情况，需要将C++端的comment拷贝到Python接口，可以参考[PR50611](https://github.com/PaddlePaddle/Paddle/pull/50611)
 3. 建议完成开发任务时，对照已存在的yaml配置，执行CMake，观察yaml配置对应的生成代码，能够快速帮你熟悉yaml配置原则。
 4. 这些任务难度不大，可以加深对框架的熟悉程度，增强代码调试能力，欢迎参与
-### 任务列表（整体进度1/52）
+### 任务列表
 |任务序号|算子名      |算子注意事项    | 需要修改ops.yaml/backward.yaml | 需要修改static_ops.yaml/static_backward.yaml | 需要修改op_compat.yaml | 需要修改op_version.yaml | 需要删除算子同名xxx_sig.cc |
 |----|-------------|-----------------|--------|--------|-----| ---|-----|
 |1   |affine_grid|version信息，IntArray参数| ✅           |        | ✅  | ✅  |✅  |   |   |   |
