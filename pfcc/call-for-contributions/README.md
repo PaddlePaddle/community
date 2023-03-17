@@ -9,6 +9,7 @@
 - 详细项目进展：https://github.com/orgs/PaddlePaddle/projects/7 
 - 已结项 & 即将结项的内容： https://github.com/PaddlePaddle/Paddle/issues/48019#issuecomment-1457650067 
 - 进行中的项目： [飞桨快乐开源活动表单->命题任务](https://github.com/PaddlePaddle/Paddle/issues/48019)
+- 一些在社区发现的可以进行贡献的想法：https://github.com/PaddlePaddle/Paddle/discussions/51794
 
 
 ## 飞桨线上开发环境——AI Studio
@@ -26,16 +27,3 @@ AI Studio uid 参考：
 <img width="453" alt="image" src="https://user-images.githubusercontent.com/39876205/201087539-4f1cecb1-8261-46e6-b425-13d21cceb45b.png">
 
 传送门：https://aistudio.baidu.com/aistudio/index
-
-
-## Project Ideas
-
-一些在社区发现的可以进行贡献的想法，先简单的记录在这里。需要先把这些想法明确成社区的项目描述，来方便开展具体的开源贡献项目。
-
-#### IDEA：改进飞桨框架的logging系统
-
-飞桨框架在C++层，python层的多个模块中会产生日志，以进行信息提示，或者告警。这些日志产生的方式（例如，C++层和python层没有统一，有些日志甚至在用`print`打印，在python层甚至有多个`get_logger`的定义）、日志的分级（哪些属于warning，哪些属于information，等）、日志的清晰程度，等多方面都有值得改进的地方。
-
-- 社区中的相关issue：[#46622](https://github.com/PaddlePaddle/Paddle/issues/46622)、[#46554](https://github.com/PaddlePaddle/Paddle/pull/46554#pullrequestreview-1122960171)、[#44857](https://github.com/PaddlePaddle/Paddle/pull/44857)、[45756](https://github.com/PaddlePaddle/Paddle/issues/45756)、[#43610](https://github.com/PaddlePaddle/Paddle/issues/43610)
-- 可参考的材料：[pytorch/rfcs/RFC-0026-logging-system.md](https://github.com/pytorch/rfcs/blob/4b75803bf90c16b0120787fa0557bfe79ace1ef3/RFC-0026-logging-system.md)
-- [Paddle报错信息文案书写规范](https://github.com/PaddlePaddle/Paddle/wiki/Paddle-Error-Message-Writing-Specification)
