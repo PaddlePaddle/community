@@ -171,7 +171,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 - **shape** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* |Tensor) – 扩展后张量的新形状，元素不能为空即`len(shape)!=0`，最多只能有一个维度为-1。
   - 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
-  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`int32`。
+  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`uint8` `int8` `int16` `int32` `int64`。
   - 如果`shape`元素不包含-1，`shape`元素内积必须等于`x.shape[axis]`。
 - **axis** (int) – 需要扩展张量的维度，可以为负数，范围为`[-len(tensor.shape),len(tensor.shape)-1]`。
 - **name** (str,optional) –  操作的名称，更多信息请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)。
@@ -184,7 +184,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 - **shape** (*Tuple* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* | *List* *[*[*int*](https://docs.python.org/3/library/functions.html#int)*]* |Tensor) – 扩展后张量的新形状，元素不能为空即`len(shape)!=0`，最多只能有一个维度为-1。
   - 如果`shape`是`list` 或者 `tuple`, 其元素必须为`int`类型。
-  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`int32`。
+  - 如果`shape`是`Tensor`，那么`shape`必须是一个维度为1-D的`Tensor`，数据类型支持`uint8` `int8` `int16` `int32` `int64`。
   - 如果`shape`元素不包含-1，`shape`元素内积必须等于`x.shape[axis]`。
 
 - **axis** (int) – 需要扩展张量的维度，可以为负数，范围为`[-len(tensor.shape),len(tensor.shape)-1]`。
@@ -231,7 +231,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
        * shape 为一个字符串`"hello" `(异常)
        * shape 为 `list` 类型，例如：`[1,2,3]`
        * shape 为 `tuple` 类型，例如：`(1,2,3)`
-       * shape 为 `paddle.Tensor` 类型，例如: `paddle.to_tensor([1.0, 2.0])`
+       * shape 为 `paddle.Tensor` 类型，例如: `paddle.to_tensor([1, 2])`
      * axis 要求为 `int` 类型。
        * axis 为一个字符串`"hello" `(异常)
        * axis 为int类型，例如 `2`
