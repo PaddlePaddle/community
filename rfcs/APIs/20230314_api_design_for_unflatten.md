@@ -1,12 +1,12 @@
 # paddle.unflatten 设计文档
 
-| API 名称     | Unflatten                            |
-| ------------ | ------------------------------------ |
-| 提交作者     | [cos43](https://github.com/cos43)    |
-| 提交时间     | 2023-03-14                           |
-| 版本号       | V1.0                                 |
-| 依赖飞桨版本 | develop                              |
-| 文件名       | 20230314_api_design_for_unflatten.md |
+| API 名称     | paddle.unflatten` / `paddle.nn.Unflatten |
+| ------------ | ---------------------------------------- |
+| 提交作者     | [cos43](https://github.com/cos43)        |
+| 提交时间     | 2023-03-14                               |
+| 版本号       | V1.0                                     |
+| 依赖飞桨版本 | develop                                  |
+| 文件名       | 20230314_api_design_for_unflatten.md     |
 
 # 一、概述
 
