@@ -1,6 +1,6 @@
 # 【PaddlePaddle Hackathon 4】核心框架开源贡献算子性能优化任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
 注：为飞桨框架优化一系列算子性能，提交流程请参考 [算子性能优化&提交流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/op_optimization/op_optimization_contributing_guides_cn.html)，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，任务列表如下：
 
@@ -45,8 +45,8 @@
 - 技术标签：深度学习框架，Python，C++，CUDA
 - 任务难度：基础
 - 详细描述：
-  - 现状：目前 Paddle 内 lerp 算子采用第三方库组合实现，性能不足；
-  - 目标：请优化计算实现，为 Paddle 优化 lerp op 在 GPU 上的计算性能，性能至少提升20%，针对性能差的case，性能至少提升4+倍。
+  - 现状：目前 Paddle 内 Prelu 算子采用第三方库组合实现，性能不足；
+  - 目标：请优化计算实现，为 Paddle 优化 Prelu op 在 GPU 上的计算性能，性能至少提升20%，针对性能差的case，性能至少提升4+倍。
 - 任务提交：
   - 设计文档：提 PR 至 community repo 的 [rfcs/OPs-Perf](https://github.com/PaddlePaddle/community/tree/master/rfcs/OPs-Perf)  目录；
   - C++ 及 GPU kernel 实现代码：提 PR 至 [paddle/phi/kernels/gpu/prelu_kernel.cu](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/phi/kernels/gpu/prelu_kernel.cu) 目录；

@@ -1,13 +1,13 @@
 # 【PaddlePaddle Hackathon 4】模型套件开源贡献任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
 注：为飞桨框架新增一系列 API，提交流程请参考 [新增API 开发&提交流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_contributing_guides_cn.html)，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，任务列表如下，其他说明事项在任务列表后：
 
 ### No.98：升级paddlenlp.transformers内的模型结构并且增加基础单测 <a name='task98'></a>
 
 - **技术标签：深度学习、Python、NLP**
-- **任务难度：**基础⭐️
+- **任务难度：基础⭐️** 
 - **详细描述：**
   - 升级指定的模型PaddleNLP模型结构，每个模型的主要工作为：
     - 为模型结构增加configuration.py, 对齐huggingface/transformers的config，并且适配在模型代码中适配config, 详情见[范例PR](https://github.com/PaddlePaddle/PaddleNLP/pull/4575)
@@ -28,7 +28,7 @@
 ### No.99：升级paddlenlp.transformers内的模型结构并且增加基础单测 <a name='task99'></a>
 
 - **技术标签：深度学习、Python、NLP**
-- **任务难度：**基础⭐️
+- **任务难度：基础⭐️** 
 - **详细描述：**
   - 升级指定的模型PaddleNLP模型结构，每个模型的主要工作为：
     - 为模型结构增加configuration.py, 对齐huggingface/transformers的config，并且适配在模型代码中适配config, 详情见[范例PR](https://github.com/PaddlePaddle/PaddleNLP/pull/4575)
@@ -49,14 +49,14 @@
 ### No.100：升级paddlenlp.transformers内的模型结构并且增加基础单测 <a name='task100'></a>
 
 - **技术标签：深度学习、Python、NLP**
-- **任务难度：**基础⭐️
+- **任务难度：基础⭐️** 
 - **详细描述：**
   - 升级指定的模型PaddleNLP模型结构，每个模型的主要工作为：
     - 为模型结构增加configuration.py, 对齐huggingface/transformers的config，并且适配在模型代码中适配config, 详情见[范例PR](https://github.com/PaddlePaddle/PaddleNLP/pull/4575)
     - 为模型增加单测, 并且做到单测通过，详情见[范例PR](https://github.com/PaddlePaddle/PaddleNLP/pull/4575)
   - 每个模型算单独的子任务，**每升级3个模型算完成一个基础任务**, 总共待升级的模型为
     - [prophetnet](https://github.com/PaddlePaddle/PaddleNLP/blame/develop/paddlenlp/transformers/prophetnet)
-    - [artist](https://github.com/PaddlePaddle/PaddleNLP/blame/develop/paddlenlp/transformers/artist)
+    - [rembert](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/paddlenlp/transformers/rembert)
     - [luke](https://github.com/PaddlePaddle/PaddleNLP/blame/develop/paddlenlp/transformers/luke)
   - 开发流程和环境配置请参考 [CONTRIBUTING.md](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/CONTRIBUTING.md)
 
@@ -69,7 +69,7 @@
 ### No.101：升级paddlenlp.transformers内的模型结构并且增加基础单测 <a name='task101'></a>
 
 - **技术标签：深度学习、Python、NLP**
-- **任务难度：**基础⭐️
+- **任务难度：基础⭐️** 
 - **详细描述：**
   - 升级指定的模型PaddleNLP模型结构，每个模型的主要工作为：
     - 为模型结构增加configuration.py, 对齐huggingface/transformers的config，并且适配在模型代码中适配config, 详情见[范例PR](https://github.com/PaddlePaddle/PaddleNLP/pull/4575)
@@ -88,7 +88,7 @@
 
 ### No.102：给AutoConverter增加新的模型组网的支持 <a name='task102'></a>
 
-- **任务难度：**基础⭐️
+- **任务难度：基础⭐️** 
 - **详细描述：**
 
   - 为PaddleNLP的AutoConverter增加支持的模型结构，使得更多的PaddleNLP模型可以无缝一行代码加载HuggingFace Hub上的torch模型
@@ -111,7 +111,7 @@
 ### No.103：新增tie_weights能力 <a name='task103'></a>
 
 - **技术标签：深度学习、Python、NLP**
-- **任务难度：基础⭐️**
+- **任务难度：基础⭐️** 
 - **详细描述：**
   - 为PaddleNLP新增tie_weights功能，能够对齐HuggingFace Transformers中的[tie_weights](https://huggingface.co/docs/transformers/main_classes/model#transformers.PreTrainedModel.tie_weights)功能
 - **提交内容：**
@@ -140,35 +140,33 @@
 
 ### No.105：基于PaddleNLP PPDiffusers 训练 AIGC 趣味模型 <a name='task105'></a>
 
-- **技术标签：**Python、NLP、扩散模型
+- **技术标签：** Python、NLP、扩散模型
 - **奖励设置：**
-  - 创意奖：一等奖奖金3k（1名），二等奖奖金1k（5名）；三等奖 面值 200 元京东卡（10名）
-  - 参与奖：证书荣誉、飞桨周边礼品、 HF store 代金券、 HF pro 账号等
-- **详细描述：**结合 [PPDiffusers](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers) 最新版本，基于自己的数据集，训练并开源趣味模型。可参考[模型训练 QuickStart](https://aistudio.baidu.com/aistudio/projectdetail/5513258)
-  - 基于 [DreamBooth + LoRA](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/dreambooth) 使用自己的图片 Fine-tune 模型；当然你也可以使用 PPDiffusers 中 Textual Inversion 等更多玩法，等你探索！
-  - 主题推荐：
-    - 流量地球
-    - 三体
-    - 表情包
-    - 家乡景观
-    - 动物萌宠
-    - 家居设计
-    - 无限想象（主题不限）
-- **提交内容：**
-  - 【必需】提交1个AI studio项目，遵从[模板](https://aistudio.baidu.com/aistudio/projectdetail/5519383)规范
-  - 【必需】将模型文件上传到Hugging Face，在模型卡片中介绍模型，并上传由模型生成的图片（以及相应Prompt，至少3组）
-  - 【可选】在Hugging Face Space搭建应用中心、跑通Inference API
-- **提交流程：**
-  - 在 [该Issue](https://github.com/PaddlePaddle/PaddleNLP/issues/4775) 下按如下模板回复，提交自己的趣味创意
+   * 创意奖：一等奖奖金3k（2名），二等奖奖金1k（5名）；三等奖 面值 200 元京东卡（10名）。创意奖获奖队伍还可获得 50 美元 HuggingFace store 代金券一张
+  * 参与奖：证书荣誉、飞桨周边礼品
 
+- **详细描述：** 结合 [PPDiffusers](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers) 最新版本，基于自己的数据集，训练并开源趣味模型。可参考 **[模型训练  QuickStart](https://aistudio.baidu.com/aistudio/projectdetail/5513258)**（需注册、登录AI Studio）
+  - 基于 [DreamBooth + LoRA](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/dreambooth) 、[Text-to-Image+LoRA](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/text_to_image) 等技术，  使用自己的图片 Fine-tune 模型；当然你也可以使用 PPDiffusers 中  [Textual Inversion](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/ppdiffusers/examples/textual_inversion) 等更多玩法，等你探索！
+  - 主题推荐：
+      - 流浪地球
+      - 三体
+      - 表情包
+      - 家乡景观
+      - 动物萌宠
+      - 家居设计
+      - 无限想象（主题不限）
+- **提交内容：**
+  - 【必需】提交1个AI studio项目，遵从 **[模板](https://aistudio.baidu.com/aistudio/projectdetail/5519383)** 规范（需注册、登录AI Studio）
+  - 【必需】将模型文件上传到Hugging Face，在模型卡片中介绍模型，并上传由模型生成的图片（以及相应Prompt，至少3组）
+  - 【必需】在AI Studio 搭建应用中心，可参考 **[ QuickStart](https://aistudio.baidu.com/aistudio/projectdetail/5513258)**
+- **提交流程：**
+  - 在 **[该Issue](https://github.com/PaddlePaddle/PaddleNLP/issues/4775)** 下按如下模板回复，提交自己的趣味创意。欢迎每支队伍提交多个模型、项目，请在同一条评论下汇总罗列出自己所有的作品
 ```plain
 【队名】：一个让人印象深刻的名字
 【模型简介】：一句话描述自己模型的特色
 【模型链接】：Hugging Face 地址
-【AI Studio 项目地址】：xxx 
-【可选】【Hugging Face 应用中心】：xxx
+【AI Studio 项目+应用中心地址】：xxx 
 ```
-
 - **评奖：**
   - AI Studio 项目like数 + Fork数/100 + Hugging Face like数，结合AI Studio项目质量（实现思路、创意、项目作为教程的易读易用性）综合评选
   - 每支队伍可以提交多个模型，选择最好成绩作为队伍最终成绩
@@ -352,17 +350,17 @@
   - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
 
-### No.115：论文复现：TPSNet: Reverse Thinking of Thin Plate Splines for Arbitrary Shape Scene Text Representation <a name='task115'></a>
+### No.115：论文复现：SPTS: Single-Point Text Spotting <a name='task115'></a>
 
 - **技术标签：Python、深度学习**
 - **任务难度：基础**️⭐️
 - **详细描述：**
-  - 论文：https://arxiv.org/pdf/2110.12826.pdf
-  - 参考repo：https://github.com/Wei-ucas/TPSNet
+  - 论文：https://arxiv.org/abs/2112.07917
+  - 参考repo：https://github.com/shannanyinxiang/SPTS
   - 验收标准：
-    - ICDAR2015上：hmean=89.1，fps=11.6
-    - CTW1500上：hmean=87.5，fps=17.9
-    - Total-Text上：hmean=88.5，fps=14.3
+      -  ICDAR2015，指标对齐论文中Table 5 
+     - Total-Text上，指标对齐论文中Table 6
+      - CTW1500上，指标对齐论文中Table 7
 - **提交内容：**
   - 代码、模型、训练日志
   - 提交代码和中英文文档PR到PaddleOCR，[参考](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/algorithm_overview.md)
@@ -460,6 +458,21 @@
   - 有基本的模型训练和debug能力。
   - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
+### No.246：论文复现：Learning Enriched Features for Fast Image Restoration and Enhancement <a name='task246'></a>
+
+- **技术标签：Python、深度学习**
+- **任务难度：进阶**⭐️
+- **详细描述：**
+  - 论文：https://arxiv.org/pdf/2205.01649
+  - 参考repo：https://github.com/swz30/MIRNetv2
+  - 验收标准：指标对齐论文中Table2～Table5。
+- **提交内容：**
+  - 代码、模型、训练日志
+  - 提交代码和中英文文档PR到PaddleOCR，[参考](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/algorithm_overview.md)
+- **技术要求：**
+  - 熟悉OCR领域相关算法，最好有PaddleOCR使用经验。
+  - 有基本的模型训练和debug能力。
+  - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
 
 ### No.121：PaddleOCR js部署 <a name='task121'></a>
 
@@ -478,8 +491,8 @@
 ### No.122：《动手学OCR》升级 <a name='task122'></a>
 
 - **技术标签：Python、文档、OCR**
-- **任务难度：基础**️⭐️
-- **详细描述：结合PaddleOCR最新版本，更新****《动手学OCR》中的相关代码，验证notebook可跑通，整合已有资料新增PP-OCRv3、PP-StructureV2章节内容**
+- **任务难度：基础⭐️**️
+- **详细描述：** 结合PaddleOCR最新版本，更新《动手学OCR》中的相关代码，验证notebook可跑通，整合已有资料新增PP-OCRv3、PP-StructureV2章节内容
 - **提交内容：**
   - 更新章节的notebook，再Dive into OCR repo的相关目录
 - **技术要求：**
@@ -1288,10 +1301,27 @@
 - **技术要求：**
   - 熟练掌握Paddle自定义算子开发
 
+### No.250：AutoShape: Real-Time Shape-Aware Monocular 3D Object Detection <a name='task250'></a>
+
+- **技术标签：Python、深度学习**
+- **任务难度：进阶**️⭐️⭐️
+- **详细描述：**
+  - 只需要复现检测部分的代码（auto-labeling部分模型不需要复现）
+  - 使用作者提供的关键点标签，在 KITTI 数据集 train set 进行训练，在 val set 上 Car 类别 3D AP (IoU > 70%) 指标对齐论文 Figure 8
+  - 模型中使用的 DCNv2 可以从 PaddleDetection 复用，iou3d 可以从 Paddle3D 复用
+  - 完成复现后合入Paddle3D
+  - 参考repo https://github.com/zongdai/AutoShape
+- **提交内容：**
+  - 代码、模型、训练日志，合入Paddle3D套件
+- **技术要求：**
+  - 熟练掌握Python、PaddlePaddle和单目3D目标检测算法
+  - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
+
+
 ### No.177：将PP-YOLOE-R在**算能BM1684**部署。利用FastDeploy，将PP-YOLOE-R在**算能BM1684X**部署 <a name='task177'></a>
 
-- **技术标签：**深度学习，C++、Python
-- **任务难度：**基础⭐️ 
+- **技术标签：** 深度学习，C++、Python
+- **任务难度：** 基础⭐️ 
 - **详细描述：**
   - 需要完成PP-YOLOE-R，算法前后处理,开发Python部署示例和C++部署示例
   - 模型repo：[PaddleDetection/release/2.6/configs/rotate/ppyoloe_r](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.6/configs/rotate/ppyoloe_r)
@@ -1312,31 +1342,35 @@
   - 了解旋转目标检测算法
 
 ### No.178：集成SOLOv2模型到FastDpeloy，并在Paddle Infenence、ONNX Runtime、TernsorRT后端测试验证 <a name='task178'></a>
+技术标签：深度学习，C++、Python
+任务难度：基础⭐️
 
-- **技术标签：**深度学习，C++、Python
-- **任务难度：**基础⭐️
-- **详细描述：**
-  - 完成SOLOv2算法前后处理，及精度对齐，开发Python部署示例和C++部署示例
-  - 模型repo：[PaddleDetection/tree/release/2.6/configs/solov2](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.6/configs/solov2)
-  - 模型repo 后处理：[deploy/cpp/src/object_detector.cc](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.6/deploy/cpp/src/object_detector.cc#L250)
-  - 模型导出文档：[deploy/EXPORT_MODEL.md](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.6/deploy/EXPORT_MODEL.md)
-  - FD模型开发文档：[develop_a_new_model.md](https://github.com/PaddlePaddle/FastDeploy/blob/develop/docs/cn/faq/develop_a_new_model.md)
-  - 提示：特别需要注意mask的处理细节。
-  - 需要开发Python部署示例和C++部署示例，详细参考链接[https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/detection/paddledetection/](https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/detection/paddledetection/sophgo)python、C++
-  - 进阶要求（非必需）：将FastDeploy联合ros编译，完成机器人的自动避障。
-- **提交内容：**
-  - Python和C++实现代码 ，在FastDeploy repo 的[examples/vision/detection/paddledetection/](https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/detection/paddledetection/sophgo)jetson；
-  - 中英文文档，在FastDeploy repo 的[examples/vision/detection/paddledetection/](https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/detection/paddledetection/sophgo)jetson；包含从零的环境安装文档
-  - 验收标准：先提交精度与速度报告，待报告通过后，提交pr到FastDeploy仓库。
-- **技术要求：部署**
-  - 熟练掌握C++、Python开发，了解AI
-  - 了解jetson orin
-  - 了解实例分割算法
+详细描述：
+
+	  - 完成SOLOv2算法前后处理，及精度对齐，开发Python部署示例和C++部署示例
+	  - 模型repo：PaddleDetection/tree/release/2.6/configs/solov2
+	  - 模型repo 后处理：deploy/cpp/src/object_detector.cc
+	  - 模型导出文档：deploy/EXPORT_MODEL.md
+	  - FD模型开发文档：develop_a_new_model.md
+	  - 提示：特别需要注意mask的处理细节。
+	  - 需要开发Python部署示例和C++部署示例，详细参考链接https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/detection/paddledetection/python、C++
+	  - 进阶要求（非必需）：将FastDeploy联合ros编译，完成机器人的自动避障。
+
+提交内容：
+
+	  - Python和C++实现代码 ，在FastDeploy repo 的examples/vision/detection/paddledetection；
+	  - 中英文文档，在FastDeploy repo 的examples/vision/detection/paddledetection；包含从零的环境安装文档
+	  - 验收标准：先提交精度与速度报告，待报告通过后，提交pr到FastDeploy仓库。
+
+技术要求：部署
+
+	  - 熟练掌握C++、Python开发，了解AI
+	  - 了解深度学习算法
 
 ### No.179：将[PointPillars](https://github.com/PaddlePaddle/Paddle3D/blob/release/1.0/docs/models/pointpillars)集成到FastDeploy，并在**Jetson Orin**硬件上部署验证精度和速度 <a name='task179'></a>
 
-- **技术标签：**深度学习，C++、Python
-- **任务难度：**进阶⭐️⭐️
+- **技术标签：** 深度学习，C++、Python
+- **任务难度：** 进阶⭐️⭐️
 - **详细描述：**
   - 完成SOLOv2算法前后处理，及精度对齐，开发Python部署示例和C++部署示例
   - 模型repo：https://github.com/PaddlePaddle/Paddle3D
@@ -1355,35 +1389,37 @@
 
 ### No.180：在FastDeploy中集成集成**地平线**推理引擎，在PP-YOLOE完成模型转换测试 <a name='task180'></a>
 
-- **技术标签：**深度学习，C++
-- 任务难度：进阶⭐️⭐️
-- 详细描述:
-  - 需要完成地平线AI推理引擎接入Fastdeploy工作，并转换PP-YOLOE后，测试模型运行正确
-  - 推理后端接入：直接通过ONNX接入自己的推理引擎，支持Paddle/ONNX模型（TensorRT是此方案）；可以先看下fastdeploy/runtime/backends/tensorrt中接入的代码，有问题可随时沟通
-- **提交内容：**
-  - 验收标准：先提交精度与速度报告，待报告通过后，提交pr到FastDeploy仓库。
-  - 推理后端
-- **技术要求：**
-  - 熟练掌握C++开发
-  - 熟练使用地平线推理工具链完成AI模型部署。
+* 技术标签：深度学习，C++
+* 任务难度：进阶⭐️⭐️
+* 详细描述:
+  * 需要完成地平线AI推理引擎接入Fastdeploy工作，并在此基础上完成PP-YOLO的推理，测试模型的精度和性能
+  * 后端接入建议：可通过ONNX接入地平线AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档。
+  * pr：提交PP-YOLO在地平线上的部署示例。
+  * 邮件：提交benchmark测试数据及精度对齐数据。
+* 技术要求：
+  * 熟练掌握C++开发
+  * 熟练使用地平线推理工具链完成AI模型部署。
 
 ### No.181：完成**TVM**接入FastDeploy，并在PP-YOLOE模型上验证正确性 <a name='task181'></a>
 
-- **技术标签：**深度学习，C++
-- **任务难度**：进阶⭐️⭐️
-- **详细描述:**
-  - 需要完成TVM接入FastDeploy工作，并完成PP-YOLOE基于TVM后端的测试，确定精度和推理速度正确
-- **提交内容：**
-  - pr：提交适配代码，及对应的中英文文档
-  - pr：提交PP-YOLOE的部署示例
-  - 邮件：提交benchmark测试数据及精度对齐数据。
-- **技术要求：**
-  - 熟练掌握C++开发。
-  - 熟练使用TVM完成AI模型部署。
+* 技术标签：深度学习，C++
+* 任务难度：进阶⭐️⭐️
+* 详细描述:
+  * 需要完成TVM接入Fastdeploy工作，并在CPU/GPU硬件上完成PP-YOLOE基于TVM后端的测试，确定精度和推理速度正确。
+  * 后端接入建议：可通过ONNX接入地平线AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档
+  * pr：提交PP-YOLOE的部署示例
+  * 邮件：提交benchmark测试数据及精度对齐数据。
+* 技术要求：
+  * 熟练掌握C++开发。
+  * 熟练使用TVM进行AI模型部署。
 
 ### No.182：完成pp-ocrv3在**RK3588**上的部署，并验证正确性 <a name='task182'></a>
 
-- **技术标签：**深度学习，C++
+- **技术标签：** 深度学习，C++
 - **任务难度**：进阶⭐️⭐️
 - **详细描述**：
   - 完成PP-OCRv3模型转换，并量化完成在在RK3588上的部署，确定精度和推理速度正确
@@ -1399,7 +1435,7 @@
 ### No.183：使用FastDeploy完成 ELECTRA 模型GLUE任务模型部署 <a name='task183'></a>
 
 - 技术标签：深度学习，C++，Python
-- 任务难度：进阶⭐️
+- 任务难度：进阶⭐️⭐️
 - 详细描述：
   - 基于FastDeploy在GLUE任务上完成 ELECTRA 模型的部署，包含C++、Python两种部署方式。
   - 参考内容
@@ -1419,9 +1455,9 @@
 
 ### No.184：在FastDeploy C API的基础上，使用rust完成PaddleDetection部署 <a name='task184'></a>
 
-- **技术标签：**深度学习，Rust
-- 任务难度：**基础⭐️**
-- 详细描述:
+- **技术标签：** 深度学习，Rust
+- **任务难度：** 基础⭐️
+- **详细描述:**
   - 在Rust层，通过调用FastDeploy C API，完成PP-YOLOE, PaddleYOLOv8, PaddleYOLOv5等模型的部署
 - **提交内容：**
   - pr：提交适配代码，及对应的中英文文档，到FastDeploy repo下的examples/application/rust路径下。
@@ -1431,8 +1467,8 @@
 
 ### No.185：在FastDeploy C++ API的基础上，使用java完成PaddleDetection部署 <a name='task185'></a>
 
-- **技术标签：**深度学习，java
-- **任务难度**：**基础⭐️**
+- **技术标签：** 深度学习，java
+- **任务难度**：基础⭐️
 - **详细描述**:
   - 在Java层，通过JNI调用FastDeploy C++ API，完成PP-YOLOE, PaddleYOLOv8, PaddleYOLOv5等模型的部署
 - **提交内容：**
@@ -1443,7 +1479,7 @@
 
 ### No.186：在FastDeploy C API的基础上，使用go完成PaddleDetection部署 <a name='task186'></a>
 
-- **技术标签：**深度学习，go
+- **技术标签：** 深度学习，go
 - **任务难度**：基础⭐️
 - 详细描述:
   - 在go层，通过调用FastDeploy C API，完成PP-YOLOE, PaddleYOLOv8, PaddleYOLOv5等模型的部署
@@ -1579,6 +1615,21 @@
   - 熟悉语音识别模型相关算法。
   - 有基本的模型训练和debug能力。
 
+### No.247：使用 Gradio 为 PaddleSpeech 声音分类模型全流程绘制WebUI工具箱（以PANN模型为例）
+* 技术标签：Python、深度学习
+* 任务难度：基础⭐
+* 详细描述：
+  * 使用Gradio 完成声音分类模型数据验证，训练，验证，压缩等过程可视化（ESC-50数据集）
+  * 要求至少包含：
+  * 数据集校验，检查程序
+  * 训练过程中参数可配置，训练过程可视化
+  * 对模型效果进行验证
+* 提交内容：
+  * 提交PR包括：代码、模型、推理文档、中英文文档
+* 技术要求：
+  * 熟悉声音分类模型相关算法。
+  * 有基本的模型训练和debug能力。
+
 ### No.195：多学科物理场可视化组件开发 <a name='task195'></a>
 
 - **技术标签：Python，科学计算，可视化组件**
@@ -1707,7 +1758,7 @@
 - - 基于论文中提供的数据集、翼型设计方法等，基于飞桨框架复现论文原始代码
   - 在跑通论文代码的基础上，能够正确的跑出论文中提出的结果，如文章图8-11所示。
 
-**阶段二（optional，难度大）：**
+**阶段二）：**
 
 - - 需要开发者有openfoam或流体相关仿真相关背景
   - 更新openfoam版本至最新版（如9.0以上），并能够复现论文结果
@@ -1771,8 +1822,94 @@
 简单了解结构变形原理
 
 
+### No.240：完成CANN接入FastDeploy，并完成高性能文本分类服务ERNIE-3.0，测试模型运行正确 <a name='task240'></a>
+* 技术标签：深度学习，C++
+* 任务难度：进阶⭐️⭐️
+* 详细描述:
+  * 需要完成昇腾AI推理引擎CANN接入Fastdeploy工作，并完成高性能文本分类服务ERNIE-3.0，测试模型运行正确，并与Paddle Lite后端对比性能数据。
+  * 后端接入建议：可通过ONNX接入昇腾AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档。
+  * pr：交ERNIE3.0在CANN上的部署示例。
+  * 将验证通过的模型，按照昇腾模型库repo要求，提交到昇腾模型库：https://gitee.com/ascend
+  * 邮件：提交benchmark测试数据及精度对齐数据。
+* 技术要求：
+  * 熟练掌握C++开发
+  * 熟练使用CANN推理工具链进行AI模型部署。
 
+### No.241：实现MagicMind接入FastDeploy，并使用YOLOv5进行测试 <a name='task241'></a>
+实现MagicMind接入FastDeploy，并使用YOLOv5进行测试。
+* 技术标签：深度学习，C++
+* 任务难度：进阶⭐⭐
+* 详细描述:
+  * 需要完成寒武纪AI推理引擎MagicMind接入Fastdeploy工作，并在此基础上完成YOLOv5的推理，测试模型的精度和性能
+  * 后端接入建议：可通过ONNX接入MagicMind，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档
+  * pr：提交YOLOv5在MagicMind的部署示例
+  * 邮件：提交benchmark 测试数据及精度对齐数据
+* 技术要求：
+  * 熟练掌握C++开发
+  * 熟练使用寒武纪MagicMind推理工具完成AI模型部署。
+  
+### No.242：PP-Strucure接入FastDeploy，并在Paddle Infenence、ONNX Runtime、TernsorRT、Openvino后端测试验证 <a name='task242'></a>
+* **技术标签：** 深度学习，C++、Python
+* **任务难度：** 基础⭐️
+* 详细描述：
+  * 完成ppstructure中表格识别模型en_ppstructure_mobile_v2.0_SLANet算法前后处理，及精度对齐，开发Python部署示例和C++部署示例
+  * 模型repo： https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.6/ppstructure/docs/models_list.md
+  * FD模型开发文档：develop_a_new_model.md
+  * 需要开发Python部署示例和C++部署示例，详细参考链接https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/detection/paddledetection/python、C++
+* 提交内容：
+  * Python和C++实现代码 ，在FastDeploy repo 的https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/ocr
+  * 中英文文档，在FastDeploy repo 的https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/ocr；包含从零的环境安装文档
+  * 验收标准：先提交精度与速度报告，待报告通过后，提交pr到FastDeploy仓库。
+* 技术要求：部署
+  * 熟练掌握C++、Python开发，了解AI
+  * 了解算法PP-Strucure算法
 
+### No.243：PP-Strucure接入FastDeploy，并在Paddle Infenence、ONNX Runtime、TernsorRT、Openvino后端测试验证 <a name='task243'></a>
+* **技术标签：** 深度学习，C++、Python
+* **任务难度：** 基础⭐️
+* 详细描述：
+  * 完成ppstructure中表格识别模型ser_VI-LayoutXLM_xfund_zh算法前后处理，及精度对齐，开发Python部署示例和C++部署示例
+  * 模型repo： https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.6/ppstructure/docs/models_list.md
+  * FD模型开发文档：develop_a_new_model.md
+  * 需要开发Python部署示例和C++部署示例，详细参考链接https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/detection/paddledetection/python、C++
+* 提交内容：
+  * Python和C++实现代码 ，在FastDeploy repo 的https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/ocr
+  * 中英文文档，在FastDeploy repo 的https://github.com/PaddlePaddle/FastDeploy/tree/develop/examples/vision/ocr；包含从零的环境安装文档
+  * 验收标准：先提交精度与速度报告，待报告通过后，提交pr到FastDeploy仓库。
+* 技术要求：部署
+  * 熟练掌握C++、Python开发，了解AI
+  * 了解算法PP-Strucure算法
+
+### No.244：完成FastDeploy中Paddle Lite GPU的适配，并完成批量测试脚本，完成10+模型的测试  <a name='task244'></a>
+* 技术标签：深度学习，C++
+* 任务难度：进阶⭐️⭐️
+* 详细描述:
+  * 需要完成Paddle Lite GPU后端接入FastDeploy工作，并在Paddle Lite 安卓后端实现的10+模型上测试，测试模型运行正确（至少完成OpenCL的适配 ）
+  * FastDeploy Paddle Lite后端代码参考：https://github.com/PaddlePaddle/FastDeploy/tree/develop/fastdeploy/runtime/backends/lite
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档
+  * 邮件：提交benchmark测试数据及精度对齐数据。
+* 技术要求：
+  * 熟练掌握C++开发
+  * 熟练使用Paddle Lite完成AI模型部署。
+
+### No.245：完成FastDeploy中Paddle Lite后端的iOS（ARM CPU）的适配，并完成5+模型的SDK  <a name='task245'></a>
+* 技术标签：深度学习，C++
+* 任务难度：进阶⭐️⭐️
+* 详细描述:
+  * 在FastDeploy中完成Paddle Lite 后端的IOS SDK，并在Paddle Lite iOS实现的10+模型上测试，测试模型运行正确
+  * API设计规范请参考FastDeploy Android SDK:  
+  * https://github.com/PaddlePaddle/FastDeploy/tree/develop/java/android
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档，到FastDeploy repo下的examples/application/ios路径下。
+  * 邮件：提交benchmark测试数据及精度对齐数据。
+* 技术要求：
+  * 熟练掌握C++开发
+  * 熟练使用Paddle Lite iOS完成AI模型部署。
 
 ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 

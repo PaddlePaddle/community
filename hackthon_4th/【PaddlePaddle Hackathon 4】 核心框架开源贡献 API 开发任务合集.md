@@ -1,19 +1,19 @@
 # 【PaddlePaddle Hackathon 4】核心框架开源贡献 API 开发任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
 注：为飞桨框架新增一系列 API，提交流程请参考 [新增API 开发&提交流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_contributing_guides_cn.html)，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，任务列表如下，其他说明事项在任务列表后：
 
 ### No.1：为 Paddle 新增 finfo API <a name='task1'></a>
 
-- 任务难度**：**基础
-- 详细描述**：**finfo计算浮点数类型的数值限制，输入参数为 Paddle 浮点数类型(paddle.float16/paddle.float32/paddle.float64/paddle.complex64/paddle.complex128)，返回包含下表属性对象。此任务目标是为 Paddle 新增 finfo API，调用路径为 paddle.finfo。要求通过 pybind 方式直接将 C++ 层实现绑定到 Python，无需开发 Paddle Kernel，可以参考 [paddle/fluid/pybind/pybind.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/pybind.cc) 中代码。更详细内容可以参考 [numpy.finfo](https://numpy.org/doc/stable/reference/generated/numpy.finfo.html) 。API 设计文档可参考 [api_design_for_finfo.md](https://github.com/PaddlePaddle/community/blob/master/rfcs/APIs/20220330_api_design_for_finfo.md)。
-- 提交内容**：**
+- 任务难度：基础
+- 详细描述：finfo计算浮点数类型的数值限制，输入参数为 Paddle 浮点数类型(paddle.float16/paddle.float32/paddle.float64/paddle.complex64/paddle.complex128)，返回包含下表属性对象。此任务目标是为 Paddle 新增 finfo API，调用路径为 paddle.finfo。要求通过 pybind 方式直接将 C++ 层实现绑定到 Python，无需开发 Paddle Kernel，可以参考 [paddle/fluid/pybind/pybind.cc](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pybind/pybind.cc) 中代码。更详细内容可以参考 [numpy.finfo](https://numpy.org/doc/stable/reference/generated/numpy.finfo.html) 。API 设计文档可参考 [api_design_for_finfo.md](https://github.com/PaddlePaddle/community/blob/master/rfcs/APIs/20220330_api_design_for_finfo.md)。
+- 提交内容：
   - Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/paddle](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle) 目录；
   - C ++ 实现代码，在 Paddle repo 的 [paddle/fluid/pybind](https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/fluid/pybind) 目录；
   - 单测代码，在 Paddle repo 的 [python/paddle/fluid/tests/unittests](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests) 目录；
   - 中文 API 文档，在 docs repo 的 [docs/api/paddle](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle) 目录和 [docs/api/paddle/Tensor_cn.rst](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/Tensor_cn.rst) 文件，同时需要在 [docs/api/paddle/Overview_cn.rst](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/Overview_cn.rst) 文件中添加 API 介绍。
-- 技术要求**：**
+- 技术要求：
   - 熟练掌握 C++ （如有 C++ 开发）、Python；
   - 熟悉 C++ 标准库 std::numeric_limits。
 
@@ -207,11 +207,11 @@
   - 能通过阅读源码，了解Paddle现有概率分布设计与实现原理，并基于已有设计，扩展新的概率分布，参考 [python/paddle/distribution](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/distribution)。
 
 
-### No.13：为 Paddle 新增 LogNormal API <a name='task13'></a>
+### No.13：为 Paddle 新增 Bernoulli API <a name='task13'></a>
 
 - 任务难度：基础
 
-  详细描述：新增 paddle.distribution.LogNormal，用于 LogNormal 分布的概率统计与随机采样，至少包括如下方法：
+  详细描述：新增 paddle.distribution.Bernoulli，用于 Bernoulli 分布的概率统计与随机采样，至少包括如下方法：
 
   - `mean`计算均值；
   - `variance`计算方差 ；
@@ -300,7 +300,7 @@
 - 任务难度：进阶
 - 详细描述：方阵的指数函数，类似 exp 函数（注意与 elementwise 的 exp 函数的区别）。设*X*为*n*×*n*的[实数](https://zh.wikipedia.org/wiki/实数)或[复数](https://zh.wikipedia.org/wiki/复数_(数学))[矩阵](https://zh.wikipedia.org/wiki/矩阵)。*X*的指数，用*eX*或exp(*X*)来表示，是由以下[幂级数](https://zh.wikipedia.org/wiki/幂级数)所给出的*n*×*n*矩阵：
 
-![img](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=6d943ac21929411583796230ef58e4a2&docGuid=NXFlS7Ad4WBi83)
+<img width="267" alt="1c0fd4d8b22a08b8c616e3303a8069c4" src="https://user-images.githubusercontent.com/117967927/223112176-737e65f9-694a-49de-b6c9-8e159ab30d81.png">
 
 - 此任务的目标是在 Paddle 框架中，新增 matrix_exp API，调用路径为：paddle.linalg.matrix_exp，设计文档可参考 [api设计文档模板](https://github.com/PaddlePaddle/community/blob/master/rfcs/APIs/api_design_template.md)。
 - 提交内容
@@ -377,7 +377,7 @@
 
 ### No.23：为 Paddle 新增 vander API <a name='task23'></a>
 
-- 任务难度：进阶
+- 任务难度：基础
 
 - 详细描述：根据输入构造 [范德蒙矩阵](https://en.wikipedia.org/wiki/Vandermonde_matrix)（各列为几何级数的矩阵）。此任务的目标是在 Paddle 框架中，新增 vander API，调用路径为：paddle.vander 和 paddle.Tensor.vander。
 - 提交内容
@@ -395,21 +395,21 @@
 
 - 技术标签：深度学习框架，Python，C++，CUDA
 
-- 任务难度：进阶
+- 任务难度：基础
 
-- 详细描述：针对 Paddle 的稀疏 Tensor 格式 COO，需要新增 softmax 的计算逻辑，一共需要新增 1个 kernel 的前向与反向，其中参数 axis 可支持任意维度，注意只需新增 coo 格式的逻辑，csr 格式的已经实现，此次无需实现。
+- 详细描述：针对 Paddle 的稀疏 Tensor 格式 COO，需要新增 is_nan 的计算逻辑，一共需要新增 1个 kernel 的前向与反向，其中参数 axis 可支持任意维度，注意只需新增 coo 格式的逻辑，csr 格式的已经实现，此次无需实现。
 
 - 提交内容
   - API 的设计文档，并提 PR 至 community repo 的 [rfcs/APIs](https://github.com/PaddlePaddle/community/tree/master/rfcs/APIs)  目录；
-  - Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/paddle/incubate/sparse/nn/functional/activation.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/incubate/sparse/nn/functional/activation.py) 文件和 [python/paddle/incubate/sparse/nn/layer/activation.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/incubate/sparse/nn/layer/activation.py) 文件；
+  - Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/paddle/sparse/unary.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/sparse/unary.py) 文件；
   - C++ kernel 实现代码，在Paddle repo 的[paddle/phi/kernels/sparse/](https://github.com/PaddlePaddle/Paddle/blob/develop//paddle/phi/kernels/sparse) 目录的 softamx_kernel.h/cc/cu 三个文件中，分别补充 coo 的计算 kernel；
-  - 单测代码，在 Paddle repo 新建 [python/paddle/fluid/tests/unittests/test_sparse_softmax_op.py](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests/test_sparse_softmax_op.py) 文件；
+  - 单测代码，在 Paddle repo 新建 [python/paddle/fluid/tests/unittests/test_sparse_is_nan.py](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/fluid/tests/unittests/test_sparse_is_nan.py) 文件；
   - yaml 文件，前反向分别添加到[python/paddle/utils/code_gen/sparse_api.yaml](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/utils/code_gen/sparse_api.yaml)、[python/paddle/utils/code_gen/sparse_bw_api.yaml](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/utils/code_gen/sparse_bw_api.yaml) 文件中。
   - 中文 API 文档，在 docs repo 的 [docs/api/paddle/incubate/sparse](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/incubate/sparse) 目录。
 
 - 技术要求
   - 熟悉稀疏 COO 存储格式，Paddle 的 SparseCooTensor 数据结构；
-  - 熟悉稀疏 Tensor 的 softmax 在 COO 存储格式下的计算逻辑；
+  - 熟悉稀疏 Tensor 的 is_nan 在 COO 存储格式下的计算逻辑；
   - 熟练掌握 Python、C++、CUDA 代码编写。
 
 ### No.25：为 Paddle 新增 paddle.sparse.any 稀疏 API <a name='task25'></a>
