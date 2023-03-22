@@ -2,11 +2,11 @@
 
 |API名称 | paddle.polygamma | 
 |---|---|
-|提交作者<input type="checkbox" class="rowselector hidden"> | 吃点儿好的(https://github.com/KateJing1212/Paddle) | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-20 | 
-|版本号 | V1.0 | 
+|提交作者<input type="checkbox" class="rowselector hidden"> | 吃点儿好的 [paddle](https://github.com/KateJing1212/community) | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-22 | 
+|版本号 | V2.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
-|文件名 | 20200320_api_design_for_polygamma.md | 
+|文件名 | 20200322_api_design_for_polygamma.md | 
 
 
 # 一、概述
@@ -24,7 +24,7 @@
 
 # 二、飞桨现状
 
-对飞桨框架目前不支持此功能，但支持 digamma 函数[(参考API文档)](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/digamma_cn.html)，且支持输入为张量。digamma 函数是 gamma 函数的对数的一阶导数，k 阶的 polygamma 函数是 gamma 函数的对数的 (k + 1) 阶导数。
+对飞桨框架目前不支持此功能，但支持 digamma 函数[(参考API文档)](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/digamma_cn.html) ，且支持输入为张量。digamma 函数是 gamma 函数的对数的一阶导数，k 阶的 polygamma 函数是 gamma 函数的对数的 (k + 1) 阶导数。
 
 ```Python
 def digamma(x, name=None):
@@ -99,6 +99,52 @@ Tensor polygamma(const Tensor& self, int64_t n) {
 ```
 可以看到，`polygamma`函数调用了`polygamma_stub`函数来计算`polygamma`函数的值，`polygamma_backward`函数则用于计算梯度。实际的计算是在`polygamma_stub`函数中进行的，该函数的实现采用了CPU和CUDA两个后端，并使用了不同的算法。完整的`polygamma`函数实现涉及到多个文件和函数，包括`polygamma_stub`、`polygamma_cpu_kernel`、`polygamma_cuda_kernel`等。
 
+
+
+更进一步来说，在CPU上，polygamma在`torch/csrc/autograd/Functions.cpp`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/torch/csrc/autograd/function.cpp)
+具体实现代码如下：
+```
+Tensor polygamma(const Tensor& input, int64_t n) {
+  auto iter = TensorIterator::unary_op(input);
+  polygamma_stub(iter.device_type(), iter, n);
+  return iter.output();
+}
+
+DEFINE_DISPATCH(polygamma_stub);
+```
+其中，`polygamma_stub`是一个分派函数，它根据输入张量的设备类型和数据类型来调用不同的计算polygamma的函数。
+
+而在CUDA上，polygamma在`torch/csrc/cuda/ElementWise.cu`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/torch/csrc/autograd/function.cpp)
+其实现逻辑是通过递归方式实现polygamma的计算
+具体代码如下：
+```
+template <typename scalar_t>
+struct PolyGammaOp {
+  __device__ __forceinline__ scalar_t operator()(scalar_t x, int64_t n) const {
+    scalar_t res = 0;
+    scalar_t d = pow(x, n + 1);
+    for (int64_t i = 0; i < n; ++i) {
+      res += 1 / (x + i);
+    }
+    res = (-1) * pow(-1, n) * factorial(n - 1) * res / d;
+    return res;
+  }
+};
+
+void polygamma_kernel_cuda(TensorIteratorBase& iter, int64_t n) {
+  AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "polygamma_cuda", [&] {
+    gpu_kernel(iter, PolyGammaOp<scalar_t>{}, n);
+  });
+}
+
+Tensor polygamma_cuda(const Tensor& self, int64_t n) {
+  auto iter = TensorIterator::unary_op(self);
+  polygamma_kernel_cuda(iter, n);
+  return iter.output();
+}
+```
+其中，`calc_polygamma`是一个计算polygamma的辅助函数，`factorial`是计算阶乘的辅助函数。在CUDA中，`PolyGammaOp`是一个functor，用于计算polygamma。`gpu_kernel`是一个PyTorch封装的CUDA kernel，用于在GPU上并行地计算polygamma。
+
 ## 2. MatLab
 
 在 MatLab 中使用的 API 格式如下：
@@ -112,6 +158,8 @@ Tensor polygamma(const Tensor& self, int64_t n) {
 在 Tensorflow 中使用的 API 格式如下：
 
 `tf.math.polygamma(a, x, name=None)`[(参考API文档)](https://www.tensorflow.org/api_docs/python/tf/math/polygamma)
+
+上述函数参数中，a是一个非负值的张量；x是一个与a的d类型相同的张量；name定义了该操作的名称。
 
 实现的代码如下：
 
@@ -243,7 +291,8 @@ print("Polygamma values for n = {} and x = {}: {}".format(n, x.numpy(), result.n
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-API设计为 `paddle.Tensor.polygamma(n, x)`。其中 `x` 为 `B1 X ... X Bn X P X M` 张量，`n` 表示多项式 gamma 函数的导数阶数。当`n=0`时，polygamma退化为 digamma。
+API设计为 `paddle.polygamma(x, n, name)`。
+其中 `x` 为非负值张量，允许的数据类型是float32和float64。`n` 表示多项式 gamma 函数的导数阶数，其为一个与 `x` 数据类型相同的张量。当`n=0`时，polygamma退化为 digamma。`name` 作为可选参数，定义了该操作的名称。
 
 ## 底层OP设计
 
@@ -251,17 +300,45 @@ polygamma可基于现有API即digamma进行实现，不再单独设计OP。
 
 ## API实现方案
 
-该 API 实现于 python/paddle/tensor/math.py，通过调研发现，Paddle 本身已实现 paddle.digamma，可以计算gamma 函数的对数的一阶导数，可利用paddle.digamma API 做n阶导实现 paddle.polygamma。 而 Paddle 中已有 paddle.digamma API 的具体实现逻辑，位于 python/paddle/tensor/math.py 下的 digamma 函数中。
+该 API 实现于 `python/paddle/tensor/math.py`，通过调研发现，Paddle 本身已实现 paddle.digamma，可以计算gamma 函数的对数的一阶导数，可利用paddle.digamma API 做n阶导实现 paddle.polygamma。
+具体来说，polygamma函数的k阶定义为：
+```
+polygamma(k, x) = d^k / dx^k [ln(gamma(x))]
+```
+根据导数的链式法则，可以将上述公式递归表示为：
+```
+polygamma(k, x) = polygamma(1, polygamma(k-1, x))
+```
+因此，初步设计的polygamma实现伪代码如下：
+```
+def digamma(x):
+    # Digamma API implementation
+    ...
+
+def polygamma(x, k):
+    if k == 1:
+        return digamma(x)
+    else:
+        return (-1) ** (k - 1) * factorial(k - 1) * polygamma(x, k - 1) + digamma(x)
+```
+
+另外，由于该API需要考虑动静统一问题，故需要验证其在静态图中能否正常工作。
 
 # 六、测试和验收的考量
 
 <!-- 参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html) -->
 
-可考虑一下场景：
+可考虑以下场景：
 
-1. 当`x` 为空张量，输出为空张量，且输出张量形状正确；
-2. 结果一致性，和 Tensorflow 以及 PyTorch 结果的数值的一致性, `paddle.polygamma(n=5, x)` , `torch.polygamma(5, x))` 和 `tf.math.polygamma(5, x)` 结果是否一致；
-3. 异常测试，对于参数异常值输入，应该有友好的报错信息及异常反馈，需要有相关测试Case验证。
+### 1. 一般场景
+* 结果一致性测试。测试对于同一输入和 Tensorflow 以及 PyTorch 中polygamma API计算结果的数值的一致性。
+* 数据类型测试。选取不同数据类型的输入，测试计算结果的准确性。
+* 参数取值测试。选取不同取值的参数 `k` （表示求导的阶数），测试计算结果的准确性。
+### 2. 边界条件
+* 当 `x` 为空张量，测试其输出是否空张量且输出张量形状是否正确。
+* 当 `n=0` ,测试其输出是否与digamma API得到的计算结果相同。
+### 3. 异常测试
+* 对于参数异常值输入，例如x的不合法值等，应该有友好的报错信息及异常反馈，需要有相关测试Case验证。
 
 # 七、可行性分析和排期规划
 
