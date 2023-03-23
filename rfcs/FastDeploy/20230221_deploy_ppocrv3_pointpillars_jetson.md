@@ -4,7 +4,7 @@
 |----------------------------------------------------------|-------------------------------------------|
 | 提交作者<input type="checkbox" class="rowselector hidden">   | 无名                            | 
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-03-23                                | 
-| 版本号                                                      | V0.0                                      | 
+| 版本号                                                      | V1.0                                      | 
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | paddlepaddle-gpu==2.4.2                     | 
 | 文件名                                                      | 20230221_deploy_ppocrv3_pointpillars_jetson.md<br> | 
 
