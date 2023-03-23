@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 吃点儿好的 [paddle](https://github.com/KateJing1212/community) | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-23 | 
-|版本号 | V4.0 | 
+|版本号 | V5.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
 |文件名 | 20200323_api_design_for_polygamma.md | 
 
@@ -310,9 +310,9 @@ print("Polygamma values for n = {} and x = {}: {}".format(n, x.numpy(), result.n
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
 API设计为 `paddle.polygamma(x, n, name=None)`。
-`x` 为张量，允许的数据类型是float32和float64，其原因是digamma对数据类型进行了限制。
-`n` 表示多项式 gamma 函数的导数阶数，其可以为一个非负整数或一个非负值张量，允许的数据类型是int32和int64；如果`n`是一个张量，需要保证其形状与`x`相同，即维度与`x`相同或是其子集，且元素数量与`x`相同；当`n=0`时，polygamma退化为 digamma。
-`name` 作为可选参数，定义了该操作的名称，其默认值为`None`。
+`x`为张量，允许的数据类型是float32和float64，其原因是digamma对数据类型进行了限制。
+`n`表示多项式 gamma 函数的导数阶数，其可以为一个非负整数或一个非负值张量，允许的数据类型是int32和int64；如果`n`是一个张量，需要保证`n`的维度`ndim`和`n`的参数量`numel`满足`ndim<=1`且`numel==1`；当`n=0`时，polygamma退化为 digamma。
+`name`作为可选参数，定义了该操作的名称，其默认值为`None`。
 另外，该API还支持`Tensor.polygamma(n)`的调用形式。
 
 ## 底层OP设计
