@@ -1,4 +1,4 @@
-# paddle.[tensor.]cummax 设计文档
+# paddle.[Tensor.]cummax 设计文档
 
 | API名称                                                      | paddle.[Tensor.]cummax               |
 | ------------------------------------------------------------ | ----------------------------------- |
@@ -12,7 +12,7 @@
 
 ## 1、相关背景
 
-cummax 是指求累积最大值（cumulative max）的功能。即求
+cummax函数的功能为求累积最小值（cumulative max）。对于输入向量/矩阵，第i个位置的计算方式为：
 $$
 y_i = \max(x_1, x_2, x_3, \cdots , x_i)
 $$
@@ -268,20 +268,21 @@ PyTorch 还提供了基于 CUDA 的算子实现。
 
 ## 命名与参数设计
 
-API设计为`paddle.cummax(x, axis, name)`以及`paddle.tensor.cummax(axis, name)`。
+API设计为`paddle.cummax(x, axis, name)`以及`paddle.Tensor.cummax(axis, name)`。
 
 paddle.cummax
 ----------------------
 参数
 :::::::::
 - x (Tensor) - 累积最大值的输入，需要进行累积最大值操作的 Tensor。
-- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累加计算。
+- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累积最大值计算。
+- dtype (str，可选) - 指定输出索引的数据类型，可以为int32和int64，默认：int64。
 - name  (str，可选) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 返回
 :::::::::
-- Out (tuple) - 返回累积最大值结果和对应的索引信息。结果的数据类型和输入`x`一致。索引的数据类型是 int64。
+- Out (tuple) - 返回累积最大值结果和对应的索引信息。累积最大值结果的数据类型和输入`x`一致。
 
-paddle.tensor.cummax指向paddle.cummax，两者是相同的API
+paddle.Tensor.cummax指向paddle.cummax，两者是相同的API
 
 ## 底层OP设计
 

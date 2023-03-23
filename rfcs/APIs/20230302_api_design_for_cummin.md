@@ -1,4 +1,4 @@
-# paddle.[tensor.]cummin 设计文档
+# paddle.[Tensor.]cummin 设计文档
 
 | API名称                                                      | paddle.[Tensor.]cummin          |
 | ------------------------------------------------------------ | ----------------------------------- |
@@ -12,7 +12,7 @@
 
 ## 1、相关背景
 
-cummin 是指求累积最小值（cumulative min）的功能。即求
+cummin函数的功能为求累积最小值（cumulative min）。对于输入向量/矩阵，第i个位置的计算方式为：
 $$
 y_i = \min(x_1, x_2, x_3, \cdots , x_i)
 $$
@@ -21,7 +21,7 @@ PyTorch、NumPy 和 Pandas 提供了相似算子。
 
 ## 2、功能目标
 
-cummin API 是一个按轴寻找累计最大值和最大值所在位置的 API。此任务的目标是在 Paddle 框架中，新增 cummin API，调用路径为：`paddle.cummin`和 `paddle.tensor.cummin`。
+cummin API 是一个按轴寻找累计最大值和最大值所在位置的 API。此任务的目标是在 Paddle 框架中，新增 cummin API，调用路径为：`paddle.cummin`和 `paddle.Tensor.cummin`。
 ## 3、意义
 
 完善矩阵运算的基本功能，增强统计运算完善度。
@@ -265,20 +265,21 @@ PyTorch 还提供了基于 CUDA 的算子实现。
 
 ## 命名与参数设计
 
-API设计为`paddle.cummin(x, axis, name)`以及`paddle.tensor.cummin(axis, name)`。
+API设计为`paddle.cummin(x, axis, name)`以及`paddle.Tensor.cummin(axis, name)`。
 
 paddle.cummin
 ----------------------
 参数
 :::::::::
 - x (Tensor) - 累积最小值的输入，需要进行累积最小值操作的 Tensor。
-- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累加计算。
-- name  (str，可选) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
+- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累积最小值计算。
+- dtype (str，可选) - 指定输出索引的数据类型，可以为int32和int64，默认：int64。
+- name (str，可选) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 返回
 :::::::::
-- Out (tuple) - 返回累积最小值结果和对应的索引信息。结果的数据类型和输入`x`一致。索引的数据类型是 int64。
+- Out (tuple) - 返回累积最小值结果和对应的索引信息。累积最小值结果的数据类型和输入`x`一致。
 
-paddle.tensor.cummin指向paddle.cummin，两者是相同的API
+paddle.Tensor.cummin指向paddle.cummin，两者是相同的API
 
 ## 底层OP设计
 
