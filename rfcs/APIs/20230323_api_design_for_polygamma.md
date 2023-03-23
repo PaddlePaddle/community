@@ -3,10 +3,10 @@
 |API名称 | paddle.polygamma | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 吃点儿好的 [paddle](https://github.com/KateJing1212/community) | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-22 | 
-|版本号 | V2.0 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-23 | 
+|版本号 | V3.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
-|文件名 | 20200322_api_design_for_polygamma.md | 
+|文件名 | 20200323_api_design_for_polygamma.md | 
 
 
 # 一、概述
@@ -24,7 +24,7 @@
 
 # 二、飞桨现状
 
-对飞桨框架目前不支持此功能，但支持 digamma 函数[(参考API文档)](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/digamma_cn.html) ，且支持输入为张量。digamma 函数是 gamma 函数的对数的一阶导数，k 阶的 polygamma 函数是 gamma 函数的对数的 (k + 1) 阶导数。
+飞桨框架目前不支持此功能，但支持 digamma 函数[(参考API文档)](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/digamma_cn.html) ，且支持输入为张量。digamma 函数是 gamma 函数的对数的一阶导数，k 阶的 polygamma 函数是 gamma 函数的对数的 (k + 1) 阶导数。
 
 ```Python
 def digamma(x, name=None):
@@ -72,7 +72,6 @@ def digamma(x, name=None):
 上述函数参数中，`input` 是一个Tensor，表示要计算polygamma函数的输入值；`n`是一个整数，表示要计算的polygamma函数的阶数；`out`是一个可选的输出Tensor，用于存储计算结果。
 
 实现的代码如下：
-
 ```cpp
 Tensor polygamma_backward(const Tensor& grad_output, const Tensor& self, int64_t n) {
   checkBackend("polygamma_backward", {grad_output, self}, Backend::CPU);
@@ -97,53 +96,72 @@ Tensor polygamma(const Tensor& self, int64_t n) {
 }
 
 ```
-可以看到，`polygamma`函数调用了`polygamma_stub`函数来计算`polygamma`函数的值，`polygamma_backward`函数则用于计算梯度。实际的计算是在`polygamma_stub`函数中进行的，该函数的实现采用了CPU和CUDA两个后端，并使用了不同的算法。完整的`polygamma`函数实现涉及到多个文件和函数，包括`polygamma_stub`、`polygamma_cpu_kernel`、`polygamma_cuda_kernel`等。
+可以看到，`polygamma`函数调用了`polygamma_stub`函数来计算`polygamma`函数的值，`polygamma_backward`函数则用于计算梯度。实际的计算是在`polygamma_stub`函数中进行的。完整的`polygamma`函数实现涉及到多个文件和函数。
 
-
-
-更进一步来说，在CPU上，polygamma在`torch/csrc/autograd/Functions.cpp`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/torch/csrc/autograd/function.cpp)
-具体实现代码如下：
-```
-Tensor polygamma(const Tensor& input, int64_t n) {
-  auto iter = TensorIterator::unary_op(input);
-  polygamma_stub(iter.device_type(), iter, n);
-  return iter.output();
-}
-
-DEFINE_DISPATCH(polygamma_stub);
-```
-其中，`polygamma_stub`是一个分派函数，它根据输入张量的设备类型和数据类型来调用不同的计算polygamma的函数。
-
-而在CUDA上，polygamma在`torch/csrc/cuda/ElementWise.cu`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/torch/csrc/autograd/function.cpp)
-其实现逻辑是通过递归方式实现polygamma的计算
-具体代码如下：
-```
-template <typename scalar_t>
-struct PolyGammaOp {
-  __device__ __forceinline__ scalar_t operator()(scalar_t x, int64_t n) const {
-    scalar_t res = 0;
-    scalar_t d = pow(x, n + 1);
-    for (int64_t i = 0; i < n; ++i) {
-      res += 1 / (x + i);
-    }
-    res = (-1) * pow(-1, n) * factorial(n - 1) * res / d;
-    return res;
+更进一步来说，在CPU上，polygamma在`aten/src/ATen/native/cpu/UnaryOpsKernel.cpp`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cpu/UnaryOpsKernel.cpp)
+其计算逻辑是通过调用digamma API和trigamma API实现polygamma的计算，具体实现代码如下，：
+```cpp
+static void polygamma_kernel(TensorIteratorBase& iter, int64_t n) {
+  if (n == 0) {
+    digamma_kernel(iter);
+  } else if (n == 1) {
+    trigamma_kernel(iter);
+  } else {
+    AT_DISPATCH_FLOATING_TYPES_AND(kBFloat16, iter.dtype(), "polygamma", [&]() {
+      cpu_kernel(
+          iter, [=](scalar_t a) -> scalar_t { return calc_polygamma(a, n); });
+    });
   }
-};
-
-void polygamma_kernel_cuda(TensorIteratorBase& iter, int64_t n) {
-  AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "polygamma_cuda", [&] {
-    gpu_kernel(iter, PolyGammaOp<scalar_t>{}, n);
-  });
-}
-
-Tensor polygamma_cuda(const Tensor& self, int64_t n) {
-  auto iter = TensorIterator::unary_op(self);
-  polygamma_kernel_cuda(iter, n);
-  return iter.output();
 }
 ```
-其中，`calc_polygamma`是一个计算polygamma的辅助函数，`factorial`是计算阶乘的辅助函数。在CUDA中，`PolyGammaOp`是一个functor，用于计算polygamma。`gpu_kernel`是一个PyTorch封装的CUDA kernel，用于在GPU上并行地计算polygamma。
+另外，引用到的`calc_polygamma`作为辅助函数，其实现代码如下：
+```cpp
+template <typename scalar_t, bool is_cuda=false>
+static inline C10_HOST_DEVICE scalar_t calc_polygamma(scalar_t x, int n) {
+  // already blocked if n <= 1
+  const auto one = scalar_t{1};
+  return ((n % 2) ? one : -one) *
+      std::exp(std::lgamma(static_cast<scalar_t>(n) + one)) *
+      zeta<scalar_t, is_cuda>(static_cast<scalar_t>(n + 1), x);
+}
+```
+
+在CUDA上，polygamma在`aten/src/ATen/native/cpu/UnaryOpsKernel.cpp`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/UnaryGammaKernels.cu)
+具体实现代码如下：
+```cpp
+CONSTEXPR_EXCEPT_WIN_CUDA char polygamma_name[] = "polygamma";
+void polygamma_kernel_cuda(TensorIteratorBase& iter, int64_t n) {
+  if (n == 0) {
+    digamma_kernel_cuda(iter);
+  } else if (n == 1) {
+    trigamma_kernel_cuda(iter);
+  } else {
+#if AT_USE_JITERATOR()
+    // TODO : `unary_jitted_gpu_kernel` for cleaner UX.
+    AT_DISPATCH_FLOATING_TYPES_AND_HALF(
+        iter.common_dtype(), "polygamma_cuda", [&]() {
+          jitted_gpu_kernel<
+              /*name=*/polygamma_name,
+              /*return_dtype=*/scalar_t,
+              /*common_dtype=*/scalar_t,
+              /*arity=*/1>(
+              iter,
+              polygamma_string,
+              /*scalar_pos=*/at::cuda::jit::BinaryFuncVariant::NoScalar,
+              /*scalar_val=*/0,
+              /*extra_args=*/std::make_tuple(n));
+        });
+#else
+    AT_DISPATCH_FLOATING_TYPES_AND_HALF(
+        iter.common_dtype(), "polygamma_cuda", [&]() {
+          gpu_kernel(iter, [=] GPU_LAMBDA(scalar_t a) -> scalar_t {
+            return calc_polygamma<scalar_t, /*is_cuda=*/true>(a, static_cast<int>(n));
+          });
+        });
+#endif // AT_USE_JITERATOR()
+  }
+}
+```
 
 ## 2. MatLab
 
@@ -291,8 +309,9 @@ print("Polygamma values for n = {} and x = {}: {}".format(n, x.numpy(), result.n
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-API设计为 `paddle.polygamma(x, n, name)`。
-其中 `x` 为非负值张量，允许的数据类型是float32和float64。`n` 表示多项式 gamma 函数的导数阶数，其为一个与 `x` 数据类型相同的张量。当`n=0`时，polygamma退化为 digamma。`name` 作为可选参数，定义了该操作的名称。
+API设计为 `paddle.polygamma(x, n, name=None)`。
+其中 `x` 为张量，允许的数据类型是float32和float64，其原因是digamma对数据类型进行了限制。`n` 表示多项式 gamma 函数的导数阶数，其为一个非负值张量，允许的数据类型是int32和int64。当`n=0`时，polygamma退化为 digamma。`name` 作为可选参数，定义了该操作的名称。
+另外，该API还支持`paddle.polygamma(n)`的调用形式。
 
 ## 底层OP设计
 
