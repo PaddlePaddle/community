@@ -291,19 +291,20 @@ gpu：
 前向计算，大体过程与cumsum类似，但是在计算部分需要实现一个能够同时计算cummin和Indices的函数ScanWithIndicesKernel
 后向计算，调用gpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
 
-前向函数签名
+前向函数定义
 
 ~~~cpp
 template <typename T, typename Context>
 void CumminKernel(const Context& dev_ctx,
                   const DenseTensor& x,
                   const Scalar& axis,
+                  DataType dtype,
                   bool flatten,
                   DenseTensor* out,
                   DenseTensor* indices);
 ~~~
 
-后向函数签名
+后向函数定义
 
 ~~~cpp
 template <typename T, typename Context>
