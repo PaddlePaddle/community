@@ -3,10 +3,10 @@
 |API名称 | paddle.polygamma | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 吃点儿好的 [paddle](https://github.com/KateJing1212/community) | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-23 | 
-|版本号 | V5.0 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-24 | 
+|版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
-|文件名 | 20200323_api_design_for_polygamma.md | 
+|文件名 | 20200324_api_design_for_polygamma.md | 
 
 
 # 一、概述
