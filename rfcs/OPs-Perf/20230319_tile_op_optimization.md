@@ -16,7 +16,7 @@
 
 ## 1.1 飞桨现状
 
-当前实现没有自主进行CUDA变成，当前性能如下表(基于PaddlePaddle　develop分支)：
+当前实现没有自主进行CUDA编程，当前性能如下表(基于PaddlePaddle　develop分支)：
 
 
 | Case No. | device|repeat_times | input_shape | input_type |old Paddle Perf(ms) |
