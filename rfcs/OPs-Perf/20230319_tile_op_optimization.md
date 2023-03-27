@@ -38,7 +38,7 @@ Pytorch中有`torch.tile`与`paddle.tile`对应，但是在pytorch中直接搜�
 
 经过对两个代码的调研，在`tile_op.cu`中使用的是CUDA原生内核的编写方法，在用`__global__`标识的函数中编写执行逻辑，实现该OP在GPU中的计算。采用的是1维线程完成整体计算。`torch.repeat`中使用的也是CUDA原生内核的编写方法，在用`__global__`标识的函数中编写执行逻辑，实现该OP在GPU中的计算，采用的也是1维线程完成整体计算。
 
-| Case No. | device|repeat_times | input_shape | input_type |torch Perf(ms) |
+| Case No. | device|repeat_times | input_shape | input_type |Pytorch Perf(ms) |
 |---|---|---|---|---|---|
 | 1 | Tesla V100 |[1,10,128,128] | [16L,100L,2L,2L]| float32 | 8.0796 | 
 | 2 | Tesla V100 |[1,10,128,128] | [16L,100L,2L,2L]| float16 | 7.7898 | 
@@ -91,7 +91,7 @@ Device端则是按照Host端处理好的输入输出信息，调用`phi::funcs::
 
 新的Paddle与Pytorch性能对比效果如下，达到了预期性能提升效果：
 
-| Case No. | device|repeat_times | input_shape | input_type |Paddle Perf(ms) |old Paddle Perf(ms) |diff |
+| Case No. | device|repeat_times | input_shape | input_type |Paddle Perf(ms) |Pytorch Perf(ms) |diff |
 |---|---|---|---|---|---|---|---|
 | 1 | Tesla V100 |[1,10,128,128] | [16L,100L,2L,2L]| float32 | 5.1831 |8.0796|faster than 55.88%|
 | 2 | Tesla V100 |[1,10,128,128] | [16L,100L,2L,2L]| float16 | 3.5461 |7.7898|faster than 120%|
