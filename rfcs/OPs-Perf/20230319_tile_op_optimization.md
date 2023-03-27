@@ -47,7 +47,7 @@ Pytorch中有`torch.tile`与`paddle.tile`对应，但是在pytorch中直接搜�
 
 ## 1.3 对比分析
 
-Paddle中是使用Eigen实现Tile的通用计算方式，并通过在.cu和.cc文件中直接对齐进行注册完成计算的。而Pytorch则是采用1维线程完成整体计算。于是最简单的优化思路就是直接按照原本的逻辑编写对应的CUDA版本，但是考虑到Tile中的复制操作是可以使用`phi::funcs::BroadcastKernel`和`kps::IdentityFunctor<T>()`结合进行实现的，因此可以利用这两个方法替换复制的操作过程对其进行优化。
+Paddle中是使用Eigen实现Tile的通用计算方式，并通过在.cu和.cc文件中直接对其进行注册完成计算的。而Pytorch则是采用1维线程完成整体计算。于是最简单的优化思路就是直接按照原本的逻辑编写对应的CUDA版本，但是考虑到Tile中的复制操作是可以使用`phi::funcs::BroadcastKernel`和`kps::IdentityFunctor<T>()`结合进行实现的，因此可以利用这两个方法替换复制的操作过程对其进行优化。
 
 # 2 设计方案与性能预期
 
