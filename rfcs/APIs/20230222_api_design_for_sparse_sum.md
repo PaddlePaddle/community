@@ -1,7 +1,5 @@
 # paddle.sparse.sum 设计文档
 
-  
-
 | API名称 | paddle.sparse.sum |
 |----------------------------------------------------------|-----------------------------------------------|
 | 提交作者<input type="checkbox" class="rowselector hidden"> | 六个骨头 |
