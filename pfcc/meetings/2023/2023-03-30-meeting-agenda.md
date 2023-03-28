@@ -1,16 +1,16 @@
-# Paddle Framework Contributor Club 第十八次会议
+# Paddle Framework Contributor Club 第十九次会议
 
-- 本次会议时间：2022-03-16 19:00
+- 本次会议时间：2022-03-30 19:00
 
 - 本次会议接入方式：
 
   - 腾讯会议：
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会](https://meeting.tencent.com/dm/0nkcEOLdyTin)，或添加至会议列表
+  - [点击链接入会](TODO)，或添加至会议列表
 
-- 本次会议主席：田川 （[gouzil](https://github.com/gouzil)）
+- 本次会议主席：詹荣瑞 （[zrr1999](https://github.com/zrr1999)）
 
-- 本次会议副主席：詹荣瑞 （[zrr1999](https://github.com/zrr1999)）
+- 本次会议副主席：张师傅 （[Liyulingyue](https://github.com/Liyulingyue)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 
@@ -30,14 +30,14 @@
 | [ccsuzzh](https://github.com/ccsuzzh)             | [DrRyanHuang](https://github.com/DrRyanHuang)         | [RedContritio](https://github.com/RedContritio)           |   [Lyutoon](https://github.com/Lyutoon)                                                    |                [PommesPeter](https://github.com/PommesPeter)                                      |  [tianxingxia-cn](https://github.com/tianxingxia-cn)                                                 |
 | [sanbuphy](https://github.com/sanbuphy)             | [jjyaoao](https://github.com/jjyaoao)         | [kk-2000](https://github.com/kk-2000)           |   [Tomoko-hjf](https://github.com/Tomoko-hjf)                                                    |                [edencfc](https://github.com/edencfc)                                      |         [CollaborativeFiltering](https://github.com/CollaborativeFiltering)                                      |        [cloud2009](https://github.com/cloud2009)   |           |
 | [hh-qiao](https://github.com/hh-qiao)             |  [AndSonder](https://github.com/AndSonder)  | [JuiceHub](https://github.com/JuiceHub) |
-
+TODO
 
 # 会议议程
 
-- 新人介绍 [hh-qiao](https://github.com/hh-qiao)、 [AndSonder](https://github.com/AndSonder)、[JuiceHub](https://github.com/JuiceHub) （5 min）
-- [From00](https://github.com/From00)  全静态选kernel方案介绍 (15min)
-- [yiakwy](https://github.com/yiakwy) 低精度计算 Mini Float 分享（10 min）
-- [sanbuphy](https://github.com/sanbuphy) 快速安装脚本开发经验分享（5-10 min）
-- [gouzil](https://github.com/gouzil) 黑客松贡献文档调研分享（5 min）
+- 新人介绍 TODO（5 min）
+- TODO 黑客松 TVM 相关题目介绍 (5-10min)
+- [Liyulingyue](https://github.com/Liyulingyue) 飞桨自动化项目（5-10 min）
+- [zrr1999](https://github.com/zrr1999) 主流跨平台 GUI 技术介绍（5-10 min）
+- TODO
 - PFCC 成员自由发言讨论（5 min）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
