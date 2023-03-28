@@ -30,7 +30,7 @@ API文档：[https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/p
 ## 1.2 业内方案调研
 
 
-Pytorch对于[Histogram算子的实现]([pytorch/SummaryOps.cu at master · pytorch/pytorch (github.com)](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/SummaryOps.cu#L55))也是采用了CUDA内核编程的方式，结合CUDA编程中的共享内存来存储最终的直方图结果，从而加快GPU中并行计算的速度。Paddle对于Histogram算子的实现，也是采用相同的策略进行的。
+Pytorch对于[Histogram算子的实现](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/SummaryOps.cu#L55)也是采用了CUDA内核编程的方式，结合CUDA编程中的共享内存来存储最终的直方图结果，从而加快GPU中并行计算的速度。Paddle对于Histogram算子的实现，也是采用相同的策略进行的。
 
 | Case No. | device| input_shape | input_type | bins | min | max |Pytorch Perf(ms) |
 |---|---|---|---|---|---|---|---|
