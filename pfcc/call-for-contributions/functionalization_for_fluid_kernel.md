@@ -31,11 +31,11 @@ kernel注册时记录输入输出的信息，是PHI算子注册机制的一个�
 
 本次迁移工作需要大家迁移的是原先Op的两个重要部分： 1) Opkernel， 2) InferShape函数。
 
-以trace op为例，要迁移的内容如下：
+以trace op为例[#39227](https://github.com/PaddlePaddle/Paddle/pull/39227/files)，要迁移的内容如下：
 
 **1) trace Op的kernel（trace op共包含cpu的正、反向kernel，gpu的正、反向kernel，共4个计算kernel）**
 
-```
+```cpp
 template <typename DeviceContext, typename T>
 class TraceKernel : public framework::OpKernel<T> {
  public:
@@ -70,7 +70,7 @@ class TraceKernel : public framework::OpKernel<T> {
 
 **2) trace op的InferShape （前反向Op各有一个InferShape， 部分检查代码省略，方便大家查看）**
 
-```
+```cpp
 class TraceOp : public framework::OperatorWithKernel {
  public:
   using framework::OperatorWithKernel::OperatorWithKernel;
@@ -140,6 +140,23 @@ OpKernel迁移共包含以下5个步骤，建议从前到后的按顺序来执�
 **文件创建：**
 
 - 以trace op为例，首先在`paddle/phi/kernels`目录下新建`trace_kernel.h`文件，用于放置前向Kernel函数声明。
+- 对于 fused 这一类算子，则需要在 `paddle/phi/kernels/fused` 目录下创建相关文件。
+
+`trace_kernel.h` 内容如下：
+
+```cpp
+// 模板为固定写法
+template <typename T, typename Context> 
+// Kernel 的命名统一加Kernel后缀
+void TraceKernel(const Context& ctx, 
+                 const DenseTensor& x, // 输入的 Tensor
+                 // Trace op的输入属性参数
+                 int offset,
+                 int axis1,
+                 int axis2,
+                 // 输出Tensor的指针
+                 DenseTensor* out);
+```
 
 > 注：所有的kernel声明，统一放在namespace phi中，缩短函数的调用前缀，将来要给外部用户使用
 
@@ -155,7 +172,7 @@ OpKernel迁移共包含以下5个步骤，建议从前到后的按顺序来执�
 
 > 一般情况下参数的命名和顺序应与python API对齐，但本次迁移的Op大多没有对应的Python API，因而可直接参考OpMaker的定义。 以trace op的 OpMaker为例，共定义了1个input， 1个output，3个 attribute：
 
-```
+```cpp
  AddInput("Input",
              "(Tensor) The input tensor, from which the diagonals are taken.");
     AddOutput("Out", "(Tensor) the sum along diagonals of the input tensor");
@@ -178,36 +195,44 @@ OpKernel迁移共包含以下5个步骤，建议从前到后的按顺序来执�
         .SetDefault(1);
 ```
 
+>   OpMaker 可以直接全局搜索：算子名+OpMaker得到（例如：TraceOpMaker）
+
 trace op实现比较规范，OpMaker和Python API的参数个数、顺序都是一致的。
 
 > **特殊情况补充：**
+>
 > 1. **特殊模板参数**：对于某些Kernel （如reshape ，copy ），这些kernel不关注数据类型T， 可以省去第一个模板参数，即为：`template <typename Context>`
 > 2. **特殊输入类型**：对于某些特殊Kernel （如concat 和split kernel）的部分输入或输出是数组类型的DenseTensor（OpMaker中有`AsDuplicable`标记）, 此时输入类型为：`const std::vector<const DenseTensor*>&`; 输出类型为：`std::vector<DenseTensor*>`
+
+注意迁移后的命名风格，OpMarker 里面都是驼峰式命名，但是迁移的时候和其他kernel统一命名风格 比如某个参数名在OpMarker 下是 ISTest，那么迁移过去之后就要变成 is_test
 
 #### 3.1.2 声明反向Kernel函数
 
 **文件创建：**
 
-- 仍然以trace op为例，首先在`paddle/phi/kernels`目录下新建`trace_grad_kernel.h`文件，用于放置反向Kernel函数声明。
+- 仍然以trace op为例，首先在`paddle/phi/kernels`目录下新建`trace_grad_kernel.h`文件，用于放置反向Kernel函数声明。与前向 Kernel 函数类似，我们参照 trace op 的 GradOPMaker 的实现编写即可；
 
 > 注：为了更好地服务于推理编包裁剪，phi设计上前向和反向kernel分离放置，这可能会导致文件数有一定膨胀，但可以减少推理在编包时不编译反向Kernel的实现阻力
 
 反向kernel没有对应的Python API，其声明需要参考GradOpMaker的定义，下面为trace op的GradOPMaker的实现，其中定义了2个input， 3个attribute（正向的时候就是3个attribute），1个output；
 
-```
+```cpp
  void Apply(GradOpPtr<T> grad_op) const override {
     grad_op->SetType("trace_grad");
-    grad_op->SetInput("Input", this->Input("Input"));                            // 需要正向的Input作为输入 
-    grad_op->SetInput(framework::GradVarName("Out"), this->OutputGrad("Out"));   // 正向输出的梯度，也作为输入
-    grad_op->SetOutput(framework::GradVarName("Input"),                          // input的梯度作为输出，
+    grad_op->SetInput("Input", this->Input("Input"));      // 需要正向的Input作为输入 
+    // 正向输出的梯度，也作为输入
+    grad_op->SetInput(framework::GradVarName("Out"), this->OutputGrad("Out"));  
+    // input的梯度作为输出
+    grad_op->SetOutput(framework::GradVarName("Input"),                          
                        this->InputGrad("Input"));
-    grad_op->SetAttrMap(this->Attrs());                                          // 同时需要正向所有的attribute
+    // 同时需要正向所有的attribute
+    grad_op->SetAttrMap(this->Attrs());                                          
   }
 ```
 
-相应地，TraceGradKernel声明为：
+相应地，`TraceGradKernel` 声明为：
 
-```
+```cpp
 template <typename T, typename Context>
 void TraceGradKernel(const Context& dev_ctx,
                      const DenseTensor& x,
@@ -218,13 +243,15 @@ void TraceGradKernel(const Context& dev_ctx,
                      DenseTensor* in_grad);
 ```
 
+>   GradOpMaker 里面带有 `framework::GradVarName` 的参数需要后缀 `_grad`
+
 函数声明同样存在格式要求，基本与前向Kernel函数声明要求一致，按照输入、参数、输出的顺序排列参数，不同之处包括：
 
-1.  反向Kernel输入参数，建议按以下顺序排列：
-	- 最前面是前向的输入（如果需要的话），参数名称和前向参数的名称一样，例如`x`
-	- 然后是前向的输出（如果需要的话），参数名称和前向参数的名称一样，例如`out`
-	- 最后是前向输出的梯度，参数名称为前向参数名称加`_grad`后缀，例如`x_grad`
-2. attribute的顺序和前向参数保持一致
+1.  反向Kernel输入参数，需按以下顺序排列：
+	- 最前面是前向的输入（如果需要的话），参数名称和前向参数的名称一样，例如 `x`
+	- 然后是前向的输出（如果需要的话），参数名称和前向参数的名称一样，例如 `out`
+	- 最后是前向输出的梯度，参数名称为前向参数名称加 `_grad` 后缀，例如 `x_grad`
+2. `attribute` 的顺序和前向参数保持一致
 
 > 注：如果有二阶反向、三阶反向Kernel，需要一并迁移，参数定义顺序参考一阶的原则
 
@@ -247,9 +274,13 @@ void TraceGradKernel(const Context& dev_ctx,
 
 #### 3.2.1 剪切OpKernel实现
 
-直接将原来的Compute函数的内容全部剪切，粘贴到新的TraceKernel中（注意，所有的kernel实现，必须放在namespace phi中）
+直接将原来的Compute函数的内容全部剪切，粘贴到新的TraceKernel中（注意，所有的kernel实现，必须放在namespace phi中，对于 fused 这类的算子需要把算子放在 namespace phi fused 下）
 
-```
+>   cpu 设备的 Compute 一般在 paddle/fluid/operators/xxx_op.h 里，gpu 设备对应的 Compute 代码一般在 paddle/fluid/operators/xxx_op.cu 里面
+>
+>   全局搜索：REGISTER_OP_CPU_KERNEL(trace 或者 REGISTER_OP_CUDA_KERNEL(trace 可以判断 trace_op 是否需要实现对应设备的算子。以 fused_attention 前向算子为例，全局搜索 REGISTER_OP_CPU_KERNEL(fused_attention) 就无法搜索到，说明该算子不需要在 CPU 设备上实现。
+
+```cpp
 namespace phi {
 template <typename T, typename Context>
 void TraceKernel(const Context& dev_ctx,
@@ -292,7 +323,7 @@ void TraceKernel(const Context& dev_ctx,
 
 将与ExecutionContext相关的逻辑全部改掉
 
-```
+```cpp
 template <typename T, typename Context>
 void TraceKernel(const Context& dev_ctx,
                  const DenseTensor& x,
@@ -329,6 +360,14 @@ void TraceKernel(const Context& dev_ctx,
   }     
  }     
 ```
+
+>   在迁移的过程中，有一部分输入参数为可选参数，可选的参数在 Compute 中会使用 AsDispensable 标注。比如 `AddInput("LnScale", "...").AsDispensable();` 在迁移过来，声明函数时需要给参数添加 `optional`选项 : `const paddle::optional<DenseTensor>& LnScale` 。 输出带有 `AsDispensable` 的就可以不用管。
+>
+>   在迁移的时候，我们会发现老的 Compute 函数中都是声明指针指向各个 Input，对于可选的参数我们可以使用 `get_ptr()` 来获得指针，如果该参数没有传入 `get_ptr()` 会返回 `nullptr` 。具体使用代码为： `auto *p = ln_scale.get_ptr()`。对于普通的 `const DenseTensor&` 类输入只需使用 `&` 获取其指针即可。
+>
+>   如果所有的可选参数都设置正确，仍然有类似于 `Expected input_names.size() == input_defs.size(), but received input_names.size():3 != input_defs.size():11` 这样的错误，请添加 sig 文件（后续会介绍）后重试。
+>
+>   需要注意，对于反向的Op（xxx_grad），有部分输入并不会使用 `AsDispensable` 而是写在 `if` 判断里的，这种情况也需要给在 if 里添加的输入添加 `optional` 参数。
 
 #### 3.2.3 替换对象类型或函数
 
@@ -386,13 +425,18 @@ void TraceKernel(const Context& dev_ctx,
  }     
 ```
 
+>可以使用如下正则表达式在 IDE 寻找需要替换的部分（需要开启IDE搜索的正则匹配功能）
+>
+>`farmework::Tensor|farmework::LoDTensor|DeviceContext|mutbale_data|platform::erros|platform::float16|platform::bfloat16|platform::complex64|platform::complex128|framework::Eigen|platform::.*?Place|framework::DefaultCPUGenerato|framework::LoD|framework::TensorCopy|platform::is_.*?_place`
+
 #### 3.2.4 迁移依赖函数
 
 迁移Kernel时，kernel调用的非本文件内的相关function及functor也需要一并迁移到phi，根据所依赖function或者functor使用场景不同，可以分为以下几种情况：
 
 1. 仅有当前所迁移kernel使用的辅助函数（具体到设备，比如trace的cpu kernel），一律和kernel实现放到同一个设备文件夹中
-- 如果辅助函数相关代码较少，就直接和kernel实现放到同一个`.cc/cu`中
-- 如果辅助函数相关代码较多，就在kernel所在的设备目录创建`.h`管理代码
+
+    - 如果辅助函数相关代码较少，就直接和kernel实现放到同一个`.cc/cu`中
+    - 如果辅助函数相关代码较多，就在kernel所在的设备目录创建`.h`管理代码
 2. 有同设备多个kernel使用的辅助函数，在kernel所在的设备目录创建`.h`放置代码
 3. 有跨设备多个kernel使用的辅助函数，在`kernels/funcs`目录下创建`.h/cc/cu`管理代码
 4. 如果当前依赖的辅助函数可以直接归类到`kernels/funcs`目录下已有的文件中，则直接放过去，不用创建新的文件
@@ -400,6 +444,8 @@ void TraceKernel(const Context& dev_ctx,
 从第3.2.3的代码来看，trace 依赖了Diagonal的函数，需要将Diagonal函数迁移到kernels中，Diagonal函数同时用于trace的cpu和gpu kernel中，即有跨设备的多个kernel使用，因此它需要在phi/funcs中创建对应的文件放置代码，这里将其放置到`phi/funcs/diagonal.h`中
 
 > 注：如果觉得依赖的函数组件过于复杂，也可以保留在原位置，include对应头文件后使用，我们后续统一再迁移
+>
+> 如果不确定迁过来之后文件放在哪里，可以采用原来放在哪个文件夹下就迁移到phi下对应文件夹的方法。比如 paddle/fluid/operators/fused/fmha_ref.h 迁移后就需要放到  paddle/phi/kernels/fusion/gpu/fmha_ref.h 。
 
 #### 3.2.5 添加头文件
 
@@ -407,22 +453,22 @@ void TraceKernel(const Context& dev_ctx,
 
 对于xxx_kernel.h，一般只需要tensor等基础数据结构头文件，例如trace_kernel.h
 
-```
+```cpp
 #include "paddle/phi/core/dense_tensor.h"
 ```
 
 对于xxx_kernel.cc/cu，其中设备Context与kernel注册逻辑相关的头文件必须添加，例如trace的cpu kernel需要
 
-```
+```cpp
 #include "paddle/phi/backends/cpu/cpu_context.h"
 #include "paddle/phi/core/kernel_registry.h"
 ```
 
 #### 3.2.6 编译调试
 
-至此，一个kernel的主体代码迁移工作已经完成，这里建议，先重新cmake，make确认下有没有语法错误或者其他编译错误，根据错误的提示进行问题的修复，解决后再继续后面的步骤。
+至此，一个kernel的主体代码迁移工作已经完成，这里建议，先重新cmake，make确认下有没有语法错误或者其他编译错误，根据错误的提示进行问题的修复，解决后再继续后面的步骤。 
 
-常见错误参考最后章节的FAQ。
+常见错误参考最后章节的 FAQ。
 
 
 ### 3.3 注册新Kernel
@@ -432,7 +478,7 @@ void TraceKernel(const Context& dev_ctx,
 2. CPU: backend名称， 这次迁移大多数算子主要是CPU和GPU kernel，如果遇到有XPU kernel的算子，也按类似的方式迁移。
 3. phi::TraceKernel: kernel的函数名称，记得带上namespace phi
 4. 剩余的均为数据类型，注册的数据类型对齐旧的kernel注册即可。
-```
+```cpp
 PD_REGISTER_KERNEL(trace,
                    CPU,
                    ALL_LAYOUT,
@@ -448,7 +494,7 @@ PD_REGISTER_KERNEL(trace,
 
 > 注：
 > 1. 如果忘记添加注册相关的头文件，会编译错误，如果出现编译错误，请检查include的头文件 
-> 2. 当新的kernel注册之后，旧kernel的compute kernel所在类和注册函数均需要删除，必须是在代码文件中直接删除，不能注释，否则会有链接错误
+> 2. 当新的kernel注册之后，旧kernel的compute kernel所在类和注册函数均需要删除，必须是在代码文件中直接删除，**不能注释**，否则会有链接错误
 > 3. phi下的注册宏后边是带函数体{}，不是直接加分号，且本次迁移需要判断出kernel需要标记的输入输出参数信息并在函数体{}中进行设置，对于标记信息的设置可参考PR [#51233](https://github.com/PaddlePaddle/Paddle/pull/51233)。除了输出的DataType，如果kernel输入需要注册，或Backend需要注册，也应一同注册上
 > 4. 注册kernel的宏声明需要在global namespace
 
@@ -461,7 +507,7 @@ PD_REGISTER_KERNEL(trace,
 
 1. OpMaker中输入、属性、输出参数**个数和顺序**和迁移后的Kernel一致的，我们会从OpProto中读取相关参数，确保其能够正确匹配，不需要实现此映射函数，对于trace前向op来讲就是如此，不需要关注这个环节
 
-	```
+	```cpp
 	 AddInput("Input",
 	             "(Tensor) The input tensor, from which the diagonals are taken.");
 	    AddOutput("Out", "(Tensor) the sum along diagonals of the input tensor");
@@ -495,29 +541,31 @@ PD_REGISTER_KERNEL(trace,
 
 - **文件创建：**仍然以trace op为例，首先在`paddle/phi/ops/compat`目录下新建`trace_sig.cc`文件，用于放置这里的映射函数。
 
-- 由于函数式kernel的一个最重要的特别就是参数顺序和类型（顺序和类型是关键，变量名称不影响），我们需要定义一个函数来做一个从OpMaker中如何获取信息，并且按照顺序传递给新的kernel函数； 这个模块就是OpArgumentMapping， trace反向op的OpArgumentMapping定义如下， KernelSignature共包含4个内容
+- 由于函数式kernel的一个最重要的特别就是**参数顺序和类型**（顺序和类型是关键，变量名称不影响），我们需要**定义一个函数来做一个从OpMaker中如何获取信息**，并且按照顺序传递给新的kernel函数； 这个模块就是`OpArgumentMapping`， trace反向op的OpArgumentMapping定义如下， KernelSignature共包含4个内容
 	1. kernel名称，这个是我们给kernel注册的时候的名称
 	2. input list： 这个要和OpMaker（或者GradOpMaker）中定义的Key要完全一致
 	3. attribute list： 这个要和OpMaker（或者GradOpMaker）中定义的Key要完全一致
 	4. output list： 这个要和OpMaker（或者GradOpMaker）中定义的Key要完全一致
 
+Trace op 的映射函数如下：
 
-	```
-	#include "paddle/phi/core/compat/op_utils.h"
-	
-	namespace phi {
-	
-	KernelSignature TraceGradOpArgumentMapping(const ArgumentMappingContext& ctx) {
-	  return KernelSignature("trace_grad",
-	                         {GradVarName("Out"), "Input"},
-	                         {"offset", "axis1", "axis2"},
-	                         {GradVarName("Input")});
-	}
-	
-	}  // namespace phi
-	
-	PD_REGISTER_ARG_MAPPING_FN(trace_grad, phi::TraceGradOpArgumentMapping);
-	```
+
+```cpp
+ #include "paddle/phi/core/compat/op_utils.h"
+ 
+ namespace phi {
+ 
+ KernelSignature TraceGradOpArgumentMapping(const ArgumentMappingContext& ctx) {
+   return KernelSignature("trace_grad",
+                          {GradVarName("Out"), "Input"},
+                          {"offset", "axis1", "axis2"},
+                          {GradVarName("Input")});
+ }
+ 
+ }  // namespace phi
+ 
+ PD_REGISTER_ARG_MAPPING_FN(trace_grad, phi::TraceGradOpArgumentMapping);
+```
 
 当与OpMake的关联建立之后，可以重新cmake，编译，然后可以运行旧的Python op单测来测试正确性。
 
@@ -533,7 +581,7 @@ PD_REGISTER_KERNEL(trace,
 `paddle/fluid/operators/xxx_op.h`
 `paddle/fluid/operators/xxx_op.cu`
 
-以及删除`paddle/fluid/operators/xxx_op.cc`中相关的`REGISTER_OP_CPU_KERNEL`和`REGISTER_OP_CUDA_KERNEL`声明
+以及删除 `paddle/fluid/operators/xxx_op.cc` 中相关的 `REGISTER_OP_CPU_KERNEL `和`REGISTER_OP_CUDA_KERNEL` 声明
 
 仍然以trace op为例，可以移除trace_op.h，trace_op.cu，以及trace_op.cc中相关的`REGISTER_OP_CPU_KERNEL`和`REGISTER_OP_CUDA_KERNEL`声明。
 
@@ -605,7 +653,7 @@ InferShape迁移为InferMeta的文件放置规则（以Tensor输入个数为判�
 
 示例如下：
 
-```
+```cpp
 void TraceInferMeta(
     const MetaTensor& x, int offset, int axis1, int axis2, MetaTensor* out);
 ```
@@ -628,9 +676,9 @@ void TraceInferMeta(
 > 2. 在迁移之前，可以看一下已有的InferShape函数是否能够直接复用，如果有现成InferMeta可以复用的话，就不建议迁移了，我们原本的op在InferShape上也有很多重复代码，比如很多简单算子都可以直接复用UnchangedInferMeta
 > 3.  InferMeta函数在文件里推荐按照字母序放置，一个是为了便于查看，另一个是为了减少规模化迁移算子带来的代码冲突
 
-示例如下：
+下面是 `TraceInferMeta` 的实现 （移除了异常判断的代码）：
 
-```
+```cpp
 void TraceInferMeta(
     const MetaTensor& x, int offset, int axis1, int axis2, MetaTensor* out) {
   int dim1 = axis1;
@@ -640,38 +688,6 @@ void TraceInferMeta(
 
   int dim1_ = dim1 < 0 ? x_dims.size() + dim1 : dim1;
   int dim2_ = dim2 < 0 ? x_dims.size() + dim2 : dim2;
-
-  PADDLE_ENFORCE_GE(
-      x_dims.size(),
-      2,
-      phi::errors::OutOfRange(
-          "Input's dim is out of range (expected at least 2, but got %ld).",
-          x_dims.size()));
-  PADDLE_ENFORCE_LT(
-      dim1_,
-      x_dims.size(),
-      phi::errors::OutOfRange(
-          "Attr(dim1) is out of range (expected to be in range of [%ld, "
-          "%ld], but got %ld).",
-          -(x_dims.size()),
-          (x_dims.size() - 1),
-          dim1));
-  PADDLE_ENFORCE_LT(
-      dim2_,
-      x_dims.size(),
-      phi::errors::OutOfRange(
-          "Attr(dim2) is out of range (expected to be in range of [%ld, "
-          "%ld], but got %ld).",
-          -(x_dims.size()),
-          (x_dims.size() - 1),
-          dim2));
-  PADDLE_ENFORCE_NE(
-      dim1_,
-      dim2_,
-      phi::errors::InvalidArgument("The dimensions should not be identical "
-                                    "%ld vs %ld.",
-                                    dim1,
-                                    dim2));
 
   auto sizes = vectorize(x_dims);
   if (x_dims.size() == 2) {
@@ -691,7 +707,7 @@ void TraceInferMeta(
 
 将原先trace op override的InferShape函数删除，在最下方声明TraceInferShapeFunctor，并注册到Op中，示例如下：
 
-```
+```cpp
 DECLARE_INFER_SHAPE_FUNCTOR(trace, TraceInferShapeFunctor,
                             PD_INFER_META(phi::TraceInferMeta));
 REGISTER_OPERATOR(trace, ops::TraceOp, ops::TraceOpMaker,
@@ -726,7 +742,7 @@ REGISTER_OPERATOR(trace, ops::TraceOp, ops::TraceOpMaker,
 	- 全局搜索`USE_OP(op_name)`，并替换为`USE_OP_ITSELF(op_name)`
   - 添加人：@zyfncg
 	- 补充：除`USE_OP`宏外，`USE_OP_DEVICE_KERNEL`宏也会导致此错误，若搜索到`USE_OP_DEVICE_KERNEL(op_name,`，可直接删除。另外，如果旧OP的`REGISTER_OP_CPU_KERNEL`和`REGISTER_OP_GPU_KERNEL`注册宏没有直接删除，而是直接注释掉，因Pybind模块编译时会在代码文本中扫描注册宏并自动生成USE_OP代码，亦会导致此错误 @From00
- 
+
  2. 问题描述：把`T* out_data = out->mutable_data<T>(dev_ctx.GetPlace());`改成了`T* out_data = dev_ctx.Alloc<T>(out);`后编译报错。
 	- 问题原因：暂不清楚
 	- 解决方法：按照@YuanRisheng 指示改成`T* out_data = dev_ctx.template Alloc<T>(out); `编译通过。
@@ -735,9 +751,9 @@ REGISTER_OPERATOR(trace, ops::TraceOp, ops::TraceOpMaker,
 
  3. 问题描述：按照新的命名规范，op命名需要和Python API名字保持一致，如果需要迁移的算子是V2版本(例如expand_v2)，在与原来的OpMaker进行关联、注册新的phi Kernel时需要注意什么地方？
   - 由于迁移过来，将`expend_v2`规范化为`expend`，会和原先已有的`expend` op产生冲突，这里原先的op一般是deprecated的版本，这种情况需要额外在`phi/core/compat/op_utils.h`中进行标记
-  
+
  4. 问题描述：Scalar和ScalarArray什么时候使用？
   - 当原先Op有动态Attribute时需要使用，比如同时有`shape` attr和`ShapeTensor` input，或者同时有`axis` attr和`AxisTensor` input，可以参考reshape、scale、full等已有kernel的写法以及相应的映射函数。
- 
+
  5. 问题描述：带有optional的参数什么时候使用？
   - 当原先Op的OpMaker中，输入输出标记有AsDispensable()时候使用，可以参考dropout、elementwise_multiply_grad等已有kernel的写法。
