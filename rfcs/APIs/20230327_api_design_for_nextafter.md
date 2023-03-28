@@ -88,18 +88,22 @@ paddle.nextafter(
 该 API 实现于 `paddle/phi/kernels/funcs/elementwise_functor.h`，
 
 通过调研发现，需要
-1 `python/paddle/tensor/math.py` 添加Python 实现代码 & 英文 API 文档，
-2 `python/paddle/tensor/init.py` 添加 nextafter API，以支持 Tensor.nextafter 的调用方式。
+1 `paddle/phi/api/yaml/ops.yaml` 添加前向算子，`paddle/phi/api/yaml/backward.yaml` 添加反向算子。
+2 `paddle/phi/infermeta/generated.cc` 添加算子 InferMeta。
 3 `paddle/phi/kernels/elementwise_kernel.cc` 添加底层OP。
-4 `paddle/phi/kernels/` 目录下添加`elementwise_nextafter_kernel.h`、`elementwise_nextafter_grad_kernel.h`文件。
-5 `paddle/phi/kernels/cpu` 目录下添加`elementwise_nextafter_kernel.cc`、`elementwise_nextafter_grad_kernel.cc`文件。
+4 `paddle/phi/kernels/` 目录下添加`nextafter_kernel.h`、`nextafter_grad_kernel.h`文件。
+5 `paddle/phi/kernels/cpu` 目录下添加`nextafter_kernel.cc`、`nextafter_grad_kernel.cc`文件。
 6 `paddle/phi/kernels/funcs/elementwise_functor.h` 添加C++实现代码。
+7 `python/paddle/tensor/math.py` 添加Python 实现代码 & 英文 API 文档，
+8 `python/paddle/tensor/init.py` 添加 nextafter API，以支持 Tensor.nextafter 的调用方式。
+9 `python/paddle/fluid/tests/unittests` 目录下添加单测文件test_nextafter_op.py。
+
 
 # 六、测试和验收的考量
 
 测试需要考虑的 case 如下：
 
-- 输出数值结果的一致性和数据类型是否正确，使用 pytorch 作为参考标准
+- 输出数值结果的一致性和数据类型是否正确，使用 numpy 的 nextafter 函数和新增API进行对比。
 - 参数 `x` 的数据类型准确性判断
 - 参数 `y` 的数据类型准确性判断
 
