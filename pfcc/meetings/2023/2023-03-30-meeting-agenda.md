@@ -36,8 +36,8 @@
 
 - 新人介绍 [Difers](https://github.com/Difers)、[zeroRains](https://github.com/zeroRains)、[BeingGod](https://github.com/BeingGod)、[Young-Flash](https://github.com/Young-Flash)（5 min）
 - 飞桨产品经理 李彤 黑客松 TVM 相关题目介绍 (5-10min)
+- [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 单测目录迁移 (5-10 min)
 - [Liyulingyue](https://github.com/Liyulingyue) 飞桨自动化项目（5-10 min）
-- [zrr1999](https://github.com/zrr1999) 主流跨平台 GUI 技术介绍（5-10 min）
-- TODO
+- [zrr1999](https://github.com/zrr1999) 主流跨平台 GUI 技术介绍（5 min）
 - PFCC 成员自由发言讨论（5 min）
 - 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
