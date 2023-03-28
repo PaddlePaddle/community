@@ -36,7 +36,7 @@ TODO
 # 会议议程
 
 - 新人介绍 TODO（5 min）
-- TODO 黑客松 TVM 相关题目介绍 (5-10min)
+- 飞桨产品经理 李彤 黑客松 TVM 相关题目介绍 (5-10min)
 - [Liyulingyue](https://github.com/Liyulingyue) 飞桨自动化项目（5-10 min）
 - [zrr1999](https://github.com/zrr1999) 主流跨平台 GUI 技术介绍（5-10 min）
 - TODO
