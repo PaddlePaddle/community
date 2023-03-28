@@ -63,8 +63,8 @@ TVM 的 `ReverseComputeInline` 原语实现可作为参考。本次任务计划�
 ```
 
 ## API实现方案
-ComputeInline 原语：分别添加接口及实现至 cinn/ir/ir_schedule.h、cinn/ir/ir_schedule.cc
-支持新增原语 Trace 重放：在 cinn/ir/schedule_desc.cc 中使用CINN_BUILD_STEP_KIND 注册 ComputeInline 原语的重放函数
+ReverseComputeInline 原语：分别添加接口及实现至 cinn/ir/ir_schedule.h、cinn/ir/ir_schedule.cc
+支持新增原语 Trace 重放：在 cinn/ir/schedule_desc.cc 中使用CINN_BUILD_STEP_KIND 注册 ReverseComputeInline 原语的重放函数
 
 # 六、测试和验收的考量。
 ComputeInline 原语单测添加至 cinn/backends/ir_schedule_test.cc
