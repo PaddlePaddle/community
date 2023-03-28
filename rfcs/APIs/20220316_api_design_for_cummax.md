@@ -268,7 +268,7 @@ PyTorch 还提供了基于 CUDA 的算子实现。
 
 ## 命名与参数设计
 
-API设计为`paddle.cummax(x, axis, name)`以及`paddle.Tensor.cummax(axis, name)`。
+API设计为`paddle.cummax(x, axis, dtype, name)`以及`paddle.Tensor.cummax(axis, dtype, name)`。
 
 paddle.cummax
 ----------------------
@@ -287,7 +287,7 @@ paddle.Tensor.cummax指向paddle.cummax，两者是相同的API
 ## 底层OP设计
 
 cpu：
-前向计算，需要计算cummax结果Out和对应的Indices，没有在paddle内部找到可以直接计算Indices的API可供调用，因此需要实现一个能够同时计算cmmin和Indices的函数ScanWithIndicesKernel
+前向计算，需要计算cummax结果Out和对应的Indices，没有在paddle内部找到可以直接计算Indices的API可供调用，因此需要实现一个能够同时计算cummax和Indices的函数ScanWithIndicesKernel
 后向计算，调用cpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
 
 gpu：

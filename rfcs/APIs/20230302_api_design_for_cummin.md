@@ -21,7 +21,7 @@ PyTorch、NumPy 和 Pandas 提供了相似算子。
 
 ## 2、功能目标
 
-cummin API 是一个按轴寻找累计最大值和最大值所在位置的 API。此任务的目标是在 Paddle 框架中，新增 cummin API，调用路径为：`paddle.cummin`和 `paddle.Tensor.cummin`。
+cummin API 是一个按轴寻找累计最小值和最小值所在位置的 API。此任务的目标是在 Paddle 框架中，新增 cummin API，调用路径为：`paddle.cummin`和 `paddle.Tensor.cummin`。
 ## 3、意义
 
 完善矩阵运算的基本功能，增强统计运算完善度。
@@ -39,7 +39,7 @@ PyTorch 中有 [API](https://pytorch.org/docs/stable/generated/torch.cummin.html
 在 PyTorch 文档中，介绍为：
 
 ```
-Returns a namedtuple (values, indices) where values is the cumulative minimum of elements of input in the dimension dim. And indices is the index location of each maximum value found in the dimension dim.
+Returns a namedtuple (values, indices) where values is the cumulative minimum of elements of input in the dimension dim. And indices is the index location of each minimum value found in the dimension dim.
 
 Parameters
  - input (Tensor) – the input tensor.
@@ -48,7 +48,7 @@ Parameters
 Keyword Arguments
  - out (tuple, optional) – the result tuple of two output tensors (values, indices)
 ```
-输入数据Tensor和cummax操作的维度dim，输出一个tuple包含计算结果values和索引indices
+输入数据Tensor和cummin操作的维度dim，输出一个tuple包含计算结果values和索引indices
 
 ### 实现方法
 
@@ -258,14 +258,14 @@ Return cumulative minimum of Series or DataFrame.
 
 比较分析：不同框架在基于 CPU 的方案上思路较为一致。其中 PyTorch 对于矩阵的操作是基于 stride 和指针完成的；Pandas 基于 Numpy 提供的矩阵操作能力，所以以索引方式操作；NumPy 没有原生实现该功能。
 PyTorch 还提供了基于 CUDA 的算子实现。
-评价：Pandas 的矩阵操作实际由 Numpy 支撑，在该运算实现效率上应不如 PyTorch 实现的；在功能上，Pandas 支持了可选的 NaN 值处理选项，有一定灵活性；NumPy 没有提供原生的 `cummax` 实现，而是基于组合的方式。
-就基于已有的方法组合实现这一途径，经过调研，PaddlePaddle 和 PyTorch 都已原生实现 `cumsum` 和 `cumprod`，为 `cummax` 提供原生实现，应能够提供更好的性能。
+评价：Pandas 的矩阵操作实际由 Numpy 支撑，在该运算实现效率上应不如 PyTorch 实现的；在功能上，Pandas 支持了可选的 NaN 值处理选项，有一定灵活性；NumPy 没有提供原生的 `cummin` 实现，而是基于组合的方式。
+就基于已有的方法组合实现这一途径，经过调研，PaddlePaddle 和 PyTorch 都已原生实现 `cumsum` 和 `cumprod`，为 `cummin` 提供原生实现，应能够提供更好的性能。
 
 # 五、方案设计
 
 ## 命名与参数设计
 
-API设计为`paddle.cummin(x, axis, name)`以及`paddle.Tensor.cummin(axis, name)`。
+API设计为`paddle.cummin(x, axis, dtype, name)`以及`paddle.Tensor.cummin(axis, dtype, name)`。
 
 paddle.cummin
 ----------------------
