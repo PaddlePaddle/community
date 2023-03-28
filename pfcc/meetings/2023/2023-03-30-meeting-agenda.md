@@ -6,7 +6,7 @@
 
   - 腾讯会议：
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会](TODO)，或添加至会议列表
+  - [点击链接入会](https://meeting.tencent.com/dm/mKPaZnetoMEq)，或添加至会议列表
 
 - 本次会议主席：詹荣瑞 （[zrr1999](https://github.com/zrr1999)）
 
