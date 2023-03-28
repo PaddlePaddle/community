@@ -1,6 +1,6 @@
 # 【PaddlePaddle Hackathon 4】核心框架开源贡献 TensorRT 开发任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
 注：为飞桨框架新增一系列 TensorRT 算子，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，任务列表如下，其他说明事项在任务列表后：
 
@@ -111,18 +111,18 @@
   - 熟练掌握 Python、C++ 代码编写
   - 熟悉 TensorRT，熟悉推理优化
 
-### No.77：为 Paddle-TRT 添加 inverse 算子 <a name='task77'></a>
+### No.77：为 Paddle-TRT 添加 bitwise_and 算子 <a name='task77'></a>
 
 - 技术标签：深度学习框架，C++，推理优化，GPU
 - 任务难度：基础
 - 详细描述：
-  - 背景：Paddle-TRT 缺乏 inverse 算子 TRT 映射实现，基于 [通用plugin方案](https://github.com/PaddlePaddle/Paddle/pull/45355) 完成TRT映射。
-  - 目标：完成 inverse 算子 TRT Layer 映射
-  - 通用 plugin PR 参考示例见[PR47003](https://github.com/PaddlePaddle/Paddle/pull/47003)、[代码贡献流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html)，历史开发任务参考 [[tracking issue\] Paddle-TensorRT 算子开发](https://github.com/PaddlePaddle/Paddle/issues/48292)。
+  - 背景：Paddle-TRT 缺乏 bitwise_and 算子 TRT 映射实现。
+  - 目标：完成 bitwise_and 算子 TRT Layer 映射
+  - PR 参考示例见 [PR47820](https://github.com/PaddlePaddle/Paddle/pull/47820)、[代码贡献流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/code_contributing_path_cn.html)，历史开发任务参考 [[tracking issue\] Paddle-TensorRT 算子开发](https://github.com/PaddlePaddle/Paddle/issues/48292)。
 - 任务提交：
-  - 完成 inverse TRT 算子映射，并提交 PR
+  - 完成 bitwise_and TRT 算子映射，并提交 PR
   - 任务要求：
-	    - 完成 inverse 功能实现代码
+	    - 完成 bitwise_and 功能实现代码
 	    - 添加单测，并验证通过
   - 单元测试样例：python/paddle/fluid/tests/unittests/ir/inference/test_trt_convert_silu.py
 - 技术要求：

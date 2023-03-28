@@ -1,8 +1,11 @@
 # 【PaddlePaddle Hackathon 4】核心框架开源贡献数据类型扩展任务合集
 
-（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/50629)）
+（此 ISSUE 为 PaddlePaddle Hackathon 第四期活动的任务 ISSUE，更多详见 [【PaddlePaddle Hackathon 第四期】任务总览](https://github.com/PaddlePaddle/Paddle/issues/51281)）
 
-注：为飞桨框架一系列算子增加支持的数据类型，提交流程请参考 [算子数据类型扩展&提交流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/op_dtype_extension/op_dtype_extension_contributing_guides_cn.html) & [低精度算子开发贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/amp_precision/index_cn.html)，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)， 任务列表如下：
+注：
+
+- 为飞桨框架一系列算子增加支持的数据类型，提交流程请参考 [算子数据类型扩展&提交流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/op_dtype_extension/op_dtype_extension_contributing_guides_cn.html) & [低精度算子开发贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/amp_precision/index_cn.html)，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)， 任务列表如下：
+- 算子FP16/BF16算子及单测完善，建议2-3个算子提交一个PR，便于快速review&merge。认领同学请在 [石墨表格](https://shimo.im/sheets/RKAWVnVNopC1NKk8/Z03pH) 中同时填写状态。
 
 ### No.45：为 Paddle logical 算子实现 float16 数据类型支持 <a name='task45'></a>
 
