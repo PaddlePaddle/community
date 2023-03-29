@@ -38,11 +38,12 @@ PyTorch 中有 `torch.special.i0e` 的 API，详细参数为 `torch.special.i0e(
 > Computes the zeroth order modified Bessel function of the first kind for each element of `input`.
 
 在实现方法上，PyTorch 是通过 C++ API 组合实现的
+
 实现代码：
 
 [代码位置](https://github.com/pytorch/pytorch/blob/HEAD/torch/csrc/api/include/torch/special.h#L456-L471)
 
-````cpp
+```cpp
 /// Computes the zeroth order modified Bessel function of the first kind of
 /// input, elementwise See
 /// https://pytorch.org/docs/master/special.html#torch.special.i0
@@ -59,7 +60,7 @@ inline Tensor i0(const Tensor& self) {
 inline Tensor& i0_out(Tensor& result, const Tensor& self) {
   return torch::special_i0_out(result, self);
 }
-````
+```
 
 [代码位置](https://github.com/pytorch/pytorch/blob/HEAD/aten/src/ATen/native/Math.h#L1458-L1474)
 
@@ -87,7 +88,7 @@ calc_i0(T _x) {
 
 [代码位置](https://github.com/pytorch/pytorch/blob/HEAD/torch/csrc/api/include/torch/special.h#L490-L505)
 
-````cpp
+```cpp
 /// Computes the exponentially scaled zeroth order modified Bessel function of
 /// the first kind See
 /// https://pytorch.org/docs/master/special.html#torch.special.i0e.
@@ -104,8 +105,8 @@ inline Tensor i0e(const Tensor& self) {
 inline Tensor& i0e_out(Tensor& result, const Tensor& self) {
   return torch::special_i0e_out(result, self);
 }
-````
 
+```
 [代码位置](https://github.com/pytorch/pytorch/blob/HEAD/aten/src/ATen/native/Math.h#L101-L125)
 
 ```cpp
@@ -229,7 +230,7 @@ double x;
 
     if (x < 0)
         x = -x;
-    if (x <= 8.0)
+    if (x <= 8.0) 
     {
         y = (x / 2.0) - 2.0;
         return (exp(x) * chbevl(y, A, 30));
