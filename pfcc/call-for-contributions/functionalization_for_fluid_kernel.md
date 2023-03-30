@@ -1,14 +1,14 @@
 # 飞桨算子体系重构 - Fluid算子函数式改造
 
-> This project will be mentored by [@From00](http://github.com/from00)
+> This project will be mentored by [@From00](http://github.com/from00) and [@AndSonder](https://github.com/AndSonder)
 
 ## 1. 背景及计划
 为了解决飞桨原Fluid算子体系存在的规范性、一致性、易用性、可维护性等诸多问题，我们设计开发了新的PHI算子体系，并在2022年进行了三期规模化迁移，将关联Python API的必要kernel从Fluid迁移至PHI。
 
 > 关于 PHI 的设计可参考 [《飞桨高可复用算子库 PHI 设计文档》](https://github.com/PaddlePaddle/docs/blob/develop/docs/design/phi/design_cn.md)。
 
-经过几期迁移工作，截至2022年09月20日，基于paddle develop分支commit bcef827统计飞桨框架算子总数701个，其中347个已迁移至PHI，另外354个算子未迁移。这个统计数据放到现在是过时的，但并不影响对算子整体状态的判断：当前Fluid下仍有大量算子没有迁移到PHI。
-Fluid下剩余算子的迁移，是一项长期而艰巨的任务，不仅代码量巨大，且存在许多后续计划废弃的算子，这些算子原则上是没必要做迁移的，但短期上却无法被删除，且可能为了兼容保留很长时间。因此，我们探索了一种低成本统一Fluid和PHI kernel的方案，通过对PHI注册体系进行扩展，让原Fluid算子可以在不改写kernel的情况下注册到PHI，从而达到统一注册体系的目的（相关PR [#49328](https://github.com/PaddlePaddle/Paddle/pull/49328)）。
+经过几期迁移工作，截至2022年09月20日，基于paddle develop分支commit bcef827统计飞桨框架算子总数701个，其中347个已迁移至PHI，另外354个算子未迁移。
+这个统计数据放到现在是过时的，但并不影响对算子整体状态的判断：当前Fluid下仍有大量算子没有迁移到PHI。Fluid下剩余算子的迁移，是一项长期而艰巨的任务，不仅代码量巨大，且存在许多后续计划废弃的算子，这些算子原则上是没必要做迁移的，但短期上却无法被删除，且可能为了兼容保留很长时间。因此，我们探索了一种低成本统一Fluid和PHI kernel的方案，通过对PHI注册体系进行扩展，让原Fluid算子可以在不改写kernel的情况下注册到PHI，从而达到统一注册体系的目的（相关PR [#49328](https://github.com/PaddlePaddle/Paddle/pull/49328)）。
 低成本统一的方案将一些Fluid算子"原封不动"地注册到PHI，虽然在注册机制的层面实现了两套算子体系的统一，但由于Fluid kernel仍保留了原先的class类形式实现，丧失了PHI下函数式算子注册时所应具备的“记录自身输入输出属性“的能力。
 > Kernel 需要将自身全部关键信息暴露给框架，记录其输入、输出和属性的信息，否则将导致框架调度与 Kernel 计算之间界限不清。
 现有 fluid Kernel 注册时仅记录了 Kernel 的 place，layout，dtype，输入输出等统一由 ExecutionContext 管理，没有相应的信息记录，现在 kernel 要改成函数式，每一个函数的输入输出和属性都是明确的，我们希望在这里记录每一个输入输出的信息，也是为了兼容 paddle-lite 的调度。
@@ -19,13 +19,29 @@ kernel注册时记录输入输出的信息，是PHI算子注册机制的一个�
 
 针对已迁移到PHI，但在注册时未规范记录输入输出信息的kernel，飞桨社区已启动注册信息的补全工作（issue [#51292](https://github.com/PaddlePaddle/Paddle/issues/51292)）。但未迁移到PHI下的算子，需要先做迁移，将kernel改造成PHI体系下的函数式形式，才能对其输入输出信息做标记。因而，针对这些算子，我们需要建立专项对其进行迁移，并在注册时正确记录输入输出参数的信息。
 
-考虑到Fluid下存量算子数量庞大，其中包含一定数量的废弃算子，且大部分kernel输入输出参数的属性与kernel本身是一致的，针对这部分算子可以根据kernel的信息自动生成填充每个输入输出的信息，不需要在注册时专门做特殊记录；因而，本次迁移只针对未废弃且必须在注册时记录输入输出参数信息的算子，其余算子当前不迁移不会对框架的调度产生影响，暂不纳入迁移范围。
+考虑到Fluid下存量算子数量庞大，其中包含一定数量的废弃算子，且大部分kernel输入输出参数的属性与kernel本身是一致的，针对这部分算子可以根据kernel的信息自动生成填充每个输入输出的信息，不需要在注册时专门做特殊记录；因而，本期迁移只针对未废弃且必须在注册时记录输入输出参数信息的算子，其余算子当前不迁移不会对框架的调度产生影响，暂不纳入迁移范围。
 
-后续飞桨研发工程师将梳理出需要迁移的算子清单，希望社区开发者共同完成这些算子的迁移改造工作。
+飞桨研发工程师已经梳理出了本期需要迁移的算子清单（共12个）：
+1. cudnn_lstm
+2. dequantize
+3. distributed_fused_lamb
+4. fused_batch_norm_act
+5. fused_batch_norm_act_grad
+6. fused_attention
+7. fused_attention_grad
+8. fusion_group
+9. pow2_decay_with_linear_warmup
+10. sequence_mask
+11. sequence_pool
+12. stft
+
+希望感兴趣的社区开发者共同来完成这些算子的迁移改造工作。
+
+
 
 ## 2. 核心工作内容
 
-在开始算子的函数式迁移改造工作之前，大家可以先了解一下PHI的整体设计，有助于大家更准确地迁移算子。其中，可以重点了解下目录结构、Kernel相关设计以及InferMeta相关设计，这些内容与本次迁移工作直接相关。
+在开始算子的函数式迁移改造工作之前，大家可以先了解一下PHI的整体设计，有助于更准确地迁移算子。其中，可以重点了解下目录结构、Kernel相关设计以及InferMeta相关设计，这些内容与本次迁移工作直接相关。
 设计文档见：[《飞桨高可复用算子库 PHI 设计文档》](https://github.com/PaddlePaddle/docs/blob/develop/docs/design/phi/design_cn.md)
 
 
@@ -104,11 +120,11 @@ class TraceOp : public framework::OperatorWithKernel {
 
 迁移的核心是改变kernel的形式，不需要了解kernel的实现细节，最核心的变化是：
 
-- **Functor+ExecutionContext** -> **Funtion+具体参数**：原先从ExecutionContext中获取kernel的input，output， attribute信息，新写法是直接使用函数传入的参数即可，对于旧的compute函数内部，大家主要需要关注的就是跟ExecutionContext相关的信息，其他的信息不需要详细了解。
+- **Functor+ExecutionContext** -> **Funtion+具体参数**：原先从ExecutionContext中获取kernel的input，output， attribute信息，新写法是直接使用函数传入的参数即可。对于旧的compute函数内部，大家主要需要关注的就是跟ExecutionContext相关的信息，其他的信息不需要详细了解。
 
 以trace op为例，跟ExecutionContext相关的操作一共以下几个地方，在改造的时候需要重点关注这些地方
 
-```
+```C++
     auto* input = context.Input<framework::Tensor>("Input");    // 获取 input
     auto* out = context.Output<framework::Tensor>("Out");       // 获取 output
 
@@ -125,7 +141,7 @@ class TraceOp : public framework::OperatorWithKernel {
 
 ## 3. OpKernel迁移
 
-OpKernel迁移共包含以下5个步骤，建议从前到后的按顺序来执行：
+OpKernel迁移共包含以下5个步骤，建议从前到后按顺序来执行：
 
 1. 声明新Kernel函数
 2. 迁移并改写原OpKernel实现
@@ -158,7 +174,7 @@ void TraceKernel(const Context& ctx,
                  DenseTensor* out);
 ```
 
-> 注：所有的kernel声明，统一放在namespace phi中，缩短函数的调用前缀，将来要给外部用户使用
+> 注：所有的kernel声明，统一放在namespace phi中，缩短函数的调用前缀。但fused类算子的声明统一放在phi::fusion命名空间中。
 
 说明如下：
 
@@ -167,7 +183,7 @@ void TraceKernel(const Context& ctx,
 3. 参数顺序：Context， InputTensor …, Attribute …, OutTensor* 。即：第一位参数为Context， 后边为输入的Tensor， 接着是输入的属性参数， 最后是输出的Tensor的指针参数。如果Kernel没有输入Tensor或者没有属性参数，略过即可
 4. 第1个函数参数，类型为`const Context&`的dev_ctx
 5. 第2个函数参数，输入Tensor，类型一般为`const DenseTensor&`，多个input可以参考OpMaker定义的顺序，变量命名对齐OpMaker
-6. 第3-5个函数参数，均为attribute（根据具体的含义，选择特定的int，float，vector<int>等类型），多个attribute可以参考OpMaker定义的顺序，变量命名对齐OpMaker
+6. 第3-5个函数参数，均为attribute（根据具体的含义，选择特定的int、float，vector<int>等类型），多个attribute可以参考OpMaker定义的顺序，变量命名对齐OpMaker
 7. 第6个函数参数，输出Tensor，类型一般为`DenseTensor*`，多个output 可以参考OpMaker定义的顺序， 变量命名对齐OpMaker
 
 > 一般情况下参数的命名和顺序应与python API对齐，但本次迁移的Op大多没有对应的Python API，因而可直接参考OpMaker的定义。 以trace op的 OpMaker为例，共定义了1个input， 1个output，3个 attribute：
@@ -202,19 +218,19 @@ trace op实现比较规范，OpMaker和Python API的参数个数、顺序都是�
 > **特殊情况补充：**
 >
 > 1. **特殊模板参数**：对于某些Kernel （如reshape ，copy ），这些kernel不关注数据类型T， 可以省去第一个模板参数，即为：`template <typename Context>`
-> 2. **特殊输入类型**：对于某些特殊Kernel （如concat 和split kernel）的部分输入或输出是数组类型的DenseTensor（OpMaker中有`AsDuplicable`标记）, 此时输入类型为：`const std::vector<const DenseTensor*>&`; 输出类型为：`std::vector<DenseTensor*>`
+> 2. **特殊输入类型**：对于某些特殊Kernel （如concat 和split kernel）的部分输入或输出是数组类型的DenseTensor（OpMaker中有`AsDuplicable`标记）, 此时输入类型为：`const std::vector<const DenseTensor*>&`; 输出类型为：`std::vector<DenseTensor*>`。一般情况下，int、float等C++内置类型通过值拷贝的方式传入，vector、optional等非内置类型通过const引用的方式输入
 
-注意迁移后的命名风格，OpMarker 里面都是驼峰式命名，但是迁移的时候和其他kernel统一命名风格 比如某个参数名在OpMarker 下是 ISTest，那么迁移过去之后就要变成 is_test
+注意迁移后的命名风格，OpMarker 里面都是驼峰式命名，但迁移的时候需要其它kernel统一命名风格。比如某个参数名在OpMarker下是 ISTest，那么迁移过去之后就要变成 is_test。
 
 #### 3.1.2 声明反向Kernel函数
 
 **文件创建：**
 
-- 仍然以trace op为例，首先在`paddle/phi/kernels`目录下新建`trace_grad_kernel.h`文件，用于放置反向Kernel函数声明。与前向 Kernel 函数类似，我们参照 trace op 的 GradOPMaker 的实现编写即可；
+- 仍然以trace op为例，首先在`paddle/phi/kernels`目录下新建`trace_grad_kernel.h`文件，用于放置反向Kernel函数声明。与前向 Kernel 函数类似，我们参照 trace op 的 GradOpMaker 的实现编写即可；
 
-> 注：为了更好地服务于推理编包裁剪，phi设计上前向和反向kernel分离放置，这可能会导致文件数有一定膨胀，但可以减少推理在编包时不编译反向Kernel的实现阻力
+> 注：为了更好地服务于推理编包裁剪，phi设计上前向和反向kernel分离放置，这可能会导致文件数有一定膨胀，但可以减少推理在编包时不编译反向kernel的实现阻力.
 
-反向kernel没有对应的Python API，其声明需要参考GradOpMaker的定义，下面为trace op的GradOPMaker的实现，其中定义了2个input， 3个attribute（正向的时候就是3个attribute），1个output；
+反向kernel没有对应的Python API，其声明需要参考GradOpMaker的定义，下面为trace op的GradOpMaker的实现，其中定义了2个input， 3个attribute（正向的时候就是3个attribute），1个output:
 
 ```cpp
  void Apply(GradOpPtr<T> grad_op) const override {
@@ -243,11 +259,11 @@ void TraceGradKernel(const Context& dev_ctx,
                      DenseTensor* in_grad);
 ```
 
->   GradOpMaker 里面带有 `framework::GradVarName` 的参数需要后缀 `_grad`
+>   GradOpMaker里`framework::GradVarName`等价于给参数命名添加后缀`_grad`
 
-函数声明同样存在格式要求，基本与前向Kernel函数声明要求一致，按照输入、参数、输出的顺序排列参数，不同之处包括：
+函数声明同样存在格式要求，基本与前向kernel函数声明要求一致，按照输入、参数、输出的顺序排列参数，不同之处包括：
 
-1.  反向Kernel输入参数，需按以下顺序排列：
+1. 反向Kernel输入参数，需按以下顺序排列：
 	- 最前面是前向的输入（如果需要的话），参数名称和前向参数的名称一样，例如 `x`
 	- 然后是前向的输出（如果需要的话），参数名称和前向参数的名称一样，例如 `out`
 	- 最后是前向输出的梯度，参数名称为前向参数名称加 `_grad` 后缀，例如 `x_grad`
@@ -274,9 +290,9 @@ void TraceGradKernel(const Context& dev_ctx,
 
 #### 3.2.1 剪切OpKernel实现
 
-直接将原来的Compute函数的内容全部剪切，粘贴到新的TraceKernel中（注意，所有的kernel实现，必须放在namespace phi中，对于 fused 这类的算子需要把算子放在 namespace phi fused 下）
+直接将原来的Compute函数的内容全部剪切，粘贴到新的TraceKernel中（注意，所有的kernel实现，必须放在namespace phi中，对于 fused 这类的算子需要把算子放在 namespace phi::fusion下）
 
->   cpu 设备的 Compute 一般在 paddle/fluid/operators/xxx_op.h 里，gpu 设备对应的 Compute 代码一般在 paddle/fluid/operators/xxx_op.cu 里面
+> cpu设备的Compute代码一般在paddle/fluid/operators/xxx_op.h 里，gpu设备对应的Compute代码一般在paddle/fluid/operators/xxx_op.cu里
 >
 >   全局搜索：REGISTER_OP_CPU_KERNEL(trace 或者 REGISTER_OP_CUDA_KERNEL(trace 可以判断 trace_op 是否需要实现对应设备的算子。以 fused_attention 前向算子为例，全局搜索 REGISTER_OP_CPU_KERNEL(fused_attention) 就无法搜索到，说明该算子不需要在 CPU 设备上实现。
 
@@ -361,13 +377,11 @@ void TraceKernel(const Context& dev_ctx,
  }     
 ```
 
->   在迁移的过程中，有一部分输入参数为可选参数，可选的参数在 Compute 中会使用 AsDispensable 标注。比如 `AddInput("LnScale", "...").AsDispensable();` 在迁移过来，声明函数时需要给参数添加 `optional`选项 : `const paddle::optional<DenseTensor>& LnScale` 。 输出带有 `AsDispensable` 的就可以不用管。
->
->   在迁移的时候，我们会发现老的 Compute 函数中都是声明指针指向各个 Input，对于可选的参数我们可以使用 `get_ptr()` 来获得指针，如果该参数没有传入 `get_ptr()` 会返回 `nullptr` 。具体使用代码为： `auto *p = ln_scale.get_ptr()`。对于普通的 `const DenseTensor&` 类输入只需使用 `&` 获取其指针即可。
->
->   如果所有的可选参数都设置正确，仍然有类似于 `Expected input_names.size() == input_defs.size(), but received input_names.size():3 != input_defs.size():11` 这样的错误，请添加 sig 文件（后续会介绍）后重试。
->
->   需要注意，对于反向的Op（xxx_grad），有部分输入并不会使用 `AsDispensable` 而是写在 `if` 判断里的，这种情况也需要给在 if 里添加的输入添加 `optional` 参数。
+> 注：  
+> 1. 在迁移的过程中，有一部分输入参数为可选参数，可选的参数在 Compute 中会使用 AsDispensable 标注，比如 `AddInput("LnScale", "...").AsDispensable()`。 可选参数迁移过来时需要声明成 `optional`类型: `const paddle::optional<DenseTensor>& LnScale` 。 输出带有 `AsDispensable` 的就可以不用管。
+> 2. 在迁移的时候，我们会发现老的 Compute 函数中都是声明指针指向各个 Input，对于可选的参数我们可以使用 `get_ptr()` 来获得指针，如果该参数没有传入 `get_ptr()` 会返回 `nullptr` 。具体使用代码为： `auto *p = ln_scale.get_ptr()`。对于普通的 `const DenseTensor&` 类输入只需使用 `&` 获取其指针即可。
+> 3. 如果所有的可选参数都设置正确，仍然有类似于 `Expected input_names.size() == input_defs.size(), but received input_names.size():3 != input_defs.size():11` 这样的错误，请添加 sig 文件（后续会介绍）后重试。
+> 4. 对于反向的Op（xxx_grad），有部分输入并不会使用 `AsDispensable` 而是写在 `if` 判断里的，这种情况也需要给在 if 里添加的输入添加 `optional` 参数。
 
 #### 3.2.3 替换对象类型或函数
 
@@ -393,7 +407,7 @@ void TraceKernel(const Context& dev_ctx,
 | `framework::TensorCopy/TensorCopySync` | `phi::Copy` |
 | `platform::is_xxx_place` | `place.GetType() == phi::AllocationType::XXX` |
 
-```
+```C++
 template <typename T, typename Context>
 void TraceKernel(const Context& dev_ctx,
                  const DenseTensor& x,
@@ -440,12 +454,16 @@ void TraceKernel(const Context& dev_ctx,
 2. 有同设备多个kernel使用的辅助函数，在kernel所在的设备目录创建`.h`放置代码
 3. 有跨设备多个kernel使用的辅助函数，在`kernels/funcs`目录下创建`.h/cc/cu`管理代码
 4. 如果当前依赖的辅助函数可以直接归类到`kernels/funcs`目录下已有的文件中，则直接放过去，不用创建新的文件
+5. 只有fused类算子使用的辅助函数，放到`kernels/fusion`目录下
 
 从第3.2.3的代码来看，trace 依赖了Diagonal的函数，需要将Diagonal函数迁移到kernels中，Diagonal函数同时用于trace的cpu和gpu kernel中，即有跨设备的多个kernel使用，因此它需要在phi/funcs中创建对应的文件放置代码，这里将其放置到`phi/funcs/diagonal.h`中
 
-> 注：如果觉得依赖的函数组件过于复杂，也可以保留在原位置，include对应头文件后使用，我们后续统一再迁移
->
-> 如果不确定迁过来之后文件放在哪里，可以采用原来放在哪个文件夹下就迁移到phi下对应文件夹的方法。比如 paddle/fluid/operators/fused/fmha_ref.h 迁移后就需要放到  paddle/phi/kernels/fusion/gpu/fmha_ref.h 。
+> 注：
+> 1. 迁移时注意看phi目录下是否已经有实现了对应的函数组件，如果已经有了，直接使用phi下的即可。可以通过在phi下搜索其它kernel是否有使用到相同的组件，看它们引用哪个位置的代码来做判断。
+> 2. 迁过来之后的文件位置和命名尽量保持和fluid对应，比如paddle/fluid/operators/fused/fmha_ref.h迁移到paddle/phi/kernels/fusion/gpu/fmha_ref.h。
+> 3. 迁移时以函数组件为基本单位迁移，对于依赖较复杂的文件，可以只迁移其中需要使用到的一部分，另一部分保留在原来的位置。在迁移函数组件时，若fluid下原先使用到的代码不多，可以在迁移后把fluid下的使用都替换成phi下的，并把原先fluid下的实现删除。若fluid下使用到的代码较多，可以通过`using fluid::xxx = phi::xxx`的方式做重定向。
+> 4. 迁移的基本原则是不给phi引入新的fluid依赖。如果原先phi下其它kernel已经使用了对应的fluid依赖，则允许新迁移的kernel也使用这个fluid依赖，后续[PHI算子库独立编译专项](https://github.com/PaddlePaddle/Paddle/issues/47615)会一并做解耦。
+> 5. 如果有较复杂的依赖无法迁移到phi，则可以将kernel改造成函数式之后，直接放在fluid下按phi函数式kerenl的方式注册，而不迁移到phi中。具体例子可参考`save_combine_op`。
 
 #### 3.2.5 添加头文件
 
@@ -477,7 +495,7 @@ void TraceKernel(const Context& dev_ctx,
 1. trace: kernel名称，和c++的名称一致（补充如果python api的名称和op名称不一致的情况）
 2. CPU: backend名称， 这次迁移大多数算子主要是CPU和GPU kernel，如果遇到有XPU kernel的算子，也按类似的方式迁移。
 3. phi::TraceKernel: kernel的函数名称，记得带上namespace phi
-4. 剩余的均为数据类型，注册的数据类型对齐旧的kernel注册即可。
+4. 剩余的均为数据类型，注册的数据类型对齐旧的kernel注册即可
 ```cpp
 PD_REGISTER_KERNEL(trace,
                    CPU,
@@ -493,11 +511,29 @@ PD_REGISTER_KERNEL(trace,
 ```
 
 > 注：
-> 1. 如果忘记添加注册相关的头文件，会编译错误，如果出现编译错误，请检查include的头文件 
-> 2. 当新的kernel注册之后，旧kernel的compute kernel所在类和注册函数均需要删除，必须是在代码文件中直接删除，**不能注释**，否则会有链接错误
-> 3. phi下的注册宏后边是带函数体{}，不是直接加分号，且本次迁移需要判断出kernel需要标记的输入输出参数信息并在函数体{}中进行设置，对于标记信息的设置可参考PR [#51233](https://github.com/PaddlePaddle/Paddle/pull/51233)。除了输出的DataType，如果kernel输入需要注册，或Backend需要注册，也应一同注册上
-> 4. 注册kernel的宏声明需要在global namespace
+> 1. 如果忘记添加注册相关的头文件，会编译错误，如果出现编译错误，请检查include的头文件。 
+> 2. 当新的kernel注册之后，旧kernel的compute kernel所在类和注册函数均需要删除，必须是在代码文件中直接删除，**不能注释**，否则会有链接错误。
+> 3. phi下的注册宏后边是带函数体{}，不是直接加分号
+> 4. 注册kernel的宏声明需要在global namespace。
 
+
+本次迁移需要判断出kernel需要标记的输入输出参数信息并在函数体{}中进行设置，对于标记信息的设置可参考PR [#51233](https://github.com/PaddlePaddle/Paddle/pull/51233)。除了输出的DataType，如果kernel输入需要注册，或Backend需要注册，也应一同注册上。
+对于一些输出信息无法静态确定的kernel，可以在注册宏花括号里推导输出信息，如`batch_norm`的gpu kernel:
+```C++
+PD_REGISTER_KERNEL(batch_norm_infer,
+                   GPU,
+                   ALL_LAYOUT,
+                   phi::BatchNormInferKernel,
+                   float,
+                   double,
+                   phi::dtype::float16) {
+  if (kernel_key.dtype() == phi::DataType::FLOAT16) {
+    kernel->OutputAt(1).SetDataType(phi::DataType::FLOAT32);
+    kernel->OutputAt(2).SetDataType(phi::DataType::FLOAT32);
+  }
+}
+```
+对于一些无法在注册宏里推导的参数，则需要对该参数注册`UNDEFINED`，然后通过`InferMeta`推导。
 
 ### 3.4 实现OpMaker参数与Kernel参数映射函数
 
@@ -533,13 +569,12 @@ PD_REGISTER_KERNEL(trace,
 	- 具体来说，可以忽略此环节的条件如下：
 		- Input和Output，除去Dispensable、Extra、Quant之外的参数和Python端API顺序、类型一致
 		- Attr，除去Extra、Quant以及use_mkldnn，use_cudnn之外的参数和Python端API顺序、类型一致
-	- 如果迁移Kernel之后，没有写这个映射函数，试着跑一下，报类似这样的错误的话，就说明需要加一下这个函数了
-		- ![图片](http://agroup.baidu-int.com/file/stream/bj/bj-47cd0de943222ad16716a49ea84d141a45bf2d9f)
+	- 如果迁移Kernel之后，没有写这个映射函数，试着跑一下，报类似 `Expected input_names.size() == input_defs.size(), but received input_names.size():3 != input_defs.size():11` 这样的错误的话，就说明需要加一下这个函数了
 
 
 2. OpMaker中输入、属性、输出参数**个数和顺序**和迁移后的Kernel不一致的，及所有反向Op（没有Proto信息），需要实现此函数，这里trace grad op就需要
 
-- **文件创建：**仍然以trace op为例，首先在`paddle/phi/ops/compat`目录下新建`trace_sig.cc`文件，用于放置这里的映射函数。
+- 文件创建：仍然以trace op为例，首先在`paddle/phi/ops/compat`目录下新建`trace_sig.cc`文件，用于放置这里的映射函数。
 
 - 由于函数式kernel的一个最重要的特别就是**参数顺序和类型**（顺序和类型是关键，变量名称不影响），我们需要**定义一个函数来做一个从OpMaker中如何获取信息**，并且按照顺序传递给新的kernel函数； 这个模块就是`OpArgumentMapping`， trace反向op的OpArgumentMapping定义如下， KernelSignature共包含4个内容
 	1. kernel名称，这个是我们给kernel注册的时候的名称
@@ -587,20 +622,27 @@ Trace op 的映射函数如下：
 
 当然，如果原先的`xxx_op.h`有其他op依赖，也可以暂时保留相应头文件，或者将相应的公共函数按照3.2.4的步骤迁移到phi中，更新一下原先的依赖。
 
-> 注意，如果出现找不到符号的报错，可能需要将部分单测中`USE_OP(xxx)`手动改为`USE_OP_ITSELF(xxx)`。
+> 注：如果出现找不到符号的报错，可能需要将部分单测中`USE_OP(xxx)`手动改为`USE_OP_ITSELF(xxx)`。
 
-### 3.6 迁移后Kernel文件位置总结
+### 3.6 xpu kernel迁移
+如果迁移的算子有实现xpu kerenl，则需要参照上述流程对xpu kernel也进行迁移。在迁移xpu kernel时，有以下注意点：
+1. xpu尽量和cpu/gpu算子分开迁移，不要合并在一个PR中提交
+2. 在自己的开发机上可以完成xpu kernel的编译，使用xpu编译选项：`cmake .. -DPY_VERSION=3.8 -DWITH_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DWITH_GPU=OFF -DWITH_XPU=ON -DON_INFER=ON -DWITH_PYTHON=ON -DWITH_AVX=ON -DWITH_MKL=ON -DWITH_MKLDNN=ON -DWITH_XPU_BKCL=ON -DWITH_DISTRIBUTE=ON -DWITH_NCCL=OFF`
+3. 迁移xpu算子的PR提交时，需要在commit message里添加`test=kunlun`触发xpu的CI测试
+4. xpu算子的实现大多都是直接调用库接口，代码逻辑简单，较难出现迁移错误，一般迁移后都能通过CI测试。若CI执行失败且发现不了问题，需要xpu环境调试，可找项目指导同学沟通。
+
+### 3.7 迁移后Kernel文件位置总结
 
 预计存在以下几种情况，迁移时大家可以对号入座：
 
-#### 3.6.1 迁移与设备无关的Kernel（很少）
+#### 3.7.1 迁移与设备无关的Kernel（很少）
 
 该类Kernel 实现与所有硬件设备无关，只需要一份代码实现，可参考reshape kernel。其新增文件及目录包括：
 
 `paddle/phi/kernels/xxx_kernel.h`
 `paddle/phi/kernels/xxx_kernel.cc`
 
-#### 3.6.2 迁移与设备相关、但CPU&GPU实现一致的Kernel
+#### 3.7.2 迁移与设备相关、但CPU&GPU实现一致的Kernel
 
 部分Kernel的实现在不同硬件上不一致，但是在常用的CPU， GPU上代码实现一致。为了减少重复代码，便于维护，此类kernel 需要抽出共有的实现逻辑，放置于`paddle/phi/kernels/impl` 目录下，可参考sign，full kernel等。其新增文件及目录包括：
 
@@ -609,7 +651,7 @@ Trace op 的映射函数如下：
 `paddle/phi/kernels/cpu/xxx_kernel.cc` ：include`xxx_kernel_impl.h`，一般仅放置kernel注册代码
  `paddle/phi/kernels/gpu/xxx_kernel.cu` ：include`xxx_kernel_impl.h`，一般仅放置kernel注册代码
 
-#### 3.6.3 迁移与设备相关、且CPU&GPU分别实现的Kernel
+#### 3.7.3 迁移与设备相关、且CPU&GPU分别实现的Kernel
 
 还有部分Kernel的实现，CPU 和GPU 上逻辑不同，此时没有共同实现的代码，需要区分CPU和GPU 硬件。
 CPU 的实现位于`paddle/phi/kernels/cpu` 目录下； GPU的实现位于`paddle/phi/kernels/gpu` 下，可参考dot ，cast kernel等。其新增文件及目录包括：
@@ -618,9 +660,12 @@ CPU 的实现位于`paddle/phi/kernels/cpu` 目录下； GPU的实现位于`padd
 `paddle/phi/kernels/cpu/xxx_kernel.cc` 
  `paddle/phi/kernels/gpu/xxx_kernel.cu` 
 
-#### 3.6.4 迁移Kernel有include其他公共头文件
+### 3.7.4 迁移xpu kernel
+xpu的代码位于`paddle/phi/kernels/xpu`目录下，新增文件`paddle/phi/kernels/xpu/xxx_kernel.cc` 
 
-有些较为复杂的kernel，其实现可能不是全部在对应的xxx_op.h/cu中，如果include了其他的头文件，建议根据具体情况，将其放置到合适位置，这里参考3.2.4节的内容。
+#### 3.7.5 迁移Kernel有include其他公共头文件
+
+有些较为复杂的kernel，其实现可能不是全部在对应的xxx_op.h/cu中。如果include了其它头文件，建议根据具体情况，将其放置到合适位置，这里参考3.2.4节的内容。
 
 
 ## 4. InferShape迁移
@@ -644,7 +689,7 @@ InferShape迁移为InferMeta的文件放置规则（以Tensor输入个数为判�
 
 仍然以trace为例，根据trace的输入Tensor个数，确定其InferShape应该迁移到`phi/infermeta`目录中的哪个文件，这里trace是一个输入Tensor，因此迁移至`phi/infermeta/unary.*`中
 
-第一步，在`unary.h`中声明TraceInferMeta，其参数列表与前述TraceKernel命名顺序均一致，不同之处如下：
+第一步，在`unary.h`中声明TraceInferMeta，其参数列表与前述TraceKernel命名顺序均一致，不同之处如下：
 
 1. InferMeta函数不需要模板参数
 2. InferMeta函数不需要首个Context参数
@@ -705,7 +750,7 @@ void TraceInferMeta(
 
 ### 4.2 声明InferShapeFunctor并删除原先InferShape
 
-将原先trace op override的InferShape函数删除，在最下方声明TraceInferShapeFunctor，并注册到Op中，示例如下：
+将原先trace op override的InferShape函数删除，在最下方声明TraceInferShapeFunctor，并注册到Op中，示例如下：
 
 ```cpp
 DECLARE_INFER_SHAPE_FUNCTOR(trace, TraceInferShapeFunctor,
@@ -720,15 +765,15 @@ REGISTER_OPERATOR(trace, ops::TraceOp, ops::TraceOpMaker,
 
 以上InferShape的迁移示例详细可以参考PR [#39517](https://github.com/PaddlePaddle/Paddle/pull/39517)
 
+> 注：对于一些InferShape较复杂，迁移难度较大的情况，如果kernel的输出类型不需要通过InferMeta进行推导（即没有注册UNDEFINED），则在本期计划中可以暂时先不迁移InferShape。
 
 ## 5. 注意事项
 
-1. Fuse Kernel迁移至phi/kernels/fusion目录（可以参考该目录下README），PR [#45802](https://github.com/PaddlePaddle/Paddle/pull/45802)中有一个迁移fuse算子的例子供参考
-2. 分布式Kernel如果不依赖fluid组件，则可以迁移至phi/kernels目录（和一般kernel同等对待，不做单独区分）；如果依赖fluid组件，则仍然放置在fluid/operators目录下，将其Kernel改写为phi的函数式，并用phi的注册宏注册
-3. 迁移的时候，尽可能避免对原Kernel实现的逻辑改动，如果觉得它原来写得不好，想优化，可以拆分PR进行（担心出现性能变化，CI又发现不了，后续导致CE模型下降）
-4. 因为InferShape函数一般简短，所以没有拆过多文件，但这样会有一定概率冲突，建议大家，Kernel和Infershape分两个PR迁移，比如先一个PR把几个Kernel一起迁了，再去另一个PR迁对应的InferShape函数
-5. kernel.cc和.cu文件中对应的kernel.h放在最前面。paddle遵循谷歌代码格式要求，头文件的include顺序是有规范的，参考[链接](https://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/headers/#include)。大家可以像code style中的示例一样，不同类别的头文件用空行分割一下，就不会被pre-commit重新调整了
-6. 注意迁移Kernel之后，DenseTensor*的输出参数，仍然是返回值的定位，所以在kernel内注意只能写该参数的成员值，而不能读它的值用作逻辑判断，可能会出错
+1. Fused kernel迁移至phi/kernels/fusion目录（可以参考该目录下README），PR [#45802](https://github.com/PaddlePaddle/Paddle/pull/45802)中有一个迁移fuse算子的例子供参考
+2. 迁移的时候，尽可能避免对原Kernel实现的逻辑改动，如果觉得它原来写得不好，想优化，可以拆分PR进行（担心出现性能变化，CI又发现不了，后续导致CE模型下降）
+3. 因为InferShape函数一般简短，所以没有拆过多文件，但这样会有一定概率冲突，建议大家，Kernel和Infershape分两个PR迁移，比如先一个PR把几个Kernel一起迁了，再去另一个PR迁对应的InferShape函数
+4. kernel.cc和.cu文件中对应的kernel.h放在最前面。paddle遵循谷歌代码格式要求，头文件的include顺序是有规范的，参考[链接](https://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/headers/#include)。大家可以像code style中的示例一样，不同类别的头文件用空行分割一下，就不会被pre-commit重新调整了
+5. 注意迁移Kernel之后，DenseTensor*的输出参数，仍然是返回值的定位，所以在kernel内注意只能写该参数的成员值，而不能读它的值用作逻辑判断，可能会出错
 
 
 ## 6. FAQ
