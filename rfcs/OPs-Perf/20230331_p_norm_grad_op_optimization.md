@@ -66,17 +66,18 @@ Pytorch中无单独的文件专门用于`p_norm_grad`算子计算。在查找相
 
 $$dx = \frac {abs(x)^p * sign(x)*broadcast(dy)}{broadcast((y+eps)^p)}$$
 
-其中$abs(·)$是绝对值函数，$sign(·)$是取符号函数，$broadcast(·)$是广播函数，因为使用除法可能会导致除0的情况，因此`p_norm_grad`算子的计算公式可以更新为
+其中abs()是绝对值函数，sign()是取符号函数，broadcast()是广播函数，p是porder参数，eps是防止除0的参数。除法可以转化成乘法，因此`p_norm_grad`算子的计算公式可以更新为
 
-$$dx = {abs(x)^p * sign(x)*broadcast(dy)}*{broadcast((y+eps)^{-p})}$$
+$$dx = abs(x)^p * sign(x)*broadcast(dy)*broadcast((y+eps)^{-p})=abs(x)^p * sign(x) * broadcast(dy * (y+eps)^{-p})$$
 
-基于Kernel调用次数和计算量的权衡，在实际实现过程中，${broadcast(dy)}*{broadcast((y+eps)^{-p})}$的部分可以转变成${broadcast(dy*(y+eps)^{-p})}$进行计算，即先算乘法再进行广播，这样可以有效减小计算量，同时也减少了Kernel的调用次数。这个部分预计需要一个`ElementWiseKernel`的调用和一个`BroadcastKernel`的调用。这部分的结果称为$y_{part}$。
+基于Kernel调用次数和计算量的权衡，在实际实现过程中，y和dy的计算部分可以转变成等式最右边的计算方式，即先算乘法再进行广播，这样可以有效减小计算量，同时也减少了Kernel的调用次数。这个部分预计需要一个`ElementWiseKernel`的调用和一个`BroadcastKernel`的调用。
+这部分的结果称Ypart。
 
 然后计算公式变成：
 
-$$dx = {abs(x)^p * sign(x)}*y_{part}$$
+$$dx = {abs(x)^p * sign(x)}*Ypart$$
 
-这里可以看到实际计算涉及到了$x$和$y_{part}$两个变量，因此这部分的计算操作可以借助`ElementWiseKernel`实现，并自定义计算过程进行操作融合，以减少Kernel的调用次数，最终调用的Kernel数为3。
+这里可以看到实际计算涉及到了x和Ypart两个变量，因此这部分的计算操作可以借助`ElementWiseKernel`实现，并自定义计算过程进行操作融合，以减少Kernel的调用次数，最终调用的Kernel数为3。
 
 还有一种方案是将所有元素操作融入到一个`ElementWiseKernel`中，但这个方案是不现实的，因为$dy$和$y$要经过`broadcast`操作才能与$x$进行计算，如果想要融合到一个`ElementWiseKernel`中则需要先对$dy$和$y$进行广播，这就已经引入了两个Kernel了，在加上一个`ElementWiseKernel`就是3个kernel，但是经过广播之后再执行ElementWise的计算无疑会增加$y_{part}$部分的计算量。
 
