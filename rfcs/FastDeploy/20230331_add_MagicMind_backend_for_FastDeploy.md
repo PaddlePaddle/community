@@ -82,3 +82,13 @@ FastDeploy 对后端的支持，主要体现在 `fastdeploy/runtime/backends` �
 # 九、参考资料
 
 [课程：FastDeploy接入寒武纪](https://aistudio.baidu.com/aistudio/education/lessonvideo/4132579)
+
+[寒武纪 MagicMind ⽤户⼿册](https://www.cambricon.com/docs/sdk_1.10.0/magicmind_1.1.0/user_guide/index.html)
+
+[MagicMind YOLOv5 c++部署实例](https://gitee.com/cambricon/magicmind_cloud/tree/master/buildin/cv/detection/yolov5_v6_1_pytorch)
+
+[寒武纪 MagicMind C++ 开发者手册](https://www.cambricon.com/docs/sdk_1.10.0/magicmind_1.1.0/developer_guide/c++/index.html)
+
+[MagicMind Benchmark指南](https://www.cambricon.com/docs/sdk_1.10.0/magicmind_1.1.0/performance_guide/index.html)
+
+
