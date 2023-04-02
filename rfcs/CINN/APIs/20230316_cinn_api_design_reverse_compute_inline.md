@@ -36,18 +36,18 @@ CINN框架暂不支持 `ReverseComputeInline` 原语，需要实现。
 
 在 TVM 中，核心代码见[ReverseComputeInline的核心代码](https://github.com/apache/tvm/blob/422ca2855a74bf0d0d88f1aa66343015f4326ac1/src/tir/schedule/primitive/compute_inline.cc)，
 其主要步骤如下：
-1. 获取需要内联的 block 所在的 scope block。
-2. 检查需要内联的 block 是否完整。
-3. 检查需要内联的 block 是否只有一个完整的生产者，并且生产者不是输出 block。
-4. 分析 block 的 body，在分析过程中会进行模式匹配，判断是否允许内联。
-5. 创建一个计划，将需要内联的 block 从 AST 中移除。
-6. 创建一个新的 AST，将内联后的 block 插入到相应的位置，并更新其他 block 的引用。
+1. 获取需要内联的块所在的作用域块。
+2. 检查需要内联的块是否完整。
+3. 检查需要内联的块是否只有一个完整的生产者，并且生产者不是输出块。
+4. 分析块的 body，在分析过程中会进行模式匹配，判断是否允许内联。
+5. 创建一个计划，将需要内联的块从 AST 中移除。
+6. 创建一个新的 AST，将内联后的块插入到相应的位置，并更新其他块的引用。
 7. 在 AST 中进行实际的变更。
 8. 更新一些缓存的标志信息。
 
 
 # 四、对比分析
-TVM 的 `ReverseComputeInline` 原语实现可作为参考。本次任务计划参考已有的 ComputeInline 操作和 CINN 调度原语开发说明文档，实现 ReverseComputeInline
+TVM 的 `ReverseComputeInline` 原语实现比较清晰，可作为参考。本次任务计划参考已有的 ComputeInline 操作和 CINN 调度原语开发说明文档，实现 ReverseComputeInline
 
 # 五、设计思路与实现方案
 
@@ -65,6 +65,34 @@ TVM 的 `ReverseComputeInline` 原语实现可作为参考。本次任务计划�
 ## API实现方案
 ReverseComputeInline 原语：分别添加接口及实现至 cinn/ir/ir_schedule.h、cinn/ir/ir_schedule.cc
 支持新增原语 Trace 重放：在 cinn/ir/schedule_desc.cc 中使用CINN_BUILD_STEP_KIND 注册 ReverseComputeInline 原语的重放函数
+实现思路如下
+```python
+def reverse_compute_inline(schedule_block):
+    #1. 获取 scope block
+    scope_root = get_scope_root(schedule_block, True)
+
+    #2. 检查完整性
+    if not is_complete(schedule_block, scope_root):
+        raise ValueError("Block is not complete")
+
+    #3. 检查消费者是否只有一个完整的生产者且生产者不是输出块
+    producer_block = get_single_producer(schedule_block, scope_root)
+    if producer_block is None:
+        raise ValueError("Consumer has no single complete producer")
+    if is_output_block(producer_block, scope_root):
+        raise ValueError("Producer is an output block")
+
+    #4. 分析块体
+    inliner = ReverseComputeInliner(schedule_block, scope_root)
+    if not inliner.body_pattern_allow_inline():
+        raise ValueError("Block body pattern does not allow inline")
+
+    #5. 创建删除叶块的计划
+    inliner.create_leaf_block_removal_plan()
+
+    #6. 创建新的
+    tgt = inliner.get_tgt_stmt()
+```
 
 # 六、测试和验收的考量。
 ComputeInline 原语单测添加至 cinn/backends/ir_schedule_test.cc
@@ -77,9 +105,9 @@ CINN中已经实现了许多其他原语，在现有的框架基础上能够很�
 
 - 排期规划
 
-3月17日 ~ 3月21日完成基本开发。
+3月28日 ~ 4月10日完成基本开发。
 
-3月21日 ~ 3月31日完成调试和测试代码的编写。
+4月10日 ~ 4月15日完成调试和测试代码的编写。
 
 # 八、影响面
 本次任务影响模块如下，
