@@ -65,7 +65,7 @@ TVM 的 `ReverseComputeInline` 原语实现比较清晰，可作为参考。本�
 ## API实现方案
 ReverseComputeInline 原语：分别添加接口及实现至 cinn/ir/ir_schedule.h、cinn/ir/ir_schedule.cc
 支持新增原语 Trace 重放：在 cinn/ir/schedule_desc.cc 中使用CINN_BUILD_STEP_KIND 注册 ReverseComputeInline 原语的重放函数
-实现思路如下
+使用类python的伪代码实现：
 ```python
 def reverse_compute_inline(schedule_block):
     #1. 获取 scope block
