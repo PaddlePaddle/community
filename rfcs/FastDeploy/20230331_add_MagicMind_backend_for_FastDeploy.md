@@ -31,7 +31,7 @@ MagicMind 是面向寒武纪 MLU 的推理加速引擎。MagicMind 能将人工�
 
 FastDeploy 对后端的支持，主要体现在 `fastdeploy/runtime/backends` 目录中，不同的后端，需要分别实现各自的加载模型、获取输入输出、推理接口的函数。
 
-寒武纪的专属接口，可根据实际情况，做相应的移植。
+此外 MagicMind 的专属接口，可根据实际情况，做相应的移植。
 
 # 五、设计思路与实现方案
 
