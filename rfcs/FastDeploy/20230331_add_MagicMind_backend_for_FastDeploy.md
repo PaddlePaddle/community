@@ -54,7 +54,7 @@ FastDeploy 对后端的支持，主要体现在 `fastdeploy/runtime/backends` �
 
 4. 编译CMake配置
 
-创建 `FastDeploy/CMakeLists.txt`，用于配置第三方库的下载，头文件的引入，以及库的引入。
+修改 `FastDeploy/CMakeLists.txt`，用于配置第三方库的下载，头文件的引入，以及库的引入。
 
 修改 `FastDeploy/cmake/magicmind.cmake`，添加`option(ENABLE_MAGICMIND)`、`file(GLOB_RECURSE DEPLOY_BACKEND_SRCS)`，`if(ENABLE_MAGICMIND)`的代码逻辑。
 
