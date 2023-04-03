@@ -79,7 +79,7 @@ $$dx = {abs(x)^p * sign(x)}*Ypart$$
 
 这里可以看到实际计算涉及到了x和Ypart两个变量，因此这部分的计算操作可以借助`ElementWiseKernel`实现，并自定义计算过程进行操作融合，以减少Kernel的调用次数，最终调用的Kernel数为3。
 
-还有一种方案是将所有元素操作融入到一个`ElementWiseKernel`中，但这个方案是不现实的，因为$dy$和$y$要经过`broadcast`操作才能与$x$进行计算，如果想要融合到一个`ElementWiseKernel`中则需要先对$dy$和$y$进行广播，这就已经引入了两个Kernel了，在加上一个`ElementWiseKernel`就是3个kernel，但是经过广播之后再执行ElementWise的计算无疑会增加$y_{part}$部分的计算量。
+还有一种方案是将所有元素操作融入到一个`ElementWiseKernel`中，但这个方案是不现实的，因为$dy$和$y$要经过`broadcast`操作才能与$x$进行计算，如果想要融合到一个`ElementWiseKernel`中则需要先对$dy$和$y$进行广播，这就已经引入了两个Kernel了，在加上一个`ElementWiseKernel`就是3个kernel，但是经过广播之后再执行ElementWise的计算无疑会增加Ypart部分的计算量。
 
 因此可以认为使用两个`ElementWiseKernel`和一个`BroadcastKernel`实现`p_norm_grad`算子的GPU计算过程是所有采用`Kernel`实现方案中的最优解了。
 
