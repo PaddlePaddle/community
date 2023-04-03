@@ -10,7 +10,7 @@
 
 # 一、概述
 ## 1、相关背景
-MagicMind 是面向寒武纪 MLU 的推理加速引擎。MagicMind 能将人工智能框架（TensorFlow、PyTorch、ONNx等）的算法模型转换成 MagicMind 统一计算图表示，并提供端到端的模型优化、代码生成以及推理业务部署能力。
+MagicMind 是面向寒武纪 MLU 的推理加速引擎。MagicMind 能将人工智能框架（TensorFlow、PyTorch、ONNX等）的算法模型转换成 MagicMind 统一计算图表示，并提供端到端的模型优化、代码生成以及推理业务部署能力。
 
 
 ## 2、功能目标
@@ -30,6 +30,8 @@ MagicMind 是面向寒武纪 MLU 的推理加速引擎。MagicMind 能将人工�
 # 四、对比分析
 
 FastDeploy 对后端的支持，主要体现在 `fastdeploy/runtime/backends` 目录中，不同的后端，需要分别实现各自的加载模型、获取输入输出、推理接口的函数。
+
+寒武纪的专属接口，可根据实际情况，做相应的移植。
 
 # 五、设计思路与实现方案
 
@@ -52,7 +54,13 @@ FastDeploy 对后端的支持，主要体现在 `fastdeploy/runtime/backends` �
 
 4. 编译CMake配置
 
-完成编译流程。
+创建 `FastDeploy/CMakeLists.txt`，用于配置第三方库的下载，头文件的引入，以及库的引入。
+
+修改 `FastDeploy/cmake/magicmind.cmake`，添加`option(ENABLE_MAGICMIND)`、`file(GLOB_RECURSE DEPLOY_BACKEND_SRCS)`，`if(ENABLE_NEW_BACKEND)`的代码逻辑。
+
+修改 `FastDeploy/FastDeploy.cmake.in`，在开始处获取编译参数，同时添加相应逻辑。
+
+修改 `FastDeploy/fastdeploy/core/config.h.in`文件，加入宏定义。
 
 5. C++后端测试
 
