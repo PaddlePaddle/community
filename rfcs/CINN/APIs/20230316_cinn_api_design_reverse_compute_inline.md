@@ -95,7 +95,7 @@ def reverse_compute_inline(schedule_block):
 ```
 
 # 六、测试和验收的考量。
-ComputeInline 原语单测添加至 cinn/backends/ir_schedule_test.cc
+ReverseComputeInline 原语单测添加至 cinn/backends/ir_schedule_test.cc
 新增原语 Trace 重放单测添加至 cinn/ir/schedule_desc_test.cc
 
 # 七、可行性分析和排期规划
