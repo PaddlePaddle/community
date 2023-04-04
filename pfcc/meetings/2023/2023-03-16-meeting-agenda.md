@@ -10,7 +10,7 @@
 
 - 本次会议主席：田川 （[gouzil](https://github.com/gouzil)）
 
-- 本次会议副主席：
+- 本次会议副主席：詹荣瑞 （[zrr1999](https://github.com/zrr1999)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 

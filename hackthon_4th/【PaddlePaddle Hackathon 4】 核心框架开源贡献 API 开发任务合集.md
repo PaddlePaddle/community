@@ -363,7 +363,7 @@
 
 - 任务难度：进阶
 
-- 详细描述：使用 LU分解 来求解线性方程组 AX=B，A为方阵，B为矩阵，A和B已知，通过LU分解方阵A来求解X。即 LU, pivots =paddle.linalg.lu(A);  X = paddle.linalg.lu_solve(LU, pivots, B) 与 使用 X=paddle.linalg.lu_solve(A, B) 直接求解线性方程组的结果一样。此任务的目标是在 Paddle 框架中，新增 lu_solve  API，调用路径为：paddle.linalg.lu_solve 和 Tensor.lu_solve
+- 详细描述：使用 LU分解 来求解线性方程组 AX=B，A为方阵，B为矩阵，A和B已知，通过LU分解方阵A来求解X。即 LU, pivots =paddle.linalg.lu(A);  X = paddle.linalg.lu_solve(LU, pivots, B) 与 使用 X=paddle.linalg.solve(A, B) 直接求解线性方程组的结果一样。此任务的目标是在 Paddle 框架中，新增 lu_solve  API，调用路径为：paddle.linalg.lu_solve 和 Tensor.lu_solve
 - 提交内容
   - API 的设计文档，并提 PR 至 community repo 的 [rfcs/APIs](https://github.com/PaddlePaddle/community/tree/master/rfcs/APIs)  目录；
   - Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/paddle/tensor/linalg.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/math.py) 文件；并在 [python/paddle/tensor/__init__.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/__init__.py#L274) 中，添加 lu_solve API，以支持 Tensor.lu_solve 的调用方式；
