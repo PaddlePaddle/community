@@ -17,7 +17,8 @@ CINN是一种在不改变模型代码的条件下加速飞桨模型运行速度�
 另一方面便于算子融合技术在编译器中可以实现跨算子自动融合，减少最终执行时的kernel数目和访存开销，达到更好的性能。
 
 Schedule 原语是 CINN 编译器优化算子计算实现的接口，目前已经实现了Split、Fuse、Reorder等常用原语，
-其中 ComputeInline 原语操作是将一个 tensor 的计算过程内联到其消费者中完成，简化计算过程。
+其中 ComputeInline 原语操作是将一个 tensor 的计算过程内联到其消费者中，
+而 ReverseComputeInline 原语操作与其相反，是将一个 tensor 的计算过程内联到其生产者中。
 
 ## 2、名词解释
 NCHW ：一种图的数据格式。N 指 Batch，C 指 Channel，H 指 Height，W 指 width。
@@ -47,7 +48,8 @@ CINN框架暂不支持 `ReverseComputeInline` 原语，需要实现。
 
 
 # 四、对比分析
-TVM 的 `ReverseComputeInline` 原语实现比较清晰，可作为参考。本次任务计划参考已有的 ComputeInline 操作和 CINN 调度原语开发说明文档，实现 ReverseComputeInline
+TVM 的 `ReverseComputeInline` 原语实现比较清晰，可作为参考。
+本次任务计划参考已有的 ComputeInline 操作、TVM 的 `ReverseComputeInline` 原语实现以及 CINN 调度原语开发说明文档，实现 ReverseComputeInline。
 
 # 五、设计思路与实现方案
 
@@ -55,9 +57,8 @@ TVM 的 `ReverseComputeInline` 原语实现比较清晰，可作为参考。本�
 在 `cinn/ir/ir_schedule.h` 中新增 `ReverseComputeInline` 原语。
 ```c++
   /**
-   * \brief Mark a previously inlined schedule block as no longer inlined. This function undoes the effects of
-   * ComputeInline on the given schedule block.
-   * @param schedule_block the previously inlined schedule block.
+   * \brief Mark an schedule block as inlined.
+   * @param schedule_block the schedule block to be inlined.
    */
   void ReverseComputeInline(const Expr& schedule_block);
 ```
