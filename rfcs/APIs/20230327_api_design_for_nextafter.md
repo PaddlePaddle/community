@@ -62,7 +62,7 @@ PyTorch 中有 `torch.nextafter` 的API，详细参数为 `torch.nextafter(input
 
 ## 共同点
 
-- PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。 Paddle 也可以基于 C++ API 实现。
+- PyTorch 是通过 std::nextafter 实现的实现，使用 Python 调用 C++ API 对应的接口。 Paddle 也可以基于 C++ API 实现。
 
 
 # 五、设计思路与实现方案
@@ -88,13 +88,13 @@ paddle.nextafter(
 通过调研发现，需要
 1. `paddle/phi/api/yaml/op_compat.yaml`、`paddle/phi/api/yaml/ops.yaml` 添加算子 Nextafter。
 2. `paddle/phi/infermeta/binary.cc`、`paddle/phi/infermeta/binary.h` 添加算子 NextafterInferMeta。
-3. `paddle/phi/kernels/cpu` 目录下添加 `nextafter_kernel.cc`文件。
-4. `paddle/phi/kernels/gpu` 目录下添加 `nextafter_kernel.cu`文件。
-5. `paddle/phi/kernels/impl/nextafter_kernel_impl.h` 目录下添加 `nextafter_kernel_impl.h`文件, C++实现代码。
+3. `paddle/phi/kernels/cpu/` 目录下添加 `nextafter_kernel.cc`文件。
+4. `paddle/phi/kernels/gpu/` 目录下添加 `nextafter_kernel.cu`文件。
+5. `paddle/phi/kernels/impl/` 目录下添加 `nextafter_kernel_impl.h`文件, C++实现代码。
 6. `paddle/phi/kernels/`目录下添加 `nextafter_kernel.h`文件。
 7. `python/paddle/__init__.py` 添加 nextafter API，以支持 Tensor.nextafter 的调用方式。
 8. `python/paddle/tensor/math.py` 添加Python 实现代码 & 英文 API 文档。
-9. `python/paddle/fluid/tests/unittests` 目录下添加单测文件 `test_nextafter_op.py`。
+9. `python/paddle/fluid/tests/unittests/` 目录下添加单测文件 `test_nextafter_op.py`。
 
 
 # 六、测试和验收的考量
