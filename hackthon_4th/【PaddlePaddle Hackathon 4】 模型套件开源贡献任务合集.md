@@ -1916,15 +1916,16 @@
 * 任务难度：进阶⭐️⭐️
 * 详细描述:
   * 需要完成海光AI推理引擎MIGraph接入Fastdeploy工作，并完成文生图模型Stable Diffusion的部署，测试模型运行正确。
-  * 后端接入建议：可通过ONNX接入地平线AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+  * 后端接入建议：可通过ONNX接入AI硬件工具链，具体操作路径可参考fastdeploy/runtime/backends/tensorrt中接入的代码。
 * 提交内容：
   * pr：提交适配代码，及对应的中英文文档。
   * pr：交Stable Diffusion在海光MIGraph上的部署示例。
+  * 将验证通过的SD模型，按照海光model zoo标准，提交到github model zoo仓库。
   * 邮件：提交benchmark测试数据及精度对齐数据。
 * 技术要求：
   * 熟练掌握C++开发
   * 熟练使用MIGraph推理工具链进行AI模型部署。
-
+	
 ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 
 ### 合入标准
