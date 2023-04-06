@@ -36,7 +36,7 @@ PyTorch 中有 `torch.nextafter` 的API，详细参数为 `torch.nextafter(input
 
 >Return the next floating-point value after input towards other, elementwise.The shapes of input and other must be broadcastable.
 
-在实现方法上，PyTorch 是通过 C++ API 组合实现的，[代码位置](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/cpu/vec/vec_base.h#L473-L479)
+在实现方法上，PyTorch 是通过 std::nextafter 实现的，[代码位置](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/cpu/vec/vec_base.h#L473-L479)
 
 实现代码：
 
@@ -85,18 +85,16 @@ paddle.nextafter(
 
 ## API实现方案
 
-该 API 实现于 `paddle/phi/kernels/funcs/elementwise_functor.h`，
-
 通过调研发现，需要
-1 `paddle/phi/api/yaml/ops.yaml` 添加前向算子，`paddle/phi/api/yaml/backward.yaml` 添加反向算子。
-2 `paddle/phi/infermeta/generated.cc` 添加算子 InferMeta。
-3 `paddle/phi/kernels/elementwise_kernel.cc` 添加底层OP。
-4 `paddle/phi/kernels/` 目录下添加`nextafter_kernel.h`、`nextafter_grad_kernel.h`文件。
-5 `paddle/phi/kernels/cpu` 目录下添加`nextafter_kernel.cc`、`nextafter_grad_kernel.cc`文件。
-6 `paddle/phi/kernels/funcs/elementwise_functor.h` 添加C++实现代码。
-7 `python/paddle/tensor/math.py` 添加Python 实现代码 & 英文 API 文档，
-8 `python/paddle/tensor/init.py` 添加 nextafter API，以支持 Tensor.nextafter 的调用方式。
-9 `python/paddle/fluid/tests/unittests` 目录下添加单测文件test_nextafter_op.py。
+1. `paddle/phi/api/yaml/op_compat.yaml`、`paddle/phi/api/yaml/ops.yaml` 添加算子 Nextafter。
+2. `paddle/phi/infermeta/binary.cc`、`paddle/phi/infermeta/binary.h` 添加算子 NextafterInferMeta。
+3. `paddle/phi/kernels/cpu` 目录下添加 `nextafter_kernel.cc`文件。
+4. `paddle/phi/kernels/gpu` 目录下添加 `nextafter_kernel.cu`文件。
+5. `paddle/phi/kernels/impl/nextafter_kernel_impl.h` 目录下添加 `nextafter_kernel_impl.h`文件, C++实现代码。
+6. `paddle/phi/kernels/`目录下添加 `nextafter_kernel.h`文件。
+7. `python/paddle/__init__.py` 添加 nextafter API，以支持 Tensor.nextafter 的调用方式。
+8. `python/paddle/tensor/math.py` 添加Python 实现代码 & 英文 API 文档。
+9. `python/paddle/fluid/tests/unittests` 目录下添加单测文件 `test_nextafter_op.py`。
 
 
 # 六、测试和验收的考量
