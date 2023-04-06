@@ -1911,6 +1911,20 @@
   * 熟练掌握C++开发
   * 熟练使用Paddle Lite iOS完成AI模型部署。
 
+### No.248：完成海光MIGraph接入FastDeploy，并使用Stable Diffusion 进行部署验证  <a name='task248'></a>
+* 技术标签：海光MIGraphX，C++
+* 任务难度：进阶⭐️⭐️
+* 详细描述:
+  * 需要完成海光AI推理引擎MIGraph接入Fastdeploy工作，并完成文生图模型Stable Diffusion的部署，测试模型运行正确。
+  * 后端接入建议：可通过ONNX接入地平线AI工具链，参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档。
+  * pr：交Stable Diffusion在海光MIGraph上的部署示例。
+  * 邮件：提交benchmark测试数据及精度对齐数据。
+* 技术要求：
+  * 熟练掌握C++开发
+  * 熟练使用MIGraph推理工具链进行AI模型部署。
+
 ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 
 ### 合入标准
