@@ -150,7 +150,7 @@ void AnyCsrGradKernel(const Context& dev_ctx,
 sparse_ops.yaml
 ```yaml
 - op : any
-  args : (Tensor x, IntArray axis={}, DataType dtype=DataType::UNDEFINED, bool keepdim=false)
+  args : (Tensor x, IntArray axis={}, bool keepdim=false)
   output : Tensor(out)
   infer_meta :
     func : AnyInferMeta
@@ -165,7 +165,7 @@ sparse_ops.yaml
 sparse_backward_ops.yaml
 ```yaml
 - backward_op : any_grad
-  forward : any(Tensor x, IntArray axis={}, DataType dtype=DataType::UNDEFINED, bool keepdim=false) -> Tensor(out)
+  forward : any(Tensor x, IntArray axis={}, bool keepdim=false) -> Tensor(out)
   args : (Tensor x, Tensor out_grad, IntArray axis={}, bool keepdim=false)
   output : Tensor(x_grad)
   infer_meta :
@@ -193,7 +193,6 @@ sparse_backward_ops.yaml
 void AnyCsrKernel(const Context& dev_ctx,
                   const SparseCsrTensor& x,
                   const IntArray& axis,
-                  DataType dtype,
                   bool keep_dim,
                   SparseCsrTensor* out) {
   size_t n_dim = axis.size();
@@ -215,7 +214,7 @@ void AnyCsrKernel(const Context& dev_ctx,
     auto* out_cols_data = out_cols.data<int64_t>();
     out_cols_data[0] = 0;
 
-    out_values = phi::Sum<T>(dev_ctx, x.values(), {}, dtype, true);
+    out_values = phi::Sum<T>(dev_ctx, x.values(), {}, true);
   } else {
     PADDLE_ENFORCE_EQ(axis[0],
                       -1,
@@ -266,11 +265,10 @@ value则取决于dout的相应位置值。
 
 均只需要给定输入张量和维度转换目标。
 
-具体的API为`paddle.sparse.any(x, axis=None, dtype=None, keepdim=False)`
+具体的API为`paddle.sparse.any(x, axis=None, keepdim=False)`
 
 - x: 输入张量
 - axis: 进行逻辑或运算的维度，例如-1表示最后一个维度进行逻辑或运算。
-- dtype: 输出张量的类型，
 - keepdim: 是否保持输入和输出维度不变，
 例如$[5, 5]$的张量输入对第一个维度进行逻辑或运算，若保持维度不变则输出为$[1, 5]$，否则为$[5]$。
 
@@ -281,7 +279,6 @@ value则取决于dout的相应位置值。
 - 正确性
 - csr对2维和3维不同`axis`参数测试
 - coo对1维、2维、3维、6维和10维不同`axis`参数测试
-- coo、csr分别对dtype缺省和特定值测试
 - 分别对每个测试样本分成keepdim为真或假
 
 具体样例如下
@@ -289,20 +286,20 @@ value则取决于dout的相应位置值。
 ```python
 class TestAny(unittest.TestCase):
     # x: sparse, out: sparse
-    def check_result(self, x_shape, dims, keepdim, format, dtype=None):
+    def check_result(self, x_shape, dims, keepdim, format):
         mask = paddle.randint(0, 2, x_shape).astype("float32")
         # "+ 1" to make sure that all zero elements in "origin_x" is caused by multiplying by "mask",
         # or the backward checks may fail.
         origin_x = (paddle.rand(x_shape, dtype='float32') + 1) * mask
         dense_x = origin_x.detach()
         dense_x.stop_gradient = False
-        dense_out = paddle.any(dense_x, dims, keepdim=keepdim, dtype=dtype)
+        dense_out = paddle.any(dense_x, dims, keepdim=keepdim)
         if format == "coo":
             sp_x = origin_x.detach().to_sparse_coo(len(x_shape))
         else:
             sp_x = origin_x.detach().to_sparse_csr()
         sp_x.stop_gradient = False
-        sp_out = paddle.sparse.any(sp_x, dims, keepdim=keepdim, dtype=dtype)
+        sp_out = paddle.sparse.any(sp_x, dims, keepdim=keepdim)
 
         np.testing.assert_allclose(
             sp_out.to_dense().numpy(), dense_out.numpy(), rtol=1e-05
@@ -329,8 +326,6 @@ class TestAny(unittest.TestCase):
         self.check_result([2, 5], 1, False, 'coo')
         self.check_result([2, 5], None, True, 'csr')
         self.check_result([2, 5], -1, True, 'csr')
-        self.check_result([2, 5], 0, False, 'coo', dtype="int32")
-        self.check_result([2, 5], -1, True, 'csr', dtype="int32")
 
     def test_any_3d(self):
         self.check_result([6, 2, 3], -1, True, 'csr')
@@ -346,7 +341,7 @@ class TestAny(unittest.TestCase):
             self.check_result([2, 3, 4, 2, 3, 4, 2, 3, 4], i, False, 'coo')
 
 class TestSparseAnyStatic(unittest.TestCase):
-    def check_result_coo(self, x_shape, dims, keepdim, dtype=None):
+    def check_result_coo(self, x_shape, dims, keepdim):
         mask = paddle.randint(0, 2, x_shape)
         origin_data = (paddle.rand(x_shape, dtype='float32') + 1) * mask
         sparse_data = origin_data.detach().to_sparse_coo(
@@ -356,7 +351,7 @@ class TestSparseAnyStatic(unittest.TestCase):
         values_data = sparse_data.values()
 
         dense_x = origin_data
-        dense_out = paddle.any(dense_x, dims, keepdim=keepdim, dtype=dtype)
+        dense_out = paddle.any(dense_x, dims, keepdim=keepdim)
 
         paddle.enable_static()
         with paddle.static.program_guard(
@@ -376,7 +371,7 @@ class TestSparseAnyStatic(unittest.TestCase):
                 shape=origin_data.shape,
                 dtype=origin_data.dtype,
             )
-            sp_out = paddle.sparse.any(sp_x, dims, keepdim=keepdim, dtype=dtype)
+            sp_out = paddle.sparse.any(sp_x, dims, keepdim=keepdim)
             sp_dense_out = sp_out.to_dense()
 
             sparse_exe = paddle.static.Executor()
@@ -400,20 +395,17 @@ class TestSparseAnyStatic(unittest.TestCase):
         self.check_result_coo([5], 0, True)
         self.check_result_coo([5], 0, False)
 
-    def test_any_2d(self):
-        self.check_result_coo([2, 5], None, False, dtype="float32")
+        self.check_result_coo([2, 5], None, False)
         self.check_result_coo([2, 5], None, True)
-        self.check_result_coo([2, 5], 0, True, dtype="float32")
-        self.check_result_coo([2, 5], 0, False)
+        self.check_result_coo([2, 5], 1, True)
+        self.check_result_coo([2, 5], 0, True)
         self.check_result_coo([2, 5], 1, False)
         self.check_result_coo([2, 5], 0, False)
 
-    def test_any_3d(self):
         for i in [0, 1, -2, None]:
             self.check_result_coo([6, 2, 3], i, False)
             self.check_result_coo([6, 2, 3], i, True)
 
-    def test_any_nd(self):
         for i in range(6):
             self.check_result_coo([8, 3, 4, 4, 5, 3], i, False)
             self.check_result_coo([8, 3, 4, 4, 5, 3], i, True)
