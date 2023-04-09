@@ -185,7 +185,7 @@ static PyObject* THPStorage_newSharedFd(PyObject* _unused, PyObject* args) {
        return lodtensor
    ```
 
-3. 在paddle/fuild/memory/allocation/mmap_allocator.h和mmap_allocator.cc中修改MemoryMapAllocation并增加全局AllocateMemoryMapAllocationAndUnlink方法
+3. 在paddle/fuild/memory/allocation/mmap_allocator.h和mmap_allocator.cc中修改MemoryMapAllocation
 
    ```c++
    class MemoryMapAllocation : public Allocation {
@@ -195,19 +195,44 @@ static PyObject* THPStorage_newSharedFd(PyObject* _unused, PyObject* args) {
        ...
    };
    
+   void AllocateMemoryMap(
+    std::string filename, int flags, size_t size, void **map_ptr_, int *fd_) {
+        ...
+        // 无论采用FD还是FS的传输策略, shm_open的步骤都是一样的:
+        if (flags & MAPPED_SHAREDMEM) {
+              fd = shm_open(filename.c_str(), file_flags, (mode_t)0600);
+              PADDLE_ENFORCE_NE(
+                  fd,
+                  -1,
+                  platform::errors::Unavailable(
+                      "File descriptor %s open failed, unable in read-write mode",
+                      filename.c_str()));
+              VLOG(6) << "shm_open: " << filename;
+        } 
+        
+        ...
+        // 基于fd传输的策略, 需要设置MAPPED_KEEPFD的标志位
+        ...
+        if (flags & MAPPED_FROMFD) {
+            PADDLE_ENFORCE_NE(shm_unlink(filename);,
+                      -1,
+                      platform::errors::Unavailable(
+                          "Could not unlink the shared memory file <", filename, ">"));
+        }
+    }
+
    // 序列化时fd为-1, 这时申请一块shmem
    // 反序列化时fd为通过传输获得的, 这时直接mmap就行
    std::shared_ptr<MemoryMapAllocation>
-   AllocateMemoryMapAllocationAndUnlink(int fd,
-                                        int flags,
-                                        size_t size) {
+   AllocateMemoryMapAllocationAndUnlink(int flags,
+                                        size_t size,
+                                        int fd) {
        void *ptr = nullptr;
        if (-1 == fd) {
            std::string handle = memory::allocation::GetIPCName();
            AllocateMemoryMap(handle, flags, size, &ptr, &fd);
-           shm_unlink(handle);
        } else {
-           ptr = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+           AllocateMemoryMap("", flags, size, &ptr, &fd);
        }
        // 构造1个shmem的wapper
        return std::make_shared<MemoryMapAllocation>(
@@ -233,11 +258,13 @@ static PyObject* THPStorage_newSharedFd(PyObject* _unused, PyObject* args) {
             if (mmap_allocation == nullptr) {
                 ...
                 int flags = memory::allocation::MAPPED_SHAREDMEM |
-                    memory::allocation::MAPPED_EXCLUSIVE;
+                    memory::allocation::MAPPED_EXCLUSIVE|
+                    memory::allocation::MAPPED_FROMFD|
+                    memory::allocation::MAPPED_KEEPFD;
                 
                 auto shared_holder =
                     memory::allocation::AllocateMemoryMapAllocationAndUnlink(
-                    -1, flags, data_size);
+                    flags, data_size, -1);
    
                 memory::Copy(platform::CPUPlace(), shared_holder->ptr(),
                              platform::CPUPlace(), data_ptr, data_size);
@@ -255,14 +282,15 @@ static PyObject* THPStorage_newSharedFd(PyObject* _unused, PyObject* args) {
                 ...
                 phi::DenseTensor tensor;
    
-                const std::string &fd = t[0].cast<int>();
+                const int &fd = t[0].cast<int>();
                 size_t size = t[1].cast<size_t>();
                 int flags = memory::allocation::MAPPED_SHAREDMEM |
-                            memory::allocation::MAPPED_NOCREATE;
+                            memory::allocation::MAPPED_NOCREATE|
+                            memory::allocation::MAPPED_FROMFD;
    
                 auto shared_holder =
                     memory::allocation::AllocateMemoryMapAllocationAndUnlink(
-                        fd, flags, size);
+                        flags, size, fd);
    
                 tensor.ResetHolderWithType(
                     shared_holder,
