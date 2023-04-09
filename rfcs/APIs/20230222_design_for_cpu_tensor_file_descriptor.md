@@ -22,7 +22,7 @@
 
 ## 3、意义
 
-ultiprocessing 是支持进程间 Tensor 传输的一种方式。
+multiprocessing 是支持进程间 Tensor 传输的一种方式。
 
 # 二、飞桨现状
 
@@ -281,7 +281,7 @@ static PyObject* THPStorage_newSharedFd(PyObject* _unused, PyObject* args) {
 1. 测试api是否可以正确执行
 2. 测试tensor是否可以被正确共享，数值计算是否正确
 3. 测试是否发生文件残留
-4. 输入Tensor的`dtype`为`float32`和`float64`时的结果正确性；
+4. 输入Tensor的`dtype`为`float32`、`float64`、`int32`、`int64`等类型时的结果正确性；
 
 # 七、可行性分析和排期规划
 
