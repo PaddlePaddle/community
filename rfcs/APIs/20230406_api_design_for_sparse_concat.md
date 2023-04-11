@@ -198,27 +198,27 @@ void ConcatCooKernel(const Context& dev_ctx,
 ```c++
 template <typename T, typename Context>
 void ConcatCsrKernel((const Context& dev_ctx,
-                    const std::vector<const SparseCsrTensor&*>& x,
+                    const std::vector<const SparseCsrTensor*>& x,
                     const Scalar& axis_scalar,
-                    SparseCsrTensor&* out);
+                    SparseCsrTensor* out);
 ```
 
 在 `paddle/phi/kernels/sparse/cpu/concat_grad_kernel.cc` 和 `paddle/phi/kernels/sparse/gpu/concat_grad_kernel.cu` 中，反向 kernel 的设计为：
 ```c++
 template <typename T, typename Context>
 void ConcatCooGradKernel(const Context& dev_ctx,
-                        const std::vector<const SparseCooTensor&*>& x,
+                        const std::vector<const SparseCooTensor*>& x,
                         const SparseCooTensor& out_grad,
                         const Scalar& axis_scalar,
-                        std::vector<SparseCooTensor&*> x_grad);
+                        std::vector<SparseCooTensor*> x_grad);
 ```
 ```c++
 template <typename T, typename Context>
 void ConcatCsrGradKernel(const Context& dev_ctx,
-                        const std::vector<const SparseCsrTensor&*>& x,
-                        const SparseCsrTensor&& out_grad,
+                        const std::vector<const SparseCsrTensor*>& x,
+                        const SparseCsrTensor& out_grad,
                         const Scalar& axis_scalar,
-                        std::vector<SparseCsrTensor&*> x_grad);
+                        std::vector<SparseCsrTensor*> x_grad);
 ```
 
 在 `paddle/phi/api/yaml/sparse_ops.yaml` 中新增对应 API：
