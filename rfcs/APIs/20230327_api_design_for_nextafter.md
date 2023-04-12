@@ -28,7 +28,7 @@ Paddle 将可以使用 `paddle.nextafter` 找到当前输入的下一个浮点�
 
 # 三、业内方案调研
 
-## PyTorch
+## 3.1 PyTorch
 
 PyTorch 中有 `torch.nextafter` 的API，详细参数为 `torch.nextafter(input, other, *, out=None) → Tensor`。
 
@@ -37,8 +37,7 @@ PyTorch 中有 `torch.nextafter` 的API，详细参数为 `torch.nextafter(input
 >Return the next floating-point value after input towards other, elementwise.The shapes of input and other must be broadcastable.
 
 在实现方法上，PyTorch 是通过 std::nextafter 实现的，[代码位置](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/cpu/vec/vec_base.h#L473-L479)
-
-实现代码：
+### 实现代码：
 
 ```cpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ complex / polar ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,15 +54,68 @@ PyTorch 中有 `torch.nextafter` 的API，详细参数为 `torch.nextafter(input
 参数表：
 
 - input：输入的第一个Tensor。必须为 float 或 double。
-- other：输入的第一个Tensor。数据类型必须与input相同。
+- other：输入的第二个Tensor。数据类型必须与input相同。
 - out：输出的Tensor,数据类型必须与input相同。
 
+### 使用示例
+```python
+>>> import torch
+>>> res = torch.nextafter(torch.tensor([1.0, 2.0]), torch.tensor([2.0, 1.0]))
+>>> res
+tensor([1.0000, 2.0000])
+>>> res.backward()
+---------------------------------------------------------------------------
+RuntimeError                              Traceback (most recent call last)
+/tmp/ipykernel_3194/3657552041.py in <module>
+----> 1 res.backward()
+
+/opt/conda/lib/python3.7/site-packages/torch/_tensor.py in backward(self, gradient, retain_graph, create_graph, inputs)
+    361                 create_graph=create_graph,
+    362                 inputs=inputs)
+--> 363         torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
+    364 
+    365     def register_hook(self, hook):
+
+/opt/conda/lib/python3.7/site-packages/torch/autograd/__init__.py in backward(tensors, grad_tensors, retain_graph, create_graph, grad_variables, inputs)
+    173     Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+    174         tensors, grad_tensors_, retain_graph, create_graph, inputs,
+--> 175         allow_unreachable=True, accumulate_grad=True)  # Calls into the C++ engine to run the backward pass
+    176 
+    177 def grad(
+
+RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn
+```
+
+通过实践验证，我们发现PyTorch中的nextafter不能反向传播梯度。
+## 3.2 TensorFlow:
+TensorFlow 中有 `tf.math.nextafter` 的API，详细参数为 `tf.math.nextafter(x1, x2, name=None)`。
+
+在 TensorFlow 中的介绍为：
+
+>This operation returns the same result as the C++ std::nextafter function. It can also return a subnormal number..
+
+在实现方法上，TensorFlow 是通过 std::nextafter 实现的，[代码位置](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/kernels/nextafter_op.h#L25-L31)
+### 实现方法
+
+```cpp
+template <typename T>
+struct nextafter_op {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const T operator()(const T& x1,
+                                                           const T& x2) const {
+    return std::nextafter(x1, x2);
+  }
+};
+```
+参数表：
+
+- x1：输入的第一个Tensor。必须为 float64, float32。
+- x2：输入的第二个Tensor。数据类型必须与x1相同。
+- out：输出的Tensor,数据类型必须与x1相同。
 # 四、对比分析
 
 ## 共同点
 
-- PyTorch 是通过 std::nextafter 实现的实现，使用 Python 调用 C++ API 对应的接口。 Paddle 也可以基于 C++ API 实现。
-
+- PyTorch 和 TensorFlow 都是通过 std::nextafter 实现的实现，使用 Python 调用 C++ API 对应的接口。 Paddle 也可以基于 C++ API 实现。
 
 # 五、设计思路与实现方案
 
@@ -81,7 +133,7 @@ paddle.nextafter(
 
 ## 底层OP设计
 
-底层增加 nextafter OP。因为需要支持广播机制，所以可以模仿Add、Subtract等基础OP设计。
+底层增加 nextafter OP。因为需要支持广播机制，所以可以模仿Add、Subtract等基础OP设计。根据Pytorch得到的结果，nextafter不需要反向传播，所以不考虑反向算子的实现。
 
 ## API实现方案
 
