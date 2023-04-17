@@ -3,10 +3,10 @@
 | API 名称     | paddle.copysign                  |
 | ------------ | -------------------------------- |
 | 提交作者     | Cattidea                         |
-| 提交时间     | 2023-02-21                       |
-| 版本号       | V0.0.1                           |
+| 提交时间     | 2023-04-16                       |
+| 版本号       | V1.0                             |
 | 依赖飞桨版本 | develop                          |
-| 文件名       | 20230221_api_design_for_copysign |
+| 文件名       | 20230416_api_design_for_copysign |
 
 # 一、概述
 
@@ -41,7 +41,7 @@ $$
 
 ```
 Parameters:
-- iput(Tensor)-magnitudes.
+- input(Tensor)-magnitudes.
 - other (Tensor or Number) – contains value(s) whose signbit(s) are applied to the magnitudes in input.
 Keyword Arguments:
 - out (Tensor, optional) – the output tensor.
@@ -74,23 +74,133 @@ Parameters:
 
 代码如下：
 
-Pytorch 中具体使用 `python` 实现，[代码](https://cs.github.com/pytorch/pytorch/blob/4d753b50451607b3314f827993df7e5527f0c0a7/torch/_refs/__init__.py#L1033)如下：
+**Pytorch** 中具体使用 `C++` 实现具体步骤如下：
 
-```python
-def copysign(
-    a: Union[TensorLikeType, NumberType], b: Union[TensorLikeType, NumberType]
-):
-    if isinstance(b, Number) and isinstance(a, Tensor):
-        b = scalar_tensor(b, dtype=a.dtype, device=a.device)
-    elif isinstance(a, Tensor) and isinstance(b, Tensor) and a.device != b.device:
-        msg = "Expected divisor (b) to be on the same device ({0}) as dividend (a), but it is found on {1}!".format(
-            a.device, b.device
-        )
-        raise RuntimeError(msg)
-    return where(signbit(b), neg(abs(a)), abs(a))
-```
+- 首先，引用 C++ <cmath> 库中的 `__builtin_copysignf__(x, y)` 实现 copysign 函数功能，[具体代码](https://github.com/pytorch/pytorch/blob/main/c10/util/math_compat.h)如下：
 
-Numpy 中的 copysign API 是通过 C++ 代码实现的，详细代码如下所示：
+      ````C++
+      #pragma once
+
+      #include <cmath>
+
+      // Android NDK platform < 21 with libstdc++ has spotty C++11 support.
+      // Various hacks in this header allow the rest of the codebase to use
+      // standard APIs.
+      #if (defined(__ANDROID__) && __ANDROID_API__ < 21 && defined(__GLIBCXX__)) || \
+          defined(__NEWLIB__)
+      #include <stdexcept>
+      // ....
+      inline float copysign(float x, float y) {
+      return __builtin_copysignf(x, y);
+      }
+      //...
+      // Convoluted definition of these binary functions for overloads other than
+      // (float,float) and (double,double).  Using a template from __gnu_cxx
+      // is dirty, but this code is only enabled on a dead platform, so there
+      // shouldn't be any risk of it breaking due to updates.
+      template <typename T, typename U>
+      typename __gnu_cxx::__promote_2<T, U>::__type copysign(T x, U y) {
+      typedef typename __gnu_cxx::__promote_2<T, U>::__type type;
+      return copysign(type(x), type(y));
+      }
+
+- 然后在 'c10/util/' 路径下创建头文件[copysign.h](https://github.com/pytorch/pytorch/blob/main/c10/util/copysign.h) 实现对 `copysign` 函数的调用，具体如下：
+
+  ```C++
+  #pragma once
+
+  #include <c10/util/BFloat16.h>
+  #include <c10/util/Half.h>
+  #include <c10/util/math_compat.h>
+
+  namespace c10 {
+
+  // Note: Explicit implementation of copysign for Half and BFloat16
+  // is needed to workaround g++-7/8 crash on aarch64, but also makes
+  // copysign faster for the half-precision types
+  template <typename T, typename U>
+  inline auto copysign(const T& a, const U& b) {
+  return std::copysign(a, b);
+  }
+
+  // Implement copysign for half precision floats using bit ops
+  // Sign is the most significant bit for both half and bfloat16 types
+  inline c10::Half copysign(c10::Half a, c10::Half b) {
+  return c10::Half((a.x & 0x7fff) | (b.x & 0x8000), c10::Half::from_bits());
+  }
+
+  inline c10::BFloat16 copysign(c10::BFloat16 a, c10::BFloat16 b) {
+  return c10::BFloat16(
+      (a.x & 0x7fff) | (b.x & 0x8000), c10::BFloat16::from_bits());
+  }
+
+  } // namespace c10
+  ```
+
+  同时在 'c10\cuda\CUDAMathCompat.h' 路径下添加 `copysign` 使得编译成功（注释是这么说的~），[代码](https://github.com/pytorch/pytorch/blob/8f1c3c68d3aba5c8898bfb3144988aab6776d549/c10/cuda/CUDAMathCompat.h#L46)如下：
+
+  ```C++
+  __MATH_FUNCTIONS_DECL__ float copysign(float x, float y) {
+  #if defined(__CUDA_ARCH__) || defined(__HIPCC__)
+  return ::copysignf(x, y);
+  #else
+  // std::copysign gets ICE/Segfaults with gcc 7.5/8 on arm64
+  // (e.g. Jetson), see PyTorch PR #51834
+  // This host function needs to be here for the compiler but is never used
+  TORCH_INTERNAL_ASSERT(
+      false, "CUDAMathCompat copysign should not run on the CPU");
+  #endif
+  }
+  __MATH_FUNCTIONS_DECL__ double copysign(double x, double y) {
+  #if defined(__CUDA_ARCH__) || defined(__HIPCC__)
+  return ::copysign(x, y);
+  #else
+  // see above
+  TORCH_INTERNAL_ASSERT(
+      false, "CUDAMathCompat copysign should not run on the CPU");
+  #endif
+  }
+  ```
+
+- 然后，在 'pytorch/aten/src/ATen/native/cuda' 路径下实现对 'c10/ 下的 `copysign` 函数的调用，[具体](https://github.com/pytorch/pytorch/blob/8f1c3c68d3aba5c8898bfb3144988aab6776d549/aten/src/ATen/native/cuda/CopysignKernel.cu#L23)如下:
+
+  ```C++
+  #define TORCH_ASSERT_NO_OPERATORS
+  #include <ATen/Dispatch.h>
+  #include <ATen/native/DispatchStub.h>
+  #include <ATen/native/cuda/Loops.cuh>
+  #include <ATen/native/TensorIterator.h>
+  #include <ATen/native/BinaryOps.h>
+
+  #if defined(__CUDACC__)
+  #include <cuda.h>
+  #include <cuda_fp16.h>
+  #include <c10/cuda/CUDAMathCompat.h>
+  #elif defined(__HIPCC__)
+  #include <hip/hip_runtime.h>
+  #include <hip/hip_fp16.h>
+  #include <c10/hip/HIPMathCompat.h>
+  #endif
+
+  // NOTE: CUDA on Windows requires that the enclosing function
+  // of a __device__ lambda not have internal linkage.
+
+  namespace at::native {
+
+  void copysign_kernel_cuda(TensorIteratorBase& iter) {
+  AT_DISPATCH_FLOATING_TYPES_AND2(kBFloat16, kHalf, iter.common_dtype(), "copysign_cuda", [&]() {
+      gpu_kernel_with_scalars(iter, []GPU_LAMBDA(scalar_t a, scalar_t b) -> scalar_t {
+      return c10::cuda::compat::copysign(a, b);
+      });
+  });
+  }
+
+  REGISTER_DISPATCH(copysign_stub, &copysign_kernel_cuda);
+
+  } // namespace at::native
+  ```
+
+**Numpy** 中的 copysign API 是通过 C++ 代码实现的，详细代码如下所示：
 
 ```C++
 identity = NULL;
@@ -115,10 +225,9 @@ Py_DECREF(f);
 
 # 四、对比分析
 
-Pytorch 通过 python 现有的 API 组合实现，代码通俗易懂，整体设计较为清晰。  
-Numpy 中通过调用底层的 C++代码实现，具体逻辑不详细展开。  
-TensorFlow 中没有 copysign API 的实现方式。  
-因此，paddle 中 copysign 主要参考 Pytorch 的实现方式，利用已有的 API 组合实现。
+Pytorch 通过底层 C++ 代码实现。
+Numpy 中通过调用底层的 C++代码实现，具体逻辑不详细展开。
+TensorFlow 中没有 copysign API 的实现方式。
 
 # 五、方案设计
 
@@ -126,18 +235,20 @@ TensorFlow 中没有 copysign API 的实现方式。
 
 API 设计为`paddle.copysign(x, y, name=None)`和`paddle.Tensor.copysign(x, y, name=None)`
 
-- x(Tensor):输入。
-- y(Tensor or np.ndarray):包含张量或数组或标量。
+- x(Tensor):预计支持 unit8、int、float、bool 等 Tensor 数据类型。
+- y(Tensor or ndarray)：预计支持 unit8、int、float、bool 等 ndraray/Tensor 数据类型。
 
 ## 底层 OP 设计
 
-使用已有 API 进行组合，不再单独设计底层 OP。
+目前两种策略：
+
+- 参考 torch 基于 C++ <cmath> 库中的 `copysign` 函数，直接实现。
+- 自己实现 `copysign` 底层逻辑。
 
 ## API 实现方案
 
-- 首先判断输入 x 和 y 的类型，判断输入 input 是否为张量，输入参数 y 是否为数组或者张量。
-- 由于 Pytorch 中的代码判断正负用到 torch.signbit API，**主要是针对-0 和+0 的判断**，-0 对应负号，+0 对应正号，但是 paddle 目前不支持-0 和+0 的判断，因此目前不考虑-0 的情况，在 paddle 中可用`[x>=0]`作为判断条件。
-- 通过 `[x>=0]` 作为判断条件，获得 True 和 False，然后通过 paddle.where 根据条件，分别赋予 paddle.abs(x) 不同的符号。
+- 首先判断输入 `x` 和 `y` 的数据类型，判断输入 `x` 是否为张量对应类型：uint8, float16、float32、float64、int32、int64、bool，输入参数 `y` 是否为 Number 或者张量对应类型：uint8, float16、float32、float64、int32、int64、bool。
+- 参考 pytorch 的实现是调用 C++ <cmath> 库中的 copysign 函数。
 
 # 六、测试和验收的考量
 
@@ -145,15 +256,17 @@ API 设计为`paddle.copysign(x, y, name=None)`和`paddle.Tensor.copysign(x, y, 
 
 - 编程范式场景：覆盖静态图和动态图测试场景。
 - 硬件场景：覆盖 CPU 和 GPU 测试场景。
-- x：Tensor，支持 float16， float32，int。
-- y：Tensor or np.ndarray 支持 float16，float32， int。
-- y 取+0 和 -0 时 paddle.copysign 的正确性（注：-0 现在没找到好的解决方案，因此当 y 取 $\pm0$ 时，都按大于等于 0 处理）。
-- 计算精度：前向计算，和 numpy 实现的函数对比结果；反向计算，由 Python 组合的新增 API 无需验证反向计算。
-- 验证广播机制的正常。
+- 数据类型检验：
+  - x 要求为 paddle.Tensor，支持 uint8, float16、float32、float64、int32、int64、bool。
+  - y 要求为 paddle.Tensor，Number 支持 uint8, float16、float32、float64、int32、int64、bool。
+- y 取 +0 和 -0 时 paddle.copysign 的正确性。
+- 结果的正确性：
+  - 前向计算：`paddle.copysign` 的计算结果和 `np.copysign` 一致。
+  - 反向计算：`paddle.copysign` 的计算反向传播所得到的梯度与使用 numpy 手动计算的结果一致。
 
 # 七、可行性分析及规划排期
 
-方案主要依赖 paddle 现有 API 组合而成，并自行实现核心算法。
+技术可行性：参考同类项目和相似的 API，无重大难点，可在周期内完成。
 
 # 八、影响面
 
@@ -168,3 +281,5 @@ API 设计为`paddle.copysign(x, y, name=None)`和`paddle.Tensor.copysign(x, y, 
 Pytorch [相关文档](https://pytorch.org/docs/stable/generated/torch.copysign.html)
 
 Numpy [相关文档](https://numpy.org/doc/stable/reference/generated/numpy.copysign.html#numpy-copysign)
+
+copysign 相关 [pr](https://github.com/pytorch/pytorch/pull/46396)
