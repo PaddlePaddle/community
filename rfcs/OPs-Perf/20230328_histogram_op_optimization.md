@@ -46,17 +46,17 @@ Pytorch对于[Histogram算子的实现](https://github.com/pytorch/pytorch/blob/
 
 ## 2.1 关键模块与性能提升点
 
-关键是使用`phi::funcs::ReduceKernel`，加速`Histogram`确定直方图边界的计算部分，从而提高`Histogram`算子在GPU上的计算性能。预期能够平均提升2倍以上。
+关键是使用__global__ kernel的方式实现了`KernelMinMax`，加速`Histogram`确定直方图边界的计算部分，从而提高`Histogram`算子在GPU上的计算性能。预期能够平均提升2倍以上。
 
 ## 2.2 Host端计算流程
 
-Host端需要为`Histogram`算子提供两个部分的数据，第一个部分是为确定直方图边界的`phi::funcs::ReduceKernel`提供相应的输入域数据，第二部分是将确定好的边界从Device端移动到Host端，为`Histogram`的核心计算部分提供边界信息。
+Host端需要为`Histogram`算子提供两个部分的数据，第一个部分是为确定直方图边界的`__global__ kernel`提供相应的输出变量，第二部分是将确定好的边界从Device端移动到Host端，为`Histogram`的核心计算部分提供边界信息。
 
-具体来说，首先就是将输入的Tensor Resize成一维，同时创建边界min和max的Tensor用于接收`phi::funcs::ReduceKernel`的输出结果。然后将边界输出传递给核心计算的`HistogramKernel`中即可。
+具体来说，首先就是首先创建一个大小为2的DenseTensor，然后分配内存，将返回的指针作为输出，传入到手动编写的`__global__ kernel`中。然后将边界输出传递给核心计算的`HistogramKernel`中即可。
 
 ## 2.4 Device端计算流程
 
-Device端则是按照Host端处理好的输入输出信息，调用`phi::funcs::ReduceKernel`对`Histogram`的直方图边界信息进行计算，然后执行`HistogramKernel`的计算即可。
+Device端则是参考了`KernelHistogram`的写法，借助共享内存和`CUDA_KERNEL_LOOP`函数，实现了`KernelMinMax`，在CUDA Kernel内部并采取`phi::CudaAtomicMin`和`phi::CudaAtomicMax`函数实现边界值的寻找。
 
 # 3 测试和验收的考量
 
@@ -66,17 +66,17 @@ Device端则是按照Host端处理好的输入输出信息，调用`phi::funcs::
 
 | Case No. | device| input_shape | input_type | bins | min | max |Paddle Perf(ms) |old Paddle Perf(ms) |diff|
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Tesla V100 | [16, 64] | int32   | 100 | 0 | 0 | 0.01753 |0.09403|faster than 436.39% |
-| 2 | Tesla V100 | [16, 64] | int64   | 100 | 0 | 0 | 0.01817 |0.13624|faster than 649.81%|
-| 3 | Tesla V100 | [16, 64] | float32 | 100 | 0 | 0 | 0.01727 |0.01889|faster than 9.38%|
+| 1 | Tesla V100 | [16, 64] | int32   | 100 | 0 | 0 | 0.01220 |0.09403|faster than 670.74% |
+| 2 | Tesla V100 | [16, 64] | int64   | 100 | 0 | 0 | 0.01515 |0.13624|faster than 799.27%|
+| 3 | Tesla V100 | [16, 64] | float32 | 100 | 0 | 0 | 0.01501 |0.01889|faster than 25.85%|
 
 新的Paddle与Pytorch性能对比效果如下，达到了预期性能提升效果：
 
 | Case No. | device| input_shape | input_type | bins | min | max |Paddle Perf(ms) |Pytorch Perf(ms) |diff|
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Tesla V100 | [16, 64] | int32   | 100 | 0 | 0 | 0.01753 |0.02255|faster than 28.64%|
-| 2 | Tesla V100 | [16, 64] | int64   | 100 | 0 | 0 | 0.01817 |0.03424|faster than 88.44%|
-| 3 | Tesla V100 | [16, 64] | float32 | 100 | 0 | 0 | 0.01727 |0.02250|faster than 30.28%|
+| 1 | Tesla V100 | [16, 64] | int32   | 100 | 0 | 0 | 0.01220 |0.02255|faster than 84.84%|
+| 2 | Tesla V100 | [16, 64] | int64   | 100 | 0 | 0 | 0.01515 |0.03424|faster than 126.01%|
+| 3 | Tesla V100 | [16, 64] | float32 | 100 | 0 | 0 | 0.01501 |0.02250|faster than 49.90%|
 
 针对三种不同的Case，优化后性能有不同程度的提升。   
 
