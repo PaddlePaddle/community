@@ -34,3 +34,4 @@
 1. 新同学介绍：[ScottWong98](https://github.com/ScottWong98), [Yang-Changhui](https://github.com/Yang-Changhui), [LyndonKong](https://github.com/LyndonKong)
 2. 飞桨与大模型
 3. Q&A
+4. 开源软件创新大赛预热
