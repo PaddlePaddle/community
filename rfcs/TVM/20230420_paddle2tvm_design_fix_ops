@@ -1,0 +1,49 @@
+## 方案名称
+为TVM PaddlePaddle前端完善 logical_or_cn/batch_norm/gaussian_random/one_hot_v2 算子支持程度设计文档
+
+| API名称 | logical_or_cn/batch_norm/gaussian_random/one_hot_v2 | 
+|---|---|
+|提交作者<input type="checkbox" class="rowselector hidden"> | TheFormerWalker | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-04-20 | 
+|版本号 | V1.0 | 
+|依赖CINN版本<input type="checkbox" class="rowselector hidden"> | develop | 
+|文件名 | 20230420_paddle2tvm_design_fix_ops.md<br> | 
+
+# 方案描述
+为TVM PaddlePaddle前端完善 logical_or_cn/batch_norm/gaussian_random/one_hot_v2 算子支持程度，并完善算子测试。
+
+
+# 方案流程
+
+**1. logical_or_cn算子**
+
+完善 logical_or_cn算子的指定输出结果存储out参数支持。
+
+[Paddle的 logical_or_cn 文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/logical_or_cn.html)
+
+**2. batch_norm**
+
+完善 batch_norm 算子的 data_format 参数（“NC", "NCL", "NCHW" 或者"NCDHW"）支持。
+
+[Paddle的 batch_norm 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/functional/batch_norm_cn.html)
+
+**3. gaussian_random 算子**
+
+完善 gaussian_random 算子的 dtype 参数支持。
+
+[Paddle的 gaussian_random 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/fluid/layers/gaussian_random_cn.html)
+
+**4. one_hot_v2 算子**
+
+完善 one_hot_v2 算子的 allow_out_of_range参数支持。
+
+[Paddle的 one_hot 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/fluid/one_hot_cn.html)
+
+# 方案运行效果
+参考[单测代码](https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py)，设计并通过各个算子的单测。
+
+
+# 项目提交时间计划
+4月20日 ~ 4月25日完成算子适配
+
+4月26日 ~ 4月30日完成算子适配的单测
