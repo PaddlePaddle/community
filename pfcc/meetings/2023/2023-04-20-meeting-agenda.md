@@ -28,8 +28,9 @@
 | [ccsuzzh](https://github.com/ccsuzzh)             | [DrRyanHuang](https://github.com/DrRyanHuang)              | [RedContritio](https://github.com/RedContritio)           | [Lyutoon](https://github.com/Lyutoon)                 | [PommesPeter](https://github.com/PommesPeter)       | [tianxingxia-cn](https://github.com/tianxingxia-cn)                                   |
 | [sanbuphy](https://github.com/sanbuphy)           | [jjyaoao](https://github.com/jjyaoao)                      | [kk-2000](https://github.com/kk-2000)                     | [Tomoko-hjf](https://github.com/Tomoko-hjf)           | [edencfc](https://github.com/edencfc)               | [CollaborativeFiltering](https://github.com/CollaborativeFiltering)                   |
 | [cloud2009](https://github.com/cloud2009)         | [hh-qiao](https://github.com/hh-qiao)                      | [AndSonder](https://github.com/AndSonder)                 | [JuiceHub](https://github.com/JuiceHub)               | [Difers](https://github.com/Difers)                 | [zeroRains](https://github.com/zeroRains)                                             |
-| [BeingGod](https://github.com/BeingGod)           | [Young-Flash](https://github.com/Young-Flash)              |
+| [BeingGod](https://github.com/BeingGod)           | [Young-Flash](https://github.com/Young-Flash)              |[ScottWong98](https://github.com/ScottWong98) | [Yang-Changhui](https://github.com/Yang-Changhui) | [LyndonKong](https://github.com/LyndonKong)
 
 # 会议议程
-1. 飞桨与大模型
-2. Q&A
+1. 新同学介绍：[ScottWong98](https://github.com/ScottWong98), [Yang-Changhui](https://github.com/Yang-Changhui), [LyndonKong](https://github.com/LyndonKong)
+2. 飞桨与大模型
+3. Q&A
