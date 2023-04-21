@@ -58,7 +58,7 @@ PyTorch 中包含 API `torch.distributions.geometric.Geometric(probs=None, logit
 
 - **probs  (**_Number, Tensor_**) – the probability of sampling 1. Must be in range (0, 1]**
 
-- **scale  (**_Number, Tensor_**) – the log-odds of sampling 1**
+- **logits  (**_Number, Tensor_**) – the log-odds of sampling 1**
 
 ### 源代码
 
@@ -680,8 +680,8 @@ def sample(self, shape):
 import paddle
 
 def prob(self, value):
-    x = paddle.pow(2 * math.pi,-value.shape.pop(1) / 2) * paddle.pow(paddle.linalg.det(self.scale), -1/2)
-    y = paddle.exp(-1/2 * paddle.t(value - self.loc) * paddle.inverse(self.scale) * (value - self.loc))
+    x = paddle.pow(2 * math.pi,-value.shape.pop(1) / 2) * paddle.pow(paddle.linalg.det(self.logits), -1/2)
+    y = paddle.exp(-1/2 * paddle.t(value - self.loc) * paddle.inverse(self.logits) * (value - self.loc))
     return x * y
 ```
 
