@@ -60,7 +60,7 @@
 
 ### 主体设计选型考量
 
-按照任务需求使用[PPHumanSeg](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.7/contrib/PP-HumanSeg)部署
+按照任务需求使用[PPLiteSeg](https://github.com/PaddlePaddle/PaddleSlim/tree/develop/example/auto_compression/semantic_segmentation)部署
 
 ## 2、关键技术点/子模块设计与实现方案
 
