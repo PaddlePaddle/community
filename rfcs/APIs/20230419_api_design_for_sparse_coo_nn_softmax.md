@@ -304,6 +304,15 @@ void SoftmaxCooGradKernel(const Context& dev_ctx,
 
 在python/paddle/sparse/nn/functional/activation.py 文件和 python/paddle/sparse/nn/layer/activation.py 文件中的原API上没有改动。
 
+参考pytorch的计算方式，先计算索引的pool映射，在对应维度上一次计算max以及求和，最终对指数的求和进行normalize计算。
+
+在cuda的kernel中，　若指定的axis大于等于稀疏维度，将使用稠密张量的softmax算子，若小于则分两步；
+-   先计算pool和max, 基于Thrust库设计函数ComputePoolMax,　计算出指定维度上索引的pools以及每个pool对应的最大值，
+-   基于pool的数量，设计对应的block和grid，调用SparseCooSoftmaxKernel, 计算pool内的softmax值
+    
+在反向梯度SparseCooSoftmaxGradKernel计算中，需先设计函数GetOffsets, 基于稀疏张量的索引计算对应稠密张量的偏移量，进而通过反向求导的公式计算梯度。
+
+
 # 六、测试和验收的考量
 
 完善单测代码，python/paddle/fluid/tests/unittests/test_sparse_softmax_op.py 文件中新增测试COO稀疏格式的case如下：
