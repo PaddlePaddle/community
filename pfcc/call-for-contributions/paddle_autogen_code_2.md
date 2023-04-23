@@ -68,15 +68,15 @@
 
     d. **增加support_trans_dtype**：这些算子原始的yaml配置缺失**support_trans_dtype**配置，需要新增。
 
-    e. **增加VarTypeInferece函数**：表示算子的**VarTypeInferece函数**的函数不能删除，需要在`filter.py`中的`get_infer_var_type_func`增加；参考[PR52274](https://github.com/PaddlePaddle/Paddle/pull/52274)
+    e. **增加VarTypeInferece函数**：表示算子的**VarTypeInferece函数**的函数不能删除，需要在`filter.py`中的`get_infer_var_type_func`增加；参考[matrix_nms](https://github.com/PaddlePaddle/Paddle/pull/52479),参考[PR52274](https://github.com/PaddlePaddle/Paddle/pull/52274)
 
     e. **组合算子**：表示算子是组合算子基础算子，对应的`backward`需要增加`composite`配置；参考[PR51940](https://github.com/PaddlePaddle/Paddle/pull/51940)
 
     f. **关注InferShape**：表示该算子的`InferShape`函数较为复杂，可能不能直接用`InferMeta`直接替换
 
-2. **`移动到ops.yaml/backward.yaml`**:这列表示对应的算子配置需要从`legacy_ops.yaml/legacy_backward.yaml`中移动到`ops.yaml/backward.yaml`,并把原来的配置删除。其中，如果算子有`backward`配置，就需要修改对应的`backward.yaml`文件。‼️ **注意原始的yaml配置不一定完整，需要对比`xxx_op.cc`中的代码进行重新完善yaml配置。尤其是kernel的data_type** !!
+2. **`移动到ops.yaml/backward.yaml`**:这列表示对应的算子配置需要从`legacy_ops.yaml/legacy_backward.yaml`中移动到`ops.yaml/backward.yaml`,并把原来的配置删除。其中，如果算子有`backward`配置，就需要修改对应的`backward.yaml`文件。‼️ **注意原始的yaml配置不一定完整，需要对比`xxx_op.cc`中的代码进行重新完善yaml配置。尤其是kernel的data_type**
 
-3. **`新增到static_ops.yaml/static_backward.yaml`**:这列表示对应的算子配置动态图和静态图不一致，需要从`legacy_ops.yaml/legacy_backward.yaml`中拷贝到`static_ops.yaml/static_backward.yaml`,保留原来`legacy_ops.yaml/legacy_backward.yaml`中的配置，并在依据静态图算子的原始算子定义，在`static_ops.yaml/static_backward.yaml`完善算子配置。‼️ **注意原始的yaml配置不一定完整，需要对比`xxx_op.cc`中的代码进行重新完善yaml配置。尤其是kernel的data_type** !!
+3. **`新增到static_ops.yaml/static_backward.yaml`**:这列表示对应的算子配置动态图和静态图不一致，需要从`legacy_ops.yaml/legacy_backward.yaml`中拷贝到`static_ops.yaml/static_backward.yaml`,保留原来`legacy_ops.yaml/legacy_backward.yaml`中的配置，并在依据静态图算子的原始算子定义，在`static_ops.yaml/static_backward.yaml`完善算子配置。‼️ **注意原始的yaml配置不一定完整，需要对比`xxx_op.cc`中的代码进行重新完善yaml配置。尤其是kernel的data_type**
 
 4. **删除xxx_op.cc**：对应的`全部`表示删除整个文件;`部分`表示这个文件中还有其他算子的OP，只能删除一部分代码
 
@@ -125,14 +125,14 @@
 
 #### op_compat.yaml主要配置说明
 
-|op_version.yaml配置选项|含义|可选性|
+|op_compat.yaml配置选项|含义|可选性|
 |---|---|---|
 |- op : abs|固定格式，如果有op_name名映射(对应的sig文件中有<br>PD_REGISTER_BASE_KERNEL_NAME(size, numel);)，需要加上括号，- op : numel(size)|必须
 |backward : abs_grad|如果有backward，配置反向名字。同样存在名字映射，如backward : topk_grad (top_k_v2_grad)|按需
 |inputs :|inputs参数名字映射，如果有多个用{}，只有在`Maker()`成员函数中参数名和`ops.yaml`不一致时才需要(一般都需要)|按需
 |outputs :|outputs参数名字映射，如果有多个用{}，只有在`Maker()`成员函数中参数名和`ops.yaml`不一致时才需要(一般都需要)|按需
-|attrs :|attrs参数名字映射，如果有多个用{}，只有在`Maker()`成员函数中参数名和`ops.yaml`不一致时才需要(**一般不需要**)|按需
-|extra :<br>   attrs : [bool use_mkldnn = false]<br> outputs : [xshape]|一些硬件相关的配置(无需关心)|按需
+|attrs :|attrs参数名字映射，如果有多个用{}，只有在`Maker()`成员函数中参数名和`ops.yaml`不一致时才需要(**一般不需要**)。注意：Tensor类型的参数定义为`inputs`或`outputs`,其他类型的参数定义为`attrs` |按需
+|extra :<br>   attrs : [bool use_mkldnn = false]<br> outputs : [xshape]|一些硬件相关的配置(一般无需关心)|按需
 |int_array:<br>axis :<br>data_type : int<br>support_tensor : true<br>shape :<br>data_type : int<br>tensor_name : Shape<br>tensors_name : ShapeTensor|配置IntArray特殊参数(axis和shape是对应的两种配置)，可参考[PR48792](https://github.com/PaddlePaddle/Paddle/pull/48792)|按需
 |scalar :<br>    rtol :<br>      data_type : std::string<br>      tensor_name : Rtol<br>   axis:<br>      data_type : int<br>      support_tensor : true|配置Scalar特殊参数(rtol和axis是两种不同的配置)，可参考[PR48792](https://github.com/PaddlePaddle/Paddle/pull/48792)|按需
 |complex_promote : [X, Y]|表示复数的参数类型提升，参见[kron](https://github.com/PaddlePaddle/Paddle/pull/50611)|
