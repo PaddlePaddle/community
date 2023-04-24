@@ -17,14 +17,14 @@ paddle.nn.PoissonNLLLoss 和 paddle.nn.functional.Poisson_nll_loss API 用于计
 该函数计算公式为：
 
 $$
-\text{loss}(\text{input}, \text{target}) = \text{input} - \text{target} * \log(\text{input}) + \log(\text{target!})
+\text{loss}(\text{input}, \text{label}) = \text{input} - \text{label} * \log(\text{input}) + \log(\text{label!})
 $$
 
 损失函数中的最后一项可以使用Stirling公式近似
 $$
-\text{target}*\log(\text{target}) - \text{target} + 0.5 * \log(2\pi\text{target})
+\text{label}*\log(\text{label}) - \text{label} + 0.5 * \log(2\pi\text{label})
 $$
-将target和每个元素都为1的同样形状的张量比较，对target值超过1的索引处考虑此项近似，对target的值小于等于1的索引处设置此项近似为0进行遮盖。
+将label和每个元素都为1的同样形状的张量比较，对label值超过1的索引处考虑此项近似，对label的值小于等于1的索引处设置此项近似为0进行遮盖。
 
 ## 2、功能目标
 
@@ -50,7 +50,7 @@ def poisson_nll_loss(
     log_input: bool = True,
     full: bool = False,
     size_average: Optional[bool] = None,
-    eps: float = 1e-8,
+    epsilon: float = 1e-8,
     reduce: Optional[bool] = None,
     reduction: str = "mean",
 ) -> Tensor:
@@ -63,7 +63,7 @@ def poisson_nll_loss(
             log_input=log_input,
             full=full,
             size_average=size_average,
-            eps=eps,
+            epsilon=epsilon,
             reduce=reduce,
             reduction=reduction,
         )
@@ -73,19 +73,19 @@ def poisson_nll_loss(
         ret = input
         raise ValueError(reduction + " is not valid")
 
-    ret = torch.poisson_nll_loss(input, target, log_input, full, eps, _Reduction.get_enum(reduction))
+    ret = torch.poisson_nll_loss(input, target, log_input, full, epsilon, _Reduction.get_enum(reduction))
     return ret
 ```
 
 由cpp提供具体实现
 ```cpp
-    Tensor poisson_nll_loss(const Tensor& input, const Tensor& target, const bool log_input, const bool full, const double eps, const int64_t reduction)
+    Tensor poisson_nll_loss(const Tensor& input, const Tensor& target, const bool log_input, const bool full, const double epsilon, const int64_t reduction)
     {
         Tensor loss;
         if (log_input) {
             loss = at::exp(input) - target * input;
         } else {
-            loss = input - target * at::log(input + eps);
+            loss = input - target * at::log(input + epsilon);
         }
 
         if (full) {
@@ -120,19 +120,19 @@ def poisson_nll_loss(
 
 `paddle.nn.functional.poisson_nll_loss(
     input,
-    target,
+    label,
     log_input = True,
     full = False,
-    eps = 1e-8,
+    epsilon = 1e-8,
     reduction = "mean",
     name:str = None
 ) -> Tensor:`
  - Input(Tensor): 期望服从泊松分布的输入，形状为`(N, *)` 或 `(*)` 其中 `*`表示任何数量的额外维度。
- - Target(Tensor): 为泊松分布的随机样本，形状为`(N, *)` 或 `(*)`，与输入的形状相同， 
+ - label(Tensor): 为泊松分布的随机样本，形状为`(N, *)` 或 `(*)`，与输入的形状相同， 
 或与输入的形状相同但有一个维度等于1（允许广播）。
- - Log_input(bool): 输入和目标是否为对数。如果为`True`，则损失函数的前两项的计算方式为$\exp(\text{input}) - \exp\text{target} * \text{target}$。如果设置为`False`，则损失函数的前两项计算方式为$\text{input} - \text{target} * \log(\text{input}+\text{eps})$。默认为`True`。
- - Full(bool)：是否计算完整的损失。如果为`True`，则添加Stirling逼近项$\text{target}*\log(\text{target}) - \text{target} + 0.5 * \log(2\pi\text{target})$。将target和每个元素都为1的同样形状的张量比较，对target值超过1的索引处考虑此项近似，对target的值小于等于1的索引处设置此项近似为0进行遮盖。默认为`False`。
- - Eps: 避免在`log_input=False`时计算$\log(0)$的小量。默认值为1e-8/。
+ - Log_input(bool): 输入和目标是否为对数。如果为`True`，则损失函数的前两项的计算方式为$\exp(\text{input}) - \exp\text{label} * \text{label}$。如果设置为`False`，则损失函数的前两项计算方式为$\text{input} - \text{label} * \log(\text{input}+\text{epsilon})$。默认为`True`。
+ - Full(bool)：是否计算完整的损失。如果为`True`，则添加Stirling逼近项$\text{label}*\log(\text{label}) - \text{label} + 0.5 * \log(2\pi\text{label})$。将label和每个元素都为1的同样形状的张量比较，对label值超过1的索引处考虑此项近似，对label的值小于等于1的索引处设置此项近似为0进行遮盖。默认为`False`。
+ - epsilon: 避免在`log_input=False`时计算$\log(0)$的小量。默认值为1e-8/。
  - Reduction：指定应用于输出结果的计算方式，指定应用于输出结果的计算方式，可选值有："none", "mean", "sum"。默认为"mean"，计算`Poisson_nll_loss`的均值；设置为"sum"时，计算`Poisson_nll_loss`的总和；设置为"none"时，则返回`Poisson_nll_loss`。
  - Name: 操作的名称，默认为None。
 
@@ -141,13 +141,13 @@ def poisson_nll_loss(
 `paddle.nn.PoissonNLLLoss(
     log_input = True,
     full = False,
-    eps = 1e-8,
+    epsilon = 1e-8,
     reduction = "mean",
     name = None
 ) -> Tensor:`
-- log_input(bool): 输入和目标是否为对数。如果为`True`，则损失函数的前两项的计算方式为$\exp(\text{input}) - \exp\text{target} * \text{target}$。如果设置为`False`，则损失函数的前两项计算方式为$\text{input} - \text{target} * \log(\text{input}+\text{eps})$。默认为`True`。
- - Full(bool)：是否计算完整的损失。如果为`True`，则添加Stirling逼近项$\text{target}*\log(\text{target}) - \text{target} + 0.5 * \log(2\pi\text{target})$。将target和每个元素都为1的同样形状的张量比较，对target值超过1的索引处考虑此项近似，对target的值小于等于1的索引处设置此项近似为0进行遮盖。默认为`False`。
- - Eps: 避免在`log_input=False`时计算$\log(0)$的小量。默认值为1e-8/。
+- log_input(bool): 输入和目标是否为对数。如果为`True`，则损失函数的前两项的计算方式为$\exp(\text{input}) - \exp\text{label} * \text{label}$。如果设置为`False`，则损失函数的前两项计算方式为$\text{input} - \text{label} * \log(\text{input}+\text{epsilon})$。默认为`True`。
+ - Full(bool)：是否计算完整的损失。如果为`True`，则添加Stirling逼近项$\text{label}*\log(\text{label}) - \text{label} + 0.5 * \log(2\pi\text{label})$。将label和每个元素都为1的同样形状的张量比较，对label值超过1的索引处考虑此项近似，对label的值小于等于1的索引处设置此项近似为0进行遮盖。默认为`False`。
+ - epsilon: 避免在`log_input=False`时计算$\log(0)$的小量。默认值为1e-8/。
  - Reduction：指定应用于输出结果的计算方式，指定应用于输出结果的计算方式，可选值有："none", "mean", "sum"。默认为"mean"，计算`Poisson_nll_loss`的均值；设置为"sum"时，计算`Poisson_nll_loss`的总和；设置为"none"时，则返回`Poisson_nll_loss`。
  - Name: 操作的名称，默认为None。
 
@@ -159,8 +159,8 @@ def poisson_nll_loss(
 1. 检查参数
 
    1. 检查 reduction 有效性（同其余 functional loss 中的实现）
-   2. 检查输入参数 eps 是否为正数
-   3. 检查输入（含 `input`、`target`）的size和dtype（同其余 functional loss 中的实现）
+   2. 检查输入参数 epsilon 是否为正数
+   3. 检查输入（含 `input`、`label`）的size和dtype（同其余 functional loss 中的实现）
 
 2. 计算
 
@@ -184,11 +184,11 @@ def poisson_nll_loss(
 3. 异常测试:
 
    - 数据类型检验:
-     - input和target的数据类型检验
+     - input和label的数据类型检验
      - 可选参数的数据类型检验
    - 具体数值检验:
-     - input 与 target 的维度一致检查
-     - 若 eps 有输入, 则要为正
+     - input 与 label 的维度一致检查
+     - 若 epsilon 有输入, 则要为正
 
 
 # 七、可行性分析和排期规划

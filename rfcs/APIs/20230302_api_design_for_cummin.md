@@ -1,27 +1,27 @@
-# paddle.[Tensor.]cummax 设计文档
+# paddle.[Tensor.]cummin 设计文档
 
-| API名称                                                      | paddle.[Tensor.]cummax               |
+| API名称                                                      | paddle.[Tensor.]cummin          |
 | ------------------------------------------------------------ | ----------------------------------- |
-| 提交作者   | jinyouzhi                             |
-| 提交时间| 2022-03-16                            |
+| 提交作者   | NetPunk                       |
+| 提交时间| 2023-03-02                           |
 | 版本号                                                       | V1.0                                |
 | 依赖飞桨版本 | develop                             |
-| 文件名                                                       | 20220316_api_design_for_cummax.md |
+| 文件名                                                       | 20230302_api_design_for_cummin.md |
 
 # 一、概述
 
 ## 1、相关背景
 
-cummax函数的功能为求累积最小值（cumulative max）。对于输入向量/矩阵，第i个位置的计算方式为：
+cummin函数的功能为求累积最小值（cumulative min）。对于输入向量/矩阵，第i个位置的计算方式为：
 $$
-y_i = \max(x_1, x_2, x_3, \cdots , x_i)
+y_i = \min(x_1, x_2, x_3, \cdots , x_i)
 $$
 
 PyTorch、NumPy 和 Pandas 提供了相似算子。
 
 ## 2、功能目标
 
-cummax API 是一个按轴寻找累计最大值和最大值所在位置的 API。此任务的目标是在 Paddle 框架中，新增 cummax API，调用路径为：`paddle.cummax`和 `paddle.Tensor.cummax`。
+cummin API 是一个按轴寻找累计最小值和最小值所在位置的 API。此任务的目标是在 Paddle 框架中，新增 cummin API，调用路径为：`paddle.cummin`和 `paddle.Tensor.cummin`。
 ## 3、意义
 
 完善矩阵运算的基本功能，增强统计运算完善度。
@@ -34,12 +34,12 @@ cummax API 是一个按轴寻找累计最大值和最大值所在位置的 API�
 
 ## PyTorch
 
-PyTorch 中有 API（https://pytorch.org/docs/stable/generated/torch.cummax.html）
+PyTorch 中有 [API](https://pytorch.org/docs/stable/generated/torch.cummin.html)
 
 在 PyTorch 文档中，介绍为：
 
 ```
-Returns a namedtuple (values, indices) where values is the cumulative maximum of elements of input in the dimension dim. And indices is the index location of each maximum value found in the dimension dim.
+Returns a namedtuple (values, indices) where values is the cumulative minimum of elements of input in the dimension dim. And indices is the index location of each minimum value found in the dimension dim.
 
 Parameters
  - input (Tensor) – the input tensor.
@@ -48,14 +48,12 @@ Parameters
 Keyword Arguments
  - out (tuple, optional) – the result tuple of two output tensors (values, indices)
 ```
-输入数据Tensor和cummax操作的维度dim，输出一个tuple包含计算结果values和索引indices
-
-相关联的 PR [Cumulative Maximum · Issue #20240 · pytorch/pytorch (github.com)](https://github.com/pytorch/pytorch/issues/20240)，其中提及`logcumsumexp` 依赖于 `cummax` 功能。
+输入数据Tensor和cummin操作的维度dim，输出一个tuple包含计算结果values和索引indices
 
 ### 实现方法
 
 在实现方法上, PyTorch采用的CPU实现为：循环遍历赋值，而CUDA实现则是调用pytorch自己实现的scan_with_indices函数。
-核心代码为：
+核心代码为如下
 [CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L769):
 
 ```cpp
@@ -76,15 +74,15 @@ void cummax_cummin_helper(const T1* self_data, T1* values_data, T2* indices_data
       }
 }
 
-void cummax_helper_cpu(const Tensor& self, Tensor& values, Tensor& indices, int64_t dim) {
+void cummin_helper_cpu(const Tensor& self, Tensor& values, Tensor& indices, int64_t dim) {
   AT_DISPATCH_ALL_TYPES_AND2(kBool, kBFloat16,
-    self.scalar_type(), "cummax_cpu",
+    self.scalar_type(), "cummin_cpu",
     [&] {
-      at::native::tensor_dim_apply3<scalar_t, int64_t>(self, values, indices, dim, cummax_cummin_helper<scalar_t, int64_t, std::greater_equal<scalar_t>>);
+      at::native::tensor_dim_apply3<scalar_t, int64_t>(self, values, indices, dim, cummax_cummin_helper<scalar_t, int64_t, std::less_equal<scalar_t>>);
     });
 }
 
-std::tuple<Tensor&, Tensor&> cummax_out(const Tensor& self, int64_t dim, Tensor& values, Tensor& indices) {
+std::tuple<Tensor&, Tensor&> cummin_out(const Tensor& self, int64_t dim, Tensor& values, Tensor& indices) {
   check_scalar_type_device_layout_equal(values, self);
   check_scalar_type_device_layout_equal(indices, at::empty({0}, self.options().dtype(at::kLong)));
   {
@@ -96,7 +94,7 @@ std::tuple<Tensor&, Tensor&> cummax_out(const Tensor& self, int64_t dim, Tensor&
       indices.fill_(0);
     } else if(self.numel() != 0) {
       dim = maybe_wrap_dim(dim, self.dim());
-      at::_cummax_helper(self, values, indices, dim);
+      at::_cummin_helper(self, values, indices, dim);
     }
   }
   namedinference::propagate_names(values, self);
@@ -104,17 +102,17 @@ std::tuple<Tensor&, Tensor&> cummax_out(const Tensor& self, int64_t dim, Tensor&
   return std::forward_as_tuple(values, indices);
 }
 
-std::tuple<Tensor, Tensor> cummax(const Tensor& self, int64_t dim) {
+std::tuple<Tensor, Tensor> cummin(const Tensor& self, int64_t dim) {
   auto values = at::empty(self.sizes(), self.options());
   auto indices = at::empty(self.sizes(), self.options().dtype(at::kLong));
-  at::cummax_out(values, indices, self, dim);
+  at::cummin_out(values, indices, self, dim);
   return std::make_tuple(values, indices);
 }
 ```
-[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L28):
+[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L45):
 
 ```cpp
-void cummax_helper_cuda(const Tensor& self, Tensor& values, Tensor& indices, int64_t dim) {
+void cummin_helper_cuda(const Tensor& self, Tensor& values, Tensor& indices, int64_t dim) {
   TensorArg output_arg{ values, "output", 1 };
   TensorArg indices_arg{ indices, "indices", 2 };
   TensorArg input_arg{ self, "input", 3 };
@@ -122,7 +120,7 @@ void cummax_helper_cuda(const Tensor& self, Tensor& values, Tensor& indices, int
 
   auto values_ = contiguous_out_arg(values);
   auto indices_ = contiguous_out_arg(indices);
-  launch_cummax_cuda_kernel(self, *values_, *indices_, dim);
+  launch_cummin_cuda_kernel(self, *values_, *indices_, dim);
   if (!values.is_same(*values_)) {
     values.copy_(*values_);
   }
@@ -132,15 +130,14 @@ void cummax_helper_cuda(const Tensor& self, Tensor& values, Tensor& indices, int
 }
 ```
 ```cpp
-void launch_cummax_cuda_kernel(const TensorBase& self, const TensorBase& values, const TensorBase& indices, int64_t dim) {
+void launch_cummin_cuda_kernel(const TensorBase& self, const TensorBase& values, const TensorBase& indices, int64_t dim) {
   AT_DISPATCH_ALL_TYPES_AND3(at::ScalarType::Bool, at::ScalarType::Half, at::ScalarType::BFloat16,
-    self.scalar_type(), "cummax_cuda", [&]() {
-    scalar_t init = self.is_floating_point() ? (-1*std::numeric_limits<scalar_t>::infinity()) : std::numeric_limits<scalar_t>::lowest();
-    scan_dim_with_indices<scalar_t>(self, values, indices, dim, init, std::greater_equal<scalar_t>());
+    self.scalar_type(), "cummin_cuda", [&]() {
+    scalar_t init = self.is_floating_point() ? std::numeric_limits<scalar_t>::infinity() : std::numeric_limits<scalar_t>::max();
+    scan_dim_with_indices<scalar_t>(self, values, indices, dim, init, std::less_equal<scalar_t>());
   });
 }
 ```
-
 
 ~~~cpp
 template<typename scalar_t, typename BinaryFunction>
@@ -179,20 +176,20 @@ Tensor cummaxmin_backward(const Tensor& grad, const Tensor& input, const Tensor&
 
 ## NumPy
 
-NumPy 具有相似功能的 API 是 `numpy.maximum.accumulate()`，文档参见 [numpy.ufunc.accumulate — NumPy v1.22 Manual](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.accumulate.html)。
+NumPy 具有相似功能的 API 是 `numpy.minimum.accumulate()`，文档参见 [numpy.ufunc.accumulate — NumPy v1.22 Manual](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.accumulate.html)。
 
-NumPy 的策略是提供一种更具兼容性的实现方式，组合实现该功能（尽管其单独提供了 `cumsum` 和 `cumprod`，但没有单独提供 `cummax`），有别于 PyTorch 分别 native 实现 `cumprod`、`cumsum` 以及 `cummax`。
+NumPy 的策略是提供一种更具兼容性的实现方式，组合实现该功能（尽管其单独提供了 `cumsum` 和 `cumprod`，但没有单独提供 `cummin`），有别于 PyTorch 分别 native 实现 `cumprod`、`cumsum` 以及 `cummin`。
 
 ## Pandas
 
-Pandas 也提供了该 API [pandas.DataFrame.cummax](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.cummax.html#pandas-dataframe-cummax)。
+Pandas 也提供了该 API [pandas.DataFrame.cummin](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.cummin.html)。
 
 介绍为：
 
 ```
-Return cumulative maximum over a DataFrame or Series axis.
+Return cumulative minimum over a DataFrame or Series axis.
 
-Returns a DataFrame or Series of the same size containing the cumulative maximum.
+Returns a DataFrame or Series of the same size containing the cumulative minimum.
 
 Parameters
 axis{0 or ‘index’, 1 or ‘columns’}, default 0
@@ -206,7 +203,7 @@ Additional keywords have no effect but might be accepted for compatibility with 
 
 Returns
 Series or DataFrame
-Return cumulative maximum of Series or DataFrame.
+Return cumulative minimum of Series or DataFrame.
 ```
 值得注意的是，Pandas 提供了更多的附加选项，即对 NaN 值的处理方式。
 并且 Pandas 支持 DataFrame 的操作。
@@ -261,44 +258,44 @@ Return cumulative maximum of Series or DataFrame.
 
 比较分析：不同框架在基于 CPU 的方案上思路较为一致。其中 PyTorch 对于矩阵的操作是基于 stride 和指针完成的；Pandas 基于 Numpy 提供的矩阵操作能力，所以以索引方式操作；NumPy 没有原生实现该功能。
 PyTorch 还提供了基于 CUDA 的算子实现。
-评价：Pandas 的矩阵操作实际由 Numpy 支撑，在该运算实现效率上应不如 PyTorch 实现的；在功能上，Pandas 支持了可选的 NaN 值处理选项，有一定灵活性；NumPy 没有提供原生的 `cummax` 实现，而是基于组合的方式。
-就基于已有的方法组合实现这一途径，经过调研，PaddlePaddle 和 PyTorch 都已原生实现 `cumsum` 和 `cumprod`，为 `cummax` 提供原生实现，应能够提供更好的性能。
+评价：Pandas 的矩阵操作实际由 Numpy 支撑，在该运算实现效率上应不如 PyTorch 实现的；在功能上，Pandas 支持了可选的 NaN 值处理选项，有一定灵活性；NumPy 没有提供原生的 `cummin` 实现，而是基于组合的方式。
+就基于已有的方法组合实现这一途径，经过调研，PaddlePaddle 和 PyTorch 都已原生实现 `cumsum` 和 `cumprod`，为 `cummin` 提供原生实现，应能够提供更好的性能。
 
 # 五、方案设计
 
 ## 命名与参数设计
 
-API设计为`paddle.cummax(x, axis, dtype, name)`以及`paddle.Tensor.cummax(axis, dtype, name)`。
+API设计为`paddle.cummin(x, axis, dtype, name)`以及`paddle.Tensor.cummin(axis, dtype, name)`。
 
-paddle.cummax
+paddle.cummin
 ----------------------
 参数
 :::::::::
-- x (Tensor) - 累积最大值的输入，需要进行累积最大值操作的 Tensor。
-- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累积最大值计算。
+- x (Tensor) - 累积最小值的输入，需要进行累积最小值操作的 Tensor。
+- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累积最小值计算。
 - dtype (str，可选) - 指定输出索引的数据类型，可以为int32和int64，默认：int64。
-- name  (str，可选) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
+- name (str，可选) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 返回
 :::::::::
-- Out (tuple) - 返回累积最大值结果和对应的索引信息。累积最大值结果的数据类型和输入`x`一致。
+- Out (tuple) - 返回累积最小值结果和对应的索引信息。累积最小值结果的数据类型和输入`x`一致。
 
-paddle.Tensor.cummax指向paddle.cummax，两者是相同的API
+paddle.Tensor.cummin指向paddle.cummin，两者是相同的API
 
 ## 底层OP设计
 
 cpu：
-前向计算，需要计算cummax结果Out和对应的Indices，没有在paddle内部找到可以直接计算Indices的API可供调用，因此需要实现一个能够同时计算cummax和Indices的函数ScanWithIndicesKernel
+前向计算，需要计算cummin结果Out和对应的Indices，没有在paddle内部找到可以直接计算Indices的API可供调用，因此需要实现一个能够同时计算cmmin和Indices的函数ScanWithIndicesKernel
 后向计算，调用cpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
 
 gpu：
-前向计算，大体过程与cumsum类似，但是在计算部分需要实现一个能够同时计算cummax和Indices的函数ScanWithIndicesKernel
+前向计算，大体过程与cumsum类似，但是在计算部分需要实现一个能够同时计算cummin和Indices的函数ScanWithIndicesKernel
 后向计算，调用gpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
 
 前向函数定义
 
 ~~~cpp
 template <typename T, typename Context>
-void CummaxKernel(const Context& dev_ctx,
+void CumminKernel(const Context& dev_ctx,
                   const DenseTensor& x,
                   const Scalar& axis,
                   DataType dtype,
@@ -311,7 +308,7 @@ void CummaxKernel(const Context& dev_ctx,
 
 ~~~cpp
 template <typename T, typename Context>
-void CummaxGradKernel(const Context& dev_ctx,
+void CumminGradKernel(const Context& dev_ctx,
                       const DenseTensor& x,
                       const DenseTensor& indices,
                       const DenseTensor& out_grad,

@@ -1301,6 +1301,23 @@
 - **技术要求：**
   - 熟练掌握Paddle自定义算子开发
 
+### No.250：AutoShape: Real-Time Shape-Aware Monocular 3D Object Detection <a name='task250'></a>
+
+- **技术标签：Python、深度学习**
+- **任务难度：进阶**️⭐️⭐️
+- **详细描述：**
+  - 只需要复现检测部分的代码（auto-labeling部分模型不需要复现）
+  - 使用作者提供的关键点标签，在 KITTI 数据集 train set 进行训练，在 val set 上 Car 类别 3D AP (IoU > 70%) 指标对齐论文 Figure 8
+  - 模型中使用的 DCNv2 可以从 PaddleDetection 复用，iou3d 可以从 Paddle3D 复用
+  - 完成复现后合入Paddle3D
+  - 参考repo https://github.com/zongdai/AutoShape
+- **提交内容：**
+  - 代码、模型、训练日志，合入Paddle3D套件
+- **技术要求：**
+  - 熟练掌握Python、PaddlePaddle和单目3D目标检测算法
+  - 参加模型复现的同学需先发送简历和想复现的文章（可多选）到paddle-lwfx <paddle-lwfx@baidu.com>报名，通过筛选后锁定题目，在Paddle导师的指导下完成复现。
+
+
 ### No.177：将PP-YOLOE-R在**算能BM1684**部署。利用FastDeploy，将PP-YOLOE-R在**算能BM1684X**部署 <a name='task177'></a>
 
 - **技术标签：** 深度学习，C++、Python
@@ -1894,6 +1911,21 @@
   * 熟练掌握C++开发
   * 熟练使用Paddle Lite iOS完成AI模型部署。
 
+### No.248：完成海光MIGraph接入FastDeploy，并使用Stable Diffusion 进行部署验证  <a name='task248'></a>
+* 技术标签：海光MIGraphX，C++
+* 任务难度：进阶⭐️⭐️
+* 详细描述:
+  * 需要完成海光AI推理引擎MIGraph接入Fastdeploy工作，并完成文生图模型Stable Diffusion的部署，测试模型运行正确。
+  * 后端接入建议：可通过ONNX接入AI硬件工具链，具体操作路径可参考fastdeploy/runtime/backends/tensorrt中接入的代码。
+* 提交内容：
+  * pr：提交适配代码，及对应的中英文文档。
+  * pr：交Stable Diffusion在海光MIGraph上的部署示例。
+  * 将验证通过的SD模型，按照海光model zoo标准，提交到github model zoo仓库。
+  * 邮件：提交benchmark测试数据及精度对齐数据。
+* 技术要求：
+  * 熟练掌握C++开发
+  * 熟练使用MIGraph推理工具链进行AI模型部署。
+	
 ～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～
 
 ### 合入标准
