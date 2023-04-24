@@ -200,6 +200,19 @@ Parameters:
   } // namespace at::native
   ```
 
+- copysign op 的反向逻辑代码位于 pytorch/torch/csrc/autograd/FunctionsManual.cpp 中的函数[copysign_tensor_self_backward](https://github.com/pytorch/pytorch/blob/72daadef2c063d160605e1fb7d84eeeccd55510f/torch/csrc/autograd/FunctionsManual.cpp#L94)
+
+  ```C++
+  Tensor copysign_tensor_self_backward(
+      const Tensor& grad,
+      const Tensor& self,
+      const Tensor& result) {
+    auto ratio = result / self;
+    ratio.masked_fill_(self == 0, 0);
+    return grad * ratio;
+  }
+  ```
+
 **Numpy** 中的 copysign API 是通过 C++ 代码实现的，详细代码如下所示：
 
 ```C++
@@ -235,20 +248,30 @@ TensorFlow 中没有 copysign API 的实现方式。
 
 API 设计为`paddle.copysign(x, y, name=None)`和`paddle.Tensor.copysign(x, y, name=None)`
 
-- x(Tensor):预计支持 unit8、int、float、bool 等 Tensor 数据类型。
-- y(Tensor or ndarray)：预计支持 unit8、int、float、bool 等 ndraray/Tensor 数据类型。
+- x(Tensor):预计支持 uint8、int、float、bool 等 Tensor 数据类型。
+- y(Tensor or Number)：预计支持 uint8、int、float、bool 等 Tensor/Number 数据类型。
 
 ## 底层 OP 设计
 
-目前两种策略：
+前向逻辑目前两种策略：
 
 - 参考 torch 基于 C++ <cmath> 库中的 `copysign` 函数，直接实现。
 - 自己实现 `copysign` 底层逻辑。
 
+反向逻辑实现(参考 torch 中对应的实现)：
+
+- 当输入 `x` 为 `0`时，反向梯度都为 `0`。
+- 当输入 `x` 不为 `0`，通过计算结果 `out` 除以 `x` 得到的比值，并乘 `x` 的梯度。
+
 ## API 实现方案
 
-- 首先判断输入 `x` 和 `y` 的数据类型，判断输入 `x` 是否为张量对应类型：uint8, float16、float32、float64、int32、int64、bool，输入参数 `y` 是否为 Number 或者张量对应类型：uint8, float16、float32、float64、int32、int64、bool。
-- 参考 pytorch 的实现是调用 C++ <cmath> 库中的 copysign 函数。
+参考 pytorch 的实现是调用 C++ <cmath> 库中的 copysign 函数：
+
+- 首先，实现 copysign 的 InferMeta 函数，位于 paddle/phi/infermeta/binary.h 中，通过输入 `x`， 推断输出 `out` 的 `shape` 和 `dtype`；
+- 然后，配置 Yaml 文件；
+- 分别在 CPU 和 GPU 以及其他设备下实现 copysign kernel 的前向、反向逻辑；
+- 封装成 python API，判断输入数据类型，实现动态图、静态图的分支；
+- 最后补充单测。
 
 # 六、测试和验收的考量
 
