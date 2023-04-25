@@ -57,6 +57,8 @@
 * 引入`Bazel`(目前支持不是很好, 没有支持的ide, 暂时不考虑)
 * 引入`FindXXX`通过查找或指定预编译 lib 来跳过编译一些第三方库编译. 示例:[Findpybind11.cmake](https://github.com/pytorch/pytorch/blob/main/cmake/Modules/Findpybind11.cmake)
 
+如果引入了`FindXXX`需要在[贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)或[安装指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/install/index_cn.html)中专门说明如何配置, 不建议在附录中追加.
+
 ## 2、关键技术点/子模块设计与实现方案
 
 ### 需要迁移的第三方库
@@ -93,6 +95,8 @@ def check_submodules():
                 "Please run 'git submodule update --init --recursive' to make sure you have all the submodules installed."
             )
 ```
+
+* 在文档中补充说明
 
 ### 正式迁移
 
