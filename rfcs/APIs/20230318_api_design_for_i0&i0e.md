@@ -1,12 +1,11 @@
 # paddle.i0 和 paddle.i0e 设计文档
-
-| API 名称      |         paddle.i0 / paddle.i0e           |
-| ------------ | ---------------------------------------- |
-| 提交作者    | PommesPeter                               |
-| 提交时间    | 2023-03-18                                |
-| 版本号      | V1.0                                      |
-| 依赖飞桨版本 | develop                                   |
-| 文件名      | 20230318_api_design_for_i0&i0e.md      |
+| API 名称     | paddle.i0 / paddle.i0e            |
+| ------------ | --------------------------------- |
+| 提交作者     | PommesPeter                       |
+| 提交时间     | 2023-04-26                        |
+| 版本号       | V1.2                              |
+| 依赖飞桨版本 | develop                           |
+| 文件名       | 20230318_api_design_for_i0&i0e.md |
 
 # 一、概述
 
@@ -16,7 +15,7 @@
 
 ## 2、功能目标
 
-根据输入的 tensor，计算其每个元素的第一类零阶修正贝塞尔函数（对应 api：`paddle.i0`）和第一类指数缩放的零阶修正贝塞尔函数（对应api：`paddle.i0e`）。
+根据输入的 tensor，计算其每个元素的第一类零阶修正贝塞尔函数（对应 api：`paddle.i0`）和第一类指数缩放的零阶修正贝塞尔函数（对应 api：`paddle.i0e`）。
 
 ## 3、意义
 
@@ -30,17 +29,19 @@
 
 ## PyTorch
 
-PyTorch 中有 `torch.special.i0` 的API，详细参数为 `torch.special.i0(input, *, out=None) → Tensor`。
-PyTorch 中有 `torch.special.i0e` 的API，详细参数为 `torch.special.i0e(input, *, out=None) → Tensor`。
+PyTorch 中有 `torch.special.i0` 的 API，详细参数为 `torch.special.i0(input, *, out=None) → Tensor`。
+PyTorch 中有 `torch.special.i0e` 的 API，详细参数为 `torch.special.i0e(input, *, out=None) → Tensor`。
 
 ### i0
 
 > Computes the zeroth order modified Bessel function of the first kind for each element of `input`.
+
 在实现方法上，PyTorch 是通过 C++ API 组合实现的
 
 实现代码：
 
 [代码位置](https://github.com/pytorch/pytorch/blob/HEAD/torch/csrc/api/include/torch/special.h#L456-L471)
+
 
 ```cpp
 /// Computes the zeroth order modified Bessel function of the first kind of
@@ -135,6 +136,7 @@ if (x <= T{8.0}) {
     return chbevl(y, coefficients, int{30});
 }
 ```
+
 参数表：
 
 - input (Tensor) – the input tensor
@@ -144,7 +146,7 @@ if (x <= T{8.0}) {
 
 > Modified Bessel function of order 0.
 > Defined as,
-> $$I_0(x)=\sum^{\infin}_{k}=0\frac{(x^2/4)^k}{(k!)^2}=J_0(ix)$$
+> $$I_0(x)=\sum^{\infty}_{k}=0\frac{(x^2/4)^k}{(k!)^2}=J_0(ix)$$
 > where $J_0$ is the Bessel function of the first kind of order 0.
 
 在实现方法上，Scipy 是通过 C 代码实现，参考了数据函数库 Cephes 的写法。
@@ -228,7 +230,7 @@ double x;
 
     if (x < 0)
         x = -x;
-    if (x <= 8.0) 
+    if (x <= 8.0)
     {
         y = (x / 2.0) - 2.0;
         return (exp(x) * chbevl(y, A, 30));
@@ -298,7 +300,6 @@ def _BesselI0eGrad(op, grad):
 
 ## 命名与参数设计
 
-
 添加 Python API
 
 ```python
@@ -323,7 +324,7 @@ paddle.i0e(
 
 观察公式：
 
-$$out_i=I_0(x)=\sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}{(k!)^2}$$
+$$out_i=I_0(x)=\sum_{k=0}^{\infty}\frac{(x_i^2/4)^k}{(k!)^2}$$
 
 对于 i0，基于实现的 i0e 乘以缩放系数即可。公式为：
 
@@ -342,7 +343,7 @@ $$out_i=I_0(x)=\sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}{(k!)^2}$$
 
 对于 i0e，基于实现的 i0 乘以缩放系数即可。公式为：
 
-$$out_i=\exp(-|x|) * I_0(x_i)=\exp(-|x|) * \sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}{(k!)^2}$$
+$$out_i=\exp(-|x|) * I_0(x_i)=\exp(-|x|) * \sum_{k=0}^{\infty}\frac{(x_i^2/4)^k}{(k!)^2}$$
 
 将定义域分为 $[0, 8]$ 和 $[8, \infty]$ 两个区间，在每个区间内部分别通过 Chebyshev 多项式展开计算系数，故提前计算切比雪夫多项式展开系数并代入公式即可。
 
@@ -361,12 +362,11 @@ $$out_i=\exp(-|x|) * I_0(x_i)=\exp(-|x|) * \sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}
 
 参考 Scipy 进行实现，该 API 实现于 `python/paddle/tensor/math.py` 和 `paddle/phi/kernels`。
 
-
 # 六、测试和验收的考量
 
 测试需要考虑的 case 如下：
 
-- 输出数值结果的一致性和数据类型是否正确，使用 numpy 作为参考标准
+- 输出数值结果的一致性和数据类型是否正确，使用 scipy 作为参考标准
 - 对不同 dtype 的输入数据 `x` 进行计算精度检验 (float32, float64)
 - 对不同范围内的输入数据进行计算精度检验 ($[0, 8]$, $[8, \infty]$)
 - 输入输出的容错性与错误提示信息
