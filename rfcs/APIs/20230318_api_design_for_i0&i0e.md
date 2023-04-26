@@ -16,7 +16,7 @@
 
 ## 2、功能目标
 
-根据输入的 tensor，计算其每个元素的第一类零阶修正贝塞尔函数（对应api：`paddle.i0`）和第一类指数缩放的零阶修正贝塞尔函数（对应api：`paddle.i0e`）。
+根据输入的 tensor，计算其每个元素的第一类零阶修正贝塞尔函数（对应 api：`paddle.i0`）和第一类指数缩放的零阶修正贝塞尔函数（对应api：`paddle.i0e`）。
 
 ## 3、意义
 
@@ -250,6 +250,37 @@ double x;
 }
 ```
 
+## TensorFlow
+
+### i0
+
+TensorFlow 中已有 `i0` 算子的反向传播实现，可作为参考。
+
+```python
+@ops.RegisterGradient("BesselI0")
+def _BesselI0Grad(op, grad):
+  """Compute gradient of bessel_i0(x) with respect to its argument."""
+  x = op.inputs[0]
+  with ops.control_dependencies([grad]):
+    partial_x = special_math_ops.bessel_i1(x)
+    return grad * partial_x
+```
+
+### i0e
+
+TensorFlow 中已有 `i0e` 算子的反向传播实现，可作为参考。
+
+```python
+@ops.RegisterGradient("BesselI0e")
+def _BesselI0eGrad(op, grad):
+  """Compute gradient of bessel_i0e(x) with respect to its argument."""
+  x = op.inputs[0]
+  y = op.outputs[0]
+  with ops.control_dependencies([grad]):
+    partial_x = (special_math_ops.bessel_i1e(x) - math_ops.sign(x) * y)
+    return grad * partial_x
+```
+
 # 四、对比分析
 
 ## 共同点
@@ -287,13 +318,25 @@ paddle.i0e(
 ## 底层OP设计
 
 ### i0
+
 参考 Scipy 的 i0 和 i0e 进行实现，实现位置为 Paddle repo 的 `paddle/phi/kernels`。可参考 Cephes 数学函数库的实现方式。
 
 观察公式：
 
 $$out_i=I_0(x)=\sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}{(k!)^2}$$
 
-可以发现右侧可以使用切比雪夫级数进行计算，故提前计算切比雪夫级数并代入公式即可。
+对于 i0，基于实现的 i0e 乘以缩放系数即可。公式为：
+
+参考 Scipy 的 `i0` 函数进行实现，需要调用 `i0e` 算子，实现位置为 Paddle repo 的 `paddle/phi/kernels`。前向传播计算过程为：
+
+1. 对输入计算绝对值 `y = abs(x)`
+2. 对 `y` 计算自然指数 `y' = exp(y)`
+3. 调用 `i0e` 得到结果 `out = y' * i0e(y)`
+
+对 `i0(x)` 函数求偏导为 `i1(x)`, 故反向传播计算过程为：
+
+1. 调用 `i1` 计算 `i0` 的偏导数 `partial_x`
+2. 计算 `grad * partial_x`
 
 ### i0e
 
@@ -301,6 +344,18 @@ $$out_i=I_0(x)=\sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}{(k!)^2}$$
 
 $$out_i=\exp(-|x|) * I_0(x_i)=\exp(-|x|) * \sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}{(k!)^2}$$
 
+将定义域分为 $[0, 8]$ 和 $[8, \infty]$ 两个区间，在每个区间内部分别通过 Chebyshev 多项式展开计算系数，故提前计算切比雪夫多项式展开系数并代入公式即可。
+
+参考 Scipy 的 `i0e` 函数进行实现，实现位置为 Paddle repo 的 `paddle/phi/kernels`。前向传播计算过程为：
+
+1. 对输入计算绝对值 `y = abs(x)`
+2. 如果输入的数值小于 8，则使用 $[0, 8]$ 区间上的 Chebyshev 多项式系数计算 `chbevl((y / 2.0) - 2.0, A)`
+3. 如果输入的数值大于 8，则使用 $[8, \infty]$ 区间上的 Chebyshev 多项式系数计算 `chbevl((32.0 / y) - 2.0, B) / sqrt(y)`
+
+对 `i0e(x)` 函数求偏导为 `i1(x) - sign(x) * y`, 故反向传播计算过程为：
+
+1. 调用 `i1` 计算 `i0` 的偏导数 `partial_x`
+2. 计算 `grad * partial_x`
 
 ## API实现方案
 
@@ -311,11 +366,13 @@ $$out_i=\exp(-|x|) * I_0(x_i)=\exp(-|x|) * \sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}
 
 测试需要考虑的 case 如下：
 
-- 输出数值结果的一致性和数据类型是否正确，使用 scipy 作为参考标准
-- 参数 `x` 的数据类型准确性判断
+- 输出数值结果的一致性和数据类型是否正确，使用 numpy 作为参考标准
+- 对不同 dtype 的输入数据 `x` 进行计算精度检验 (float32, float64)
+- 对不同范围内的输入数据进行计算精度检验 ($[0, 8]$, $[8, \infty]$)
 - 输入输出的容错性与错误提示信息
-- 输出Dtype错误或不兼容时抛出异常
+- 输出 Dtype 错误或不兼容时抛出异常
 - 保证调用属性时是可以被正常找到的
+- 覆盖静态图和动态图测试场景
 
 # 七、可行性分析和排期规划
 
@@ -338,4 +395,6 @@ $$out_i=\exp(-|x|) * I_0(x_i)=\exp(-|x|) * \sum_{k=0}^{\infin}\frac{(x_i^2/4)^k}
 
 [scipy.special.i0e](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.i0e.html#scipy.special.i0e)
 
-[paddle.complex](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/creation.py#L2160-L2209)
+[TensorFlow API 文档](https://www.tensorflow.org/api_docs/python/tf/math/bessel_i1)
+
+[Rational Approximations for the Modified Bessel Function of the First Kind – I1(x) for Computations with Double Precision](https://www.bing.com/search?q=%22Rational+Approximations+for+the+Modified+Bessel+Function+of+the+First+Kind+%0D%0A%23+++++-+I1%28x%29+for+Computations+with+Double+Precision%22+by+Pavel+Holoborodko&qs=n&form=QBRE&sp=-1&lq=1&pq=%22rational+approximations+for+the+modified+bessel+function+of+the+first+kind+%23+-+i1%28x%29+for+computations+with+double+precision%22+by+pavel+holoborodko&sc=0-146&sk=&cvid=2507FDB609B24E39BEA10DE5D3482BD8&ghsh=0&ghacc=0&ghpl=)
