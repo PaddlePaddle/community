@@ -8,7 +8,7 @@ Paddle目前使用的代码风格检查工具及hooks版本较低，导致开发
 内部已经完成了precommit, pylint, remove-ctrlf,cpplint,cmake-format,yapf,cmakelint,cmake-format 8大检查工具的升级，还剩下两大检查工具clang-tidy和flake8还未引入，期待社区开发者主导完成。
 
 ## clang-tidy调研情况
-【新增】clang-tidy：13.0.0 （总错误数：40288，需修改文件数：3055，见[详细列表](https://shimo.im/file/RKAWM7b2BwsQGJq8)）
+【新增】clang-tidy：13.0.0 （总错误数：40288，需修改文件数：3055，见[详细列表](https://shimo.im/sheets/RKAWM7b2BwsQGJq8/vLv2M)）
 * 原因：和clang-format保持一致。
 * 收益：使得C++代码更加规范、更加现代化
 * 风险：
