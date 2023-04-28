@@ -76,7 +76,7 @@ C++ API文档能够在一定程度上自动更新，但由于其中包含大量�
 abs
 -------------------------------
 
-.. cpp:function:: PADDLE_API Tensor abs(const Tensor& x)
+.. cpp:function:: Tensor paddle::experimental::abs(const Tensor& x)
 
 绝对值函数。
 
