@@ -76,7 +76,7 @@ C++ API 与 Python API 有两种对齐方案，其一是通过文件记录映射
 
 C++ API文档能够在一定程度上自动更新，但由于其中包含大量不可更新元素，故 C++ API文档以类似于Paddle Python中文文档的形式，存放在Docs目录下。
 
-以`PADDLE_API Tensor abs(const Tensor& x);`为例，其中文文档内容应为：
+`PADDLE_API Tensor abs(const Tensor& x);`是一个类 Python 的 C++ API，故展示页面不仅要展示C++的信息，还要展示对应的 Python API 信息。以abs为例，其中文文档内容应为：
 
 ```python
 .. _cn_api_fluid_layers_abs:
@@ -84,23 +84,31 @@ C++ API文档能够在一定程度上自动更新，但由于其中包含大量�
 abs
 -------------------------------
 
-.. cpp:function:: PADDLE_API Tensor abs(const Tensor& x)
+.. cpp:function:: PADDLE_API Tensor paddle::experimental::abs(const Tensor& x)
 
 绝对值函数。
 
 .. math::
     out = |x|
 
+对应的Python API
+:::::::::::::::::::::
+[paddle.abs(x, name=None)](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/abs_cn.html)
+
+定义目录
+:::::::::::::::::::::
+paddle\phi\api\include\api.h
+
 参数
-:::::::::
+:::::::::::::::::::::
     - **x** (Tensor) - 输入的 Tensor。
 
 返回
-:::::::::
+:::::::::::::::::::::
 输出 Tensor，与 ``x`` 维度相同。
 
 代码示例
-:::::::::
+:::::::::::::::::::::
 
 #include "paddle/extension.h"
 
