@@ -68,9 +68,7 @@ C++ API抽取可以通过Python脚本解析`site-packages/paddle/include/paddle`
 
 ## 3、 C++ API 与 Python API 对齐
 
-C++ API 与 Python API 有两种对齐方案，其一是通过文件记录映射表，将C++ API名称映射到指定的Python API上；其二，根据C++ API文件名直接匹配对应的Python API。
-
-本次优先使用后者，对于特殊的API，使用第一种方案进行铆定。
+仅类Python 的 C++ API 需要与 Python API 信息对齐。对于这部分API，首先根据C++ API文件名直接匹配对应的Python API，再对这部分信息进行核验，生成文档映射表。
 
 ## 4、 C++ API文档
 
