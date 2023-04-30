@@ -18,9 +18,11 @@
 
 ## 2、功能目标
 
-在[飞桨API文档页面](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/index_cn.html)引入新的章节`PADDLE_API`，用于展示飞桨当前的类 Python 的 C++运算 API。
+在[飞桨API文档页面](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/index_cn.html)引入新的章节`PADDLE_API`，用于展示飞桨当前暴露给用户的C++ 接口。
 
-展示内容应与Python API文档对其，包括：API名称、对应的Python API名称、API介绍、参数、返回值、示例代码。
+展示的内容为全部被`PADDLE_API`修饰的成员，包括但不仅包括API、Class、宏定义。
+
+不失一般的，对于所有的展示的内容，应包含namespace、定义、 接口注释等。特别的，对于不同的被`PADDLE_API`修饰的成员，需要展示不同的信息。以class为例，不仅需要展示类定义，还需要展示对应的成员函数（如果有）、成员变量（如果有）；对于类Python 的 API，展示内容应与Python API文档对其，包括对应的Python API名称、API介绍、参数、返回值、示例代码。
 
 ## 3、意义
 
