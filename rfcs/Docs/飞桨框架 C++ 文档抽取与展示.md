@@ -70,9 +70,42 @@ C++ API抽取可以通过Python脚本解析`site-packages/paddle/include/paddle`
 
 仅类Python 的 C++ API 需要与 Python API 信息对齐。对于这部分API，首先根据C++ API文件名直接匹配对应的Python API，再对这部分信息进行核验，生成文档映射表。
 
-## 4、 C++ API文档
+## 4、 OverView 页面
+Overview 页面风格应与 [Python 的 Overview](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/index_cn.html)保持一致。
 
-C++ API文档能够在一定程度上自动更新，但由于其中包含大量不可更新元素，故 C++ API文档以类似于Paddle Python中文文档的形式，存放在Docs目录下。
+一个简易的示例页面如下：
+
+```python
+# C++ 文档
+欢迎使用飞桨框架（PaddlePaddle），PaddlePaddle 是一个易用、高效、灵活、可扩展的深度学习框架，致力于让深度学习技术的创新与应用更简单。
+
+在本版本中，飞桨框架对 C++ 接口做了许多优化，您可以参考下表来了解飞桨框架最新版的 C++ 目录结构与说明。更详细的说明，请参见 版本说明 。此外，您可参考 PaddlePaddle 的 GitHub 了解详情。
+
+## namespace1
+namespace1的介绍
+
+### class
+- class name 1
+- class name 2
+### API 
+- API name 1
+- API name 2
+
+## namespace2
+namespace2的介绍
+
+### class
+- class name 1
+- class name 2
+### API 
+- API name 1
+- API name 2
+
+```
+
+## 5、 C++ 文档
+
+C++ 文档能够在一定程度上自动更新，但由于其中包含大量不可更新元素，故 C++ 文档以类似于Paddle Python中文文档的形式，存放在Docs目录下。
 
 `PADDLE_API Tensor abs(const Tensor& x);`是一个类 Python 的 C++ API，故展示页面不仅要展示C++的信息，还要展示对应的 Python API 信息。以abs为例，其中文文档内容应为：
 
@@ -146,7 +179,7 @@ COPY-FROM: paddle.abs
 
 ```
 
-## 5、 更新与维护
+## 6、 更新与维护
 
 每日更新时，拉取最新paddle源码，并编译对应的whl包，用于自动提取PADDLE_API。对于不同的提取结果，采用不同的策略：
 - 对于已有但是没有抽取到的信息，可以被视为退场，docs目录下虽然保存对应的rst文件，但不在官网页面展示
