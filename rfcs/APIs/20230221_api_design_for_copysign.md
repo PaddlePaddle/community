@@ -200,18 +200,34 @@ Parameters:
   } // namespace at::native
   ```
 
-- copysign op 的反向逻辑代码位于 pytorch/torch/csrc/autograd/FunctionsManual.cpp 中的函数[copysign_tensor_self_backward](https://github.com/pytorch/pytorch/blob/72daadef2c063d160605e1fb7d84eeeccd55510f/torch/csrc/autograd/FunctionsManual.cpp#L94)
+- copysign op 的反向逻辑代码：
+  当参数 `y` 为 `Tensor` 或 `Number` 类型时，copysign 的反向逻辑代码分别位于 pytorch/pytorch/blob/main/tools/autograd/derivatives.yaml 的 yaml 文件自动生成：
+
+  ```yaml
+  - name: copysign.Tensor(Tensor self, Tensor other) -> Tensor
+    self: copysign_tensor_self_backward(grad, self, result)
+    other: zeros_like(other)
+    result: copysign_tensor_self_backward(self_t, self_p, result)
+
+  - name: copysign.Scalar(Tensor self, Scalar other) -> Tensor
+    self: copysign_tensor_self_backward(grad, self, result)
+    result: auto_element_wise
+  ```
+
+  其中：当 `y` 为 `Tensor` 时，反向逻辑的具体实现代码位于 pytorch/torch/csrc/autograd/FunctionsManual.cpp 中的函数[copysign_tensor_self_backward](https://github.com/pytorch/pytorch/blob/72daadef2c063d160605e1fb7d84eeeccd55510f/torch/csrc/autograd/FunctionsManual.cpp#L94)
 
   ```C++
-  Tensor copysign_tensor_self_backward(
-      const Tensor& grad,
-      const Tensor& self,
-      const Tensor& result) {
-    auto ratio = result / self;
-    ratio.masked_fill_(self == 0, 0);
-    return grad * ratio;
-  }
+    Tensor copysign_tensor_self_backward(
+        const Tensor& grad,
+        const Tensor& self,
+        const Tensor& result) {
+      auto ratio = result / self;
+      ratio.masked_fill_(self == 0, 0);
+      return grad * ratio;
+    }
   ```
+
+  当 `y` 为 `Number` 时，通过 `auto_element_wise` 函数返回结果。
 
 **Numpy** 中的 copysign API 是通过 C++ 代码实现的，详细代码如下所示：
 
@@ -261,7 +277,8 @@ API 设计为`paddle.copysign(x, y, name=None)`和`paddle.Tensor.copysign(x, y, 
 反向逻辑实现(参考 torch 中对应的实现)：
 
 - 当输入 `x` 为 `0`时，反向梯度都为 `0`。
-- 当输入 `x` 不为 `0`，通过计算结果 `out` 除以 `x` 得到的比值，并乘 `x` 的梯度。
+- 当输入 `x` 不为 `0`时，通过计算结果 `out` 除以 `x` 得到的比值，并乘 `x` 的梯度。
+- 当输入 `y` 为 `Tensor`时，
 
 ## API 实现方案
 
