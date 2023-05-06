@@ -278,7 +278,7 @@ API 设计为`paddle.copysign(x, y, name=None)`和`paddle.Tensor.copysign(x, y, 
 
 - 当输入 `x` 为 `0`时，反向梯度都为 `0`。
 - 当输入 `x` 不为 `0`时，通过计算结果 `out` 除以 `x` 得到的比值，并乘 `x` 的梯度。
-- 当输入 `y` 为 `Tensor`时，
+- 当输入 `y` 为 `Tensor`时，`y` 的梯度为 `0`。
 
 ## API 实现方案
 
