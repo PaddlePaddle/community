@@ -297,9 +297,8 @@ gpu：
 template <typename T, typename Context>
 void CumminKernel(const Context& dev_ctx,
                   const DenseTensor& x,
-                  const Scalar& axis,
-                  DataType dtype,
-                  bool flatten,
+                  int axis,
+                  int dtype,
                   DenseTensor* out,
                   DenseTensor* indices);
 ~~~
@@ -312,8 +311,8 @@ void CumminGradKernel(const Context& dev_ctx,
                       const DenseTensor& x,
                       const DenseTensor& indices,
                       const DenseTensor& out_grad,
-                      const Scalar& axis,
-                      bool flatten,
+                      int axis,
+                      int dtype,
                       DenseTensor* x_grad);
 ~~~
 
@@ -330,12 +329,11 @@ Python 接口实现位置为`paddle/tesnor/math.py`。
   - 不同 shape；
   - 前向计算和反向计算；
   - axis 维度：0，1，默认（None），-1等；
-  - dtype 类型：验证 `float64`，`int32`等；
-
-- 边界情况：对 NaN 等异常值的处理，参考 `paddle.cumsum` 的测试，这里选择与 NumPy 保持一致，即遇到 NaN 结果也为 NaN；
-  - 含有 NaN 的用例；
+  - 计算dtype类型：验证 `float64`，`int32`等；
+  - 索引dtype类型：验证指定索引数据类型是否正确，测试`int64`和`int32`
 
 - 不同计算设备：覆盖 CPU 和 GPU 等实现；
+- API调用和OP计算分别测试
 - 错误检查：输入参数类型、形状的有效性校验。
 
 # 七、可行性分析及规划排期
