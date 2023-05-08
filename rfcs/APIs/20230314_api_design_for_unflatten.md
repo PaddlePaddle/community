@@ -158,7 +158,7 @@ paddle.unflatten API 的设计主要参考 PyTorch 中的实现，PyTorch 中`un
 
 返回：在 axis 维度扩展成 shape 形状的 tensor
 
-`Tensor.unflatten(shape, axis, name=None)`
+`Tensor.unflatten(axis, shape, name=None)`
 
 参数说明如下：
 
