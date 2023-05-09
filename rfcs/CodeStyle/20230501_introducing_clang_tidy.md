@@ -26,7 +26,15 @@
 
 ## 二、飞桨现状
 
-Paddle 目前引入了`clang-format` `clang-lint`等工具用于 C++ 端的代码风格监控。c++ 端的静态分析工具还不够完善，因此可引入 `clang-tidy`。
+Paddle 目前引入了 `clang-format`，`cpplint` 等工具用于 C++ 端的代码风格监控。
+
+其中，`clang-format` 用于格式化代码，它可以根据用户提供的配置文件（`.clang-format` 或 `_clang-format`）将代码自动格式化成指定的风格，如 [LLVM](https://llvm.org/docs/CodingStandards.html) 风格、[Google](https://google.github.io/styleguide/cppguide.html) 风格等。
+
+`cpplint` 是由 Google 开发和维护的一个代码风格检查工具，用于检查 C/C++ 文件的风格问题，遵循 [Google 的 C++ 风格指南](http://google.github.io/styleguide/cppguide.html)。`cpplint` 可以检查代码中的格式错误、命名规范、注释、头文件和其他编程约定等问题。
+
+`clang-tidy` 是一个静态代码分析工具，可用于检查代码中的潜在问题，提升代码稳健性。`clang-tidy` 可以检查代码中的内存管理错误、类型不匹配错误、未定义行为等问题。`clang-tidy` 可以使用不同的检查器配置，每个配置可以启用或禁用一组相关的检查器。
+
+总的来说，`clang-format` 与 `cpplint` 用于提高代码可读性和风格的工具，而 `clang-tidy` 则是用于发现和修复潜在问题和错误的工具。在飞桨中引入 `clang-tidy`，并与 `clang-format` 和 `cpplint` 结合使用，可进一步提高代码质量与可维护性。
 
 ## 三、`clang-tidy` 相关调研
 
@@ -203,7 +211,7 @@ repos:
       rev: v1.3.5
       hooks:
           - id: clang-tidy
-            args: [--fix-errors, -p=build, -extra-arg=-Wno-unknown-warning-option]
+            args: [-p=build, -extra-arg=-Wno-unknown-warning-option]
 ```
 
 并添加 `.clang-tidy` 配置文件，内容如本文档第三节配置文件所示。并关闭所有检查项。
@@ -212,7 +220,7 @@ repos:
 
 - 根据 `clang-tidy` 检查项创建 `tracking issue`，邀请小伙伴一起欢乐开源；
 - 将 `clang-tidy` 检查项逐一打开，并逐步修复；
-- 部分代码可借助 `clang-tidy` 的自动修复功能修复，已在 `pre-commit` hook 中启用。
+- 部分代码可借助 `clang-tidy` 的自动修复功能修复，如 `clang-tidy -p=./build/ --fix-errors -extra-arg=-Wno-unknown-warning-option <FILE_NEED_FIXED>`。
 
 ### 3. 将 `clang-tidy` 同步到release分支
 
@@ -222,7 +230,7 @@ repos:
 
 此出可参考 [upgrade pre-commit tools in docker](https://github.com/PaddlePaddle/Paddle/pull/43534)。
 
-# 五、测试和验收的考量
+## 五、测试和验收的考量
 
 确保不会引起性能倒退，确保不会引起代码风格倒退，通过 CI 各条流水线。
 
