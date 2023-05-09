@@ -203,7 +203,7 @@ grep error: clang-tidy.log | grep "\[.*\]" | grep -o "/paddle/.*\.cpp"| awk '{pr
 
 为 Paddle 引入 `clang-tidy` 可分为如下几步，分别进行：
 
-### 1. 在 `.pre-commit-config.yaml` 在添加 `clang-tidy` 检查项
+### 1.1 在 `.pre-commit-config.yaml` 在添加 `clang-tidy` 检查项
 
 ```yaml
 repos:
@@ -216,11 +216,32 @@ repos:
 
 并添加 `.clang-tidy` 配置文件，内容如本文档第三节配置文件所示。并关闭所有检查项。
 
+### 1.2 使用单独的脚本运行 `clang-tidy`，开发者手动执行
+
+考虑到引入 `clang-tidy` 到 `pre-commit`，可能会导致 `pre-commit` 运行缓慢，因此，也可提供单独的脚本运行 `clang-tidy`，开发者在修改文件后，手动执行。如：
+
+```shell
+#!/bin/bash
+
+# for ubuntu
+# check clang-tidy exists
+if ! command -v clang-tidy &> /dev/null
+then
+    echo "clang-tidy could not be found"
+    sudo apt update
+    sudo apt install clang-tidy
+    exit
+fi
+
+clang-tidy -p=./build/ -extra-arg=-Wno-unknown-warning-option $1
+```
+
 ### 2. 存量修复
 
 - 根据 `clang-tidy` 检查项创建 `tracking issue`，邀请小伙伴一起欢乐开源；
 - 将 `clang-tidy` 检查项逐一打开，并逐步修复；
-- 部分代码可借助 `clang-tidy` 的自动修复功能修复，如 `clang-tidy -p=./build/ --fix-errors -extra-arg=-Wno-unknown-warning-option <FILE_NEED_FIXED>`。
+- 部分代码可借助 `clang-tidy` 的自动修复功能修复，如 `clang-tidy -p=./build/ --fix-errors -extra-arg=-Wno-unknown-warning-option <FILE_NEED_FIXED>`；
+- 对于某些情况下，需要跳过 `clang-tidy` 检查的，可以使用 `NOLINT`, `NOLINTNEXTLINE`, `NOLINTBEGIN ... NOLINTEND` 来抑制检查诊断。
 
 ### 3. 将 `clang-tidy` 同步到release分支
 
