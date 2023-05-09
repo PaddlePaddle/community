@@ -12,7 +12,7 @@
 ## 1、相关背景
 为了提升飞桨 API 丰富度，针对 Paddle 的两种稀疏 Tensor 格式 COO 与 CSR ，都需新增 any 的计算逻辑，
 any 的计算逻辑是元素中任意一个为真结果即为真。
-一共需要新增 2 个 kernel 的前向与反向，其中 COO 格式的 axis 支持任意维度，CSR 格式的 axis 可只支持-1，即按行读取。
+一共需要新增 2 个 kernel 的前向，其中 COO 格式的 axis 支持任意维度，CSR 格式的 axis 可只支持-1，即按行读取。
 另外当 axis=None 时所有元素进行 any 运算。
 
 ## 3、意义
@@ -23,7 +23,8 @@ any 的计算逻辑是元素中任意一个为真结果即为真。
 
 # 三、业内方案调研
 ## Pytorch
-Pytorch 中相关实现如下(pytorch/aten/src/ATen/native/ReduceOps.cpp)
+Pytorch 中相关实现如下(pytorch/aten/src/ATen/native/ReduceOps.cpp)，
+PyTorch 只支持COO格式的稀疏张量，且与普通张量的实现放在了一起。
 
 ```cpp
 template <int identity, typename Stub>
@@ -62,7 +63,7 @@ TORCH_IMPL_FUNC(any_out)
 scipy.sparse库中没有any()函数。但是，可以使用numpy库中的any()函数在稀疏矩阵中执行相同的操作。
 
 ## paddle DenseTensor
-DenseTensor中的sum被定义为paddle.any(x, axis=None, dtype=None, keepdim=False, name=None)，
+DenseTensor中的any被定义为paddle.any(x, axis=None, dtype=None, keepdim=False, name=None)，
 在指定维度上进行进行逻辑或运算的 Tensor，数据类型和输入数据类型一致。
 代码如下
 ```python
@@ -214,12 +215,12 @@ void AnyCsrKernel(const Context& dev_ctx,
     auto* out_cols_data = out_cols.data<int64_t>();
     out_cols_data[0] = 0;
 
-    out_values = phi::Sum<T>(dev_ctx, x.values(), {}, true);
+    out_values = phi::Any<T>(dev_ctx, x.values(), {}, true);
   } else {
     PADDLE_ENFORCE_EQ(axis[0],
                       -1,
                       phi::errors::Unimplemented(
-                          "`axis` of SumCsrKernel only support None or -1 now."
+                          "`axis` of AnyCsrKernel only support None or -1 now."
                           "More number will be supported in the future."));
     out_dims = make_ddim({x.dims()[0], 1});
     out_crows = EmptyLike<int64_t, Context>(dev_ctx, x.crows());
@@ -417,10 +418,10 @@ class TestSparseAnyStatic(unittest.TestCase):
 # 七、可行性分析及规划排期
 
 方案主要自行实现核心算法
-预计4.10号前完成cpu部分的实现和测试
-预计4.10号前完成gpu部分的实现和测试
-预计4.15号前完成各种参数的实现和测试
-预计4.20号前完成文档
+预计5.10号前完成cpu部分的实现和测试
+预计5.10号前完成gpu部分的实现和测试
+预计5.15号前完成各种参数的实现和测试
+预计5.20号前完成文档
 
 # 八、影响面
 
