@@ -81,8 +81,8 @@ Overview 页面风格应与 [Python 的 Overview](https://www.paddlepaddle.org.c
 
 在本版本中，飞桨框架对 C++ 接口做了许多优化，您可以参考下表来了解飞桨框架最新版的 C++ 目录结构与说明。更详细的说明，请参见 版本说明 。此外，您可参考 PaddlePaddle 的 GitHub 了解详情。
 
-## namespace1
-namespace1的介绍
+## name1.h
+name1.h的介绍
 
 ### class
 - class name 1
@@ -91,8 +91,8 @@ namespace1的介绍
 - API name 1
 - API name 2
 
-## namespace2
-namespace2的介绍
+## name2.h
+name1.h的介绍
 
 ### class
 - class name 1
