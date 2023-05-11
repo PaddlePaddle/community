@@ -30,9 +30,11 @@
 | [ccsuzzh](https://github.com/ccsuzzh)             | [DrRyanHuang](https://github.com/DrRyanHuang)              | [RedContritio](https://github.com/RedContritio)           | [Lyutoon](https://github.com/Lyutoon)                 | [PommesPeter](https://github.com/PommesPeter)       | [tianxingxia-cn](https://github.com/tianxingxia-cn)                                   |
 | [sanbuphy](https://github.com/sanbuphy)           | [jjyaoao](https://github.com/jjyaoao)                      | [kk-2000](https://github.com/kk-2000)                     | [Tomoko-hjf](https://github.com/Tomoko-hjf)           | [edencfc](https://github.com/edencfc)               | [CollaborativeFiltering](https://github.com/CollaborativeFiltering)                   |
 | [cloud2009](https://github.com/cloud2009)         | [hh-qiao](https://github.com/hh-qiao)                      | [AndSonder](https://github.com/AndSonder)                 | [JuiceHub](https://github.com/JuiceHub)               | [Difers](https://github.com/Difers)                 | [zeroRains](https://github.com/zeroRains)                                             |
-| [BeingGod](https://github.com/BeingGod)           | [Young-Flash](https://github.com/Young-Flash)              |[ScottWong98](https://github.com/ScottWong98) | [Yang-Changhui](https://github.com/Yang-Changhui) | [LyndonKong](https://github.com/LyndonKong)
+| [BeingGod](https://github.com/BeingGod)           | [Young-Flash](https://github.com/Young-Flash)              |[ScottWong98](https://github.com/ScottWong98) | [Yang-Changhui](https://github.com/Yang-Changhui) | [LyndonKong](https://github.com/LyndonKong) | [zade23](https://github.com/zade23) |
+| [megemini](https://github.com/megemini) | |
 
 # 会议议程
+1. 新同学自我介绍：[zade23](https://github.com/zade23)、[megemini](https://github.com/megemini) (5min)
 1. [Ligoml](https://github.com/ligoml) 介绍中国软件开源创新大赛：飞桨框架任务挑战赛赛题内容与当前整体情况 (10min)
 2. 介绍实现飞桨框架的 python level jit compiler
 3. [enkilee](https://github.com/enkilee) 介绍在飞桨框架中引入 clang-tidy (10min)
