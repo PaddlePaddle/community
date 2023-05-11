@@ -35,7 +35,8 @@
 
 # 会议议程
 1. 新同学自我介绍：[zade23](https://github.com/zade23)、[megemini](https://github.com/megemini) (5min)
-1. [Ligoml](https://github.com/ligoml) 介绍中国软件开源创新大赛：飞桨框架任务挑战赛赛题内容与当前整体情况 (10min)
-2. 介绍实现飞桨框架的 python level jit compiler
-3. [enkilee](https://github.com/enkilee) 介绍在飞桨框架中引入 clang-tidy (10min)
-4. [Liyulingyue](https://github.com/Liyulingyue) 介绍飞桨框架 C++ 文档抽取与展示 (5min)
+2. [Ligoml](https://github.com/ligoml) 介绍中国软件开源创新大赛：飞桨框架任务挑战赛赛题内容与当前整体情况 (10min)
+3. [zrr1999](https://github.com/zrr1999) 介绍 [赛题一：实现飞桨框架的 python level jit compiler](https://github.com/PaddlePaddle/Paddle/issues/53172#paddlepaddle01) (10min)
+4. [enkilee](https://github.com/enkilee) 介绍 [赛题四：在飞桨框架中引入 clang-tidy](https://github.com/PaddlePaddle/Paddle/issues/53172#paddlepaddle04) (10min)
+5. [Liyulingyue](https://github.com/Liyulingyue) 介绍 [赛题六：飞桨框架 C++ 文档抽取与展示](https://github.com/PaddlePaddle/Paddle/issues/53172#paddlepaddle06) (5min)
+6. 自由讨论
