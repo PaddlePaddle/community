@@ -18,11 +18,13 @@
 
 ## 2、功能目标
 
-在[飞桨API文档页面](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/index_cn.html)引入新的章节`PADDLE_API`，用于展示飞桨当前暴露给用户的C++ 接口。
+在[飞桨API文档页面](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/index_cn.html)引入新的章节`C++ API`，用于展示飞桨当前暴露给用户的C++ 接口。C++ 文档标题的位置，level 与 python 的 “API 文档” 相同，放到 “API 文档” 标题的右边。
 
-展示的内容为全部被`PADDLE_API`修饰的成员，包括但不仅包括API、Class、宏定义。
+展示的内容为编译后全部被`PADDLE_API`修饰的c++ 成员，包括但不仅包括API、Class、宏定义。
 
 不失一般的，对于所有的展示的内容，应包含namespace、定义、 接口注释等。特别的，对于不同的被`PADDLE_API`修饰的成员，需要展示不同的信息。以class为例，不仅需要展示类定义，还需要展示对应的成员函数（如果有）、成员变量（如果有）；对于类Python 的 API，展示内容应与Python API文档对其，包括对应的Python API名称、API介绍、参数、返回值、示例代码。
+
+本次工作的重心为工具的建设，而非 C++ 文档内容的建设，因此仅构造用于自动抽取并生成文档的工具。本次工作不通过人工的方式对中英文内容进行翻译或补充示例代码。
 
 ## 3、意义
 
@@ -51,7 +53,7 @@
 - 类Python 的 C++ API对应的Python API信息。由于两种语言的API命名几乎保持一致，可以通过搜索匹配的方式获取对应的Python API名称、说明等信息。
 
 无法确定能够通过自动化脚本获取的信息有：
-- C++ API的参数信息和返回值信息，如果C++ API的参数信息完全与Python对齐，则C++文档直接抽取Python文档的参数信息即可，否则，可能需要人工补足。
+- C++ API的参数说明，如果C++ API的参数信息完全与Python对齐，则C++文档直接抽取Python文档的参数信息即可。
 - C++ API的示例代码。
 
 考虑到赛题需求以及整个体系的维护性，仅当`类 Python 的 C++ API`的参数信息能够与python文档完全对应时，拷贝python文档的参数解释信息。
@@ -60,7 +62,7 @@
 - 总览，提供一个用于快速搜索的界面。例如，以 API、Class、Enum等定义类型为一级标题，namespace为二级标题的导航界面。
 - 单独介绍，对于每个API、Class、Enum都提供一个单独的介绍页面。
 
-此外，可以进一步在docs下构造C++的示例代码运行测试脚本，以提高文档质量。
+本次工作的重心为工具的建设，而非 C++ 文档内容的建设，因此仅通过自动化的方式来生成 C++ 文档，本次工作不通过人工的方式对中英文内容进行翻译或补充示例代码。
 
 ## 2、 C++ API抽取
 
@@ -107,6 +109,13 @@ name1.h的介绍
 
 C++ 文档能够自动更新，C++ 文档的历史存档以类似于Paddle Python中文文档的形式，存放在Docs目录下。
 
+C++ API 文档包含:
+- 函数名
+- 函数说明
+- 定义目录：能够连接到对应的paddle源代码
+- 参数：对于无注释文本，仅展示参数名和参数类型即可，对于有注释文本需要展示对应注释
+- 返回：对于无注释文本，仅展示返回值类型即可，对于有注释文本需要展示对应注释
+
 下面是一个 C++ API文档的示例：
 
 ```python
@@ -122,15 +131,28 @@ functionname
 :::::::::::::::::::::
 path
 
-返回值
+参数
+:::::::::::::::::::::
+    - **x** (Tensor) - 介绍文本
+
+返回
 :::::::::::::::::::::
 介绍文本
 
 ```
 
+
 ## 6、 类 Python 的 C++ API文档
 
 对于类 Python 的 C++ API，如果参数信息能够与Python完全对齐，则需要同步展示Python的信息，并且复用部分Python的说明文本。
+
+类 Python 的 C++ API 文档包含:
+- 函数名
+- 函数说明：可以直接从Python端复用说明文本。
+- 对应Python API名称与链接
+- 定义目录：能够连接到对应的paddle源代码
+- 参数：对于无注释文本，仅展示参数名和参数类型即可，对于有注释文本需要展示对应注释。此外，可以直接从Python端复用说明文本。
+- 返回：对于无注释文本，仅展示返回值类型即可，对于有注释文本需要展示对应注释。此外，可以直接从Python端复用说明文本。
 
 `PADDLE_API Tensor abs(const Tensor& x);`是一个类 Python 的 C++ API，API 能够完全与 Python 端对齐，故展示页面不仅要展示C++的信息，还要展示对应的 Python API 信息。以abs为例，其中文文档内容应为：
 
@@ -198,6 +220,13 @@ COPY-FROM: paddle.abs
 
 ## 7、 C++ class文档
 
+C++ class 文档包含:
+- 函数名
+- 函数说明
+- 定义目录：能够连接到对应的paddle源代码
+- 参数：对于无注释文本，仅展示参数名和参数类型即可，对于有注释文本需要展示对应注释。此外，可以直接从Python端复用说明文本。
+- 类函数：展示对应名称和参数。
+
 C++ class文档的示例模板如下：
 
 ```python
@@ -251,13 +280,67 @@ fun2
 - 对于新增或修改的信息，通过脚本自动抽取对应信息生成rst文档。
 - 对于类Python 的 C++ API，不仅需要解析C++的文件信息，还需要根据对应Python 文档修改rst内容。
 
-## 9、 扩展与维护成本
+## 9、 其他说明
+特别说明如下：
+- 对齐工作可以参考 paddle/phi/api/ext/tensor_compat.h 文件，这个文件里维护了 C++ 和 Python API 完全对齐的 API 列表。
+- 部分API可以通过`paddle::`的形式进行使用，部分需要更进一步的命名空间`paddle::experimental::`进行使用。目前的解决方案是人工在代码中增加逻辑，对tensor_compat.h 文件中的API介绍时，增加说明`可以通过paddle::进行调用用`。
+- 仅对于类Python的 C++ API，我们提供中文页面，对于其他API、class，仅保证中英页面一致，不做翻译处理。
 
-综合考虑赛题要求、赛题导师和参赛成员的意见，当前的 rfc 方案侧重于0人工维护。当前的解决方案几乎可以实现0人工维护，但在下述情况下，仍需要进行人工维护：
-1. 补充注释：随着C++ 算子的开发，注释必然日趋规范，目前的API注释比仅为 3/460，即当前的注释规范可能并不稳定。在后续的工作中，注释规范可能发生变化，当我们确定了注释的格式后，需要对文档抽取函数进行少量更改，以适配新的注释格式抽取API的说明。维护量：低
+## 10、 扩展与维护成本
+
+综合考虑赛题要求、赛题导师和参赛成员的意见，当前的 rfc 方案侧重于零人工维护，但在下述情况下，仍需要进行人工维护：
+1. 补充注释：随着C++ 算子的开发，注释必然日趋规范,在后续的工作中，注释规范可能发生变化，当我们确定了注释的格式后，需要对文档抽取函数进行少量更改，以适配新的注释格式抽取API的说明。维护量：低
+    - 当前仓库中注释方式有以下几类：
+      - 使用brief
+        ```python
+            /*! \brief  Set nccl communicators. */
+        ```
+      - `//`和标记`NOTE`结合使用
+        ```python
+         // NOTE: DeviceContext hold resources. Used in training scenarios.
+         // The interface used by the training scene, DeviceContext will initialize
+         // all resources and delete them when destructing.
+         // Note that you must set the Allocator before calling Init function.
+        ```
+      - 使用`@`标记
+        ```python
+             /**
+                 * @brief Given two tensors x and y, compute Lp-norm of (x-y).
+                 *        It is not a norm in a strict sense, only as a measure of distance.
+                 *        The shapes of x and y must be broadcastable. Where, z = x - y,
+                 * 
+                 *        When p = 0, defining $0^0 = 0$, the zero-norm of z is simply
+                 *        the number of non-zero elements of z.
+                 *        $$
+                 *        ||z||_{0} = \lim_{p \rightarrow 0} \sum_{i=1}^{m} |z_i|^p
+                 *        $$
+                 * 
+                 *        When p = inf, the inf-norm of z is the maximum element of z.
+                 *        $$
+                 *        ||z||_\infty=\max_i |z_i|
+                 *        $$
+                 * 
+                 *        When p = -inf, the negative-inf-norm of z is the minimum element of z.
+                 *        $$
+                 *        ||z||_{-\infty}=\min_i |z_i|
+                 *        $$
+                 * 
+                 *        Otherwise, the p-norm of z follows the formula,
+                 *        $$
+                 *        ||z||_{p} = (\sum_{i=i}^{m} |z_i|^p)^{1/p}
+                 *        $$
+                 * @param  ctx     device context
+                 * @param  x       the input Tensor of Dist
+                 * @param  y       the Right-hand-side input Tensor of Dist
+                 * @param  p       the norm to be computed
+                 * @param  out     the output of Dist, which is the p-norm of (x - y)
+             */
+           ```
+
+    其中第三种方式对于文本的描述最为清晰，但每次增加API时的工作成本都会偏大。
 
 此外，Paddle的文档应保持对用户友好，为了达成这一要求，仍需进行的工作，以及这些工作在后续API变更中带来的维护压力如下：
-1. 补充说明注释：补充C++ 所有函数、类的注释。补充后，文档信息可以自动抽取与展示。工作量：大、维护压力：中。
+1. 补充说明注释：补充C++ 所有函数、类的注释。补充后，文档信息可以自动抽取与展示。工作量：中、维护压力：小。
 2. 补充示例代码：补充C++ 所有函数、类的示例代码。补充后，文档信息可以自动抽取与展示。工作量：大、维护压力：中。
 3. 补充中文信息：补充C++ 所有函数、类的中文信息，包括但不限于说明、参数解释、返回值表述。以目前的Python 中文文档为例，这些内容需要手动更改，无法自动地和代码内容对齐。工作量：大、维护压力：大。
 4. 映射类 Python C++：对所有的类Python 的 C++ API进行映射，包括但不限于两者的区别和差异，这些内容需要手动更改，可能在某次更新后，C++ API彻底与Python API割裂，不具有对应关系。工作量：大、维护压力：大。
