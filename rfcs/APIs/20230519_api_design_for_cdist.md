@@ -16,7 +16,7 @@ Issue: 【PaddlePaddle Hackathon 4】2、为 Paddle 新增 cdist API
 
 ## 2、功能目标
 
-为 Paddle 新增 cdist API。dist API 用于计算两个输入 Tensor 的 p 范数（p-norm），计算结果为形状为 [1] 的 Tensor，而 cdist API 则用于计算两个输入 Tensor 的所有行向量对的 p 范数（p-norm），输出结果的形状和两个 Tensor 乘积的形状一致。
+为 Paddle 新增 cdist API。dist API 用于计算两个输入 Tensor 的 p 范数（p-norm），计算结果为形状为 [] 的 0-D Tensor，而 cdist API 则用于计算两个输入 Tensor 的所有行向量对的 p 范数（p-norm），输出结果的形状和两个 Tensor 乘积的形状一致。
 ## 3、意义
 为 Paddle 新增 cdist API，提供距离计算功能。
 # 二、飞桨现状
@@ -36,7 +36,9 @@ Pytorch 中使用的 API 格式如下：
 
 API设计为 `paddle.cdist(x1, x2, p=2.0)`。其中 `x1` 为 `B1 X ... X Bn X P X M` 张量，`x2` 为 `B1 X ... X Bn X R X M` 张量。`p` 为 p-范数对应的 p 值，p ∈[0,∞]。输出张量的形状为 `B1 X ... X Bn X P X R`。
 
-这里与 `torch.cdist(x1, x2, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')` 的设计不同之处是去除了 `compute_mode` 参数，其作用是使用矩阵乘法加速欧氏距离（p=2）的计算。在 PyTorch 中，参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`，当 P > 25 或 R > 25 时，则使用矩阵乘法加速计算，否则使用普通的欧氏距离计算。对于 PaddlePaddle 的实现目前没有添加这一功能。
+这里与 `torch.cdist(x1, x2, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')` 的设计不同之处是去除了 `compute_mode` 参数，其作用是使用矩阵乘法加速欧氏距离（p=2）的计算。在 PyTorch 中，参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`，当 P > 25 或 R > 25 时，则使用矩阵乘法加速计算，否则使用普通的欧氏距离计算。
+
+对于 PaddlePaddle 将这一功能改为默认，即所有计算 p=2 时都通过矩阵运算加速。
 
 ## 底层OP设计
 无，通过已有的算子在 python 端进行组合。
