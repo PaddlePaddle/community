@@ -22,23 +22,119 @@ Issue: 【PaddlePaddle Hackathon 4】2、为 Paddle 新增 cdist API
 # 二、飞桨现状
 对飞桨框架目前不支持此功能，可用其他API组合实现的此功能。
 # 三、业内方案调研
+## 1. Scipy
 
-## Pytorch
-Pytorch 中使用的 API 格式如下：
+在 Scipy 中使用的 API 格式如下：
+
+`scipy.spatial.distance.cdist(XA, XB, metric='euclidean', *, out=None, **kwargs)`
+
+上述函数参数中，`metric` 表示距离度量方式。
+
+Scipy 支持丰富的距离度量方式，如：'braycurtis', 'canberra', 'chebyshev', 'cityblock', 'correlation', 'cosine', 'dice', 
+'euclidean', 'hamming', 'jaccard', 'jensenshannon','kulsinski', 'kulczynski1', 'mahalanobis', 'matching', 'minkowski',
+'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener','sokalsneath', 'sqeuclidean', 'yule' 等。
+
+
+## 2. Pytorch
+
+在 Pytorch 中使用的 API 格式如下：
+
 `torch.cdist(x1, x2, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')`
-在 Pytorch 中， 通过在 c++ 与 cuda 端编写了 op 算子，之后在python端调用。通过参数 p 可以等价于多种距离的计算。 并且在 p=2 的时候可以通过矩阵运算加速运算的过程。
+
+计算的方式与 `dist` 算子相似，只是变为 x1 和 x2 各自每一行两两之间计算 dist。
+这里的 `compute_mode` 参数，其作用是使用矩阵乘法加速欧氏距离（p=2）的计算。
+在 PyTorch 中，参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`，当 P > 25 或 R > 25 时，则使用矩阵乘法加速计算，否则使用普通的欧氏距离计算。
+
+## 3. Tensorflow
+
+没有对应的API, 对于 dist 距离的计算可以用其他 API 组合实现。
+
 # 四、对比分析
-**PyTorch** 的方案中的功能最直观也最全面，使用起来用户友好。
+
+## 1. 不同框架API使用方式
+
+### 1. Scipy
+
+```Python
+from scipy.spatial import distance
+import numpy as np
+
+a = np.array([[0.9041, 0.0196], [-0.3108, -2.4423], [-0.4821, 1.059]])
+b = np.array([[-2.1763, -0.4713], [-0.6986, 1.3702]])
+
+distance.cdist(a, b, "euclidean")
+
+
+# array([[3.11927026, 2.09589304],
+#        [2.71384068, 3.83217237],
+#        [2.28300936, 0.37910116]])
+```
+
+### 2. PyTorch
+
+```Python
+import torch
+
+a = torch.tensor([[0.9041, 0.0196], [-0.3108, -2.4423], [-0.4821, 1.059]])
+b = torch.tensor([[-2.1763, -0.4713], [-0.6986, 1.3702]])
+torch.cdist(a, b, p=2)
+
+# tensor([[3.1193, 2.0959],
+#         [2.7138, 3.8322],
+#         [2.2830, 0.3791]])
+```
+
+### 3. Tensorflow
+无对应的 api，需要手动实现。
+
+### 4. 总结
+综上所述**Scipy** 对应的计算方法最全面
+
+**Pytorch** 计算的公式与 dist 算子相同，通过不同的参数 p 来控制对应的计算结果。该方法更简洁更友好，对于大部分的情况下足够使用。
+
+**Tensorflow** 没有此API，需要手动实现，使用较为繁琐。
+
+
+
 # 五、设计思路与实现方案
 ## 命名与参数设计
 
-<!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
+该算子与 Pytorch 保持一致，方便使用用户使用。
 
-API设计为 `paddle.cdist(x1, x2, p=2.0)`。其中 `x1` 为 `B1 X ... X Bn X P X M` 张量，`x2` 为 `B1 X ... X Bn X R X M` 张量。`p` 为 p-范数对应的 p 值，p ∈[0,∞]。输出张量的形状为 `B1 X ... X Bn X P X R`。
+API设计为 `paddle.cdist(x, y, p=2)`。`p` 为 p-范数对应的 p 值，p 大于等于零。
 
-这里与 `torch.cdist(x1, x2, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')` 的设计不同之处是去除了 `compute_mode` 参数，其作用是使用矩阵乘法加速欧氏距离（p=2）的计算。在 PyTorch 中，参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`，当 P > 25 或 R > 25 时，则使用矩阵乘法加速计算，否则使用普通的欧氏距离计算。
+对于 torch 的 api 中 参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`， PaddlePaddle 暂不添加这一功能。原因如下：
 
-对于 PaddlePaddle 将这一功能改为默认，即所有计算 p=2 时都通过矩阵运算加速。
+torch 中的该方法如下
+```
+Tensor _euclidean_dist(const Tensor& x1, const Tensor& x2) {
+  /** This function does the fist part of the euclidean distance calculation
+   * We divide it in two steps to simplify dealing with subgradients in the
+   * backward step */
+  Tensor x1_norm = x1.pow(2).sum(-1, true);
+  Tensor x1_pad = at::ones_like(x1_norm, LEGACY_CONTIGUOUS_MEMORY_FORMAT);
+  Tensor x2_norm = x2.pow(2).sum(-1, true);
+  Tensor x2_pad = at::ones_like(x2_norm, LEGACY_CONTIGUOUS_MEMORY_FORMAT);
+  Tensor x1_ = at::cat({x1.mul(-2), std::move(x1_norm), std::move(x1_pad)}, -1);
+  Tensor x2_ = at::cat({x2, std::move(x2_pad), std::move(x2_norm)}, -1);
+  Tensor result = x1_.matmul(x2_.mT());
+  result.clamp_min_(0).sqrt_();
+  return result;
+}
+```
+上述算法在 paddle 下通过 python 端进行组合，实现如下
+```
+x_norm = paddle.sum(x.pow(2), keepdim=True, axis=-1)
+y_norm = paddle.sum(y.pow(2), keepdim=True, axis=-1)
+x_pad = paddle.ones_like(x_norm)
+y_pad = paddle.ones_like(y_norm)
+x_ = paddle.concat([x * -2, x_norm, x_pad], -1)
+y_ = paddle.concat([y, y_pad, y_norm], -1)
+y_perm = list(range(len(y_.shape)))
+y_perm[-1], y_perm[-2] = y_perm[-2], y_perm[-1]
+out = paddle.clip(x_.matmul(paddle.transpose(y_, y_perm)), min=0).sqrt()
+```
+发现该方法在较大的数据下没有明显的加速效果，甚至比原先的方法还慢。
 
 ## 底层OP设计
 无，通过已有的算子在 python 端进行组合。
@@ -47,5 +143,10 @@ API设计为 `paddle.cdist(x1, x2, p=2.0)`。其中 `x1` 为 `B1 X ... X Bn X P 
 实现位置为 Paddle repo `python/paddle/tensor/linalg.py` 目录。
 # 六、测试和验收的考量
 测试 api 功能的准确性。
+1. 不同 shape 的计算结果测试
+2. 不同 p 下的计算结果测试
+3. shape 错误时报错测试
+4. p < 0 时报错测试
+5. 动静态图下计算的测试
 # 七、可行性分析和排期规划
 本 API 难度适中，工期上能满足要求。
