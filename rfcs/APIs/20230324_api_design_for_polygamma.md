@@ -324,6 +324,8 @@ polygamma 中 `n=0` 的情况基于现有 API 即 digamma 进行实现，此外�
 
 ## API实现方案
 
+### 前向传播
+
 该 API 实现于 `python/paddle/tensor/math.py`，通过调研发现，Paddle 本身已实现 `pdadle.digamma`，可以计算 gamma 函数的对数的一阶导数，可利用 `paddle.digamma` API 做 n 阶导实现 `paddle.polygamma`。具体来说，polygamma 函数的 k 阶定义为：
 
 $$\Phi^k(x) = \frac{d^k}{dx^k} [\ln(\Gamma(x))]$$
@@ -352,6 +354,15 @@ def polygamma(x, k):
         # Running polygamma kernel code.
         ...
 ```
+
+### 反向传播
+
+根据定义，反向传播的实现为如下表示：
+
+$$ (\Phi^k(x))' = \frac{d}{dx}\Phi^k(x) = \Phi^{k+1}(x) $$
+
+故可以直接重复使用上述代码即可。
+
 
 另外，由于该API需要考虑动静统一问题，故需要验证其在静态图中能否正常工作。
 
