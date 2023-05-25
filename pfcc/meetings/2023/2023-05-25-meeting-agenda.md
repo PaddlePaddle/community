@@ -37,6 +37,6 @@
 1. 新同学自我介绍：[WintersMontagne10335](https://github.com/WintersMontagne10335)、[zbt78](https://github.com/zbt78) (5min)
 2. [RichardWooSJTU](https://github.com/RichardWooSJTU) 介绍  Paddle的量化推理基础能力建设 (15min)
 3. [risemeup1](https://github.com/risemeup1)  介绍 编译第三方库的最新工作分享 (15min)
-4. [heavyrain-lzy](https://github.com/heavyrain-lzy) 介绍 代码自动生成 (15min)
-5. [Ligoml](https://github.com/ligoml) 介绍 联合开发项目 (10min)
-6. 自由讨论
+4. [heavyrain-lzy](https://github.com/heavyrain-lzy) 介绍 代码自动生成项目进展 (15min)
+5. PFCC成员自由发言与讨论（5 min）
+6. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
