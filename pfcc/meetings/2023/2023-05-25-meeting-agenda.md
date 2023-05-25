@@ -35,8 +35,9 @@
 
 # 会议议程
 1. 新同学自我介绍：[WintersMontagne10335](https://github.com/WintersMontagne10335)、[zbt78](https://github.com/zbt78) （旁听同学：[linlin7916](https://github.com/linlin7916)）(5min)
-2. [RichardWooSJTU](https://github.com/RichardWooSJTU) 介绍  Paddle的量化推理基础能力建设 (15min)
-3. [risemeup1](https://github.com/risemeup1)  介绍 编译第三方库的最新工作分享 (15min)
-4. [heavyrain-lzy](https://github.com/heavyrain-lzy) 介绍 代码自动生成项目进展 (15min)
-5. PFCC成员自由发言与讨论（5 min）
-6. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
+2. 开源之星名单公布，来看看有没有你 [2023年上半年开源之星](https://github.com/PaddlePaddle/community/blob/master/contributors/certificate-inspection.md)（1min）
+3. [RichardWooSJTU](https://github.com/RichardWooSJTU) 介绍  Paddle的量化推理基础能力建设 (15min)
+4. [risemeup1](https://github.com/risemeup1)  介绍 编译第三方库的最新工作分享 (15min)
+5. [heavyrain-lzy](https://github.com/heavyrain-lzy) 介绍 代码自动生成项目进展 (15min)
+6. PFCC成员自由发言与讨论（5 min）
+7. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
