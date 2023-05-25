@@ -35,6 +35,8 @@
 | 孔远杭 | [kongdebug](https://github.com/kongdebug)             | 徐晓健 | [SigureMo](https://github.com/SigureMo)           |
 | 梁嘉铭 | [AndPuQing](https://github.com/AndPuQing)             | 郑必城 | [Zheng-Bicheng](https://github.com/Zheng-Bicheng) |
 
+<img src="./StarOfPaddlePaddleOpenSource_2022.png" width = "500" alt="2022年开源之星"/>
+
 ### 2023年上半年开源之星
 | 姓名   | GitHub ID                                       | 姓名   | GitHub ID                                     |
 | ------ | ----------------------------------------------- | ------ | --------------------------------------------- |
