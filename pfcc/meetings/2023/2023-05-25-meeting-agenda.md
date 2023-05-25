@@ -34,7 +34,7 @@
 | [megemini](https://github.com/megemini)           | [WintersMontagne10335](https://github.com/WintersMontagne10335) | [zbt78](https://github.com/zbt78)                         |
 
 # 会议议程
-1. 新同学自我介绍：[WintersMontagne10335](https://github.com/WintersMontagne10335)、[zbt78](https://github.com/zbt78) (5min)
+1. 新同学自我介绍：[WintersMontagne10335](https://github.com/WintersMontagne10335)、[zbt78](https://github.com/zbt78) （旁听同学：[linlin7916](https://github.com/linlin7916)）(5min)
 2. [RichardWooSJTU](https://github.com/RichardWooSJTU) 介绍  Paddle的量化推理基础能力建设 (15min)
 3. [risemeup1](https://github.com/risemeup1)  介绍 编译第三方库的最新工作分享 (15min)
 4. [heavyrain-lzy](https://github.com/heavyrain-lzy) 介绍 代码自动生成项目进展 (15min)
