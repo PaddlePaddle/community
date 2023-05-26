@@ -101,7 +101,7 @@ torch.cdist(a, b, p=2)
 
 该算子与 Pytorch 保持一致，方便使用用户使用。
 
-API设计为 `paddle.cdist(x, y, p=2)`。`p` 为 p-范数对应的 p 值，p 大于等于零。
+API设计为 `paddle.cdist(x, y, p=2, use_mm_for_euclid_dist=True)`。其中 `p` 为 p-范数对应的 p 值，p 大于等于零。
 
 对于 torch 的 api 中 参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`， PaddlePaddle 考虑添加这一功能。原因如下：
 
