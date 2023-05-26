@@ -101,9 +101,12 @@ torch.cdist(a, b, p=2)
 
 该算子与 Pytorch 保持一致，方便使用用户使用。
 
-API设计为 `paddle.cdist(x, y, p=2, use_mm_for_euclid_dist=True)`。其中 `p` 为 p-范数对应的 p 值，p 大于等于零。
+API设计为 `paddle.cdist(x, y, p=2, compute_mode=compute_mode='use_mm_for_euclid_dist_if_necessary)`。其中 `p` 为 p-范数对应的 p 值，p 大于等于零。
 
-对于 torch 的 api 中 参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`， PaddlePaddle 考虑添加这一功能。原因如下：
+对于 torch 的 api 中 参数 `compute_mode`， PaddlePaddle 考虑添加这一功能，且设计思路同 torch 相似，默认为：
+use_mm_for_euclid_dist_if_necessary，代表我们会根据 P or R 的大小选择是否使用矩阵加速，
+donot_use_mm_for_euclid_dist：永远不会使用矩阵乘加速，
+use_mm_for_euclid_dist：始终使用矩阵乘加速。原因如下：
 
 torch 中的该方法如下
 ```
@@ -170,6 +173,7 @@ x 的 shape 为 (10, 10, 10), y 的 shape 为 (10, 10, 10)
 | 动态图反向计算 | 0.00015584778785705566s | 0.00006124091148376465s  | 
 | 静态图前向计算 | 0.00025142621994018555s  | 0.00014510750770568848s  | 
 | 静态图反向计算 | 0.00019922804832458497s  | 0.00009114623069763184s | 
+
 
 ## 底层OP设计
 无，通过已有的算子在 python 端进行组合。
