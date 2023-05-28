@@ -106,72 +106,183 @@ Edge中包含 in_slot_id ,in_rank, grad_node_等信息
 ![img_2.png](img_2.png)
 图中以C_OP节点的反向图结构建立为例。在执行C_OP代码后首先1创建C_G_OP反向节点；2,3设置其中attribute,tensorwrapper变量；4设置输出的meta信息。 5对输出的tensor设置autogradMeta信息，绑定反向节点,6设置meta中edge的下一结点，7设置输入的meta信息。
 
-举个反向图节点创建的例子:
+
+前向过程后 可以创建好反向图中的节点, 然后将这些节点信息读取出来. 通过网络输出张量tensor 获取到对应的反向图节点,然后再基于该节点寻找下一个节点,以此类推获取到全部方向图节点.
+
+
+基于网络输出的张量tensor获取对应的反向节点gradNode可以通过如下实现:
 ```c++
-// Node Creation
-  if(require_any_grad) {
-    paddle::platform::RecordEvent node_creation_record_event("matmul node_creation", paddle::platform::TracerEventType::OperatorInner, 1);
-
-    egr::EagerUtils::PassStopGradient(false,out_autograd_meta);
-
-    // Node Construction
-    auto grad_node = std::shared_ptr<MatmulGradNodeFinal>(new MatmulGradNodeFinal(1, 2));
-    // SetAttributes if needed
-    grad_node->SetAttributetranspose_x(transpose_x);
-    grad_node->SetAttributetranspose_y(transpose_y);
-    // Set TensorWrappers for Forward Inputs if needed
-    grad_node->SetTensorWrapperx(x);
-    grad_node->SetTensorWrappery(y);
-    // SetGradOutMeta & SetEdges
-    grad_node->SetGradOutMeta(x, 0);
-    grad_node->SetGradOutMeta(y, 1);
-    // SetOutRank & SetHistory & SetGradInMeta & RetainGrad
-    if (out_autograd_meta) {
-      egr::EagerUtils::SetOutRankWithSlot(out_autograd_meta, 0);
+auto meta = egr::EagerUtils::nullable_autograd_meta(self->tensor);
+meta.GradNode()
+```
+基于当前的gradNode获取下一个节点的信息函数next_functions可以通过如下实现:
+```c++
+const paddle::small_vector<std::vector, kSlotSmallVectorSize>& metas = node->OutputMeta();
+for (const auto& meta_list : metas) {
+    for (const GradSlotMeta& meta : meta_list) {
+        const auto& edge = meta.GetEdge();
+        GradNodeBase* next_node = edge.GetMutableGradNode().get();
+        }
     }
-    if (out_autograd_meta) {
-      egr::EagerUtils::SetHistory(out_autograd_meta, grad_node);
-    }
-    grad_node->SetGradInMeta(out, 0);
-    egr::EagerUtils::CheckAndRetainGrad(out);
-    // Set TensorWrappers for Forward Outputs if needed
-
-  }
 ```
 
-前向过程后 可以创建好反向图中的节点, 然后将这些节点信息读取出来. 通过网络输出张良tensor 获取到对应的反向图节点,然后再基于该节点寻找下一个节点,以此类推获取到全部方向图节点.
-```c++
-* 遍历输出tensor的vector变量 tensors ，获取反向节点grad_node放入队列，更新node_input_buffers_dict map
 
-const paddle::experimental::Tensor& tensor = tensors[i];
-// 对每个tensor创建反向信息：auto_grad_meta
-
-AutogradMeta* auto_grad_meta = EagerUtils::nullable_autograd_meta(tensor);
-if (auto_grad_meta == nullptr) {}
-
-// 获取输出tensor是第几个输出out_slot_id_；第几个tensor out_rank_
-auto input_info = auto_grad_meta->OutRankInfo();
-
-// 获取该tensor作为输入的反向节点
-auto shared_grad_node = auto_grad_meta->GetMutableGradNode();
-if (shared_grad_node == nullptr || shared_grad_node.get() == nullptr ||
-    auto_grad_meta->StopGradient()) {}
-    
-// 获得普通grad_node的指针变量
-GradNodeBase* grad_node = shared_grad_node.get();
-if (is_general_grad) {
-  // Save orig grad node
-  orig_queue.push_back(grad_node);
-  // Replace grad_node with copied grad_node
-  grad_node = GeneralGrad::Instance().CopyGradNode(shared_grad_node);
-  // Record potential startup grad node
-  GeneralGrad::Instance().GetPotentialStartupNodes()->insert(grad_node);
-}
-```    
 
 ## 2. 将反向图的节点信息暴露给pythonAPI
-首先在c++语言下创建一个函数 该函数的输入是一个输出张量,基于该张量获取到所有的反向图节点信息,并进行返回,
-然后将该函数通过工具pybind11暴露给python
+前面一个步骤中可以设计两个函数grad_fn()和next_functions()来获取反向图的节点信息,然后将这两个函数暴露给pythonAPI.
+
+### 2.1 暴露grad_fn()函数
+其中grad_fn()函数,可以作为tensor的一个方法, 所以需要c++中给张量新增一个方法,并暴露给python.
+tensor.grad_fn 应该在paddle/fluid/pybind/eager_properties.cc中实现
+
+可以按照以下步骤进行：
+1. 定义 grad_fn 属性的 getter 函数。
+2. 在 variable_properties 结构体数组中添加该属性。
+
+首先，为 grad_fn 定义一个 getter 函数。 函数可以定义为tensor_properties_get_grad_fn()：
+
+tensor_properties_get_grad_fn 函数的实现。这个函数返回一个 GradNode 对象，通过调用 egr::EagerUtils::nullable_autograd_meta(self->tensor) 和 meta.GradNode() 获取：
+```c++
+#include "paddle/fluid/imperative/utils/eager_utils.h"
+
+static PyObject tensor_properties_get_grad_fn(TensorObject self, void* closure) {
+    EAGER_TRY
+    if (!self->tensor.defined()) {
+        // Handle undefined tensors if necessary; otherwise, return nullptr or an appropriate PyObject.
+        // In this case, I will return Py_None.
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    // Get GradNode from the tensor
+    auto meta = egr::EagerUtils::nullable_autograd_meta(self->tensor);    // If meta exists, get the GradNode
+    if (meta) {
+        // Get the GradNode from meta
+        auto grad_node = meta.GradNode();        // Convert GradNode to a Python object
+        // The conversion will depend on the structure of GradNode.
+        PyObject* py_grad_node = GradooNodeToPyObject(grad_node); // You need to implement GradooNodeToPyObject according to the actual GradNode structure.        return py_grad_node;
+    } else {
+        // If meta does not exist, return an appropriate Python object (e.g., None or a special value).
+        Py_INCREF(Py_None);
+        return Py_None;
+    }    EAGER_CATCH_AND_THROW_RETURN_NULL
+}
+}
+```
+
+然后 将新的 tensor_properties_get_grad_fn 属性添加到 variable_properties 结构体数组中：
+```c++
+struct PyGetSetDef variable_properties[] = {
+    // ... other properties ...
+    {"grad_fn",
+     (getter)tensor_properties_get_grad_fn,
+     nullptr, // No setter function
+     nullptr, // No documentation provided
+     nullptr}, // No closure
+    // ... other properties ...
+    {nullptr, nullptr, nullptr, nullptr, nullptr}
+};
+```
+Python Tensor 类将包含一个名为 grad_fn 的属性，只具有 getter 方法，使用者可以通过如下方式访问 grad_fn 属性：
+```python
+tensor = Tensor()
+grad_fn = tensor.grad_fn
+```
+注意，您需要实现 GradooNodeToPyObject 函数，以将 GradNode 转换为 PyObject。这个函数的实现将根据 GradNode 的实际结构而不同。
+
+### 2.2 暴露GradNode转化成python对象
+为了将GradNode类绑定到Python模块，您需要使用pybind11库创建一个C++函数，该函数对Python构造函数、方法和属性进行描述和绑定。以下是一个示例代码
+
+```c++
+#include <pybind11/pybind11.h>
+#include "GradNodeBase.h"
+namespace py = pybind11;
+
+PYBIND11_MODULE(grad_node, m) {
+    py::class_<GradNodeBase>(m, "GradNodeBase")
+        .def(py::init<size_t, size_t>(), py::arg("bwd_in_slot_num"), py::arg("bwd_out_slot_num"))
+        .def("InputMeta", &GradNodeBase::InputMeta)
+        .def("OutputMeta", &GradNodeBase::OutputMeta)
+        .def("MutableOutputMeta", &GradNodeBase::MutableOutputMeta)
+        .def("SetGradInMeta", py::overload_cast<const paddle::Tensor&, size_t>(&GradNodeBase::SetGradInMeta),
+             py::arg("fwd_out"), py::arg("slot_rank"))
+        .def("SetGradInMeta", py::overload_cast<const std::vector<paddle::Tensor>&, size_t>(&GradNodeBase::SetGradInMeta),
+             py::arg("fwd_out"), py::arg("slot_rank"))
+        .def("SetGradOutMeta", py::overload_cast<const paddle::Tensor&, size_t>(&GradNodeBase::SetGradOutMeta),
+             py::arg("fwd_in"), py::arg("slot_rank"))
+        // ...其他重载SetGradInMeta以及SetGradOutMeta方法
+        .def("SetDefaultGradInOutMeta", &GradNodeBase::SetDefaultGradInOutMeta)
+        .def("RegisterGradientHook", &GradNodeBase::RegisterGradientHook, py::arg("slot_id"), py::arg("rank"), py::arg("hook"))
+        .def("ApplyGradientHooks", &GradNodeBase::ApplyGradientHooks, py::arg("tensors"))
+        .def("HandleComplexGradToRealGrad", &GradNodeBase::HandleComplexGradToRealGrad, py::arg("out_grads"));
+}
+
+```
+### 2.3 暴露next_functions()
+next_functions是GradNode暴露到Python端的类型的一个属性。需要参考paddle/fluid/pybind/eager_properties.cc实现。eager_properties.cc里是将Tensor的属性暴露的具体实现源码。
+6.next_functions需要获取GradNode的后继节点的所有GradNode
+
+为了将next_functions属性作为GradNode类的一部分绑定到Python模块，需要实现一个名为next_functions的C++ getter方法，并在Pybind11描述中将其映射为Python类的属性。
+
+首先，可以在GradNodeBase类中添加一个方法，该方法实现了获取后继节点的功能：
+
+```c++
+// GradNodeBase.h
+#include <vector>
+class GradNodeBase {
+    // ... 其他方法和字段
+
+    std::vector<GradNodeBase*> NextFunctions(); // 新增加的方法
+};
+
+// GradNodeBase.cpp
+std::vector<GradNodeBase> GradNodeBase::NextFunctions() {
+    std::vector<GradNodeBase> next_nodes;
+    const paddle::small_vector<std::vector, kSlotSmallVectorSize>& metas = OutputMeta();
+    for (const auto& meta_list : metas) {
+        for (const GradSlotMeta& meta : meta_list) {
+            const auto& edge = meta.GetEdge();
+            GradNodeBase* next_node = edge.GetMutableGradNode().get();
+            next_nodes.push_back(next_node);
+        }
+    }
+    return next_nodes;
+}
+
+
+```
+
+然后，在Pybind11绑定中将next_functions映射为Python类的属性。
+    
+```c++
+#include <pybind11/pybind11.h>
+#include "GradNodeBase.h"
+namespace py = pybind11;
+
+PYBIND11_MODULE(grad_node, m) {
+    py::class_<GradNodeBase>(m, "GradNodeBase")
+        // ... 其他绑定
+        .def_property_readonly("next_functions", &GradNodeBase::NextFunctions);
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 3.将反向图的节点信息通过graphviz进行可视化
 基于上面的步骤获取到所有反向图节点信息后 参考pytorchvize的实现 将所有的节点信息组织成一个拓扑图进行显示.
