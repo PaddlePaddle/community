@@ -160,7 +160,7 @@ static PyObject tensor_properties_get_grad_fn(TensorObject self, void* closure) 
         // Get the GradNode from meta
         auto grad_node = meta.GradNode();        // Convert GradNode to a Python object
         // The conversion will depend on the structure of GradNode.
-        PyObject* py_grad_node = GradooNodeToPyObject(grad_node); // You need to implement GradooNodeToPyObject according to the actual GradNode structure.        return py_grad_node;
+        PyObject* py_grad_node = ToPyObject(grad_node); // You need to implement ToPyObject according to the actual GradNode structure.        return py_grad_node;
     } else {
         // If meta does not exist, return an appropriate Python object (e.g., None or a special value).
         Py_INCREF(Py_None);
@@ -168,7 +168,14 @@ static PyObject tensor_properties_get_grad_fn(TensorObject self, void* closure) 
     }    EAGER_CATCH_AND_THROW_RETURN_NULL
 }
 }
+
+PyObject* ToPyObject(const platform::Place& value) {
+auto obj = ::pybind11::cast(value);
+obj.inc_ref();
+return obj.ptr();
+}
 ```
+
 
 然后 将新的 tensor_properties_get_grad_fn 属性添加到 variable_properties 结构体数组中：
 ```c++
