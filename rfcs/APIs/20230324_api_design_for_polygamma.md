@@ -313,7 +313,7 @@ API设计为 `paddle.polygamma(x, n, name=None)`。
 
 - `x` 为张量，允许的数据类型是 float32 和 float64，其原因是 digamma 对数据类型进行了限制；
 
-- `n` 表示多项式 gamma 函数的导数阶数，只能为非负整数，允许的数据类型是 int32 和 int64；当 `n = 0` 时，polygamma 退化为 digamma。
+- `n` 表示多项式 gamma 函数的导数阶数，只能为非负整数，允许的数据类型为整型 int；当 `n = 0` 时，polygamma 退化为 digamma。
 
 - `name`作为可选参数，定义了该操作的名称，其默认值为 `None`。
 
