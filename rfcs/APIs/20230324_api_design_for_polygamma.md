@@ -311,9 +311,9 @@ print("Polygamma values for n = {} and x = {}: {}".format(n, x.numpy(), result.n
 
 API设计为 `paddle.polygamma(x, n, name=None)`。
 
-- `x` 为张量，允许的数据类型是 float32 和 float64，其原因是 digamma 对数据类型进行了限制；`n` 表示多项式 gamma 函数的导数阶数，其可以为一个非负整数或一个非负值张量，允许的数据类型是 int32 和 int64；如果 `n` 是一个张量，需要保证 `n` 的维度 `ndim` 和 `n` 的参数量 `numel` 满足 `ndim <= 1` 且 `numel == 1`；
+- `x` 为张量，允许的数据类型是 float32 和 float64，其原因是 digamma 对数据类型进行了限制；
 
-- 当 `n=0` 时，polygamma 退化为 digamma。
+- `n` 表示多项式 gamma 函数的导数阶数，只能为非负整数，允许的数据类型是 int32 和 int64；当 `n = 0` 时，polygamma 退化为 digamma。
 
 - `name`作为可选参数，定义了该操作的名称，其默认值为 `None`。
 
@@ -321,7 +321,7 @@ API设计为 `paddle.polygamma(x, n, name=None)`。
 
 ## 底层OP设计
 
-polygamma 中 `n=0` 的情况基于现有 API 即 digamma 进行实现，此外的情况将设计 `PolygammaKernel`。
+polygamma 中 `n = 0` 的情况基于现有 API 即 digamma 进行实现，此外的情况将设计 `PolygammaKernel`。
 
 对于实现角度而言，可使用 C++ 标准库当中的 `std::lgamma(x)`，即表示为 $\ln(\Gamma(x))$，对其求自然指数即可得到 $e^{\ln\Gamma(x)}=\Gamma(x)$，所以实现角度而言可以转换为：
 
@@ -452,12 +452,12 @@ $$ (\Phi^n(x))' = \frac{d}{dx}\Phi^n(x) = \Phi^{n+1}(x) $$
 
 - 结果一致性测试。测试对于同一输入和 Scipy 中 polygamma API 计算结果的数值的一致性。
 - 数据类型测试。选取不同数据类型的输入，测试计算结果的准确性。
-- 参数取值测试。选取不同取值的参数 `n` （表示求导的阶数），测试计算结果的准确性。
+- 参数取值测试。选取不同取值的参数 `n` （表示求导的阶数），测试计算结果的准确性。对于 `n = 0` 的情况，需要和 Scipy 中的 psi API 计算结果一致。
 
-1. 边界条件
+2. 边界条件
 
 - 当 `x` 为空张量，测试其输出是否空张量且输出张量形状是否正确。
-- 当 `n=0` ,测试其输出是否与digamma API得到的计算结果相同。
+- 当 `n = 0` ,测试其输出是否与 digamma API 得到的计算结果相同。
 
 3. 异常测试
 
@@ -473,4 +473,12 @@ $$ (\Phi^n(x))' = \frac{d}{dx}\Phi^n(x) = \Phi^{n+1}(x) $$
 
 # 名词解释
 
+无
+
 # 附件及参考资料
+
+[scipy.polygamma](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.polygamma.html)
+
+[torch.polygamma](https://pytorch.org/docs/stable/generated/torch.polygamma.html)
+
+[polygamma wikipedia](https://en.wikipedia.org/wiki/Polygamma_function)
