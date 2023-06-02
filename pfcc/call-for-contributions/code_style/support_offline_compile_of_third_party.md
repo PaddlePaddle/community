@@ -5,9 +5,9 @@
 > Tracking issue: [PaddlePaddle/Paddle#54305](https://github.com/PaddlePaddle/Paddle/issues/54305)
 ## 目的
 现在Paddle编译第三方库通过ExternalProject_Add命令对第三方库下载，当编译到某个第三方库的时候才会下载第三方库，然后编译，这种方式会存在很多问题,具体如下：
-1 一边编译一边下载，当编译到某个第三方库的时候开始下载，导致git clone的频率增加，如果网络或者代理不稳定，任何一次git clone失败就会导致编译出问题，本地编译和CI均太过于依赖代理；
-2 外部用户需要翻墙才能访问github，经常会因为git clone而下载失败；
-3 研发RD删除build目录后重新编译就需要重新下载这些第三方库，又要重新git clone第三方库，没有达到复用的效果，编译时间会增加很多，也会因为网络和代理问题影响研发效率。
+1. 一边编译一边下载，当编译到某个第三方库的时候开始下载，导致git clone的频率增加，如果网络或者代理不稳定，任何一次git clone失败就会导致编译出问题，本地编译和CI均太过于依赖代理；
+2. 外部用户需要翻墙才能访问github，经常会因为git clone而下载失败；
+3. 研发RD删除build目录后重新编译就需要重新下载这些第三方库，又要重新git clone第三方库，没有达到复用的效果，编译时间会增加很多，也会因为网络和代理问题影响研发效率。
 
 ## 方案设计
 1 通过git submodule的方式将paddle依赖的所有第三方库放在根目录Paddle/third_party下,只需git clone --recusrsive 可以将Paddle的第三方库全部下载下来，后续在编译阶段将不再下载第三方库，直接编译。
@@ -47,9 +47,35 @@ zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack
 |8|cutlass|WITH_GPU|https://github.com/NVIDIA/cutlass.git tag:v2.11.0|
 |9|dgc|WITH_DGC(受WITH_DISTRIBUTE控制)|https://fleet.bj.bcebos.com/dgc/collective_f66ef73.tgz|
 |10|dirent|WIN32|repo：tronkko/direnttag：1.23.2|
-|11|dlpack|
-默认打开|
-repo：dmlc/dlpack.git
-tag：v0.4|
+|11|dlpack|默认打开|repo：dmlc/dlpack.git tag：v0.4|
+|12|eigen|默认打开|repo：https://gitlab.com/libeigen/eigen.git tag：f612df273689a19d25b45ca4f8269463207c4fee|
+|13|flashattn|WITH_GPU|${GIT_URL}/PaddlePaddle/flash-attention.git tag:18106c1ba0ccee81b97ca947397c08a141815a47|
+|14|gflags|默认打开repo: gflags/gflags.git tag: v2.2.2|
+|15|glog|默认打开|repo：google/glog.git tag：v0.4.0|
+|16|gloo|NOT WIN32 AND NOT APPLE|repo：sandyhouse/gloo.git tag：v0.0.2|
+|17|gtest|WITH_TESTING、WITH_DISTRIBUTE|repo：google/googletest.git tag：release-1.8.1|
+|18|lapack|默认打开|repo：https://paddlepaddledeps.bj.bcebos.com/lapack_lnx_v3.10.0.20210628.tar.gz|
+|19|leveldb|WITH_PSLIB|repo：https://github.com/google/leveldb tag：v1.18|
+|20|libmct|WITH_PSLIB、WITH_LIBMCT|https://pslib.bj.bcebos.com/libmct/libmct.tar.gz 0.1.0版本|
+|21|libxsmm|WITH_PSLIB|repo：hfp/libxsmm.git tag：7cc03b5b342fdbc6b6d990b190671c5dbb8489a2|
+|22|lite|WITH_LITE|repo：PaddlePaddle/Paddle-Lite.git tag：81ef66554099800c143a0feff6e0a491b3b0d12e|
+|23|mkldnn|WITH_MKLDNN、WITH_MKL、AVX2_FOUND|repo：oneapi-src/oneDNN.git tag：9b186765dded79066e0cd9c17eb70b680b76fb8e|
+|24|mklml|WITH_MKLML|https://paddlepaddledeps.bj.bcebos.com/mklml_win_2019.0.5.20190502.zip|
+|25|onnxruntime|WITH_ONNXRUNTIME 1|https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}onnxruntime-win-x64-${ONNXRUNTIME_VERSION}.zip|
+|26|openblas|/|repo：xianyi/OpenBLAS.git tag：v0.3.7|
+|27|paddle2onnx|WITH_ONNXRUNTIME|https://github.com/PaddlePaddle/Paddle2ONNX/releases/download/v${PADDLE2ONNX_VERSION}/paddle2onnx-win-x64-${PADDLE2ONNX_VERSION}.zip|
+|28|pocketfft|WITH_POCKETFFT（默认打开|repo：https://gitlab.mpcdf.mpg.de/mtr/pocketfft.git tag：release_for_eigen|
+||poplar|WITH_IPU|/|
+|29|protobuf|默认打开|repo：protocolbuffers/protobuf.git tag：9f75c5aa851cd877fb0d93ccc31b8567a6706546|
+|30|pslib_brpc|WITH_PSLIB、WITH_PSLIB_BRPC|https://pslib.bj.bcebos.com/pslib_brpc.tar.gz 0.1.0版本|
+|31|pslib|WITH_PSLIB|https://pslib.bj.bcebos.com/pslib_brpc.tar.gz 0.1.0版本|
+|32|pybind11|WITH_PYTHON(默认打开)|repo: pybind/pybind11.git|tag: v2.4.3|
+|32|python|WITH_PYTHON（默认打开）|/|
+|33|rocksdb|WITH_PSCORE|repo: https://github.com/facebook/rocksdb tag: v6.10.1|
+|34|snappy|WITH_PSLIB，WITH_DISTRIBUTE|repo：https://github.com/google/snappy tag：1.1.7|
+
+
+
+
 
 
