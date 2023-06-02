@@ -12,9 +12,9 @@
 
 ## 1、相关背景
 
-cummax 是指求累积最大值（cumulative max）的功能。即求
+cummax函数的功能为求累积最小值（cumulative max）。对于输入向量/矩阵，第i个位置的计算方式为：
 $$
-    y_i = \max\(x_1, x_2, x_3, \cdots , x_i\)
+y_i = \max(x_1, x_2, x_3, \cdots , x_i)
 $$
 
 PyTorch、NumPy 和 Pandas 提供了相似算子。
@@ -48,15 +48,15 @@ Parameters
 Keyword Arguments
  - out (tuple, optional) – the result tuple of two output tensors (values, indices)
 ```
-即输入参数为 Tensor 和指定的维，两个值和索引的切片。
+输入数据Tensor和cummax操作的维度dim，输出一个tuple包含计算结果values和索引indices
 
-相关联的 PR [Cumulative Maximum · Issue #20240 · pytorch/pytorch (github.com)](https://github.com/pytorch/pytorch/issues/20240)，其中提及`logcumsumexp` 依赖于 `cummax` 功能。
+相关联的 PR [Cumulative Maximum · Issue #20240 · pytorch/pytorch (github.com)](https://github.com/pytorch/pytorch/issues/20240)，其中提及`logcumsumexp` 依赖于 `cummax` 功能。
 
 ### 实现方法
 
-在实现方法上, PyTorch 通用实现采用的遍历，[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L638)，CUDA 采用的[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L17)。
+在实现方法上, PyTorch采用的CPU实现为：循环遍历赋值，而CUDA实现则是调用pytorch自己实现的scan_with_indices函数。
 核心代码为：
-CPU:
+[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L769):
 
 ```cpp
 template<typename T1, typename T2, typename Operation>
@@ -111,7 +111,8 @@ std::tuple<Tensor, Tensor> cummax(const Tensor& self, int64_t dim) {
   return std::make_tuple(values, indices);
 }
 ```
-GPU:
+[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L28):
+
 ```cpp
 void cummax_helper_cuda(const Tensor& self, Tensor& values, Tensor& indices, int64_t dim) {
   TensorArg output_arg{ values, "output", 1 };
@@ -140,6 +141,42 @@ void launch_cummax_cuda_kernel(const TensorBase& self, const TensorBase& values,
 }
 ```
 
+
+~~~cpp
+template<typename scalar_t, typename BinaryFunction>
+void scan_dim_with_indices(const TensorBase& self, const TensorBase& values, const TensorBase& indices, //int64_t dim) {
+     int64_t dim, scalar_t init, BinaryFunction binary_op) {
+  int ndim = self.dim();
+  auto self_ = self.expect_contiguous();
+  TORCH_INTERNAL_ASSERT(values.is_contiguous() && indices.is_contiguous());
+  if (dim == ndim - 1) {
+    scan_innermost_dim_with_indices<scalar_t>(*self_, values, indices, init, binary_op);
+  } else {
+    scan_outer_dim_with_indices<scalar_t>(*self_, values, indices, dim, init, binary_op);
+  }
+}
+~~~
+
+其中函数`scan_innermost_dim_with_indices`和`scan_outer_dim_with_indices`的相关代码较长，它们的功能是在不同维度上对输入进行并行的累积操作，其中关于并行扫描部分实现的代码值得参考。
+
+CPU/GPU反向计算
+
+~~~cpp
+Tensor cummaxmin_backward(const Tensor& grad, const Tensor& input, const Tensor& indices, int64_t dim) {
+  if (input.numel() == 0) {
+    return input;
+  }
+  auto result = at::zeros(input.sizes(), input.options());
+
+  // for composite compliance, use out-of-place variant of
+  // `scatter_add` if `indices` or `grad` is a Tensor Subclass.
+  if (areAnyTensorSubclassLike({indices, grad})) {
+    return result.scatter_add(dim, indices, grad);
+  }
+  return result.scatter_add_(dim, indices, grad);
+}
+~~~
+
 ## NumPy
 
 NumPy 具有相似功能的 API 是 `numpy.maximum.accumulate()`，文档参见 [numpy.ufunc.accumulate — NumPy v1.22 Manual](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.accumulate.html)。
@@ -148,8 +185,7 @@ NumPy 的策略是提供一种更具兼容性的实现方式，组合实现该�
 
 ## Pandas
 
-Pandas 也提供了该 API [pandas.DataFrame.cummax¶
-](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.cummax.html#pandas-dataframe-cummax)。
+Pandas 也提供了该 API [pandas.DataFrame.cummax](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.cummax.html#pandas-dataframe-cummax)。
 
 介绍为：
 
@@ -219,7 +255,6 @@ Return cumulative maximum of Series or DataFrame.
                     else:
                         seen_na[lab, j] = 1
                         out[i, j] = val
-
 ```
 
 # 四、对比分析
@@ -233,15 +268,57 @@ PyTorch 还提供了基于 CUDA 的算子实现。
 
 ## 命名与参数设计
 
-API设计为`paddle.cummax(x, axis , dtype, name)`以及`paddle.Tensor.cummax(axis, dtype, name)`。参数设计参考`paddle.cumsum`。
-- x (Tensor) - 需要进行累积最大值统计的 Tensor。
-- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累加计算。
-- dtype (str，可选) - 输出Tensor的数据类型，支持int32、int64、float32、float64. 如果指定了，那么在执行操作之前，输入张量将被转换为dtype. 这对于防止数据类型溢出非常有用。默认为：None。
-- name  (str，可选) - 操作的名称（可选，默认值为None）。
+API设计为`paddle.cummax(x, axis, dtype, name)`以及`paddle.Tensor.cummax(axis, dtype, name)`。
+
+paddle.cummax
+----------------------
+参数
+:::::::::
+- x (Tensor) - 累积最大值的输入，需要进行累积最大值操作的 Tensor。
+- axis (int, 可选) - 指明需要统计的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累积最大值计算。
+- dtype (str，可选) - 指定输出索引的数据类型，可以为int32和int64，默认：int64。
+- name  (str，可选) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
+返回
+:::::::::
+- Out (tuple) - 返回累积最大值结果和对应的索引信息。累积最大值结果的数据类型和输入`x`一致。
+
+paddle.Tensor.cummax指向paddle.cummax，两者是相同的API
 
 ## 底层OP设计
 
-参考 paddle.cumsum 实现。
+cpu：
+前向计算，需要计算cummax结果Out和对应的Indices，没有在paddle内部找到可以直接计算Indices的API可供调用，因此需要实现一个能够同时计算cummax和Indices的函数ScanWithIndicesKernel
+后向计算，调用cpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
+
+gpu：
+前向计算，大体过程与cumsum类似，但是在计算部分需要实现一个能够同时计算cummax和Indices的函数ScanWithIndicesKernel
+后向计算，调用gpu_scatter_add函数在Indices指定位置分配grad值，具体可以查看上面的pytorch实现
+
+前向函数定义
+
+~~~cpp
+template <typename T, typename Context>
+void CummaxKernel(const Context& dev_ctx,
+                  const DenseTensor& x,
+                  const Scalar& axis,
+                  DataType dtype,
+                  bool flatten,
+                  DenseTensor* out,
+                  DenseTensor* indices);
+~~~
+
+后向函数定义
+
+~~~cpp
+template <typename T, typename Context>
+void CummaxGradKernel(const Context& dev_ctx,
+                      const DenseTensor& x,
+                      const DenseTensor& indices,
+                      const DenseTensor& out_grad,
+                      const Scalar& axis,
+                      bool flatten,
+                      DenseTensor* x_grad);
+~~~
 
 ## API实现方案
 
@@ -254,8 +331,9 @@ Python 接口实现位置为`paddle/tesnor/math.py`。
 
 - 正确性验证：可以与 NumPy 的结果对齐；
   - 不同 shape；
+  - 前向计算和反向计算；
   - axis 维度：0，1，默认（None），-1等；
-  - dtype 类型：验证 `float64`，`int32`等。
+  - dtype 类型：验证 `float64`，`int32`等；
 
 - 边界情况：对 NaN 等异常值的处理，参考 `paddle.cumsum` 的测试，这里选择与 NumPy 保持一致，即遇到 NaN 结果也为 NaN；
   - 含有 NaN 的用例；

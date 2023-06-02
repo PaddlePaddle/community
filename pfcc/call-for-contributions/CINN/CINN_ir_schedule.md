@@ -172,7 +172,7 @@ serial for (i, 0, 1024)
 {
   serial for (i, 0, 32)
   {
-    serial for (j, 0, 32)
+    serial for (j, 0, 64)
     {
       ScheduleBlock(B)
       {
@@ -181,7 +181,7 @@ serial for (i, 0, 1024)
       }
     }
   }
-  serial for (i, 0, 32)
+  serial for (i, 0, 64)
   {
     serial for (j, 0, 32)
     {
@@ -198,12 +198,12 @@ serial for (i, 0, 1024)
 {
   serial for (i, 0, 32)
   {
-    serial for (j, 0, 32)
+    serial for (j, 0, 64)
     {
-      ScheduleBlock(C)
+      ScheduleBlock(B)
       {
         i0, i1 = axis.bind(i, j)
-        C[i0, i1] = (2 * B[i1, i0])
+        C[i1, i0] = (2 * (1 + A[i0, i1]))
       }
     }
   }
