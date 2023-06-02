@@ -5,7 +5,7 @@
 > Tracking issue: [PaddlePaddle/Paddle#54305](https://github.com/PaddlePaddle/Paddle/issues/54305)
 ## 目的
 现在Paddle编译第三方库通过ExternalProject_Add命令对第三方库下载，当编译到某个第三方库的时候才会下载第三方库，然后编译，这种方式会存在很多问题,具体如下：
-1. 一边编译一边下载，当编译到某个第三方库的时候开始下载，导致git clone的频率增加，如果网络理不稳定，任何一次git clone失败就会导致编译出问题，本地编译和CI均太过于依赖网络；
+1. 一边编译一边下载，当编译到某个第三方库的时候开始下载，导致git clone的频率增加，如果网络不稳定，任何一次git clone失败就会导致编译出问题，本地编译和CI均太过于依赖网络；
 2. 研发RD删除build目录后重新编译就需要重新下载这些第三方库，又要重新git clone第三方库，没有达到复用的效果，编译时间会增加很多，也会因为网络问题影响研发效率。
 
 ## 方案设计
@@ -45,11 +45,11 @@ zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack
 |7|cusparselt|WITH_CUSPARSELT|https://developer.download.nvidia.com/compute/libcusparse-lt/0.2.0/local_installers/libcusparse_lt-linux-x86_64-0.2.0.1.tar.gz|
 |8|cutlass|WITH_GPU|https://github.com/NVIDIA/cutlass.git tag:v2.11.0|
 |9|dgc|WITH_DGC(受WITH_DISTRIBUTE控制)|https://fleet.bj.bcebos.com/dgc/collective_f66ef73.tgz|
-|10|dirent|WIN32|repo：tronkko/direnttag：1.23.2|
+|10|dirent|WIN32|repo：tronkko/dirent tag：1.23.2|
 |11|dlpack|默认打开|repo：dmlc/dlpack.git tag：v0.4|
 |12|eigen|默认打开|repo：https://gitlab.com/libeigen/eigen.git tag：f612df273689a19d25b45ca4f8269463207c4fee|
 |13|flashattn|WITH_GPU|${GIT_URL}/PaddlePaddle/flash-attention.git tag:18106c1ba0ccee81b97ca947397c08a141815a47|
-|14|gflags|默认打开repo: gflags/gflags.git tag: v2.2.2|
+|14|gflags|默认打开｜repo: gflags/gflags.git tag: v2.2.2|
 |15|glog|默认打开|repo：google/glog.git tag：v0.4.0|
 |16|gloo|NOT WIN32 AND NOT APPLE|repo：sandyhouse/gloo.git tag：v0.0.2|
 |17|gtest|WITH_TESTING、WITH_DISTRIBUTE|repo：google/googletest.git tag：release-1.8.1|
@@ -73,7 +73,7 @@ zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack
 |35|rocksdb|WITH_PSCORE|repo: https://github.com/facebook/rocksdb tag: v6.10.1|
 |36|snappy|WITH_PSLIB，WITH_DISTRIBUTE|repo：https://github.com/google/snappy tag：1.1.7|
 |37|threadpool|默认打开|repo: progschj/ThreadPool.git tag: 9a42ec1e329f259a5f4881a291db1dcb8f2ad9040｜
-|38|utf8proc|默认打开|repo: JuliaStrings/utf8proc.git|tag: v2.6.1|
+|38|utf8proc|默认打开|repo: JuliaStrings/utf8proc.git tag: v2.6.1|
 |39|warpctc|默认打开|repo：baidu-research/warp-ctc.git tag：37ece0e1bbe8a0019a63ac7e6462c36591c66a5b|
 |40|xbyak|WITH_XBYAK(默认为ON)|repo：herumi/xbyak.git tag：v5.81|
 |41|xxhash|默认|repo：Cyan4973/xxHash.git tag：v0.6.5|
