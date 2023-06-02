@@ -5,9 +5,8 @@
 > Tracking issue: [PaddlePaddle/Paddle#54305](https://github.com/PaddlePaddle/Paddle/issues/54305)
 ## 目的
 现在Paddle编译第三方库通过ExternalProject_Add命令对第三方库下载，当编译到某个第三方库的时候才会下载第三方库，然后编译，这种方式会存在很多问题,具体如下：
-1. 一边编译一边下载，当编译到某个第三方库的时候开始下载，导致git clone的频率增加，如果网络或者代理不稳定，任何一次git clone失败就会导致编译出问题，本地编译和CI均太过于依赖代理；
-2. 外部用户需要翻墙才能访问github，经常会因为git clone而下载失败；
-3. 研发RD删除build目录后重新编译就需要重新下载这些第三方库，又要重新git clone第三方库，没有达到复用的效果，编译时间会增加很多，也会因为网络和代理问题影响研发效率。
+1. 一边编译一边下载，当编译到某个第三方库的时候开始下载，导致git clone的频率增加，如果网络理不稳定，任何一次git clone失败就会导致编译出问题，本地编译和CI均太过于依赖网络；
+2. 研发RD删除build目录后重新编译就需要重新下载这些第三方库，又要重新git clone第三方库，没有达到复用的效果，编译时间会增加很多，也会因为网络问题影响研发效率。
 
 ## 方案设计
 1. 通过git submodule的方式将paddle依赖的所有第三方库放在根目录Paddle/third_party下,只需git clone --recusrsive 可以将Paddle的第三方库全部下载下来，后续在编译阶段将不再下载第三方库，直接编译。
@@ -61,7 +60,7 @@ zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack
 |22|lite|WITH_LITE|repo：PaddlePaddle/Paddle-Lite.git tag：81ef66554099800c143a0feff6e0a491b3b0d12e|
 |23|mkldnn|WITH_MKLDNN、WITH_MKL、AVX2_FOUND|repo：oneapi-src/oneDNN.git tag：9b186765dded79066e0cd9c17eb70b680b76fb8e|
 |24|mklml|WITH_MKLML|https://paddlepaddledeps.bj.bcebos.com/mklml_win_2019.0.5.20190502.zip|
-|25|onnxruntime|WITH_ONNXRUNTIME 1|https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}onnxruntime-win-x64-${ONNXRUNTIME_VERSION}.zip|
+|25|onnxruntime|WITH_ONNXRUNTIME|https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}onnxruntime-win-x64-${ONNXRUNTIME_VERSION}.zip|
 |26|openblas|/|repo：xianyi/OpenBLAS.git tag：v0.3.7|
 |27|paddle2onnx|WITH_ONNXRUNTIME|https://github.com/PaddlePaddle/Paddle2ONNX/releases/download/v${PADDLE2ONNX_VERSION}/paddle2onnx-win-x64-${PADDLE2ONNX_VERSION}.zip|
 |28|pocketfft|WITH_POCKETFFT（默认打开|repo：https://gitlab.mpcdf.mpg.de/mtr/pocketfft.git tag：release_for_eigen|
