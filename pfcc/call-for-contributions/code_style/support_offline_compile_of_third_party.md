@@ -49,7 +49,7 @@ zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack
 |11|dlpack|默认打开|repo：dmlc/dlpack.git tag：v0.4|
 |12|eigen|默认打开|repo：https://gitlab.com/libeigen/eigen.git tag：f612df273689a19d25b45ca4f8269463207c4fee|
 |13|flashattn|WITH_GPU|${GIT_URL}/PaddlePaddle/flash-attention.git tag:18106c1ba0ccee81b97ca947397c08a141815a47|
-|14|gflags|默认打开｜repo: gflags/gflags.git tag: v2.2.2|
+|14|gflags|默认打开|repo: gflags/gflags.git tag: v2.2.2|
 |15|glog|默认打开|repo：google/glog.git tag：v0.4.0|
 |16|gloo|NOT WIN32 AND NOT APPLE|repo：sandyhouse/gloo.git tag：v0.0.2|
 |17|gtest|WITH_TESTING、WITH_DISTRIBUTE|repo：google/googletest.git tag：release-1.8.1|
