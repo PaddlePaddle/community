@@ -10,18 +10,18 @@
 3. 研发RD删除build目录后重新编译就需要重新下载这些第三方库，又要重新git clone第三方库，没有达到复用的效果，编译时间会增加很多，也会因为网络和代理问题影响研发效率。
 
 ## 方案设计
-1 通过git submodule的方式将paddle依赖的所有第三方库放在根目录Paddle/third_party下,只需git clone --recusrsive 可以将Paddle的第三方库全部下载下来，后续在编译阶段将不再下载第三方库，直接编译。
-2 若用户git clone  xxx，没有加--recusrsive则Paddle/third_party/目录存在但是为空，在setup.py和third_party.cmake会自动执行git submodule update --init，在cmake阶段也会把第三方库下载下来，在make阶段不需要网。
+1. 通过git submodule的方式将paddle依赖的所有第三方库放在根目录Paddle/third_party下,只需git clone --recusrsive 可以将Paddle的第三方库全部下载下来，后续在编译阶段将不再下载第三方库，直接编译。
+2. 若用户git clone  xxx，没有加--recusrsive则Paddle/third_party/目录存在但是为空，在setup.py和third_party.cmake会自动执行git submodule update --init，在cmake阶段也会把第三方库下载下来，在make阶段不需要网。
 ## 方案规划
 1. 将不打开任何编译选项，即cmake ..需要下载的第三方库(zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack protobuf gloo crypotopp pybind11 pocketfft xbyak)通过git submodule作为Paddle的子模块，编译的时候不再需要下载第三方库；
 2. 将常用编译选项下(如WITH_GPU，WITH_DISTRIBUTE等)且比较小的第三方库作为Paddle的子模块；
 3. 其它的第三方库根据不同的编译选项进行判断，在cmake时下载，在make -j时准备好所有的第三方库。
 
 ## 注意事项
-1 注意所用第三方库的tag，有的第三方库在不同平台下使用的tag不同，如protobuf，需要进行判断；
-2 需要了解增加删除修改submodule的常用命令以及cmake ExternalProject_Add各个参数的用法；
-3 注意第三方库位置变换之后，include头文件的路径也需要变化；
-4 注意不要在源码引入任何编译产物，第三方库的编译产物放在build目录下。参考PR：[https://github.com/PaddlePaddle/Paddle/pull/53744]
+1. 注意所用第三方库的tag，有的第三方库在不同平台下使用的tag不同，如protobuf，需要进行判断；
+2. 需要了解增加删除修改submodule的常用命令以及cmake ExternalProject_Add各个参数的用法；
+3. 注意第三方库位置变换之后，include头文件的路径也需要变化；
+4. 注意不要在源码引入任何编译产物，第三方库的编译产物放在build目录下。参考PR：[https://github.com/PaddlePaddle/Paddle/pull/53744]
 
 ## 第三方库统计
 ### 可以作为submodule的第三方库，主要是放在github或者gitlab上的repo
@@ -73,6 +73,12 @@ zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack
 |32|python|WITH_PYTHON（默认打开）|/|
 |33|rocksdb|WITH_PSCORE|repo: https://github.com/facebook/rocksdb tag: v6.10.1|
 |34|snappy|WITH_PSLIB，WITH_DISTRIBUTE|repo：https://github.com/google/snappy tag：1.1.7|
+|35|threadpool|默认打开|repo: progschj/ThreadPool.git tag: 9a42ec1e329f259a5f4881a291db1dcb8f2ad9040｜
+|36|utf8proc|默认打开|repo: JuliaStrings/utf8proc.git|tag: v2.6.1|
+|37|warpctc|默认打开|repo：baidu-research/warp-ctc.git tag：37ece0e1bbe8a0019a63ac7e6462c36591c66a5b|
+|38|xbyak|WITH_XBYAK(默认为ON)|repo：herumi/xbyak.git tag：v5.81|
+|39|xxhash|默认|repo：Cyan4973/xxHash.git tag：v0.6.5|
+|40|zlib|默认打开|repo: madler/zlib.git tag: v1.2.8|
 
 
 
