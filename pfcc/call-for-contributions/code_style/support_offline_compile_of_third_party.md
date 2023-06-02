@@ -65,20 +65,20 @@ zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack
 |26|openblas|/|repo：xianyi/OpenBLAS.git tag：v0.3.7|
 |27|paddle2onnx|WITH_ONNXRUNTIME|https://github.com/PaddlePaddle/Paddle2ONNX/releases/download/v${PADDLE2ONNX_VERSION}/paddle2onnx-win-x64-${PADDLE2ONNX_VERSION}.zip|
 |28|pocketfft|WITH_POCKETFFT（默认打开|repo：https://gitlab.mpcdf.mpg.de/mtr/pocketfft.git tag：release_for_eigen|
-||poplar|WITH_IPU|/|
-|29|protobuf|默认打开|repo：protocolbuffers/protobuf.git tag：9f75c5aa851cd877fb0d93ccc31b8567a6706546|
-|30|pslib_brpc|WITH_PSLIB、WITH_PSLIB_BRPC|https://pslib.bj.bcebos.com/pslib_brpc.tar.gz 0.1.0版本|
-|31|pslib|WITH_PSLIB|https://pslib.bj.bcebos.com/pslib_brpc.tar.gz 0.1.0版本|
-|32|pybind11|WITH_PYTHON(默认打开)|repo: pybind/pybind11.git|tag: v2.4.3|
-|32|python|WITH_PYTHON（默认打开）|/|
-|33|rocksdb|WITH_PSCORE|repo: https://github.com/facebook/rocksdb tag: v6.10.1|
-|34|snappy|WITH_PSLIB，WITH_DISTRIBUTE|repo：https://github.com/google/snappy tag：1.1.7|
-|35|threadpool|默认打开|repo: progschj/ThreadPool.git tag: 9a42ec1e329f259a5f4881a291db1dcb8f2ad9040｜
-|36|utf8proc|默认打开|repo: JuliaStrings/utf8proc.git|tag: v2.6.1|
-|37|warpctc|默认打开|repo：baidu-research/warp-ctc.git tag：37ece0e1bbe8a0019a63ac7e6462c36591c66a5b|
-|38|xbyak|WITH_XBYAK(默认为ON)|repo：herumi/xbyak.git tag：v5.81|
-|39|xxhash|默认|repo：Cyan4973/xxHash.git tag：v0.6.5|
-|40|zlib|默认打开|repo: madler/zlib.git tag: v1.2.8|
+|29|poplar|WITH_IPU|/|
+|30|protobuf|默认打开|repo：protocolbuffers/protobuf.git tag：9f75c5aa851cd877fb0d93ccc31b8567a6706546|
+|31|pslib_brpc|WITH_PSLIB、WITH_PSLIB_BRPC|https://pslib.bj.bcebos.com/pslib_brpc.tar.gz 0.1.0版本|
+|32|pslib|WITH_PSLIB|https://pslib.bj.bcebos.com/pslib_brpc.tar.gz 0.1.0版本|
+|33|pybind11|WITH_PYTHON(默认打开)|repo: pybind/pybind11.git|tag: v2.4.3|
+|34|python|WITH_PYTHON（默认打开）|/|
+|35|rocksdb|WITH_PSCORE|repo: https://github.com/facebook/rocksdb tag: v6.10.1|
+|36|snappy|WITH_PSLIB，WITH_DISTRIBUTE|repo：https://github.com/google/snappy tag：1.1.7|
+|37|threadpool|默认打开|repo: progschj/ThreadPool.git tag: 9a42ec1e329f259a5f4881a291db1dcb8f2ad9040｜
+|38|utf8proc|默认打开|repo: JuliaStrings/utf8proc.git|tag: v2.6.1|
+|39|warpctc|默认打开|repo：baidu-research/warp-ctc.git tag：37ece0e1bbe8a0019a63ac7e6462c36591c66a5b|
+|40|xbyak|WITH_XBYAK(默认为ON)|repo：herumi/xbyak.git tag：v5.81|
+|41|xxhash|默认|repo：Cyan4973/xxHash.git tag：v0.6.5|
+|42|zlib|默认打开|repo: madler/zlib.git tag: v1.2.8|
 
 
 
