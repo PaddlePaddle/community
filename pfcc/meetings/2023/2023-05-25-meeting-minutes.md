@@ -23,11 +23,11 @@
 
 ### 3、Paddle 的量化推理基础能力建设
 
-飞桨研发 [RichardWooSJTU](https://github.com/RichardWooSJTU) 介绍 Paddle 的量化推理基础能力建设，本项目关联开源之夏 Paddle 第 1 题，给开发者们指引了任务开发的方向。
+飞桨研发 [RichardWooSJTU](https://github.com/RichardWooSJTU) 介绍 Paddle 的量化推理基础能力建设，本项目关联[开源之夏 Paddle 第 1 题](https://summer-ospp.ac.cn/org/prodetail/23ba90314?list=org&navpage=org)，给开发者们指引了任务开发的方向。
 
 ### 4、编译第三方库的最新工作分享
 
-飞桨研发 [risemeup1](https://github.com/risemeup1)  介绍编译第三方库的最新工作分享，通过编译第三方库工作的优化，可以提升下载编译包效率，进一步提升飞桨框架的使用体验。
+飞桨研发 [risemeup1](https://github.com/risemeup1)  介绍编译第三方库的最新工作分享，通过编译第三方库工作的优化，可以提升下载编译包效率，进一步提升飞桨框架的使用体验。邀请社区开发者进行贡献的任务已经公布：[#54305](https://github.com/PaddlePaddle/Paddle/issues/54305)。
 
 ### 5、代码自动生成项目进展
 
