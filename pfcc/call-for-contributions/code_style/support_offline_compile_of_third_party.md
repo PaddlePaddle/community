@@ -35,7 +35,7 @@ arm_brpc box_ps concurrentqueue cusparselt dgc jemalloc lapack libmct mklml onnx
 zlib gflags glog eigen threadpool dlpack xxhash warpctc warprnnt utf8proc lapack protobuf gloo crypotopp pybind11 pocketfft xbyak
 
 ### 不同编译选项对应的第三方库
-|依赖库名称|编译选项|paddle使用的安装包、repo及tag/commit|
+|序号｜依赖库名称|编译选项|paddle使用的安装包、repo及tag/commit|
 |-------|----|-------|
 |1|arm_brpc|WITH_ARM_BRPC|https://paddlerec.bj.bcebos.com/online_infer/arm_brpc_ubuntu18/output.tar.gz 1.1.0版本|
 |2|box_ps|WITH_BOX_PS|http://box-ps.gz.bcebos.com/box_ps.tar.gz 0.1.1版本|
