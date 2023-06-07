@@ -1,6 +1,7 @@
 # PaddleSOT 孵化项目
 
 ## 一、概要
+PaddleSOT，即 Paddle Symbolic Opcode Translator，飞桨动转静体系下的子图 Fallback 孵化项目。
 
 ### 1. 相关背景
 
