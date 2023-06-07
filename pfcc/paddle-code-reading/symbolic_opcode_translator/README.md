@@ -17,9 +17,9 @@ Paddle 当前的动转静是基于 `AST Transformer` 原理实现的。AST 转�
 def unsupport_func(x):
     x = 2 * x
     t = x.numpy() # t 依赖了 x 的值，依赖静态图的执行结果
-    t = np.ones(t) 
+    t = np.ones(t)
     return paddle.to_tensor(t)
-    
+
 x = paddle.to_tensor([2])
 unsupport_func(x)  # raise error
 ```
@@ -27,11 +27,11 @@ unsupport_func(x)  # raise error
 
 ### 2. 目标收益
 
-* **训练成功率的大幅提升** 
-  
+* **训练成功率的大幅提升**
+
   子图 Fallback 机制的引入，根本上解决了历史遗留的 numpy 语法、控制流边界 case 等疑难长尾问题带来的转静失败问题，自动识别并回退到动态图执行，将会大幅提升转静训练的成功率；
 * **拓宽接入编译器的路径**
-  
+
   作为接入编译器、解锁加速新能力的前置条件，此方案有效解决了 组合算子拆分模块中「动态 Shape」的机制问题，确保所有的静态子图都能按预期地拆分为元算子，流畅传递给 CINN 后端；
 
 * **更加灵活的动转静能力**
@@ -101,7 +101,7 @@ eval_frame_function :: PyFrameObject -> CustomCode
 | `Disable Eval Frame` | `True`： 递归的函数调用不进行转写。比如：Paddle 内部的函数没必要转写，开启可以加速 | `False`：递归的函数也会触发 eval frame转写。默认场景|
 
 ```python
-def father(): 
+def father():
     child ()
 ```
 
@@ -161,7 +161,6 @@ Python 运行时的关键数据结构有两个：`PyFrameObject` 提供函数逻
 当模拟执行的过程中发现组网逻辑，`OpcodeExecutor` 将相应的信息记录到 `FunctionGraph` 的 `Statement IR` 中。同时，`OpcodeExecutor` 将利用静态图的 `infer_meta` 机制获取输出 `Tensor` 的 `meta` 信息，结合 meta 信息生成新的 `TensorVariable` 并继续推进模拟执行。
 
 当顺利完成模拟执行后，子图 FallBack 将根据保存的 `FunctionGraph` 结合现有的动转静接口生成 Program。
-
 
 ### 2.5 函数调用: `OpcodeInlineExecutor`
 
@@ -249,7 +248,7 @@ print(out)
              30 LOAD_FAST                1 (y)
              32 CALL_FUNCTION            1
              34 RETURN_VALUE
-             
+
 # __resume_fn_0
   9           0 JUMP_ABSOLUTE           10
 
@@ -271,7 +270,7 @@ print(out)
 
  14     >>   28 LOAD_FAST                0 (y)
              30 RETURN_VALUE
-             
+
 
 # __resume_fn_1
   9           0 JUMP_ABSOLUTE           20
@@ -318,7 +317,7 @@ def fn(x):
     print(x)
     x = x * 2
     return x
- 
+
  x = paddle.to_tensor([1])
  out = symbolic_trace(fn)(x)
  print(out)
@@ -357,7 +356,7 @@ def fn(x):
 对于转换后的字节码，会同时生成一个 `Guard`，这个 `Guard` 会用于确保新的 frame 可以直接复用这个转换后的字节码：
 
 * 如果 `Guard` 返回 `False`，则认为 `Cache` 没命中，会再次触发字节码转换
-  
+
 ![](./img/guard.png)
 
 Guard 是一个函数，它的签名如下：
@@ -492,18 +491,18 @@ ResNet18 中的部分 SIR 示例
 StatmentIR: SIR_0
   inputs: ['layer_0', 'layer_1'，'var_0']
   outputs: ['var_69']
-  statements: 
-    layer      || var_1 = Conv2D ((layer_0, var_0), {}) 
-    layer      || var_2 = BatchNorm2D ((layer_1, var_1), {}) 
-    layer      || var_3 = ReLU ((layer_2, var_2), {}) 
-    layer      || var_4 = MaxPool2D ((layer_3, var_3), {}) 
-    layer      || var_5 = Conv2D ((layer_5, var_4), {}) 
-    layer      || var_6 = BatchNorm2D ((layer_6, var_5), {}) 
-    layer      || var_7 = ReLU ((layer_7, var_6), {}) 
-    layer      || var_8 = Conv2D ((layer_8, var_7), {}) 
-    layer      || var_9 = BatchNorm2D ((layer_9, var_8), {}) 
-    method     || var_10 = __add__ ((var_9, var_4), {}) 
-    layer      || var_11 = ReLU ((layer_10, var_10), {}) 
+  statements:
+    layer      || var_1 = Conv2D ((layer_0, var_0), {})
+    layer      || var_2 = BatchNorm2D ((layer_1, var_1), {})
+    layer      || var_3 = ReLU ((layer_2, var_2), {})
+    layer      || var_4 = MaxPool2D ((layer_3, var_3), {})
+    layer      || var_5 = Conv2D ((layer_5, var_4), {})
+    layer      || var_6 = BatchNorm2D ((layer_6, var_5), {})
+    layer      || var_7 = ReLU ((layer_7, var_6), {})
+    layer      || var_8 = Conv2D ((layer_8, var_7), {})
+    layer      || var_9 = BatchNorm2D ((layer_9, var_8), {})
+    method     || var_10 = __add__ ((var_9, var_4), {})
+    layer      || var_11 = ReLU ((layer_10, var_10), {})
     api        || var_12 = paddle.nn.functional.relu (var_11)
 ```
 
@@ -517,7 +516,7 @@ StatmentIR: SIR_0
 #### 2.10.3 `StatementIR` 支持的四类语句
 `StatementIR` 中支持了 4种语句，分别为:
 
-* `call_api` ：对 var 执行一条 paddle 的 api 
+* `call_api` ：对 var 执行一条 paddle 的 api
 * `call_method` ：第一个参数是一个 `Variable` 的情况下，执行 `args[0]` 的方法，并获取结果。
 * `call_sir` ：（可融合的关键）调用另外一个 `sir`，存在一个类似准备 frame 的过程，来实现 name 的重新绑定。
 * `call_layer` ：（基于Paddle的动转静统一）直接调用一个 `paddle.nn.Layer``，可以减少字节码的模拟执行，是一个子图质量的优化手段。
