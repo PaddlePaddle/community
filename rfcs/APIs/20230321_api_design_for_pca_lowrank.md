@@ -1,6 +1,6 @@
 # paddle.pca_lowrank 设计文档
 
-| API 名称     | paddle.pca_lowrank` / `paddle.nn.pca_lowrank |
+| API 名称     | paddle.pca_lowrank` / `paddle.sparse.pca_lowrank |
 | ------------ |----------------------------------------------|
 | 提交作者     | [Sblue-G](https://github.com/Sblue-G)        |
 | 提交时间     | 2023-03-21                                   |
@@ -12,7 +12,7 @@
 
 ## 1、相关背景
 
-Paddle 需要扩充 API：paddle.pca_lowrank，Tensor.pca_lowrank，paddle.nn.pca_lowrank。
+Paddle 需要扩充 API：paddle.pca_lowrank，paddle.sparse.pca_lowrank。
 
 ## 2、功能目标
 
@@ -26,11 +26,9 @@ Paddle 需要扩充 API：paddle.pca_lowrank，Tensor.pca_lowrank，paddle.nn.pc
 
 飞桨目前没有直接提供此API，但飞桨提供了实现低秩矩阵、批次低秩矩阵或稀疏矩阵进行线性主成分分析的工具和模块。
 
-对于低秩矩阵PCA，可以使用PaddleSlim库中的slim.prune.LowRankFilter API。这个API可以对模型的权重进行低秩分解，并且只保留最大的几个奇异值，从而减少模型的参数量和计算量。
+对于低秩矩阵PCA和批次低秩矩阵PCA，可以现存的paddle API组合实现
 
-对于批次低秩矩阵PCA，可以使用PaddleSlim库中的slim.prune.BatchNormFilter API。这个API可以对BatchNorm层的权重进行低秩分解，并且只保留最大的几个奇异值，从而减少模型的参数量和计算量。
-
-对于稀疏矩阵PCA，可以使用PaddleSlim库中的slim.prune.SparseFilter API。这个API可以对模型的权重进行稀疏化，从而减少模型的参数量和计算量。
+对于稀疏矩阵PCA，可以使用paddle现存的paddle sparse API组合实现
 
 # 三、业内方案调研
 
@@ -214,15 +212,25 @@ paddle.pca_lowrank API 的设计主要参考 PyTorch 中的实现，PyTorch 中`
 
 ## 命名与参数设计
 
-`paddle.pca_lowrank(A: Tensor, q: Optional[int] = None, center: bool = True, niter: int = 2)` 
+`paddle.pca_lowrank(x, q=None, center=True, niter=2, name=None)` 
 参数说明如下：
 
-- **A** (Tensor) – 输入张量的尺寸，一般为`(*, m, n)`
-- **q** (int, optional) – 稍微高估的排名A，默认情况下q = min(6,m,n)
-- **center** (bool, optional) – 如果为真，则将输入张量居中，否则，假设输入居中
+- **x** (Tensor) – 输入张量的尺寸，一般为`(*, m, n)`
+- **q** (int, optional) – 稍微高估的x矩阵的秩，默认情况下q = min(6,m,n)
+- **center** (bool, optional) – 如果为真，则将输入张量居中
 - **niter** (int, optional) –  要进行的子空间迭代次数；niter 必须是非负整数，默认为2
 
-返回：中心矩阵的奇异值分解的最佳近似A，形式为一个namedtuple。
+返回：低秩矩阵或批低秩矩阵的奇异值分解的结果U、S、V。
+
+`paddle.sparse.pca_lowrank(x, q=None, center=True, niter=2, name=None)` 
+参数说明如下：
+
+- **x** (Tensor) – 输入张量的尺寸，一般为`(m, n)`
+- **q** (int, optional) – 稍微高估的x矩阵的秩，默认情况下q = min(6,m,n)
+- **center** (bool, optional) – 如果为真，则将输入张量居中
+- **niter** (int, optional) –  要进行的子空间迭代次数；niter 必须是非负整数，默认为2
+
+返回：稀疏矩阵的奇异值分解的结果U、S、V。
 
 ## 底层 OP 设计
 
