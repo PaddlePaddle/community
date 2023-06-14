@@ -3,14 +3,15 @@
 |领域 | 将 xdoctest 引入到飞桨框架工作流中                       | 
 |---|--------------------------------|
 |提交作者 | megemini (柳顺) | 
-|提交时间 | 2023-06-12 | 
-|版本号 | V1.2 | 
+|提交时间 | 2023-06-14 | 
+|版本号 | V1.3 | 
 |依赖飞桨版本 | develop 分支 | 
 |文件名 | 将 xdoctest 引入到飞桨框架工作流中.md | 
 
-**v1.1 修订记录**
+**v1.3 修订记录**
 
-- 增加 整体对于 Paddle 代码 CI 的调研。
+- 增加 任务排期的优先级
+- 修改 部分格式
 
 **v1.2 修订记录**
 
@@ -21,6 +22,10 @@
 - 修改 使用 `google` 样式为 `google/freeform` 样式。
 - 修改 `中英文 API 文档` 的复制示例特性为 `推荐`。
 - 修改 部分描述。
+
+**v1.1 修订记录**
+
+- 增加 整体对于 Paddle 代码 CI 的调研。
 
 
 # 一、概述
@@ -148,95 +153,35 @@ Paddle 代码的 CI 流水线相关工具放置在 [Paddle/tools/](https://githu
 
     - 编译脚本 
 
-        1. 执行命令：
-            
-            `paddle/scripts/paddle_build.sh build_and_check_cpu`
+        1. 执行命令：`paddle/scripts/paddle_build.sh build_and_check_cpu`
 
-        2. `paddle_build.sh` 脚本执行 
-        
-            `generate_api_spec ${PYTHON_ABI:-""} "PR"` 
-            
-            生成 `PR` 对应的 API 
-            
-            `paddle/fluid/API_PR.spec`
+        2. `paddle_build.sh` 脚本执行 `generate_api_spec ${PYTHON_ABI:-""} "PR"` 生成 `PR` 对应的 API `paddle/fluid/API_PR.spec`
 
-        3. `generate_upstream_develop_api_spec` 
-        
-            中的
-            
-            `generate_api_spec "$1" "DEV"` 
-            
-            生成 `DEV` 对应的 API 
-            
-            `paddle/fluid/API_DEV.spec`
+        3. `generate_upstream_develop_api_spec` 中的 `generate_api_spec "$1" "DEV"` 生成 `DEV` 对应的 API `paddle/fluid/API_DEV.spec`
 
     - 测试脚本
 
-        1. 执行命令：
-        
-            `paddle/scripts/paddle_build.sh build_and_check_gpu`
+        1. 执行命令：`paddle/scripts/paddle_build.sh build_and_check_gpu`
 
-        2. `paddle_build.sh` 脚本执行 
-        
-            `build_and_check_gpu` 
-            
-            命令，并调用 
-            
-            `exec_samplecode_test`
+        2. `paddle_build.sh` 脚本执行 `build_and_check_gpu` 命令，并调用 `exec_samplecode_test`
 
-        3. `exec_samplecode_test` 
-        
-            调用 
-            
-            `sampcd_processor.py` 
-            
-            脚本进行代码检查：
-            
-            `python sampcd_processor.py --threads=${SAMPLE_CODE_EXEC_THREADS} gpu; example_error=$?`
+        3. `exec_samplecode_test` 调用 `sampcd_processor.py` 脚本进行代码检查：
+        `python sampcd_processor.py --threads=${SAMPLE_CODE_EXEC_THREADS} gpu; example_error=$?`
 
 - python 部分 `Paddle/tools/sampcd_processor.py`
 
-    1. `sampcd_processor.py` 
-        
-        首先获取到当前的运行环境：
-        
-        `get_test_capacity`
-        
-        这里判断当前环境是否适合 `gpu` 运行等。
+    1. `sampcd_processor.py` 首先获取到当前的运行环境： `get_test_capacity`，
+    这里判断当前环境是否适合 `gpu` 运行等。
 
-    2. 创建临时代码运行目录 
-    
-        `SAMPLECODE_TEMPDIR`
-        
-        并根据是否全量测试，获取/生成 API 及相应示例代码：
-    
-        `filenames = get_filenames(args.full_test)`
+    2. 创建临时代码运行目录 `SAMPLECODE_TEMPDIR`，并根据是否全量测试，获取/生成 API 及相应示例代码：`filenames = get_filenames(args.full_test)`。
 
     3. 对于全量测试
 
-        - `get_full_api_from_pr_spec` 
-        
-            利用之前的 
-            
-            `API_PR_SPEC_FN` (`paddle/fluid/API_PR.spec`) 
-            
-            生成 API 列表。
+        - `get_full_api_from_pr_spec` 利用之前的 `API_PR_SPEC_FN` (`paddle/fluid/API_PR.spec`) 生成 API 列表。
 
-        - 如果没有，则利用 
-        
-            `Paddle/tools/print_signatures.py` 
-            
-            中的 
-            
-            `get_all_api` 
-            
-            生成全量 API。
+        - 如果没有，则利用 `Paddle/tools/print_signatures.py` 中的 `get_all_api` 生成全量 API。
 
-    4. 对于增量测试，
-    
-        `get_incrementapi` 
-        
-        利用之前的 
+    4. 对于增量测试，`get_incrementapi` 利用之前的 
 
         - `API_PR_SPEC_FN(paddle/fluid/API_PR.spec)`
 
@@ -244,9 +189,7 @@ Paddle 代码的 CI 流水线相关工具放置在 [Paddle/tools/](https://githu
 
         生成增量 API 列表。
 
-    5. `get_filenames` 
-    
-        在生成 API 列表之后，逐个 `eval` 判断接口的可执行性，对于有 `__doc__` 的接口，利用 
+    5. `get_filenames` 在生成 API 列表之后，逐个 `eval` 判断接口的可执行性，对于有 `__doc__` 的接口，利用 
         
         - `sampcd_extract_to_file` 
         
@@ -254,36 +197,15 @@ Paddle 代码的 CI 流水线相关工具放置在 [Paddle/tools/](https://githu
         
         抽取示例代码并保存至文件。
 
-    6. `sampcd_extract_to_file` 
-    
-        会判断 docstring 中是否有示例代码，示例代码的 `required` 是否满足，是否跳过 `skiptest` 等。
+    6. `sampcd_extract_to_file` 会判断 docstring 中是否有示例代码，示例代码的 `required` 是否满足，是否跳过 `skiptest` 等。
 
-    7. 示例代码生成之后，利用 
-    
-        `multiprocessing` 
-        
-        的 
-        
-        `map_async(execute_samplecode, filenames.keys())` 
-        
-        逐个执行示例，并判断是否出错。
+    7. 示例代码生成之后，利用 `multiprocessing` 的 `map_async(execute_samplecode, filenames.keys())` 逐个执行示例，并判断是否出错。
 
-    8. `execute_samplecode` 
-    
-        利用 
-        
-        `python xxx.py` 
-        
-        的模式执行示例代码，并根据 
-        
-        `subprc.returncode` 
-        
-        判断是否出错。同时，在执行时对运行时间进行记录。
+    8. `execute_samplecode` 利用 `python xxx.py` 的模式执行示例代码，并根据 `subprc.returncode` 判断是否出错。同时，在执行时对运行时间进行记录。
 
     9. 最后对总体结果进行输出。
-    10. 利用 
-        `exec_gen_doc` 
-        生成预览文档。
+
+    10. 利用 `exec_gen_doc` 生成预览文档。
 
 其中：
 
@@ -379,73 +301,27 @@ $ xdoctest torch --style=google --command=list > tmp.txt
 
 `Paddle/tools/print_signatures.py`
 
-1. `print_signatures.py`
+1. `print_signatures.py` 通过 `get_all_api` 获取 API 列表。
 
-    通过
+2. `get_all_api` 利用 `pkgutil.walk_packages` 遍历 `paddle.__path__` 中的各个模块。
 
-    `get_all_api`
+3. 对于正常引入的模块，利用 `process_module` 解析模块中的 API。
 
-    获取 API 列表。
+4. `process_module` 只对含有属性 `__all__` 的模块进行解析，并跳过 `__all__` 中私有方法。
 
-2. `get_all_api`
+5. 通过 `insert_api_into_dict` 对于正常 `eval` 的接口进行记录。
 
-    利用
+6. `insert_api_into_dict` 通过 `inspect.getdoc` 获取到接口的文档。
 
-    `pkgutil.walk_packages`
-
-    遍历 `paddle.__path__` 中的各个模块。
-
-3. 对于正常引入的模块，利用
-
-    `process_module`
-
-    解析模块中的 API。
-
-4. `process_module` 
-
-    只对含有属性 `__all__` 的模块进行解析，并跳过 `__all__` 中私有方法。
-
-5. 通过
-
-    `insert_api_into_dict`
-
-    对于正常 `eval` 的接口进行记录。
-
-6. `insert_api_into_dict` 
-
-    通过
-
-    `inspect.getdoc`
-
-    获取到接口的文档。
-
-7. 回到
-
-    `process_module`
-
-    中，对于通过
-
-    `insert_api_into_dict`
-
-    记录的接口，判断接口类型为
-
-    `inspect.isclass(api_info['object'])`
-
-    的，进一步通过
-
-    `inspect.getmembers`
-
-    获取内部方法。同样需要过滤掉私有方法。
+7. 回到 `process_module` 中，对于通过 `insert_api_into_dict` 记录的接口，判断接口类型为 `inspect.isclass(api_info['object'])` 的，进一步通过 `inspect.getmembers` 获取内部方法。同样需要过滤掉私有方法。
 
 8. 当遍历完 `paddle.__path__` 目录下的所有模块后，还需要遍历 `paddle` 模块本身的所有属性：
 
     `api_counter += process_module(paddle, attr)`
 
-    这是由于，`paddle` 通过 `globals` 直接赋值等方式，暴露很多接口在 `paddle` 模块下，这些接口是无法通过 `paddle.__path__` 获取的。比如：
-
-    `Paddle/python/paddle/tensor/ops.py`
-
-    中的
+    这是由于，`paddle` 通过 `globals` 直接赋值等方式，暴露很多接口在 `paddle` 模块下，这些接口是无法通过 `paddle.__path__` 获取的。比如： 
+    
+    `Paddle/python/paddle/tensor/ops.py` 中的
 
     ``` python
     add_sample_code(
@@ -475,68 +351,26 @@ $ xdoctest torch --style=google --command=list > tmp.txt
 
 `xdoctest` 的入口为 `xdoctest.runner.doctest_module`:
 
-1. 对于传入 
-
-    `xdoctest.runner.doctest_module` 
-    
-    的 
-
-    `module_identifier`
-
-    有两种类型：
+1. 对于传入 `xdoctest.runner.doctest_module` 的 `module_identifier` 有两种类型：
 
     - `types.ModuleType`
 
     - `str`
 
-2. 对于 
-
-    `types.ModuleType`
-
-    类型的模块，比如：
-    
-    `paddle`
-
-    直接设置模块的信息：
+2. 对于 `types.ModuleType` 类型的模块，比如： `paddle`，直接设置模块的信息：
 
     ``` python
     modinfo['module'] = module_identifier
     modinfo['modpath'] = modinfo['module'].__file__
     ```
 
-3. 对于
+3. 对于 `str` 类型的模块，比如：
 
-    `str`
+    - `"paddle.abs"` 直接通过 `core._rectify_to_modpath` 识别其模块路径。
 
-    类型的模块，比如：
+    - `"paddle::abs"` 这类带有 `::` 的字符串，后半部分表示模块下的测试目标，如 `方法` 等。而前半部分，则同样通过 `core._rectify_to_modpath` 识别其模块路径。
 
-    - `"paddle.abs"`
-
-        直接通过 
-
-        `core._rectify_to_modpath`
-
-        识别其模块路径。
-
-    - `"paddle::abs"`
-
-        这类带有 `::` 的字符串，后半部分表示模块下的测试目标，如 `方法` 等。
-
-        而前半部分，则同样通过
-
-        `core._rectify_to_modpath`
-
-        识别其模块路径。
-
-4. 通过判断
-
-    `modinfo['modpath']`
-
-    是否为 `None` 作为后续的
-
-    `parsable_identifier`
-
-    标识依据。
+4. 通过判断 `modinfo['modpath']` 是否为 `None` 作为后续的 `parsable_identifier` 标识依据。
 
     ``` python
     if modinfo['modpath'] is None:
@@ -545,49 +379,15 @@ $ xdoctest torch --style=google --command=list > tmp.txt
         parsable_identifier = modinfo['modpath']
     ```
 
-    也就是说，如果一个模块是正常的，如 `paddle`，能够获取到 `modpath`，则后续以此为解析的根。而不是类似 Paddle 以此模块下的 `__all__` 为依据。
+    也就是说，如果一个模块是正常的，如 `paddle`，能够获取到 `modpath`，则后续以此为解析的根。而不是类似 Paddle 以此模块下的 `__all__` 为依据。`core.parse_doctestables` 根据此标识解析接口。
 
-    `core.parse_doctestables`
+5. 之后利用 `parse_google_docstr_examples` 或者 `parse_auto_docstr_examples`(默认) 对文档进行示例的解析。
 
-    根据此标识解析接口。
+6. 其中，对于 `.py` 文件使用 `static_analysis`， 而对于 `.so` 等动态接口使用 `dynamic_analysis` 解析示例代码。
 
-5. 之后利用 
+7. 对于解析出来的示例，利用 `eval`, `compile`, `exec` 等进行运行。
 
-    `parse_google_docstr_examples`
-
-    或者
-
-    `parse_auto_docstr_examples`(默认)
-
-    对文档进行示例的解析。
-
-6. 其中，对于 
-
-    `.py` 
-    
-    文件使用
-
-    `static_analysis`
-
-    而对于
-
-    `.so` 等动态接口使用
-
-    `dynamic_analysis`
-
-    解析示例代码。
-
-7. 对于解析出来的示例，利用
-
-    `eval`, `compile`, `exec`
-
-    等进行运行。
-
-8. 利用 
-
-    `check_output`, `check_exception`
-
-    等方法检查
+8. 利用 `check_output`, `check_exception` 等方法检查
 
     - `got` 示例输出
     
@@ -612,25 +412,12 @@ $ xdoctest torch --style=google --command=list > tmp.txt
 
 `xdoctest` 的这种接口解析方式，与 Paddle 存在几个较大的差别：
 
-- 对于不是模块的接口，通过解析模块路径的方法进行查找。这对于
+- 对于不是模块的接口，通过解析模块路径的方法进行查找。这对于 `paddle.abs` 之类的方法无法捕获。 `paddle.abs` 本身是方法而不是模块，所以 `xdoctest` 会进而寻找 `paddle.abs` 的路径，查找不到后便会报错。
 
-    `paddle.abs`
+- `xdoctest` 遵循 `__init__.py` 与模块的关系，对于不含 `__init__.py` 的包不做寻找。比如
+`Paddle/python/paddle/incubate/nn/layer/` 下面没有 `__init__.py` 导致找不到这个包
 
-    之类的方法无法捕获。
-
-    `paddle.abs` 本身是方法而不是模块，所以 `xdoctest` 会进而寻找 `paddle.abs` 的路径，查找不到后便会报错。
-
-- `xdoctest` 遵循 `__init__.py` 与模块的关系，对于不含 `__init__.py` 的包不做寻找。比如 
-
-    `Paddle/python/paddle/incubate/nn/layer/`
-
-    下面没有 `__init__.py` 导致找不到这个包
-
-- 对于 `__file__` 不存在的模块会报错，比如
-
-    `paddle.fluid.libpaddle.eager.ops`
-
-    虽然是模块，但不包含 `__file__`，解析出错。
+- 对于 `__file__` 不存在的模块会报错，比如 `paddle.fluid.libpaddle.eager.ops`，虽然是模块，但不包含 `__file__`，解析出错。
 
 - `xdoctest` 不区分是否为私有方法，也就是下划线符号(`"_"`)开头的方法。
 
@@ -647,11 +434,7 @@ $ xdoctest torch --style=google --command=list > tmp.txt
 
 Paddle docs 的 CI 流水线相关工具放置在 [docs/ci_scripts/](https://github.com/PaddlePaddle/docs/tree/develop/ci_scripts) 目录下。
 
-目前对于 python 示例代码的检查，主要通过 
-
-[docs/ci_scripts/chinese_samplecode_processor.py](https://github.com/PaddlePaddle/docs/blob/develop/ci_scripts/chinese_samplecode_processor.py) 
-
-完成。
+目前对于 python 示例代码的检查，主要通过 [docs/ci_scripts/chinese_samplecode_processor.py](https://github.com/PaddlePaddle/docs/blob/develop/ci_scripts/chinese_samplecode_processor.py) 完成。
 
 相关工具将 python 代码中的示例提取出来，并单独封装为一个 python 文件，以执行此文件是否正确(是否报错)为依据，判断此示例代码的正确性。
 
@@ -816,11 +599,7 @@ Some code in docstring...
 
 ### 3.1 Paddle 代码
 
-目前 Paddle 中 python 相关代码，主要放置在 
-
-[Paddle/python/paddle/](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle) 
-
-目录下。
+目前 Paddle 中 python 相关代码，主要放置在 [Paddle/python/paddle/](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle) 目录下。
 
 其中包括(Paddle 官方 develop 版本，`sampcd_processor.py` 内统计)：
 - `3648` 个接口
@@ -893,11 +672,7 @@ $ xdoctest --style=google paddle
 
 ### 3.2 Paddle docs
 
-目前 Paddle docs 中的相关 API 主要放置在 
-
-[docs/docs/api/paddle/](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle) 
-
-目录下。
+目前 Paddle docs 中的相关 API 主要放置在 [docs/docs/api/paddle/](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle) 目录下。
 
 其中包括(Paddle docs 的 commit 为 `0132db11`)：
 
@@ -966,12 +741,7 @@ COPY-FROM: paddle.gather
 - `instert_codes_into_cn_rst_if_need` 抽取代码至文档中
 - `read_rst_lines_and_copy_info` 根据 `COPY-FROM` 相关正则，分析需要抽取代码的具体 python API
 - `find_codeblock_needed` 负责具体查找 API 的 docstring
-- `find_codeblock_needed` 
-    复用 
-    `docs/docs/api/gen_doc.py` 
-    中的
-    `extract_code_blocks_from_docstr`
-    方法，对 docstring 中的示例进行抽取
+- `find_codeblock_needed` 复用 `docs/docs/api/gen_doc.py` 中的 `extract_code_blocks_from_docstr` 方法，对 docstring 中的示例进行抽取
 - `extract_code_blocks_from_docstr` 抽取 `Examples` 中的 `code-block`
 
 此上，由于 `COPY-FROM` 复用的 `extract_code_blocks_from_docstr` 方法，导致 `code-block` 只能在 `代码示例` 部分使用。
@@ -1657,15 +1427,25 @@ def register_buffer(self, name: str, tensor: Optional[Tensor], persistent: bool 
 
 # 五、排期规划
 
-- 修改目前 Paddle docs 中 `COPY-FROM` 的逻辑
-- 修改目前 Paddle docs 中仍使用 `code-block` 的示例代码为 `COPY-FROM`
-- 修改目前 Paddle docs 的代码检查方式
-- Paddle 代码 CI 中引入 `xdoctest` 检查
-- 分批次修改已有代码的示例
-- 更新文档《开发 API Python 端》与《API 文档书写规范》
-- 不再兼容旧格式
-- 中英文 API 文档特性更新
-- 代码检查移交
+- (1) 修改目前 Paddle docs 中 `COPY-FROM` 的逻辑 (a)
+- (2) 修改目前 Paddle docs 中仍使用 `code-block` 的示例代码为 `COPY-FROM` (b)
+- (3) 修改目前 Paddle docs 的代码检查方式 (a)
+- (4) Paddle 代码 CI 中引入 `xdoctest` 检查 (a)
+- (5) 分批次修改已有代码的示例 (b)
+- (6) 更新文档《开发 API Python 端》与《API 文档书写规范》(b)
+- (7) 不再兼容旧格式 (c)
+- (8) 中英文 API 文档特性更新 (c)
+- (9) 代码检查移交 (d)
+
+圆括号中的字母 `(x)` 表示任务优先级，原则上后一等级的任务需要依赖前一等级任务的完成。
+
+其中:
+
+- 任务 `(2)` 和 `(5)`，不涉及具体框架逻辑的修改，且任务量较大，建议借助 `快乐开源` 等活动进行。
+
+- 任务 `(1) (3) (4) (6) (7) (9) `，涉及 CI 流水线的修改，建议分批次（依优先级）提交 `ISSUE`，开发者认领并开发。
+
+- 任务 `(8)`，不在本项目的范围内，另作安排。
 
 # 六、影响面
 
@@ -1683,11 +1463,7 @@ def register_buffer(self, name: str, tensor: Optional[Tensor], persistent: bool 
 
     3. 对框架架构的影响
 
-        - 修改 Paddle docs 中 
-        
-            `docs/docs/api/copy_codes_from_en_doc.py`
-            
-            示例抽取逻辑
+        - 修改 Paddle docs 中 `docs/docs/api/copy_codes_from_en_doc.py` 示例抽取逻辑
 
         - 改变 Paddle docs 对于代码的 编写/抽取 方式，包括 `Examples` 以及整个 docstring
 
@@ -1718,11 +1494,7 @@ def register_buffer(self, name: str, tensor: Optional[Tensor], persistent: bool 
 
     3. 对框架架构的影响
 
-        修改 Paddle docs 中的
-        
-        `docs/ci_scripts/chinese_samplecode_processor.py`
-
-        分流 `google/freeform` 样式代码，但不做检查。
+        修改 Paddle docs 中的 `docs/ci_scripts/chinese_samplecode_processor.py` 分流 `google/freeform` 样式代码，但不做检查。
 
     4. 其他风险
 
@@ -1741,21 +1513,13 @@ def register_buffer(self, name: str, tensor: Optional[Tensor], persistent: bool 
 
     3. 对框架架构的影响
 
-        - `Paddle/tools/sampcd_processor.py`
+        - `Paddle/tools/sampcd_processor.py` 引入 `xdoctest` 检查。前期，分流 `google/freeform` 样式代码至 `xdoctest`，其他流程不变。中后期，全部代码检查移至 `xdoctest`，删除旧的代码检查。
 
-            引入 `xdoctest` 检查。
-
-            前期，分流 `google/freeform` 样式代码至 `xdoctest`，其他流程不变。
-
-            中后期，全部代码检查移至 `xdoctest`，删除旧的代码检查。
-
-        - `Paddle/python/unittest_py/requirements.txt`
-
-            增加 `xdoctest` 依赖项。
+        - `Paddle/python/unittest_py/requirements.txt` 增加 `xdoctest` 依赖项。
 
     4. 其他风险
 
-        - `sampcd_processor.py` 中存在 `>>>` 样式的检查，显示已经遗弃，不知道中间有什么考量？
+        `sampcd_processor.py` 中存在 `>>>` 样式的检查，显示已经遗弃，不知道中间有什么考量？
 
 - 分批次修改已有代码的示例
 
