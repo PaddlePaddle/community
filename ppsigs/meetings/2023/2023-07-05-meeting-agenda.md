@@ -10,14 +10,13 @@
 
 |                                                         |                                                     |                                                       |                                                     |                                                   |
 | ------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------- |
-| [WilliamQF-AI](https://github.com/WilliamQF-AI)         | [yuwen37](https://github.com/yuwen37)               | [jnriwuuikezo](https://github.com/jnriwuuikezo)       | [dongdengwei](https://github.com/dongdengwei)       | [lcen543](https://github.com/lcen543)             |
-| [EasyIsAllYouNeed](https://github.com/EasyIsAllYouNeed) | [happybear105](https://github.com/happybear105)     | [tyh153](https://github.com/tyh153)                   | [leelbc](https://github.com/leelbc)                 | [94185944](https://github.com/94185944)           |
-| [Victory8858](https://github.com/Victory8858)           | [ArtificialZeng](https://github.com/ArtificialZeng) | [wangweiliii](https://github.com/wangweiliii)         | [xinxin19950423](https://github.com/xinxin19950423) | [bltcn@163.com](https://github.com/bltcn)         |
-| [greatv](https://github.com/greatv)                     | [Gmgge](https://github.com/Gmgge)                   | [marshall-dteach](https://github.com/marshall-dteach) | [greenbug](https://github.com/greenbug)             | [txygood](https://github.com/txygood)             |
-| [starfall](https://github.com/starfall)                 | [kongdebug](https://github.com/kongdebug)           | [teymur-git](https://github.com/teymur-git)           | [shuibole](https://github.com/shuibole)             | [dylanchiang](https://github.com/dylanchiang)     |
-| [livingbody](https://github.com/livingbody)             | [myboliu](https://github.com/myboliu)               | [chongchongmao](https://github.com/chongchongmao)     | [liukai1055](https://github.com/liukai1055)         | [Wangrongsheng](https://github.com/Wangrongsheng) |
-
-
+| [shiyutang](https://github.com/shiyutang)               | [onecatcn](https://github.com/onecatcn)             | [ToddBear](https://github.com/ToddBear)               | [KevinLi43](https://github.com/KevinLi43)           | [lcen543](https://github.com/lcen543)             |
+| [WilliamQF-AI](https://github.com/WilliamQF-AI)         | [yuwen37](https://github.com/yuwen37)               | [jnriwuuikezo](https://github.com/jnriwuuikezo)       | [dongdengwei](https://github.com/dongdengwei)       | [94185944](https://github.com/94185944)           |
+| [EasyIsAllYouNeed](https://github.com/EasyIsAllYouNeed) | [happybear105](https://github.com/happybear105)     | [tyh153](https://github.com/tyh153)                   | [leelbc](https://github.com/leelbc)                 | [bltcn@163.com](https://github.com/bltcn)         |
+| [Victory8858](https://github.com/Victory8858)           | [ArtificialZeng](https://github.com/ArtificialZeng) | [wangweiliii](https://github.com/wangweiliii)         | [xinxin19950423](https://github.com/xinxin19950423) | [txygood](https://github.com/txygood)             |
+| [greatv](https://github.com/greatv)                     | [Gmgge](https://github.com/Gmgge)                   | [marshall-dteach](https://github.com/marshall-dteach) | [greenbug](https://github.com/greenbug)             | [dylanchiang](https://github.com/dylanchiang)     |
+| [starfall](https://github.com/starfall)                 | [kongdebug](https://github.com/kongdebug)           | [teymur-git](https://github.com/teymur-git)           | [shuibole](https://github.com/shuibole)             | [Wangrongsheng](https://github.com/Wangrongsheng) |
+| [livingbody](https://github.com/livingbody)             | [myboliu](https://github.com/myboliu)               | [chongchongmao](https://github.com/chongchongmao)     | [liukai1055](https://github.com/liukai1055)         |                                                   |
 
 ## 会议议程
 * 介绍 Issue 攻关活动（5 mins）
