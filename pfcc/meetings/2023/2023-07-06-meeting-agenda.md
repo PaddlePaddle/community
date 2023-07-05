@@ -10,7 +10,7 @@
 
 - 本次会议主席：李敏 （[enkilee](https://github.com/enkilee)）
 
-- 本次会议副主席：[待定] （）
+- 本次会议副主席：何健飞 （[Tomoko-hjf](https://github.com/Tomoko-hjf)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 
@@ -36,9 +36,9 @@
 
 # 会议议程
 
-1. 新同学自我介绍：[minleminzui](https://github.com/minleminzui)、[Sahala08](https://github.com/Sahala08)、[marshall-dteach](https://github.com/marshall-dteach)、[jiamingkong](https://github.com/jiamingkong)  (<=10min)
-2. 小组讨论 (10min)
-2.1. [sanbuphy](https://github.com/sanbuphy) 初探 python 虚拟机原理与 Dynamo 机制 (15min)
-2.2. [Tomoko-hjf](https://github.com/Tomoko-hjf) PaConvert 代码转换工具讲解 (15min)
-3. PFCC 成员自由发言与讨论（5 min）
-4. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
+1. 新同学自我介绍：[minleminzui](https://github.com/minleminzui)、[Sahala08](https://github.com/Sahala08)、[marshall-dteach](https://github.com/marshall-dteach)、[jiamingkong](https://github.com/jiamingkong)  (5 min)
+2. 飞桨研发 [HydrogenSulfate](https://github.com/HydrogenSulfate) 分享 PaddleScience-一个统一训练范式的科学计算套件 (20 min)
+3. PFCC 成员 [sanbuphy](https://github.com/sanbuphy) 分享《初探 python 虚拟机原理与 Dynamo 机制》 (15 min)
+4. PFCC 成员 [Tomoko-hjf](https://github.com/Tomoko-hjf) 分享《PaConvert 代码转换工具讲解》 (15 min)
+5. PFCC 成员自由发言与讨论（5 min）
+6. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
