@@ -37,7 +37,7 @@
 # 会议议程
 
 1. 新同学自我介绍：[minleminzui](https://github.com/minleminzui)、[Sahala08](https://github.com/Sahala08)、[marshall-dteach](https://github.com/marshall-dteach)、[jiamingkong](https://github.com/jiamingkong)  (5 min)
-2. 飞桨研发 [HydrogenSulfate](https://github.com/HydrogenSulfate) 分享 PaddleScience-一个统一训练范式的科学计算套件 (20 min)
+2. 飞桨研发 [HydrogenSulfate](https://github.com/HydrogenSulfate) 分享 《PaddleScience: 一个统一训练范式的科学计算套件》 (20 min)
 3. PFCC 成员 [sanbuphy](https://github.com/sanbuphy) 分享《初探 python 虚拟机原理与 Dynamo 机制》 (15 min)
 4. PFCC 成员 [Tomoko-hjf](https://github.com/Tomoko-hjf) 分享《PaConvert 代码转换工具讲解》 (15 min)
 5. PFCC 成员自由发言与讨论（5 min）
