@@ -32,11 +32,11 @@
 | [cloud2009](https://github.com/cloud2009)         | [hh-qiao](https://github.com/hh-qiao)                           | [AndSonder](https://github.com/AndSonder)                 | [JuiceHub](https://github.com/JuiceHub)               | [Difers](https://github.com/Difers)                 | [zeroRains](https://github.com/zeroRains)                           |
 | [BeingGod](https://github.com/BeingGod)           | [Young-Flash](https://github.com/Young-Flash)                   | [ScottWong98](https://github.com/ScottWong98)             | [Yang-Changhui](https://github.com/Yang-Changhui)     | [LyndonKong](https://github.com/LyndonKong)         | [zade23](https://github.com/zade23)                                 |
 | [megemini](https://github.com/megemini)           | [WintersMontagne10335](https://github.com/WintersMontagne10335) | [zbt78](https://github.com/zbt78)                         | [DrownFish](https://github.com/DrownFish19)           | [co63oc](https://github.com/co63oc)                 | [minleminzui](https://github.com/minleminzui)                            |            
-| [Sahala08](https://github.com/Sahala08)           | [marshall-dteach](https://github.com/marshall-dteach)           | [jiamingkong](https://github.com/jiamingkong)             | [txyugood](https://github.com/txyugood)            |
+| [Sahala08](https://github.com/Sahala08)           | [marshall-dteach](https://github.com/marshall-dteach)           | [jiamingkong](https://github.com/jiamingkong)             | [txyugood](https://github.com/txyugood)            | [gaoziyuan](https://github.com/gaoziyuan)            | [MayYouBeProsperous](https://github.com/MayYouBeProsperous)            | [NotHaozi](https://github.com/NotHaozi)            |
 
 # 会议议程
 
-1. 新同学自我介绍：[minleminzui](https://github.com/minleminzui)、[Sahala08](https://github.com/Sahala08)、[marshall-dteach](https://github.com/marshall-dteach)、[jiamingkong](https://github.com/jiamingkong)、[txyugood](https://github.com/txyugood)  (5 min)
+1. 新同学自我介绍：[minleminzui](https://github.com/minleminzui)、[Sahala08](https://github.com/Sahala08)、[marshall-dteach](https://github.com/marshall-dteach)、[jiamingkong](https://github.com/jiamingkong)、[txyugood](https://github.com/txyugood)、[gaoziyuan](https://github.com/gaoziyuan)、[MayYouBeProsperous](https://github.com/MayYouBeProsperous)、[NotHaozi](https://github.com/NotHaozi)   (5 min)
 2. PFCC 成员 [Tomoko-hjf](https://github.com/Tomoko-hjf) 分享《PaConvert 代码转换工具讲解》 (15 min)
 3. 飞桨研发 [HydrogenSulfate](https://github.com/HydrogenSulfate) 分享 《PaddleScience: 一个统一训练范式的科学计算套件》 (20 min)
 4. PFCC 成员 [sanbuphy](https://github.com/sanbuphy) 分享《初探 python 虚拟机原理与 Dynamo 机制》 (15 min)
