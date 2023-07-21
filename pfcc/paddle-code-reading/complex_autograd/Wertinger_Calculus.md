@@ -180,6 +180,7 @@ $$
 ### 推导链式法则
 
 假定 $z = x + jy$, $f(z) = u + jy$, $l(f) = l$，
+
 ![图片](./images/lr.png)
 
 其中 $x, y, u, v, l$ 都是实数，并且这里也复用函数名和函数的返回值的名字。那么根据实函数的链式法则，也可以推广得到
@@ -490,11 +491,12 @@ $$
 \end{align}
 $$
 
+
 $$
 \begin{align}
 \frac{\partial l}{\partial \bar{z}} &= \frac{\partial l}{\partial s}\frac{\partial s}{\partial \bar{z}} + \frac{\partial l}{\partial \bar{s}}\frac{\partial \bar{s}}{\partial \bar{z}} \\
 &= \frac{\partial l}{\partial s}\frac{\partial s}{\partial \bar{z}} + \frac{\partial l}{\partial \bar{s}}\overline{\frac{\partial s}{\partial z}} \\
-&= (1 + 0j)*0 + (1-0j)*(3-4j) \\
+&= (1 + 0j)* 0 + (1-0j)*(3-4j) \\
 &=3 - 4j
 \end{align}
 $$
@@ -574,7 +576,7 @@ $$
 \begin{align}
 \frac{\partial l}{\partial \bar{z}} &= \frac{\partial l}{\partial s}\frac{\partial s}{\partial \bar{z}} + \frac{\partial l}{\partial \bar{s}}\frac{\partial \bar{s}}{\partial \bar{z}} \\
 &= \frac{\partial l}{\partial s}\frac{\partial s}{\partial \bar{z}} + \frac{\partial l}{\partial \bar{s}}\overline{\frac{\partial s}{\partial z}} \\
-&= (1 + 1j)*0 + (1-1j)*(3-4j) \\
+&= (1 + 1j)* 0 + (1-1j)*(3-4j) \\
 &= -1 - 7j
 \end{align}
 $$
@@ -753,7 +755,7 @@ $$
 
 而 Wertinger Calculus 方法则从在非复解析函数的条件下，将一般复数的函数拆分为 $(z, \bar{z})$ 的二元函数的做法，在这种变化下，函数对两个输入变量都是复解析的。因此在链式法则中，总需要假设共轭变量的存在，计算多个路径的梯度之和。
 
-对于复函数的 vjp(链式法则)，在最终输出是实数的预设下，$\frac{\partial l}{\partial s}$ 和 $\frac{\partial l}{\partial \bar{s}}$ 互为共轭，因此只需要传入一个即可。
+对于复函数的 vjp(链式法则)，在最终输出是实数的预设下, $\frac{\partial l}{\partial s}$ 和 $\frac{\partial l}{\partial \bar{s}}$ 互为共轭，因此只需要传入一个即可。
 
 对于 jax 选择的是 $\frac{\partial l}{\partial s}$， 而 torch/tensorflow 选择的是 $\frac{\partial l}{\partial \bar{s}}$ .
 
