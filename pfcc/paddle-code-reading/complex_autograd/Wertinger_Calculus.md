@@ -38,7 +38,7 @@ $$
 
 如果以上的条件满足，那么就认为 $f$ 在 $z_{0}$ 的邻域可微 (differentiable)。 这虽然是实数情形的直接扩展，也符合“变化率之比的极限”这一本质，但是复函数的可微是远比实函数的可微更强的条件。对于复函数来说，可微同时也意味着复解析 (complex analytic), 全纯 (holomorphic) 或者正则 (regular).
 
-复解析 (complex analytic)：函数 $f:U \rightarrow \mathbb{C} $ 在定义域上的某个点 $z_{0}$ 的领域上可以表示为下述收敛幂级数，则在这一点复解析。
+复解析 (complex analytic)：函数 $f:U \rightarrow \mathbb{C}$ 在定义域上的某个点 $z_{0}$ 的领域上可以表示为下述收敛幂级数，则在这一点复解析。
 
 $$
 f(z) = \sum_{n=0}^{\infty}c_{n}(z - z_{n})^n
@@ -125,6 +125,9 @@ $$
 
 $$
 \frac{\partial u(x, y)}{\partial x} \equiv 0  \\
+$$
+
+$$
 \frac{\partial u(x, y)}{\partial y} \equiv 0
 $$
 
@@ -148,6 +151,9 @@ $$
 
 $$
 x = x - \lambda \frac{\partial u}{\partial x} \\
+$$
+
+$$
 y = y - \lambda \frac{\partial u}{\partial y}
 $$
 
@@ -188,6 +194,9 @@ $$
 
 $$
 \frac{\partial l}{\partial x} = \frac{\partial l}{\partial u} \frac{\partial u}{\partial x} + \frac{\partial l}{\partial v} \frac{\partial v}{\partial x} \\
+$$
+
+$$
 \frac{\partial l}{\partial y} = \frac{\partial l}{\partial u} \frac{\partial u}{\partial y} + \frac{\partial l}{\partial v} \frac{\partial v}{\partial y}
 $$
 
@@ -224,7 +233,7 @@ $$
 
 ### C-C 非解析函数
 
-对于复函数 $f(z) = s$, 其中 $z = x+jy$，$s = u+jv$， 假设其不是复解析函数，但是实部 $u$ 和虚部 $v$ 是 $(x,y)$ 的实解析函数，亦即四个偏导数都存在
+对于复函数 $f(z) = s$, 其中 $z = x+jy$，$s = u+jv$ ，假设其不是复解析函数，但是实部 $u$ 和虚部 $v$ 是 $(x,y)$ 的实解析函数，亦即四个偏导数都存在
 
 $$
 \frac{\partial u}{\partial x}, \frac{\partial u}{\partial y}, \frac{\partial v}{\partial x}, \frac{\partial v}{\partial y}
@@ -238,6 +247,9 @@ $$
 
 $$
 x(z) = \frac{1}{2}(z + \bar{z}) \\
+$$
+
+$$
 y(z) = -\frac{j}{2}(z - \bar{z})
 $$
 
@@ -246,27 +258,49 @@ $$
 
 $$
 x(z, \bar{z}) = \frac{1}{2}(z + \bar{z}) \\
+$$
+
+$$
 y(z, \bar{z}) = -\frac{j}{2}(z - \bar{z})
 $$
 
 ![图片](./images/c-r-vjp.png)
 
-那么由于 $f$ 的实部和虚部对于 $x, y$ 是实解析的，那么根据复解析函数的链式法则，可知，$f(z, \bar{z})$ 对于 $z, \bar{z}$ 也都是复解析的，可以得到
+那么由于 $f$ 的实部和虚部对于 $x, y$ 是实解析的，那么根据复解析函数的链式法则，可知， $f(z, \bar{z})$ 对于 $z, \bar{z}$ 也都是复解析的，可以得到
 
 $$
 \frac{\partial f}{\partial z} = \frac{\partial f}{\partial x}\frac{\partial x}{\partial z} + \frac{\partial f}{\partial y}\frac{\partial y}{\partial z} \\
+$$
+
+$$
 \frac{\partial f}{\partial \bar{z}} = \frac{\partial f}{\partial x}\frac{\partial x}{\partial \bar{z}} + \frac{\partial f}{\partial y}\frac{\partial y}{\partial \bar{z}}
 $$
+
 其中
+
 $$
 \frac{\partial x}{\partial z} = \frac{1}{2} \\
+$$
+
+$$
 \frac{\partial x}{\partial \bar{z}} = \frac{1}{2} \\
+$$
+
+$$
 \frac{\partial y}{\partial z} = -\frac{j}{2} \\
+$$
+
+$$
 \frac{\partial y}{\partial \bar{z}} =\frac{j}{2} \\
 $$
+
 代入上述公式中，可以得到
+
 $$
 \frac{\partial f}{\partial z} = \frac{1}{2}(\frac{\partial f}{\partial x} - j\frac{\partial f}{\partial y}) \\
+$$
+
+$$
 \frac{\partial f}{\partial \bar{z}} = \frac{1}{2}(\frac{\partial f}{\partial x} +j\frac{\partial f}{\partial y}) \\
 $$
 
@@ -278,6 +312,9 @@ $$
 
 $$
 \frac{\partial f}{\partial z} = \overline{\frac{\partial \bar{f}}{\partial \bar{z}}} \\
+$$
+
+$$
 \frac{\partial f}{\partial \bar{z}} = \overline{\frac{\partial \bar{f}}{\partial z}}
 $$
 
@@ -298,6 +335,9 @@ $$
 
 $$
 \frac{\partial l}{\partial z} = \frac{\partial l}{\partial s}\frac{\partial s}{\partial z} + \frac{\partial l}{\partial \bar{s}}\frac{\partial \bar{s}}{\partial z} \\
+$$
+
+$$
 \frac{\partial l}{\partial \bar{z}} = \frac{\partial l}{\partial s}\frac{\partial s}{\partial \bar{z}} + \frac{\partial l}{\partial \bar{s}}\frac{\partial \bar{s}}{\partial \bar{z}} \\
 $$
 
@@ -315,19 +355,31 @@ $$
 
 $$
 \frac{\partial l}{\partial z} = \frac{1}{2}[(\frac{\partial l}{\partial u}\frac{\partial u}{\partial x} +\frac{\partial l}{\partial v}\frac{\partial v}{\partial x}) - j(\frac{\partial l}{\partial u}\frac{\partial u}{\partial y} + \frac{\partial l}{\partial v}\frac{\partial v}{\partial y})] \\
+$$
+
+$$
 \frac{\partial l}{\partial \bar{z}} = \frac{1}{2}[(\frac{\partial l}{\partial u}\frac{\partial u}{\partial x} + \frac{\partial l}{\partial v}\frac{\partial v}{\partial x}) + j(\frac{\partial l}{\partial u}\frac{\partial u}{\partial y} + \frac{\partial l}{\partial v}\frac{\partial v}{\partial y})]
 $$
+
 对于使用拆分为实部和虚部的方式来说，其实所计算的梯度的方向是和共轭梯度一致的。首先从起始梯度
+
 $$
 \frac{\partial l}{\partial \bar{s}} = \frac{1}{2}(\frac{\partial l}{\partial u} +j\frac{\partial l}{\partial v})
 $$
+
 开始，这对应着 vjp 中的 v. 对于这个梯度而言，实部和虚部分别是
+
 $$
 \frac{1}{2}\frac{\partial l}{\partial u}, \frac{1}{2}\frac{\partial l}{\partial v}
 $$
+
 代入拆分为实部虚部的方式多推导得到的链式法则，可以得出 $\frac{\partial l}{\partial \bar{z}}$ 的实部和虚部分别为
+
 $$
 \frac{1}{2}(\frac{\partial l}{\partial u}\frac{\partial u}{\partial x} + \frac{\partial l}{\partial v}\frac{\partial v}{\partial x}) \\
+$$
+
+$$
 \frac{1}{2}(\frac{\partial l}{\partial u}\frac{\partial u}{\partial y} + \frac{\partial l}{\partial v}\frac{\partial v}{\partial y})
 $$
 
@@ -340,7 +392,9 @@ Torch/tensorflow 的规则
 $$
 \frac{\partial l}{\partial \bar{s}} \rightarrow \frac{\partial l}{\partial \bar{z}}
 $$
+
 jax 的规则
+
 $$
 \frac{\partial l}{\partial s} \rightarrow \frac{\partial l}{\partial z}
 $$
@@ -355,10 +409,14 @@ $$
 $$
 f(z) = cz = cx + jcy, c \in \mathbb{C}
 $$
+
 c 是常数。
 
 $$
 \frac{\partial f}{\partial z} = \frac{1}{2}(\frac{\partial f}{\partial x} -j \frac{\partial f}{\partial y}) = \frac{1}{2}(c -jjc) = c \\
+$$
+
+$$
 \frac{\partial f}{\partial \bar{z}} = \frac{1}{2}(\frac{\partial f}{\partial x} + j \frac{\partial f}{\partial y}) = \frac{1}{2}(c +jjc) = 0
 $$
 
@@ -372,6 +430,9 @@ c 是常数。
 
 $$
 \frac{\partial f}{\partial z} = \frac{1}{2}(\frac{\partial f}{\partial x} -j \frac{\partial f}{\partial y}) = \frac{1}{2}(c -j(-j)c) = 0 \\
+$$
+
+$$
 \frac{\partial f}{\partial z^{*}} = \frac{1}{2}(\frac{\partial f}{\partial x} + j \frac{\partial f}{\partial y}) = \frac{1}{2}(c + j(-j)c) = c
 $$
 
@@ -383,6 +444,9 @@ $$
 
 $$
 \frac{\partial f}{\partial z} = \frac{1}{2}(\frac{\partial f}{\partial x} -j \frac{\partial f}{\partial y}) = \frac{1}{2}(2x -j 2y) = \bar{z} \\
+$$
+
+$$
 \frac{\partial f}{\partial \bar{z}} = \frac{1}{2}(\frac{\partial f}{\partial x} + j \frac{\partial f}{\partial y}) = \frac{1}{2}(2x + j2y) = z
 $$
 
@@ -396,7 +460,7 @@ $$
 s = f(z, z_{2}) = zz_{2}
 $$
 
-这对 $z_{1}$ 是一个复解析函数。令 $z = 1+2j, z_{2}=3 + 4j$, 那么 $s = -5+10j$.
+这对 $z_{1}$ 是一个复解析函数。令 $z = 1+2j, z_{2}=3 + 4j$, 那么 $s = -5+10j$ .
 
 令 $\frac{\partial l}{\partial s} = 1 +0j$, 计算 $\frac{\partial l}{\partial z}$ 和 $\frac{\partial l}{\partial \bar{z}}$.
 
@@ -440,9 +504,14 @@ $$
 $$
 s = f(z, z_{2}) = zz_{2} = (x+jy)(x_{2} + jy_{2}) = (xx_{2} - yy_{2}) + j(xy_{2} + x_{2}y)
 $$
+
 故
+
 $$
 u =xx_{2} - yy_{2} \\
+$$
+
+$$
 v = xy_{2} + x_{2}y
 $$
 
@@ -476,6 +545,9 @@ $$
 
 $$
 \frac{\partial l}{\partial \bar{z}} = 3 -4j \\
+$$
+
+$$
 \frac{\partial l}{\partial z} = \overline{\frac{\partial l}{\partial \bar{z}}} = 3 + 4j
 $$
 
@@ -526,6 +598,9 @@ $$
 
 $$
 \frac{\partial l}{\partial \bar{z}} = -1 -7j \\
+$$
+
+$$
 \frac{\partial l}{\partial z} = \overline{\frac{\partial l}{\partial \bar{z}}} = -1 + 7j
 $$
 
@@ -536,9 +611,14 @@ $$
 $$
 s = f(z) = z + \bar{z}^{2}
 $$
+
 令 $z = 1+2j$， 首先可以计算
+
 $$
 \frac{\partial s}{\partial z} = 1 \\
+$$
+
+$$
 \frac{\partial s}{\partial \bar{z}} = 2\bar{z} = 2 - 4j
 $$
 
@@ -550,6 +630,9 @@ $$
 
 $$
 u = x + x^{2} - y^{2} \\
+$$
+
+$$
 v = y-2xy
 $$
 
@@ -605,6 +688,9 @@ $$
 
 $$
 \frac{\partial l}{\partial \bar{z}} = 3-4j \\
+$$
+
+$$
 \frac{\partial s}{\partial z} = \overline{\frac{\partial l}{\partial \bar{z}}} = 3 + 4j
 $$
 
@@ -653,6 +739,9 @@ $$
 
 $$
 \frac{\partial l}{\partial \bar{z}} = 7-3j \\
+$$
+
+$$
 \frac{\partial s}{\partial z} = \overline{\frac{\partial l}{\partial \bar{z}}} = 7 + 3j
 $$
 
