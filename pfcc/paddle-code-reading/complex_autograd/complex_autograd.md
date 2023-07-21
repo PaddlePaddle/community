@@ -64,16 +64,20 @@ $$Im(z) = \frac{z - z^*}{2j}$$
 
 可以研究 $f(z, z*)$ ,因为如果 $f$ 是真实可微的,那么这个函数具有偏导数
 
-$$\frac{\partial }{\partial x}  =  \frac{\partial z}{\partial x} * \frac{\partial }{\partial z}+ \frac{\partial z^*}{\partial x}*\frac{\partial }{\partial z^*}
+$$
+\frac{\partial }{\partial x}  =  \frac{\partial z}{\partial x} * \frac{\partial }{\partial z}+ \frac{\partial z^*}{\partial x}*\frac{\partial }{\partial z^*}
 =>
 \frac{\partial }{\partial x}= \frac{\partial }{\partial z} + \frac{\partial }{\partial z^*}
 $$
 
-$$\frac{\partial }{\partial y}  =  \frac{\partial z}{\partial y} * \frac{\partial }{\partial z}+ \frac{\partial z^*}{\partial y}*\frac{\partial }{\partial z^*}
+$$
+\frac{\partial }{\partial y}  =  \frac{\partial z}{\partial y} * \frac{\partial }{\partial z}+ \frac{\partial z^*}{\partial y}*\frac{\partial }{\partial z^*}
 =>
-\frac{\partial }{\partial y}= j * (\frac{\partial }{\partial z} - \frac{\partial }{\partial z^*} )$$
+\frac{\partial }{\partial y}= j * (\frac{\partial }{\partial z} - \frac{\partial }{\partial z^*} )
+$$
 
 通过上面的公式，我们可以得到
+
 $$
 \frac{\partial }{\partial z}  =  \frac{1}{2} * (\frac{\partial }{\partial x} - j * \frac{\partial }{\partial y})
 $$
@@ -105,9 +109,12 @@ $$
 
 ## 共轭Wirtinger导数推导
 假设有函数 $s = f(z) = f(x+jy) \triangleq u(x, y) + jv(x, y), z = x + jy$ $\mathbb{C} \rightarrow \mathbb{C}$
+
 $L$ 为最终的loss， $s$ 为 $f(z)$ 的输出,所以这里我们的目标是去计算 $\frac{\partial L}{\partial z^*}$
 
-$$\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial u} * \frac{\partial u}{\partial z^*} + \frac{\partial L}{\partial v} * \frac{\partial v}{\partial z^*} $$
+$$
+\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial u} * \frac{\partial u}{\partial z^*} + \frac{\partial L}{\partial v} * \frac{\partial v}{\partial z^*}
+$$
 
 根据上述Wirtinger calculus的经典定义:
 
@@ -119,14 +126,16 @@ $$
 \frac{\partial L}{\partial s^*} = \frac{1}{2} * (\frac{\partial L}{\partial u} + j*\frac{\partial L}{\partial v}) 
 $$
 
-由于这里的$L$为实数，且$u$和$v$均是实函数,不难发现，他们互为共轭:
+由于这里的 $L$ 为实数，且 $u$ 和 $v$ 均是实函数,不难发现，他们互为共轭:
 
-$$(\frac{\partial L}{\partial s})^* = \frac{\partial L}{\partial s^*}
+$$
+(\frac{\partial L}{\partial s})^* = \frac{\partial L}{\partial s^*}
 $$
 
 且 $\frac{\partial L}{\partial s^*}$ 为我们反向计算时输入的梯度:
 
 通过上述等式，我们可以得到：
+
 $$
 \frac{\partial L}{\partial u} = \frac{\partial L}{\partial s} + \frac{\partial L}{\partial s^*}
 $$
@@ -137,15 +146,20 @@ $$
 
 综合上述可得：
 
-$$\frac{\partial L}{\partial z^*} = (\frac{\partial L}{\partial s} + \frac{\partial L}{\partial s^*})*\frac{\partial u}{\partial z^*} - 1j*(\frac{\partial L}{\partial s} - \frac{\partial L}{\partial s^*})*\frac{\partial v}{\partial z^*} =>
+$$
+\frac{\partial L}{\partial z^*} = (\frac{\partial L}{\partial s} + \frac{\partial L}{\partial s^*})*\frac{\partial u}{\partial z^*} - 1j*(\frac{\partial L}{\partial s} - \frac{\partial L}{\partial s^*})*\frac{\partial v}{\partial z^*} =>
 $$
 
-$$\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial s} * (\frac{\partial u}{\partial z^*} + j * \frac{\partial v}{\partial z^*}) + \frac{\partial L}{\partial s^*} * (\frac{\partial u}{\partial z^*} - j *\frac{\partial u}{\partial z^*})=>
+$$
+\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial s} * (\frac{\partial u}{\partial z^*} + j * \frac{\partial v}{\partial z^*}) + \frac{\partial L}{\partial s^*} * (\frac{\partial u}{\partial z^*} - j *\frac{\partial u}{\partial z^*})=>
 $$
 
-$\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial s} * \frac{\partial (u+vj)}{\partial z^*}  + \frac{\partial L}{\partial s^*} * \frac{\partial (u+vj)^*}{\partial z^*} =>
-$
-$$\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial s} * \frac{\partial s}{\partial z^*}  + \frac{\partial L}{\partial s^*} * \frac{\partial s^*}{\partial z^*} =>
+$$
+\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial s} * \frac{\partial (u+vj)}{\partial z^*}  + \frac{\partial L}{\partial s^*} * \frac{\partial (u+vj)^*}{\partial z^*} =>
+$$
+
+$$
+\frac{\partial L}{\partial z^*} = \frac{\partial L}{\partial s} * \frac{\partial s}{\partial z^*}  + \frac{\partial L}{\partial s^*} * \frac{\partial s^*}{\partial z^*} =>
 $$
 
 最终我们可以得到:
@@ -158,24 +172,24 @@ $$
 ## 工程实现
 假设有函数 $f(z=x+yj) = cz = c(x+yj) = cx+cyj$$c \in \mathbb{R}$
 1. 利用Wirtinger实现
-2. 
+
 $\frac{\partial s}{\partial z} = \frac{1}{2} * (\frac{\partial s}{\partial x} - j*\frac{\partial s}{\partial y}) = \frac{1}{2} *(c - (c*1j)*1j) = c$
 
 $\frac{\partial s}{\partial z^*} = \frac{1}{2} * (\frac{\partial s}{\partial x} + j*\frac{\partial s}{\partial y}) = \frac{1}{2} *(c + (c*1j)*1j) = 0$
 
 $\frac{\partial L}{\partial z^*} = 1 * 0 + 1*c = c $
 
-1. 但是我们可以注意到如果将$z ，z^*$当作独立的两个变量，那么就很像二元函数的性质，以二元函数的性质计算,证明见:
-2. 
+2. 但是我们可以注意到如果将$z ，z^*$当作独立的两个变量，那么就很像二元函数的性质，以二元函数的性质计算,证明见:[Wertinger Calculus](./Wertinger_Calculus.md)
+
+   
 $\frac{\partial s}{\partial z} = \frac{\partial (c*z)}{\partial z} =c$
 
 $\frac{\partial s}{\partial z^*} = \frac{\partial (c*z)}{\partial z^*} =0$
 
-1. 类似fft相关的方法，会产生 $\mathbb{C} \rightarrow \mathbb{R} $ 以及 $\mathbb{R} \rightarrow \mathbb{C}$ 的场景
-1) 针对 $\mathbb{C} \rightarrow \mathbb{R} $ 的场景，输出变量为实数，则共轭即为本身 $s^* = s$
+1. 类似fft相关的方法，会产生 $\mathbb{C} \rightarrow \mathbb{R}$ 以及 $\mathbb{R} \rightarrow \mathbb{C}$ 的场景
+1) 针对 $\mathbb{C} \rightarrow \mathbb{R}$ 的场景，输出变量为实数，则共轭即为本身 $s^* = s$
    
-$\frac{\partial L}{\partial z^*} = 2 *(output\_grad) * \frac{\partial s}{\partial z^*}
-$
+$\frac{\partial L}{\partial z^*} = 2 *(output\_grad) * \frac{\partial s}{\partial z^*}$
 
 2) 针对 $\mathbb{R} \rightarrow \mathbb{C}$ 的场景，输入变量为实数
    
