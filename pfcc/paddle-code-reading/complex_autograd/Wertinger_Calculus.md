@@ -53,7 +53,7 @@ $$
 $$
 \begin{align}
 \frac{\partial u(x, y)}{\partial x} = \frac{\partial v(x, y)}{\partial y} \\
-\frac{\partial v(x, y)}{\partial x} = -\frac{\partial u(x, y)}{\partial y} 
+\frac{\partial v(x, y)}{\partial x} = -\frac{\partial u(x, y)}{\partial y}
 \end{align}
 $$
 
@@ -64,7 +64,7 @@ $$
 $$
 \begin{align}
 & \lim_{h \rightarrow 0}\frac{f(z_{0} + h) - f(z_{0})}{h} \\
-=& \lim_{\Delta x \rightarrow 0} \frac{\Delta u + j \Delta v}{\Delta x} 
+=& \lim_{\Delta x \rightarrow 0} \frac{\Delta u + j \Delta v}{\Delta x}
 \end{align}
 $$
 
@@ -115,7 +115,7 @@ $$
 
 $$
 \frac{\partial u(x, y)}{\partial x} \equiv 0  \\
-\frac{\partial u(x, y)}{\partial y} \equiv 0 
+\frac{\partial u(x, y)}{\partial y} \equiv 0
 $$
 
 而这种情况下 f 的值只能是一个固定的实数，这种平凡的情形并没有什么研究的价值。对于优化来说，优化的目标总是可以用实数来衡量的，而实函数一般又不全纯(holomorphic), 那么要怎么优化它呢？
@@ -126,7 +126,7 @@ $$
 
 ![图片](./images/c-r.png)
 
-那么其梯度就是 
+那么其梯度就是
 
 $$
 \nabla u = [\frac{\partial u}{\partial x}, \frac{\partial u}{\partial y}]^{T}
@@ -139,11 +139,11 @@ $$
 x = x - \lambda \frac{\partial u}{\partial x} \\
 y = y - \lambda \frac{\partial u}{\partial y}
 $$
-那么如果再以某种方式将这量个偏导数重新组合成复数的形式，那么就是 
+那么如果再以某种方式将这量个偏导数重新组合成复数的形式，那么就是
 $$
 \frac{\partial u}{\partial x} + j \frac{\partial u}{\partial y}
 $$
-如果我们此处用一个并不太严谨的符号来表示它，比如 
+如果我们此处用一个并不太严谨的符号来表示它，比如
 
 $$
 \frac{\partial u}{\partial z} = \frac{\partial u}{\partial x} + j \frac{\partial u}{\partial y}
@@ -164,7 +164,7 @@ $$
 
 其中 $x, y, u, v, l$ 都是实数，并且这里也复用函数名和函数的返回值的名字。那么根据实函数的链式法则，也可以推广得到
 
-假定已知 
+假定已知
 $$
 \frac{\partial l}{\partial f} = \frac{\partial l}{\partial u} +j \frac{\partial l}{\partial v}
 $$
@@ -176,7 +176,7 @@ $$
 或者也可以写成矩阵乘法的形式
 $$
 \begin{bmatrix} \frac{\partial l}{\partial x} & \frac{\partial l}{\partial y} \\
-\end{bmatrix} = 
+\end{bmatrix} =
 \begin{bmatrix}\frac{\partial l}{\partial u} & \frac{\partial l}{\partial v} \\
 \end{bmatrix}
 \begin{bmatrix}
@@ -230,7 +230,7 @@ $$
 \frac{\partial f}{\partial z} = \frac{\partial f}{\partial x}\frac{\partial x}{\partial z} + \frac{\partial f}{\partial y}\frac{\partial y}{\partial z} \\
 \frac{\partial f}{\partial \bar{z}} = \frac{\partial f}{\partial x}\frac{\partial x}{\partial \bar{z}} + \frac{\partial f}{\partial y}\frac{\partial y}{\partial \bar{z}}
 $$
-其中 
+其中
 $$
 \frac{\partial x}{\partial z} = \frac{1}{2} \\
 \frac{\partial x}{\partial \bar{z}} = \frac{1}{2} \\
@@ -270,7 +270,7 @@ $$
 $$
 这也可以表示成矩阵乘法的形式
 $$
-\begin{bmatrix} \frac{\partial l}{\partial z} & \frac{\partial l}{\partial \bar{z}} \end{bmatrix}= 
+\begin{bmatrix} \frac{\partial l}{\partial z} & \frac{\partial l}{\partial \bar{z}} \end{bmatrix}=
 \begin{bmatrix} \frac{\partial l}{\partial s} & \frac{\partial l}{\partial \bar{s}} \end{bmatrix}
 \begin{bmatrix} \frac{\partial s}{\partial z} & \frac{\partial s}{\partial \bar{z}} \\
 \frac{\partial \bar{s}}{\partial z} & \frac{\partial \bar{s}}{\partial \bar{z}}
@@ -286,7 +286,7 @@ $$
 $$
 \frac{\partial l}{\partial \bar{s}} = \frac{1}{2}(\frac{\partial l}{\partial u} +j\frac{\partial l}{\partial v})
 $$
-开始，这对应着 vjp 中的 v. 对于这个梯度而言，实部和虚部分别是 
+开始，这对应着 vjp 中的 v. 对于这个梯度而言，实部和虚部分别是
 $$
 \frac{1}{2}\frac{\partial l}{\partial u}, \frac{1}{2}\frac{\partial l}{\partial v}
 $$
@@ -357,7 +357,7 @@ $$
 
 令 $\frac{\partial l}{\partial s} = 1 +0j$, 计算 $\frac{\partial l}{\partial z}$ 和 $\frac{\partial l}{\partial \bar{z}}$.
 
-首先可以计算 
+首先可以计算
 $$
 \begin{align}
 \frac{\partial s}{\partial z} &= z_{2} = 3 + 4j \\
@@ -419,7 +419,7 @@ $$
 3 & -4
 \end{bmatrix}
 $$
-故可以得到 
+故可以得到
 $$
 \frac{\partial l}{\partial \bar{z}} = 3 -4j \\
 \frac{\partial l}{\partial z} = \overline{\frac{\partial l}{\partial \bar{z}}} = 3 + 4j
@@ -429,7 +429,7 @@ $$
 
 两种计算方式结果一致。
 
-再令 
+再令
 $$
 \frac{\partial l}{\partial s} = 1+1j
 $$
@@ -500,7 +500,7 @@ $$
 \end{align}
 $$
 
-令 
+令
 $$
 \frac{\partial l}{\partial s} = 1+0j
 $$
@@ -543,7 +543,7 @@ $$
 $$
 计算结果一致。
 
-再令 
+再令
 $$
 \frac{\partial l}{\partial s} = 1+1j
 $$
@@ -609,6 +609,4 @@ $$
 
 1. [The Complex Gradient Operator and the CR-Calculus](https://arxiv.org/abs/0906.4835)
 2. [On the Computation of Complex-valued Gradients with Application to Statistically Optimum Beamforming](http://arxiv.org/abs/1701.00392)
-3. [附录 Wertinger Calculus](https://onlinelibrary.wiley.com/doi/pdf/10.1002/0471439002.app1)
-
-
+3. [Wertinger Calculus](https://onlinelibrary.wiley.com/doi/pdf/10.1002/0471439002.app1)

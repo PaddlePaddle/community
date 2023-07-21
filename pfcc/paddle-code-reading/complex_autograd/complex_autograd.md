@@ -37,16 +37,16 @@ $Im(z) = \frac{z - z^*}{2j}$
 可以研究$f(z, z*)$,因为如果$f$是真实可微的,那么这个函数具有偏导数
 
 $\frac{\partial }{\partial x}  =  \frac{\partial z}{\partial x} * \frac{\partial }{\partial z}+ \frac{\partial z^*}{\partial x}*\frac{\partial }{\partial z^*}
-=> 
-\frac{\partial }{\partial x}= \frac{\partial }{\partial z} + \frac{\partial }{\partial z^*} 
+=>
+\frac{\partial }{\partial x}= \frac{\partial }{\partial z} + \frac{\partial }{\partial z^*}
 $
 $\frac{\partial }{\partial y}  =  \frac{\partial z}{\partial y} * \frac{\partial }{\partial z}+ \frac{\partial z^*}{\partial y}*\frac{\partial }{\partial z^*}
 =>
 \frac{\partial }{\partial y}= j * (\frac{\partial }{\partial z} - \frac{\partial }{\partial z^*} )$
 通过上面的公式，我们可以得到
 $
-\frac{\partial }{\partial z}  =  \frac{1}{2} * (\frac{\partial }{\partial x} - j * \frac{\partial }{\partial y})  
-\\ 
+\frac{\partial }{\partial z}  =  \frac{1}{2} * (\frac{\partial }{\partial x} - j * \frac{\partial }{\partial y})
+\\
 \frac{\partial }{\partial z^*}= \frac{1}{2} * (\frac{\partial }{\partial x} + j * \frac{\partial }{\partial y})$
 
 这是在wiki上关于Wirtinger calculus的经典定义
@@ -103,10 +103,10 @@ $\frac{\partial L}{\partial z^*} = 1 * 0 + 1*c = c $
 1. 但是我们可以注意到如果将$z ，z^*$当作独立的两个变量，那么就很像二元函数的性质，以二元函数的性质计算,证明见:
 $\frac{\partial s}{\partial z} = \frac{\partial (c*z)}{\partial z} =c$
 $\frac{\partial s}{\partial z^*} = \frac{\partial (c*z)}{\partial z^*} =0$
- 
+
 1. 类似fft相关的方法，会产生$\mathbb{C} \rightarrow \mathbb{R} $以及 $\mathbb{R} \rightarrow \mathbb{C}$的场景
 1) 针对$\mathbb{C} \rightarrow \mathbb{R} $的场景，输出变量为实数，则共轭即为本身$s^* = s$
-$\frac{\partial L}{\partial z^*} = 2 *(output\_grad) * \frac{\partial s}{\partial z^*}  
+$\frac{\partial L}{\partial z^*} = 2 *(output\_grad) * \frac{\partial s}{\partial z^*}
 $
 2) 针对$\mathbb{R} \rightarrow \mathbb{C}$的场景，输入变量为实数
 $\frac{\partial L}{\partial z^*} = 2 *Re(output\_grad^* * \frac{\partial s}{\partial z^*})
@@ -116,4 +116,4 @@ $
 ## 参考文献
 1. [The Complex Gradient Operator and the CR-Calculus](https://arxiv.org/abs/0906.4835)
 2. [On the Computation of Complex-valued Gradients with Application to Statistically Optimum Beamforming](http://arxiv.org/abs/1701.00392)
-3. [附录 Wertinger Calculus](https://onlinelibrary.wiley.com/doi/pdf/10.1002/0471439002.app1)
+3. [Wertinger Calculus](https://onlinelibrary.wiley.com/doi/pdf/10.1002/0471439002.app1)
