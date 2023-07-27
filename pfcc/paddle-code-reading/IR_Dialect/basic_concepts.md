@@ -57,10 +57,6 @@
 ### 2. 功能目标
 根据前期的调研，我们计划将 IR 体系升级重点分为四个模块：类型系统、模型结构、高阶特性、Pass升级，并分别进行设计和评审
 
-<p align="center">
-<img width=40%  alt="image" src="img/type_design.png">
-</p>
-
 相应的功能目标如下：
 1. 构建可扩展的 `Type` 类型系统
    + 能够支持List、Dict等复杂容器
