@@ -38,6 +38,14 @@ Paddle 目前引入了 `clang-format`，`cpplint` 等工具用于 C++ 端的代�
 
 ## 三、`clang-tidy` 相关调研
 
+### 部分知名项目使用`clang-tidy`版本调研
+
+- pytorch 使用 15.0.6
+- tensorflow 使用 6.0 (ubuntu 16.04)
+- pybind11 使用 15
+
+### 存量代码`clang-tidy`扫描结果调研
+
 首先使用 `clang-tidy` (LLVM version 10.0.0) 对代码仓库 (commit 0c2ab714befeaac35a3df5d92cfe7cb1631ce716) 进行扫描，其中，编译选项为 `cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_GPU=ON -DWITH_TENSORRT=ON -DWITH_DISTRIBUTE=ON -DWITH_MKL=ON -DWITH_AVX=ON -DCUDA_ARCH_NAME=Volta -DWITH_PYTHON=ON  -DWITH_TESTING=ON -DWITH_COVERAGE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWITH_CONTRIB=ON -DWITH_INFERENCE_API_TEST=ON -DPY_VERSION=3.8 -DWITH_PSCORE=ON -DWITH_GLOO=ON -DWITH_LITE=ON -DWITH_STRIP=ON -DWITH_UNITY_BUILD=ON`。扫描用的脚本如下所示：
 
 ```shell
