@@ -32,7 +32,7 @@
 
 ## 一、IR 升级概要
 ### 1. 相关背景
-详见 [IR 底层基础类型系统设计文档](./basic_concepts.md#1-相关背景)
+> 详见 [IR 底层基础类型系统设计文档](./basic_concepts.md#1-相关背景)
 
 
 <p align="center">
@@ -40,12 +40,12 @@
 </p>
 
 上图为当前框架的 IR 状态图。上图中：
-1. 偏橙色的方块表示框架中的 IR 数据结构：目前包括 `Program`、`Graph`、`CINN Program`、`CINN Graph`.
+1. 偏橙色的方块表示框架中的 IR 数据结构：目前包括 `Program`、`Graph`、`CINN Program`、`CINN Graph`。
 2. 偏绿色的方块表示框架中的广义 `Pass` ：目前包括 添加反向、分布式优化切图、组合算子拆分、框架图优化 `Pass`、`CINN Program Pass`、`CINN Graph Pass`等等。
 
 目前因为 IR，导致的主要问题包扩：
 1. 代码复用性问题：
-   + 两种场景 Paddle 和 Cinn 。很多功能相能相同 `Pass` ,需要重复开发两次（`ConstantFold`、`CSE`等等）。
+   + 两种场景 Paddle 和 Cinn 。很多功能相能相同 `Pass` ，需要重复开发两次（`ConstantFold`、`CSE`等等）。
    + IR 元素和具体的场景强绑定在一起，场景无关逻辑无法复用。
 2. 框架稳定性问题：
    + 目前的 paddle 模型结构 `Program` 存在序列式 IR 的隐式依赖。所有可能破坏算子顺序的模块，都是不完备的，都是存在风险的。
@@ -61,7 +61,7 @@
    + 计算图不符合 `SSA` 原则。编译器领域的很多成熟的优化理论无法直接应用。
    + ....................
 2. `Pass` 的开发难度和维护陈本高
-   + `Graph` 里面内嵌了 `Program` 。为保证一致性，在 `Graph` 上做图变换 `Pass` , 还需要同步修改内嵌的 `Porgram` 数据结构。开发难度高。
+   + `Graph` 里面内嵌了 `Program` 。为保证一致性，在 `Graph` 上做图变换 `Pass` ， 还需要同步修改内嵌的 `Porgram` 数据结构。开发难度高。
    + `Op` 和 `Var` 被同时抽象为了 `Graph` 的节点（ `Op` 为点，`Var` 为边更加合理），进一步加大了图变化的复杂度。
    + ...................
 
@@ -79,7 +79,7 @@ MLIR 的出现证明了可以用一套数据结构同时满足 `Graph` 和 `Prog
 
 在编译器中，首先会对所有算子类型附一个 `uint32_t` 变量表示索引。  然后在全局维持了一个哈希表对算子类型信息进行抽象。key 是`infershape`、 `inferdtype`、 `inferlayout`、`CINNStrategy`、`OpPattern`等信息描述， value 是 `vector<any>`，表示所有类型的算子类型的该信息组成的数组。
 
-比如假设 `conv2d` 的 `index` 是 128，那么 `conv2d` 的 `infershape` 函数是存储在哈希表的 `infershape` 对应的数组的第128个变量。和主框架类似，这种方式也存在空间浪费问题。比如假设全局定义了 200 个算子，那意味着哈希表的几乎每个 `value` 都是一个 size 为 200 的 `vector<any>` , 而200个成员里面，只有一部分是真正有意义的。
+比如假设 `conv2d` 的 `index` 是 128，那么 `conv2d` 的 `infershape` 函数是存储在哈希表的 `infershape` 对应的数组的第128个变量。和主框架类似，这种方式也存在空间浪费问题。比如假设全局定义了 200 个算子，那意味着哈希表的几乎每个 `value` 都是一个 size 为 200 的 `vector<any>` ， 而200个成员里面，只有一部分是真正有意义的。
 
 如果要用一套 IR 统一主框架和编译器，那个不管是算子的数量、还是算子类型信息的种类，都是急剧增加，如果继续使用主框架或者编译器的这种抽象方式，显然是不合适的。
 
@@ -93,7 +93,7 @@ MLIR 的出现证明了可以用一套数据结构同时满足 `Graph` 和 `Prog
 
 本次 IR 重构升级的功能目标，主要分为以下四个方面。
 1. 统一 IR 体系，共享开发成果。
-   + 开发 IR 基础库, 置于 Paddle 库的最底层， 里面的开发成果可由所有场景共享。
+   + 开发 IR 基础库， 置于 Paddle 库的最底层， 里面的开发成果可由所有场景共享。
    + IR 库会对 `Interface` 、`Trait`、`Type`、`Attribute`、`Op`、`Porgram`等 IR 组件从具体场景中剥离出来，进行系统性的抽象。
      + 新 IR `Program` 可以逐步替换当前框架中的 `Program`、`Graph`、`Cinn Program`、`Cinn Graph`。
      + ...................
@@ -107,7 +107,7 @@ MLIR 的出现证明了可以用一套数据结构同时满足 `Graph` 和 `Prog
 
 3. 增强 IR 能力，支持更多优化。
    + 新 IR 对类型进行规范抽象，支持`List`、`Dict`等复杂类型，以及更近一步的类型嵌套表示。
-   + 新 IR 会通过定义相应的`Trait`,  对 `inplace` 算子以及 `View` 类算子进行合理的抽象描述。
+   + 新 IR 会通过定义相应的`Trait`，  对 `inplace` 算子以及 `View` 类算子进行合理的抽象描述。
    + 新 IR 的计算图严格遵守 `SSA` 原则。可以应用很多编译器方向的优化理论。
    + ...................................
 4. 基于新 IR，优化 `Pass` 写法，降低开发难度和维护成本。@推理部署方向
@@ -137,7 +137,7 @@ MLIR 的出现证明了可以用一套数据结构同时满足 `Graph` 和 `Prog
    + `Attribute` 是对一个具体的常量进行抽象，它是包含了具体的值的。比如 `Fp32Attr` ，用户是可以获取到它对应的数值是多少。
    + `Op` 是对算子进行抽象。比如 `ConvOp` 、`ReluOp` 等等。它通过 `yaml` 文件进行定义，`yaml` 文件中会列举改 `Op` 的输入&输出&属性的约束，以及它所支持的 `Trait` 和 `Interface` 。IR会通过 `python` 脚本自动生成相应的 C++ 算子定义。
    + 这三者是基于 `Trait` 和 `Interface` 进行定义的。它们会对关联自己所拥有的相应 `Trait` 和 `Interface` 。 比如 `ConvOp` 会关联 `InferShapeInterface` 、`GradOpInterface`、`ReadOnlyTrait`、`ValueSemanticsTrait`等特征和接口， `Relu_Op`则只会关联`InferShapeInterface`、`GradOpInterface`、`InplaceTrait`等特征和接口。
-   + 这三者也是可以任意扩展的，只要派生自相应的基类、关联相应的 `Trait` 和 `Interface` , 遵循相应的实现规则即可。
+   + 这三者也是可以任意扩展的，只要派生自相应的基类、关联相应的 `Trait` 和 `Interface` ， 遵循相应的实现规则即可。
 
 3. `Dialect`
    + `Dialect` 用来对 `Type`、`Attribtue`、`Op`做模块化管理， 比如 `BuiltinDialect`、`PaddleDialect`、`CinnDialect`等等。一个`Dialect` 里面包含了一系列的` Type`、`Attribtue`、`Op`的定义。相应的，每个 `Type`、`Attribtue`、`Op`都是定义在某个唯一的 `Dialect` 里面。对整个 IR 框架而言， `Dialect` 是可以随意插拔的。
@@ -170,7 +170,7 @@ MLIR 的出现证明了可以用一套数据结构同时满足 `Graph` 和 `Prog
 坚持 SSA 设计原则，保证模型结构有向无环，一方面可以让 paddle 模型对齐竞品，另一方面，当前很多成熟的编译器优化理论都是基于 SSA 的，而深度学习框架也在逐步向编译器考虑，这可以让后续的很多优化做的更加顺畅。
 
 IR 中很多对象是一次构造，多次引用。常规做法是构造一次，然后通过指针的方式进行引用。
-比如 `OpInfo` , 目前 Paddle 是在算子注册的时候，构造一个 `OpInfo` 对象，然后在相应的 `OperatorBase` 里面包含了 `OpInfo` 指针作为成员变量。
+比如 `OpInfo` ， 目前 Paddle 是在算子注册的时候，构造一个 `OpInfo` 对象，然后在相应的 `OperatorBase` 里面包含了 `OpInfo` 指针作为成员变量。
 
 本文大部分场景采用 `Pimpl` 设计模式。将具体实现对象封装在 `Impl` 数据结构中。
 采用这种设计模式的数据结构包括 `Type`、`Attribute`、`OpInfo`、`OpResult`、`Value`、`OpOperand` 等等，它们自身都只包含一个 `impl` 指针，可以快速浅拷贝。真正的实现对应 `TypeStorage` 、`AttributeStorage`、`OpInfoImpl`、`OpResultImpl`、`ValueImpl`、`OpOperandImpl`。其中， `Impl` 不会对用户暴漏，但是 `Storage` 会。
@@ -202,9 +202,9 @@ IR 中很多对象是一次构造，多次引用。常规做法是构造一次�
 
 首先，我们用 `Attribute` 来描述一个属性。在此之上，派生出各种类型的属性，比如 `StrAttribute` 、`DictionaryAttribute`等等。
 
-对目前的 paddle 主框架而言，`OperatorBase` 包含了两个`hash_map<string, Attribtue>`用来描述算子属性，一个是必要属性， 另一个是运行时属性;
+对目前的 paddle 主框架而言，`OperatorBase` 包含了两个`hash_map<string， Attribtue>`用来描述算子属性，一个是必要属性， 另一个是运行时属性;
 在新 IR 中，我们将两个哈希表合为一个，抽象为 `DictionaryAttribiute attrs`。
-但是我们会在算子类型信息( `OpInfoImpl` )中,存储一个属性名列表(`vector<string>`)，用来记录该类型算子都包含哪些必要属性（注：必要属性名是有顺序的, 可通过该顺序跟算子库函数签名对齐）。
+但是我们会在算子类型信息( `OpInfoImpl` )中，存储一个属性名列表(`vector<string>`)，用来记录该类型算子都包含哪些必要属性（注：必要属性名是有顺序的， 可通过该顺序跟算子库函数签名对齐）。
 
 算子的属性检查只会根据定义针对必要属性。用户可以在算子中临时存储一些运行时属性，但是运行时属性只能用来辅助计算，不允许改变计算语意。模型在导出时，默认会裁剪掉所有的运行时属性。
 
@@ -219,7 +219,7 @@ class Attribute {
 ```
 
 
-定义工具类 `AttrBase` 将 `ConcreteAttribute` ,` BaseAttribute`, `StorageAttribute`关联起来：
+定义工具类 `AttrBase` 将 `ConcreteAttribute` ，` BaseAttribute`， `StorageAttribute`关联起来：
 
 ```cpp
 // AttrBase用来将ConcreteAttributeType, BaseAttributeType, StorageAttributeType关联在一起
@@ -233,7 +233,7 @@ class AttrBase: public BaseT {
 ```
 
 对每种 `Attribtue` 类型，需要首先在 `AttributeStorage` 基础上派生它的存储对象。
-比如定义要定义 `StrAttibute` , 先定义 `StrAttributeStorage` :
+比如定义要定义 `StrAttibute` ， 先定义 `StrAttributeStorage` :
 ```cpp
 class StrAttributeStorage : public AttributeStorage{
    // 该内存对象由IRContext负责开辟和回收。
@@ -388,7 +388,7 @@ class Operation {
 }
 ```
 
-我们将 `Operation` 指针进一步装饰为 `OpBase` , 方便做具体算子的基类。以及实现从` Operation*` 到具体 `Op` 的转换。
+我们将 `Operation` 指针进一步装饰为 `OpBase` ， 方便做具体算子的基类。以及实现从` Operation*` 到具体 `Op` 的转换。
 
 `OpBase` 的定义：
 
@@ -412,18 +412,18 @@ class OpBase {
 但是权重属性的数据量一般会非常大，直接根据权重值进行哈希或者判等的效率显然是非常低的。
 我们沿用 paddle 的一贯做法，将权重单独存储，在模型中通过权重名对权重值进行获取和保存。
 
-我们在每个模型中，维护一个哈希表： `hash_map<StrAttribute, Variable*>` 来表示该模型对应的权重值。 用户可以通过接口在此哈希表中插入、删除、访问、修改相应的 `Variable` 。
+我们在每个模型中，维护一个哈希表： `hash_map<StrAttribute， Variable*>` 来表示该模型对应的权重值。 用户可以通过接口在此哈希表中插入、删除、访问、修改相应的 `Variable` 。
 Variable类似于paddle中的Varibale， 它包含：
 1. `Type  type_`：表明 `Variable` 的类型；
 2. `void*  data_`:   指向具体的数据；
 3. `bool is_mutable_`: 表明数据是否会在模型的执行当中被改变；
 4. 数据的大小、对齐等等其他性质。
 
-对于模型中的对权重的使用，我们定义 G`etParameterOp`、`SetParameterOp`。分别从相应模型的哈希表中, 获取、设置相应的权重内容。
+对于模型中的对权重的使用，我们定义 G`etParameterOp`、`SetParameterOp`。分别从相应模型的哈希表中， 获取、设置相应的权重内容。
 其中， `GetParameterOp`接受一个字符串作为属性，意义是从该模型的哈希表中加载该字符串对应的属性，并将其转换为输出。
 `SetParameterOp` 接受一个字符串作为属性，一个张量类型的输入，没有输出。 表示用该属性和张量组成的键值对更新模型权重哈希表。
 
-相应的，在模型组网的时候，我们需要在 `startup program` 中插入相应的 `SetParameterOp` , 而在 `main program` 中插入相应的 `GetParameterOp` 。 我们通过将 `starpup program` 执行完得到的参数哈希表移动给` main program`，来实现两个 `program` 的通信。对于模型的任何参数（比如学习率等），只要我们想要在权重文件中存储该值，那就应该在相应的位置插入 `Get/SetParameterOp` 。后期如果有必要，我们也可以定义 `Get/SetCombineParameterOp` 等，一次性加载&存储大批量权重。
+相应的，在模型组网的时候，我们需要在 `startup program` 中插入相应的 `SetParameterOp` ， 而在 `main program` 中插入相应的 `GetParameterOp` 。 我们通过将 `starpup program` 执行完得到的参数哈希表移动给` main program`，来实现两个 `program` 的通信。对于模型的任何参数（比如学习率等），只要我们想要在权重文件中存储该值，那就应该在相应的位置插入 `Get/SetParameterOp` 。后期如果有必要，我们也可以定义 `Get/SetCombineParameterOp` 等，一次性加载&存储大批量权重。
 
 当模型导出的时候，会将模型中的哈希表存储为权重文件，算子列表存储为模型文件。当从文件中初始化模型的时候，会将所有的 `Variable` 的 `isMutable` 设为 `False` ， 然后遍历模型中的所有算子，遇见 `SetParameterOp` 的时候，就将相应的 `isMutable` 设为 `True` 。 对于 `Pass` 而言，对于权重，可以通过访问相应的 `isMutable` 来判定是否可以将该 `Parameter` 当作常量进行变换。
 
@@ -509,7 +509,7 @@ prtotected:
     ConcreteInterface::Concept* impl_;
     OpInterfaceBase::OpInterfaceBase(Operation* op, ConcreteInterface::Concept* impl): OpBase(op), impl_(impl){}
 };
-// 需要具体算子类型的特征类,必须定义Impl结构体
+// 需要具体算子类型的特征类，必须定义Impl结构体
 class InferShapeInterface : public OpInterfaceBase<InferShapeInterface>{
    struct Concept {
       void(*infer_shape_) (Operation*);
@@ -581,7 +581,7 @@ REGISTER_OPERATOR(conv2d,
 `OpInfoImpl` 应该是通过以具体算子为模版参数的接口进行构建。
 ```cpp
 template <typename ConcreteOp>
-static OpInfoImpl* create();//根据具体的Op, 创建一个OpInfoImpl
+static OpInfoImpl* create();//根据具体的Op， 创建一个OpInfoImpl
 ```
 
 `OpInfoImpl` 是对具体的 `Op` 类型的相关信息抽象。`OpInfo` 是对 `OpInfoImpl` 指针的封装。
@@ -599,7 +599,7 @@ class OpInfoImpl {
     void destroy();//回收自身
     bool hasTrait(TypeId traitId);// 二分搜索trait id列表，进行查找
     bool hasInterface(TypeId interfaceId);// 二分搜索interface id列表，进行查找
-    // 二分搜索interface id列表，获取相应的void*,然后强转为Interface::Impl*
+    // 二分搜索interface id列表，获取相应的void*，然后强转为Interface::Impl*
     template <class Interface>
     Interface::Concept* getInterfaceImpl();
 private:
@@ -659,7 +659,7 @@ op : addmm
 
 ```cpp
 // Op最为所有算子的工具基类，用来将算子和它的特征关联起来
-// 第一个模版参数为 ConcreteOpType , 表示具体的算子类型
+// 第一个模版参数为 ConcreteOpType ， 表示具体的算子类型
 // 后续的所有模版参数都是该算子所具有的特征和接口。
 template <typename ConcreteOp, class... TraitOrInterface>
 class Op : public OpBase {
@@ -739,7 +739,7 @@ class Program {
 ```
 
 
-可以看见，它的 `var` 是抛开 `op` 独立定义的。 `op` 在它的输入输出中通过字符串，对 `var` 进行了引用。在新 IR 中， `fc` 网络的计算图描述如下（只是样板, 后续可能会有微调）：
+可以看见，它的 `var` 是抛开 `op` 独立定义的。 `op` 在它的输入输出中通过字符串，对 `var` 进行了引用。在新 IR 中， `fc` 网络的计算图描述如下（只是样板， 后续可能会有微调）：
 
 ```cpp
 program {
@@ -760,25 +760,25 @@ program {
 
 在当前 Paddle 中主要包含两种：
 
-+ 一种是 `inplace` 算子，比如 `relu_` , 这种算子只改变输入 `tensor` 的值，不改变 `shape` 和 `dtype` .  典型特征以下划线结尾，正常来说，它会有一个函数签名(输入、输出、属性)完全匹配的非 `inplace` 类型算子。
++ 一种是 `inplace` 算子，比如 `relu_` ， 这种算子只改变输入 `tensor` 的值，不改变 `shape` 和 `dtype` .  典型特征以下划线结尾，正常来说，它会有一个函数签名(输入、输出、属性)完全匹配的非 `inplace` 类型算子。
 
-+ 另一种是 `view` 类型算子，比如 `reshape` , 这种算子不会改变 `tensor` 的值，但是会对底层内存重新进行解释，改变 `shape` 和 `dtype` 。
++ 另一种是 `view` 类型算子，比如 `reshape` ， 这种算子不会改变 `tensor` 的值，但是会对底层内存重新进行解释，改变 `shape` 和 `dtype` 。
 但本质上，造成的结果是一致的，那就是多个 `tensor` 对应了同一块内存。
 
 
 本方案会将 `inplace` 算子定义为新的算子， 输入&输出&属性都和原算子一致。但是算子名后跟了下划线，算子特征有所变化。别名算子直接定义即可。
 ```cpp
-class ReluOp﻿: Op<ReluOp, ReadOnlyTrait， HasValueSemanticsTrait, ...>  {...}
-class Relu_Op﻿: Op<Relu_Op, InplaceTrait, ...>  {...}
-class ReshapeOp﻿: Op<ReshapeOp﻿, ViewLikeTrait, ReadOnlyTrait，...>  {...}
+class ReluOp: Op<ReluOp, ReadOnlyTrait， HasValueSemanticsTrait, ...>  {...}
+class Relu_Op: Op<Relu_Op, InplaceTrait, ...>  {...}
+class ReshapeOp: Op<ReshapeOp, ViewLikeTrait, ReadOnlyTrait,...>  {...}
 ```
 
 `ReadOnlyTrait` 表示该算子不会修改它的操作数（意味着不是 `inplace` 算子）。 `HasValueSemanticsTrait` 比 `ReadOnlyTrait` 更强一层，表示该算子不仅不会修改它的操作数，而且不会给操作数增加别名。（不仅不是 `inplace` 算子，而且不是 `view` 类算子）。`InplaceTrait` 表示该算子是某个算子的 `inplace` 版本，它的算子名一定以下划线结尾，而且去掉下划线，就是算子的非 `inplace` 版本。`ViewLikeTrait` 表示该算子的输出是输入的别名。（目前暂定它的第一个输出是第一个输出的别名，以后可以考虑将其升级为 `Interface` ）
 
 
-为了处理多个 `tensor` 对应同一块内存这种情况，我们将张量操作数在 IR 上分为两种类型。一种是 `tensor` , 另一种是 `v_tensor` (`value tensor`)。两种类型的实现完全一致，可以互相构造（即可以通过 `v_tensor` 为参数，构造 `tensor` ; 反之亦然）。可以定义两个工具算子： `to_tensor`, `to_vtensor`实现 `tensor` 和 `v_tensor` 的类型转换（深拷贝）。
+为了处理多个 `tensor` 对应同一块内存这种情况，我们将张量操作数在 IR 上分为两种类型。一种是 `tensor` ， 另一种是 `v_tensor` (`value tensor`)。两种类型的实现完全一致，可以互相构造（即可以通过 `v_tensor` 为参数，构造 `tensor` ; 反之亦然）。可以定义两个工具算子： `to_tensor`， `to_vtensor`实现 `tensor` 和 `v_tensor` 的类型转换（深拷贝）。
 
-但是在 IR 层面来说，我们认为， `v_tensor` 是一个只读的变量, 不存在别名，构造以后底层永远不会改变。而 `tensor` 恰恰相反，表示它是存在别名的，它的底层可能在不被感知的情况下被修改。相应的，如果一个算子它的所有张量输入都是 `v_tensor` , 那么它的乱序执行，以及图变换都是完备的。（因为输入永远不变，早晚执行都一样）。而如果它的某个张量输入是 `tensor` , 那么它不能乱序执行，对它的图变换也必须非常保守。（输入是 `tensor` , 意味着可能存在别的张量和它共享同一个底层，别的张量可能在某个阶段被修改，因此，乱序执行是有风险的。）
+但是在 IR 层面来说，我们认为， `v_tensor` 是一个只读的变量， 不存在别名，构造以后底层永远不会改变。而 `tensor` 恰恰相反，表示它是存在别名的，它的底层可能在不被感知的情况下被修改。相应的，如果一个算子它的所有张量输入都是 `v_tensor` ， 那么它的乱序执行，以及图变换都是完备的。（因为输入永远不变，早晚执行都一样）。而如果它的某个张量输入是 `tensor` ， 那么它不能乱序执行，对它的图变换也必须非常保守。（输入是 `tensor` ， 意味着可能存在别的张量和它共享同一个底层，别的张量可能在某个阶段被修改，因此，乱序执行是有风险的。）
 
 对于静态图组网，或者动态图组网，我们都适用 `tensor` 作为相应的输入输出类型。这种网络，虽然也是符合 `SSA` 的无环图，但是它只能按顺序执行，基本不能做什么图变换优化。当组网完成以后，开始做优化。
 
@@ -796,12 +796,12 @@ use(b)
 会被转换为:
 ```cpp
 use(a)
-// a1是a的深拷贝，类型是 v_tensor, 只读，不能有别名
+// a1是a的深拷贝，类型是 v_tensor， 只读，不能有别名
 a1 = to_vtensor(a): (pd.tensor) -> pd.v_tensor
 
 b1 = conv(a1, ...) : (pd.v_tensor, ...) -> pd.v_tensor
 
-// b是b1的深拷贝，类型转回tensor, 保证后文的类型没有发生变化.
+// b是b1的深拷贝，类型转回tensor， 保证后文的类型没有发生变化.
 b = to_tensor(b1): (pd.v_tensor) -> pd.tensor
 use(a)
 use(b)
@@ -815,8 +815,8 @@ use(b)
 b = to_tensor(a):(pd.v_tensor, ...) -> pd.tensor
 ```
 
-如果 `b` 的所有 `user` 都没有修改 `b` 或者给它起别名。 那说明 `b` 等价于只读的 `v_tensor`,  那么它可以被它的来源 `a` 替换。
-通过 `Pass 2` ,  可以大规模消除 `Pass 1` 中产生的不必要的深拷贝。对于我们大部分常见的模型，这两个 `pass` 会将所有的 `tensor` 转换为`v_tensor`, 随后对其进行图变换和并发执行都是完备的。
+如果 `b` 的所有 `user` 都没有修改 `b` 或者给它起别名。 那说明 `b` 等价于只读的 `v_tensor`，  那么它可以被它的来源 `a` 替换。
+通过 `Pass 2` ，  可以大规模消除 `Pass 1` 中产生的不必要的深拷贝。对于我们大部分常见的模型，这两个 `pass` 会将所有的 `tensor` 转换为`v_tensor`， 随后对其进行图变换和并发执行都是完备的。
 
 对于一些特殊场景，比如 `inplace` 算子、或者 `view` 类算子，它会继续保留着 `tensor` 类型。图变换和并行调度会对这类算子保守对待。
 
@@ -844,7 +844,7 @@ b = relu(a) : (pd.tensor) -> pd.tensor
 use(b)
 ```
 
-这样做的好处是， 比如 `conv+bn+relu_`,  正常来说不能融合， 但是将 `relu_` 转换成 `relu` 以后， 这三个算子就可以融合一个为一个算子。等所有的图优化做完以后，用户可以选择性的插入一个类似的 `pass` ， 再将非 `inplace` 算子转换为 `inplace` 算子。假设输入的为最常见的` conv+bn+relu` 模式：
+这样做的好处是， 比如 `conv+bn+relu_`，  正常来说不能融合， 但是将 `relu_` 转换成 `relu` 以后， 这三个算子就可以融合一个为一个算子。等所有的图优化做完以后，用户可以选择性的插入一个类似的 `pass` ， 再将非 `inplace` 算子转换为 `inplace` 算子。假设输入的为最常见的` conv+bn+relu` 模式：
 
 ```cpp
 // ....
@@ -854,7 +854,7 @@ d = relu(c) : (pd.tensor) -> pd.tensor
 // .....
 ```
 
-经过 `pass1` , 该代码会被变换为：
+经过 `pass1` ， 该代码会被变换为：
 
 ```cpp
 // ....
@@ -893,7 +893,7 @@ d1 = conv_bn_relu(a1, ...) : (pd.v_tensor, ...) -> pd.v_tensor
 d = to_tensor(d1): (pd.v_tensor) -> pd.tensor
 // .....
 ```
-显而易见，这种 `Pass` 流程，可能相对来说，更加复杂，但是它的优点在于更加通用。每一个 `Pass` 在任何场景下，都是严格完备正确的。 用户可以在流水线的任何一个阶段插入任何一个 `Pass`, 也是安全的。
+显而易见，这种 `Pass` 流程，可能相对来说，更加复杂，但是它的优点在于更加通用。每一个 `Pass` 在任何场景下，都是严格完备正确的。 用户可以在流水线的任何一个阶段插入任何一个 `Pass`， 也是安全的。
 
 
 
@@ -1049,7 +1049,7 @@ NonValueTensorType have an optional list of optional sizes and an optional
 dtype.
 
 默认初始 `tensor` 都是 `torch.tensor` ，通过 `MaximizeValueSemanticsPass` 将` torch.tensor` 尽可能地转换为 `torch.v_tensor` ，随后进行图变换。
-对于 `inplace` 算子，他会在算子定义的时候，标志 `IsTrailingUnderscoreInplaceVariant` , 会通过 `ReduceTrailingUnderscoreInplaceVariant` 的 `Pass` 将其转换为非 `inplace` 算子 + `overwritten` 算子。
+对于 `inplace` 算子，他会在算子定义的时候，标志 `IsTrailingUnderscoreInplaceVariant` ， 会通过 `ReduceTrailingUnderscoreInplaceVariant` 的 `Pass` 将其转换为非 `inplace` 算子 + `overwritten` 算子。
 本文在 `Inplace` 算子的设计上参考了 `TorchMlir` 的实现。
 
 ### 1.3 MLIR 对大参数的处理方式
