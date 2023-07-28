@@ -12,16 +12,17 @@
     - [2. 功能目标](#2-功能目标)
     - [3. 设计概要](#3-设计概要)
     - [4. Paddle 现状](#4-paddle-现状)
-  - [二、竞品对照](#二竞品对照)
-    - [2.1 MLIR 类型系统](#21-mlir-类型系统)
-    - [2.2 TVM 类型系统](#22-tvm-类型系统)
-    - [2.3 Mindspore 类型系统](#23-mindspore-类型系统)
-    - [2.4 竞品类型系统比对](#24-竞品类型系统比对)
-  - [三、设计思路与实现方案](#三设计思路与实现方案)
-    - [3.1 Type 类](#31-type-类)
-    - [3.2 Type 对象](#32-type-对象)
-    - [3.3 扩展工具](#33-扩展工具)
-    - [3.4 使用方式](#34-使用方式)
+  - [二、设计思路与实现方案](#二设计思路与实现方案)
+    - [2.1 Type 类](#21-type-类)
+    - [2.2 Type 对象](#22-type-对象)
+    - [2.3 扩展工具](#23-扩展工具)
+    - [2.4 使用方式](#24-使用方式)
+- [附录](#附录)
+  - [一、竞品对照](#一竞品对照)
+    - [1.1 MLIR 类型系统](#11-mlir-类型系统)
+    - [1.2 TVM 类型系统](#12-tvm-类型系统)
+    - [1.3 Mindspore 类型系统](#13-mindspore-类型系统)
+    - [1.4 竞品类型系统比对](#14-竞品类型系统比对)
 
 ## 一、IR 升级概要
 
@@ -365,9 +366,224 @@ inline bool IsType(const std::type_index& type) {
 + 从表达能力上来说， 没有抽象出具体的 `Type` 数据结构，因此无法支持类型的组合嵌套。 支持不了` List`、`Dict`等模版类型。
 + 从扩展性上来说，一处类型的扩展，其它两处，以及对应的转换函数，都需要进行扩展修改。
 
-## 二、竞品对照
 
-### 2.1 MLIR 类型系统
+
+
+## 二、设计思路与实现方案
+
+C++ 认为万事万物皆可为对象（ `Object` ），对象上有其属性和行为。 具有相同性质的对象，可以抽象为类( `Class` )。类似的，我们可以抽象出 `Type` 类和 `Type` 对象的概念。
+
+`Float32Type`、`DenseTensorType`、`FunctionType`等数据结构的定义代表着 `Type` 类，里面会定义该 `Type` 类对应的接口及成员。而描述计算图中一个输入&输出的类型，需要的是一个 `Type` 对象。一个 `Type` 对象一定属于某个 `Type` 类。
+
+`Type` 类和 `Type` 对象是一对一或者一对多的关系。
+
+有些 `Type` 类只对应唯一个 `Type` 对象，比如，`Float32Type`、`Uint8Type`等等。这类 `Type` 对象构造时不需要额外参数描述。
+有些 `Type` 类则对应多个 `Type` 对象，比如`FunctionType`、`DenseTensorType`等等。这类 `Type` 对象构造时需要额外参数描述，比如 `DenseTensorType` 需要传递 `shape`、`lod_level`、`data_type`作为参数。 参数不同，构造出的 `Type` 对象也不同。
+
+### 2.1 Type 类
+
+如下是 `TypeID` 的简单定义。可以通过 `TypeID` 对象对每一种 `Type` 类进行唯一标识。对任意一种 `Type` 类，比如 `DenseTensorType` , 可以通过 `TypeID::get<DenseTensorType>()` 来获得其对应的 `TypeID` 。 `TypeID相` 等，表示 `Type` 类相同。
+
+```cpp
+class TypeID {
+     struct Storage {};
+ public:
+    template<typename T> static TypeID get() {
+        static Storage instance;
+        return TypeID(&instance);
+    }
+  private:
+    TypeID(const Storage *storage) : storage(storage) {}
+    const Storage *storage_;
+}
+```
+我们将不同 `Type` 类的属性和行为，抽象为 `AbstractType` 对象。目前来说，暂时可能就只有 `name` 和 `type_id` 。但是后续看 `Pass` 设计时的需求，可能会增加对特征( `Trait` )和接口( `Interface` )的抽象。特征用来做类型做横向划分，比如在 IR 变换中，某些时候，我们可能不会在意具体类型是什么，只在意该类型有没有某种性质（比如 `shape` ）。特征和接口会在下个阶段的算子定义设计中详细讲述，此处不再展开。
+
+```cpp
+class AbstractType {
+    const TypeID type_id_; // 表明该对象对应的Type的TypeID.
+    const char* name_;//表明该Type的name.
+    // const Dialect& dialect_; //表明该对象对应的Type注册在哪个dialect里面。目前暂时不用。
+}
+```
+
+在 `IRContext` 中，可以维持一个以 `TypeID` 为 key 的散列表。 记录框架支持的所有 `Type` 类,以及相应的性质。
+```cpp
+class IRContext {
+    static IRContex* instance();
+
+private:
+    IRContext();
+    // 在静态变量初始化的时候初始化一次，中途不再改变。
+    std::unordered_map<TypeID, AbstractType*> register_types;
+
+    /// 用来做类型的内存管理。
+    StorageUniquer type_storage;
+};
+```
+
+### 2.2 Type 对象
+
+在 `Type` 的数据结构定义中，`impl` 指针指向由 `IRContext` 管理的，包含了该 `Type` 对象的所有知识的存储对象。两个相同的 `Type` 对象，它们的存储对象也一定是相同的，在 `IRContext` 中共用同一份内存。 基于此，`impl`指针的是否相等，与 `Type` 对象是否相同，完全等价。
+```cpp
+class Type {
+  //其它接口省略
+  TypeStorage* impl{nullptr};
+};
+```
+
+下文讨论如何在 `IRContext` 中，对不同 `Type` 对象的存储对象进行管理。显然，同一个 `Type` 类对应的存储对象的类型也一定是相同的，但是不同的 `Type` 类对应的存储对象类型则不一定相同。理所应当地，我们定义数据结构 `TypeStorage` 作为存储对象的基类，并构建存储对象的派生体系。
+
+`TypeStorage` 里面存储所有 `Type` 对象都需要的信息。就目前而言，首先需要存储的是它的 `Type` 类信息。因此，如下所示， `TypeStorage` 里面包含一个 `AbstractType` 指针，这个指针和 `IRContext` 中的 `register_types` 的哈希对象共享底层。
+
+```cpp
+//如果需要统一属性和类型，还可以在TypeStorage和AttribtueStorage的基础上，进一步抽象出公共的StorageBase。
+class TypeStroraage{
+   /// The abstract description for this type.
+   AbstractType *abstract_type{nullptr};
+}
+```
+
+对于无参 `Type` 类（单例类型），这种 `Type` 类对应唯一的 `Type` 对象。比如 `Float32Type` 、 `Float64Type` 等类型，用 `TypeStorage` 作为存储对象即可。
+对于有参 `Type` 类，这种 `Type` 类一般对应多个 `Type` 对象。需要在存储对象中存储参数值，因此，必须对 `TypeStorage` 进行派生。
+比如 `DenseTensorType` , 需要额外参数。因此，我们基于 `TypeStorage` 派生 `DenseTensorTypeStorage` 类型. 新增了 `data_type` 、 `dims `lod_level` 这三个成员变量存储参数。
+此时， `DenseTensorType` 类对应的 `Type` 对象的 `impl` 指针，指向的是 `TypeStorage` 的真实类型是 `DenseTensorTypeStorage` 。
+
+```cpp
+class DenseTensorTypeStorage{
+  public:
+    // 定义hash_key， 用以在TypeContext中用哈希表进行存储
+    using KeyTy = std::tuple<Type, std::vector<int64_t>, int32_t>;
+    KeyTy getAsKey() const {
+       return KeyTy(data_type, dims, lod_level);
+    }
+    // 哈希函数，用来存储
+    static std::size_t hashFunc(const KeyTy &tblgenKey) {
+       return hash_combine(std::get<0>(tblgenKey), std::get<1>(tblgenKey), std::get<2>(tblgenKey));
+    }
+
+    //判断是否相等,保证互斥性
+    bool operator==(const KeyTy &tblgenKey) const {
+      return (data_type == std::get<0>(tblgenKey)) && (dims == std::get<1>(tblgenKey)) && (lod_level == std::get<2>(tblgenKey));
+    }
+
+    //用来在TypeContext中构造类型对象。 后续可以给这个函数额外添加分配器参数。
+    static DenseTensorTypeStorage *construct(const KeyTy &tblgenKey) {
+        auto data_type = std::get<0>(tblgenKey);
+        auto dims = std::get<1>(tblgenKey);
+        auto lod_level = std::get<2>(tblgenKey);
+        return new DenseTensorTypeStorage(data_type, dims, lod_level);
+    }
+    Type data_type;
+    std::vector<int64_t> dims;
+    int32_t lod_level;
+
+};
+```
+
+### 2.3 扩展工具
+
+所有 `Type` 类的派生，只派生接口，不派生成员。比如 `DenseTensorType` 、 `Float32Type` 等都是 `Type` 的派生类,但不会新增任何成员变量。
+只派生接口，不派生成员可以保证，从子类到父类的类型转换，不会丢失任何信息。当定义一种具体类型（`ConcreteType`）时，需要考虑它的基类（`BaseType`）以及相应的内存类型（`StorageType`)。 我们通过提供一个 `TypeBase` 的模版工具类将这三者关联起来。
+
+```cpp
+// TypeBase用来将ConcreteType, BaseType, StorageType关联在一起
+template <typename ConcreteT, typename BaseT, typename StorageT>
+class TypeBase: public BaseT {
+  public:
+    using ImplType = StorageT;
+    /// Utility for easy access to the storage instance.
+    ImplType *getImpl() const { return static_cast<ImplType *>(this->impl); }
+}
+```
+
+比如我们定义 Paddle 中对应 `Float32Type` 类型时,  `Float32Type` 不需要额外的内存，因此，直接用 `TypeStorage` 作为它的存储类型。
+
+```cpp
+class Float32Type : public TypeBase<Float32Type, Type, TypeStorage> {
+  public:
+  // 该函数会返回一个Float32Type对象，由于集成关系，可以直接转变为Type对象。
+  // 该Type对象的impl指针是恒定且唯一的。
+  static Float32Type get(TypeContext *context);
+}
+
+// 将该Type对应的TypeID注册到TypeContext中。
+REGISTER_TYPE_ID(Float32Type)
+```
+
+
+再比如定义 Paddle 中对应 `DenseTensorType` , 注意到 `DenseTensorType` 中需要 `data_type` 、`dims`、`lod_level`。因此，需要定义相应的`DenseTensorTypeStorage`
+
+```cpp
+class DenseTensorType: public TypeBase<DenseTensorType, Type, DenseTensorTypeStorage> {
+    static DenseTensorType get(TypeContext *context, Type data_type, std::vector<int64_t> dims, int32_t lod_level = 0) {
+            ....在context中查找是否已经构造，如果没有，则进行构造。并以构造的 DenseTensorTypeStorage指针构造DenseTensorType。
+    }
+    std::vector<int64_t> getDims() const {
+        return getImpl()->dims;
+    }
+    Type getDataType() const {
+        return getImpl()->data_type;
+    }
+    int32_t getLoDlevel() const {
+       return getImpl()->lod_level;
+    }
+}
+REGISTER_TYPE_ID(DenseTensorType)
+```
+
+### 2.4 使用方式
+
+利用静态 `get` 接口，初始化 `type` 对象。
+
+该接口的使用，主要是在类型的构造阶段。包括 `pass` 中，直接设置类型。以及在 python api 中，对类型初始化的使用。
+比如目前的 python 中组网时， `type=core.VarDesc.VarType.FP32` 会被替换为 `type = ir.Type.FP32`。而对应的 FP32 的底层 C++ 实现就会调用以上接口。
+```cpp
+// 初始化一个Float32Type对象
+Type fp32_type = Float32Type::get(type_context);
+
+// 初始化一个shape为[1，1], data_type为 Float32Type， lod为默认值0的LoDTensorType对象
+Type lod_tensor_type = LoDTensorType::get(type_context, fp32_type, {1,1});
+```
+
+判断两个类型相等， 直接用相等运算符。这个主要用来做类型验证，比如 Op 定义中约束了算子的输入类型。可通过该接口判定类型是否满足约束。
+
+```cpp
+Type. type1, type2;
+........
+if(type1 == type2) {
+......}
+
+if(type1 != type2) {
+.......}
+```
+
+判断是否是某种类型, 用 `isa` 接口(关于 `isa` 接口和下文的 `dyn_cast` 接口的实现，在后文的具体实现中会讲到)
+```cpp
+Type type1;
+.....
+
+// type的impl指针里面存储了AbstractType*指针，里面有TypeID对象，所以只需要判断该TypeID和 LoDTensorType的TypeID是否一致即可实现isa接口。
+if(type1.isa<LoDTensorType>()) {
+   .....
+}
+```
+
+类型转化使用 `dyn_cas` t接口:
+```cpp
+// 初始化一个Float32Type对象
+Type fp32_type = Float32Type::get(type_context);
+
+Float32Type fp32_type_1 = fp32_type.dyn_cast<Float32TensorType >();
+
+....
+```
+
+
+# 附录
+## 一、竞品对照
+
+### 1.1 MLIR 类型系统
 
 在 MLIR 中，类型、属性、算子是 `Dialect` 的三大成员。用户通过ODS形式进行类型定制扩展，如下是 `Shape Dialect` 中 `Shape_Type` 的定义：
 
@@ -446,7 +662,7 @@ MLIR 通过 `Type` 对象对描述类型。每种类型对应的存储对象是�
 3. 提供一个静态构造方法。`DerivedStorage *construct(TypeStorageAllocator &, const KeyTy &key)`
 4. 如果包含了可变组件，可变组件不可以成为 key 的一部分。
 
-### 2.2 TVM 类型系统
+### 1.2 TVM 类型系统
 
 与 MLIR 类似，TVM 中也定义了 `Type` 类型作为所有类型的基类。
 
@@ -564,7 +780,7 @@ class TensorType : public Type {
 };
 ```
 
-### 2.3 Mindspore 类型系统
+### 1.3 Mindspore 类型系统
 MIndspore 首先通过枚举类型 `TypeId` 对所有类型进行了分类。 从大的分类，分为 `MetaType` 、 `ObjectType` 、 `Number Types` 、 `Monad Types` 、 `Sparse Types` 。继续细化出了如下所列的 65 种 `TypeID` 。
 
 ```cpp
@@ -808,7 +1024,7 @@ GVAR_DEF(TypePtr, kComplex64, std::make_shared<Complex>(static_cast<int>(BitsNum
 GVAR_DEF(TypePtr, kComplex128, std::make_shared<Complex>(static_cast<int>(BitsNum::eBits128)));
 ```
 
-### 2.4 竞品类型系统比对
+### 1.4 竞品类型系统比对
 首先，MLIR、TVM、MIndspore 都有自己的类型系统。都定义了 `Type` 数据结构来表示类型。 每种类型，都会在 `Type` 的基础上派生自己的类型。
 从复杂类型对象的成员内存管理上来说，MLIR 是构建了 `MLIRContext` 数据结构，类型的内存管理由 `MLIRContex` 去负责。 `Type` 对象里面永远只包含一个唯一的指向内存对象的 `impl` 指针。判断相等时，只需要判断指针相等即可得到结论。
 TVM 和 Mindspore 没有 `context` 的概念，因此，存储对象的管理是通过智能指针去管理的。TVM 使用的自己定义的类似智能指针的数据结构， MIndspore 使用的标准库的 `share_ptr`.
@@ -817,214 +1033,3 @@ TVM 和 Mindspore 没有 `context` 的概念，因此，存储对象的管理是
 但从效率上来说，MLIR 更加高效。MLIR 的 `Type` 对象只包含了一个 `impl` 指针。而 TVM 和 Mindspore 中的 `Type` 对象包含的是智能指针，显然，在空间和时间复杂性、以及空间和时间局部性方面，MLIR的方案都优于 TVM 和 `Mindspore` .
 
 因此，我们采用类似 MLIR 的实现方式来设计实现 Paddle 的类型系统。
-
-
-## 三、设计思路与实现方案
-
-C++ 认为万事万物皆可为对象（ `Object` ），对象上有其属性和行为。 具有相同性质的对象，可以抽象为类( `Class` )。类似的，我们可以抽象出 `Type` 类和 `Type` 对象的概念。
-
-`Float32Type`、`DenseTensorType`、`FunctionType`等数据结构的定义代表着 `Type` 类，里面会定义该 `Type` 类对应的接口及成员。而描述计算图中一个输入&输出的类型，需要的是一个 `Type` 对象。一个 `Type` 对象一定属于某个 `Type` 类。
-
-`Type` 类和 `Type` 对象是一对一或者一对多的关系。
-
-有些 `Type` 类只对应唯一个 `Type` 对象，比如，`Float32Type`、`Uint8Type`等等。这类 `Type` 对象构造时不需要额外参数描述。
-有些 `Type` 类则对应多个 `Type` 对象，比如`FunctionType`、`DenseTensorType`等等。这类 `Type` 对象构造时需要额外参数描述，比如 `DenseTensorType` 需要传递 `shape`、`lod_level`、`data_type`作为参数。 参数不同，构造出的 `Type` 对象也不同。
-
-### 3.1 Type 类
-
-如下是 `TypeID` 的简单定义。可以通过 `TypeID` 对象对每一种 `Type` 类进行唯一标识。对任意一种 `Type` 类，比如 `DenseTensorType` , 可以通过 `TypeID::get<DenseTensorType>()` 来获得其对应的 `TypeID` 。 `TypeID相` 等，表示 `Type` 类相同。
-
-```cpp
-class TypeID {
-     struct Storage {};
- public:
-    template<typename T> static TypeID get() {
-        static Storage instance;
-        return TypeID(&instance);
-    }
-  private:
-    TypeID(const Storage *storage) : storage(storage) {}
-    const Storage *storage_;
-}
-```
-我们将不同 `Type` 类的属性和行为，抽象为 `AbstractType` 对象。目前来说，暂时可能就只有 `name` 和 `type_id` 。但是后续看 `Pass` 设计时的需求，可能会增加对特征( `Trait` )和接口( `Interface` )的抽象。特征用来做类型做横向划分，比如在 IR 变换中，某些时候，我们可能不会在意具体类型是什么，只在意该类型有没有某种性质（比如 `shape` ）。特征和接口会在下个阶段的算子定义设计中详细讲述，此处不再展开。
-
-```cpp
-class AbstractType {
-    const TypeID type_id_; // 表明该对象对应的Type的TypeID.
-    const char* name_;//表明该Type的name.
-    // const Dialect& dialect_; //表明该对象对应的Type注册在哪个dialect里面。目前暂时不用。
-}
-```
-
-在 `IRContext` 中，可以维持一个以 `TypeID` 为 key 的散列表。 记录框架支持的所有 `Type` 类,以及相应的性质。
-```cpp
-class IRContext {
-    static IRContex* instance();
-
-private:
-    IRContext();
-    // 在静态变量初始化的时候初始化一次，中途不再改变。
-    std::unordered_map<TypeID, AbstractType*> register_types;
-
-    /// 用来做类型的内存管理。
-    StorageUniquer type_storage;
-};
-```
-
-### 3.2 Type 对象
-
-在 `Type` 的数据结构定义中，`impl` 指针指向由 `IRContext` 管理的，包含了该 `Type` 对象的所有知识的存储对象。两个相同的 `Type` 对象，它们的存储对象也一定是相同的，在 `IRContext` 中共用同一份内存。 基于此，`impl`指针的是否相等，与 `Type` 对象是否相同，完全等价。
-```cpp
-class Type {
-  //其它接口省略
-  TypeStorage* impl{nullptr};
-};
-```
-
-下文讨论如何在 `IRContext` 中，对不同 `Type` 对象的存储对象进行管理。显然，同一个 `Type` 类对应的存储对象的类型也一定是相同的，但是不同的 `Type` 类对应的存储对象类型则不一定相同。理所应当地，我们定义数据结构 `TypeStorage` 作为存储对象的基类，并构建存储对象的派生体系。
-
-`TypeStorage` 里面存储所有 `Type` 对象都需要的信息。就目前而言，首先需要存储的是它的 `Type` 类信息。因此，如下所示， `TypeStorage` 里面包含一个 `AbstractType` 指针，这个指针和 `IRContext` 中的 `register_types` 的哈希对象共享底层。
-
-```cpp
-//如果需要统一属性和类型，还可以在TypeStorage和AttribtueStorage的基础上，进一步抽象出公共的StorageBase。
-class TypeStroraage{
-   /// The abstract description for this type.
-   AbstractType *abstract_type{nullptr};
-}
-```
-
-对于无参 `Type` 类（单例类型），这种 `Type` 类对应唯一的 `Type` 对象。比如 `Float32Type` 、 `Float64Type` 等类型，用 `TypeStorage` 作为存储对象即可。
-对于有参 `Type` 类，这种 `Type` 类一般对应多个 `Type` 对象。需要在存储对象中存储参数值，因此，必须对 `TypeStorage` 进行派生。
-比如 `DenseTensorType` , 需要额外参数。因此，我们基于 `TypeStorage` 派生 `DenseTensorTypeStorage` 类型. 新增了 `data_type` 、 `dims `lod_level` 这三个成员变量存储参数。
-此时， `DenseTensorType` 类对应的 `Type` 对象的 `impl` 指针，指向的是 `TypeStorage` 的真实类型是 `DenseTensorTypeStorage` 。
-
-```cpp
-class DenseTensorTypeStorage{
-  public:
-    // 定义hash_key， 用以在TypeContext中用哈希表进行存储
-    using KeyTy = std::tuple<Type, std::vector<int64_t>, int32_t>;
-    KeyTy getAsKey() const {
-       return KeyTy(data_type, dims, lod_level);
-    }
-    // 哈希函数，用来存储
-    static std::size_t hashFunc(const KeyTy &tblgenKey) {
-       return hash_combine(std::get<0>(tblgenKey), std::get<1>(tblgenKey), std::get<2>(tblgenKey));
-    }
-
-    //判断是否相等,保证互斥性
-    bool operator==(const KeyTy &tblgenKey) const {
-      return (data_type == std::get<0>(tblgenKey)) && (dims == std::get<1>(tblgenKey)) && (lod_level == std::get<2>(tblgenKey));
-    }
-
-    //用来在TypeContext中构造类型对象。 后续可以给这个函数额外添加分配器参数。
-    static DenseTensorTypeStorage *construct(const KeyTy &tblgenKey) {
-        auto data_type = std::get<0>(tblgenKey);
-        auto dims = std::get<1>(tblgenKey);
-        auto lod_level = std::get<2>(tblgenKey);
-        return new DenseTensorTypeStorage(data_type, dims, lod_level);
-    }
-    Type data_type;
-    std::vector<int64_t> dims;
-    int32_t lod_level;
-
-};
-```
-
-### 3.3 扩展工具
-
-所有 `Type` 类的派生，只派生接口，不派生成员。比如 `DenseTensorType` 、 `Float32Type` 等都是 `Type` 的派生类,但不会新增任何成员变量。
-只派生接口，不派生成员可以保证，从子类到父类的类型转换，不会丢失任何信息。当定义一种具体类型（`ConcreteType`）时，需要考虑它的基类（`BaseType`）以及相应的内存类型（`StorageType`)。 我们通过提供一个 `TypeBase` 的模版工具类将这三者关联起来。
-
-```cpp
-// TypeBase用来将ConcreteType, BaseType, StorageType关联在一起
-template <typename ConcreteT, typename BaseT, typename StorageT>
-class TypeBase: public BaseT {
-  public:
-    using ImplType = StorageT;
-    /// Utility for easy access to the storage instance.
-    ImplType *getImpl() const { return static_cast<ImplType *>(this->impl); }
-}
-```
-
-比如我们定义 Paddle 中对应 `Float32Type` 类型时,  `Float32Type` 不需要额外的内存，因此，直接用 `TypeStorage` 作为它的存储类型。
-
-```cpp
-class Float32Type : public TypeBase<Float32Type, Type, TypeStorage> {
-  public:
-  // 该函数会返回一个Float32Type对象，由于集成关系，可以直接转变为Type对象。
-  // 该Type对象的impl指针是恒定且唯一的。
-  static Float32Type get(TypeContext *context);
-}
-
-// 将该Type对应的TypeID注册到TypeContext中。
-REGISTER_TYPE_ID(Float32Type)
-```
-
-
-再比如定义 Paddle 中对应 `DenseTensorType` , 注意到 `DenseTensorType` 中需要 `data_type` 、`dims`、`lod_level`。因此，需要定义相应的`DenseTensorTypeStorage`
-
-```cpp
-class DenseTensorType: public TypeBase<DenseTensorType, Type, DenseTensorTypeStorage> {
-    static DenseTensorType get(TypeContext *context, Type data_type, std::vector<int64_t> dims, int32_t lod_level = 0) {
-            ....在context中查找是否已经构造，如果没有，则进行构造。并以构造的 DenseTensorTypeStorage指针构造DenseTensorType。
-    }
-    std::vector<int64_t> getDims() const {
-        return getImpl()->dims;
-    }
-    Type getDataType() const {
-        return getImpl()->data_type;
-    }
-    int32_t getLoDlevel() const {
-       return getImpl()->lod_level;
-    }
-}
-REGISTER_TYPE_ID(DenseTensorType)
-```
-
-### 3.4 使用方式
-
-利用静态 `get` 接口，初始化 `type` 对象。
-
-该接口的使用，主要是在类型的构造阶段。包括 `pass` 中，直接设置类型。以及在 python api 中，对类型初始化的使用。
-比如目前的 python 中组网时， `type=core.VarDesc.VarType.FP32` 会被替换为 `type = ir.Type.FP32`。而对应的 FP32 的底层 C++ 实现就会调用以上接口。
-```cpp
-// 初始化一个Float32Type对象
-Type fp32_type = Float32Type::get(type_context);
-
-// 初始化一个shape为[1，1], data_type为 Float32Type， lod为默认值0的LoDTensorType对象
-Type lod_tensor_type = LoDTensorType::get(type_context, fp32_type, {1,1});
-```
-
-判断两个类型相等， 直接用相等运算符。这个主要用来做类型验证，比如 Op 定义中约束了算子的输入类型。可通过该接口判定类型是否满足约束。
-
-```cpp
-Type. type1, type2;
-........
-if(type1 == type2) {
-......}
-
-if(type1 != type2) {
-.......}
-```
-
-判断是否是某种类型, 用 `isa` 接口(关于 `isa` 接口和下文的 `dyn_cast` 接口的实现，在后文的具体实现中会讲到)
-```cpp
-Type type1;
-.....
-
-// type的impl指针里面存储了AbstractType*指针，里面有TypeID对象，所以只需要判断该TypeID和 LoDTensorType的TypeID是否一致即可实现isa接口。
-if(type1.isa<LoDTensorType>()) {
-   .....
-}
-```
-
-类型转化使用 `dyn_cas` t接口:
-```cpp
-// 初始化一个Float32Type对象
-Type fp32_type = Float32Type::get(type_context);
-
-Float32Type fp32_type_1 = fp32_type.dyn_cast<Float32TensorType >();
-
-....
-```
