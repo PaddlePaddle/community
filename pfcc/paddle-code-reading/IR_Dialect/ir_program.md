@@ -903,7 +903,9 @@ d = to_tensor(d1): (pd.v_tensor) -> pd.tensor
 ### 1.1 Oneflow
 OneFlow 的 `Op` 定义是通过 MLIR 的 ODS 进行定义的。
 ```cpp
-def OneFlow_Conv2DOp : OneFlow_ConvolutionBaseOp<"conv2d", [NoSideEffect, AttrSizedOperandSegments,                     DeclareOpInterfaceMethods<UserOpCompatibleInterface>, DeclareOpInterfaceMethods<NCHWCompatibleInterface>]> {}
+def OneFlow_Conv2DOp : OneFlow_ConvolutionBaseOp<"conv2d", [NoSideEffect, AttrSizedOperandSegments,
+             DeclareOpInterfaceMethods<UserOpCompatibleInterface>,
+             DeclareOpInterfaceMethods<NCHWCompatibleInterface>]> {}
 ```
 
 一方面，OneFlow 对 `tablegen` 进行了扩展，编译时，会基于 `ODS` 定义生成自己的算子定义，如下为生成的 `conv2d` 的算子定义：
@@ -932,7 +934,12 @@ REGISTER_USER_OP("conv2d")
 ```
 另一方面，当启用 MLIR 编译选项是，OneFlow 会同步生成 MLIR 算子定义，如下是借助 MLIR 生成的 `conv2d` 的定义：
 ```cpp
-class Conv2DOp : public ::mlir::Op<Conv2DOp, ::mlir::OpTrait::ZeroRegions, ::mlir::OpTrait::OneResult, ::mlir::OpTrait::OneTypedResult<::mlir::TensorType>::Impl, ::mlir::OpTrait::ZeroSuccessors, ::mlir::OpTrait::AtLeastNOperands<2>::Impl, ::mlir::OpTrait::AttrSizedOperandSegments, ::mlir::OpTrait::OpInvariants, ::mlir::MemoryEffectOpInterface::Trait, ::mlir::oneflow::UserOpCompatible::Trait, ::mlir::oneflow::NCHWCompatible::Trait, ::mlir::OpTrait::IsOpConfCompatible> {
+class Conv2DOp : public ::mlir::Op<Conv2DOp, ::mlir::OpTrait::ZeroRegions, ::mlir::OpTrait::OneResult,
+    ::mlir::OpTrait::OneTypedResult<::mlir::TensorType>::Impl,
+    ::mlir::OpTrait::ZeroSuccessors, ::mlir::OpTrait::AtLeastNOperands<2>::Impl,
+    ::mlir::OpTrait::AttrSizedOperandSegments, ::mlir::OpTrait::OpInvariants,
+    ::mlir::MemoryEffectOpInterface::Trait, ::mlir::oneflow::UserOpCompatible::Trait,
+    ::mlir::oneflow::NCHWCompatible::Trait, ::mlir::OpTrait::IsOpConfCompatible> {
 
 ........
 }
