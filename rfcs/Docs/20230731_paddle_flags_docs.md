@@ -92,7 +92,7 @@ Paddle 目前在 `paddle/phi/core/flags.h` 中对 gflags 中的 Flag 注册宏 `
 
 ref: https://github.com/gflags/gflags
 
-![image-20230728163636633](./.assert/image-20230728163636633.png)
+![image-20230728163636633](https://github.com/huangjiyi/community/assets/43315610/95e0fff1-5c38-4d21-b5ec-0bb6052086e5)
 
 上图中只列出了一些关键数据结构及其关键成员变量和方法
 
@@ -186,7 +186,7 @@ set(C10_USE_GFLAGS ${USE_GFLAGS})
 
 具体实现：
 
-![image-20230725115154789](./.assert/image-20230725115154789.png)
+![image-20230725115154789](https://github.com/huangjiyi/community/assets/43315610/18cfe5bc-d50d-404a-85be-e4783b818ea2)
 
 - `C10_DEFINE_<type>`：用于定义特定类型的标志，统一调用 `C10_DEFINE_typed_var` 宏
 
@@ -310,7 +310,7 @@ set(C10_USE_GFLAGS ${USE_GFLAGS})
 
 ### 2. 实现方案
 
-![image-20230731141805774](./.assert/image-20230731141805774.png)
+![image](https://github.com/huangjiyi/community/assets/43315610/7620c99b-8db5-46ab-9c92-6dfea50f579d)
 
 下面从底层数据结构开始介绍
 
