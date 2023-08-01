@@ -4,9 +4,9 @@
 
 - 本次会议接入方式：
 
-  - 腾讯会议：
+  - 腾讯会议：983-161-320
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会](https://meeting.tencent.com/dm/n3DceaEH0DyX)，或添加至会议列表
+  - [点击链接入会](https://meeting.tencent.com/dm/VojjLHgcOv2S)，或添加至会议列表
 
 - 本次会议主席：何健飞 （[Tomoko-hjf](https://github.com/Tomoko-hjf)）
 
