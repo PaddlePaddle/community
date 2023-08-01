@@ -43,18 +43,18 @@
 
 | 编号 | mentor                                                       | leader                                     | 题目名称                                                     |
 | ---- | ------------------------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------ |
-| 1    | [@jzhang533](https://github.com/jzhang533) [@gglin001](https://github.com/gglin001) | [@zrr1999](https://github.com/zrr1999)     | 实现飞桨框架的 python level jit compiler                     |
-| 2    | [@ZzSean](https://github.com/ZzSean)                                                      |                                            | 改进 CINN 日志和报错系统                                     |
-| 4    | [@zhangbo9674](https://github.com/zhangbo9674)               | [@GreatV](https://github.com/GreatV)       | 在飞桨框架中引入 clang-tidy                                  |
-| 5    | [@SigureMo](https://github.com/SigureMo)                     | [@megemini](https://github.com/megemini)   | 将 xdoctest 引入到飞桨框架工作流中                           |
-| 9    | [@zhangting2020](https://github.com/zhangting2020)           |                                            | 优化飞桨开源模型Mask R-CNN训练性能                           |
-| 10   | [@SigureMo](https://github.com/SigureMo)                     |                                            | 为 PaddleSOT 项目添加 Python 3.11 版本支持                   |
-| 11   | [@YuanRisheng](https://github.com/YuanRisheng) [@Aurelius84](https://github.com/Aurelius84) |                                            | 新 IR 组件及API Python端适配                                 |
-| 12   | [@xiaoguoguo626807](https://github.com/xiaoguoguo626807) [@Aurelius84](https://github.com/Aurelius84) |                                            | 新 IR 模型结构的可视化工具建设                               |
-| 13   | [@GGBond8488](https://github.com/GGBond8488)                 |                                            | 复数kernel调研与实现                                         |
-| 14   | [@HydrogenSulfate](https://github.com/HydrogenSulfate)       |                                            | PaddleScience 领域经典论文复现                               |
-| 15   | [@wangguan1995](https://github.com/wangguan1995)             |                                            | PaddleScience 领域前沿论文复现                               |
-| 16   | [@hitywt](https://github.com/hitywt) [@GhostScreaming](https://github.com/GhostScreaming) | [@AndSonder](https://github.com/AndSonder) | Fluid 分布式算子函数式迁移专项（题目暂定）是赛题3的延续，[@AndSonder](https://github.com/AndSonder) 是赛题3的队长 |
+| 1    | [@jzhang533](https://github.com/jzhang533) [@gglin001](https://github.com/gglin001) | [@zrr1999](https://github.com/zrr1999)     | [实现飞桨框架的 python level jit compiler](https://github.com/PaddlePaddle/Paddle/issues/53172#paddlepaddle01)                     |
+| 2    | [@ZzSean](https://github.com/ZzSean)                                                      |                                            | [改进 CINN 日志和报错系统](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle02)                                     |
+| 4    | [@zhangbo9674](https://github.com/zhangbo9674)               | [@GreatV](https://github.com/GreatV)       | [在飞桨框架中引入 clang-tidy](https://github.com/PaddlePaddle/Paddle/issues/53172#paddlepaddle04)                                  |
+| 5    | [@SigureMo](https://github.com/SigureMo)                     | [@megemini](https://github.com/megemini)   | [将 xdoctest 引入到飞桨框架工作流中](https://github.com/PaddlePaddle/Paddle/issues/53172#paddlepaddle05)                           |
+| 9    | [@zhangting2020](https://github.com/zhangting2020)           |                                            | [优化飞桨开源模型Mask R-CNN训练性能](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle09)                           |
+| 10   | [@SigureMo](https://github.com/SigureMo)                     |                                            | [为 PaddleSOT 项目添加 Python 3.11 版本支持](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle10)                   |
+| 11   | [@YuanRisheng](https://github.com/YuanRisheng) [@Aurelius84](https://github.com/Aurelius84) |                                            | [新 IR 组件及API Python端适配](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle11)                                 |
+| 12   | [@xiaoguoguo626807](https://github.com/xiaoguoguo626807) [@Aurelius84](https://github.com/Aurelius84) |                                            | [新 IR 模型结构的可视化工具建设](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle12)                               |
+| 13   | [@GGBond8488](https://github.com/GGBond8488)                 |                                            | [复数kernel调研与实现](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle13)                                         |
+| 14   | [@HydrogenSulfate](https://github.com/HydrogenSulfate)       |                                            | [PaddleScience 领域经典论文复现](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle14)                               |
+| 15   | [@wangguan1995](https://github.com/wangguan1995)             |                                            | [PaddleScience 领域前沿论文复现](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle15)                               |
+| 16   | [@hitywt](https://github.com/hitywt) [@GhostScreaming](https://github.com/GhostScreaming) | [@AndSonder](https://github.com/AndSonder) | [Fluid 分布式算子迁移到 PHI](https://github.com/PaddlePaddle/Paddle/issues/55663#paddlepaddle16) |
 
 3. PFCC 成员自由发言与讨论（5 min）
 4. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
