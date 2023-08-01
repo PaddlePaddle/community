@@ -33,13 +33,13 @@
 | [BeingGod](https://github.com/BeingGod)           | [Young-Flash](https://github.com/Young-Flash)                   | [ScottWong98](https://github.com/ScottWong98)             | [Yang-Changhui](https://github.com/Yang-Changhui)     | [LyndonKong](https://github.com/LyndonKong)         | [zade23](https://github.com/zade23)                                 |
 | [megemini](https://github.com/megemini)           | [WintersMontagne10335](https://github.com/WintersMontagne10335) | [zbt78](https://github.com/zbt78)                         | [DrownFish](https://github.com/DrownFish19)           | [co63oc](https://github.com/co63oc)                 | [minleminzui](https://github.com/minleminzui)                            |            
 | [Sahala08](https://github.com/Sahala08)           | [marshall-dteach](https://github.com/marshall-dteach)           | [jiamingkong](https://github.com/jiamingkong)             | [txyugood](https://github.com/txyugood)            | [gaoziyuan](https://github.com/gaoziyuan)            | [MayYouBeProsperous](https://github.com/MayYouBeProsperous)            |
-| [NotHaozi](https://github.com/NotHaozi)       | [xingmingyyj](https://github.com/xingmingyyj)            | [hongtushi](https://github.com/hongtushi)           |      [qiuwenbogdut](https://github.com/qiuwenbogdut)        |      |             |           |      
+| [NotHaozi](https://github.com/NotHaozi)       | [xingmingyyj](https://github.com/xingmingyyj)            | [ruoyunbai](https://github.com/ruoyunbai)           |      [xiaoyewww](https://github.com/xiaoyewww)        | [hongtushi](https://github.com/hongtushi)           |      [qiuwenbogdut](https://github.com/qiuwenbogdut)   |           |      
 
 # 会议议程
 
-1. 新同学自我介绍：[xingmingyyj](https://github.com/xingmingyyj)、[hongtushi](https://github.com/hongtushi)、[qiuwenbogdut](https://github.com/qiuwenbogdut)   (5 min)
+1. 新同学自我介绍：[xingmingyyj](https://github.com/xingmingyyj)、[ruoyunbai](https://github.com/ruoyunbai)、[xiaoyewww](https://github.com/xiaoyewww)、[hongtushi](https://github.com/hongtushi)、[qiuwenbogdut](https://github.com/qiuwenbogdut)   (5 min)
 
-2. 飞桨研发导师对软件开源创新大赛赛题进行讲解与答疑，讲解顺序：
+2. 飞桨研发导师与团队队长对软件开源创新大赛赛题进行讲解与答疑，每道赛题 10 min，讲解顺序：
 
 | 编号 | mentor                                                       | leader                                     | 题目名称                                                     |
 | ---- | ------------------------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------ |
