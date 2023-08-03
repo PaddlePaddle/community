@@ -156,7 +156,7 @@ prof = profiler.Profiler(
 
 
 
-## 2.模块级分析：确定最耗时的模块
+## 2. 模块级分析：确定最耗时的模块
 
 Paddle中封装了 NVTX API，可以借助Nsight System 工具来做更深入的性能分析。基于各框架提供的NVTX使用方法以及各框架的Hook机制存在差异，我们在[PaPerf](https://github.com/Xreki/PaPerf)中提供了 profile_paddle.py 和 profile_torch.py，用于在模块层级提取各模型的性能异常点。由于工具依赖于Nsight System，因此用户需要分别在服务器和自己的主机（Windows、或 Mac）上安装App。具体的安装和使用可以参考Nvidia 官网的相关介绍 [Nsight System](https://developer.nvidia.com/nsight-systems)。
 
@@ -196,7 +196,7 @@ def train():
 
 根据模块级别的开销占比，可以针对性地去展开timeline分析细节，由于每个模型情况不同，我们不对timeline分析细节做过多的案例展示。分析人员应该根据前面对瓶颈的判断，结合timeline的现象去寻找导致瓶颈的原因。
 
-## API/OP级分析
+## 3. API/OP级分析
 
 定位模型中的耗时API/OP也需要依赖于 Paddle 内置的Profiler工具，注意需要注释掉PaPerf相关的使用。
 
