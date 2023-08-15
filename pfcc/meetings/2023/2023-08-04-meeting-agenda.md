@@ -34,11 +34,11 @@
 | [megemini](https://github.com/megemini)           | [WintersMontagne10335](https://github.com/WintersMontagne10335) | [zbt78](https://github.com/zbt78)                         | [DrownFish](https://github.com/DrownFish19)           | [co63oc](https://github.com/co63oc)                 | [minleminzui](https://github.com/minleminzui)                            |            
 | [Sahala08](https://github.com/Sahala08)           | [marshall-dteach](https://github.com/marshall-dteach)           | [jiamingkong](https://github.com/jiamingkong)             | [txyugood](https://github.com/txyugood)            | [gaoziyuan](https://github.com/gaoziyuan)            | [MayYouBeProsperous](https://github.com/MayYouBeProsperous)            |
 | [NotHaozi](https://github.com/NotHaozi)       | [xingmingyyj](https://github.com/xingmingyyj)            | [ruoyunbai](https://github.com/ruoyunbai)           |      [xiaoyewww](https://github.com/xiaoyewww)        | [hongtushi](https://github.com/hongtushi)           |      [qiuwenbogdut](https://github.com/qiuwenbogdut)   |   
-[Candy2Tang](https://github.com/Candy2Tang)   | [kaedeharai](https://github.com/kaedeharai)   |  [ooooo-create](https://github.com/ooooo-create)   |   
+[ooooo-create](https://github.com/ooooo-create)   | [kaedeharai](https://github.com/kaedeharai)   |  [Candy2Tang](https://github.com/Candy2Tang)   |   
 
 # 会议议程
 
-1. 新同学自我介绍：[Candy2Tang ](https://github.com/Candy2Tang )、[kaedeharai](https://github.com/kaedeharai)、[ooooo-create](https://github.com/ooooo-create)  (5 min)
+1. 新同学自我介绍：[ooooo-create](https://github.com/ooooo-create)、[kaedeharai](https://github.com/kaedeharai)、[Candy2Tang](https://github.com/Candy2Tang)  (5 min)
 2. PFCC 成员 [Difers](https://github.com/Difers) 和 [LoneRanger](https://github.com/longranger2) 分享《Fp16数据类型扩展》 (15 min)
 3. PFCC 成员 [WintersMontagne10335](https://github.com/WintersMontagne10335) 分享《算子性能优化快速入门》 (15 min)
 4. PFCC 成员 [AndSonder](https://github.com/AndSonder) 分享《Profile性能分析工具使用》 (10 min)
