@@ -56,13 +56,13 @@ $$\frac{\partial u(x, y)}{\partial x} \equiv 0 \\ \frac{\partial u(x, y)}{\parti
 而这种情况下 $f$ 的值只能是一个固定的实数，这种平凡的情形并没有什么研究的价值。对于优化来说，优化的目标总是可以用实数来衡量的，而实函数一般又不全纯(holomorphic), 那么要怎么优化它呢？
 
 ## Wertinger Calculus
-即使 $f(z)$ 不是全纯的，可以将其重写为二变量函数 $f(z, z*)$ ,总是全纯的。这是因为实部和虚部的组成部分 $z$ 可以表示为 $z$ 和 $z^*$
+即使 $f(z)$ 不是全纯的，可以将其重写为二变量函数 $f(z, z^{\*})$ ,总是全纯的。这是因为实部和虚部的组成部分 $z$ 可以表示为 $z$ 和 $z^*$
 
 $$Re(z) = \frac{z + z^*}{2}$$
 
 $$Im(z) = \frac{z - z^*}{2j}$$
 
-可以研究 $f(z, z*)$ ,因为如果 $f$ 是真实可微的,那么这个函数具有偏导数
+可以研究 $f(z, z^{\*})$ ,因为如果 $f$ 是真实可微的,那么这个函数具有偏导数
 
 $$
 \frac{\partial }{\partial x}  =  \frac{\partial z}{\partial x} * \frac{\partial }{\partial z} + \frac{\partial z^* }{\partial x} * \frac{\partial }{\partial z^* }
@@ -172,13 +172,13 @@ $$
 
 最终我们可以得到:
 
-$$\frac{\partial L}{\partial z^* } = (\frac{\partial L}{\partial s^* })^* * \frac{\partial s}{\partial z^* }  + \frac{\partial L}{\partial s^* } * (\frac{\partial s}{\partial z})^* =(output\_grad)^* * \frac{\partial s}{\partial z^* } + output\_grad * (\frac{\partial s}{\partial z})^*
+$$\frac{\partial L}{\partial z^* } = (\frac{\partial L}{\partial s^* })^* * \frac{\partial s}{\partial z^* }  + \frac{\partial L}{\partial s^* } * (\frac{\partial s}{\partial z})^* =(output\_{grad})^* * \frac{\partial s}{\partial z^* } + output\_{grad} * (\frac{\partial s}{\partial z})^*
 $$
 
 这个就是我们要计算的梯度。
 
 ## 工程实现
-假设有函数 $f(z=x+yj) = cz = c(x+yj) = cx+cyj$$c \in \mathbb{R}$
+假设有函数 $f(z=x+yj) = cz = c(x+yj) = cx+cyj$ $c \in \mathbb{R}$
 1. 利用Wirtinger实现
 
 $$\frac{\partial s}{\partial z} = \frac{1}{2} * (\frac{\partial s}{\partial x} - j * \frac{\partial s}{\partial y}) = \frac{1}{2} * (c - (c*1j)*1j) = c$$
@@ -197,11 +197,11 @@ $$\frac{\partial s}{\partial z^* } = \frac{\partial (c * z )}{\partial z^* } =0$
 1. 类似fft相关的方法，会产生 $\mathbb{C} \rightarrow \mathbb{R}$ 以及 $\mathbb{R} \rightarrow \mathbb{C}$ 的场景
 1) 针对 $\mathbb{C} \rightarrow \mathbb{R}$ 的场景，输出变量为实数，则共轭即为本身 $s^* = s$
    
-$$\frac{\partial L}{\partial z^* } = 2 * (output\_grad) * \frac{\partial s}{\partial z^* }$$
+$$\frac{\partial L}{\partial z^* } = 2 * (output\_{grad}) * \frac{\partial s}{\partial z^* }$$
 
 2) 针对 $\mathbb{R} \rightarrow \mathbb{C}$ 的场景，输入变量为实数
    
-$$\frac{\partial L}{\partial z^* } = 2 * Re(output\_grad^* * \frac{\partial s}{\partial z^* })$$
+$$\frac{\partial L}{\partial z^* } = 2 * Re(output\_{grad}^* * \frac{\partial s}{\partial z^* })$$
 
 
 ## 参考文献
