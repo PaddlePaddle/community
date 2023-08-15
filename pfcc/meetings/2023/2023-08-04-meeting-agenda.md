@@ -1,4 +1,4 @@
-# Paddle Framework Contributor Club 第二十五次会议
+# Paddle Framework Contributor Club 第二十六次会议
 
 - 本次会议时间：2023-08-17 19:00
 
@@ -10,7 +10,7 @@
 
 - 本次会议主席：卢畅 （[AndSonder](https://github.com/AndSonder)）
 
-- 本次会议副主席：卢畅 （[Difers](https://github.com/Difers)）
+- 本次会议副主席：陈志超 （[Difers](https://github.com/Difers)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 
