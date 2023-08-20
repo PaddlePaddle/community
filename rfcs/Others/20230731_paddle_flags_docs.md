@@ -291,7 +291,7 @@ set(C10_USE_GFLAGS ${USE_GFLAGS})
 
 ### 2. 实现方案
 
-![image](https://github.com/huangjiyi/community/assets/43315610/7620c99b-8db5-46ab-9c92-6dfea50f579d)
+![image](https://github.com/huangjiyi/community/assets/43315610/87832764-c4f2-4620-b2c2-94f7d3c5b9a4)
 
 下面从底层数据结构开始介绍
 
