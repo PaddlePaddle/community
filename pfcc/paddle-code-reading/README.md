@@ -10,4 +10,6 @@
 * AutoGrad系统
 * 新执行器
 * 算子库
+* [IR Dialect](./IR_Dialect/)
 * [Python & C++ 交互](./cpp_and_python_interoperability)
+* [动转静 SOT](./symbolic_opcode_translator/)

@@ -10,7 +10,7 @@
 
 - 本次会议主席：詹荣瑞 （[zrr1999](https://github.com/zrr1999)）
 
-- 本次会议副主席：张春乔 （[Liyulingyue](https://github.com/Liyulingyue)）
+- 本次会议副主席：张一乔 （[Liyulingyue](https://github.com/Liyulingyue)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 
