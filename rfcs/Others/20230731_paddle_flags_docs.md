@@ -333,12 +333,12 @@ class Flag {
  private:
   friend class FlagRegistry;
 
-  const std::string name_;			// flag name
-  const std::string description_;	// description message
-  const std::string file_;			// file name where the flag is defined
-  const FlagType type_;				// flag value type
-  const void* default_value_;		// flag default value ptr
-  void* value_;						// flag current value ptr
+  const std::string name_;	   // flag name
+  const std::string description_;  // description message
+  const std::string file_;	   // file name where the flag is defined
+  const FlagType type_;		   // flag value type
+  const void* default_value_;	   // flag default value ptr
+  void* value_;			   // flag current value ptr
 };
 ```
 
