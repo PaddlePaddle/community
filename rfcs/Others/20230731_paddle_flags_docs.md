@@ -53,7 +53,7 @@ void FlagRegistry::RegisterFlag(CommandLineFlag* flag) {
 
 另外，对于 Paddle 目前的使用需求，gflags 中的的很多功能是冗余的。
 
-针对上述问题，计划针对 Paddle 的功能需求实现一个简单的 flags 独立工具库来替换 gflags。
+针对上述问题，计划针对 Paddle 的功能需求实现一个精简的 flags 独立工具库来替换 gflags。
 
 ### 2. 功能目标
 
@@ -333,12 +333,12 @@ class Flag {
  private:
   friend class FlagRegistry;
 
-  const std::string name_;
-  const std::string description_;
-  const std::string file_;
-  const FlagType type_;
-  const void* default_value_;
-  void* value_;
+  const std::string name_;			// flag name
+  const std::string description_;	// description message
+  const std::string file_;			// file name where the flag is defined
+  const FlagType type_;				// flag value type
+  const void* default_value_;		// flag default value ptr
+  void* value_;						// flag current value ptr
 };
 ```
 
@@ -563,13 +563,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
 
   - `--help`：
 
-    在 `gflags` 中是打印所有文件中所有的 flag 信息，包括 name, default_value, description string
-
-    但是Paddle 中定义了 300+ Flag，直接在命令行中全部打印出来太多了
-
-    另外在 gflags 中实现了一个 `--helpshort`，效果是只打印当前文件中 `DEFINE` 的 Flag，具体通过匹配 `Flag`  中的 `file_` 成员实现。（计划实现的 `--help` 效果是只打印当前文件中 `DEFINE` 的 Flag，然后计划将打印所有文件中所有的 flag 信息设计成一个函数接口）
-
-    本来计划实现 `--helpshort` 作为 `--help`，但是后来发现 gflags 中获取调用 `ParseCommandLineFlags` 文件路径的方式是获取 argv[0] 的可执行程序名称，然后假设该名称与 `main` 函数所在的源文件名称相同，然后在 `FlagRegistry` 的文件列表中查找名称（不是路径）相同的文件。这里面有一个比较严重的问题，就是可执行程序名称和 `main` 函数所在的源文件名称是由用户决定的，所以不能确定是否相同，因此避免出现预期之外的问题，就不实现 `--helpshort` 了，最后 `--help` 的实现打印所有 Flag，同时实现一个接口将打印的 Flag 信息可以保存到文件中方便查看。
+    与 `gflags` 保持一致，根据定义所在文件的顺序打印所有 Flag 的帮助信息，包括 name, default_value, description string，考虑到 Paddle 中定义了 300+ Flag，直接在命令行中打印出来不方便查询，因此另外设计了一个可以将打印的帮助信息输出到文件中的接口
 
   - `--fromen=value` 和 `--tryfromenv=value`：`value` 为用 `,` 分隔的环境变量名 `env1,env2,...`，实现的效果是将环境变量 `name` 的值赋给 `FLAGS_##name`，其中 `--tryfromenv` 对于没有定义的环境变量会忽略不会报错，`--fromenv` 则会报错
 
