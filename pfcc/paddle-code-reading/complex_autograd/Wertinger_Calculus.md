@@ -179,7 +179,7 @@ $$
 
 ### 推导链式法则
 
-假定 $z = x + jy$, $f(z) = u + vy$, $l(f) = l$，
+假定 $z = x + jy$, $f(z) = u + vj$, $l(f) = l$，
 
 ![图片](./images/lr.png)
 
