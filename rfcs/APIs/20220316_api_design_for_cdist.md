@@ -3,8 +3,8 @@
 |API名称 | paddle.cdist | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 汪昕([GreatV](https://github.com/GreatV)) | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-16 | 
-|版本号 | V1.0 | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-02 | 
+|版本号 | V2.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
 |文件名 | 20200316_api_design_for_cdist.md | 
 
@@ -12,11 +12,11 @@
 # 一、概述
 ## 1、相关背景
 
-Issue: [【PaddlePaddle Hackathon 2】7、为 Paddle 新增 cdist API](https://github.com/PaddlePaddle/Paddle/issues/40328)
+`cdist` 用于计算两组行向量集合中每一对之间的 `p-norm` 距离。
 
 ## 2、功能目标
 
-为 Paddle 新增 cdist API。dist API 用于计算两个输入 Tensor 的 p 范数（p-norm），计算结果为形状为 [1] 的 Tensor，而 cdist API 则用于计算两个输入 Tensor 的所有行向量对的 p 范数（p-norm），输出结果的形状和两个 Tensor 乘积的形状一致。
+为 Paddle 新增 cdist API。dist API 用于计算两个输入 Tensor 的 p 范数（p-norm），计算结果为形状为 [] 的 Tensor，而 cdist API 则用于计算两个输入 Tensor 的所有行向量对的 p 范数（p-norm），输出结果的形状和两个 Tensor 乘积的形状一致。
 
 ## 3、意义
 
@@ -224,17 +224,11 @@ array([[3.1192703 , 2.0958931 ],
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-API设计为 `paddle.cdist(x1, x2, p=2.0)`。其中 `x1` 为 `B1 X ... X Bn X P X M` 张量，`x2` 为 `B1 X ... X Bn X R X M` 张量。`p` 为 p-范数对应的 p 值，p ∈[0,∞]。输出张量的形状为 `B1 X ... X Bn X P X R`。
-
-这里与 `torch.cdist(x1, x2, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')` 的设计不同之处是去除了 `compute_mode` 参数，其作用是使用矩阵乘法加速欧氏距离（p=2）的计算。在 PyTorch 中，参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`，当 P > 25 或 R > 25 时，则使用矩阵乘法加速计算，否则使用普通的欧氏距离计算。对于 PaddlePaddle 的实现这应该成为默认的优化计算行为，无需做成用户可选的行为。
-
-## 底层OP设计
-
-参考 PyTorch [cdist_impl](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/Distance.cpp#L49) 进行实现，实现位置为 Paddle repo 的 `paddle/phi/kernels` 目录。
+API设计为 `paddle.cdist(x, y, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')`。其中 `x` 为 `B1 X ... X Bn X P X M` 张量，`y` 为 `B1 X ... X Bn X R X M` 张量。`p` 为 p-范数对应的 p 值，p ∈[0,∞]。输出张量的形状为 `B1 X ... X Bn X P X R`。`compute_mode` 参数的作用是使用矩阵乘法加速欧氏距离（p=2）的计算。当参数 `compute_mode='use_mm_for_euclid_dist_if_necessary'`，当 P > 25 或 R > 25 时，则使用矩阵乘法加速计算，否则使用普通的欧氏距离计算。
 
 ## API实现方案
 
-参考 PyTorch 进行实现，实现位置为 Paddle repo `python/paddle/tensor/linalg.py` 目录。
+参考 PyTorch 采用现有 PYTHON API 组合实现，实现位置为 Paddle repo `python/paddle/tensor/linalg.py` 目录。
 
 # 六、测试和验收的考量
 
@@ -242,8 +236,8 @@ API设计为 `paddle.cdist(x1, x2, p=2.0)`。其中 `x1` 为 `B1 X ... X Bn X P 
 
 可考虑一下场景：
 
-1. 当`x1`、`X2` 为空张量，输出为空张量，且输出张量形状正确；
-2. 结果一致性，和 SciPy 以及 PyTorch 结果的数值的一致性, `paddle.cdist(x1, x2, p=2.0)` , `scipy.spatial.distance.cdist(input,'minkowski', p=2)` 和 `torch.cdist(x1, x2, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')` 结果是否一致；
+1. 当`x`、`y` 为空张量，输出为空张量，且输出张量形状正确；
+2. 结果一致性，和 SciPy 以及 PyTorch 结果的数值的一致性, `paddle.cdist(x, y, p=2.0)` , `scipy.spatial.distance.cdist(input,'minkowski', p=2)` 和 `torch.cdist(x, y, p=2.0, compute_mode='use_mm_for_euclid_dist_if_necessary')` 结果是否一致；
 3. 当 p < 1 时, 确保反向传播不会产生 NaNs；
 4. 异常测试，对于参数异常值输入，应该有友好的报错信息及异常反馈，需要有相关测试Case验证。
 
