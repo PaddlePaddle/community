@@ -446,7 +446,7 @@ class TypeStroraage{
 
 对于无参 `Type` 类（单例类型），这种 `Type` 类对应唯一的 `Type` 对象。比如 `Float32Type` 、 `Float64Type` 等类型，用 `TypeStorage` 作为存储对象即可。
 对于有参 `Type` 类，这种 `Type` 类一般对应多个 `Type` 对象。需要在存储对象中存储参数值，因此，必须对 `TypeStorage` 进行派生。
-比如 `DenseTensorType` , 需要额外参数。因此，我们基于 `TypeStorage` 派生 `DenseTensorTypeStorage` 类型. 新增了 `data_type` 、 `dims `lod_level` 这三个成员变量存储参数。
+比如 `DenseTensorType` , 需要额外参数。因此，我们基于 `TypeStorage` 派生 `DenseTensorTypeStorage` 类型. 新增了 `data_type` 、 `dims` 和 `lod_level` 这三个成员变量存储参数。
 此时， `DenseTensorType` 类对应的 `Type` 对象的 `impl` 指针，指向的是 `TypeStorage` 的真实类型是 `DenseTensorTypeStorage` 。
 
 ```cpp
@@ -569,7 +569,7 @@ if(type1.isa<LoDTensorType>()) {
 }
 ```
 
-类型转化使用 `dyn_cas` t接口:
+类型转化使用 `dyn_cast` 接口:
 ```cpp
 // 初始化一个Float32Type对象
 Type fp32_type = Float32Type::get(type_context);
@@ -707,7 +707,7 @@ class ObjectRef {
 };
 ```
 
-对类型系统而言， `TypeNode` 表示类型存储对象，派生自 `Object`。  `Type` 表示类型，派生自 `OjectRef` `。二者通过TVM_DEFINE_OBJECT_REF_METHODS` 宏进行关联。
+对类型系统而言， `TypeNode` 表示类型存储对象，派生自 `Object`。  `Type` 表示类型，派生自 `OjectRef`。二者通过`TVM_DEFINE_OBJECT_REF_METHODS` 宏进行关联。
 ```cpp
 class TypeNode : public Object {
  public:
