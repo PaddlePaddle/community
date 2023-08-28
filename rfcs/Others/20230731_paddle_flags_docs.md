@@ -1,8 +1,9 @@
-## 实现 Paddle flags 机制
+## 实现 Paddle flags 工具库
 
 | 版本 | 作者      | 时间      |
 | ---- | --------- | -------- |
 | V1.0 | huangjiyi | 2023.7.31 |
+| V2.0 | huangjiyi | 2023.8.21 |
 
 ## 一、概要
 
@@ -10,7 +11,7 @@
 
 目前 Paddle 已基本完成 PHI 算子库的独立编译 ([PR#53735](https://github.com/PaddlePaddle/Paddle/pull/53735))，在实现这个目标的过程中出现过一个问题：phi 中用到 gflags 第三方库的 Flag 定义宏在 phi 编译成动态链接库后无法在 windows 上暴露 Flag 符号，当时的做法是在 phi 下重写 Flag 定义宏 (底层仍然依赖 gflags 第三方库)，使其能够在 windows 上暴露 Flag 符号 ([PR#52991](https://github.com/PaddlePaddle/Paddle/pull/52991))
 
-但是目前还存在 gflags 第三方库相关的另外一个问题：由于 Paddle 依然依赖了 gflags 库，外部用户同时使用 paddle C++ 库和 gflags 库时，会出现以下错误：
+但是目前还存在 gflags 第三方库相关的另外一个问题：由于 Paddle C++ 库中包含了 gflags 库文件，外部用户同时使用 paddle C++ 库和 gflags 库时，会出现以下错误：
 
 ``` bash
 ERROR: something wrong with flag 'flagfile' in file '/Paddle/third_party/gflags/src/gflags.cc'.  One possibility: file '/Paddle/third_party/gflags/src/gflags.cc' is being linked both statically and dynamically into this executable.
@@ -22,7 +23,7 @@ ERROR: something wrong with flag 'flagfile' in file '/Paddle/third_party/gflags/
 DEFINE_string(flagfile,   "", "load flags from file");
 ```
 
-因为 Paddle 依赖了 gflags，所以 `libpaddle.so` 中也会注册 `flagfile`，然后外部用户如果再依赖 gflags，会重复注册 `flagfile` 导致报错，`gflags.cc` 中的报错相关代码：
+因为 Paddle 库中的 gflags 库文件会注册 `flagfile`，然后外部用户如果再依赖 gflags，会重复注册 `flagfile` 导致报错，`gflags.cc` 中的报错相关代码：
 
 ``` C++
 void FlagRegistry::RegisterFlag(CommandLineFlag* flag) {
@@ -50,24 +51,24 @@ void FlagRegistry::RegisterFlag(CommandLineFlag* flag) {
 }
 ```
 
-为了解决上述问题，计划移除 Paddle 对 gflags 第三方库的依赖，在 Paddle 下实现一套独立的 flags 相关机制。
+另外，对于 Paddle 目前的使用需求，gflags 中的的很多功能是冗余的。
+
+针对上述问题，计划针对 Paddle 的功能需求实现一个精简的 flags 独立工具库来替换 gflags。
 
 ### 2. 功能目标
 
-在 Paddle 下实现一套独立的 flags 相关机制，包括：
+在 Paddle 下实现一套独立的 flags 工具库，包括：
 
 - 多种类型（bool, int32, uint32, int64, uint64, double, string）的 Flag 定义和声明宏
 - 命令行参数解析，即根据命令行参数对已定义的 Flag 的 value 进行更新
+- 根据环境变量的值对对应的 Flag 进行赋值
 - 其他 Paddle 用到的 Flag 相关操作
-- 待后续补充 ...
 
-细节要求：新实现的 flags 相关机制提供的接口与现有的接口尽可能保持一致，从而降低替换成本
-
-待后续 Paddle 下独立的 flags 相关机制初步实现完善后，暂时将 Paddle 现有的依赖第三方库的 flags 机制保留，实现能够通过编译选项以及宏控制，选择使用哪个版本 flags 机制（需要两个版本的接口一致）
+初期暂时将 Paddle 目前依赖的第三方库的 gflags 保留，实现能够通过编译选项以及宏控制，选择使用哪个版本 flags 工具库（需要两个版本的接口一致），待后续 Paddle 下独立的 flags 工具库完善后，再考虑移除 gflags 第三方库。
 
 ### 3. 意义
 
-完善 Paddle 下的 flags 机制，提高框架开发者开发体验以及用户使用体验
+完善 Paddle 下的 flags 工具，提高框架开发者开发体验以及用户使用体验
 
 ## 二、飞桨现状
 
@@ -75,16 +76,17 @@ Paddle 目前在 `paddle/phi/core/flags.h` 中对 gflags 中的 Flag 注册宏 `
 
 ### Paddle 中现有的 gflags 用法
 
-在 Paddle 中现有的 flags 用法主要是 Flag 注册和声明宏，以及一些 gflags 的接口：
+以下是 Paddle 中存在的一个 gflags 用法及其使用场景：
 
 1. 目前 Paddle 中使用最多的接口是 Flag 注册和声明宏：`(PHI_)?(DEFINE|DECLARE)_<type>`，其中有 `PHI_` 前缀的宏是 Paddle 的重写版本，底层实现与 `(DEFINE|DECLARE)_<type>` 基本一致：
-   - `(PHI_)?DEFINE_<type>(name,val, txt)` 用于定义目标类型的 FLAG，会定义一个全局变量 `FLAGS_name`，同时进行注册，约 200+ 处用法
-   - `(PHI_)?DECLARE_<type>(name)` 用于声明 FLAG 全局变量，`extern` 用法，约 300+ 处用法
-2. `gflags::ParseCommandLineFlags(int* argc, char*** argv, bool remove_flags)`：用于解析运行时命令行输入的标志，大部分在测试文件中使用，约 20+ 处用法
-3. `gflags::(GetCommandLineOption|SetCommandLineOption|AllowCommandLineReparsing|<Type>FromEnv)`：其他一些用法较少的 gflags 接口：
-   - `bool GetCommandLineOption(const char* name, std::string* OUTPUT)`：用于获取 FLAG 的值，1 处用法
-   - `std::string SetCommandLineOption(const char* name, const char* value)`：将 `value` 赋值给 `FLAGS_name`，2 处用法
-   - `void AllowCommandLineReparsing()`：允许命令行重新解析，1 处用法
+   - `(PHI_)?DEFINE_<type>(name,val, txt)`：定义全局标志变量 `FLAGS_name`，并且将 flag 的一些信息进行注册，约 200+ 处用法
+   - `(PHI_)?DECLARE_<type>(name)` 用于声明 FLAG 全局变量，`extern` 用法，用于需要访问 `FLAGS_name` 的场景，约 300+ 处用法
+2. `gflags::ParseCommandLineFlags(int* argc, char*** argv, bool remove_flags)`：命令行标志解析，约 20+ 处用法
+   - 在 Paddle 中，一部分 `ParseCommandLineFlags` 在测试文件中使用，用于在命令行运行测试程序时设置一些可选参数；
+   - 还有一部分在命令行输入 argv 的基础上，手动添加一些 flag，比如添加 `--tryfromenv` 设置环境变量 flag，再调用 `ParseCommandLineFlags` 进行解析，因为 gflags 没有直接根据环境变量设置 flags 的接口，所以才通过这种方式实现
+3. `bool GetCommandLineOption(const char* name, std::string* OUTPUT)`：查找一个 flag，如果存在则将 `FLAG_##name` 存放在 `OUTPUT`，在 Paddle 中只用到了查找功能来判断一个 flag 是否被定义，1 处用法
+4. `std::string SetCommandLineOption(const char* name, const char* value)`：用于将 `FLAG_##name` 的值设置为 `value`，2 处用法
+5. `void AllowCommandLineReparsing()`：Paddle 中有一处用法放在 `ParseCommandLineFlags` 之前调用，函数名叫允许命令行重新解析，但在 `gflags.cc` 实现代码中，这个设置只是允许 `ParseCommandLineFlags` 传入一些未定义的 flag 而不报错，1 处用法
 
 ## 三、业内方案调研
 
@@ -264,28 +266,7 @@ set(C10_USE_GFLAGS ${USE_GFLAGS})
 
 ### 1. 设计思路
 
-首先明确 Paddle 需要哪些用法及其使用场景，然后在分析这些用法如何实现
-
-#### 明确 Paddle 需要哪些用法及其使用场景
-
-在[Paddle 中现有的 gflags 用法](#paddle-中现有的-gflags-用法)中，Paddle 需要的用法包括：
-
-- `DEFINE_<type>(name, val, txt)`：定义全局标志变量 `FLAGS_name`，并且将 flag 的一些信息进行注册
-
-- `DECLARE_<type>(name)`：声明全局标志变量 `FLAGS_name`，用于需要访问 `FLAGS_name` 的场景
-
-- `ParseCommandLineFlags(int* argc, char*** argv, bool remove_flags)`：命令行标志解析，`*argc` 表示标志数量，`*argv` 表示标志字符串（如 `--name=value`）数组。
-  - 在 Paddle 中，大部分 `ParseCommandLineFlags` 在测试文件中使用，用于在命令行运行测试程序时设置一些可选参数；
-  
-  - 还有一些地方在命令行输入 argv 的基础上，手动添加一些 flag，比如添加 `--tryfromenv` 设置环境变量 flag，再调用 `ParseCommandLineFlags` 进行解析。
-  
-- `bool GetCommandLineOption(const char* name, std::string* OUTPUT)`：查找一个 flag，如果存在则将 `FLAG_##name` 存放在 `OUTPUT`，在 Paddle 中只用到了查找功能来判断一个 flag 是否被定义
-
-- `std::string SetCommandLineOption(const char* name, const char* value)`：用于将 `FLAG_##name` 的值设置为 `value`
-
-- `void AllowCommandLineReparsing()`：Paddle 中有一处用法放在 `ParseCommandLineFlags` 之前调用，函数名叫允许命令行重新解析，但在 `gflags.cc` 实现代码中，这个设置只是允许 `ParseCommandLineFlags` 传入一些未定义的 flag 而不报错
-
-#### 实现思路
+针对[Paddle 中现有的 gflags 用法](#paddle-中现有的-gflags-用法)，对这些用法如何实现进行的分析如下：
 
 - `DEFINE_<type>` 和 `DECLARE_<type>`
 
@@ -306,11 +287,11 @@ set(C10_USE_GFLAGS ${USE_GFLAGS})
   - 考虑是否支持其他的 gflags 特殊标志，比如 `--flagfile`，从一个文件中解析 Flag，Paddle 代码中没用到，不确定外部是否会用到
   - 报错机制：对于不满足目标格式的 Flag 或者解析得到未定义的 Flag 的报错机制，Paddle 中用到的 `AllowCommandLineReparsing()` 与这个机制相关
 
-- `GetCommandLineOption` 和 `SetCommandLineOption`：在 Flag 注册表中设计对应功能的接口即可
+- `GetCommandLineOption`， `SetCommandLineOption`，`AllowCommandLineReparsing`：在 Flag 注册表中设计对应功能的接口即可
 
 ### 2. 实现方案
 
-![image](https://github.com/huangjiyi/community/assets/43315610/7620c99b-8db5-46ab-9c92-6dfea50f579d)
+![image](https://github.com/huangjiyi/community/assets/43315610/87832764-c4f2-4620-b2c2-94f7d3c5b9a4)
 
 下面从底层数据结构开始介绍
 
@@ -329,40 +310,48 @@ enum class FlagType : uint8_t {
 };
 
 class Flag {
-public:
+ public:
   Flag(std::string name,
        std::string description,
        std::string file,
        FlagType type,
+       const void* default_value,
        void* value)
-    : name_(name),
-      description_(description),
-      file_(file),
-      type_(type),
-      value_(value) {
-  }
+      : name_(name),
+        description_(description),
+        file_(file),
+        type_(type),
+        default_value_(default_value),
+        value_(value) {}
   ~Flag() = default;
+
+  // Summary: --name_: type_, description_ (default: default_value_)
+  std::string Summary() const;
 
   void SetValueFromString(const std::string& value);
 
-private:
-  const std::string name_;         // flag name
+ private:
+  friend class FlagRegistry;
+
+  const std::string name_;	   // flag name
   const std::string description_;  // description message
-  const std::string file_;         // file name where the flag is defined
-  const FlagType type_;            // flag value type
-  void* value_;                    // flag value ptr
+  const std::string file_;	   // file name where the flag is defined
+  const FlagType type_;		   // flag value type
+  const void* default_value_;	   // flag default value ptr
+  void* value_;			   // flag current value ptr
 };
 ```
 
 - `FlagType` 表示 Flag 数据类型
-- `Flag` 包含一个 Flag 的全部信息，主要参考了 gflags，相当于 gflags 中的 `CommandLineFlag` + `FlagValue`，但是只保留了必要的信息和方法，这里移除了 gflags 中 value 的默认值 (Paddle没有和默认值相关的用法)，只保留一个当前值
+- `Flag` 包含一个 Flag 的全部信息，主要参考了 gflags，相当于 gflags 中的 `CommandLineFlag` + `FlagValue`
 - `SetValueFromString`：将输入的 `value` 字符串转化为目标 `type_` 的数值赋给 `value_`，在这个函数中需要检查 `value` 是否满足目标 `type_` 的格式
+- `Summary`：对一个 Flag 的信息进行总结，用于打印帮助信息
 
 #### `FlagRegistry`: Flag 注册表
 
 ``` C++
 class FlagRegistry {
-public:
+ public:
   static FlagRegistry* Instance() {
     static FlagRegistry* global_registry_ = new FlagRegistry();
     return global_registry_;
@@ -370,14 +359,24 @@ public:
 
   void RegisterFlag(Flag* flag);
 
-  void SetFlagValue(const std::string& name, const std::string& value);
+  bool SetFlagValue(const std::string& name, const std::string& value);
 
-  bool HasFlag(const std::string& name);
+  bool HasFlag(const std::string& name) const;
 
-private:
+  void PrintAllFlagHelp(std::ostream& os) const;
+
+ private:
   FlagRegistry() = default;
 
   std::map<std::string, Flag*> flags_;
+
+  struct FlagCompare {
+    bool operator()(const Flag* flag1, const Flag* flag2) const {
+      return flag1->name_ < flag2->name_;
+    }
+  };
+
+  std::map<std::string, std::set<Flag*, FlagCompare>> flags_by_file_;
 
   std::mutex mutex_;
 };
@@ -386,12 +385,14 @@ private:
 - `FlagRegistry` 为 Flag 注册表类，用于管理所有定义的 Flag
 - 只有一个全局单例，外部只能通过 `FlagRegistry::Instance()`  获取
 - 主要数据：
-  - `std::map<std::string, Flag*> flags_`：name 到 Flag 指针的查找表 
+  - `std::map<std::string, Flag*> flags_`：name 到 Flag 指针的查找表
+  - `std::map<std::string, std::set<Flag*, FlagCompare>> flags_by_file_`：根据定义所在文件区分不同的 Flag，`key` 是文件名，`value` 是定义在该文件中的 Flag 指针集合（根据 flag name 排序），主要用于在打印所以 flag 是按定义文件进行输出。
   - `std::mutex mutex_`：互斥锁，在修改 `flags_` 前 lock
 - 主要方法包括：
   - `RegisterFlag`：注册 Flag
   - `SetFlagValue`：将 `value` string 表示的值赋给 `flags_[name]->value_`，
   - `HasFlag`：查找 Flag 是否存在
+  - `PrintAllFlagHelp`：打印所有 Flag 的帮助信息
 
 #### `FlagRegisterer`: Flag 注册器
 
@@ -402,6 +403,7 @@ public:
   FlagRegisterer(std::string name,
                  std::string description,
                  std::string file,
+                 const T* default_value,
                  T* value);
 };
 
@@ -430,9 +432,10 @@ template <typename T>
 FlagRegisterer::FlagRegisterer(std::string name,
                                std::string help,
                                std::string file,
+                               const T* default_value,
                                T* value) {
   FlagType type = FlagTypeTraits<T>::Type;
-  Flag* flag = new Flag(name, help, file, type, value);
+  Flag* flag = new Flag(name, help, file, type, default_value, value);
   FlagRegistry::Instance()->RegisterFlag(flag);
 }
 ```
@@ -443,16 +446,17 @@ FlagRegisterer::FlagRegisterer(std::string name,
 #### `PD_DEFINE_<type>`: Flag 定义宏
 
 ``` C++
-#define PD_DEFINE_VARIABLE(type, name, value, description) \
-  namespace phi {                                           \
-  namespace flag_##type {                                   \
-    PD_EXPORT_FLAG type FLAGS_##name = value;              \
-    /* Register FLAG */                                     \
-    static FlagRegisterer flag_##name##_registerer(         \
-      #name, description, __FILE__, &FLAGS_##name);         \
-  }                                                         \
-  }                                                         \
-  using phi::flag_##type::FLAGS_##name
+#define PD_DEFINE_VARIABLE(type, name, default_value, description)           \
+  namespace paddle {                                                         \
+  namespace flags {                                                          \
+  static const type FLAGS_##name##_default = default_value;                  \
+  type FLAGS_##name = default_value;                                         \
+  /* Register FLAG */                                                        \
+  static ::paddle::flags::FlagRegisterer flag_##name##_registerer(           \
+      #name, description, __FILE__, &FLAGS_##name##_default, &FLAGS_##name); \
+  }                                                                          \
+  }                                                                          \
+  using paddle::flags::FLAGS_##name
 
 #define PD_DEFINE_bool(name, val, txt) \
   PD_DEFINE_VARIABLE(bool, name, val, txt)
@@ -476,13 +480,13 @@ FlagRegisterer::FlagRegisterer(std::string name,
 #### `PD_DECLARE_<type>`: Flag 声明宏
 
 ``` C++
-#define PD_DECLARE_VARIABLE(type, name)      \
-  namespace phi {                             \
-  namespace flag_##type {                     \
-    extern PD_IMPORT_FLAG type FLAGS_##name; \
-  }                                           \
-  }                                           \
-  using phi::flag_##type::FLAGS_##name
+#define PD_DECLARE_VARIABLE(type, name) \
+  namespace paddle {                    \
+  namespace flags {                     \
+  extern type FLAGS_##name;             \
+  }                                     \
+  }                                     \
+  using paddle::flags::FLAGS_##name
 
 #define PD_DECLARE_bool(name) PD_DECLARE_VARIABLE(bool, name)
 #define PD_DECLARE_int32(name) PD_DECLARE_VARIABLE(int32_t, name)
@@ -559,15 +563,9 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
 
   - `--help`：
 
-    在 `gflags` 中是打印所有文件中所有的 flag 信息，包括 name, default_value, description string（我们没有定义 default_value 所以不打印了）
+    与 `gflags` 保持一致，根据定义所在文件的顺序打印所有 Flag 的帮助信息，包括 name, default_value, description string，考虑到 Paddle 中定义了 300+ Flag，直接在命令行中打印出来不方便查询，因此另外设计了一个可以将打印的帮助信息输出到文件中的接口
 
-    但是Paddle 中定义了 200+ Flag，全部打印出来太多了，我认为 `--help` 在 Paddle 中的使用场景主要在测试中，所以不太需要打印所有 flag
-
-    在 gflags 中实现了一个 `--helpshort`，效果是只打印当前文件中 `DEFINE` 的 Flag，具体通过匹配 `Flag`  中的 `file_` 成员实现
-
-    综上，计划实现的 `--help` 效果是只打印当前文件中 `DEFINE` 的 Flag，然后计划将打印所有文件中所有的 flag 信息设计成一个函数接口
-
-  - `--fromen=value` 和 `--tryfromenv=value`：`value` 为用 `,` 分隔的环境变量名 `env1,env2,...`，实现的效果是将环境变量 `name` 的值赋给 `FLAGS_##name`，其中 `--tryfromenv` 对于没有定义的环境变量会忽略不会宝座，`--fromenv` 则会报错
+  - `--fromen=value` 和 `--tryfromenv=value`：`value` 为用 `,` 分隔的环境变量名 `env1,env2,...`，实现的效果是将环境变量 `name` 的值赋给 `FLAGS_##name`，其中 `--tryfromenv` 对于没有定义的环境变量会忽略不会报错，`--fromenv` 则会报错
 
   计划不支持的 `gflags` 特殊标志：
 
@@ -597,14 +595,14 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
 
 - 需要将所有的 `(PHI_)?(DEFINE|DECLARE)_<type>` 替换为 `PD_(DEFINE|DECLARE)_<type>`
 - 其余的 gflags 用法（较少）与新实现的接口不同也需要替换
+- cmake 中依赖关系的变化
 
 ## 五、测试与验收的考量
 
 ### 自测方案
 
-- 构建单测，验证各功能的准确性
-- 测试新旧版本的一致性
-- 测试新旧版本切换的编译选项
+- 因为 Paddle 里有非常多 flags 的用法，这些用法都是对于 flags 工具的测试，所以看最终 CI 有没有问题基本就行了，不需要额外写单测
+- 需要分别测试新旧版本 flags 工具的 CI 通过情况
 
 ## 六、影响面
 
@@ -614,7 +612,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
 
 ### 对二次开发用户的影响
 
-新实现的接口与目前暴露的 `paddle/phi/core/flags.h` 中的接口基本一致，部分接口如 `ParseCommandLineFlags` 因为功能相较于 gflags 更少，对于会用到新版本未实现功能的用户会有影响
+主要是一些接口变化的影响
 
 ### 对框架架构的影响
 
