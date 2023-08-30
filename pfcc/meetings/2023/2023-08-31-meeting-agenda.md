@@ -45,5 +45,5 @@
 4. 飞桨研发 [0x45f](https://github.com/0x45f) 分享《自动代码生成》 (15 min)
 5. PFCC 成员 [Tomoko-hjf](https://github.com/Tomoko-hjf) 分享《黑客松小助手开发进展与demo演示》 (10 min)
 6. PFCC 成员自由发言与讨论（5 min）
-   - 飞桨社区开源发展委员会意见征集 @[jzhang533](https://github.com/jzhang533)
+   - [飞桨社区开源发展委员会意见征集](https://github.com/PaddlePaddle/community/issues/608) @[jzhang533](https://github.com/jzhang533)
 7. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
