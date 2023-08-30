@@ -40,9 +40,10 @@
 # 会议议程
 
 1. 新同学自我介绍：[MarioLulab](https://github.com/MarioLulab)、 [Lylin](https://github.com/Lylin)、[idontkonwher](https://github.com/idontkonwher)、[whisky-12](https://github.com/whisky-12)、[InsaneOnion](https://github.com/InsaneOnion)、[yoyoIcy](https://github.com/yoyoIcy)  (5 min)
-2. PFCC 成员 [Tomoko-hjf](https://github.com/Tomoko-hjf) 分享《黑客松小助手开发进展与demo演示》 (10 min)
-3. 飞桨研发 [Aurelius84](https://github.com/Aurelius84) 分享《新IR开场介绍》 (10 min)
+2. 飞桨研发 [Aurelius84](https://github.com/Aurelius84) 分享《新IR开场介绍》 (10 min)
 3. 飞桨研发 [kangguangli](https://github.com/kangguangli) 分享《新IR-program translator》 (15 min)
 4. 飞桨研发 [0x45f](https://github.com/0x45f) 分享《自动代码生成》 (15 min)
+5. PFCC 成员 [Tomoko-hjf](https://github.com/Tomoko-hjf) 分享《黑客松小助手开发进展与demo演示》 (10 min)
 6. PFCC 成员自由发言与讨论（5 min）
+   - 飞桨社区开源发展委员会意见征集 @[jzhang533](https://github.com/jzhang533)
 7. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
