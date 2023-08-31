@@ -35,11 +35,11 @@
 | [Sahala08](https://github.com/Sahala08)           | [marshall-dteach](https://github.com/marshall-dteach)           | [jiamingkong](https://github.com/jiamingkong)             | [txyugood](https://github.com/txyugood)            | [gaoziyuan](https://github.com/gaoziyuan)            | [MayYouBeProsperous](https://github.com/MayYouBeProsperous)            |
 | [NotHaozi](https://github.com/NotHaozi)       | [xingmingyyj](https://github.com/xingmingyyj)            | [ruoyunbai](https://github.com/ruoyunbai)           |      [xiaoyewww](https://github.com/xiaoyewww)        | [hongtushi](https://github.com/hongtushi)           |      [qiuwenbogdut](https://github.com/qiuwenbogdut)   |
 [ooooo-create](https://github.com/ooooo-create)   |  [kaedeharai](https://github.com/kaedeharai)   |  [Candy2Tang](https://github.com/Candy2Tang)   |  [MarioLulab](https://github.com/MarioLulab)   |  [Lylin](https://github.com/Lylin)   |  [idontkonwher](https://github.com/idontkonwher)   |
-[whisky-12](https://github.com/whisky-12)   |  [InsaneOnion](https://github.com/InsaneOnion)   |  [yoyoIcy](https://github.com/yoyoIcy)
+[whisky-12](https://github.com/whisky-12)   |  [InsaneOnion](https://github.com/InsaneOnion)   |  [yoyoIcy](https://github.com/yoyoIcy)|  [yuchen202](https://github.com/yuchen202)
 
 # 会议议程
 
-1. 新同学自我介绍：[MarioLulab](https://github.com/MarioLulab)、 [Lylin](https://github.com/Lylin)、[idontkonwher](https://github.com/idontkonwher)、[whisky-12](https://github.com/whisky-12)、[InsaneOnion](https://github.com/InsaneOnion)、[yoyoIcy](https://github.com/yoyoIcy)  (5 min)
+1. 新同学自我介绍：[MarioLulab](https://github.com/MarioLulab)、 [Lylin](https://github.com/Lylin)、[idontkonwher](https://github.com/idontkonwher)、[whisky-12](https://github.com/whisky-12)、[InsaneOnion](https://github.com/InsaneOnion)、[yoyoIcy](https://github.com/yoyoIcy)  、[yuchen202](https://github.com/yuchen202)(5 min)
 2. 飞桨研发 [Aurelius84](https://github.com/Aurelius84) 分享《新IR开场介绍》 (10 min)
 3. 飞桨研发 [kangguangli](https://github.com/kangguangli) 分享《新IR-program translator》 (15 min)
 4. 飞桨研发 [0x45f](https://github.com/0x45f) 分享《自动代码生成》 (15 min)
