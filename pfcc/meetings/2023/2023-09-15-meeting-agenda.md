@@ -42,5 +42,5 @@
 1. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 简单开个场+介绍一下会议议程(5 min)
 2. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 分享《Paddle模型在基于Arm的MCU/SOC上落地的思路》 (15 min)
 3. Arm Ecosystem Evangelist [Liliya](https://github.com/Liliyaw) 分享《Arm虚拟硬件赋能Paddle边缘软件生态》 (20 min)
-4. 飞桨研发、EB推理大佬 [heavengate](https://github.com/heavengate) 分享《飞桨大模型推理部署高性能优化》 (20 min)
+4. 飞桨研发、大模型推理大佬 [heavengate](https://github.com/heavengate) 分享《飞桨大模型推理部署高性能优化》 (20 min)
 5. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
