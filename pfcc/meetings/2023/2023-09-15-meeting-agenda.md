@@ -1,12 +1,12 @@
 # Paddle Framework Contributor Club 第二十八次会议
 
-- 本次会议时间：2023-09-15 19:00
+- 本次会议时间：2023/09/15 19:00-21:00 (GMT+08:00) 中国标准时间 - 北京
 
 - 本次会议接入方式：
 
-  - 腾讯会议：352-140-151
+  - 腾讯会议：402-977-749
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会](https://meeting.tencent.com/dm/keA7Sw9qWK8P)，或添加至会议列表
+  - [点击链接入会](https://meeting.tencent.com/dm/07J2XqMo0si5)，或添加至会议列表
 
 - 本次会议主席：郑必城 （[Zheng-Bicheng](https://github.com/Zheng-Bicheng)）
 
