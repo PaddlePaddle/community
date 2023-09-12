@@ -862,7 +862,7 @@ Exponentially scaled modified Bessel function of order 1
 
 # 四、对比分析
 
-上述三个方案实际相同，在TensorFlow的实现版本中对于double类型的输入在 Chebyshev 多项式中使用了更多项目来近似，由于当前Paddle的部分算子当中已经引入了 Eigen3，在当前的版本当中将参考 TensorFlow 的版本直接调用 Eigen3 中的实现对齐主流方案当中的计算精度。
+上述三个方案实际相同，为了将当前 paddle 算子的实现和 Eigen 解耦，将参考 Pytorch 独立实现 C++ API。
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
