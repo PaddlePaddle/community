@@ -1,4 +1,4 @@
-此文档展示 PaddlePaddle Hackathon 第五期活动-飞桨护航计划集训营项目详细介绍，更多详见  [PaddlePaddle Hackathon 说明](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_cn)。
+此文档展示 **PaddlePaddle Hackathon 第五期活动——飞桨护航计划集训营** 项目详细介绍，更多详见  [PaddlePaddle Hackathon 说明](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_cn)。
 
 ### 项目一：算子规范和 ProgramTranslator 功能优化
 
