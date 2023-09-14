@@ -188,7 +188,7 @@ paddle.Tensor.copysign_(
 
 通过调研发现，需要
 1. `paddle/phi/api/yaml/op_compat.yaml`、`paddle/phi/api/yaml/ops.yaml` 添加算子 Copysign。
-2. `paddle/phi/infermeta/binary.cc`、`paddle/phi/infermeta/binary.h` 添加算子 NextafterInferMeta。
+2. `paddle/phi/infermeta/binary.cc`、`paddle/phi/infermeta/binary.h` 添加算子 CopysignInferMeta。
 3. `paddle/phi/kernels/cpu/` 目录下添加 `copysign_kernel.cc`文件。
 4. `paddle/phi/kernels/gpu/` 目录下添加 `copysign_kernel.cu`文件。
 5. `paddle/phi/kernels/impl/` 目录下添加 `copysign_kernel_impl.h`文件, C++实现代码。
