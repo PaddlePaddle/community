@@ -17,4 +17,4 @@
 * 过需求 （10mins）
   * 就近期收集到的套件需求，大家自由讨论
 * 自由发言，可以提需求给大家讨论、提问等（10 mins）
-* 确定下次的会议主席、call for tech presentation、召开时间（3 mins）
+* 确定下次的会议主持人、call for tech presentation、召开时间（3 mins）
