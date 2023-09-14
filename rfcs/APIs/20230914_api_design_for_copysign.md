@@ -12,7 +12,7 @@
 
 ## 1、相关背景
 
-详细描述：根据两个输入逐元素地计算结果张量，其结果由第一个输入的绝对值大小及第二个输入的符号组成。此任务的目标是在 Paddle 框架中，新增 copysign API，调用路径为：paddle.copysign 和 Tensor.copysign。
+详细描述：根据两个输入逐元素地计算结果张量，其结果由第一个输入的绝对值大小及第二个输入的符号组成。此任务的目标是在 Paddle 框架中，新增 copysign API，调用路径为：paddle.copysign、paddle.copysign_、Tensor.copysign、Tensor.copysign_。
 
 ## 3、意义
 
