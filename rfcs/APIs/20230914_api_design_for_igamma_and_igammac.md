@@ -14,7 +14,7 @@
 为了提升飞桨 API 丰富度，支持随机分布生成相关 API，Paddle 需要扩充 API `paddle.igamma`, `paddle.igammac`。
 
 ## 2、功能目标
-新增 paddle.igamma /igammac API，即实现(上)不完全伽马函数和补(下)不完全伽马函数的 API。
+新增 paddle.igamma /igammac API，即实现[(上)不完全伽马函数和补(下)不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
 这两个函数的定义如下：
 $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 $$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $$
@@ -39,7 +39,7 @@ PyTorch 中有 `torch.Tensor.igamma(other)` 和 `torch.Tensor.igammac(other)` �
 因为 PyTorch 中这些 API 的实际计算逻辑相似性较大，因此下文的分析均以 igammac 为例。
 
 在 PyTorch (aten/src/ATen/native/Math.h)中，不完全伽马函数的核心计算逻辑是 `calc_igammac`/`calc_igammacc` 函数，
-然后针对不同架构，进行了不同的并行化操作，核心计算逻辑代码如下
+这是一个`inline`函数，后续进行了不同的向量化操作，核心计算逻辑代码如下
 ```cpp
 template <typename scalar_t>
 static inline scalar_t calc_igammac(scalar_t a, scalar_t x) {
@@ -122,7 +122,7 @@ static inline scalar_t calc_igammac(scalar_t a, scalar_t x) {
 }
 ```
 
-针对一般 CPU 的并行化处理，主要是给`Vectorized`结构体添加一个新方法，代码如下(aten/src/ATen/cpu/vec/vec256/vec256_float.h)
+针对一般 float 的向量化处理，主要是给`Vectorized`结构体添加一个新方法，代码如下(aten/src/ATen/cpu/vec/vec256/vec256_float.h)
 ```cpp
   Vectorized<float> igamma(const Vectorized<float> &x) const {
     __at_align__ float tmp[size()];
@@ -136,7 +136,7 @@ static inline scalar_t calc_igammac(scalar_t a, scalar_t x) {
   }
 ```
 
-针对 CUDA 的并行化处理，代码如下(aten/src/ATen/native/cuda/IGammaKernel.cu)
+针对 CUDA，核心计算逻辑代码如下(aten/src/ATen/native/cuda/IGammaKernel.cu)，这部分与 CPU的实现相似
 ```cpp
 template <typename scalar_t>
 __noinline__ __host__ __device__ scalar_t calc_igammac(scalar_t a, scalar_t x) {
@@ -219,6 +219,28 @@ __noinline__ __host__ __device__ scalar_t calc_igammac(scalar_t a, scalar_t x) {
 }
 
 
+```
+
+然后通过一些内部的机制，例如 `AT_DISPATCH_FLOATING_TYPES` 对其处理，代码如下：
+```cpp
+template<typename scalar_t>
+struct CalcIgamma{
+  CalcIgamma(bool calc_igammac): calc_igammac_(calc_igammac){}
+  bool calc_igammac_;
+  __device__ scalar_t operator() (scalar_t a, scalar_t b) const {
+    if (calc_igammac_) {
+      return calc_igammac(a,b);
+    } else {
+      return calc_igamma(a,b);
+    }
+  }
+};
+
+void igammac_kernel_cuda(TensorIteratorBase& iter) {
+  AT_DISPATCH_FLOATING_TYPES(iter.common_dtype(), "igammac_cuda", [&]() {
+    gpu_kernel(iter, CalcIgamma<scalar_t>(true));
+  });
+}
 ```
 
 ## Scipy
@@ -390,8 +412,13 @@ paddle.Tensor.igammac_(
 ```
 
 ## 底层OP设计
+对于底层 OP 主要分为三部分，由于 `igamma` 和 `igammac`是互补关系，所以实际上可服用代码很多，
+因此底层OP设计仅以`igammac`为例。
 
-不涉及
+### 实现基础计算逻辑
+根据 igamma (上不完全伽马函数) 的定义。
+这两个函数的定义如下：
+$$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 
 ## API实现方案
 
@@ -401,7 +428,7 @@ paddle.Tensor.igammac_(
 参考 PyTorch 的实现，使用 C++ 独立编写的计算逻辑。
 
 ### igammac
-
+参考 PyTorch 的实现，使用 C++ 独立编写的计算逻辑。
 
 # 六、测试和验收的考量
 
@@ -426,7 +453,7 @@ paddle.Tensor.igammac_(
 gammainc 是 igamma 的另一种写法，gammaincc 是 igammac 的另一种写法。
 
 # 附件及参考资料
-
+- [不完全伽马函数的定义——小时百科](https://wuli.wiki/online/IncGam.html)
 - [torch.igamma](https://pytorch.org/docs/stable/special.html#torch.special.gammainc)
 - [torch.igammac](https://pytorch.org/docs/stable/special.html#torch.special.gammaincc)
 - [scipy](https://github.com/scipy/scipy)
