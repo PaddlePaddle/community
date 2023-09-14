@@ -77,12 +77,6 @@ GPU Kernel
 float,double,int,int64_t,float16,bfloat16
 ```
 
-paddle.where 支持的参数 dtype:
-
-- x: ['float16', 'float32', 'float64', 'int32', 'int64', 'uint16']
-- y: ['float16', 'float32', 'float64', 'int32', 'int64', 'uint16']
-- condition: ['bool']
-
 使用 full/full_like 和 where 组合完成的 masked_fill API，支持 broadcast 机制。
 
 ```python
