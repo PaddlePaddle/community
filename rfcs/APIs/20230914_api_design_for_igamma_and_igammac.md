@@ -416,9 +416,16 @@ paddle.Tensor.igammac_(
 因此底层OP设计仅以`igammac`为例。
 
 ### 实现基础计算逻辑
-根据 igamma (上不完全伽马函数) 的定义。
-这两个函数的定义如下：
+根据 igamma (上不完全伽马函数) 的定义，即
 $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
+设计相应的CPU和CUDA计算函数（CPU和CUDA主体逻辑相似，仅写法上会存在一些差异），这部分与PyTorch相似，也是最核心的内容。
+
+### 实现基础计算逻辑的向量化（针对CPU）
+可采用类似 PyTorch 的向量化技术加速。
+
+### 实现基础计算逻辑的向量化（针对GPU）
+这里的 hip 和 cuda 的实现可利用 Paddle 已经实现的很多宏或函数，从而消除两者的差异，
+最终实现 Kernel 函数。
 
 ## API实现方案
 
