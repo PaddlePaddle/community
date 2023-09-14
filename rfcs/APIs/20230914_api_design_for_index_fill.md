@@ -49,6 +49,13 @@ Parameters:
 ```
 输入用于定位的dim和index，原地修改tensor对应位置的值为value
 
+其中输入参数信息有：
+
+* X支持所有基本数据类型和复数类型，包括float16、float16复数、bool等
+* index内部必须为Long类型，防止Tensor过大导致索引溢出
+* index只能为1-D Tensor或者一个标量
+* value如果为复数，源Tensor也得是复数
+
 ### 实现方法
 
 在实现方法上, PyTorch采用的CPU实现为：循环遍历赋值，而CUDA实现则是调用pytorch自己实现的scan_with_indices函数。
