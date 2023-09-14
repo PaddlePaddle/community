@@ -35,7 +35,7 @@ $$\Gamma(a, z) = \int_z^\infty e^{-t} t^{a - 1} dt$$
 - $\lim\limits_{x,a \to 0} P(x, a) = 1$
 - $\Gamma(a, z) + \gamma(a, z) = \Gamma(a)$
 - $Q(a, z) = \frac{\Gamma(a, z)}{\Gamma(a)}$
-- $ P(a, z) = \frac{\gamma(a, z)}{\Gamma(a)}$
+- $P(a, z) = \frac{\gamma(a, z)}{\Gamma(a)}$
 
 ## 2、功能目标
 
