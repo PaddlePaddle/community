@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+此文档展示 **PaddlePaddle Hackathon 第五期活动——开源贡献个人挑战赛 API 开发任务** 详细介绍，更多详见  [PaddlePaddle Hackathon 说明](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_cn)。
+
+>>>>>>> c772f065d8e545f849972ac9799755b643a3296d
 ## 【开源贡献个人挑战赛-热身赛】任务详情：
 
 为飞桨框架新增一系列 API，提交流程请参考 [新增API 开发&提交流程](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_contributing_guides_cn.html)，开发请参考 [贡献指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/index_cn.html)，任务列表如下，其他说明事项：
@@ -274,4 +279,8 @@
 
 - 了解 Paddle 算子开发流程
 - 熟练掌握 C++，Python
+<<<<<<< HEAD
 - 有一定的 CUDA 开发经验
+=======
+- 有一定的 CUDA 开发经验
+>>>>>>> c772f065d8e545f849972ac9799755b643a3296d
