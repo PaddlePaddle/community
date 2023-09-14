@@ -53,7 +53,7 @@ Parameters:
 
 在实现方法上, PyTorch采用的CPU实现为：循环遍历赋值，而CUDA实现则是调用pytorch自己实现的scan_with_indices函数。
 核心代码为：
-[CPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/ReduceOps.cpp#L769):
+CPU:
 
 ```cpp
 void index_fill_kernel(
@@ -116,7 +116,7 @@ void index_fill_kernel(
   });
 }
 ```
-[GPU](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/ScanKernels.cpp#L28):
+GPU:
 
 ```cpp
 template <typename scalar_t>
@@ -186,10 +186,10 @@ paddle.index_fill
 参数
 :::::::::
 
-- x (Tensor) - 需要填充的目标张量，支持类型int32, int64, float32, float64。
-- axis (int) - 做索引操作的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累积最大值计算。
-- index (Tensor) - 包含索引的一维张量，可以为int32和int64
-- value (float) - 张量填充的值，可以为int32, int64, float32, float64
+- x (Tensor) - 需要填充的目标Tensor，`x` 的数据类型可以是 float16, float32，float64，int32，int64，bool。
+- axis (int) - 索引轴。数据类型为 int。
+- index (Tensor) - 包含索引下标的 1-D Tensor，可以为int32和int64
+- value (scalar|Tensor) - Tensor填充的值，可以为标量或者0-D Tensor
 - name  (str) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
 :::::::::
@@ -204,10 +204,10 @@ paddle.index_fill_
 参数
 :::::::::
 
-- x (Tensor) - 需要填充的目标张量，支持类型int32, int64, float32, float64。
-- axis (int) - 做索引操作的维度。-1代表最后一维。默认：None，将输入展开为一维变量再进行累积最大值计算。
-- index (Tensor) - 包含索引的一维张量，可以为int32和int64
-- value (float) - 张量填充的值，可以为int32, int64, float32, float64
+- x (Tensor) - 需要填充的目标Tensor，`x` 的数据类型可以是 float16, float32，float64，int32，int64，bool。
+- axis (int) - 索引轴。数据类型为 int。
+- index (Tensor) - 包含索引下标的 1-D Tensor，可以为int32和int64
+- value (scalar|Tensor) - Tensor填充的值，可以为标量或者0-D Tensor
 - name  (str) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
 paddle.Tensor.index_fill_指向paddle.index_fill\_，两者是相同的API
