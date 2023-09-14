@@ -357,7 +357,7 @@ XlaOp Igamma(XlaOp a, XlaOp x) {
 
 ```python
 paddle.igamma(
-    inout: Tensor,
+    input: Tensor,
     other: Tensor,
     name: str | None = None
 )
@@ -365,7 +365,7 @@ paddle.igamma(
 
 ```python
 paddle.igammac(
-    inout: Tensor,
+    input: Tensor,
     other: Tensor,
     name: str | None = None
 )
@@ -373,7 +373,7 @@ paddle.igammac(
 
 ```python
 paddle.igamma_(
-    inout: Tensor,
+    input: Tensor,
     other: Tensor,
     name: str | None = None
 )
@@ -381,7 +381,7 @@ paddle.igamma_(
 
 ```python
 paddle.igammac_(
-    inout: Tensor,
+    input: Tensor,
     other: Tensor,
     name: str | None = None
 )
@@ -432,10 +432,16 @@ $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 该 API 实现于 `python/paddle/tensor/manipulation.py`。
 
 ### igamma
-参考 PyTorch 的实现，使用 C++ 独立编写的计算逻辑。
+对于 igamma 、 igamma_ 、igammac 和 igammac_ 有类似的API，下面列出了`igamma`的情况。
 
-### igammac
-参考 PyTorch 的实现，使用 C++ 独立编写的计算逻辑。
+具体的API为`paddle.igamma(input, other, name = None)`和`paddle.Tensor.igamma(input, other)`
+
+- input: 输入张量，即公式中的 $a$
+- other: 输入张量，即公式中的 $x$
+
+
+例如将一维张量$[3, 5]$和一维张量$[2, 7]$输入，则计算结果如下：
+$$ \Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t} dt] =  $$
 
 # 六、测试和验收的考量
 
