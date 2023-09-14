@@ -1,6 +1,6 @@
 # paddle.igamma 设计文档
 
-|API名称 | paddle.igamma | 
+|API名称 | paddle.igamma、paddle.igammac | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | 汪昕([GreatV](https://github.com/GreatV)) | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-13 | 
@@ -34,7 +34,8 @@ $$\Gamma(a, z) = \int_z^\infty e^{-t} t^{a - 1} dt$$
 - 对于 $a \ge 0$ 有 $\lim\limits_{x \to \infty} P(x, a) = 1$
 - $\lim\limits_{x,a \to 0} P(x, a) = 1$
 - $\Gamma(a, z) + \gamma(a, z) = \Gamma(a)$
-- $Q(a, z) = \frac{\Gamma(a, z)}{\Gamma(a)}$ $ P(a, z) = \frac{\gamma(a, z)}{\Gamma(a)}$
+- $Q(a, z) = \frac{\Gamma(a, z)}{\Gamma(a)}$
+- $ P(a, z) = \frac{\gamma(a, z)}{\Gamma(a)}$
 
 ## 2、功能目标
 
@@ -64,7 +65,7 @@ $$\gamma(a, x) = x^a e^{-x} \sum_{k=0}^{\infty} \frac{\Gamma(a)}{\Gamma(a + k + 
 
 $$\Gamma(a, x) = \frac{\text{tgamma1pm1}(a) - \text{powm1}(x, a)}{a} + x^a \sum_{k=1}^{\infty}\frac{(-1)^k x^k}{(a + k) k !}$$
 
-其中 $\text{tgamma1pm1}(a) = \Gamma(a + 1) - 1$，$\text{powm1}(x, a) = x^a - 1$。tgamma1pm1 的 精度上限为 35位左右，且与 Lanczos 近似值相关，以俩者中较大值为准。当 a 取整数或半整数时，有两种特殊情况，对于 a 是 `[1, 30)` 范围内的整数，则可用有限和计算
+其中 $\text{tgamma1pm1}(a) = \Gamma(a + 1) - 1$ 以及 $\text{powm1}(x, a) = x^a - 1$ tgamma1pm1 的 精度上限为 35位左右，且与 Lanczos 近似值相关，以俩者中较大值为准。当 a 取整数或半整数时，有两种特殊情况，对于 a 是 `[1, 30)` 范围内的整数，则可用有限和计算
 
 $$Q(a, x) = e^{-x} \sum_{n=0}^{a - 1} \frac{x^n}{n!}$$
 
@@ -78,7 +79,7 @@ $$P(a, x) = \frac12 \text{erfc}(\sqrt{y}) - \frac{e^{-y}}{\sqrt{2 \pi a}} T(a, \
 
 $$Q(a, x) = \frac12 \text{erfc}(\sqrt{y}) + \frac{e^{-y}}{\sqrt{2 \pi a}} T(a, \lambda); \lambda \gt 1$$
 
-其中 $\lambda = \frac x a$，$y = a (\lambda - 1 - \text{ln} \lambda) = - a (\text{ln}(1 + \sigma) - \sigma); \sigma = \frac{x - a}{a}$
+其中 $\lambda = \frac x a$ 且 $y = a (\lambda - 1 - \text{ln} \lambda) = - a (\text{ln}(1 + \sigma) - \sigma) 以及 \sigma = \frac{x - a}{a}$
 
 $$T(a, \lambda) = \sum_{k=0}^{N}(\sum_{n=0}^{M} C_k^n z^n) a^{-k}; z = \text{sign}(\lambda - 1) \sqrt{2 \sigma}$$
 
