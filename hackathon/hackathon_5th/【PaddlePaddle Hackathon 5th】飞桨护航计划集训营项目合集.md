@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-此文档展示 PaddlePaddle Hackathon 第五期活动-飞桨护航计划集训营项目详细介绍，更多详见  [PaddlePaddle Hackathon 说明](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_cn)。
-=======
 此文档展示 **PaddlePaddle Hackathon 第五期活动——飞桨护航计划集训营** 项目详细介绍，更多详见  [PaddlePaddle Hackathon 说明](https://www.paddlepaddle.org.cn/contributionguide?docPath=hackathon_cn)。
->>>>>>> c772f065d8e545f849972ac9799755b643a3296d
 
 ### 项目一：算子规范和 ProgramTranslator 功能优化
 
@@ -338,8 +334,4 @@ SGPT：58亿参数SGPT-BE在BEIR上的表现优于最佳可用句子嵌入7%，�
 - 熟悉 Python
 - 对slim算法方向有一定了解 
 - 对PaddleSlim仓库有使用经验
-<<<<<<< HEAD
 - 对预测、压缩有了解
-=======
-- 对预测、压缩有了解
->>>>>>> c772f065d8e545f849972ac9799755b643a3296d
