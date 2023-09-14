@@ -31,7 +31,7 @@
 import paddle
 
 paddle.seed(123)
-x = paddle.rand([3, 3], dtype='float32')
+x = paddle.ones([3, 3], dtype='float32')
 # Tensor(shape=[3, 3], dtype=float32, place=CUDAPlace(0), stop_gradient=True,
 #        [[0.00276479, 0.45899123, 0.96637046],
 #         [0.66818708, 0.05855134, 0.33184195],
@@ -44,7 +44,7 @@ mask = paddle.randint(0, 2, [3, 3]).astype('bool')
 #         [True , True , True ]])
 
 def masked_fill(x, mask, value):
-    y = paddle.full(x.shape, value, x.dtype)
+    y = paddle.full_like(x, value, x.dtype)
     return paddle.where(mask, y, x)
 
 out = masked_fill(x, mask, 2)
@@ -53,6 +53,36 @@ out = masked_fill(x, mask, 2)
 #         [2.        , 2.        , 2.        ],
 #         [2.        , 2.        , 2.        ]])
 ```
+
+paddle.full_like 支持的参数 dtype:
+
+- x: ['bool','float16','float32','float64','int16','int32','int64','uint16']
+- fill_value: ['bool','float16','float32','float64','int16','int32','int64','uint16']
+- dtype: ['bool','float16','float32','float64','int16','int32','int64','uint16']
+
+paddle.where 支持的参数 dtype:
+
+- x: ['float16', 'float32', 'float64', 'int32', 'int64', 'uint16']
+- y: ['float16', 'float32', 'float64', 'int32', 'int64', 'uint16']
+- condition: ['bool']
+
+使用 full 和 where 组合完成的 masked_fill API，支持 broadcast 机制。
+
+```python
+x = paddle.ones([3, 3], dtype='float32')
+mask = paddle.randint(0, 2, [1, 3]).astype('bool')
+
+out = masked_fill(x, mask, 2)
+print(out)
+
+# Tensor(shape=[3, 3], dtype=float32, place=Place(gpu:0), stop_gradient=True,
+#        [[2., 1., 2.],
+#         [2., 1., 2.],
+#         [2., 1., 2.]])
+```
+
+full/full_like 和 where 均支持在 CPU 和 GPU 上运行。
+
 
 # 三、业内方案调研
 
@@ -194,7 +224,7 @@ masked_fill_支持inplace方式修改输入张量。
 
 在 python/paddle/tensor/manipulation.py 中增加 masked_fill 以及 masked_fill_ 函数。
 
-通过full和where实现。
+通过 `paddle.full_like` 和 `paddle.where` 组合实现。
 
 ```python
 out = paddle.full(x.shape, value, x.dtype)
