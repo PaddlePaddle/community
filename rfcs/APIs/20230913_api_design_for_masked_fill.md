@@ -54,11 +54,28 @@ out = masked_fill(x, mask, 2)
 #         [2.        , 2.        , 2.        ]])
 ```
 
+
+full/full_like 和 where 均支持在 CPU 和 GPU 上运行。
+
 paddle.full_like 支持的参数 dtype:
 
-- x: ['bool','float16','float32','float64','int16','int32','int64','uint16']
-- fill_value: ['bool','float16','float32','float64','int16','int32','int64','uint16']
-- dtype: ['bool','float16','float32','float64','int16','int32','int64','uint16']
+```python 
+CPU Kernel 
+float,double,int8_t,uint8_t,int16_t,int,int64_t,bool,float16,bfloat16,complex32,complex64
+
+GPU Kernel
+float,double,int8_t,uint8_t,int16_t,int,int64_t,bool,float16,bfloat16,complex32,complex64
+```
+
+paddle.where 支持的参数 dtype:
+
+```python 
+CPU Kernel 
+float, double, int, int64_t
+
+GPU Kernel
+float,double,int,int64_t,float16,bfloat16
+```
 
 paddle.where 支持的参数 dtype:
 
@@ -66,7 +83,7 @@ paddle.where 支持的参数 dtype:
 - y: ['float16', 'float32', 'float64', 'int32', 'int64', 'uint16']
 - condition: ['bool']
 
-使用 full 和 where 组合完成的 masked_fill API，支持 broadcast 机制。
+使用 full/full_like 和 where 组合完成的 masked_fill API，支持 broadcast 机制。
 
 ```python
 x = paddle.ones([3, 3], dtype='float32')
@@ -81,7 +98,6 @@ print(out)
 #         [2., 1., 2.]])
 ```
 
-full/full_like 和 where 均支持在 CPU 和 GPU 上运行。
 
 
 # 三、业内方案调研
