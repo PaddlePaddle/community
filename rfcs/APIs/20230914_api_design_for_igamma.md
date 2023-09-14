@@ -11,7 +11,7 @@
 # 一、概述
 ## 1、相关背景
 
-`igamma (gammainc)` 用于计算不完全 gamma 函数，下不完全 gamma 函数 $P$ 和上不完全 gamma 函数 $Q$ 由下式定义：
+`igamma(gammainc)` 和 `igammac(gammaincc)` 用于计算不完全 gamma 函数。分别表示归一化的下不完全 gamma 函数 $P$ 和归一化的上不完全 gamma 函数 $Q$ 。由下式定义：
 
 $$P(a, x) = \frac{1}{\Gamma(a)} \int_0^x e^{-t} t^{a - 1} dt$$
 
@@ -23,14 +23,22 @@ $$\Gamma(a)=\int_0^{\infty} e^{-t} t^{a - 1} dt$$
 
 此处使用的 `gamma` 函数的归一化定义，其中 $P(a, x) + Q(a, x) = 1$
 
+非归一化的下不完全 gamma 函数和上不完全 gamma 函数分别定义为：
+
+$$\gamma(a, z) = \int_0^z e^{-t} t^{a - 1} dt$$
+
+$$\Gamma(a, z) = \int_z^\infty e^{-t} t^{a - 1} dt$$
+
 不完全 gamma 函数满足如下性质：
 
 - 对于 $a \ge 0$ 有 $\lim\limits_{x \to \infty} P(x, a) = 1$
 - $\lim\limits_{x,a \to 0} P(x, a) = 1$
+- $\Gamma(a, z) + \gamma(a, z) = \Gamma(a)$
+- $Q(a, z) = \frac{\Gamma(a, z)}{\Gamma(a)}$ $ P(a, z) = \frac{\gamma(a, z)}{\Gamma(a)}$
 
 ## 2、功能目标
 
-为 Paddle 新增 igamma API。用于计算下不完全 gamma 函数。
+为 Paddle 新增 `igamma` 和 `igammac` API。用于计算下不完全 gamma 函数 和 上不完全 gamma 函数。
 
 ## 3、意义
 
@@ -53,6 +61,34 @@ $$\Gamma(a)=\int_0^{\infty} e^{-t} t^{a - 1} dt$$
 Scipy 的实现主要参考 NIST Digital Library of Mathematical functions [Incomplete Gamma and Related Functions](https://dlmf.nist.gov/8) 和 [Boost](https://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/sf_gamma/igamma.html) 的实现。即，计算它们的 series 表示：
 
 $$\gamma(a, x) = x^a e^{-x} \sum_{k=0}^{\infty} \frac{\Gamma(a)}{\Gamma(a + k + 1)} x^n = x^a e^{-x} \sum_{k=0}^{\infty} \frac{x^n}{a^{k \mp 1}}$$
+
+$$\Gamma(a, x) = \frac{\text{tgamma1pm1}(a) - \text{powm1}(x, a)}{a} + x^a \sum_{k=1}^{\infty}\frac{(-1)^k x^k}{(a + k) k !}$$
+
+其中 $\text{tgamma1pm1}(a) = \Gamma(a + 1) - 1$，$\text{powm1}(x, a) = x^a - 1$。tgamma1pm1 的 精度上限为 35位左右，且与 Lanczos 近似值相关，以俩者中较大值为准。当 a 取整数或半整数时，有两种特殊情况，对于 a 是 `[1, 30)` 范围内的整数，则可用有限和计算
+
+$$Q(a, x) = e^{-x} \sum_{n=0}^{a - 1} \frac{x^n}{n!}$$
+
+对于 a 是 `[0.5, 30)` 范围内的半整数，则可使用以下有限和：
+
+$$Q(a, x) = \text{erfc}(\sqrt{x}) + \frac{e^{-x}}{\sqrt{\pi x}}\sum_{n=1}^{i} \frac{x^n}{(1 - \frac{1}{2})...(n - \frac{1}{2})}$$
+
+当 a 较大，且 $x \sim a$ 时，可使用下式计算：
+
+$$P(a, x) = \frac12 \text{erfc}(\sqrt{y}) - \frac{e^{-y}}{\sqrt{2 \pi a}} T(a, \lambda); \lambda \le 1$$
+
+$$Q(a, x) = \frac12 \text{erfc}(\sqrt{y}) + \frac{e^{-y}}{\sqrt{2 \pi a}} T(a, \lambda); \lambda \gt 1$$
+
+其中 $\lambda = \frac x a$，$y = a (\lambda - 1 - \text{ln} \lambda) = - a (\text{ln}(1 + \sigma) - \sigma); \sigma = \frac{x - a}{a}$
+
+$$T(a, \lambda) = \sum_{k=0}^{N}(\sum_{n=0}^{M} C_k^n z^n) a^{-k}; z = \text{sign}(\lambda - 1) \sqrt{2 \sigma}$$
+
+对于归一化不完全 gamma 函数，主幂项的计算影响函数的准确性。对于较小的 a 和 x，将幂项与 Lanczos 近似值相结合可获得最大精度，可使用下式计算：
+
+$$\frac{x^a e^{-x}}{\Gamma(a)} = e^{x - a} (\frac{x}{a + g - 0.5})^a \sqrt{\frac{a + g - 0.5}{e}} \frac{1}{L(a)}$$
+
+当 a 和 x 较大时，通过下式计算：
+
+$$e^{x - a} (\frac{x}{a + g - 0.5})^a = e^{a\text{log1pmx}(\frac{x - a - g + 0.5}{a + g - 0.5}) +\frac{x(0.5 - g)}{a + g - 0.5}}; \text{log1pmx}(z) = \text{ln}(1 + z) - z$$
 
 ## 2. MatLab
 
@@ -135,7 +171,10 @@ a = tf.math.igamma(a1, a2)
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-API设计为 `paddle.igamma(a, x)`。其中，`a` 为参数 $a > 0$，`x` 为变量 $x \ge 0$。`paddle.gammainc(a, x)` 为 `paddle.igamma(a, x)` 的别名。`igamma_(a, x)` 为 `igamma(a, x)` 的 inplace 版本。`Tensor.igamma(a, x)` 和 `Tensor.igammac(a, x)` 做为 Tensor 的方法使用，`Tensor.igamma_(a, x)` 和 `Tensor.igammac_(a, x)` 做为 Tensor 方法的inplace版本。
+下不完全 gamma 函数 API设计为 `paddle.igamma(a, x)`。其中，`a` 为参数 $a > 0$，`x` 为变量 $x \ge 0$。`paddle.gammainc(a, x)` 为 `paddle.igamma(a, x)` 的别名。`igamma_(a, x)` 为 `igamma(a, x)` 的 inplace 版本。`Tensor.igamma(a, x)` 和 `Tensor.gammainc(a, x)` 做为 Tensor 的方法使用，`Tensor.igamma_(a, x)` 和 `Tensor.gammainc_(a, x)` 做为 Tensor 方法的inplace版本。
+
+上不完全 gamma 函数 API设计为 `paddle.igammac(a, x)`。其中，`a` 为参数 $a > 0$，`x` 为变量 $x \ge 0$。`paddle.gammaincc(a, x)` 为 `paddle.igammac(a, x)` 的别名。`igammac_(a, x)` 为 `igammac(a, x)` 的 inplace 版本。`Tensor.igammac(a, x)` 和 `Tensor.gammaincc(a, x)` 做为 Tensor 的方法使用，`Tensor.igammac_(a, x)` 和 `Tensor.gammaincc_(a, x)` 做为 Tensor 方法的inplace版本。
+
 
 ## API实现方案
 
