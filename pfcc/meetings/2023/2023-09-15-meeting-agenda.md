@@ -35,12 +35,14 @@
 | [Sahala08](https://github.com/Sahala08)           | [marshall-dteach](https://github.com/marshall-dteach)           | [jiamingkong](https://github.com/jiamingkong)             | [txyugood](https://github.com/txyugood)            | [gaoziyuan](https://github.com/gaoziyuan)            | [MayYouBeProsperous](https://github.com/MayYouBeProsperous)            |
 | [NotHaozi](https://github.com/NotHaozi)       | [xingmingyyj](https://github.com/xingmingyyj)            | [ruoyunbai](https://github.com/ruoyunbai)           |      [xiaoyewww](https://github.com/xiaoyewww)        | [hongtushi](https://github.com/hongtushi)           |      [qiuwenbogdut](https://github.com/qiuwenbogdut)   |
 [ooooo-create](https://github.com/ooooo-create)   |  [kaedeharai](https://github.com/kaedeharai)   |  [Candy2Tang](https://github.com/Candy2Tang)   |  [MarioLulab](https://github.com/MarioLulab)   |  [Lylin](https://github.com/Lylin)   |  [idontkonwher](https://github.com/idontkonwher)   |
-[whisky-12](https://github.com/whisky-12)   |  [InsaneOnion](https://github.com/InsaneOnion)   |  [yoyoIcy](https://github.com/yoyoIcy)|  [yuchen202](https://github.com/yuchen202)
+[whisky-12](https://github.com/whisky-12)   |  [InsaneOnion](https://github.com/InsaneOnion)   |  [yoyoIcy](https://github.com/yoyoIcy)|  [yuchen202](https://github.com/yuchen202) | [Wong4j](https://github.com/Wong4j)  | [Wanglongzhi2001](https://github.com/Wanglongzhi2001)  | 
+| [silverling](https://github.com/silverling) |  |  |
 
 # 会议议程
 
-1. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 简单开个场+介绍一下会议议程(5 min)
-2. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 分享《Paddle模型在基于Arm的MCU/SOC上落地的思路》 (15 min)
-3. Arm Ecosystem Evangelist [Liliya](https://github.com/Liliyaw) 分享《Arm虚拟硬件赋能Paddle边缘软件生态》 (20 min)
-4. 飞桨研发、大模型推理大佬 [heavengate](https://github.com/heavengate) 分享《飞桨大模型推理部署高性能优化》 (20 min)
-5. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
+1. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 简单开个场+介绍一下会议议程(3 min)
+2. 新人自我介绍：[Wong4j](https://github.com/Wong4j)、[Wanglongzhi2001](https://github.com/Wanglongzhi2001)、[silverling](https://github.com/silverling)(2 min)
+3. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 分享《Paddle模型在基于Arm的MCU/SOC上落地的思路》 (15 min)
+4. Arm Ecosystem Evangelist [Liliya](https://github.com/Liliyaw) 分享《Arm虚拟硬件赋能Paddle边缘软件生态》 (20 min)
+5. 飞桨研发、大模型推理大佬 [heavengate](https://github.com/heavengate) 分享《飞桨大模型推理部署高性能优化》 (20 min)
+6. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
