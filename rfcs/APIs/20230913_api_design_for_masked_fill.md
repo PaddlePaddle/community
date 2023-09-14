@@ -66,6 +66,11 @@ Pytorch中 有 API `Tensor.masked_fill_(mask, value)`
 Fills elements of self tensor with value where mask is True. The shape of mask must be broadcastable with the shape of the underlying tensor.
 ```
 
+其中输入参数的描述如下：
+
+- mask (BoolTensor) – the boolean mask
+- value (float) – the value to fill in with
+
 ### 实现方法
 
 
@@ -165,61 +170,38 @@ Tensorflow 并没有直接提供 `masked_fill` 的API，但是可以通过 `tf.w
 
 ## 命名与参数设计
 
-paddle.masked_fill(input, mask, value, inplace=False)
+paddle.masked_fill(input, mask, value)
 
-paddle.masked_fill_(input, mask, value, inplace=False)
+paddle.masked_fill_(input, mask, value)
 
-Tensor.masked_fill(input, mask, value)
+Tensor.masked_fill(mask, value)
 
-Tensor.masked_fill_(input, mask, value)
+Tensor.masked_fill_(mask, value)
 
 masked_fill_支持inplace方式修改输入张量。
 
 - `input (Tensor)`: 输入的张量，需要进行填充操作。
 - `mask (Tensor, bool)`: 用于指定填充位置的布尔值掩码张量，与 input 张量形状相同。
-- `value (Tensor, bool, int, float)`: 待填充的数据，参数类型支持布尔值、整数、浮点数以及0维的张量。
+- `value (Tensor, bool, int, float, complex)`: 待填充的数据，参数类型支持布尔值、整数、浮点数以及0维的张量。
 - `inplace (bool, optional)`: 是否进行 inplace 操作。如果设置为 True，则会直接修改输入张量，否则返回一个新的张量，默认为 False。
 
 
 ## 底层OP设计
 
-参考飞桨现有算子，分别实现cpu和cuda的算子kernel。对于value是Tensor和非Tensor的两种不同情况各自使用单独的OP。
+依赖python实现，无需底层op支持。
 
 ## API实现方案
 
-在 python/paddle/tensor/manipulation.py 中增加 masked_fill 以及 masked_fill_ 函数，分别通过_C_ops调用底层算子。
+在 python/paddle/tensor/manipulation.py 中增加 masked_fill 以及 masked_fill_ 函数。
 
-- 首先检查输入参数的合法性，然后调用底层算子
-- 如果value的值是多维度的张量，则需要报错
-- 检查mask和input的形状是否一致，如果不一致，则检查是否可以broadcast，如果不能broadcast，则报错
-- 调用 CPU/GPU 的算子进行计算
+通过full和where实现。
 
-CPU Kernel实现方案预定为使用Where Op实现，GPU 计算Kernel实现方案预定为使用CUDA Kernel实现。
-
-## 代码实现文件路径
-
-CPU中正向和反向计算： paddle/phi/kernels/cpu/masked_fill_scalar_kernel.cc paddle/phi/kernels/cpu/masked_fill_scalar_grad_kernel.cc paddle/phi/kernels/cpu/masked_fill_tensor_kernel.cc paddle/phi/kernels/cpu/masked_fill_tensor_grad_kernel.cc
-
-GPU中正向和反向计算: paddle/phi/kernels/gpu/masked_fill_scalar_kernel.cu paddle/phi/kernels/gpu/masked_fill_scalar_grad_kernel.cu paddle/phi/kernels/gpu/masked_fill_tensor_kernel.cu paddle/phi/kernels/gpu/masked_fill_tensor_grad_kernel.cu
-
-```cpp
-template <typename T, typename Context>
-void MasedFillScalarKernel(const Context& dev_ctx,
-                           const DenseTensor& x,
-                           const DenseTensor& mask,
-                           float value,
-                           DenseTensor* output);
-
-template <typename T, typename Context>
-void MasedFillTensorKernel(const Context& dev_ctx,
-                           const DenseTensor& x,
-                           const DenseTensor& mask,
-                           const DenseTensor& value,
-                           DenseTensor* output);
-
+```python
+out = paddle.full(x.shape, value, x.dtype)
+out = paddle.where(mask, y, x)
 ```
 
-算子注册路径与算子实现路径相同。
+## 代码实现文件路径
 
 函数API实现路径: python/paddle/tensor/manipulation.py
 
