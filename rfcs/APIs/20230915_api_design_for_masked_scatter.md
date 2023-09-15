@@ -3,10 +3,10 @@
 |API名称 | paddle.masked_scatter | 
 |---|---|
 |提交作者| ranchongzhi | 
-|提交时间 | 2023-09-14 | 
+|提交时间 | 2023-09-15 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本| develop | 
-|文件名 | 20230914_api_design_for_masked_scatter.md | 
+|文件名 | 20230915_api_design_for_masked_scatter.md | 
 
 
 # 一、概述
