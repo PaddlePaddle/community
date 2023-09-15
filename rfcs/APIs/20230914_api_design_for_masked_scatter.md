@@ -194,9 +194,9 @@ Tensor.masked_scatter_(mask, source)
 ```
 masked_scatter和masked_scatter_分别表示out-place和in-place两种计算形式。
 
-- `input (Tensor, float, double, int, int64_t, float16, bfloat16)`: 输入的张量，需要进行填充操作。
+- `input (Tensor, float, double, int, int64_t, float16, bfloat16)`: 输入的张量，需要根据mask进行赋值操作。
 - `mask (Tensor, bool)`: 用于指定填充位置的布尔值掩码张量，与 input 张量形状相同，或者可以广播成input张量的形状。
-- `source (Tensor, float, double, int, int64_t, float16, bfloat16)`: 待填充的数据，参数类型支持布尔值、整数、浮点数以及0维的张量。
+- `source (Tensor, float, double, int, int64_t, float16, bfloat16)`: 待填充的张量，其中元素的数量应该不少于mask中True的个数。
 - `name (str，可选)` :一般无需设置，默认值为 None。
 
 
@@ -230,3 +230,4 @@ Python 实现代码 & 英文 API 文档，放在 Paddle repo 的 `python/paddle/
 # 名词解释
 
 # 附件及参考资料
+[TORCH.TENSOR.MASKED_SCATTER_](https://pytorch.org/docs/2.0/generated/torch.Tensor.masked_scatter_.html#torch.Tensor.masked_scatter_)
