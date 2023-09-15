@@ -1,22 +1,28 @@
-# paddle.i0 和 paddle.i0e 设计文档
+# paddle.log_normal 设计文档
 
-| API 名称     | log_normal / log_normal_            |
+| API 名称     | log_normal / log_normal_/ bernoulli_   |
 | ------------ | --------------------------------- |
 | 提交作者     | PommesPeter                       |
 | 提交时间     | 2023-09-14                        |
 | 版本号       | V1.0                              |
 | 依赖飞桨版本 | develop                           |
-| 文件名       | 20230426_api_design_for_log_normal.md |
+| 文件名       | 20230914_api_design_for_bernoulli_&log_normal.md |
 
 # 一、概述
 
 ## 1、相关背景
 
-为了提升飞桨 API 丰富度，支持随机分布生成相关 API，Paddle 需要扩充 API `paddle.log_normal`, `paddle.log_normal_`。
+为了提升飞桨 API 丰富度，支持随机分布生成相关 API，Paddle 需要扩充 API `paddle.bernoulli_`, `paddle.log_normal`, `paddle.log_normal_`。
 
 ## 2、功能目标
 
-指定均值 `mean` 和方差 `std`，生成其指定大小 `shape` 和数据类型 `dtype` 的对数正态分布，新增 paddle.log_normal /log_normal_ API；
+指定均值 `mean` 和方差 `std`，生成其指定大小 `shape` 和数据类型 `dtype` 的对数正态分布，新增 paddle.log_normal /log_normal_ API；功能预期如下：
+
+1. paddle.bernoulli_(x, p=0.5) 可以 inplace 的修改输入 x，填充伯努利分布的值
+2. paddle.Tensor.bernoulli_(p=0.5) 作为 paddle.bernoulli_ 的 Tensor 类方法使用
+3. paddle.log_normal_(x, mean=1.0, std=2.0) 可以 inplace 的修改输入 x，填充对数正态分布的值
+4. paddle.Tensor.log_normal_(mean=1.0, std=2.0) 作为 paddle.log_normal_ 的 Tensor 类方法使用
+5. paddle.log_normal(mean=1.0, std=2.0, shape=None, dtype=None) 作为非 inplace 的API，可以创建一个对数正态分布的Tensor
 
 ## 3、意义
 
@@ -30,14 +36,17 @@
 
 ## PyTorch
 
+PyTorch 中有 `Tensor.bernoulli_(p=0.5, *, generator=None) → Tensor` 的 API。
 PyTorch 中有 `torch.distributions.log_normal.LogNormal(loc, scale, validate_args=None)` 的 API。
 PyTorch 中有 `torch.Tensor.log_normal_` 的 API，详细参数为 `Tensor.log_normal_(mean=1, std=2, *, generator=None)`。
+
+### bernoulli_
 
 ### LogNormal
 
 > Creates a log-normal distribution parameterized by loc and scale where:
 
-```
+```math
 X ~ Normal(loc, scale)
 Y = exp(X) ~ LogNormal(loc, scale)
 ```
@@ -47,7 +56,7 @@ Y = exp(X) ~ LogNormal(loc, scale)
 - loc (float or Tensor) – mean of log of distribution
 - scale (float or Tensor) – standard deviation of log of the distribution
 
-在实现方法上，PyTorch 是通过普通正态分布的 Python API 进行指数转换后得到对数正态分布。算子底层调用 C++ Kernel 执行相关操作。
+在实现方法上，LogNormal 是调用普通正态分布 `Normal` Python API 进行指数转换后得到对数正态分布。其中 `Normal` 是调用 `torch.normal` 生成正态分布，`torch.nomral` 底层 C++ Kernel 执行。
 
 实现代码：
 
@@ -170,6 +179,8 @@ at::Tensor& log_normal_impl_(at::Tensor& self, double mean, double std, c10::opt
 ```
 
 ## Scipy
+
+### lognorm
 
 `scipy.stats.lognorm = <scipy.stats._continuous_distns.lognorm_gen object>`
 > A lognormal continuous random variable.
@@ -368,9 +379,13 @@ class lognorm_gen(rv_continuous):
 lognorm = lognorm_gen(a=0.0, name='lognorm')
 ```
 
+### lognorm_
+
 Scipy 未提供 lognorm_ 形式的 API。
 
 ## TensorFlow
+
+### lognormal
 
 Tensorflow 在[Tensorflow/Probability](https://github.com/tensorflow/probability/blob/v0.21.0/tensorflow_probability/python/distributions/lognormal.py#L36-L164) 这个库中实现了 LogNormal，使用 Python API 结合相关已有算子组合实现。
 
@@ -508,26 +523,64 @@ class LogNormal(transformed_distribution.TransformedDistribution):
             'scale': tf.math.reduce_std(log_x, axis=0)}
 ```
 
+### lognormal_
+
 # 四、对比分析
 
-## 共同点
+## bernoulli_
 
-- Scipy 和 Tensorflow 均使用 Python API 组合实现 LogNormal 类。
-- 都能根据输入的 tensor 计算出填充对数正态分布之后的结果。
-- 都能根据均值和方差随机生成对数正态分布。
-- 都有提供对 Python 的调用接口。
-- 方差和均值均支持 tensor 的输入。
+- 共同点
+  - Scipy 和 Tensorflow 均使用 Python API 组合实现 LogNormal 类。
 
-## 不同点
+- 不同点
+  - PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
 
-- PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
-- Scipy 和 Tensorflow 是使用现有的 C++ 算子对应的 Python API 组合实现。
+## log_normal
+
+- 共同点
+  - Scipy 和 Tensorflow 均使用 Python API 组合实现 LogNormal 类。
+  - 都能根据输入的 tensor 计算出填充对数正态分布之后的结果。
+  - 都能根据均值和方差随机生成对数正态分布。
+  - 都有提供对 Python 的调用接口。
+  - 方差和均值均支持 tensor 的输入。
+- 不同点
+  - PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
+  - Scipy 和 Tensorflow 是使用现有的 C++ 算子对应的 Python API 组合实现。
+
+## log_normal_
+
+- 共同点
+  - Scipy 和 Tensorflow 均使用 Python API 组合实现 LogNormal 类。
+  - 都能根据输入的 tensor 计算出填充对数正态分布之后的结果。
+  - 都能根据均值和方差随机生成对数正态分布。
+  - 都有提供对 Python 的调用接口。
+  - 方差和均值均支持 tensor 的输入。
+- 不同点
+  - PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
 
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
 
-添加 Python API
+添加 Python API:
+
+`paddle.bernoulli_(x, p=0.5, name=None)`
+
+```python
+paddle.bernoulli_(
+    x: Tensor,
+    p: float,
+    name: str=None
+)
+```
+
+| 参数名 | 类型 | 描述 |
+| -- | -- | -- |
+| x | Tensor | 用户输入的 tensor |
+| p | float | 伯努利分布的概率 |
+| name | str | 操作对应的名字 |
+
+`paddle.log_normal(x, mean=0.0, std=1.0, shape=None, dtype='float64', name=None)`
 
 ```python
 paddle.log_normal(
@@ -540,6 +593,17 @@ paddle.log_normal(
 )
 ```
 
+| 参数名 | 类型 | 描述 |
+| -- | -- | -- |
+| x | Tensor | 用户输入的 tensor |
+| mean | float \| Tensor | 对数正态分布的均值 |
+| std | float \| Tensor | 对数正态分布的方差 |
+| shape | Lists \| Tuple | 对数正态分布的 tensor 形状 |
+| dtype | str \| np.dtyp | 对数正态分布的 tensor 类型 |
+| name | str | 操作对应的名字 |
+
+`paddle.log_normal_(x, mean=0.0, std=1.0, name=None)`
+
 ```python
 paddle.log_normal_(
     x: Tensor,
@@ -549,6 +613,13 @@ paddle.log_normal_(
 )
 ```
 
+| 参数名 | 类型 | 描述 |
+| -- | -- | -- |
+| x | Tensor | 用户输入的 tensor |
+| mean | float \| Tensor | 对数正态分布的均值 |
+| std | float \| Tensor | 对数正态分布的方差 |
+| name | str | 操作对应的名字 |
+
 ## 底层OP设计
 
 不涉及
@@ -556,6 +627,8 @@ paddle.log_normal_(
 ## API实现方案
 
 该 API 实现于 `python/paddle/tensor/random.py`。
+
+### bernoulli_
 
 ### log_normal
 
@@ -569,20 +642,20 @@ $$f(x;μ,σ)=\frac{1}{x\sigma\sqrt{2\pi}}\exp(-\frac{(\ln x-\mu)^2}{2\sigma^2})$
 
 从而，$f(x)=F'(x)=\frac{1}{x}f(\ln x)=\frac{1}{x\sigma\sqrt{2\pi}}\exp(-\frac{(\ln x-\mu)^2}{2\sigma^2})$
 
-因此，只需要对所求得的正态分布求自然对数即可得到对数正态分布。
+因此，只需要对所求得的正态分布求自然指数 $e^x$ 即可得到对数正态分布。
 
 ### log_normal_
 
-考虑 inplace 操作，可以使用 `normal` 和 `exp_` 组合实现 `log_normal_`。
+考虑 inplace 操作，可以使用 `normal_` 和 `exp_` 组合实现 `log_normal_`。
 
 # 六、测试和验收的考量
 
 测试需要考虑的 case 如下：
 
-- 输出数值结果的一致性和数据类型是否正确，使用 scipy 作为参考标准
+- 输出数值结果的一致性和数据类型是否正确，使用 numpy 作为参考标准
 - 对不同 dtype 的输入数据 `x` 进行计算精度检验 (float32, float64)
 - 输入输出的容错性与错误提示信息
-- 输出 Dtype 错误或不兼容时抛出异常
+- 输出 dtype 错误或不兼容时抛出异常
 - 保证调用属性时是可以被正常找到的
 - 覆盖静态图和动态图测试场景
 
