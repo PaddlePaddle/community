@@ -28,9 +28,9 @@
 
 Pytorch 中有 API `torch.copysign(input, other, *, out=None)` ，支持广播运算，以及张量和浮点数输入：
 
-```
-Create a new floating-point tensor with the magnitude of input and the sign of other, elementwise
-```
+  ```
+  Create a new floating-point tensor with the magnitude of input and the sign of other, elementwise
+  ```
 
 $$
 out_i=\begin{cases}
@@ -39,14 +39,14 @@ out_i=\begin{cases}
 \end{cases}
 $$
 
-```
-Parameters:
-- input(Tensor)-magnitudes.
-- other (Tensor or Number) – contains value(s) whose signbit(s) are applied to the magnitudes in input.
-Keyword Arguments:
-- out (Tensor, optional) – the output tensor.
+  ```
+  Parameters:
+  - input(Tensor)-magnitudes.
+  - other (Tensor or Number) – contains value(s) whose signbit(s) are applied to the magnitudes in input.
+  Keyword Arguments:
+  - out (Tensor, optional) – the output tensor.
 
-```
+  ```
 
 官方文档链接为：https://pytorch.org/docs/stable/generated/torch.copysign.html?highlight=copysign#torch.copysign
 
@@ -54,28 +54,73 @@ Keyword Arguments:
 
 - 前向逻辑代码通过 std::copysign 实现的，[代码位置](https://github.com/pytorch/pytorch/blob/main/c10/util/copysign.h)
 
-```cpp
-  template <typename T, typename U>
-  inline auto copysign(const T& a, const U& b) {
-  return std::copysign(a, b);
+  ```cpp
+    template <typename T, typename U>
+    inline auto copysign(const T& a, const U& b) {
+    return std::copysign(a, b);
+    }
+
+    // Implement copysign for half precision floats using bit ops
+    // Sign is the most significant bit for both half and bfloat16 types
+    inline c10::Half copysign(c10::Half a, c10::Half b) {
+    return c10::Half((a.x & 0x7fff) | (b.x & 0x8000), c10::Half::from_bits());
+    }
+
+    inline c10::BFloat16 copysign(c10::BFloat16 a, c10::BFloat16 b) {
+    return c10::BFloat16(
+        (a.x & 0x7fff) | (b.x & 0x8000), c10::BFloat16::from_bits());
+    }
+    }
+  ```
+
+- 前向逻辑GPU同样通过 std::copysign 实现的，[代码位置](https://github.com/pytorch/pytorch/blob/main/c10/c10/cuda/CUDAMathCompat.h#L46)
+
+  ```cpp
+    __MATH_FUNCTIONS_DECL__ float copysign(float x, float y) {
+    #if defined(__CUDA_ARCH__) || defined(__HIPCC__)
+    return ::copysignf(x, y);
+    #else
+    // std::copysign gets ICE/Segfaults with gcc 7.5/8 on arm64
+    // (e.g. Jetson), see PyTorch PR #51834
+    // This host function needs to be here for the compiler but is never used
+    TORCH_INTERNAL_ASSERT(
+        false, "CUDAMathCompat copysign should not run on the CPU");
+    #endif
+    }
+    __MATH_FUNCTIONS_DECL__ double copysign(double x, double y) {
+    #if defined(__CUDA_ARCH__) || defined(__HIPCC__)
+    return ::copysign(x, y);
+    #else
+    // see above
+    TORCH_INTERNAL_ASSERT(
+        false, "CUDAMathCompat copysign should not run on the CPU");
+    #endif
+    }
+  ```
+
+  在 CopysignKernel.cu 的地方实现调用[代码位置](https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/native/cuda/CopysignKernel.cu#L23)
+
+  ```cpp
+  // NOTE: CUDA on Windows requires that the enclosing function
+  // of a __device__ lambda not have internal linkage.
+  namespace at::native {
+
+  void copysign_kernel_cuda(TensorIteratorBase& iter) {
+  AT_DISPATCH_FLOATING_TYPES_AND2(kBFloat16, kHalf, iter.common_dtype(), "copysign_cuda", [&]() {
+      gpu_kernel_with_scalars(iter, []GPU_LAMBDA(scalar_t a, scalar_t b) -> scalar_t {
+      return c10::cuda::compat::copysign(a, b);
+      });
+  });
   }
 
-  // Implement copysign for half precision floats using bit ops
-  // Sign is the most significant bit for both half and bfloat16 types
-  inline c10::Half copysign(c10::Half a, c10::Half b) {
-  return c10::Half((a.x & 0x7fff) | (b.x & 0x8000), c10::Half::from_bits());
-  }
+  REGISTER_DISPATCH(copysign_stub, &copysign_kernel_cuda);
 
-  inline c10::BFloat16 copysign(c10::BFloat16 a, c10::BFloat16 b) {
-  return c10::BFloat16(
-      (a.x & 0x7fff) | (b.x & 0x8000), c10::BFloat16::from_bits());
-  }
-  }
-```
+  } // namespace at::native
+  ```
 
 - 反向逻辑代码位于 torch/csrc/autograd/FunctionsManual.cpp 中的函数[copysign_tensor_self_backward](https://github.com/pytorch/pytorch/blob/main/torch/csrc/autograd/FunctionsManual.cpp#L94)
 
-  ```C++
+  ```cpp
     Tensor copysign_tensor_self_backward(
         const Tensor& grad,
         const Tensor& self,
@@ -112,29 +157,51 @@ Parameters:
 官方文档链接为：https://numpy.org/doc/stable/reference/generated/numpy.copysign.html#numpy-copysign
 
 ### 3.4.1 实现代码：
+
 **Numpy** 中的 copysign API 是通过 C++ 代码实现的，详细代码如下所示：
 
-```C++
-identity = NULL;
-if (0 && identity == NULL) {
-    return -1;
-}
-f = PyUFunc_FromFuncAndDataAndSignatureAndIdentity(
-    copysign_functions, copysign_data, copysign_signatures, 4,
-    2, 1, PyUFunc_None, "copysign",
-    DOC_NUMPY_CORE_UMATH_COPYSIGN, 0, NULL, identity
-);
-if (0) {
-    Py_DECREF(identity);
-}
-if (f == NULL) {
-    return -1;
-}
+  ```cpp
+  identity = NULL;
+  if (0 && identity == NULL) {
+      return -1;
+  }
+  f = PyUFunc_FromFuncAndDataAndSignatureAndIdentity(
+      copysign_functions, copysign_data, copysign_signatures, 4,
+      2, 1, PyUFunc_None, "copysign",
+      DOC_NUMPY_CORE_UMATH_COPYSIGN, 0, NULL, identity
+  );
+  if (0) {
+      Py_DECREF(identity);
+  }
+  if (f == NULL) {
+      return -1;
+  }
 
 PyDict_SetItemString(dictionary, "copysign", f);
 Py_DECREF(f);
 ```
 
+在math库中声明[代码位置](https://github.com/numpy/numpy/blob/main/numpy/core/include/numpy/npy_math.h#L199)
+
+  ```cpp
+  #include <math.h>
+  ...
+  #define npy_copysign copysign
+  ...
+  ```
+在loops.c中调用[代码位置](https://github.com/numpy/numpy/blob/main/numpy/core/src/umath/loops.c.src#L1213-L1221)
+
+  ```cpp
+  NPY_NO_EXPORT void
+  @TYPE@_copysign(char **args, npy_intp const *dimensions, npy_intp const *steps, void *NPY_UNUSED(func))
+  {
+      BINARY_LOOP {
+          const @type@ in1 = *(@type@ *)ip1;
+          const @type@ in2 = *(@type@ *)ip2;
+          *((@type@ *)op1)= npy_copysign@c@(in1, in2);
+      }
+  }
+  ```
 # 四、对比分析
 
 - PyTorch 是通过 std::copysign 实现的实现，使用 Python 调用 C++ API 对应的接口。 Paddle 也可以基于 C++ API 实现。
@@ -170,6 +237,10 @@ paddle.Tensor.copysign_(
 )
 ```
 
+- `x` 要求为 paddle.Tensor，支持 uint8、bfloat16、float16、float32、float64、int32、int64、bool。
+- `y` 要求为 paddle.Tensor，Number 支持 uint8、bfloat16、float16、float32、float64、int32、int64、bool。
+- `name`作为可选参数，定义了该操作的名称，其默认值为`None`。
+
 ## 底层OP设计
 
 底层增加 copysign OP。
@@ -195,7 +266,7 @@ paddle.Tensor.copysign_(
 6. `paddle/phi/kernels/`目录下添加 `copysign_kernel.h`文件。
 7. `python/paddle/__init__.py` 添加 copysign API，以支持 Tensor.copysign 的调用方式。
 8. `python/paddle/tensor/math.py` 添加Python 实现代码 & 英文 API 文档。
-9. `python/paddle/fluid/tests/unittests/` 目录下添加单测文件 `test_copysign_op.py`。
+9. `paddle/test/legacy_test/` 目录下添加单测文件 `test_copysign_op.py`。
 
 
 # 六、测试和验收的考量
@@ -205,8 +276,9 @@ paddle.Tensor.copysign_(
 - 编程范式场景：覆盖静态图和动态图测试场景。
 - 硬件场景：覆盖 CPU 和 GPU 测试场景。
 - 数据类型检验：
-  - x 要求为 paddle.Tensor，支持 uint8, float16、float32、float64、int32、int64、bool。
-  - y 要求为 paddle.Tensor，Number 支持 uint8, float16、float32、float64、int32、int64、bool。
+  - x 要求为 paddle.Tensor，支持 uint8、bfloat16、float16、float32、float64、int32、int64、bool。
+  - y 要求为 paddle.Tensor，Number 支持 uint8、bfloat16、float16、float32、float64、int32、int64、bool。
+  - x和y暂时无法满足同为complex类型计算。
 - y 取 +0 和 -0 时 paddle.copysign 的正确性。
 - 结果的正确性：
   - 前向计算：`paddle.copysign` 的计算结果和 `np.copysign` 一致。
