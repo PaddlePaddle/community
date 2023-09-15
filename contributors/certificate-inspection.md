@@ -1,6 +1,6 @@
-飞桨社区非常感谢，每一位以不同形式为飞桨做出贡献的开发者。我们通过该证书来给为飞桨的 [Paddle仓库](https://github.com/PaddlePaddle/Paddle) 贡献过 PR 的开发者提供一份正式的证明。该证书发放的对象不包括百度的员工，以及通过项目与飞桨进行合作的公司的员工。
+飞桨社区非常感谢，每一位以不同形式为飞桨做出贡献的开发者。我们通过该证书来给为飞桨的 [Paddle仓库](https://github.com/PaddlePaddle/Paddle) 、[PaddleOCR仓库](https://github.com/PaddlePaddle/PaddleOCR)贡献过 PR 的开发者提供一份正式的证明。该证书发放的对象不包括百度的员工，以及通过项目与飞桨进行合作的公司的员工。
 
-我们可能无法联系到所有满足条件的开发者，如果你曾经为飞桨的 [Paddle仓库](https://github.com/PaddlePaddle/Paddle) 贡献过 PR，并且也期望得到一份证书，还请通过 [ext_paddle_oss@baidu.com](mailto:ext_paddle_oss@baidu.com) 邮箱联系我们，我们会给你补寄证书。
+由于条件限制，我们可能无法联系到所有满足条件的开发者，如果你曾经为飞桨的 [Paddle仓库](https://github.com/PaddlePaddle/Paddle) 、[PaddleOCR仓库](https://github.com/PaddlePaddle/PaddleOCR)贡献过 PR，并且也期望得到一份证书，还请通过 [ext_paddle_oss@baidu.com](mailto:ext_paddle_oss@baidu.com) 邮箱联系我们，提供 GitHub ID、姓名和邮寄地址，我们会在确认贡献情况后尽快给你补寄证书。
 
 
 
@@ -14,7 +14,8 @@
 | ---------------------- | -------- | ------------ |
 | 飞桨 v2.3 开源贡献证书 | 2022.7.1 | H20220701XXX |
 | 飞桨 v2.4 开源贡献证书 | 2022.11.30 | H20221130XXX  |
-| 飞桨 v2.4 开源贡献证书 |  2023.8.16  | H20230816XXX   |
+| 飞桨 v2.5 开源贡献证书 |  2023.8.16  | H20230816XXX   |
+| PaddleOCR release2.7 开源贡献证书 |  2023.9.1  | T20230901XXX   |
 
 
 ### 证书样例

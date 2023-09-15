@@ -469,6 +469,7 @@ ir::Operation* OpTranscriber::operator()(ir::IrContext* ctx,
   this->InsertSliceOperationForInput(
       ctx, param_map, op_desc, input_infos, program);
 
+
   auto op_inputs = this->GenerateOperationInput( // 获取 Input
       ctx, param_map, op_desc, op_info.name(), input_infos, program);
 
