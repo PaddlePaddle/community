@@ -87,7 +87,7 @@ NPY_INPLACE double npy_hypot(double x, double y)
 ```
 
 
-## 3. Pytorch
+## 2. Pytorch
 
 在 Pytorch 中使用的 API 格式如下：
 
