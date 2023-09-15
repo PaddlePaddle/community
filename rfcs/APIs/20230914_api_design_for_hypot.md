@@ -199,7 +199,7 @@ a = torch.hypot(torch.tensor([4.0]), torch.tensor([3.0, 4.0, 5.0]))
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-API设计为 `paddle.hypot(x, y, name)`。其中，`x`, `y` 为 `Tensor` 类型，是直角三角形的边，``paddle.hypot_(x)` 为 inplace 版本。`Tensor.hypot(p)` 为 Tensor 的方法版本。`Tensor.hypot_(x)` 为 Tensor 的 方法 inplace 版本。
+API设计为 `paddle.hypot(x, y, name)`。其中，`x`, `y` 为 `Tensor` 类型，是直角三角形的边，`paddle.hypot_(x)` 为 inplace 版本。`Tensor.hypot(p)` 为 Tensor 的方法版本。`Tensor.hypot_(x)` 为 Tensor 的 方法 inplace 版本。
 
 ## API实现方案
 
