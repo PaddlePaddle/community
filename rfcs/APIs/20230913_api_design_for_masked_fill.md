@@ -234,11 +234,10 @@ masked_fill_支持inplace方式修改输入张量。
 
 在 python/paddle/tensor/manipulation.py 中增加 masked_fill 以及 masked_fill_ 函数。
 
-通过 `paddle.full_like` 和 `paddle.where` 组合实现。
+通过 `paddle.where` 实现。
 
 ```python
-out = paddle.full(x.shape, value, x.dtype)
-out = paddle.where(mask, y, x)
+out = paddle.where(mask, value, x)
 ```
 
 ## 代码实现文件路径
