@@ -220,9 +220,9 @@ Tensor.masked_fill_(mask, value)
 
 masked_fill_支持inplace方式修改输入张量。
 
-- `input (Tensor)`: 输入的张量，需要进行填充操作。
+- `input (Tensor, float, double, int, int64_t, float16, bfloat16)`: 输入的张量，需要进行填充操作。
 - `mask (Tensor, bool)`: 用于指定填充位置的布尔值掩码张量，与 input 张量形状相同。
-- `value (Tensor, bool, int, float, complex)`: 待填充的数据，参数类型支持布尔值、整数、浮点数以及0维的张量。
+- `value (Tensor, float, double, int, int64_t, float16, bfloat16)`: 待填充的数据，参数类型支持布尔值、整数、浮点数以及0维的张量。
 - `name (str，可选)` - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
 
