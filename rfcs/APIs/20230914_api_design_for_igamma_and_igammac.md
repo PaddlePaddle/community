@@ -14,7 +14,7 @@
 为了提升飞桨 API 丰富度，支持随机分布生成相关 API，Paddle 需要扩充 API `paddle.igamma`, `paddle.igammac`。
 
 ## 2、功能目标
-新增 paddle.igamma /igammac API，即实现[(上)不完全伽马函数和补(下)不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
+新增 paddle.igamma /igammac API，即实现[上不完全伽马函数和下不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
 这两个函数的定义如下：
 $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 $$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $$
@@ -23,11 +23,11 @@ $$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $$
 
 ## 3、意义
 
-为 Paddle 增加(上)不完全伽马函数和补(下)不完全伽马函数，丰富 `paddle` 的 API。
+为 Paddle 增加上不完全伽马函数和下不完全伽马函数，丰富 `paddle` 的 API。
 
 # 二、飞桨现状
 
-- 目前 Paddle 缺少 `igamma` 和 `igammac` API，无法方便地计算(上)不完全伽马函数和补(下)不完全伽马函数的数值，以及 inplace 的方式修改输入 `x`。
+- 目前 Paddle 缺少 `igamma` 和 `igammac` API，无法方便地计算上不完全伽马函数和下不完全伽马函数的数值，以及 inplace 的方式修改输入 `x`。
 
 # 三、业内方案调研
 
@@ -444,6 +444,8 @@ $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 $$ \Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t} dt] =  $$
 
 # 六、测试和验收的考量
+1. 添加单测文件 `test/legacy_test/test_igamma_op.py` 和 `test/legacy_test/test_igamma_op.py`。
+2. 在单测文件 `test/legacy_test/test_inplace.py` 补充测试。
 
 测试需要考虑的 case 如下：
 
@@ -454,16 +456,21 @@ $$ \Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t}
 - 保证调用属性时是可以被正常找到的
 - 覆盖静态图和动态图测试场景
 
+```python
+
+
+```
+
 # 七、可行性分析和排期规划
 
-方案主要依赖现有原理实现。工期上可以满足在当前版本周期内开发完成。
+方案主要根据相关数学原理并参考 PyTorch 的工程实现方法，工期上可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 
 新增 API，对其他模块无影响
 
 # 名词解释
-gammainc 是 igamma 的另一种写法，gammaincc 是 igammac 的另一种写法。
+gammainc 是 igamma 的另一种写法，即上不完全伽马函数，gammaincc 是 igammac 的另一种写法，即下不完全伽马函数。
 
 # 附件及参考资料
 - [不完全伽马函数的定义——小时百科](https://wuli.wiki/online/IncGam.html)
