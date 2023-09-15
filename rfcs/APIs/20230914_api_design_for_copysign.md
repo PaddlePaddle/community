@@ -202,19 +202,55 @@ PyTorch和Numpy实现方式基本一致，都是底层调用cpp的math库实现`
 
 API的设计为:
 
-- paddle.copysign(x, y) 作为独立的函数调用，非 inplace
-- paddle.copysign_(x, y)，作为独立的函数，inplace 地修改输入；
-- Tensor.copysign(y)做为 Tensor 的方法使用，非 inplace;
-- Tensor.copysign_(y)做为 Tensor 的方法使用， inplace 修改输入；
+- paddle.copysign(x, y, name=None) 作为独立的函数调用，非 inplace;
+- paddle.copysign_(x, y, name=None)，作为独立的函数，inplace 地修改输入;
+- Tensor.copysign(y, name=None)做为 Tensor 的方法使用，非 inplace;
+- Tensor.copysign_(y, name=None)做为 Tensor 的方法使用， inplace 修改输入;
 
 其中
 
-+ x(Tensor) - 需要取用绝对值作为输出数值部分的Tensor
-+ y(Tensor, int, float 等 number)
++ x(Tensor) - 需要取用绝对值作为输出数值部分的 Tensor , 支持 `int32`、`int64`、`float32`、`float64`
++ y(Tensor | Number) - 为 Tensor 时，shape 需要与 x 相同，或者可广播成 x.shape；为 Number 时，支持 `int32`、`int64`、`float32`、`float64`
 
 ## 底层OP设计
 
-参考PyTorch与Numpy中的设计，调用底层cpp实现OP
+参考PyTorch与Numpy中的设计，调用底层cpp实现OP，反向 kernel impl 大致如下：
+
+```cpp
+template<typename T>
+struct CopySignGradFunctor {
+    CopySignGradFunctor(const T* x_data, const T* y_data, const T* dout, T* dx, int64_t numel)
+    : x_data_(x_data), y_data_(y_data), dout_(dout), dx_(dx), numel_(numel) {}
+
+    // backward 逻辑如下
+    HOSTDEVICE void operator()(int64_t idx) const {
+        if (x_data_[idx] == T(0)) dx_[idx] = T(0);
+        else dx_[idx] = T(dout_[idx]) * (T(std::copysign(x_data_[idx], y_data_[idx]) / x_data_[idx]));
+    }
+
+    const T* x_data_;
+    const T* y_data_;
+    const T* dout_;
+    T* dx_;
+    int64_t numel_;
+};
+
+template <typename T, typename Context>
+void CopySignGradKernel(const Context& dev_ctx,
+                   const DenseTensor& x,
+                   const DenseTensor& y,
+                   const DenseTensor& out_grad,
+                   DenseTensor* x_grad) {
+    dev_ctx.template Alloc<T>(x_grad);
+    auto x_data = x.data<T>(), y_data = y.data<T>(), out_grad_data = out_grad.data<T>();
+    auto x_grad_data = x_grad->data<T>();
+    phi::funcs::ForRange<Context> for_range(dev_ctx, x.numel());
+    phi::CopySignGradFunctor<T> functor(x_data, y_data, out_grad_data, x_grad_data, x.numel());
+    for_range(functor);
+}
+```
+
+
 
 ## API实现方案
 
