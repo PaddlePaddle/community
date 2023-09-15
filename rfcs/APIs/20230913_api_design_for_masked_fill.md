@@ -31,7 +31,7 @@
 import paddle
 
 paddle.seed(123)
-x = paddle.ones([3, 3], dtype='float32')
+x = paddle.ones([3, 3], dtype='float64')
 # Tensor(shape=[3, 3], dtype=float32, place=CUDAPlace(0), stop_gradient=True,
 #        [[0.00276479, 0.45899123, 0.96637046],
 #         [0.66818708, 0.05855134, 0.33184195],
@@ -44,10 +44,9 @@ mask = paddle.randint(0, 2, [3, 3]).astype('bool')
 #         [True , True , True ]])
 
 def masked_fill(x, mask, value):
-    y = paddle.full_like(x, value, x.dtype)
-    return paddle.where(mask, y, x)
+    return paddle.where(mask, value, x)
 
-out = masked_fill(x, mask, 2)
+out = masked_fill(x, mask, 2.)
 # Tensor(shape=[3, 3], dtype=float32, place=CUDAPlace(0), stop_gradient=True,
 #        [[2.        , 2.        , 0.96637046],
 #         [2.        , 2.        , 2.        ],
@@ -55,17 +54,7 @@ out = masked_fill(x, mask, 2)
 ```
 
 
-full/full_like 和 where 均支持在 CPU 和 GPU 上运行。
-
-paddle.full_like 支持的 dtype:
-
-```python 
-CPU Kernel 
-float,double,int8_t,uint8_t,int16_t,int,int64_t,bool,float16,bfloat16,complex32,complex64
-
-GPU Kernel
-float,double,int8_t,uint8_t,int16_t,int,int64_t,bool,float16,bfloat16,complex32,complex64
-```
+where 支持在 CPU 和 GPU 上运行。
 
 paddle.where 支持的 dtype:
 
@@ -77,13 +66,13 @@ GPU Kernel
 float,double,int,int64_t,float16,bfloat16
 ```
 
-使用 full/full_like 和 where 组合完成的 masked_fill API，支持 broadcast 机制。
+使用 where 可以完成 masked_fill API，支持 broadcast 机制。
 
 ```python
-x = paddle.ones([3, 3], dtype='float32')
+x = paddle.ones([3, 3], dtype='float64')
 mask = paddle.randint(0, 2, [1, 3]).astype('bool')
 
-out = masked_fill(x, mask, 2)
+out = masked_fill(x, mask, 2.)
 print(out)
 
 # Tensor(shape=[3, 3], dtype=float32, place=Place(gpu:0), stop_gradient=True,
