@@ -209,8 +209,8 @@ API的设计为:
 
 其中
 
-+ x(Tensor) - 需要取用绝对值作为输出数值部分的 Tensor , 支持 `int32`、`int64`、`float32`、`float64`
-+ y(Tensor | Number) - 为 Tensor 时，shape 需要与 x 相同，或者可广播成 x.shape；为 Number 时，支持 `int32`、`int64`、`float32`、`float64`
++ x(Tensor) - 需要取用绝对值作为输出数值部分的 Tensor , 支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`
++ y(Tensor | Number) - 为 Tensor 时，shape 需要与 x 相同，或者可广播成 x.shape；为 Number 时，支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`
 
 ## 底层OP设计
 
