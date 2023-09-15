@@ -15,4 +15,4 @@
   * 本周提出的新需求讨论
   * 命题任务讨论
 * 自由发言，可以提需求给大家讨论、提问等，对活动内容的建议（10 mins）
-* 确定下次的会议主席、call for tech presentation、召开时间（3 mins）
+* 确定下次的会议主持人、call for tech presentation、召开时间（3 mins）
