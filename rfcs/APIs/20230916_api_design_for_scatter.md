@@ -1,0 +1,158 @@
+# paddle.scatter 设计文档
+
+| API名称      | paddle.scatter                     |
+| ------------ | -------------------------------------- |
+| 提交作者     | mhy                                    |
+| 提交时间     | 2023-09-16                             |
+| 版本号       | V1.0                                   |
+| 依赖飞桨版本  |  develop                                |
+| 文件名       | 20230916_api_design_for_scatter.md |
+
+# 一、概述
+
+## 1、相关背景
+
+`scatter` 是一个常用的API， API提供了根据index信息更新原Tensor的功能。
+
+## 2、功能目标
+
+当前 `paddle.scatter` API提供了根据index信息更新原Tensor的功能，但缺少指定轴和归约方式等功能。
+
+## 3、意义
+
+该API是一个常用的API，可以方便用户使用。让用户不用自己实现该功能，提高用户的使用效率。
+
+# 二、飞桨现状
+
+当前 `paddle.scatter` API但缺少指定轴和归约方式等功能。
+
+paddle是通过 op kernel 的形式实现 `scatter` 和 `scatter_` API。
+```python
+_C_ops.scatter(x, index, updates, overwrite)
+_C_ops.scatter_(x, index, updates, overwrite)
+
+helper.append_op(
+          type="scatter",
+          inputs={"X": x, "Ids": index, "Updates": updates},
+          attrs={'overwrite': overwrite},
+          outputs={"Out": out},
+      )
+```
+
+paddle 实现的 index 功能和 torch的`scatter`中的index的功能不一致。paddle 的 index 只能是一维或者0维的。
+
+```python
+        import paddle
+        #input:
+        x = paddle.to_tensor([[1, 1], [2, 2], [3, 3]], dtype='float32')
+        index = paddle.to_tensor([2, 1, 0, 1], dtype='int64')
+        # shape of updates should be the same as x
+        # shape of updates with dim > 1 should be the same as input
+        updates = paddle.to_tensor([[1, 1], [2, 2], [3, 3], [4, 4]], dtype='float32')
+        overwrite = False
+        # calculation:
+        if not overwrite:
+            for i in range(len(index)):
+                x[index[i]] = paddle.zeros([2])
+
+        for i in range(len(index)):
+            if (overwrite):
+                x[index[i]] = updates[i]
+            else:
+                x[index[i]] += updates[i]
+        # output:
+        out = paddle.to_tensor([[3, 3], [6, 6], [1, 1]])
+        out.shape # [3, 2]
+```
+
+# 三、业内方案调研
+
+## Pytorch
+
+Pytorch中 有 API `Tensor.scatter_(dim, index, src, reduce=None) → Tensor`
+
+在pytorch中，介绍为：
+
+```
+Writes all values from the tensor `src` into `self` at the indices specified in the `index` tensor. For each value in `src`, its output index is specified by its index in `src` for` dimension != dim` and by the corresponding value in `index` for `dimension = dim`.
+```
+
+其中输入参数的描述如下：
+
+- dim (int) – the axis along which to index
+- index (LongTensor) – the indices of elements to scatter, can be either empty or of the same dimensionality as src. When empty, the operation returns self unchanged.
+- src (Tensor or float) – the source element(s) to scatter.
+- reduce (str, optional) – reduction operation to apply, can be either 'add' or 'multiply'.
+
+PyTorch实现api原理如下，其中index的维度和src的维度一致。：
+```python
+# For a 3-D tensor, self is updated as:
+self[index[i][j][k]][j][k] = src[i][j][k]  # if dim == 0
+self[i][index[i][j][k]][k] = src[i][j][k]  # if dim == 1
+self[i][j][index[i][j][k]] = src[i][j][k]  # if dim == 2
+```
+
+## Tensorflow
+
+Tensorflow 没有提供 `scatter` 的API。
+
+# 四、对比分析
+- Pytorch 自定义Kernel的方式更加高效. index支持多维度，支持指定dim和reduce方式。
+- Tensorflow 不支持 scatter API
+
+# 五、方案设计
+
+## 命名与参数设计
+```python
+# https://github.com/PaddlePaddle/Paddle/blob/release/2.5/python/paddle/tensor/manipulation.py#L2849
+paddle.scatter(x, index, updates, overwrite=True, axis=0, reduce=None, name=None)
+paddle.scatter_(x, index, updates, overwrite=True, axis=0, reduce=None, name=None)
+```
+scatter 参数如下：
+- `x (Tensor)` - ndim > = 1 的输入 N-D Tensor。数据类型可以是 float32，float64。
+- `index （Tensor）`- 一维或者零维 Tensor。数据类型可以是 int32，int64。 index 的长度不能超过 updates 的长度，并且 index 中的值不能超过输入的长度。
+- `updates （Tensor` - 根据 index 使用 update 参数更新输入 x。当 index 为一维 tensor 时，updates 形状应与输入 x 相同，并且 dim>1 的 dim 值应与输入 x 相同。当 index 为零维 tensor 时，updates 应该是一个 (N-1)-D 的 Tensor，并且 updates 的第 i 个维度应该与 x 的 i+1 个维度相同。
+- `overwrite （bool，可选)`- 指定索引 index 相同时，更新输出的方式。如果为 True，则使用覆盖模式更新相同索引的输出，如果为 False，则根据`reduce`参数指定的模式更新相同索引的输出。默认值为 True。
+- `axis (int, 可选)` - 指定用来索引的轴。默认值为0.
+- `reduce(str,可选)` - 指定规约运算，可以是“加”或“乘”。
+- `name (str，可选)` - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
+
+
+## 底层OP设计
+
+增强现有 scatter op 实现，支持指定dim和指定reduce方法。具体为`_C_ops.scatter`和`_C_ops.scatter_`.
+
+## API实现方案
+
+[API已有](https://github.com/PaddlePaddle/Paddle/blob/release/2.5/python/paddle/tensor/manipulation.py#L2849)，需要新增axis和reduce参数。
+
+## 代码实现文件路径
+
+函数API实现路径: python/paddle/tensor/manipulation.py
+
+单元测试路径：在 Paddle repo 的 test/ 目录, 同时在 paddle/test/legacy_test/test_inplace.py、paddle/test/legacy_test/test_scatter_op.py 修改对应的单侧。
+
+
+# 六、测试和验收的考量
+
+测试考虑的case如下：
+
+- 不同 dim 下功能是否符合预期。
+- 不同 reduce 下功能是否符合预期。
+- 验证反向梯度是否符合预期。
+
+# 七、可行性分析及规划排期
+
+方案实施难度可控，工期上可以满足在当前版本周期内开发完成。
+
+# 八、影响面
+
+为独立新增API，对其他模块没有影响
+
+# 名词解释
+
+无
+
+# 附件及参考资料
+
+无
