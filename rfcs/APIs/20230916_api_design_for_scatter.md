@@ -114,7 +114,7 @@ scatter 参数如下：
 - `updates （Tensor` - 根据 index 使用 update 参数更新输入 x。当 index 为一维 tensor 时，updates 形状应与输入 x 相同，并且 dim>1 的 dim 值应与输入 x 相同。当 index 为零维 tensor 时，updates 应该是一个 (N-1)-D 的 Tensor，并且 updates 的第 i 个维度应该与 x 的 i+1 个维度相同。
 - `overwrite （bool，可选)`- 指定索引 index 相同时，更新输出的方式。如果为 True，则使用覆盖模式更新相同索引的输出，如果为 False，则根据`reduce`参数指定的模式更新相同索引的输出。默认值为 True。
 - `axis (int, 可选)` - 指定用来索引的轴。默认值为0.
-- `reduce(str,可选)` - 指定规约运算，可以是“加”或“乘”。
+- `reduce(str,可选)` - 指定规约运算，可以是“add”或“multiply”。
 - `name (str，可选)` - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
 
