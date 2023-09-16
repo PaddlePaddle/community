@@ -120,7 +120,7 @@ scatter 参数如下：
 
 ## 底层OP设计
 
-增强现有 scatter op 实现，支持指定dim和指定reduce方法。具体为`_C_ops.scatter`和`_C_ops.scatter_`.
+增强现有 scatter op 实现，支持指定dim和指定reduce方法。具体为`_C_ops.scatter`和`_C_ops.scatter_`. OP 的参数遵循API的参数与顺序。
 
 ## API实现方案
 
