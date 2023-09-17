@@ -30,6 +30,7 @@
 
 # 二、飞桨现状
 
+- 目前 Paddle 缺少 `bernoulli_` API，无法 inplace 方式将输入 tensor 按照伯努利分布来填充。
 - 目前 Paddle 缺少 `log_normal` 和 `log_normal_` API，无法方便地生成对数正态分布，以及 inplace 的方式修改输入 `x`，填充对应的对数正态分布的值。
 
 # 三、业内方案调研
