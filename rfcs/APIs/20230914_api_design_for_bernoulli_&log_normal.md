@@ -42,6 +42,71 @@ PyTorch 中有 `torch.Tensor.log_normal_` 的 API，详细参数为 `Tensor.log_
 
 ### bernoulli_
 
+在实现方法上，PyTorch 通过 C++ **Kernel** 实现 `bernoulli_` API。
+
+> Tensor.bernoulli_(p=0.5, *, generator=None) → Tensor
+
+参数说明：
+- p (float) - `p` should either be a scalar or tensor containing probabilities to be used for drawing the binary random number.
+- generator (torch.Generator, optional) – a pseudorandom number generator for sampling
+
+实现代码：
+
+```c++
+void bernoulli_scalar_kernel(const TensorBase &self, double p, c10::optional<Generator> gen) {
+  CPUGeneratorImpl* generator = get_generator_or_default<CPUGeneratorImpl>(gen, detail::getDefaultCPUGenerator());
+  int64_t seed;
+  {
+    // See Note [Acquire lock when using random generators]
+    std::lock_guard<std::mutex> lock(generator->mutex_);
+    seed = generator->random();
+  }
+  int64_t n = self.numel();
+  bool contig = self.is_contiguous();
+
+  AT_DISPATCH_ALL_TYPES_AND2(at::ScalarType::Bool, at::ScalarType::BFloat16, self.scalar_type(), "bernoulli_scalar_cpu_", [&] {
+    at::Tensor tmp_int_tensor;
+    if (std::is_same<scalar_t, int>::value && contig) {
+      tmp_int_tensor = self;
+    } else {
+      tmp_int_tensor = at::empty(self.sizes(), self.options().dtype(at::kInt));
+    }
+
+    scalar_t *self_ptr = self.data_ptr<scalar_t>();
+    int *sample_int_ptr = tmp_int_tensor.data_ptr<int>();
+
+    auto sample = [&](int64_t begin, int64_t end) {
+      int64_t len = end - begin;
+      if (len > 0) {
+        VSLStreamStatePtr stream;
+        vslNewStream(&stream, VSL_BRNG_MCG31, seed);
+        vslSkipAheadStream(stream, begin);
+        viRngBernoulli(VSL_RNG_METHOD_BERNOULLI_ICDF, stream, len,
+          sample_int_ptr + begin, p);
+        vslDeleteStream(&stream);
+
+        // vectorized copy if using buffer and contiguous, i.e., being non-int
+        // type and contiguous
+        if (!std::is_same<scalar_t, int>::value && contig) {
+          scalar_t *self_seg = self_ptr + begin;
+          int* tmp_seg = sample_int_ptr + begin;
+          at::vec::convert<int, scalar_t>(tmp_seg, self_seg, len);
+        }
+      }
+    };
+
+    parallel_for(0, n, /* grain_size= */ 800, sample);
+
+    // copy_ if using buffer and non contiguous
+    if (!contig) {
+      OptionalTensorRef(self)->copy_(tmp_int_tensor);
+    }
+  });
+}
+```
+
+[代码位置](https://github.com/pytorch/pytorch/blob/HEAD/aten/src/ATen/native/cpu/DistributionKernels.cpp#L49-L98)
+
 ### LogNormal
 
 > Creates a log-normal distribution parameterized by loc and scale where:
@@ -179,6 +244,10 @@ at::Tensor& log_normal_impl_(at::Tensor& self, double mean, double std, c10::opt
 ```
 
 ## Scipy
+
+### bernoulli_
+
+未提供 bernoulli_ inplace 操作。
 
 ### lognorm
 
@@ -384,6 +453,10 @@ lognorm = lognorm_gen(a=0.0, name='lognorm')
 Scipy 未提供 lognorm_ 形式的 API。
 
 ## TensorFlow
+
+### bernoulli_
+
+未提供 bernoulli_ inplace 操作。
 
 ### lognormal
 
@@ -629,6 +702,10 @@ paddle.log_normal_(
 该 API 实现于 `python/paddle/tensor/random.py`。
 
 ### bernoulli_
+
+考虑到 `Paddle` 本身已经实现 `paddle.uniform_`，本方案考虑使用 Python API 实现。
+
+使用 `paddle.uniform_` 生成一个正态分布，随后将正态分布中小于 `p` 的部分，生成对应的 mask 矩阵，与原 tensor 进行索引。
 
 ### log_normal
 
