@@ -1,4 +1,4 @@
-# paddle.log_normal 设计文档
+# paddle.bernoulli_ / paddle.log_normal_ / paddle.log_normal API 设计文档
 
 | API 名称     | log_normal / log_normal_/ bernoulli_   |
 | ------------ | --------------------------------- |
