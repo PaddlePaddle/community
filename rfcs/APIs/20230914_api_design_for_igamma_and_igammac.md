@@ -446,9 +446,7 @@ $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 
 
 例如将一维张量 $[3, 5]$ 和一维张量 $[2, 7]$ 输入，则计算结果如下：
-$
- \Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t} dt]
-$
+$\Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t} dt]$
 
 # 六、测试和验收的考量
 1. 添加单测文件 `test/legacy_test/test_igamma_op.py` 和 `test/legacy_test/test_igamma_op.py`。
