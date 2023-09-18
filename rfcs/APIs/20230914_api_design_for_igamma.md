@@ -91,9 +91,9 @@ $$\frac{x^a e^{-x}}{\Gamma(a)} = e^{x - a} (\frac{x}{a + g - 0.5})^a \sqrt{\frac
 
 $$e^{x - a} (\frac{x}{a + g - 0.5})^a = e^{a\text{log1pmx}(\frac{x - a - g + 0.5}{a + g - 0.5}) +\frac{x(0.5 - g)}{a + g - 0.5}}; \text{log1pmx}(z) = \text{ln}(1 + z) - z$$
 
-## 2. MatLab
+## 2. MATLAB
 
-在 MatLab 中使用的 API 格式如下：
+在 MATLAB 中使用的 API 格式如下：
 
 `g = igamma(nu,z)`
 
@@ -107,9 +107,169 @@ MATLAB 的实现主要参考 NIST Digital Library of Mathematical functions [Inc
 
 `torch.special.gammainc(input, other, *, out=None) → Tensor`
 
-在 Pytorch 中，使用 `gammainc` 计算正则化下不完全 gamma 函数。
+在 Pytorch 中，使用 `gammainc` 计算正则化下不完全 gamma 函数。支持的数据类型有 `float32`，`float64`, `bfloat16`。
 
 Pytorch 正则化不完全伽马函数及其辅助函数的实现源自 SciPy 的 gammainc、Cephes 的 igam 和 igamc 以及 Boost 的 Lanczos 近似的实现。
+
+`igammac` 具体实现代码，正则化上不完全 gamma 函数的计算根据 a 和 x 的值以不同的方式进行：如果 x 和/或 a 位于定义区域的边界，则在边界处分配结果，如果 a 较大且 a ~ x，则使用大参数统一渐近展开（见 DLMF 8.12.4 [igam1]）。如果 x > 1.1 且 x < a，则使用正则化下不完全伽马的子集。否则，根据 [igam2] 公式 (5) 计算序列
+  
+```cpp
+template <typename scalar_t>
+__noinline__ __host__ __device__ scalar_t calc_igammac(scalar_t a, scalar_t x) {
+  /* the calculation of the regularized upper incomplete gamma function
+   * is done differently based on the values of a and x:
+   * - if x and/or a is at the boundary of defined region, then assign the
+   *   result at the boundary
+   * - if a is large and a ~ x, then using Uniform Asymptotic Expansions for
+   *   Large Parameter (see DLMF 8.12.4 [igam1])
+   * - if x > 1.1 and x < a, using the substraction from the regularized lower
+   *   incomplete gamma
+   * - otherwise, calculate the series from [igam2] eq (5)
+   */
+
+  using accscalar_t = at::acc_type<scalar_t, /*is_cuda=*/true>;
+  accscalar_t absxma_a;
+
+  static const accscalar_t SMALL = 20.0;
+  static const accscalar_t LARGE = 200.0;
+  static const accscalar_t SMALLRATIO = 0.3;
+  static const accscalar_t LARGERATIO = 4.5;
+
+  if ((x < 0) || (a < 0)) {
+    // out of defined-region of the function
+    return std::numeric_limits<accscalar_t>::quiet_NaN();
+  }
+  else if (a == 0) {
+    if (x > 0) {
+      return 0.0;
+    }
+    else {
+      return std::numeric_limits<accscalar_t>::quiet_NaN();
+    }
+  }
+  else if (x == 0) {
+    return 1.0;
+  }
+  else if (::isinf(static_cast<accscalar_t>(a))) {
+    if (::isinf(static_cast<accscalar_t>(x))) {
+      return std::numeric_limits<accscalar_t>::quiet_NaN();
+    }
+    return 1.0;
+  }
+  else if (::isinf(static_cast<accscalar_t>(x))) {
+    return 0.0;
+  }
+
+  absxma_a = ::fabs(x - a) / a;
+  if ((a > SMALL) && (a < LARGE) && (absxma_a < SMALLRATIO)) {
+     // Compute igam/igamc using DLMF 8.12.3/8.12.4 [igam1]
+     return _igam_helper_asymptotic_series(a, x, 0);
+  }
+  else if ((a > LARGE) && (absxma_a < LARGERATIO / ::sqrt(a))) {
+     // Compute igam/igamc using DLMF 8.12.3/8.12.4 [igam1]
+     return _igam_helper_asymptotic_series(a, x, 0);
+  }
+
+  if (x > 1.1) {
+    if (x < a) {
+      // Compute igam using DLMF 8.11.4. [igam1]
+      return 1.0 - _igam_helper_series(a, x);
+    }
+    else {
+      // Compute igamc using DLMF 8.9.2. [igam1]
+      return _igamc_helper_continued_fraction(a, x);
+    }
+  }
+  else if (x <= 0.5) {
+    if (-0.4 / ::log(x) < a) {
+      // Compute igam using DLMF 8.11.4. [igam1]
+      return 1.0 - _igam_helper_series(a, x);
+    }
+    else {
+      // Compute igamc using DLMF 8.7.3 [igam1]. This is related to the series in
+      // _igam_helper_series but extra care is taken to avoid cancellation.
+      return _igamc_helper_series(a, x);
+    }
+  }
+  else {
+    if (x * 1.1 < a) {
+      // Compute igam using DLMF 8.11.4. [igam1]
+      return 1.0 - _igam_helper_series(a, x);
+    }
+    else {
+      // Compute igamc using DLMF 8.7.3 [igam1]. This is related to the series in
+      // _igam_helper_series but extra care is taken to avoid cancellation.
+      return _igamc_helper_series(a, x);
+    }
+  }
+}
+```
+
+`igamma` 实现代码，根据 a 和 x 的值，正则化下不完全 gamma 函数的计算方法有所不同：如果 x 和/或 a 位于定义区域的边界，则在边界处分配结果；如果 a 较大且 a ~ x，则使用大参数统一渐近展开（见 DLMF 8.12.3 [igam1]） * -如果 x > 1 且 x ~ x，则使用大参数统一渐近展开；如果 x > 1 且 x > a，则使用正则化上不完全 gammab ÷≤ 的子项；否则，根据 [igam2] 公式 (4) 计算序列。
+
+```cpp
+template <typename scalar_t>
+__noinline__ __host__ __device__ scalar_t calc_igamma(scalar_t a, scalar_t x) {
+  /* the calculation of the regularized lower incomplete gamma function
+   * is done differently based on the values of a and x:
+   * - if x and/or a is at the boundary of defined region, then assign the
+   *   result at the boundary
+   * - if a is large and a ~ x, then using Uniform Asymptotic Expansions for
+   *   Large Parameter (see DLMF 8.12.3 [igam1])
+   * - if x > 1 and x > a, using the substraction from the regularized upper
+   *   incomplete gammab ÷≤
+   * - otherwise, calculate the series from [igam2] eq (4)
+   */
+
+  using accscalar_t = at::acc_type<scalar_t, /*is_cuda=*/true>;
+  accscalar_t absxma_a;
+  static const accscalar_t SMALL = 20.0;
+  static const accscalar_t LARGE = 200.0;
+  static const accscalar_t SMALLRATIO = 0.3;
+  static const accscalar_t LARGERATIO = 4.5;
+
+  // boundary values following SciPy
+  if ((x < 0) || (a < 0)) {
+    // out of defined-region of the function
+    return std::numeric_limits<accscalar_t>::quiet_NaN();
+  }
+  else if (a == 0) {
+    if (x > 0) {
+      return 1.0;
+    }
+    else {
+      return std::numeric_limits<accscalar_t>::quiet_NaN();
+    }
+  }
+  else if (x == 0) {
+    return 0.0; // zero integration limit
+  }
+  else if (::isinf(static_cast<accscalar_t>(a))) {
+    if (::isinf(static_cast<accscalar_t>(x))) {
+      return std::numeric_limits<accscalar_t>::quiet_NaN();
+    }
+    return 0.0;
+  }
+  else if (::isinf(static_cast<accscalar_t>(x))) {
+    return 1.0;
+  }
+
+  /* Asymptotic regime where a ~ x. */
+  absxma_a = ::fabs(x - a) / a;
+  if ((a > SMALL) && (a < LARGE) && (absxma_a < SMALLRATIO)) {
+    return _igam_helper_asymptotic_series(a, x, 1);
+  }
+  else if ((a > LARGE) && (absxma_a < LARGERATIO / ::sqrt(a))) {
+    return _igam_helper_asymptotic_series(a, x, 1);
+  }
+
+  if ((x > 1.0) && (x > a)) {
+    return 1.0 - calc_igammac(a, x);
+  }
+
+  return _igam_helper_series(a, x);
+}
+```
 
 ## 4. Tensorflow
 
