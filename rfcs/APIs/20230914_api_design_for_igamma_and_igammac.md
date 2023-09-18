@@ -11,7 +11,7 @@
 
 ## 1、相关背景
 
-为了提升飞桨 API 丰富度，支持随机分布生成相关 API，Paddle 需要扩充 API `paddle.igamma`, `paddle.igammac`。
+为了提升飞桨 API 丰富度，支持随机分布生成相关 API，Paddle 需要扩充 API `paddle.igamma`, `paddle.igammac`, `paddle.igamma_`, `paddle.igammac_`。
 
 ## 2、功能目标
 新增 paddle.igamma /igammac API，即实现[上不完全伽马函数和下不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
