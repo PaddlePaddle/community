@@ -39,11 +39,11 @@ $$\Gamma(a, z) = \int_z^\infty e^{-t} t^{a - 1} dt$$
 
 ## 2、功能目标
 
-为 Paddle 新增 `igamma` 和 `igammac` API。用于计算下不完全 gamma 函数 和 上不完全 gamma 函数。
+为 Paddle 新增 `igamma` 和 `igammac` API。用于计算下不完全 gamma 函数 和 上不完全 gamma 函数以及 inpace 版本的各 API。
 
 ## 3、意义
 
-为 Paddle 新增 igamma API，提供不完全 gamma 函数。
+为 Paddle 新增 `igamma` 和 `igammac` API，提供不完全 gamma 函数。
 
 # 二、飞桨现状
 
@@ -172,14 +172,14 @@ a = tf.math.igamma(a1, a2)
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-下不完全 gamma 函数 API设计为 `paddle.igamma(a, x)`。其中，`a` 为参数 $a > 0$，`x` 为变量 $x \ge 0$。`paddle.gammainc(a, x)` 为 `paddle.igamma(a, x)` 的别名。`igamma_(a, x)` 为 `igamma(a, x)` 的 inplace 版本。`Tensor.igamma(a, x)` 和 `Tensor.gammainc(a, x)` 做为 Tensor 的方法使用，`Tensor.igamma_(a, x)` 和 `Tensor.gammainc_(a, x)` 做为 Tensor 方法的inplace版本。
+下不完全 gamma 函数 API设计为 `paddle.igamma(input, other)`。其中，`other` 为参数 $\text{other} > 0$，`input` 为变量 $\text{input} \ge 0$。`igamma_(input, other)` 为 `igamma(input, other)` 的 inplace 版本。`Tensor.igamma(other)` 做为 Tensor 的方法使用，`Tensor.igamma_(other)` 做为 Tensor 方法的 inplace 版本。
 
-上不完全 gamma 函数 API设计为 `paddle.igammac(a, x)`。其中，`a` 为参数 $a > 0$，`x` 为变量 $x \ge 0$。`paddle.gammaincc(a, x)` 为 `paddle.igammac(a, x)` 的别名。`igammac_(a, x)` 为 `igammac(a, x)` 的 inplace 版本。`Tensor.igammac(a, x)` 和 `Tensor.gammaincc(a, x)` 做为 Tensor 的方法使用，`Tensor.igammac_(a, x)` 和 `Tensor.gammaincc_(a, x)` 做为 Tensor 方法的inplace版本。
+上不完全 gamma 函数 API设计为 `paddle.igammac(input, other)`。其中，`other` 为参数 $\text{other} > 0$，`input` 为变量 $\text{input} \ge 0$。`igammac_(input, other)` 为 `igammac(input, other)` 的 inplace 版本。`Tensor.igammac(other)` 做为 Tensor 的方法使用，`Tensor.igammac_(other)` 做为 Tensor 方法的 inplace 版本。
 
 
 ## API实现方案
 
-C ++/CUDA 参考 PyTorch 实现，实现位置为 Paddle repo `paddle/phi/kernels` 目录，cc 文件在 `paddle/phi/kernels/cpu` 目录和 cu 文件在 `paddle/phi/kernels/gpu` 目录。Python 实现代码 & 英文 API 文档，放在 Paddle repo 的 `python/paddle/tensor/manipulation.py` 文件。
+C ++/CUDA 参考 PyTorch 实现，实现位置为 Paddle repo `paddle/phi/kernels` 目录，cc 文件在 `paddle/phi/kernels/cpu` 目录和 cu 文件在 `paddle/phi/kernels/gpu` 目录。Python 实现代码 & 英文 API 文档，放在 Paddle repo 的 `python/paddle/tensor/math.py` 文件。
 
 # 六、测试和验收的考量
 
