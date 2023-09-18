@@ -24,7 +24,52 @@
 
 # 二、飞桨现状
 
-目前paddle缺少相关功能实现。只能通过 paddle 现有的 API 组合实现。
+目前paddle缺少相关功能实现。只能通过 paddle 现有的 API 组合实现。实现如下：
+
+```python
+import paddle
+
+def masked_scatter(x, mask, src):
+    """
+    利用现有api实现masked_scatter功能
+    """
+    # make sure the mask can be broadcastable to input
+    assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
+    # turn mask to bool
+    mask = paddle.broadcast_to(mask, shape=x.shape)
+    # make sure the true nums in mask is <= the nums of source
+    assert mask.sum() <= src.numel(), 'mask true nums must be <= source size'
+    # make sure the dtype of x and source is the same
+    assert x.dtype == src.dtype, 'input and source must have the same dtype'
+    # out-place的实现
+    output = x.clone()
+    output[mask] = src.flatten()[:mask.sum()]
+    return output
+    # in-place的实现
+    # x[mask] = src.flatten()[:mask.sum()]
+    # return x
+
+a = paddle.randn([3,4])
+print("a:", a)
+mask = paddle.to_tensor([1.,0.5,1.,0.5])
+mask = mask>0.6
+print("mask: ", mask)
+b = paddle.to_tensor([1.,2.,3.,4.,5.,6.,7.])
+print("result of masked_scatter: ", masked_scatter(a, mask, b))
+
+"""
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
+       [[-0.17249003,  1.19607437,  0.34872168, -0.66658390],
+        [ 2.30244637,  0.33958769, -0.15876916, -0.49489051],
+        [-0.01191955,  0.66219229, -0.62860924, -0.00913781]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+       [True , False, True , False])
+result of masked_scatter: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
+       [[ 1.        ,  1.19607437,  2.        , -0.66658390],
+        [ 3.        ,  0.33958769,  4.        , -0.49489051],
+        [ 5.        ,  0.66219229,  6.        , -0.00913781]])
+"""
+```
 
 # 三、业内方案调研
 
@@ -184,9 +229,9 @@ Numpy中没有`masked_scatter`API的实现
 
 ## 命名与参数设计
 ```python
-paddle.masked_scatter(input, mask, source)
+paddle.masked_scatter(x, mask, source)
 
-paddle.masked_scatter_(input, mask, source)
+paddle.masked_scatter_(x, mask, source)
 
 Tensor.masked_scatter(mask, source)
 
@@ -194,35 +239,56 @@ Tensor.masked_scatter_(mask, source)
 ```
 masked_scatter和masked_scatter_分别表示out-place和in-place两种计算形式。
 
-- `input (Tensor, float, double, int, int64_t, float16, bfloat16)`: 输入的张量，需要根据mask进行赋值操作。
+- `x (Tensor)`: 输入的张量，需要根据mask进行赋值操作。
 - `mask (Tensor, bool)`: 用于指定填充位置的布尔值掩码张量，与 input 张量形状相同，或者可以广播成input张量的形状。
-- `source (Tensor, float, double, int, int64_t, float16, bfloat16)`: 待填充的张量，其中元素的数量应该不少于mask中True的个数。
+- `source (Tensor)`: 待填充的张量，其中元素的数量应该不少于mask中True的个数。
 - `name (str，可选)` :一般无需设置，默认值为 None。
 
+## 底层OP设计
+
+依赖已有OP(broadcast_to / flatten)实现，无需实现新的底层Op。
 
 ## API实现方案
 
-C ++/CUDA 参考 PyTorch 实现，实现位置为 Paddle repo `paddle/phi/kernels` 目录，cc 文件在 `paddle/phi/kernels/cpu` 目录和 cu 文件在 `paddle/phi/kernels/gpu` 目录。
-
-Python 实现代码 & 英文 API 文档，放在 Paddle repo 的 `python/paddle/tensor/manipulation.py` 文件。并在 `python/paddle/tensor/init.py` 中，添加 masked_scatter & masked_scatter_ API，以支持 paddle.Tensor.masked_scatter & paddle.Tensor.masked_scatter_ 的调用方式。
+在 python/paddle/tensor/manipulation.py 中增加 masked_scatter 以及 masked_scatter_ 函数。初步的实现方案如下：
+```python
+def masked_scatter(x, mask, src):
+    """
+    利用现有api实现masked_scatter功能
+    """
+    # make sure the mask can be broadcastable to input
+    assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
+    # turn mask to bool
+    mask = paddle.broadcast_to(mask, shape=x.shape)
+    # make sure the true nums in mask is <= the nums of source
+    assert mask.sum() <= src.numel(), 'mask true nums must be <= source size'
+    # make sure the dtype of x and source is the same
+    assert x.dtype == src.dtype, 'input and source must have the same dtype'
+    # out-place的实现
+    output = x.clone()
+    output[mask] = src.flatten()[:mask.sum()]
+    return output
+    # in-place的实现
+    # x[mask] = src.flatten()[:mask.sum()]
+    # return x
+```
 
 # 六、测试和验收的考量
-参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
-1. 添加单测文件 `test/legacy_test/test_masked_scatter_op.py`。
-2. 在单测文件 `test/legacy_test/test_inplace.py` 补充测试。
+
+1. 添加单测文件 `paddle/test/legacy_test/test_masked_scatter_op.py`。
+2. 同时在 `paddle/test/legacy_test/test_inplace.py` 中新增对应的inplace api 单测
+
 
 测试需要考虑的 case 如下：
 
-- 输出数值结果的一致性和数据类型是否正确，使用 PyTorch 作为参考标准
-- 对不同 dtype 的输入数据 `x` 进行计算精度检验 (float32, float64)
-- 输入输出的容错性与错误提示信息
-- 输出 Dtype 错误或不兼容时抛出异常
-- 保证调用属性时是可以被正常找到的
-- 覆盖静态图和动态图测试场景
+- 输入的mask和input的形状不一致，但是可以broadcast
+- 检查算子计算结果的正确性，以pytorch为参考
+- 测试在进行反向梯度计算时结果的正确性
+- 错误检查：输入x不满足要求时,能否正确抛出错误
 
 # 七、可行性分析和排期规划
 
-方案主要参考 PyTorch 的工程实现方法，工期上可以满足在当前版本周期内开发完成。
+方案主要利用paddle现有api完成，工期上可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 新增 API，对其他模块无影响
