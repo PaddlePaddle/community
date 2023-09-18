@@ -221,14 +221,15 @@ paddle不支持 mean/max/min 规约，多了assign规约。
 
  PyTorch 和 TensorFlow 实现的主要差异在于 index 的计算上，而 paddle 的 put_along_axis 的索引规则与 PyTorch 的 scatter_reduce 以及 TensorFlow 的 scatter_nd 系列不一样并且本次任务并不需要修改索引规则，所以只需要关注归约算子的实现。
  - PyTorch 和 TensorFlow 的归约算子实现原理相同
- - paddle 之前的归约算子的实现与 PyTorch 风格接近且 PyTorch 实现了 mean 归约算子而 TensorFlow 没有
+ - paddle 之前的归约算子的实现与 PyTorch 风格接近且
+ - PyTorch 实现了 mean 归约算子而 TensorFlow 没有
 
  # 五、设计思路与实现方案
 
  ## 命名与参数设计
 
- paddle.put_along_axis(arr, indices, values, axis, reduce='assign')
- paddle.put_along_axis_(arr, indices, values, axis, reduce='assign')
+ `paddle.put_along_axis(arr, indices, values, axis, reduce='assign')`
+ `paddle.put_along_axis_(arr, indices, values, axis, reduce='assign')`
 
  其中 put_along_axis_ 是 put_along_axis 的 inplace 版本。
 
