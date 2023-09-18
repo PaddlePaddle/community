@@ -417,7 +417,8 @@ paddle.Tensor.igammac_(
 ```
 
 ## 底层OP设计
-对于底层 OP 主要分为三部分，由于 `igamma` 和 `igammac`是互补关系，所以实际上可服用代码很多，
+Kernel部分实现添加在 `paddle/phi/kernels/cpu/igamma_kernel.cc` 和 `paddle/phi/kernels/cpu/igammac_kernel.cc`
+对于底层 OP 主要分为三部分，由于 `igamma` 和 `igammac`是互补关系，所以实际上可复用代码很多，
 因此底层OP设计仅以`igammac`为例。
 
 ### 实现基础计算逻辑
