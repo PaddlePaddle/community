@@ -60,7 +60,7 @@ print(out)
 
 `scipy.special.multigammaln(a, d)`
 
-其中，`a` 为 `ndarray` 类型，是多元 gamma 函数的变量，`d` 为 `int` 类型，是多元 gamma 函数的积分空间。
+其中，`a` 为 `ndarray` 类型，是多元 gamma 函数的变量，`d` 为 `int` 类型，是多元 gamma 函数积分空间的维度。
 
 实现的伪代码如下：
 
@@ -81,7 +81,7 @@ def multigammaln(a, d):
 
 `jax.scipy.special.multigammaln(a, d)`
 
-其中，`a` 为 `ndarray` 类型，是多元 gamma 函数的变量，`d` 为 `int` 类型，是多元 gamma 函数的积分空间。
+其中，`a` 为 `ndarray` 类型，是多元 gamma 函数的变量，`d` 为 `int` 类型，是多元 gamma 函数积分空间的维度。
 
 实现代码如下：
 
@@ -105,7 +105,7 @@ def multigammaln(a: ArrayLike, d: ArrayLike) -> Array:
 
 `torch.special.multigammaln(input, p, *, out=None)`
 
-其中，`input` 为 `Tensor` 类型，是多元 gamma 函数的变量，`p` 为 `int` 类型，是多元 gamma 函数的积分空间。
+其中，`input` 为 `Tensor` 类型，是多元 gamma 函数的变量，`p` 为 `int` 类型，是多元 gamma 函数的积分空间的维度。
 
 实现代码如下：
 
@@ -149,7 +149,7 @@ torch.special.multigammaln(a, 2)
 
 <!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
 
-API设计为 `paddle.multigammaln(x, p)`。其中，`x` 为 `Tensor` 类型，是多元 gamma 函数的变量，`p` 为 `int` 类型，是多元 gamma 函数的积分空间。`paddle.multigammaln_(x, p)` 为 inplace 版本。`Tensor.multigammaln(p)` 为 Tensor 的方法版本。`Tensor.multigammaln_(p)` 为 Tensor 的 方法 inplace 版本。
+API设计为 `paddle.multigammaln(x, p)`。其中，`x` 为 `Tensor` 类型，是多元 gamma 函数的变量，`p` 为 `int` 类型，是多元 gamma 函数的积分空间的维度。`paddle.multigammaln_(x, p)` 为 inplace 版本。`Tensor.multigammaln(p)` 为 Tensor 的方法版本。`Tensor.multigammaln_(p)` 为 Tensor 的 方法 inplace 版本。
 
 ## API实现方案
 
