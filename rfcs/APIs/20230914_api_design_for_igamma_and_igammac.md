@@ -39,6 +39,8 @@ $$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $$
 PyTorch 中有 `torch.igamma(input, other, *, out=None)`和`torch.igammac(input, other, *, out=None)` 的 API，以及相应inplace版本。
 PyTorch 中有 `torch.Tensor.igamma(other)` 和 `torch.Tensor.igammac(other)` 的 API，以及相应inplace版本。
 
+PyTorch 中输入 CPU 支持 float16, bfloat16, float32, float64，GPU支持 float32, float64
+
 因为 PyTorch 中这些 API 的实际计算逻辑相似性较大，因此下文的分析均以 igammac 为例。
 
 在 PyTorch (aten/src/ATen/native/Math.h)中，不完全伽马函数的核心计算逻辑是 `calc_igammac`/`calc_igammacc` 函数，
@@ -453,7 +455,7 @@ $$ \Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t}
 测试需要考虑的 case 如下：
 
 - 输出数值结果的一致性和数据类型是否正确，使用 scipy 作为参考标准
-- 对不同 dtype 的输入数据 `x` 进行计算精度检验 (float32, float64)
+- 对不同 dtype 的输入数据 `input` 和 `other` 进行计算精度检验，与PyTorch保持一致
 - 输入输出的容错性与错误提示信息
 - 输出 Dtype 错误或不兼容时抛出异常
 - 保证调用属性时是可以被正常找到的
