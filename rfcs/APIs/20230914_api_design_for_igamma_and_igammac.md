@@ -14,7 +14,7 @@
 为了提升飞桨 API 丰富度，支持随机分布生成相关 API，Paddle 需要扩充 API `paddle.igamma`, `paddle.igammac`, `paddle.igamma_`, `paddle.igammac_`。
 
 ## 2、功能目标
-新增 paddle.igamma /igammac API，即实现[上不完全伽马函数和下不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
+新增 `paddle.igamma`, `paddle.igammac`, `paddle.igamma_`, `paddle.igammac_` API，即实现[上不完全伽马函数和下不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
 这两个函数的定义如下：
 $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 $$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $$
@@ -30,7 +30,7 @@ $$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $$
 
 # 二、飞桨现状
 
-- 目前 Paddle 缺少 `igamma` 和 `igammac` API，无法方便地计算上不完全伽马函数和下不完全伽马函数的数值，以及 inplace 的方式修改输入 `x`。
+- 目前 Paddle 缺少 `paddle.igamma`, `paddle.igammac`, `paddle.igamma_`, `paddle.igammac_` API，无法方便地计算上不完全伽马函数和下不完全伽马函数的数值，以及 inplace 的方式修改输入 `x`。
 
 # 三、业内方案调研
 
@@ -445,8 +445,10 @@ $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 - other: 输入张量，即公式中的 $x$
 
 
-例如将一维张量$[3, 5]$和一维张量$[2, 7]$输入，则计算结果如下：
-$$ \Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t} dt] =  $$
+例如将一维张量 $[3, 5]$ 和一维张量 $[2, 7]$ 输入，则计算结果如下：
+$
+ \Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t} dt]
+$
 
 # 六、测试和验收的考量
 1. 添加单测文件 `test/legacy_test/test_igamma_op.py` 和 `test/legacy_test/test_igamma_op.py`。
