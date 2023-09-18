@@ -56,7 +56,8 @@ paddle不支持 mean/max/min 规约，多了assign规约。
 
  因为整个算子的实现部分可以分为 index 的计算和归约算子的实现两个部分，而本次任务仅需要增强归约方式，所以下面仅阐述归约算子的实现方法。
  在实现方法上，PyTorch 在 CPU 端的实现如下：
- ``` CPP
+
+ ``` c++
  class ReduceMultiply {
  public:
    template <typename scalar_t>
@@ -116,23 +117,14 @@ paddle不支持 mean/max/min 规约，多了assign规约。
    }
  };
  static TensorAssign tensor_assign;
- ```
 
- CUDA 端实现逻辑类似，不过是使用了设备端函数 `fastAtomicAdd`和`gpuAtomicMin`等函数。
-
- 可以看出 Paddle 的 add、assign、mul 归约方式算子与 PyTorch 的对应实现部分是一致的，而 PyTorch 的 amax、amin 和 mean 归约算子的实现也是非常简单直观， amax 算子就是取二者之间的较大值，amin 算子就是取二者之间的较小值，主要变化点在于 mean 算子的实现方式，mean 归约算子的实现方式是先和 add 算子一样进行累加，最后在外部判断如果是 mean 算子的话就除元素个数：（对应文件路径：aten/src/ATen/native/TensorAdvancedIndexing.cpp）
-
- ```CPP
-     if (op == ReductionType::MEAN) {
-       auto counts = include_self ? at::ones_like(result) : at::zeros_like(result);
-       counts.index_add_(dim, index, at::ones_like(source));
-       counts.masked_fill_(counts == 0, 1);
-       if (result.is_floating_point() || result.is_complex()) {
-         result.div_(counts);
-       } else {
-         result.div_(counts, "floor");
-       }
-     }
+// mean
+if (op == SCATTER_GATHER_OP::REDUCE_MEAN) {
+  auto counts = include_self ? at::ones_like(result) : at::zeros_like(result);
+  counts.index_add_(dim, index, at::ones_like(source));
+  counts.masked_fill_(counts == 0, 1);
+  result.div_(counts);
+}
  ```
 
  ## TensorFlow
@@ -180,8 +172,8 @@ paddle不支持 mean/max/min 规约，多了assign规约。
  };
  ```
 
- 归约算子的实现：
- ``` CPP
+ 归约的实现：
+ ``` c++
  template <>
  struct Assign<scatter_op::UpdateOp::ADD> {
    template <typename Params, typename Update>
