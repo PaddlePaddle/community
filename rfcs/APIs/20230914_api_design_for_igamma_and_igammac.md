@@ -419,6 +419,7 @@ paddle.Tensor.igammac_(
 ## 底层OP设计
 Kernel部分CPU实现添加在 `paddle/phi/kernels/cpu/igamma_kernel.cc` 和 `paddle/phi/kernels/cpu/igammac_kernel.cc`，
 Kernel部分GPU实现添加在 `paddle/phi/kernels/gpu/igamma_kernel.cu` 和 `paddle/phi/kernels/gpu/igammac_kernel.cu`，
+输入 CPU 支持 float16, bfloat16, float32, float64，GPU支持 float32, float64,
 对于底层 OP 主要分为三部分，由于 `igamma` 和 `igammac`是互补关系，所以实际上可复用代码很多，
 因此底层OP设计仅以`igammac`为例。
 
@@ -443,8 +444,8 @@ $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 
 具体的API为`paddle.igamma(input, other, name = None)`和`paddle.Tensor.igamma(input, other)`
 
-- input: 输入张量，即公式中的 $a$
-- other: 输入张量，即公式中的 $x$
+- input: 输入张量，即公式中的 $a$, CPU 支持 float16, bfloat16, float32, float64，GPU支持 float32, float64
+- other: 输入张量，即公式中的 $x$, CPU 支持 float16, bfloat16, float32, float64，GPU支持 float32, float64
 
 
 例如将一维张量 $[3, 5]$ 和一维张量 $[2, 7]$ 输入，则计算结果如下：
