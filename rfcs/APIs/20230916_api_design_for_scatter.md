@@ -71,7 +71,7 @@ paddle 实现的 index 功能和 torch的`scatter`中的index的功能不一致�
 
 ## Pytorch
 
-Pytorch中 有 API `Tensor.scatter_(dim, index, src, reduce=None) → Tensor`
+### Pytorch中 有 API `Tensor.scatter_(dim, index, src, reduce=None) → Tensor`
 
 在pytorch中，介绍为：
 
@@ -86,13 +86,42 @@ Writes all values from the tensor `src` into `self` at the indices specified in 
 - src (Tensor or float) – the source element(s) to scatter.
 - reduce (str, optional) – reduction operation to apply, can be either 'sum' or 'multiply'.
 
-PyTorch实现api原理如下，其中index的维度和src的维度一致。：
+`torch.scatter` 和 paddle.scatter  的区别在于:
+1. torch 支持 dim 配置.
+
 ```python
 # For a 3-D tensor, self is updated as:
 self[index[i][j][k]][j][k] = src[i][j][k]  # if dim == 0
 self[i][index[i][j][k]][k] = src[i][j][k]  # if dim == 1
 self[i][j][index[i][j][k]] = src[i][j][k]  # if dim == 2
 ```
+
+2. reduce 额外支持 ‘multiply'
+3. index的维度和src是一致的。
+
+
+### Pytorch中 有 API `Tensor.index_reduce_(dim, index, source, reduce, *, include_self=True) → Tensor`
+
+其中输入参数的描述如下：
+
+- dim (int) – dimension along which to index
+- index (Tensor) – indices of source to select from, should have dtype either torch.int64 or torch.int32
+- source (FloatTensor) – the tensor containing values to accumulate
+- reduce (str) – the reduction operation to apply ("prod", "mean", "amax", "amin")
+
+`torch.index_reduce_` 和 paddle.scatter 的区别在于:
+1. torch 支持 dim 配置.
+
+```python
+self[index[i], :, :] *= src[i, :, :]  # if dim == 0
+self[:, index[i], :] *= src[:, i, :]  # if dim == 1
+self[:, :, index[i]] *= src[:, :, i]  # if dim == 2
+```
+
+2. reduce 支持 mean, amax, amin, 但不支持 add
+3. index的维度是一维的。
+4. paddle 只支持 include_self = False。
+
 
 ## Tensorflow
 
@@ -116,9 +145,14 @@ scatter 参数如下：
 - `updates （Tensor` - 根据 index 使用 update 参数更新输入 x。当 index 为一维 tensor 时，updates 形状应与输入 x 相同，并且 dim>1 的 dim 值应与输入 x 相同。当 index 为零维 tensor 时，updates 应该是一个 (N-1)-D 的 Tensor，并且 updates 的第 i 个维度应该与 x 的 i+1 个维度相同。
 - `overwrite （bool，可选)`- 指定索引 index 相同时，更新输出的方式。如果为 True，则使用覆盖模式更新相同索引的输出，如果为 False，则根据`reduce`参数指定的模式更新相同索引的输出。默认值为 True。
 - `axis (int, 可选)` - 要索引的维度。默认值为0.
-- `reduce(str,可选)` - 指定规约运算，可以是“sum”或“multiply”。默认值为"sum".
+- `reduce(str,可选)` - 指定规约运算，可以是“sum”或“mul”。默认值为"sum".
 - `name (str，可选)` - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
+
+相比于 torch.scatter 和 torch.index_reduce ：
+1. 新增 axis 属性，支持按axis所以，实现方式同 torch.index_reduce。
+2. 新增 reduce 属性，支持 sum/mul 规约方式，实现方式同  torch.scatter.
+3. 相比于 torch.index_reduce 中的 include_self=True，paddle.scatter 保持不变，仍为 include_self=False 。
 
 ## 底层OP设计
 
@@ -133,6 +167,7 @@ self[:, :, index[i]] *= src[:, :, i]  # if axis == 2
 ```
 
 为了保证兼容性，保留 `overwrite` 字段。只有到 `overwrite` 为False时，按照 `reduce` 选择规约方式；否则则按照 `assign` 逻辑处理。
+
 
 ## API实现方案
 
