@@ -18,6 +18,8 @@
 
 当前 `paddle.scatter` API提供了根据index信息更新原Tensor的功能，但指定维度和归约方式功能尚不支持。
 
+目前 `paddle.scatter` 的规约支持 None和sum。
+
 ## 3、意义
 
 该API是一个常用的API，可以方便用户使用。让用户不用自己实现该功能，提高用户的使用效率。
