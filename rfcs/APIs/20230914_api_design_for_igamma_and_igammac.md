@@ -434,7 +434,7 @@ $$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
 
 ## API实现方案
 
-该 API 实现于 `python/paddle/tensor/manipulation.py`。
+该 API 实现于 `python/paddle/tensor/math.py`。
 
 ### igamma
 对于 igamma 、 igamma_ 、igammac 和 igammac_ 有类似的API，下面列出了`igamma`的情况。
