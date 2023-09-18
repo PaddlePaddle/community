@@ -12,7 +12,7 @@
  # 一、概述
  ## 1、相关背景
 
- 当前paddle.put_along_axis API提供了根据index信息和归约方式累计到原Tensor的对应位置上，希望在此基础上，进一步增强该API的归约功能。
+ 当前 paddle.put_along_axis API提供了根据index信息和归约方式累计到原Tensor的对应位置上，希望在此基础上，进一步增强该API的归约功能。
 
  ## 2、功能目标
 
@@ -33,6 +33,25 @@
 
  PyTorch 的归约方式支持 sum、prod、mean、amax 和 amin 五种，其中 sum 和 prod 对应 paddle 的 add 和 mul 归约方式，因此需要为 paddle 补充 mean、amin、amax 三种归约方式。
 
+ `Tensor.scatter_reduce_(dim, index, src, reduce, *, include_self=True) → Tensor`
+
+- dim (int) – the axis along which to index
+- index (LongTensor) – the indices of elements to scatter and reduce.
+- src (Tensor) – the source elements to scatter and reduce
+- reduce (str) – the reduction operation to apply for non-unique indices ("sum", "prod", "mean", "amax", "amin")
+- include_self (bool) – whether elements from the self tensor are included in the reduction
+
+索引计算方式与 paddle 一致。
+ ```python
+self[index[i][j][k]][j][k] += src[i][j][k]  # if dim == 0
+self[i][index[i][j][k]][k] += src[i][j][k]  # if dim == 1
+self[i][j][index[i][j][k]] += src[i][j][k]  # if dim == 2
+ ```
+
+paddle不支持include_self=True，默认是 include_self=False的。
+
+paddle不支持 mean/max/min 规约，多了assign规约。
+
  ### 实现方法
 
  因为整个算子的实现部分可以分为 index 的计算和归约算子的实现两个部分，而本次任务仅需要增强归约方式，所以下面仅阐述归约算子的实现方法。
@@ -44,10 +63,6 @@
    constexpr void operator() (at::opmath_type<scalar_t> * self_data, scalar_t * src_data) const {
      using opmath_t = at::opmath_type<scalar_t>;
      *self_data *= opmath_t(*src_data);
-   }
-
-   constexpr void operator() (bool * self_data, bool * src_data) const {
-     *self_data = *self_data && *src_data;
    }
  };
  static ReduceMultiply reduce_multiply;
@@ -223,6 +238,12 @@
  - `axis (int) - 指定沿着哪个维度获取对应的值，数据类型为：int。`
  - `reduce (str，可选) - 归约操作类型，默认为 assign，可选为 add， mul，max, min, mean。不同的规约操作插入值 value 对于输入矩阵 arr 会有不同的行为，如为 assgin 则覆盖输入矩阵，add 则累加至输入矩阵，mul 则累乘至输入矩阵，max 则取最大至输入矩阵， min 则取最小至输入矩阵， mean 则取平均至输入矩阵。`
 
+
+相比于 torch.scatter_reduce 主要差异点为：
+
+1. reduce 新增 max, min, mean 等规约方式。 torch 不支持 assgin。
+2. torch 支持 include_self 配置， paddle 使用 include_self=False，此处保持不变。
+
  ## 底层OP设计
 
  在 CPU 端的归约算子实现：
@@ -232,7 +253,7 @@
   public:
    template <typename tensor_t>
    void operator()(tensor_t* self_data, tensor_t* src_data) const {
-     *self_data = std::isnan<tensor_t>(*self_data) ? *self_data : std::max(*self_data, *src_data);
+     *self_data = std::isnan<tensor_t>(*src_data) ? *src_data : std::max(*self_data, *src_data);
    }
  };
  static ReduceMaximum reduce_maximum;
@@ -241,7 +262,7 @@
   public:
    template <typename tensor_t>
    void operator()(tensor_t* self_data, tensor_t* src_data) const {
-     *self_data = std::isnan<tensor_t>(*self_data) ? *self_data :  std::min(*self_data, *src_data);
+     *self_data = std::isnan<tensor_t>(*src_data) ? *src_data :  std::min(*self_data, *src_data);
    }
  };
  static ReduceMinimum reduce_minimum;
@@ -299,6 +320,7 @@
 
  测试考虑的 case 如下：
  - 增加 reduce 分别为 'min'、'max' 和 'mean' 时的单测.
+ - 验证反向梯度是否正确。
 
  # 七、可行性分析和排期规划
 
