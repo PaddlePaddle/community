@@ -153,7 +153,7 @@ API设计为 `paddle.multigammaln(x, p)`。其中，`x` 为 `Tensor` 类型，�
 
 ## API实现方案
 
-参考 PyTorch 采用现有 PYTHON API 组合实现，实现位置为 Paddle repo `python/paddle/tensor/math.py` 目录。并在 python/paddle/tensor/init.py 中，添加 `mvlgamma` & `mvlgamma_` API（alias for `multigammaln`），以支持 `paddle.Tensor.mvlgamma` & `paddle.Tensor.mvlgamma_` 的调用方式
+参考 PyTorch 采用现有 PYTHON API 组合实现，实现位置为 Paddle repo `python/paddle/tensor/math.py` 目录。并在 python/paddle/tensor/init.py 中，添加 `multigammaln` & `multigammaln_` API，以支持 `paddle.Tensor.multigammaln` & `paddle.Tensor.multigammaln_` 的调用方式。
 
 # 六、测试和验收的考量
 
