@@ -134,25 +134,30 @@ Tensorflow 没有提供 `scatter` 的API。
 # 五、方案设计
 
 ## 命名与参数设计
+
+为了兼容现有API，并支持axis, reduce的功能扩展，scatter API 按如下接口设计：
+
 ```python
 # https://github.com/PaddlePaddle/Paddle/blob/release/2.5/python/paddle/tensor/manipulation.py#L2849
 paddle.scatter(x, index, updates, overwrite=True,  axis=0, reduce='sum', name=None)
 paddle.scatter_(x, index, updates, overwrite=True, axis=0, reduce='sum', name=None)
-```
+
 scatter 参数如下：
+```
 - `x (Tensor)` - ndim > = 1 的输入 N-D Tensor。数据类型可以是 float32，float64。
 - `index （Tensor）`- 一维或者零维 Tensor。数据类型可以是 int32，int64。 index 的长度不能超过 updates 的长度，并且 index 中的值不能超过输入的长度。
 - `updates （Tensor` - 根据 index 使用 update 参数更新输入 x。当 index 为一维 tensor 时，updates 形状应与输入 x 相同，并且 dim>1 的 dim 值应与输入 x 相同。当 index 为零维 tensor 时，updates 应该是一个 (N-1)-D 的 Tensor，并且 updates 的第 i 个维度应该与 x 的 i+1 个维度相同。
 - `overwrite （bool，可选)`- 指定索引 index 相同时，更新输出的方式。如果为 True，则使用覆盖模式更新相同索引的输出，如果为 False，则根据`reduce`参数指定的模式更新相同索引的输出。默认值为 True。
 - `axis (int, 可选)` - 要索引的维度。默认值为0.
-- `reduce(str,可选)` - 指定规约运算，可以是“sum”或“mul”。默认值为"sum".
+- `reduce(str,可选)` - 指定规约运算，可以是 sum、mul, mean, max, min。默认值为 sum.
 - `name (str，可选)` - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
 
 相比于 torch.scatter 和 torch.index_reduce ：
 1. 新增 axis 属性，支持按axis所以，实现方式同 torch.index_reduce。
-2. 新增 reduce 属性，支持 sum/mul 规约方式，实现方式同  torch.scatter.
+2. 新增 reduce 属性，支持 sum、mul、mean, max, min 规约方式，实现方式同  torch.scatter、torch.index_reduce .
 3. 相比于 torch.index_reduce 中的 include_self=True，paddle.scatter 保持不变，仍为 include_self=False 。
+4. assign 规约，任由 overwrite 控制，reduce 中不新增。
 
 ## 底层OP设计
 
