@@ -220,8 +220,8 @@ if (op == SCATTER_GATHER_OP::REDUCE_MEAN) {
 
  ## 命名与参数设计
 
- `paddle.put_along_axis(arr, indices, values, axis, reduce='assign')`
- `paddle.put_along_axis_(arr, indices, values, axis, reduce='assign')`
+ `paddle.put_along_axis(arr, indices, values, axis, reduce='assign', include_self=True)`
+ `paddle.put_along_axis_(arr, indices, values, axis, reduce='assign', include_self=True)`
 
  其中 put_along_axis_ 是 put_along_axis 的 inplace 版本。
 
