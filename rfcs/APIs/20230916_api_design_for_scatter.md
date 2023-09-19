@@ -226,6 +226,7 @@ self[:, :, index[i]] *= src[:, :, i]  # if axis == 2
 ```
 
 reduce=sum 的计算逻辑和 mean 类似。
+overwite的计算逻辑不变，同assign。
 
 ## API实现方案
 
