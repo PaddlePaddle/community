@@ -170,15 +170,13 @@ void index_fill_kernel_impl(
 
 ## Paddle
 
-Paddle已经实现了index_put API用于依据索引 `indices` ，将指定位置的 `x` 重新赋值为 `value`，链接：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/index_put__cn.html
-
-其API的用法和index_fill不甚相同，但是功能上可以覆盖，可以说更加灵活
+Paddle已经实现setitem函数，可以直接在索引维度上赋值，动态图下直接用`=`号，静态图下使用paddle.static.setitem API
 
 
 
 # 四、对比分析
 
-可以直接参考的实现是pytorch，但是鉴于paddle中已有index_put API，可以想到组合index_put和其它Paddle API，在python端实现index_fill的功能，由此利用index_put已经实现的动静图、前反向功能
+可以直接参考的实现是pytorch，但是鉴于paddle中已有根据索引赋值的功能，可以想到组合其它Paddle API，在python端实现index_fill的功能。
 
 
 
@@ -186,16 +184,16 @@ Paddle已经实现了index_put API用于依据索引 `indices` ，将指定位�
 
 ## 命名与参数设计
 
-API设计为`paddle.index_fill(x, axis, index, value, name)`以及`paddle.index_fill_(x, axis, index, value, name)`。
+API设计为`paddle.index_fill(x, index, axis, value, name)`以及`paddle.index_fill_(x, index, axis, value, name)`。
 
 paddle.index_fill
 ----------------------
 参数
 :::::::::
 
-- x (Tensor) - 需要填充的目标Tensor，`x` 的数据类型可以是 float16, float32，float64，int32，int64，bool。
-- axis (int) - 索引轴。数据类型为 int。
+- x (Tensor) - 需要填充的目标Tensor，`x` 的数据类型可以是 float16, float32，float64，int32，int64，bool
 - index (Tensor) - 包含索引下标的 1-D Tensor，可以为int32和int64
+- axis (int) - 索引轴。数据类型为 int
 - value (scalar|Tensor) - Tensor填充的值，可以为标量或者0-D Tensor
 - name  (str) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
@@ -211,9 +209,9 @@ paddle.index_fill_
 参数
 :::::::::
 
-- x (Tensor) - 需要填充的目标Tensor，`x` 的数据类型可以是 float16, float32，float64，int32，int64，bool。
-- axis (int) - 索引轴。数据类型为 int。
+- x (Tensor) - 需要填充的目标Tensor，`x` 的数据类型可以是 float16, float32，float64，int32，int64，bool
 - index (Tensor) - 包含索引下标的 1-D Tensor，可以为int32和int64
+- axis (int) - 索引轴。数据类型为 int
 - value (scalar|Tensor) - Tensor填充的值，可以为标量或者0-D Tensor
 - name  (str) - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
@@ -225,56 +223,23 @@ python端API组合实现
 
 ## API实现方案
 
-参考 PyTorch 的计算逻辑，先将输入Tensor展开，再构造index_put的输入参数，最后返回形状复原后的结果，初版代码如下
+使用transpose函数将需要索引的轴提出到第一个维度，将要更改的数聚集到索引列上，然后直接赋值`value`
 
 ~~~python
-def compute_stride(axis, dims):
-    size = 1
-    for i in range(axis + 1, len(dims)):
-        size *= dims[i]
-    return size
+if not isinstance(index, (paddle.Tensor, Variable)):
+    raise ValueError("index must be Tensor")
 
-if isinstance(index, paddle.Tensor):
-    index = index.numpy()
+perm = [i for i in range(len(x.shape))]
+perm[0] = axis
+perm[axis] = 0
 
-ndims = len(x.shape)
-finished = 0
-counter = [0] * ndims
-x_data = 0
-x_stride = compute_stride(axis, x.shape)
-x_dim_vec = x.shape
-out = paddle.to_tensor(x)
-out = paddle.flatten(out)
-idx = []
-
-while finished == 0:
-    for i in index:
-        idx.append(x_data + i * x_stride)
-    if ndims == 1: break
-    for dim_i in range(ndims):
-        if dim_i == axis:
-            if dim_i == ndims - 1:
-                finished = 1
-                break
-            continue
-        x_stride_ = compute_stride(dim_i, x_dim_vec)
-        counter[dim_i] += 1
-        x_data += x_stride_
-        if counter[dim_i] == x_dim_vec[dim_i]:
-            if dim_i == ndims - 1:
-                finished = 1
-                break
-            else:
-                x_data -= counter[dim_i] * x_stride_
-                counter[dim_i] = 0
-        else:
-            break
-
-values = paddle.to_tensor([value] * len(idx))
-idx = paddle.to_tensor(idx)
-indices = (idx,)
-out = paddle.index_put(out, indices, values, accumulate=False)
-return paddle.reshape(out, x_dim_vec)
+out = paddle.clone(x)
+out = paddle.transpose(out, perm)
+if in_dynamic_mode():
+    out[index] = value
+else:
+    out = paddle.static.setitem(out, index, value)
+return paddle.transpose(out, perm)
 ~~~
 
 索引的遍历参考了cummax/cummin算子的CPU实现，[链接](https://github.com/PaddlePaddle/Paddle/pull/53546/files#diff-0417a927e0148c22ecb722f950e2f9704d6e899e9899521f0a269b173ceb2de2)
