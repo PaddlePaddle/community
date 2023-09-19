@@ -1,12 +1,12 @@
 # paddle.put_along_axis 设计文档
 
-| API名称      | paddle.scatter                     |
+| API名称      | paddle.put_along_axis                     |
 | ------------ | -------------------------------------- |
 | 提交作者     | mhy                                    |
 | 提交时间     | 2023-09-18                             |
 | 版本号       | V1.0                                   |
 | 依赖飞桨版本  |  develop                                |
-| 文件名       | 20230918_api_design_for_scatter.md |
+| 文件名       | 20230918_api_design_for_put_along_axis.md |
 
 
  # 一、概述
@@ -229,7 +229,7 @@ if (op == SCATTER_GATHER_OP::REDUCE_MEAN) {
  - `indices (Tensor) - 索引矩阵，包含沿轴提取 1d 切片的下标，必须和 arr 矩阵有相同的维度，需要能够 broadcast 与 arr 矩阵对齐，数据类型为：int、int64。`
  - `value （float）- 需要插入的值，形状和维度需要能够被 broadcast 与 indices 矩阵匹配，数据类型为：float32、float64。`
  - `axis (int) - 指定沿着哪个维度获取对应的值，数据类型为：int。`
- - `reduce (str，可选) - 归约操作类型，默认为 assign，可选为 add， mul，max, min, mean。不同的规约操作插入值 value 对于输入矩阵 arr 会有不同的行为，如为 assgin 则覆盖输入矩阵，add 则累加至输入矩阵，mul 则累乘至输入矩阵，max 则取最大至输入矩阵， min 则取最小至输入矩阵， mean 则取平均至输入矩阵。`
+ - `reduce (str，可选) - 归约操作类型，默认为 assign，可选为 add， mul，amax, amin, mean。不同的规约操作插入值 value 对于输入矩阵 arr 会有不同的行为，如为 assgin 则覆盖输入矩阵，add 则累加至输入矩阵，mul 则累乘至输入矩阵，amax 则取最大至输入矩阵， amin 则取最小至输入矩阵， mean 则取平均至输入矩阵。`
  - `include_self (bool，可选)` - arr 张量中的元素是否包含在规约中。默认值 include_self = True.
 
 
@@ -305,6 +305,57 @@ if (op == SCATTER_GATHER_OP::REDUCE_MEAN) {
 
  mean 归约算子最后在外部除元素个数。
 
+反向梯度计算逻辑如下：
+
+```c++
+  if (reduce == "prod") {
+    Tensor masked_self = self.masked_fill(self == 0, 1);
+    Tensor masked_self_result = masked_self.index_reduce(dim, index, source, reduce, include_self);
+    grad_self = grad * masked_self_result / masked_self;
+    Tensor src_zero = source == 0;
+    Tensor src_num_zeros = zeros_like(self).index_add(dim, index, src_zero.to(self.dtype())).index_select(dim, index);
+    Tensor src_single_zero = bitwise_and(src_zero, src_num_zeros == 1);
+    // For src positions with src_single_zero, (grad * result).index_select(dim,index) / source.masked_fill(src_zero, 1)
+    // would incorrectly propagate zeros as the gradient
+    Tensor masked_src = source.masked_fill(src_single_zero, 1);
+    Tensor masked_src_result = self.index_reduce(dim, index, masked_src, reduce, include_self);
+    Tensor grad_src1 = where(src_single_zero,
+                             (grad * masked_src_result).index_select(dim, index),
+                             (grad * result).index_select(dim, index) / source.masked_fill(src_zero, 1));
+    if ((src_num_zeros > 1).any().item<bool>()) {
+      auto node = std::make_shared<DelayedError>(
+        "index_reduce(): Double backward is unsupported for source when >1 zeros in source are scattered to the same position in self",
+        /* num inputs */ 1);
+      auto result = node->apply({ grad_src1 });
+      grad_src = result[0];
+    } else {
+      grad_src = grad_src1;
+    }
+  } else if (reduce == "mean") {
+    Tensor N = include_self ? ones_like(grad) : zeros_like(grad);
+    N = N.index_add(dim, index, ones_like(source));
+    N.masked_fill_(N == 0, 1);
+    grad_self = grad / N;
+    Tensor N_src = N.index_select(dim, index);
+    grad_src = grad.index_select(dim, index) / N_src;
+  } else if (reduce == "amax" || reduce == "amin") {
+    Tensor value = result.index_select(dim, index);
+    Tensor self_is_result = (self == result).to(self.scalar_type());
+    Tensor source_is_result = (source == value).to(self.scalar_type());
+    Tensor N_to_distribute = self_is_result.index_add(dim, index, source_is_result);
+    Tensor grad_distributed = grad / N_to_distribute;
+    grad_self = self_is_result * grad_distributed;
+    grad_src = source_is_result * grad_distributed.index_select(dim, index);
+  } else {
+    AT_ERROR("Expected 'reduce' to be one of 'prod', 'amax', 'amin' or 'mean' but got ", reduce, ".");
+  }
+
+  if (!include_self) {
+    grad_self = grad_self.index_fill(dim, index, 0);
+  }
+```
+
+reduce=sum 的计算逻辑和 mean 类似。
 
  ## API实现方案
 
