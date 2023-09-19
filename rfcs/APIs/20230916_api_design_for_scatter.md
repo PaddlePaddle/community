@@ -139,8 +139,8 @@ Tensorflow 没有提供 `scatter` 的API。
 
 ```python
 # https://github.com/PaddlePaddle/Paddle/blob/release/2.5/python/paddle/tensor/manipulation.py#L2849
-paddle.scatter(x, index, updates, overwrite=True,  axis=0, reduce='sum', name=None)
-paddle.scatter_(x, index, updates, overwrite=True, axis=0, reduce='sum', name=None)
+paddle.scatter(x, index, updates, overwrite=True,  axis=0, reduce='sum', include_self=False, name=None)
+paddle.scatter_(x, index, updates, overwrite=True, axis=0, reduce='sum', include_self=False, name=None)
 
 scatter 参数如下：
 ```
