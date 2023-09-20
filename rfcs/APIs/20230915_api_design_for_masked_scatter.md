@@ -23,31 +23,48 @@
 该API是一个常用的API，可以方便用户使用。让用户不用自己实现该功能，提高用户的使用效率。
 
 # 二、飞桨现状
+## 组合实现
+目前paddle缺少相关功能实现。只能通过 paddle 现有的 API 组合实现。主要利用的api如下：
+- `paddle.broadcast_to`：将mask广播成和待填充tensor一样形状。
+- `paddle.where`：查找mask中值为true对应位置的索引。
+- `paddle.index_put`：根据索引和值对待填充tensor对应位置进行赋值。
 
-目前paddle缺少相关功能实现。只能通过 paddle 现有的 API 组合实现。实现如下：
-
+具体代码实现如下：
 ```python
 import paddle
 
-def masked_scatter(x, mask, src):
+def masked_scatter(x, mask, value, inplace=False):
     """
     利用现有api实现masked_scatter功能
     """
     # make sure the mask can be broadcastable to input
     assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
-    # turn mask to bool
     mask = paddle.broadcast_to(mask, shape=x.shape)
-    # make sure the true nums in mask is <= the nums of source
-    assert mask.sum() <= src.numel(), 'mask true nums must be <= source size'
+    # make sure the true nums in mask is <= the nums of value
+    assert mask.sum() <= value.numel(), 'mask true nums must be <= value size'
     # make sure the dtype of x and source is the same
-    assert x.dtype == src.dtype, 'input and source must have the same dtype'
-    # out-place的实现
-    output = x.clone()
-    output[mask] = src.flatten()[:mask.sum()]
-    return output
-    # in-place的实现
-    # x[mask] = src.flatten()[:mask.sum()]
-    # return x
+    assert x.dtype == value.dtype, 'input and source must have the same dtype'
+
+    indexs = tuple(item.squeeze() for item in paddle.where(mask))
+    print("index of true value in mask: ", indexs)
+    if inplace and paddle.in_dynamic_mode():
+        return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
+    else:
+        return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
+```
+## 初步测试
+测试的代码如下所示：
+```python
+class Net(paddle.nn.Layer):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.linear = paddle.nn.Linear(4, 4)
+    
+    @paddle.jit.to_static
+    def forward(self, x):
+        y = self.linear(x)
+        return masked_scatter(y, mask, b, inplace=True)
+
 
 a = paddle.randn([3,4])
 print("a:", a)
@@ -55,21 +72,190 @@ mask = paddle.to_tensor([1.,0.5,1.,0.5])
 mask = mask>0.6
 print("mask: ", mask)
 b = paddle.to_tensor([1.,2.,3.,4.,5.,6.,7.])
-print("result of masked_scatter: ", masked_scatter(a, mask, b))
+ 
+net = Net()
+res = net(a)
 
-"""
+loss = paddle.mean(paddle.pow(res-paddle.ones_like(res), 2))
+loss.backward()
+print("res: ",res)
+```
+通过装饰器`@paddle.jit.to_static`指定动静态图模式，通过`inplace`参数指定执行inplace或outplace操作。
+### 动态图测试
+#### outplace
+```
 a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[-0.17249003,  1.19607437,  0.34872168, -0.66658390],
-        [ 2.30244637,  0.33958769, -0.15876916, -0.49489051],
-        [-0.01191955,  0.66219229, -0.62860924, -0.00913781]])
+       [[ 0.50508595, -0.57142472,  0.34164023, -1.71793330],
+        [-1.04813683,  1.94749498,  0.92576098,  0.18977740],
+        [ 0.24962157, -0.95671540, -0.70601028,  0.20051311]])
 mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
        [True , False, True , False])
-result of masked_scatter: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[ 1.        ,  1.19607437,  2.        , -0.66658390],
-        [ 3.        ,  0.33958769,  4.        , -0.49489051],
-        [ 5.        ,  0.66219229,  6.        , -0.00913781]])
-"""
+index of true value in mask:  (Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
+       [0, 0, 1, 1, 2, 2]), Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
+       [0, 2, 0, 2, 0, 2]))
+res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
+       [[ 1.        , -0.48612538,  2.        ,  1.98325372],
+        [ 3.        , -1.27658749,  4.        , -1.09418225],
+        [ 5.        ,  0.70582151,  6.        ,  0.13813046]])
 ```
+#### inplace
+```
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
+       [[-1.28495479, -0.33748436,  2.15355968, -1.56535161],
+        [ 0.07834079, -0.16553184, -0.60210073,  0.51506144],
+        [-0.02662235, -1.04836142, -1.66325510,  0.92996895]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+       [True , False, True , False])
+index of true value in mask:  (Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
+       [0, 0, 1, 1, 2, 2]), Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
+       [0, 2, 0, 2, 0, 2]))
+res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
+       [[ 1.        ,  1.03400707,  2.        , -3.30637121],
+        [ 3.        , -0.07386497,  4.        ,  0.61626333],
+        [ 5.        , -0.09191823,  6.        ,  0.74832195]])
+```
+### 静态图测试
+#### outplace
+```
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
+       [[-1.76391935, -0.00142353,  0.32293102,  2.12124515],
+        [-1.27195692, -1.44442165,  0.40191424, -2.08972764],
+        [ 0.67450720, -0.40461785, -1.49469006, -0.15822217]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+       [True , False, True , False])
+index of true value in mask:  (var squeeze_0.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True), var squeeze_1.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True))
+I0920 15:59:18.341959  7804 program_interpreter.cc:140] New Executor is Running.
+I0920 15:59:18.349983  7804 interpreter_util.cc:605] Standalone Executor is Used.
+res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
+       [[ 1.        ,  0.89891565,  2.        , -0.57123518],
+        [ 3.        , -0.41151577,  4.        ,  0.73677796],
+        [ 5.        , -0.69148386,  6.        , -0.32962719]])
+```
+#### inplace
+静态图模式下`paddle.index_put_`不可用，此处仍展示运行结果以及警告信息，测试代码如下：
+```python
+import paddle
+
+def masked_scatter(x, mask, value, inplace=False):
+    """
+    利用现有api实现masked_scatter功能
+    """
+    # make sure the mask can be broadcastable to input
+    assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
+    # turn mask to bool
+    mask = paddle.broadcast_to(mask, shape=x.shape)
+    # make sure the true nums in mask is <= the nums of value
+    assert mask.sum() <= value.numel(), 'mask true nums must be <= value size'
+    # make sure the dtype of x and source is the same
+    assert x.dtype == value.dtype, 'input and source must have the same dtype'
+
+    indexs = tuple(item.squeeze() for item in paddle.where(mask))
+    print("index of true value in mask: ", indexs)
+    if inplace and not paddle.in_dynamic_mode():
+        return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
+
+class Net(paddle.nn.Layer):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.linear = paddle.nn.Linear(4, 4)
+    
+    @paddle.jit.to_static
+    def forward(self, x):
+        y = self.linear(x)
+        return masked_scatter(y, mask, b, inplace=True)
+
+
+a = paddle.randn([3,4])
+print("a:", a)
+mask = paddle.to_tensor([1.,0.5,1.,0.5])
+mask = mask>0.6
+print("mask: ", mask)
+b = paddle.to_tensor([1.,2.,3.,4.,5.,6.,7.])
+ 
+net = Net()
+res = net(a)
+
+loss = paddle.mean(paddle.pow(res-paddle.ones_like(res), 2))
+loss.backward()
+print("res: ",res)
+
+'''
+这种情况会报错：
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
+       [[-0.34334219,  0.29797703,  1.57610333,  0.57713234],
+        [ 1.01555479, -0.78327483,  1.50608945, -0.32091832],
+        [-0.76809406, -0.49917048, -0.96261829,  0.04977092]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+       [True , False, True , False])
+index of true value in mask:  (var squeeze_0.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True), var squeeze_1.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True))
+E:\MyAPP\miniconda\Lib\site-packages\paddle\utils\inplace_utils.py:31: UserWarning: In static graph mode, index_put_() is the same as index_put() and does not perform inplace operation.
+  warnings.warn(
+Traceback (most recent call last):
+  File "D:\PythonProjects\community\test.py", line 76, in <module>
+    res = net(a)
+          ^^^^^^
+  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\nn\layer\layers.py", line 1348, in __call__
+    return self.forward(*inputs, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\jit\dy2static\program_translator.py", line 480, in __call__
+    return self._perform_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\jit\dy2static\program_translator.py", line 802, in _perform_call
+    error_data.raise_new_exception()
+  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\jit\dy2static\error.py", line 452, in raise_new_exception
+    raise new_exception from None
+ValueError: In transformed code:
+
+    File "D:\PythonProjects\community\test.py", line 65, in forward
+        return masked_scatter(y, mask, b, inplace=True)
+    File "D:\PythonProjects\community\test.py", line 49, in masked_scatter
+        if inplace and not paddle.in_dynamic_mode():
+    File "D:\PythonProjects\community\test.py", line 50, in masked_scatter
+        print("index of true value in mask: ", indexs)
+        if inplace and not paddle.in_dynamic_mode():
+            return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ <--- HERE
+        # if inplace and paddle.in_dynamic_mode():
+        #     return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
+
+    File "E:\MyAPP\miniconda\Lib\site-packages\decorator.py", line 232, in fun
+        return caller(func, *(extras + args), **kw)
+    File "E:\MyAPP\miniconda\Lib\site-packages\paddle\base\wrapped_decorator.py", line 25, in __impl__
+        return wrapped_func(*args, **kwargs)
+    File "E:\MyAPP\miniconda\Lib\site-packages\paddle\utils\inplace_utils.py", line 41, in __impl__
+        raise ValueError(
+
+    ValueError: Sorry about what's happend. In to_static mode, index_put_'s output variable flatten_0.tmp_0_slice_0 is a viewed Tensor in dygraph. This will result in inconsistent calculation behavior between dynamic and static graphs. You mast find the location of the strided API be called, and call flatten_0.tmp_0_slice_0 = flatten_0.tmp_0_slice_0.assign().
+'''
+```
+根据报错提示修改代码，做法是将用于填充的Tensor复制一份：
+```python
+# 修改前
+return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])    
+# 修改后
+return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()].clone())
+
+'''
+运行结果如下：
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
+       [[ 0.72673988,  1.74302280,  0.36312774, -0.89876205],
+        [-0.83842933, -0.06078178,  1.21603084,  1.57265437],
+        [-0.10622863,  0.21086957, -0.16041717, -0.34174833]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+       [True , False, True , False])
+index of true value in mask:  (var squeeze_0.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True), var squeeze_1.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True))
+E:\MyAPP\miniconda\Lib\site-packages\paddle\utils\inplace_utils.py:31: UserWarning: In static graph mode, index_put_() is the same as index_put() and does not perform inplace operation.
+  warnings.warn(
+I0920 16:11:18.380725 20956 program_interpreter.cc:140] New Executor is Running.
+I0920 16:11:18.387750 20956 interpreter_util.cc:605] Standalone Executor is Used.
+res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
+       [[ 1.        , -2.04496288,  2.        ,  1.41189837],
+        [ 3.        ,  1.45620036,  4.        , -0.32584974],
+        [ 5.        , -0.36014718,  6.        ,  0.02144548]])
+'''
+```
+## 总结
+从测试结果看来，静态图模式下，`paddle.index_put_`这个api貌似无法使用，所以只在`动态图且需要inplace操作`的情况下调用`paddle.index_put_`，其余情况都调用`paddle.index_put`。
 
 # 三、业内方案调研
 
@@ -229,21 +415,21 @@ Numpy中没有`masked_scatter`API的实现
 
 ## 命名与参数设计
 ```python
-paddle.masked_scatter(x, mask, source)
+paddle.masked_scatter(x, mask, value)
 
-paddle.masked_scatter_(x, mask, source)
+paddle.masked_scatter_(x, mask, value)
 
-Tensor.masked_scatter(mask, source)
+Tensor.masked_scatter(mask, value)
 
-Tensor.masked_scatter_(mask, source)
+Tensor.masked_scatter_(mask, value)
 ```
 masked_scatter和masked_scatter_分别表示out-place和in-place两种计算形式。
 
-- `x (Tensor)`: 输入的张量，需要根据mask进行赋值操作。
+- `x (Tensor, float16, float32，float64，int32，int64，bool)`: 输入的张量，需要根据mask进行赋值操作。
 - `mask (Tensor, bool)`: 用于指定填充位置的布尔值掩码张量，与 input 张量形状相同，或者可以广播成input张量的形状。
-- `source (Tensor)`: 待填充的张量，其中元素的数量应该不少于mask中True的个数。
+- `value (Tensor, float16, float32，float64，int32，int64，bool)`: 待填充的张量，其中元素的数量应该不少于mask中True的个数。
 - `name (str，可选)` :一般无需设置，默认值为 None。
-
+> 注：x所支持参数类型参考了`paddle.index_put`这个api，与其保持一致
 ## 底层OP设计
 
 依赖已有OP(broadcast_to / flatten)实现，无需实现新的底层Op。
@@ -252,25 +438,24 @@ masked_scatter和masked_scatter_分别表示out-place和in-place两种计算形�
 
 在 python/paddle/tensor/manipulation.py 中增加 masked_scatter 以及 masked_scatter_ 函数。初步的实现方案如下：
 ```python
-def masked_scatter(x, mask, src):
+def masked_scatter(x, mask, value, inplace=False):
     """
     利用现有api实现masked_scatter功能
     """
     # make sure the mask can be broadcastable to input
     assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
-    # turn mask to bool
     mask = paddle.broadcast_to(mask, shape=x.shape)
-    # make sure the true nums in mask is <= the nums of source
-    assert mask.sum() <= src.numel(), 'mask true nums must be <= source size'
+    # make sure the true nums in mask is <= the nums of value
+    assert mask.sum() <= value.numel(), 'mask true nums must be <= value size'
     # make sure the dtype of x and source is the same
-    assert x.dtype == src.dtype, 'input and source must have the same dtype'
-    # out-place的实现
-    output = x.clone()
-    output[mask] = src.flatten()[:mask.sum()]
-    return output
-    # in-place的实现
-    # x[mask] = src.flatten()[:mask.sum()]
-    # return x
+    assert x.dtype == value.dtype, 'input and source must have the same dtype'
+
+    indexs = tuple(item.squeeze() for item in paddle.where(mask))
+    print("index of true value in mask: ", indexs)
+    if inplace and paddle.in_dynamic_mode():
+        return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
+    else:
+        return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
 ```
 
 # 六、测试和验收的考量
@@ -296,4 +481,6 @@ def masked_scatter(x, mask, src):
 # 名词解释
 
 # 附件及参考资料
+[paddle.index_put_](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/index_put__cn.html#cn-api-paddle-index-put)
+
 [TORCH.TENSOR.MASKED_SCATTER_](https://pytorch.org/docs/2.0/generated/torch.Tensor.masked_scatter_.html#torch.Tensor.masked_scatter_)
