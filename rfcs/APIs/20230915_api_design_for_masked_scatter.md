@@ -37,9 +37,9 @@ def masked_scatter(x, mask, value, inplace=False):
     """
     利用现有api实现masked_scatter功能
     """
-    # make sure the mask can be broadcastable to input
-    assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
-    mask = paddle.broadcast_to(mask, shape=x.shape)
+    # make sure the mask.shape==x.shape
+    if mask.shape != x.shape:
+        mask = paddle.broadcast_to(mask, shape=x.shape)
     # make sure the true nums in mask is <= the nums of value
     assert mask.sum() <= value.numel(), 'mask true nums must be <= value size'
     # make sure the dtype of x and source is the same
