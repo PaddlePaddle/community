@@ -170,13 +170,15 @@ void index_fill_kernel_impl(
 
 ## Paddle
 
-Paddle已经实现setitem函数，可以直接在索引维度上赋值，动态图下直接用`=`号，静态图下使用paddle.static.setitem API
+Paddle已经实现了index_put API用于依据索引 `indices` ，将指定位置的 `x` 重新赋值为 `value`，链接：https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/index_put__cn.html
+
+其API的用法和index_fill不甚相同，但是功能上可以覆盖，可以说更加灵活
 
 
 
 # 四、对比分析
 
-可以直接参考的实现是pytorch，但是鉴于paddle中已有根据索引赋值的功能，可以想到组合其它Paddle API，在python端实现index_fill的功能。
+可以直接参考的实现是pytorch，但是鉴于paddle中已有index_put API，可以想到组合index_put和其它Paddle API，在python端实现index_fill的功能，由此利用index_put已经实现的动静图、前反向功能
 
 
 
@@ -223,23 +225,18 @@ python端API组合实现
 
 ## API实现方案
 
-使用transpose函数将需要索引的轴提出到第一个维度，将要更改的数聚集到索引列上，然后直接赋值`value`
+使用transpose函数将需要索引的轴提出到第一个维度，将要更改的数聚集到索引列上，然后利用index_put函数赋值`value`
 
 ~~~python
-if not isinstance(index, (paddle.Tensor, Variable)):
-    raise ValueError("index must be Tensor")
-
-perm = [i for i in range(len(x.shape))]
-perm[0] = axis
-perm[axis] = 0
-
-out = paddle.clone(x)
-out = paddle.transpose(out, perm)
-if in_dynamic_mode():
-    out[index] = value
+if inplace:
+    paddle.transpose(x, perm)
+    paddle.index_put_(x, (index,), value)
+    return x
 else:
-    out = paddle.static.setitem(out, index, value)
-return paddle.transpose(out, perm)
+    out = paddle.clone(x)
+    out = paddle.transpose(out, perm)
+    out = paddle.index_put(out, (index,), value)
+    return paddle.transpose(out, perm)
 ~~~
 
 索引的遍历参考了cummax/cummin算子的CPU实现，[链接](https://github.com/PaddlePaddle/Paddle/pull/53546/files#diff-0417a927e0148c22ecb722f950e2f9704d6e899e9899521f0a269b173ceb2de2)
