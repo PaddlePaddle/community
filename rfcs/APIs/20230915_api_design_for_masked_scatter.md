@@ -132,7 +132,7 @@ res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
         [ 5.        , -0.69148386,  6.        , -0.32962719]])
 ```
 #### inplace
-静态图模式下`paddle.index_put_`不可用，此处仍展示运行结果以及警告信息，测试代码如下：
+静态图模式下调用`paddle.index_put_`会自动调用`paddle.index_put`，此处仍展示运行结果以及警告信息，测试代码如下：
 ```python
 import paddle
 
