@@ -55,11 +55,12 @@ def masked_scatter(x, mask, value, inplace=False):
 ## 初步测试
 测试的代码如下所示：
 ```python
+paddle.enable_static()
 class Net(paddle.nn.Layer):
     def __init__(self):
         super(Net, self).__init__()
         self.linear = paddle.nn.Linear(4, 4)
-    
+
     @paddle.jit.to_static
     def forward(self, x):
         y = self.linear(x)
@@ -80,41 +81,56 @@ loss = paddle.mean(paddle.pow(res-paddle.ones_like(res), 2))
 loss.backward()
 print("res: ",res)
 ```
-通过装饰器`@paddle.jit.to_static`指定动静态图模式，通过`inplace`参数指定执行inplace或outplace操作。
+通过`paddle.enable_static()`开启静态图模式，通过装饰器`@paddle.jit.to_static`指定动转静模式，通过`inplace`参数指定执行inplace或outplace操作。
 ### 动态图测试
 #### outplace
 ```
 a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[ 0.50508595, -0.57142472,  0.34164023, -1.71793330],
-        [-1.04813683,  1.94749498,  0.92576098,  0.18977740],
-        [ 0.24962157, -0.95671540, -0.70601028,  0.20051311]])
+       [[ 0.44060594,  1.41967177, -1.03187060, -3.06084108],
+        [ 0.56911004,  0.56130934,  0.92636645,  0.57359296],
+        [-0.04028929,  0.62526917,  0.94755191,  0.33935449]])
 mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
        [True , False, True , False])
 index of true value in mask:  (Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
        [0, 0, 1, 1, 2, 2]), Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
        [0, 2, 0, 2, 0, 2]))
 res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
-       [[ 1.        , -0.48612538,  2.        ,  1.98325372],
-        [ 3.        , -1.27658749,  4.        , -1.09418225],
-        [ 5.        ,  0.70582151,  6.        ,  0.13813046]])
+       [[ 1.        , -0.21508914,  2.        , -2.90583634],
+        [ 3.        ,  0.71659684,  4.        ,  1.51268935],
+        [ 5.        ,  0.37763220,  6.        ,  1.25583470]])
 ```
 #### inplace
 ```
 a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[-1.28495479, -0.33748436,  2.15355968, -1.56535161],
-        [ 0.07834079, -0.16553184, -0.60210073,  0.51506144],
-        [-0.02662235, -1.04836142, -1.66325510,  0.92996895]])
+       [[-0.42622679,  1.33712113, -2.09334922,  0.85301965],
+        [ 0.04164613, -0.73910606, -1.98063576,  0.72360164],
+        [ 0.88421333, -0.84990823, -1.24371624, -0.19058874]])
 mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
        [True , False, True , False])
 index of true value in mask:  (Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
        [0, 0, 1, 1, 2, 2]), Tensor(shape=[6], dtype=int64, place=Place(cpu), stop_gradient=True,
        [0, 2, 0, 2, 0, 2]))
 res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
-       [[ 1.        ,  1.03400707,  2.        , -3.30637121],
-        [ 3.        , -0.07386497,  4.        ,  0.61626333],
-        [ 5.        , -0.09191823,  6.        ,  0.74832195]])
+       [[ 1.        ,  1.71939731,  2.        ,  0.88803411],
+        [ 3.        ,  0.41720986,  4.        , -0.35232383],
+        [ 5.        , -0.06541544,  6.        , -0.97038400]])
 ```
 ### 静态图测试
+#### outplace
+```
+a: var gaussian_0.tmp_0 : LOD_TENSOR.shape(3, 4).dtype(float32).stop_gradient(True)
+mask:  var tmp_1 : LOD_TENSOR.shape(4,).dtype(bool).stop_gradient(True)
+index of true value in mask:  (var squeeze_0.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True), var squeeze_1.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True))
+res:  var index_put_0.tmp_0 : LOD_TENSOR.shape(3, 4).dtype(float32).stop_gradient(False)
+```
+#### inplace
+```
+a: var gaussian_0.tmp_0 : LOD_TENSOR.shape(3, 4).dtype(float32).stop_gradient(True)
+mask:  var tmp_1 : LOD_TENSOR.shape(4,).dtype(bool).stop_gradient(True)
+index of true value in mask:  (var squeeze_0.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True), var squeeze_1.tmp_0 : LOD_TENSOR.shape(-1,).dtype(int64).stop_gradient(True))
+res:  var index_put_0.tmp_0 : LOD_TENSOR.shape(3, 4).dtype(float32).stop_gradient(False)
+```
+### 动转静测试
 #### outplace
 ```
 a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
@@ -140,10 +156,9 @@ def masked_scatter(x, mask, value, inplace=False):
     """
     利用现有api实现masked_scatter功能
     """
-    # make sure the mask can be broadcastable to input
-    assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
-    # turn mask to bool
-    mask = paddle.broadcast_to(mask, shape=x.shape)
+     # make sure the mask.shape==x.shape
+    if mask.shape != x.shape:
+        mask = paddle.broadcast_to(mask, shape=x.shape)
     # make sure the true nums in mask is <= the nums of value
     assert mask.sum() <= value.numel(), 'mask true nums must be <= value size'
     # make sure the dtype of x and source is the same
@@ -255,7 +270,7 @@ res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
 '''
 ```
 ## 总结
-从测试结果看来，静态图模式下，`paddle.index_put_`这个api貌似无法使用，所以只在`动态图且需要inplace操作`的情况下调用`paddle.index_put_`，其余情况都调用`paddle.index_put`。
+从测试结果看来，动转静模式下，`paddle.index_put_`这个api貌似无法使用，所以只在`动态图且需要inplace操作`的情况下调用`paddle.index_put_`，其余情况都调用`paddle.index_put`。
 
 # 三、业内方案调研
 
@@ -425,14 +440,14 @@ Tensor.masked_scatter_(mask, value)
 ```
 masked_scatter和masked_scatter_分别表示out-place和in-place两种计算形式。
 
-- `x (Tensor, float16, float32，float64，int32，int64，bool)`: 输入的张量，需要根据mask进行赋值操作。
+- `x (Tensor)`: 输入的张量，支持的数据类型为float16、float32、float64、int32、int64、bool，需要根据mask进行赋值操作。
 - `mask (Tensor, bool)`: 用于指定填充位置的布尔值掩码张量，与 input 张量形状相同，或者可以广播成input张量的形状。
-- `value (Tensor, float16, float32，float64，int32，int64，bool)`: 待填充的张量，其中元素的数量应该不少于mask中True的个数。
+- `value (Tensor)`: 待填充的张量，支持的数据类型为float16、float32、float64、int32、int64、bool，其中元素的数量应该不少于mask中True的个数。
 - `name (str，可选)` :一般无需设置，默认值为 None。
 > 注：x所支持参数类型参考了`paddle.index_put`这个api，与其保持一致
 ## 底层OP设计
 
-依赖已有OP(broadcast_to / flatten)实现，无需实现新的底层Op。
+依赖已有OP(broadcast_to / flatten)实现，无需实现新的底层OP。
 
 ## API实现方案
 
