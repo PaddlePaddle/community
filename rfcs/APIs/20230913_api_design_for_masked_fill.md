@@ -214,7 +214,6 @@ masked_fill_支持inplace方式修改输入张量。
 - `value (Tensor, scalar)`: 待填充的数据，参数类型支持布尔值、整数、浮点数以及0维的张量。支持的数据类型有float、double、int、int64_t、float16和bfloat16。
 - `name (str，可选)` - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
-
 ## 底层OP设计
 
 依赖已有OP(where / full)实现，无需实现新的底层Op。
