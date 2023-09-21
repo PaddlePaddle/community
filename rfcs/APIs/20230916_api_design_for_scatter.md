@@ -158,7 +158,7 @@ scatter 参数如下：
 1. 目前不支持执行axis的属性，默认支持axis=0。
 2. reduce方式只支持 add，需要新增 mul、mean、amax、amin等规约方式。
 3. 不支持include_self配置，目前默认是 include_self=False。
-4. assign规约是由overwite控制，而不是reduce。考虑gpu下会出现多个结果，无法实现，所以需要删除assign的实现。但保留overwrite参数，默认值为False。但最好是将overwite参数删除。
+4. assign规约是由overwite控制，而不是reduce。注意当是assign模式时，index的数值不唯一时，计算结果行为不确定，梯度计算也不对。
 
 ## 底层OP设计
 
