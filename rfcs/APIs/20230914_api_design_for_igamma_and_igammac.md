@@ -16,11 +16,12 @@
 ## 2、功能目标
 新增 `paddle.igamma`, `paddle.igammac`, `paddle.igamma_`, `paddle.igammac_` API，即实现[上不完全伽马函数和下不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
 这两个函数的定义如下：
-$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $
-$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $
 
-上不完全伽马函数 $\Gamma(a,x)$ 的定义域为 $a>0$，$x\geq 0$，值域为 $(0,\Gamma(a)]$。
-下不完全伽马函数 $\gamma(a,x)$ 的定义域为 $a>0$，$x\geq 0$，值域为 $[0,\Gamma(a))$，其中 $\Gamma(a)$ 是伽马函数的值。
+$\Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $
+$\gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $
+
+上不完全伽马函数 $\Gamma(a,x)$ 的定义域为 $a>0$，$x \geq 0$，值域为 $(0,\Gamma(a)]$。
+下不完全伽马函数 $\gamma(a,x)$ 的定义域为 $a>0$，$x \geq 0$，值域为 $[0,\Gamma(a))$，其中 $\Gamma(a)$ 是伽马函数的值。
 
 相应的 API 需要输入两个参数 `input` 与 `other`，对应上式的 $a$ 和 $x$；
 
