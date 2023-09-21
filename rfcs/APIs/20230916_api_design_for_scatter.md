@@ -1,4 +1,4 @@
-# paddle.scatter API增项设计文档
+# paddle.scatter API增强设计文档
 
 | API名称      | paddle.scatter                     |
 | ------------ | -------------------------------------- |
@@ -139,8 +139,8 @@ Tensorflow 没有提供 `scatter` 的API。
 
 ```python
 # https://github.com/PaddlePaddle/Paddle/blob/release/2.5/python/paddle/tensor/manipulation.py#L2849
-paddle.scatter(x, index, updates, overwrite=True,  axis=0, reduce='sum', include_self=False, name=None)
-paddle.scatter_(x, index, updates, overwrite=True, axis=0, reduce='sum', include_self=False, name=None)
+paddle.scatter(x, index, updates, overwrite=False,  axis=0, reduce='sum', include_self=False, name=None)
+paddle.scatter_(x, index, updates, overwrite=False, axis=0, reduce='sum', include_self=False, name=None)
 
 scatter 参数如下：
 ```
@@ -154,11 +154,11 @@ scatter 参数如下：
 - `name (str，可选)` - 具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None。
 
 
-相比于 torch.scatter 和 torch.index_reduce ：
+相比于 paddle.scatter ：
 1. 目前不支持执行axis的属性，默认支持axis=0。
 2. reduce方式只支持 add，需要新增 mul、mean、amax、amin等规约方式。
 3. 不支持include_self配置，目前默认是 include_self=False。
-4. assign规约是有overwite控制，而不是reduce。考虑兼容性，不修改次属性。
+4. assign规约是由overwite控制，而不是reduce。考虑gpu下会出现多个结果，无法实现，所以需要删除assign的实现。但保留overwrite参数，默认值为False。但最好是将overwite参数删除。
 
 ## 底层OP设计
 
