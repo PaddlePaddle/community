@@ -16,8 +16,8 @@
 ## 2、功能目标
 新增 `paddle.igamma`, `paddle.igammac`, `paddle.igamma_`, `paddle.igammac_` API，即实现[上不完全伽马函数和下不完全伽马](https://wuli.wiki/online/IncGam.html)函数的 API。
 这两个函数的定义如下：
-$$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
-$$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $$
+$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $
+$ \gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $
 
 上不完全伽马函数 $\Gamma(a,x)$ 的定义域为 $a>0$，$x\geq 0$，值域为 $(0,\Gamma(a)]$。
 下不完全伽马函数 $\gamma(a,x)$ 的定义域为 $a>0$，$x\geq 0$，值域为 $[0,\Gamma(a))$，其中 $\Gamma(a)$ 是伽马函数的值。
@@ -425,7 +425,7 @@ Kernel部分GPU实现添加在 `paddle/phi/kernels/gpu/igamma_kernel.cu` 和 `pa
 
 ### 实现基础计算逻辑
 根据 igamma (上不完全伽马函数) 的定义，即
-$$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $$
+$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $
 设计相应的CPU和CUDA计算函数（CPU和CUDA主体逻辑相似，仅写法上会存在一些差异），这部分与PyTorch相似，也是最核心的内容。
 
 ### 实现基础计算逻辑的向量化（针对CPU）
