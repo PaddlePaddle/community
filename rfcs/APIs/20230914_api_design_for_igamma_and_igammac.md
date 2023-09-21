@@ -427,7 +427,7 @@ Kernel部分GPU实现添加在 `paddle/phi/kernels/gpu/igamma_kernel.cu` 和 `pa
 
 ### 实现基础计算逻辑
 根据 igamma (上不完全伽马函数) 的定义，即
-$ \Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $
+$\Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $
 设计相应的CPU和CUDA计算函数（CPU和CUDA主体逻辑相似，仅写法上会存在一些差异），这部分与PyTorch相似，也是最核心的内容。
 
 ### 实现基础计算逻辑的向量化（针对CPU）
