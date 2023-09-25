@@ -85,7 +85,7 @@ DocTr++版面矫正在文档比对、关键字提取、合同篡改确认等重�
 
 正确进行版面矫正的模型代码和权重，提交PR到PaddleOCR。
 
-### No.68：轻量语义分割网络[PIDNet](https://arxiv.org/abs/2206.02066)
+### No.68：轻量语义分割网络PIDNet
 
 **任务背景：**
 
@@ -183,7 +183,7 @@ ToT提出了一种新的思维架构来显著提升GPT解决问题的能力，�
 
 **任务背景：**
 
-RetroMAE，这是一种基于掩码自动编码器（MAE）的新的面向检索的预训练范式。RetroMAE有三个关键设计。1） 一种新的MAE工作流程，其中输入句子被不同掩码的编码器和解码器污染。句子嵌入是从编码器的屏蔽输入生成的；然后，通过掩蔽语言建模，基于句子嵌入和解码器的掩蔽输入来恢复原始句子。2） 非对称模型结构，以全尺寸类BERT变换器作为编码器，以单层变换器作为解码器。3） 不对称掩蔽率，编码器的掩蔽率适中：15~30%，解码器的掩蔽率激进：50~70%。预训练的模型在广泛的密集检索基准上显著提高了SOTA的性能，如BEIR和MS MARCO。
+RetroMAE，这是一种基于掩码自动编码器（MAE）的新的面向检索的预训练范式。RetroMAE有三个关键设计。1） 一种新的MAE工作流程，其中输入句子被不同掩码的编码器和解码器污染。句子嵌入是从编码器的屏蔽输入生成的；然后，通过掩蔽语言建模，基于句子嵌入和解码器的掩蔽输入来恢复原始句子。2） 非对称模型结构，以全尺寸类BERT变换器作为编码器，以单层变换器作为解码器。3） 不对称掩蔽率，编码器的掩蔽率适中：15-30%，解码器的掩蔽率激进：50-70%。预训练的模型在广泛的密集检索基准上显著提高了SOTA的性能，如BEIR和MS MARCO。
 
 paper: https://arxiv.org/abs/2205.12035
 
@@ -288,7 +288,7 @@ minigpt-4量化能力评估，[代码](https://github.com/salesforce/LAVIS/tree/
 **详细描述：**
 
 - 将已接入appflow的应用以及对应的模型添加单测，应用+模型数量：12个
-- 参考https://github.com/PaddlePaddle/PaddleMIX/blob/develop/tests/models/test_blip2.py，添加groudingdino、sam模型的单测：2个，
+- 参考https://github.com/PaddlePaddle/PaddleMIX/blob/develop/tests/models/test_blip2.py ，添加groudingdino、sam模型的单测：2个，
 - 添加应用单测：10个 
   - [自动标注（AutoLabel）](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/applications/Automatic_label/README.md/#自动标注autolabel)
   - [文图生成（Text-to-Image Generation）](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/applications/text2image/README.md/#文图生成text-to-image-generation)
