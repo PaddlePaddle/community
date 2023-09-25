@@ -524,7 +524,7 @@ ConcatDataset可以将多个数据集连接在一起，形成一个大的数据�
 - 熟悉模型训练验证时常用的对数据集操作，以及ConcatDataset 的实现原理
 - 熟练掌握 Python
 
-### No.24：为 Paddle 新增 ConcatDataset API
+### No.24：为 Paddle 新增 SubsetRandomSampler API
 
 **详细描述：**
 
@@ -652,28 +652,6 @@ SubsetRandomSampler子集随机采样器，从数据集的指定子集中随机�
 **技术要求：**
 
 - 熟练掌握Cholesky数学语言以及线性代数中矩阵相关运算
-- 熟练掌握 Python
-
-### No.30：为 Paddle 新增 Layer.astype / Layer.cpu / Layer.cuda API
-
-**详细描述：**
-
-对paddle.nn.Layer进行设备类型或数据类型的转换，需要支持astype/cpu/cuda，包括以下调用形式：
-
-- paddle.nn.Layer.astype
-- paddle.nn.Layer.cpu
-- paddle.nn.Layer.cuda：注意输入参数类型需要全面，要同时支持paddle.CUDAPlace与字符串形式
-
-**提交内容：**
-
-- API 的设计文档，并提 PR 至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/APIs 目录
-- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [paddle/nn/layer/layers.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/nn/layer/layers.py) 文件
-- 单测代码，Paddle repo 的 [test/](https://github.com/PaddlePaddle/Paddle/tree/develop/test) 目录
-- 中文API文档，在 [paddle.nn.Layer](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/nn/Layer_cn.html) 页面增加该类方法
-
-**技术要求：**
-
-- 熟悉 `Layer.astype/cpu/cuda`的计算逻辑和适用场景
 - 熟练掌握 Python
 
 ### No.30：为 Paddle 新增 vdot API
