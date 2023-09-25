@@ -6,14 +6,14 @@
 
 **详细描述：**
 
-为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **Pa**ddlePaddle Code **Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第1组（编号为1 ~ 20）** 的API转换规则开发。
+为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **PaddlePaddle Code Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第1组（编号为1 ~ 20）** 的API转换规则开发。
 
 **提交内容：**
 
 - **API映射关系文档**：具体文档模板及要求请参考 [《API映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/api_difference/pytorch_api_mapping_format_cn.md) 。PR提交到 [PaddlePaddle/docs](https://github.com/PaddlePaddle/docs) 下，需要为每个 API 新增对应的 md 文件并放入`docs/guides/model_convert/convert_from_pytorch/api_difference` 对应目录下，文件名为PyTorch API名。如果已存在该API的映射关系，则无需新增 md 文件，只需要**检查并校正之前的文档正确性**。
 - **API转换规则**：请Fork代码仓库 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 来提交代码，具体开发步骤，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)步骤
 - **单测代码**：提交到  [PaConvert](https://github.com/PaddlePaddle/PaConvert) 中，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤5，注意单测规范与要求。
-- **注**：如果发现由于对应Paddle API的 **功能****缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
+- **注**：如果发现由于对应Paddle API的 **功能缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
 
 **技术要求：**
 
@@ -24,14 +24,14 @@
 
 **详细描述：**
 
-为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **Pa**ddlePaddle Code **Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第2组（编号为21 ~ 41）** 的API转换规则开发。
+为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **PaddlePaddle Code Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第2组（编号为21 ~ 41）** 的API转换规则开发。
 
 **提交内容：**
 
 - **API映射关系文档**：具体文档模板及要求请参考 [《API映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/api_difference/pytorch_api_mapping_format_cn.md) 。PR提交到 [PaddlePaddle/docs](https://github.com/PaddlePaddle/docs) 下，需要为每个 API 新增对应的 md 文件并放入`docs/guides/model_convert/convert_from_pytorch/api_difference` 对应目录下，文件名为PyTorch API名。如果已存在该API的映射关系，则无需新增 md 文件，只需要**检查并校正之前的文档正确性**。
 - **API转换规则**：请Fork代码仓库 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 来提交代码，具体开发步骤，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)步骤
 - **单测代码**：提交到  [PaConvert](https://github.com/PaddlePaddle/PaConvert) 中，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤5，注意单测规范与要求。
-- **注**：如果发现由于对应Paddle API的 **功能****缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
+- **注**：如果发现由于对应Paddle API的 **功能缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
 
 **技术要求：**
 
@@ -42,14 +42,14 @@
 
 **详细描述：**
 
-为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **Pa**ddlePaddle Code **Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第3组（编号为42 ~ 61）** 的API转换规则开发。
+为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **PaddlePaddle Code Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第3组（编号为42 ~ 61）** 的API转换规则开发。
 
 **提交内容：**
 
 - **API映射关系文档**：具体文档模板及要求请参考 [《API映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/api_difference/pytorch_api_mapping_format_cn.md) 。PR提交到 [PaddlePaddle/docs](https://github.com/PaddlePaddle/docs) 下，需要为每个 API 新增对应的 md 文件并放入`docs/guides/model_convert/convert_from_pytorch/api_difference` 对应目录下，文件名为PyTorch API名。如果已存在该API的映射关系，则无需新增 md 文件，只需要**检查并校正之前的文档正确性**。
 - **API转换规则**：请Fork代码仓库 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 来提交代码，具体开发步骤，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)步骤
 - **单测代码**：提交到  [PaConvert](https://github.com/PaddlePaddle/PaConvert) 中，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤5，注意单测规范与要求。
-- **注**：如果发现由于对应Paddle API的 **功能****缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
+- **注**：如果发现由于对应Paddle API的 **功能缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
 
 **技术要求：**
 
@@ -60,14 +60,14 @@
 
 **详细描述：**
 
-为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **Pa**ddlePaddle Code **Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第4组（编号为62 ~ 83）** 的API转换规则开发。
+为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **PaddlePaddle Code Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第4组（编号为62 ~ 83）** 的API转换规则开发。
 
 **提交内容：**
 
 - **API映射关系文档**：具体文档模板及要求请参考 [《API映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/api_difference/pytorch_api_mapping_format_cn.md) 。PR提交到 [PaddlePaddle/docs](https://github.com/PaddlePaddle/docs) 下，需要为每个 API 新增对应的 md 文件并放入`docs/guides/model_convert/convert_from_pytorch/api_difference` 对应目录下，文件名为PyTorch API名。如果已存在该API的映射关系，则无需新增 md 文件，只需要**检查并校正之前的文档正确性**。
 - **API转换规则**：请Fork代码仓库 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 来提交代码，具体开发步骤，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)步骤
 - **单测代码**：提交到  [PaConvert](https://github.com/PaddlePaddle/PaConvert) 中，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤5，注意单测规范与要求。
-- **注**：如果发现由于对应Paddle API的 **功能****缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
+- **注**：如果发现由于对应Paddle API的 **功能缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
 
 **技术要求：**
 
@@ -78,14 +78,14 @@
 
 **详细描述：**
 
-为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **Pa**ddlePaddle Code **Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第5组（编号为84 ~ 102）** 的API转换规则开发。
+为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **PaddlePaddle Code Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第5组（编号为84 ~ 102）** 的API转换规则开发。
 
 **提交内容：**
 
 - **API映射关系文档**：具体文档模板及要求请参考 [《API映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/api_difference/pytorch_api_mapping_format_cn.md) 。PR提交到 [PaddlePaddle/docs](https://github.com/PaddlePaddle/docs) 下，需要为每个 API 新增对应的 md 文件并放入`docs/guides/model_convert/convert_from_pytorch/api_difference` 对应目录下，文件名为PyTorch API名。如果已存在该API的映射关系，则无需新增 md 文件，只需要**检查并校正之前的文档正确性**。
 - **API转换规则**：请Fork代码仓库 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 来提交代码，具体开发步骤，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)步骤
 - **单测代码**：提交到  [PaConvert](https://github.com/PaddlePaddle/PaConvert) 中，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤5，注意单测规范与要求。
-- **注**：如果发现由于对应Paddle API的 **功能****缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
+- **注**：如果发现由于对应Paddle API的 **功能缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
 
 **技术要求：**
 
@@ -96,14 +96,14 @@
 
 **详细描述：**
 
-为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **Pa**ddlePaddle Code **Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第6组（编号为103 ~ 124）** 的API转换规则开发。
+为了能自动化将其它深度学习代码转写成 Paddle 代码，从而提升模型代码迁移的效率，我们建设了 [**代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **PaddlePaddle Code Convert** Toolkits。此次需要你完成 [**API转换名单**](https://shimo.im/sheets/RKAWVnVNopC1NKk8/LmUrM) **中第6组（编号为103 ~ 124）** 的API转换规则开发。
 
 **提交内容：**
 
 - **API映射关系文档**：具体文档模板及要求请参考 [《API映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/api_difference/pytorch_api_mapping_format_cn.md) 。PR提交到 [PaddlePaddle/docs](https://github.com/PaddlePaddle/docs) 下，需要为每个 API 新增对应的 md 文件并放入`docs/guides/model_convert/convert_from_pytorch/api_difference` 对应目录下，文件名为PyTorch API名。如果已存在该API的映射关系，则无需新增 md 文件，只需要**检查并校正之前的文档正确性**。
 - **API转换规则**：请Fork代码仓库 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 来提交代码，具体开发步骤，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)步骤
 - **单测代码**：提交到  [PaConvert](https://github.com/PaddlePaddle/PaConvert) 中，参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤5，注意单测规范与要求。
-- **注**：如果发现由于对应Paddle API的 **功能****缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
+- **注**：如果发现由于对应Paddle API的 **功能缺失、功能Bug、功能diff** 等问题，导致无法实现转换，请在API映射关系文档中说明，同时需开发屏蔽版本的测试case（参考已有代码）。
 
 **技术要求：**
 
