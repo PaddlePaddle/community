@@ -288,7 +288,7 @@ minigpt-4量化能力评估，[代码](https://github.com/salesforce/LAVIS/tree/
 **详细描述：**
 
 - 将已接入appflow的应用以及对应的模型添加单测，应用+模型数量：12个
-- 参考https://github.com/PaddlePaddle/PaddleMIX/blob/develop/tests/models/test_blip2.py，添加groudingdino、sam模型的单测：2个，
+- 参考https://github.com/PaddlePaddle/PaddleMIX/blob/develop/tests/models/test_blip2.py ，添加groudingdino、sam模型的单测：2个，
 - 添加应用单测：10个 
   - [自动标注（AutoLabel）](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/applications/Automatic_label/README.md/#自动标注autolabel)
   - [文图生成（Text-to-Image Generation）](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/applications/text2image/README.md/#文图生成text-to-image-generation)
