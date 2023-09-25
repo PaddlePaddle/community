@@ -633,13 +633,10 @@ SubsetRandomSampler子集随机采样器，从数据集的指定子集中随机�
 
 - 使用 Cholesky 因子U计算对称正定矩阵的逆矩阵：返回矩阵`inv`。使用 LAPACK 例程`dpotri`和`spotri`(以及相应的 MAGMA 例程)计算逆。
 
-- - - 下三角矩阵
-
-![img](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=a78bd93e694b47de901ce875bef35455&docGuid=nmbTxaHahXayON)
-
-- - - 上三角矩阵
-
-![img](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=877aac6c1e48439e97a72871ea542000&docGuid=nmbTxaHahXayON)
+  - 下三角矩阵
+  ![img](./img/29_1.png)
+  - 上三角矩阵
+  ![img](./img/29_2.png)
 
 - 调用形式
   - paddle.cholesky_inverse , 作为独立的函数调用
@@ -898,11 +895,9 @@ Householder变换是一种简洁的线性变换，也称为镜面反射变换。
 
 - 用于求解一维的幂平均池化 (power-average pooling)
   - 每个窗口的计算过程： 
-
-![img](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=620f32dbf832417abab2621784a18c2f&docGuid=nmbTxaHahXayON)
-
-- - - 当 p=∞ 时等同于最大池化
-    - 当 p=1 时等同于累加池化
+  ![img](./img/39_1.png)
+     - 当 p=∞ 时等同于最大池化
+     - 当 p=1 时等同于累加池化
 - 调用形式
   - paddle.nn.LPPool1D
   - paddle.nn.LPPool2D
