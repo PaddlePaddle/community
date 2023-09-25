@@ -175,64 +175,23 @@ PyTorch 底层调用 C++ `std::signbit` 实现，Tensorflow 通过 Python API �
 添加 Python API:
 
 ```python
-paddle.i0(
+paddle.signbit(
     x: Tensor,
     name: str=None
 )
 ```
 
 参数表：
+- x: (Tensor) 输入的 tensor。数据类型支持 `float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`
+- name: (str) 算子的名称。
 
+## 底层 OP 设计
 
-- paddle.signbit(x, y, name=None) 作为独立的函数调用，非 inplace;
-- Tensor.signbit(y, name=None)做为 Tensor 的方法使用，非 inplace;
-
-其中
-
-+ x(Tensor) - 需要取用绝对值作为输出数值部分的 Tensor , 支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`
-+ y(Tensor | Number) - 为 Tensor 时，shape 需要与 x 相同，或者可广播成 x.shape，支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`；为 Number 时，支持 `bool`、`int`、`float`
-
-## 底层OP设计
-
-参考PyTorch与Numpy中的设计，调用底层cpp实现OP，反向 kernel impl 大致如下：
-
-```cpp
-template<typename T>
-struct CopySignGradFunctor {
-    CopySignGradFunctor(const T* x_data, const T* y_data, const T* dout, T* dx, int64_t numel)
-    : x_data_(x_data), y_data_(y_data), dout_(dout), dx_(dx), numel_(numel) {}
-
-    // backward 逻辑如下
-    HOSTDEVICE void operator()(int64_t idx) const {
-        if (x_data_[idx] == T(0)) dx_[idx] = T(0);
-        else dx_[idx] = T(dout_[idx]) * (T(std::copysign(x_data_[idx], y_data_[idx]) / x_data_[idx]));
-    }
-
-    const T* x_data_;
-    const T* y_data_;
-    const T* dout_;
-    T* dx_;
-    int64_t numel_;
-};
-
-template <typename T, typename Context>
-void CopySignGradKernel(const Context& dev_ctx,
-                   const DenseTensor& x,
-                   const DenseTensor& y,
-                   const DenseTensor& out_grad,
-                   DenseTensor* x_grad) {
-    dev_ctx.template Alloc<T>(x_grad);
-    auto x_data = x.data<T>(), y_data = y.data<T>(), out_grad_data = out_grad.data<T>();
-    auto x_grad_data = x_grad->data<T>();
-    phi::funcs::ForRange<Context> for_range(dev_ctx, x.numel());
-    phi::CopySignGradFunctor<T> functor(x_data, y_data, out_grad_data, x_grad_data, x.numel());
-    for_range(functor);
-}
-```
-
-
+直接使用 Python API 实现，无需设计底层 OP。
 
 ## API实现方案
+
+
 
 1. 配置算子的yaml，注意配置inplace
 2. 实现`CopySignInferMeta`，在调用kernel之前计算好`out`的`shape`和`dtype`
@@ -244,15 +203,13 @@ void CopySignGradKernel(const Context& dev_ctx,
 
 测试考虑的case如下：
 
-+ **编程范式场景**：常规覆盖动态图和静态图的测试场景
-
-+ **硬件场景**：常规需覆盖 CPU、GPU 两种测试场景
-+ **参数组合场景**：常规覆盖 API 的全部入参，需要对全部入参进行参数有效性和边界值测试，同时可选参数也需有相应的测试覆盖
-+ **计算精度**：需要保证前向计算、反向计算的精度正确性
-  + 前向计算：通过 numpy 实现的函数的对比结果
-  + 反向计算：通过 numpy 推导，计算反向结果的正确性
-+ **维度测试**：Paddle API 支持的最低维度为 0 维，单测中应编写相应的 0 维尺寸测试 case
-+ **边界测试**：y为0、+0、-0时，测试与numpy结果的一致性
+- **编程范式场景**：常规覆盖动态图和静态图的测试场景
+- **硬件场景**：常规需覆盖 CPU、GPU 两种测试场景
+- **参数组合场景**：需要对全部入参进行参数有效性和边界值测试；同时可选参数也需有相应的测试覆盖；输入输出的容错性与错误提示信息
+- **计算精度**：需要保证前向计算、反向计算的精度正确性
+  - 前向计算：通过 numpy 实现的函数的对比结果
+- **维度测试**：Paddle API 支持的最低维度为 0 维，单测中应编写相应的 0 维尺寸测试 case
+- **边界测试**：x 为 0、+0、-0 时，测试与 numpy 结果的一致性
 
 # 七、可行性分析及规划排期
 
@@ -268,6 +225,6 @@ void CopySignGradKernel(const Context& dev_ctx,
 
 # 附件及参考资料
 
-[PyTorch文档](https://pytorch.org/docs/stable/generated/torch.copysign.html?highlight=copysign#torch.copysign)
+[PyTorch 文档](https://pytorch.org/docs/stable/generated/torch.signbit.html)
 
-[Numpy文档](https://numpy.org/doc/stable/reference/generated/numpy.copysign.html#numpy-copysign)
+[Numpy 文档](https://numpy.org/doc/stable/reference/generated/numpy.signbit.html)
