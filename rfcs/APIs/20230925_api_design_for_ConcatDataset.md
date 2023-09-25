@@ -1,4 +1,4 @@
-# paddle.index_fill 设计文档
+# paddle.ConcatDataset 设计文档
 
 | API名称                                                      | paddle.io.ConcatDataset |
 | ------------------------------------------------------------ | ----------------------------------- |
