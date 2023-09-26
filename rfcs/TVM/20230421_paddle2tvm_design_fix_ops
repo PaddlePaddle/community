@@ -1,0 +1,49 @@
+## 方案名称
+为TVM PaddlePaddle前端完善 assign/conv2d/conv2d_transpose/scale 算子支持程度设计文档
+
+| API名称 | assign/conv2d/conv2d_transpose/scale | 
+|---|---|
+|提交作者<input type="checkbox" class="rowselector hidden"> | Eddy Wang | 
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-04-21 | 
+|版本号 | V1.0 | 
+|依赖CINN版本<input type="checkbox" class="rowselector hidden"> | develop | 
+|文件名 | 20230421_paddle2tvm_design_fix_ops.md<br> | 
+
+# 方案描述
+为TVM PaddlePaddle前端完善 assign/conv2d/conv2d_transpose/scale 算子支持程度，并完善算子测试。
+
+
+# 方案流程
+
+**1. assign算子**
+
+完善 assign算子的指定输出结果存储out参数支持。
+
+[Paddle的 assign 文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/assign_cn.html)
+
+**2. conv2d**
+
+完善 conv2d 算子的 data_format 参数（"NCHW" 或者"NHWC"）支持。
+
+[Paddle的 Conv2D 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/nn/Conv2D_cn.html)
+
+**3. conv2d_transpose 算子**
+
+完善 conv2d_transpose 算子的 data_format 参数（"NCHW" 或者"NHWC"）支持。
+
+[Paddle的 Conv2DTranspose 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/fluid/dygraph/Conv2DTranspose_cn.html)
+
+**4. scale 算子**
+
+完善 scale  算子的 act 参数支持。
+
+[Paddle的 scale 算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/scale_cn.html)
+
+# 方案运行效果
+参考[单测代码](https://github.com/apache/tvm/blob/main/tests/python/frontend/paddlepaddle/test_forward.py)，设计并通过各个算子的单测。
+
+
+# 项目提交时间计划
+4月21日 ~ 4月26日完成算子适配
+
+4月27日 ~ 4月31日完成算子适配的单测

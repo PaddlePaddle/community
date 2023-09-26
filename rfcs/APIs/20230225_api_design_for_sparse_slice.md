@@ -198,7 +198,7 @@ void get_csr_submatrix(const I n_row,
 
 由于 PyTorch 并没有支持稀疏 Tensor 的 slice 操作，故我们只对 TensorFlow 和 SciPy 进行分析。
 
-TensorFlow 
+TensorFlow
 - 优点：实现了 COO 格式下对任意维度 slice 的操作
 - 缺点：仅支持 COO 格式
 
@@ -218,7 +218,7 @@ SciPy
 template <typename T, typename Context>
 void SliceCooKernel(const Context& dev_ctx,
                     const SparseCooTensor& x,
-                    const std::vector<int64_t>& axes,
+                    const phi::IntArray& axes,
                     const phi::IntArray& starts,
                     const phi::IntArray& ends,
                     SparseCooTensor* out);
@@ -227,7 +227,7 @@ void SliceCooKernel(const Context& dev_ctx,
 template <typename T, typename Context>
 void SliceCsrKernel(const Context& dev_ctx,
                     const SparseCsrTensor& x,
-                    const std::vector<int64_t>& axes,
+                    const phi::IntArray& axes,
                     const phi::IntArray& starts,
                     const phi::IntArray& ends,
                     SparseCsrTensor* out);
@@ -239,7 +239,7 @@ template <typename T, typename Context>
 void SliceCooGradKernel(const Context& dev_ctx,
                         const SparseCooTensor& x,
                         const SparseCooTensor& out_grad,
-                        const std::vector<int64_t>& axes,
+                        const phi::IntArray& axes,
                         const phi::IntArray& starts,
                         const phi::IntArray& ends,
                         SparseCooTensor* x_grad);
@@ -249,7 +249,7 @@ template <typename T, typename Context>
 void SliceCsrGradKernel(const Context& dev_ctx,
                         const SparseCsrTensor& x,
                         const SparseCsrTensor& out_grad,
-                        const std::vector<int64_t>& axes,
+                        const phi::IntArray& axes,
                         const phi::IntArray& starts,
                         const phi::IntArray& ends,
                         SparseCsrTensor* x_grad);
@@ -258,7 +258,7 @@ void SliceCsrGradKernel(const Context& dev_ctx,
 在 `paddle/phi/api/yaml/sparse_ops.yaml` 中新增对应 API：
 ```yaml
 - op : slice
-  args : (Tensor x, int64_t[] axes, IntArray starts, IntArray ends, int64_t[] infer_flags, int64_t[] decrease_axis)
+  args : (Tensor x, IntArray axes, IntArray starts, IntArray ends)
   output : Tensor(out)
   infer_meta :
     func : UnchangedInferMeta
@@ -273,15 +273,15 @@ void SliceCsrGradKernel(const Context& dev_ctx,
 在 `paddle/phi/api/yaml/sparse_backward.yaml` 中新增对应 API：
 ```yaml
 - backward_op : slice_grad
-  forward : slice (Tensor x, int64_t[] axes, IntArray starts, IntArray ends, int64_t[] infer_flags, int64_t[] decrease_axis) -> Tensor(out)
-  args : (Tensor x, Tensor out_grad, int64_t[] axes, IntArray starts, IntArray ends, int64_t[] infer_flags, int64_t[] decrease_axis)
+  forward : slice (Tensor x, IntArray axes, IntArray starts, IntArray ends) -> Tensor(out)
+  args : (Tensor x, Tensor out_grad, IntArray axes, IntArray starts, IntArray ends)
   output : Tensor(x_grad)
   infer_meta :
     func : UnchangedInferMeta
     param : [x]
   kernel :
     func : slice_coo_grad{sparse_coo, sparse_coo -> sparse_coo},
-           slice_csr_grad{sparse_csr, sparse_csr -> sparse_csr} 
+           slice_csr_grad{sparse_csr, sparse_csr -> sparse_csr}
 ```
 ## 底层OP设计
 
@@ -298,7 +298,7 @@ void SliceCsrGradKernel(const Context& dev_ctx,
 paddle.sparse.slice(x, axes, starts, ends)
 ```
 - **x** (Tensor) - 输入的稀疏 Tensor，支持 COO 和 CSR 格式
-- **axes** (list|tuple) - 需要进行 slice 操作的维度，如果是 CSR 格式的稀疏 Tensor，确保长度为 2 或 3
+- **axes** (list|tuple|Tensor) - 需要进行 slice 操作的维度，如果是 CSR 格式的稀疏 Tensor，确保长度为 2 或 3
 - **starts** (list|tuple|Tensor) - 各维度上 slice 的起始位置，如果是 CSR 格式的稀疏 Tensor，确保长度为 2 或 3
 - **ends** (list|tule|Tensor) - 各维度上 slice 的结束位置，如果是 CSR 格式的稀疏 Tensor，确保长度为 2 或 3
 

@@ -2,10 +2,10 @@
 
 |API名称 | paddle.polygamma | 
 |---|---|
-|提交作者<input type="checkbox" class="rowselector hidden"> | 吃点儿好的 [paddle](https://github.com/KateJing1212/community) | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2023-03-24 | 
-|版本号 | V1.0 | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
+|提交作者 | PommesPeter | 
+|提交时间 | 2023-05-23 | 
+|版本号 | V2.0 | 
+|依赖飞桨版本 | develop | 
 |文件名 | 20200324_api_design_for_polygamma.md | 
 
 
@@ -69,9 +69,8 @@ def digamma(x, name=None):
 
 `torch.polygamma(input, n, *, out=None) -> Tensor`[(参考API文档)](https://pytorch.org/docs/stable/generated/torch.polygamma.html)
 
-上述函数参数中，`input` 是一个Tensor，表示要计算polygamma函数的输入值；`n`是一个整数，表示要计算的polygamma函数的阶数；`out`是一个可选的输出Tensor，用于存储计算结果。
+上述函数参数中，`input` 是一个 Tensor，表示要计算polygamma函数的输入值；`n` 是一个整数，表示要计算的polygamma函数的阶数；`out` 是一个可选的输出Tensor，用于存储计算结果。实现的代码如下：
 
-实现的代码如下：
 ```cpp
 Tensor polygamma_backward(const Tensor& grad_output, const Tensor& self, int64_t n) {
   checkBackend("polygamma_backward", {grad_output, self}, Backend::CPU);
@@ -96,10 +95,11 @@ Tensor polygamma(const Tensor& self, int64_t n) {
 }
 
 ```
-可以看到，`polygamma`函数调用了`polygamma_stub`函数来计算`polygamma`函数的值，`polygamma_backward`函数则用于计算梯度。实际的计算是在`polygamma_stub`函数中进行的。完整的`polygamma`函数实现涉及到多个文件和函数。
+可以看到，`polygamma` 函数调用了 `polygamma_stub` 函数来计算 `polygamma` 函数的值，`polygamma_backward` 函数则用于计算梯度。实际的计算是在 `polygamma_stub` 函数中进行的。完整的`polygamma`函数实现涉及到多个文件和函数。
 
-更进一步来说，在CPU上，polygamma在`aten/src/ATen/native/cpu/UnaryOpsKernel.cpp`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cpu/UnaryOpsKernel.cpp)
-其计算逻辑是通过调用digamma API和trigamma API实现polygamma的计算，具体实现代码如下，：
+更进一步来说，在 CPU 上，polygamma在 `aten/src/ATen/native/cpu/UnaryOpsKernel.cpp` 文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cpu/UnaryOpsKernel.cpp)
+其计算逻辑是通过调用 digamma API 和 trigamma API 实现 polygamma 的计算，具体实现代码如下：
+
 ```cpp
 static void polygamma_kernel(TensorIteratorBase& iter, int64_t n) {
   if (n == 0) {
@@ -114,7 +114,9 @@ static void polygamma_kernel(TensorIteratorBase& iter, int64_t n) {
   }
 }
 ```
-另外，引用到的`calc_polygamma`作为辅助函数，其实现代码如下：
+
+另外，引用到的 `calc_polygamma` 作为辅助函数，其实现代码如下：
+
 ```cpp
 template <typename scalar_t, bool is_cuda=false>
 static inline C10_HOST_DEVICE scalar_t calc_polygamma(scalar_t x, int n) {
@@ -126,8 +128,8 @@ static inline C10_HOST_DEVICE scalar_t calc_polygamma(scalar_t x, int n) {
 }
 ```
 
-在CUDA上，polygamma在`aten/src/ATen/native/cpu/UnaryOpsKernel.cpp`文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/UnaryGammaKernels.cu)
-具体实现代码如下：
+在 CUDA 上，polygamma 在`aten/src/ATen/native/cpu/UnaryOpsKernel.cpp` 文件中实现[(参考链接)](https://github.com/pytorch/pytorch/blob/master/aten/src/ATen/native/cuda/UnaryGammaKernels.cu)，具体实现代码如下：
+
 ```cpp
 CONSTEXPR_EXCEPT_WIN_CUDA char polygamma_name[] = "polygamma";
 void polygamma_kernel_cuda(TensorIteratorBase& iter, int64_t n) {
@@ -301,74 +303,182 @@ result = tf.math.polygamma(n, x)
 print("Polygamma values for n = {} and x = {}: {}".format(n, x.numpy(), result.numpy()))
 ```
 
-上述框架从使用体验来说，**Scipy**调用API方便，易于使用，但不支持输入为张量。**MatLab**中的polygamma值计算与digamma复用同一函数，实现逻辑相似但不支持输入张量。**PyTorch**和**Tensorflow** 支持输入张量，输出结果为一个 TensorFlow 的`tf.Tensor` 对象，如有需要可以借助其他方法转换为python标准类型。
+上述框架从使用体验来说，**Scipy** 调用 API 方便，易于使用，但不支持输入为张量。**MatLab** 中的 polygamma 值计算与 digamma 复用同一函数，实现逻辑相似但不支持输入张量。**PyTorch** 和 **Tensorflow** 支持输入张量，输出结果为一个 `Tensor` 对象，如有需要可以借助其他方法转换为 python 标准类型。
 
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
 
-<!-- 参考：[飞桨API 设计及命名规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_design_guidelines_standard_cn.html) -->
-
 API设计为 `paddle.polygamma(x, n, name=None)`。
-`x`为张量，允许的数据类型是float32和float64，其原因是digamma对数据类型进行了限制。
-`n`表示多项式 gamma 函数的导数阶数，其可以为一个非负整数或一个非负值张量，允许的数据类型是int32和int64；如果`n`是一个张量，需要保证`n`的维度`ndim`和`n`的参数量`numel`满足`ndim<=1`且`numel==1`；当`n=0`时，polygamma退化为 digamma。
-`name`作为可选参数，定义了该操作的名称，其默认值为`None`。
-另外，该API还支持`Tensor.polygamma(n)`的调用形式。
+
+- `x` 为张量，允许的数据类型是 float32 和 float64，其原因是 digamma 对数据类型进行了限制；
+
+- `n` 表示多项式 gamma 函数的导数阶数，只能为非负整数，允许的数据类型为整型 int；当 `n = 0` 时，polygamma 退化为 digamma。
+
+- `name`作为可选参数，定义了该操作的名称，其默认值为 `None`。
+
+另外，该API还支持 `Tensor.polygamma(n)` 的调用形式。
 
 ## 底层OP设计
 
-polygamma可基于现有API即digamma进行实现，不再单独设计OP。
+polygamma 中 `n = 0` 的情况基于现有 API 即 digamma 进行实现，此外的情况将设计 `PolygammaKernel`。
+
+对于实现角度而言，可使用 C++ 标准库当中的 `std::lgamma(x)`，即表示为 $\ln(\Gamma(x))$，对其求自然指数即可得到 $e^{\ln\Gamma(x)}=\Gamma(x)$，所以实现角度而言可以转换为：
+
+$$ \Phi^k(x) = (-1)^{k+1}\Gamma(k + 1)\zeta(k + 1, x) = (-1)^{k+1}e^{\text{lgamma}(x)}\zeta(k + 1, x)$$
+
+$\zeta$ 函数的实现可参考 pytorch，方便用于计算。该实现不需要使用递归实现，计算性能较高，代码如下：
+
+```cpp
+template <typename T>
+static inline T zeta(T x, T q) {
+  const T MACHEP = T{1.11022302462515654042E-16};
+  constexpr T zero = T{0.0};
+  constexpr T half = T{0.5};
+  constexpr T one = T{1.0};
+  static const T A[] = {
+      12.0,
+      -720.0,
+      30240.0,
+      -1209600.0,
+      47900160.0,
+      -1.8924375803183791606e9, /*1.307674368e12/691*/
+      7.47242496e10,
+      -2.950130727918164224e12,  /*1.067062284288e16/3617*/
+      1.1646782814350067249e14,  /*5.109094217170944e18/43867*/
+      -4.5979787224074726105e15, /*8.028576626982912e20/174611*/
+      1.8152105401943546773e17,  /*1.5511210043330985984e23/854513*/
+      -7.1661652561756670113e18  /*1.6938241367317436694528e27/236364091*/
+  };
+
+  int i = 0;
+  T a, b, k, s, t, w;
+  if (x == one) {
+    return std::numeric_limits<T>::infinity();
+  }
+
+  if (x < one) {
+    return std::numeric_limits<T>::quiet_NaN();
+  }
+
+  if (q <= zero) {
+    if (q == std::floor(q)) {
+      return std::numeric_limits<T>::infinity();
+    }
+    if (x != std::floor(x)) {
+      return std::numeric_limits<T>::quiet_NaN();
+    }
+  }
+
+  s = std::pow(q, -x);
+  a = q;
+  i = 0;
+  b = zero;
+  while ((i < 9) || (a <= T{9.0})) {
+    i += 1;
+    a += one;
+    b = std::pow(a, -x);
+    s += b;
+    if ((-MACHEP * s < b) && (b < MACHEP * s)) {
+      return static_cast<T>(s);
+    }
+  }
+
+  w = a;
+  s += b * w / (x - one);
+  s -= half * b;
+  a = one;
+  k = zero;
+  for (int i = 0; i < 12; i++) {
+    a *= x + k;
+    b /= w;
+    t = a * b / A[i];
+    s = s + t;
+    t = std::fabs(t / s);
+    if (t < MACHEP) {
+      return static_cast<T>(s);
+    }
+    k += one;
+    a *= x + k;
+    b /= w;
+    k += one;
+  }
+  return static_cast<T>(s);
+}
+```
 
 ## API实现方案
 
-该 API 实现于 `python/paddle/tensor/math.py`，通过调研发现，Paddle 本身已实现 paddle.digamma，可以计算gamma 函数的对数的一阶导数，可利用paddle.digamma API 做n阶导实现 paddle.polygamma。
-具体来说，polygamma函数的k阶定义为：
-```
-polygamma(k, x) = d^k / dx^k [ln(gamma(x))]
-```
-根据导数的链式法则，可以将上述公式递归表示为：
-```
-polygamma(k, x) = polygamma(1, polygamma(k-1, x))
-```
-因此，初步设计的polygamma实现伪代码如下：
-```
-def digamma(x):
-    # Digamma API implementation
-    ...
+### 前向传播
 
-def polygamma(x, k):
-    if k == 1:
+该 API 实现于 `python/paddle/tensor/math.py`，通过调研发现，Paddle 本身已实现 `pdadle.digamma`，可以计算 gamma 函数的对数的一阶导数，可利用 `paddle.digamma` API 做 n 阶导实现 `paddle.polygamma`。具体来说，polygamma 函数的 k 阶定义为：
+
+$$\Phi^n(x) = \frac{d^n}{dx^n} [\ln(\Gamma(x))]$$
+
+根据其[数学定义](https://zh.wikipedia.org/wiki/%E5%A4%9A%E4%BC%BD%E7%8E%9B%E5%87%BD%E6%95%B0)，polygamma 可以使用级数表示法表示为：
+
+$$ \Phi^n(x) = (-1)^{n+1}n!\zeta(n + 1, x) $$
+
+进一步可以化简为：
+
+$$ \Phi^n(x) = (-1)^{n+1}n!\zeta(n + 1, x) = (-1)^{n+1}\Gamma(n + 1)\zeta(n + 1, x) $$
+
+因此，本设计中，默认 `n = 0` 表示 $\ln\Gamma(x)$ 的一阶导数，初步设计的 polygamma 实现伪代码如下：
+
+```python
+def polygamma(x, n):
+    if k == 0:
         return digamma(x)
     else:
-        return (-1) ** (k - 1) * factorial(k - 1) * polygamma(x, k - 1) + digamma(x)
+        # Running polygamma kernel code.
+        ...
 ```
+
+### 反向传播
+
+根据定义，反向传播的实现为如下表示：
+
+$$ (\Phi^n(x))' = \frac{d}{dx}\Phi^n(x) = \Phi^{n+1}(x) $$
+
+故可以直接重复使用前向代码即可。
 
 另外，由于该API需要考虑动静统一问题，故需要验证其在静态图中能否正常工作。
 
 # 六、测试和验收的考量
 
-<!-- 参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html) -->
-
 可考虑以下场景：
 
-### 1. 一般场景
-* 结果一致性测试。测试对于同一输入和 Tensorflow 以及 PyTorch 中polygamma API计算结果的数值的一致性。
-* 数据类型测试。选取不同数据类型的输入，测试计算结果的准确性。
-* 参数取值测试。选取不同取值的参数 `k` （表示求导的阶数），测试计算结果的准确性。
-### 2. 边界条件
-* 当 `x` 为空张量，测试其输出是否空张量且输出张量形状是否正确。
-* 当 `n=0` ,测试其输出是否与digamma API得到的计算结果相同。
-### 3. 异常测试
-* 对于参数异常值输入，例如x的不合法值等，应该有友好的报错信息及异常反馈，需要有相关测试Case验证。
+1. 一般场景
+
+- 结果一致性测试。测试对于同一输入和 Scipy 中 polygamma API 计算结果的数值的一致性。
+- 数据类型测试。选取不同数据类型的输入，测试计算结果的准确性。
+- 参数取值测试。选取不同取值的参数 `n` （表示求导的阶数），测试计算结果的准确性。对于 `n = 0` 的情况，需要和 Scipy 中的 psi API 计算结果一致。
+
+2. 边界条件
+
+- 当 `x` 为空张量，测试其输出是否空张量且输出张量形状是否正确。
+- 当 `n = 0` ,测试其输出是否与 digamma API 得到的计算结果相同。
+
+3. 异常测试
+
+- 对于参数异常值输入，例如x的不合法值等，应该有友好的报错信息及异常反馈，需要有相关测试 Case 验证。
 
 # 七、可行性分析和排期规划
 
-本 API 主要参考已有API实现，难度适中，工期上能满足要求。
+本 API 主要参考已有 API 实现，难度适中，工期上能满足要求。
 
 # 八、影响面
 
-为独立新增API，对其他模块没有影响。
+为独立新增 API，对其他模块没有影响。
 
 # 名词解释
 
+无
+
 # 附件及参考资料
+
+[scipy.polygamma](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.polygamma.html)
+
+[torch.polygamma](https://pytorch.org/docs/stable/generated/torch.polygamma.html)
+
+[polygamma wikipedia](https://en.wikipedia.org/wiki/Polygamma_function)

@@ -1,6 +1,6 @@
 # clang-tidy代码风格检查工具的引入
 
-> This project will be mentored by [@luotao1](http://github.com/luotao1)
+> This project will be mentored by [@Galaxy1458](http://github.com/Galaxy1458) and [@zhangbo9674](http://github.com/zhangbo9674)
 
 ## 背景
 Paddle目前使用的代码风格检查工具及hooks版本较低，导致开发者在提交代码时会碰到一些问题，加强代码规范检查，有利于提高Paddle代码质量，增强代码的可读性。
@@ -8,7 +8,7 @@ Paddle目前使用的代码风格检查工具及hooks版本较低，导致开发
 内部已经完成了precommit, pylint, remove-ctrlf,cpplint,cmake-format,yapf,cmakelint,cmake-format 8大检查工具的升级，还剩下两大检查工具clang-tidy和flake8还未引入，期待社区开发者主导完成。
 
 ## clang-tidy调研情况
-【新增】clang-tidy：13.0.0 （总错误数：40288，需修改文件数：3055）
+【新增】clang-tidy：13.0.0 （总错误数：40288，需修改文件数：3055，见[详细列表](https://shimo.im/sheets/RKAWM7b2BwsQGJq8/vLv2M)）
 * 原因：和clang-format保持一致。
 * 收益：使得C++代码更加规范、更加现代化
 * 风险：
