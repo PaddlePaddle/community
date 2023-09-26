@@ -1,7 +1,7 @@
 
-# paddle.optimizer.lr.CyclicLR设计文档
+# paddle.optimizer.lr.LinearLR设计文档
 
-| API名称                                                      | paddle.optimizer.lr.CyclicLR        |
+| API名称                                                      | paddle.optimizer.lr.LinearLR        |
 | ------------------------------------------------------------ | ----------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll                     |
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-09-25                          |
