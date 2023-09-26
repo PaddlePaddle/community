@@ -451,13 +451,13 @@ lognorm = lognorm_gen(a=0.0, name='lognorm')
 
 ### lognorm_
 
-Scipy 未提供 lognorm_ 形式的 API。
+Scipy 未提供 lognorm_ inplace 操作。
 
 ## TensorFlow
 
 ### bernoulli_
 
-未提供 bernoulli_ inplace 操作。
+TensorFlow 未提供 bernoulli_ inplace 操作。
 
 ### lognormal
 
@@ -599,12 +599,14 @@ class LogNormal(transformed_distribution.TransformedDistribution):
 
 ### lognormal_
 
+TensorFlow 未提供 lognormal_ inplace 操作。
+
 # 四、对比分析
 
 ## bernoulli_
 
 - 共同点
-  - Scipy 和 Tensorflow 均使用 Python API 组合实现 LogNormal 类。
+  - Scipy 和 Tensorflow 均使用 Python API 组合实现 Bernoulli 类。
 
 - 不同点
   - PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
@@ -613,24 +615,19 @@ class LogNormal(transformed_distribution.TransformedDistribution):
 
 - 共同点
   - Scipy 和 Tensorflow 均使用 Python API 组合实现 LogNormal 类。
-  - 都能根据输入的 tensor 计算出填充对数正态分布之后的结果。
   - 都能根据均值和方差随机生成对数正态分布。
   - 都有提供对 Python 的调用接口。
   - 方差和均值均支持 tensor 的输入。
 - 不同点
-  - PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
+  - PyTorch 使用 Python 调用 C++ 对应的接口。
   - Scipy 和 Tensorflow 是使用现有的 C++ 算子对应的 Python API 组合实现。
 
 ## log_normal_
 
 - 共同点
-  - Scipy 和 Tensorflow 均使用 Python API 组合实现 LogNormal 类。
-  - 都能根据输入的 tensor 计算出填充对数正态分布之后的结果。
-  - 都能根据均值和方差随机生成对数正态分布。
-  - 都有提供对 Python 的调用接口。
-  - 方差和均值均支持 tensor 的输入。
+  - Scipy 和 Tensorflow 均未提供 inplace 操作
 - 不同点
-  - PyTorch 是在 C++ API 基础上实现，使用 Python 调用 C++ 对应的接口。
+  - PyTorch 使用 Python 调用 C++ 对应的 inplace 接口。
 
 # 五、设计思路与实现方案
 
@@ -654,7 +651,7 @@ paddle.bernoulli_(
 | p | float | 伯努利分布的概率 |
 | name | str | 操作对应的名字 |
 
-`paddle.log_normal(x, mean=0.0, std=1.0, shape=None, dtype='float64', name=None)`
+`paddle.log_normal(x, mean=0.0, std=1.0, shape=None, dtype=None, name=None)`
 
 ```python
 paddle.log_normal(
