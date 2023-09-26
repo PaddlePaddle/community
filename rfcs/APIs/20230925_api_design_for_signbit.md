@@ -110,7 +110,7 @@ REGISTER_DISPATCH(signbit_stub, &signbit_kernel_cuda);
 } // namespace at::native
 ```
 
-最后，PyTorch signbit 能够支持 `float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
+最后，PyTorch signbit 能够支持 `float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16` 数据类型的 Tensor。
 
 **反向实现：**
 
