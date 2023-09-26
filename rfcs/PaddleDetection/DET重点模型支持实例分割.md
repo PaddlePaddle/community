@@ -55,7 +55,9 @@ PP-YOLO-E+和RT-DETR较于YOLOv8在目标检测任务上的精度、实时性和
 参考已有的`ppdet/modeling/transformers/mask_dino_transformer.py`，复用maskdino中的分割模块实现，少量修改`ppdet/modeling/transformers/rtdetr_transformer.py`，使得`RTDETRTransformer`可以通过`with_mask`参数来控制是否使用分割头。
 
 # 六、测试和验收的考量
-PP-YOLO-E+_crn_l、RT-DETR-L模型在COCO数据集的实例分割任务上的精度优于YOLOv8-L。
+1. PP-YOLO-E+_crn_l、RT-DETR-L模型在COCO数据集的实例分割任务上的精度优于YOLOv8-L
+2. PP-YOLO-E+_crn_l、RT-DETR-L对应的实例分割模型能够进行动态图和静态图模式下的推理部署
+3. 补全文档，其中包括PP-YOLO-E+_crn_l、RT-DETR-L在V100或T4上和其他模型的推理时间、FLOGS和参数量等的对比， 相关配置文件的使用， 如训练，评估和推理等等。
 
 # 七、影响面
 添加的分割头可以通过`with_mask`参数来控制是否使用，对其他模块没有影响。
