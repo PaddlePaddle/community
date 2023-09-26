@@ -110,6 +110,8 @@ REGISTER_DISPATCH(signbit_stub, &signbit_kernel_cuda);
 } // namespace at::native
 ```
 
+最后，PyTorch signbit 能够支持 `float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
+
 **反向实现：**
 
 无反向实现。
@@ -182,7 +184,7 @@ paddle.signbit(
 ```
 
 参数表：
-- x: (Tensor) 输入的 tensor。数据类型支持 `float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`
+- x: (Tensor) 输入的 tensor。数据类型支持 `float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
 - name: (str) 算子的名称。
 
 ## 底层 OP 设计
