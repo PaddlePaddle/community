@@ -1,4 +1,4 @@
-# paddle.copysign 设计文档
+# paddle.signbit 设计文档
 
 | API 名称     | paddle.signbit                  |
 | ------------ | -------------------------------- |
@@ -40,12 +40,12 @@ PyTorch 中有 API `torch.signbit(input, *, out=None) → Tensor` 以及对应�
 > Tests if each element of input has its sign bit set or not.
 
 参数表如下：
+
 - Parameters:
   - input (Tensor) – the input tensor.
 
 - Keyword Arguments:
   - out (Tensor, optional) – the output tensor.
-
 
 **前向实现：**
 
@@ -133,6 +133,7 @@ def signbit(x):
 
   return _scalar(f, x)
 ```
+
 Unsupported arguments: `out`, `where`, `casting`, `order`, `dtype`, `subok`, `signature`, `extobj`.
 
 ## Numpy
@@ -141,7 +142,7 @@ Unsupported arguments: `out`, `where`, `casting`, `order`, `dtype`, `subok`, `si
 
 > Returns element-wise True where signbit is set (less than zero).
 
-实现代码
+实现代码：
 
 ```cpp
 static int
@@ -184,6 +185,7 @@ paddle.signbit(
 ```
 
 参数表：
+
 - x: (Tensor) 输入的 tensor。数据类型支持 `float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
 - name: (str) 算子的名称。
 
@@ -193,13 +195,8 @@ paddle.signbit(
 
 ## API实现方案
 
-
-
-1. 配置算子的yaml，注意配置inplace
-2. 实现`CopySignInferMeta`，在调用kernel之前计算好`out`的`shape`和`dtype`
-3. 实现`CopySignKernel`的CPU和GPU代码以及forward、backward
-4. 封装Python的API，支持动态图和静态图，编写文档
-5. 编写单测
+1. 利用 `paddle.sign` 判断数的正负，确定符号位。
+2. 根据 1 输出的结果，筛选小于 0 的位置，最后输出 `mask`。
 
 # 六、测试和验收的考量
 
