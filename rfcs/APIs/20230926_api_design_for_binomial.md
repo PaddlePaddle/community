@@ -495,7 +495,7 @@ class Binomial(Distribution):
 
 2. 使用同样的参数实例化 `Binomial` 类和 `BinomialNumpy` 类，并调用 `mean`、`variance`、`entropy`、`prob`、`kl_divergence`方法，测试结果是否相等（容许一定误差）。参数 `total_count` 和 `probs` 的支持的数据类型需测试详尽。
 
-3. 使用 `LogNormal` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。
+3. 使用 `Binomial` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。
 
 
 # 七、可行性分析和排期规划
