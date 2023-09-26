@@ -611,6 +611,7 @@ profiler.stop()  ######  这里停止 profiler
 - Dummy model, 用于测试
 - 测试用例，精度比较脚本，生成精度比较结果
 - 工程代码及运行步骤
+- NOTE：以上内容通过AI Studio创建项目上传
 
 **技术要求：**
 
