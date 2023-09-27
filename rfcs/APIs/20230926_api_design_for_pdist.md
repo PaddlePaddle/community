@@ -368,7 +368,7 @@ API的设计为paddle.pdist(x, p=2.0)，其中 `x` 严格为 shape=[M, N] 的 Te
 
 ## API实现方案
 
-参考`Paddle.pdist`和与`Scipy`中的设计，组合已有API实现功能
+参考`PyTorch`与`Scipy`中的设计，组合已有API实现功能
 
 # 六、测试和验收的考量
 
