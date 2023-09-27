@@ -763,7 +763,7 @@ F^{-1}(x;\lambda) =
 
 
 # 六、测试和验收的考量
-`Poisson` 类测试以 Torch 作为基准，验证API的正确性。
+`ContinuousBernoulli` 类测试以 Torch 作为基准，验证API的正确性。
 
 1. 使用同样的参数实例化 `ContinuousBernoulli` 类和 `ContinuousBernoulliTorch` 类，并调用 `mean`、`variance`、`entropy`、`log_prob`、`kl_divergence`等方法，测试结果是否相等（容许一定误差）。参数 `rate` 的支持的数据类型需测试详尽。
 
