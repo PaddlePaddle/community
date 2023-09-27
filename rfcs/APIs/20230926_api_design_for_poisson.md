@@ -296,7 +296,7 @@ class Poisson(
     return assertions
 ```
 
-`tfp.distributions.Binomial` 继承自 `tfp.distribution.DiscreteDistributionMixin` 和 `tfp.distribution.AutoCompositeTensorDistribution`
+`tfp.distributions.Poisson` 继承自 `tfp.distribution.DiscreteDistributionMixin` 和 `tfp.distribution.AutoCompositeTensorDistribution`
 
 # 四、对比分析
 Pytorch 与 Tensorflow 实现方式大体类似，都是通过基本的概率计算得到相应的概率属性。Tensorflow 实现的方法更丰富，测试更为详细。
