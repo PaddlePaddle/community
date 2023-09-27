@@ -255,7 +255,7 @@ class ContinuousBernoulli(ExponentialFamily):
         return torch.where(out_unst_reg, log_norm, taylor)
 ```
 
-`torch.distributions.poisson.ContinuousBernoulli`继承自 `torch.distributions.ExponentialFamily`
+`torch.distributions.continuous_bernoulli.ContinuousBernoulli`继承自 `torch.distributions.ExponentialFamily`
 
 ### TensorFlow
 TensorFlow 中有 API `tfp.distributions.ContinuousBernoulli(
@@ -643,7 +643,7 @@ class ContinuousBernoulli(distribution.AutoCompositeTensorDistribution):
     return assertions
 ```
 
-`tfp.distributions.Binomial` 继承自 `tfp.distribution.AutoCompositeTensorDistribution`
+`tfp.distributions.ContinuousBernoulli` 继承自 `tfp.distribution.AutoCompositeTensorDistribution`
 
 # 四、对比分析
 Pytorch 与 Tensorflow 实现方式大体类似，都是通过基本的概率计算得到相应的概率属性。Tensorflow 实现的方法更丰富，测试更为详细。
