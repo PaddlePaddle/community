@@ -673,7 +673,7 @@ class ContinuousBernoulli(Distribution):
     
 ```
 
-`Poisson` 类的初始化参数是 `probs` ，类包含的方法及实现方案如下：
+`ContinuousBernoulli` 类的初始化参数是 `probs` ，类包含的方法及实现方案如下：
 
 记参数 `probs`$=\lambda$。
 
