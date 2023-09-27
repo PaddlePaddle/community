@@ -393,8 +393,8 @@ class Poisson(Distribution):
 $$f(x;\lambda) = \frac{e^{-\lambda} \lambda^x}{x!}$$
 
 # 附件及参考资料
-1. [Tensorflow 的 Binomial 文档](https://tensorflow.google.cn/probability/api_docs/python/tfp/distributions/Poisson)
+1. [Tensorflow 的 Poisson 文档](https://tensorflow.google.cn/probability/api_docs/python/tfp/distributions/Poisson)
 
-2. [Pytorch 的 Binomial 文档](https://pytorch.org/docs/stable/distributions.html#poisson)
+2. [Pytorch 的 Poisson 文档](https://pytorch.org/docs/stable/distributions.html#poisson)
 
-3. [Numpy 的 Binomial 文档](https://numpy.org/doc/1.21/reference/random/generated/numpy.random.poisson.html)
+3. [Numpy 的 Poisson 文档](https://numpy.org/doc/1.21/reference/random/generated/numpy.random.poisson.html)
