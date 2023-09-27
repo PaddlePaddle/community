@@ -364,11 +364,11 @@ Scipy利用现有API组合实现，PyTorch则在底层重写cpp算子。
 
 ## 命名与参数设计
 
-API的设计为paddle.cdist(x, y, p=2.0)，其中 `x` 严格为 shape=[M, N] 的 Tensor，`p` 为p-范数对应的p值，输出为一行 `Mx(M-1)/2` 列的 Tensor
+API的设计为paddle.pdist(x, p=2.0)，其中 `x` 严格为 shape=[M, N] 的 Tensor，`p` 为p-范数对应的p值，输出为一行 `Mx(M-1)/2` 列的 Tensor
 
 ## API实现方案
 
-参考`Paddle.cdist`和与`Scipy`中的设计，组合已有API实现功能
+参考`Paddle.pdist`和与`Scipy`中的设计，组合已有API实现功能
 
 # 六、测试和验收的考量
 
