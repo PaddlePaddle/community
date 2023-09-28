@@ -42,7 +42,7 @@ Paddle 框架内定义了 `Distribution` 抽象基类，并且实现了 `Uniform
 torch.distributions.gamma.Gamma(concentration, rate)
 ```
 
-使用上面语句可得到形状参数为 `concentration`、尺度参数为 `rate` 的伽马分布。
+使用上面代码可得到形状参数为 `concentration`、尺度参数为 `rate` 的伽马分布。
 
 
 `Gamma` 类的部分代码如下：
@@ -233,7 +233,7 @@ class Gamma(ExponentialFamily):
 ```
 
 ### 2、KL散度
-在文件 `python\paddle\distribution\kl.py`中注册伽马分布 KL 散度计算函数。
+在文件 `python\paddle\distribution\kl.py` 中注册伽马分布 KL 散度计算函数。
 
 ```python
 @register_kl(Gamma, Gamma)
@@ -256,9 +256,9 @@ def _kl_gamma_gamma(p, q):
 paddle 中已实现了概率分布的基类 `Distribution`，以及指数族概率分布基类 `ExponentialFamily` ，通过现有的 API，我们可以实现 `Gamma` 概率分布。
 
 ## 排期规划
-1. 10月15日~10月20日完成 API 开发与调试。
+1. 10月1日~10月7日完成 API 开发与调试。
 
-2. 10月21日~10月25日完成测试代码的开发。
+2. 10月8日~10月15日完成测试代码的开发。
 
 # 八、影响面
 本次任务涉及以下内容：

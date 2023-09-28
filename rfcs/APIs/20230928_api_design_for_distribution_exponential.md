@@ -79,7 +79,7 @@ class Exponential(ExponentialFamily):
 tfp.distributions.Exponential(rate)
 ```
 
-使用上面语句可得到率参数为 `rate` 的指数分布，分布可写作 $X \sim Exponential (rate)$ 。
+使用上面代码可得到率参数为 `rate` 的指数分布，分布可写作 $X \sim Exponential (rate)$ 。
 
 `Exponential` 概率分布与 `Gamma` 分布有以下关系，因而 TensorFlow 是使用 `Gamma` 概率分布来实现 `Exponential` 概率分布。
 
