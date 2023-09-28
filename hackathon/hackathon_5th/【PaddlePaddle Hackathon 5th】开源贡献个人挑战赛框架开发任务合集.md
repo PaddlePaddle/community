@@ -156,7 +156,7 @@
 
 - 正向推导，根据输入的切分状态推导输出的切分状态
 - 逆向推导，根据输出的切分状态推导输入的切分状态
-- 可参考 paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules) 和 tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/slice_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
+- 可参考 [**切分推导规则参考文档**](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/spmd_rules.md)，paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules，可参考 split)，tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/slice_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
 
 **提交内容：**
 
@@ -176,7 +176,7 @@
 
 - 正向推导，根据输入的切分状态推导输出的切分状态
 - 逆向推导，根据输出的切分状态推导输入的切分状态
-- 可参考 paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules) 和 tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions) 和 pytorch 中x相关的实现逻辑 (pytorch/torch/distributed/_tensor/ops)
+- 可参考 [**切分推导规则参考文档**](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/spmd_rules.md)，paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules)，tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions) 和 pytorch 中相关的实现逻辑 (pytorch/torch/distributed/_tensor/ops)
 
 **提交内容：**
 
@@ -196,7 +196,7 @@
 
 - 正向推导，根据输入的切分状态推导输出的切分状态
 - 逆向推导，根据输出的切分状态推导输入的切分状态
-- 可参考 paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules) 和 tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/squeeze_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
+- 可参考 [**切分推导规则参考文档**](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/spmd_rules.md)，paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules)，tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/squeeze_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
 
 **提交内容：**
 
