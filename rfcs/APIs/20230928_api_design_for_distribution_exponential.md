@@ -232,7 +232,9 @@ $$ f_{F}(x; \theta) =  \theta e^{- \theta x },  (x \ge 0) $$
 
 Gamma 概率分布的概率密度函数如下：
 
-$$\begin{array}{l} \ f(x)=\frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1}e^{-\beta x},(x \geq 0) \\ \Gamma(\alpha)=\int_{0}^{\infty} x^{\alpha-1} e^{-x} \mathrm{~d} x, (\alpha>0) \end{array}$$
+$$ f(x)=\frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1}e^{-\beta x},(x \geq 0) $$
+
+$$ \Gamma(\alpha)=\int_{0}^{\infty} x^{\alpha-1} e^{-x} \mathrm{~d} x, (\alpha>0) $$
 
 其中参数 $\alpha$ 称为形状参数，$\beta$ 称为尺度参数。如果一个随机变量 $X$ 呈伽马分布，则可以写作 $X \sim Gamma(\alpha, \beta)$。
 
