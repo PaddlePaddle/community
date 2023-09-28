@@ -1,103 +1,77 @@
-# 轻量语义分割网络PIDNet —— 设计文档
+# 分类大模型--人体视觉任务SOLIDER—— 设计文档
 
-| 任务名称                                                     | 轻量语义分割网络PIDNet | 
+| 任务名称                                                     | 分类大模型--人体视觉任务SOLIDE |
 |----------------------------------------------------------|----------------------|
-| 提交作者<input type="checkbox" class="rowselector hidden">   | Asthestarsfalll           | 
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-9-26            | 
-| 版本号                                                      | V1.0                 | 
-| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本            | 
-| 文件名                                                      | pidnet.md<br> | 
+| 提交作者<input type="checkbox" class="rowselector hidden">   | Yang-Changhui |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-9-28            |
+| 版本号                                                      | V1.0                 |
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本            |
+| 文件名                                                      | SOLIDER.md<br> |
 
 # 一、概述
 ## 1、相关背景
 
-该模型为轻量化分割方向的前沿模型，超过自研模型ppliteseg精度和速度平衡，Cityscapes上精度直逼高精度OCRNet，数据和模型、代码均已经开源。
+该论文利用自监督训练方式，充分利用现有大量人体无标注数据，得到一个可以通用于下游各种人体视觉任务的预训练大模型，本任务的完成可以支持PaddleClas各种人体视觉任务。 
 
 
 ## 2、功能目标
-为PaddleSeg 添加该模型，达到论文Table.6中的指标，进行TIPC验证lite train lite infer 链条，参考PR提交规范提交代码PR到ppseg中。
+需要前向对齐网络，需对齐的模型包括swin_tiny_patch4_window7_224、swin_small_patch4_window7_224以及swin_base_patch4_window7_224。
 
 ## 3、意义
 
-为PaddleSeg 增加实时语义分割SOTA模型。
+为PaddleClas 增加分类大模型--人体视觉任务SOLIDE。
 
 
 # 二、业内方案调研
 
-PIDNet 源码已经开源，地址：https://github.com/XuJiacong/PIDNet
+SOLIDER 源码已经开源，地址：https://github.com/tinyvision/SOLIDER
 
 性能表现如下
 
-| Model (Cityscapes) | Val (% mIOU) | Test (% mIOU)| FPS |
-|:-:|:-:|:-:|:-:|
-| PIDNet-S | [78.8](https://drive.google.com/file/d/1JakgBam_GrzyUMp-NbEVVBPEIXLSCssH/view?usp=sharing) | [78.6](https://drive.google.com/file/d/1VcF3NXLQvz2qE3LXttpxWQSdxTbATslO/view?usp=sharing) | 93.2 |
-| PIDNet-M | [79.9](https://drive.google.com/file/d/1q0i4fVWmO7tpBKq_eOyIXe-mRf_hIS7q/view?usp=sharing) | [79.8](https://drive.google.com/file/d/1wxdFBzMmkF5XDGc_LkvCOFJ-lAdb8trT/view?usp=sharing) | 42.2 |
-| PIDNet-L | [80.9](https://drive.google.com/file/d/1AR8LHC3613EKwG23JdApfTGsyOAcH0_L/view?usp=sharing) | [80.6](https://drive.google.com/file/d/1Ftij_vhcd62WEBqGdamZUcklBcdtB1f3/view?usp=sharing) | 31.1 |
+| Task                                              | Dataset     | Swin Tiny ([Link](https://drive.google.com/file/d/12UyPVFmjoMVpQLHN07tNh4liHUmyDqg8/view?usp=share_link)) | Swin Small ([Link](https://drive.google.com/file/d/1oyEgASqDHc7YUPsQUMxuo2kBZyi2Tzfv/view?usp=share_link)) | Swin Base ([Link](https://drive.google.com/file/d/1uh7tO34tMf73MJfFqyFEGx42UBktTbZU/view?usp=share_link)) |
+| ------------------------------------------------- | ----------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Person Re-identification (mAP/R1) w/o re-ranking  | Market1501  | 91.6/96.1                                                    | 93.3/96.6                                                    | 93.9/96.9                                                    |
+|                                                   | MSMT17      | 67.4/85.9                                                    | 76.9/90.8                                                    | 77.1/90.7                                                    |
+| Person Re-identification (mAP/R1) with re-ranking | Market1501  | 95.3/96.6                                                    | 95.4/96.4                                                    | 95.6/96.7                                                    |
+|                                                   | MSMT17      | 81.5/89.2                                                    | 86.5/91.7                                                    | 86.5/91.7                                                    |
+| Attribute Recognition (mA)                        | PETA_ZS     | 74.37                                                        | 76.21                                                        | 76.43                                                        |
+|                                                   | RAP_ZS      | 74.23                                                        | 75.95                                                        | 76.42                                                        |
+|                                                   | PA100K      | 84.14                                                        | 86.25                                                        | 86.37                                                        |
+| Person Search (mAP/R1)                            | CUHK-SYSU   | 94.9/95.7                                                    | 95.5/95.8                                                    | 94.9/95.5                                                    |
+|                                                   | PRW         | 56.8/86.8                                                    | 59.8/86.7                                                    | 59.7/86.8                                                    |
+| Pedestrian Detection (MR-2)                       | CityPersons | 10.3/40.8                                                    | 10.0/39.2                                                    | 9.7/39.4                                                     |
+| Human Parsing (mIOU)                              | LIP         | 57.52                                                        | 60.21                                                        | 60.50                                                        |
+| Pose Estimation (AP/AR)                           | COCO        | 74.4/79.6                                                    | 76.3/81.3                                                    | 76.6/81.5                                                    |
 
-| Model (CamVid) | Val (% mIOU) | Test (% mIOU)| FPS |
-|:-:|:-:|:-:|:-:|
-| PIDNet-S |-| [80.1](https://drive.google.com/file/d/1h3IaUpssCnTWHiPEUkv-VgFmj86FkY3J/view?usp=sharing) | 153.7 |
-| PIDNet-M |-| [82.0](https://drive.google.com/file/d/1rNGTc8LD42h8G3HaedtqwS0un4_-gEbB/view?usp=sharing) | 85.6 |
-
-# 四、对比分析
+# 三、对比分析
 
 参考官方原码实现即可。
 
-# 五、设计思路与实现方案
+# 四、设计思路与实现方案
 
 ## 总体思路
-### Edge label 实现
+### 在SwinTransformer中添加semantic_embed_w与semantic_embed_b处理模型
 
-PIDNet 中需要额外生成 edge label 以对边缘部分进行监督，虽然 PaddleSeg 中已经内置了 edge label 的方式，但是具体实现细节差距较大，因此需要单独添加该生成方法。
+在对比swim_transformer模型与SOLIDER模型发现，前者缺少semantic_embed_w与semantic_embed_b，需要补充。
 
-另外 PIDNet 中 edge label 跟随 label 和 image 一起参与数据增强，而 PaddleSeg 中默认行为为使用增强过后的 label 生成 edge label，因此可以考虑单独增加一个 transform,代码如下
+### 对齐SwinTransformerBlock
 
-```python
-@manager.TRANSFORMS.add_component
-class AddEdgeLabel:
-    def __call__(self, data):
-        edge = cv2.Canny(data['label'], 0.1, 0.2)
-        kernel = np.ones((4, 4), np.uint8)
-        edge = edge[6:-6, 6:-6]
-        edge = np.pad(edge, ((6,6),(6,6)), mode='constant')
-        edge = (cv2.dilate(edge, kernel, iterations=1)>50)*1.0
-        data['gt_fields'].append('edge')
-        data['edge'] = edge
-        return data
-```
+PaddleClas中现有的swim_transformer模型中的SwinTransformerBlock模块，与SOLIDER模型中的SwinBlock模块处理方式不一样，导致该部分输出结果不同。
 
-### LOSS 对齐
+### 模型转换
 
-PIDNet 中使用了多个loss，其中 sem_loss 为 cross_entropy 和 ohem 的组合，与 PaddleSeg 有以下冲突：
-1. cross_entropy 的 reduction 参数为 False，即维持输入的形状；
-2. ohem 中使用了 class weight。
+由于swim_transformer和SOLIDER网络结构参数名不同，以及paddle和torch的模型存储结构不同，需要进行模型转换。
 
-考虑修改如下：
-为 PaddleSeg 的CrossEntropyLoss 添加 use_post_process  的参数用于控制是否平均输出。
-```python
-    if self.use_post_process:
-        return self._post_process_loss(logit, label, semantic_weights, loss)
-    return loss
-```
-为 PaddleSeg 的 OhemCrossEntropyLoss 添加 weight 参数
+# 五、测试和验收的考量
 
-```python
-    if self.weight is not None:
-        loss = F.cross_entropy(
-            logit, label, weight=self.weight, ignore_index=self.ignore_index, axis=1)
-    else:
-        loss = F.softmax_with_cross_entropy(
-            logit, label, ignore_index=self.ignore_index, axis=1)
-```
+1. 增加介绍文档PaddleClas/docs/zh_CN/models/sodier.md
+2. 对swin系列backbone进行必要的修改
+3. 发送转化swin系列（swin_tiny_patch4_window7_224、swin_small_patch4_window7_224以及swin_base_patch4_window7_224）的权重和对齐日志
 
-# 六、测试和验收的考量
-
-达到论文Table.6中的指标，进行TIPC验证lite train lite infer 链条，参考PR提交规范提交代码PR到ppseg中。
-
-# 七、影响面
+# 六、影响面
 
 对其他模块没有影响。
 
-# 八、排期规划
+# 七、排期规划
 
 可以在活动时间内完成。
