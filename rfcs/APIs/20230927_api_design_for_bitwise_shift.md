@@ -40,7 +40,7 @@ Computes the right arithmetic shift of input by other bits. The input tensor mus
 
 ## 实现方法
 
-从实现方法上，PyTorch是将位运算注册到element_wise系列中实现的，[代码位置](https://github.com/pytorch/pytorch/blob/main/torch/_prims/__init__.py#L1144-L1149)
+从实现方法上，PyTorch是将位运算注册到element_wise系列中实现的，[代码位置](https://github.com/pytorch/pytorch/blob/main/torch/_prims/__init__.py#L1144-L1151)
 
 ```python
 shift_right_arithmetic = _make_elementwise_binary_prim(
@@ -49,6 +49,8 @@ shift_right_arithmetic = _make_elementwise_binary_prim(
     doc="",
     type_promotion=ELEMENTWISE_PRIM_TYPE_PROMOTION_KIND.DEFAULT,
 )
+
+shift_right_logical = _not_impl  # 可见pytorch中仅支持算数位移
 ```
 
 具体元素尺度的实现，[代码位置](https://github.com/pytorch/pytorch/blob/main/torch/_inductor/codegen/common.py#L401-L405)：
@@ -145,19 +147,97 @@ npy_rshift@u@@c@(npy_@u@@type@ a, npy_@u@@type@ b)
 }
 ```
 
+
+
+## Jax
+
+算数位移
+
+- jax.lax.**shift_right_arithmetic**(*x*, *y*)[[source\]](https://jax.readthedocs.io/en/latest/_modules/jax/_src/lax/lax.html#shift_right_arithmetic)
+
+  Elementwise arithmetic right shift: x ≫ y.
+
+  Parameters
+
+  - **x** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Array`](https://jax.readthedocs.io/en/latest/_autosummary/jax.Array.html#jax.Array), [`ndarray`](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray), [`bool_`](https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.bool_), [`number`](https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.number.html#jax.numpy.number), [`bool`](https://docs.python.org/3/library/functions.html#bool), [`int`](https://docs.python.org/3/library/functions.html#int), [`float`](https://docs.python.org/3/library/functions.html#float), [`complex`](https://jax.readthedocs.io/en/latest/_autosummary/jax.lax.complex.html#jax.lax.complex)]) 
+  - **y** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Array`](https://jax.readthedocs.io/en/latest/_autosummary/jax.Array.html#jax.Array), [`ndarray`](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray), [`bool_`](https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.bool_), [`number`](https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.number.html#jax.numpy.number), [`bool`](https://docs.python.org/3/library/functions.html#bool), [`int`](https://docs.python.org/3/library/functions.html#int), [`float`](https://docs.python.org/3/library/functions.html#float), [`complex`](https://jax.readthedocs.io/en/latest/_autosummary/jax.lax.complex.html#jax.lax.complex)]) 
+
+  Return type[`Array`](https://jax.readthedocs.io/en/latest/_autosummary/jax.Array.html#jax.Array)
+
+具体[实现代码](https://github.com/google/jax/blob/2d068a1caa97ebde662604bb95298cff2abb0afa/jax/experimental/jax2tf/jax2tf.py#L1748-L1760)
+
+```python
+# Note: Bitwise operations only yield identical results on unsigned integers!
+# pylint: disable=protected-access
+def _shift_right_arithmetic_raw(x, y):
+  if x.dtype.is_unsigned:
+    assert x.dtype == y.dtype
+    orig_dtype = x.dtype
+    signed_dtype = _UNSIGNED_TO_SIGNED_TABLE[orig_dtype]
+    x = tf.cast(x, signed_dtype)
+    y = tf.cast(y, signed_dtype)
+    res = tf.bitwise.right_shift(x, y)
+    return tf.cast(res, orig_dtype)
+  else:
+    return tf.bitwise.right_shift(x, y)
+```
+
+>  在算术位移过程中，如果是有符号数，则直接进行算数位移；如果是无符号数，则先转换成对应的有符号数，再进行位移（因为算术右移时常常需要补符号位，只有有符号数才能保证结果正确性），最后转回无符号数。
+
+
+
+逻辑位移
+
++ jax.lax.**shift_right_logical**(*x*, *y*) [source](https://jax.readthedocs.io/en/latest/_modules/jax/_src/lax/lax.html#shift_right_logical)
+
+  Elementwise logical right shift: �≫�.Parameters
+
+  - **x** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Array`](https://jax.readthedocs.io/en/latest/_autosummary/jax.Array.html#jax.Array), [`ndarray`](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray), [`bool_`](https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.bool_), [`number`](https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.number.html#jax.numpy.number), [`bool`](https://docs.python.org/3/library/functions.html#bool), [`int`](https://docs.python.org/3/library/functions.html#int), [`float`](https://docs.python.org/3/library/functions.html#float), [`complex`](https://jax.readthedocs.io/en/latest/_autosummary/jax.lax.complex.html#jax.lax.complex)]) 
+  - **y** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Array`](https://jax.readthedocs.io/en/latest/_autosummary/jax.Array.html#jax.Array), [`ndarray`](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray), [`bool_`](https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.bool_), [`number`](https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.number.html#jax.numpy.number), [`bool`](https://docs.python.org/3/library/functions.html#bool), [`int`](https://docs.python.org/3/library/functions.html#int), [`float`](https://docs.python.org/3/library/functions.html#float), [`complex`](https://jax.readthedocs.io/en/latest/_autosummary/jax.lax.complex.html#jax.lax.complex)]) 
+
+  Return type[`Array`](https://jax.readthedocs.io/en/latest/_autosummary/jax.Array.html#jax.Array)
+
+
+
+具体[实现代码](https://github.com/google/jax/blob/2d068a1caa97ebde662604bb95298cff2abb0afa/jax/experimental/jax2tf/jax2tf.py#L1776-L1786)
+
+```python
+def _shift_right_logical_raw(x, y):
+  if x.dtype.is_unsigned:
+    return tf.bitwise.right_shift(x, y)
+  else:
+    assert x.dtype == y.dtype
+    orig_dtype = x.dtype
+    unsigned_dtype = _SIGNED_TO_UNSIGNED_TABLE[orig_dtype]
+    x = tf.cast(x, unsigned_dtype)
+    y = tf.cast(y, unsigned_dtype)
+    res = tf.bitwise.right_shift(x, y)
+    return tf.cast(res, orig_dtype)
+```
+
+> 在逻辑位移过程中，如果是无符号数，则直接进行算数位移；如果是有符号数，则先转换成无符号数，再进行位移（因为逻辑右移时常常需要补0，只有无符号数才能保证结果正确性），最后转回有符号数。
+
+
+
+
+
 # 四、对比分析
 
 PyTorch是将算子注册到element wise系列中，Numpy也类似地`BINARY_LOOP`来做element wise的shift操作。
+
+同时，PyTorch与Numpy中都仅支持算术位移，不支持逻辑位移，而JAX中实现了算术位移和逻辑位移。
+
+
 
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
 
-API的设计为`paddle.bitwise_right_shift(x, y)`，其余几个shift操作同理，其中 `x` 与 `y` 需要有相同的shape或者能够进行广播，且类型都必须为int。
+API的设计为`paddle.bitwise_right_shift(x, y, is_arithmetic=True)`，其余几个shift操作同理，其中 `x` 与 `y` 需要有相同的shape或者能够进行广播，且类型都必须为int；`is_arithmetic` 为bool类型，默认为 `True` 表示算术位移，当其为 `False` 时则为逻辑位移。
 
 ## API实现方案
 
-参考`PyTorch`和与`Numpy`中的设计，组合已有API实现功能
+参考`PyTorch`、`Numpy`、`JAX`中的设计，组合已有API实现功能
 
 # 六、测试和验收的考量
 
