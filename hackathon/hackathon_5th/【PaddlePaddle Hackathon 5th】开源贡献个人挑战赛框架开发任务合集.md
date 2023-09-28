@@ -208,7 +208,7 @@
 - 熟练掌握 C++，Python
 - 了解分布式训练
 
-### No.105：将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel实现从fluid下迁移到phi下
+### No.101：将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel实现从fluid下迁移到phi下
 
 **详细描述：**
 
@@ -232,7 +232,7 @@
 
 https://github.com/PaddlePaddle/Paddle/pull/56846
 
-### No.106：将paddle内部的fused_embedding_eltwise_layernorm、fusion_transpose_flatten_concat和fused_fc_elementwise_layernorm算子及其kernel实现从fluid下迁移到phi下
+### No.102：将paddle内部的fused_embedding_eltwise_layernorm、fusion_transpose_flatten_concat和fused_fc_elementwise_layernorm算子及其kernel实现从fluid下迁移到phi下
 
 **详细描述：**
 
@@ -256,7 +256,7 @@ https://github.com/PaddlePaddle/Paddle/pull/56846
 
 https://github.com/PaddlePaddle/Paddle/pull/56846
 
-### No.107：将paddle内部的skip_layernorm、fc和fused_bias_dropout_residual_layer_norm算子及其kernel实现从fluid下迁移到phi下
+### No.103：将paddle内部的skip_layernorm、fc和fused_bias_dropout_residual_layer_norm算子及其kernel实现从fluid下迁移到phi下
 
 **详细描述：**
 
@@ -280,7 +280,7 @@ https://github.com/PaddlePaddle/Paddle/pull/56846
 
 https://github.com/PaddlePaddle/Paddle/pull/56846
 
-### No.108：将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下
+### No.104：将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下
 
 **详细描述：**
 
@@ -304,7 +304,7 @@ https://github.com/PaddlePaddle/Paddle/pull/56846
 
 https://github.com/PaddlePaddle/Paddle/pull/56846
 
-### No.109：将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下
+### No.105：将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下
 
 **详细描述：**
 
