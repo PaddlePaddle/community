@@ -246,7 +246,7 @@ def _kl_gamma_gamma(p, q):
 测试以 `scipy.stats.gamma` 为基准，测试的主要内容如下：
 1. 测试 `mean`、`variance`、`prob`、`log_prob`、`entropy`的准确性，测试参数包含一维和多维参数。
 
-2. 测试 `sample` 和 `rsample` 采样结果的形状、均值和方差是否符合要求，然后使用Kolmogorov-Smirnov test 验证采样结果是否符合分布要求。此外，还需要测试 `rsample` 的采样结果是否支持方向传播。
+2. 测试 `sample` 和 `rsample` 采样结果的形状、均值和方差是否符合要求，然后使用 Kolmogorov-Smirnov test 验证采样结果是否符合分布要求。此外，还需测试 `rsample` 的采样结果是否支持方向传播。
 
 3. 测试覆盖动态图和静态图模式，覆盖 raise 语句。
 

@@ -6,7 +6,7 @@
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-28 | 
 |版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop | 
-|文件名 | 20230928_api_design_for_exponential.md<br> | 
+|文件名 | 20230928_api_design_for_distribution_exponential.md<br> | 
 
 
 # 一、概述
@@ -79,12 +79,13 @@ class Exponential(ExponentialFamily):
 tfp.distributions.Exponential(rate)
 ```
 
-使用上面语句可得到率参数为 `rate` 的指数分布，分布可写作 $ X \sim Exponential (rate)$ 。
+使用上面语句可得到率参数为 `rate` 的指数分布，分布可写作 $X \sim Exponential (rate)$ 。
 
-`Exponential` 概率分布与 `Gamma` 分布有以下关系，因而 TensorFlow 是通过 `Gamma` 概率分布实现 `Exponential` 概率分布。
+`Exponential` 概率分布与 `Gamma` 分布有以下关系，因而 TensorFlow 是使用 `Gamma` 概率分布来实现 `Exponential` 概率分布。
 
-
-$$Exponential(rate) = Gamma(concentration=1., rate)$$
+```python
+Exponential(rate) = Gamma(concentration=1., rate)
+```
 
 `Exponential` 类的部分代码如下：
 ```python
@@ -198,7 +199,7 @@ def _kl_exponential_exponential(p, q):
 测试以 `scipy.stats.expon` 为基准，测试的主要内容如下：
 1. 测试 `mean`、`variance`、`prob`、`log_prob`、`entropy`的准确性，测试参数包含一维和多维参数。
 
-2. 测试 `sample` 和 `rsample` 采样结果的形状、均值和方差是否符合要求，然后使用Kolmogorov-Smirnov test 验证采样结果是否符合分布要求。此外，还需要测试 `rsample` 的采样结果是否支持方向传播。
+2. 测试 `sample` 和 `rsample` 采样结果的形状、均值和方差是否符合要求，然后使用 Kolmogorov-Smirnov test 验证采样结果是否符合分布要求。此外，还需测试 `rsample` 的采样结果是否支持方向传播。
 
 3. 测试覆盖动态图和静态图模式，覆盖 raise 语句。
 
