@@ -3,7 +3,7 @@
 | API名称                                                      | paddle.linalg.matrix_exp                  |
 | ------------------------------------------------------------ | ----------------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">   | zade23                                    |
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-09-26                                |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2023-09-28                                |
 | 版本号                                                       | V1.0                                      |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                                   |
 | 文件名                                                       | 20200928_api_design_for_matrix_exp.md<br> |
@@ -15,13 +15,13 @@
 
 ## 2、功能目标
 
-对应 PyTorch 的 `torch.linalg.matrix_exp` 操作，调用路径为`paddle.linalg.matrix_exp`，用于计算方阵 $x$ 的指数函数，即 $e^x$。对于 $x \in \mathbb{K}^{n \times n}$，其中$\mathbb{K}$ 可以是实数集$(\mathbb{R}$）或复数集$(\mathbb{C}$），其定义如下：即使用矩阵指数的经典定义——泰勒级数，采用幂级数的方式表示，定义如下：
+对应 PyTorch 的 `torch.linalg.matrix_exp` 操作，调用路径为`paddle.linalg.matrix_exp`，用于计算方阵 xx 的指数函数，即 exe^x。对于 x∈Kn×nx \in \mathbb{K}^{n \times n}，其中K\mathbb{K} 可以是实数集(R(\mathbb{R}）或复数集(C(\mathbb{C}），其定义如下：即使用矩阵指数的经典定义——泰勒级数，采用幂级数的方式表示，定义如下：
 $$
 \mathrm{matrix\_exp}(x) = \sum_{k=0}^\infty \frac{1}{k!}x^k \in \mathbb{K}^{n \times n} \
 $$
-如果矩阵 $x$ 具有特征值 $\lambda_i \in \mathbb{C}$，那么矩阵 $\mathrm{matrix\_exp}(x)$ 的特征值为 $e^{\lambda_i} \in \mathbb{C}$。
+如果矩阵 xx 具有特征值 λi∈C\lambda_i \in \mathbb{C}，那么矩阵 matrix_exp(x)\mathrm{matrix\_exp}(x) 的特征值为 eλi∈Ce^{\lambda_i} \in \mathbb{C}。
 
-API 需要输入一个参数 `input`，对应上式的 $x$
+API 需要输入一个参数 `input`，对应上式的 xx
 
 ## 3、意义
 为 Paddle 增加用于计算矩阵的指数函数的 API 功能，丰富`paddle`支持线性代数运算的 API。
