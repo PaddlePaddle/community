@@ -9,25 +9,25 @@
 | 文件名       | 20230929_api_design_for_diagonal_scatter.md |
 
 
- # 一、概述
- ## 1、相关背景
+# 一、概述
+## 1、相关背景
 丰富Paddle的Tensor相关API，支持更多样的tensor操作
 
- ## 2、功能目标
-实现diagonal_scatter API，能够将src张量值嵌入到input张量中，同时src张量将会沿着input的对角线元素分布，支持dim1和dim2两个维度：
+## 2、功能目标
+实现diagonal_scatter API，能够将src张量值嵌入到input张量中，同时src张量将会沿着input的对角线元素分布，支持axis1和axis2两个维度：
 
 - paddle.diagonal_scatter作为独立函数调用
 - Tensor.diagonal_scatter作为Tensor的方法使用
 
- ## 3、意义
+## 3、意义
 支持Paddle在张量上执行更细粒度的操作
 
- # 二、飞桨现状
+# 二、飞桨现状
 目前飞桨有类似功能的API实现，fill_diagonal_tensor，可以直接复用该API，或者通过API paddle.diagonal组合实现该功能
 
- # 三、业内方案调研
+# 三、业内方案调研
 
- ## PyTorch
+## PyTorch
 PyTorch中有API：`torch.diagonal_scatter(input, src, offset=0, dim1=0, dim2=1)`
 
 在PyTorch中介绍如下，功能与Paddle的需求一致：
@@ -209,44 +209,62 @@ def diagonal(input, offset: int = 0, dim1: int = 0, dim2: int = 1):
     return TensorBox(ir.GenericView.create(input, sizes, reindexer))
 ```
 
- ## TensorFlow
+## TensorFlow
 
 TensorFlow中没有diagonal_scatter API的实现，但是有核心函数tf.linalg.diag，可以通过组合来实现对应逻辑
- ## Numpy
+## Numpy
 
 Numpy中没有diagonal_scatter API的实现，但是有核心函数numpy.diagonal，可以通过组合来实现对应逻辑
 
- # 四、对比分析
+# 四、对比分析
   - PyTorch是在C++ API基础上实现，使用Python调用C++对应的接口
   - Tensorflow、Numpy中没有对应API的实现
 
 
- # 五、设计思路与实现方案
+# 五、设计思路与实现方案
 
- ## 命名与参数设计
+## 命名与参数设计
+
+paddle.diagonal_scatter
+
  ```python
-paddle.diagonal_scatter(input, src, offset=0, dim1=0, dim2=1, name=None)
-paddle.diagonal_scatter_(input, src, offset=0, dim1=0, dim2=1, name=None) # inplace
-Tensor.diagonal_scatter(src, offset=0, dim1=0, dim2=1, name=None)
-Tensor.diagonal_scatter_(src, offset=0, dim1=0, dim2=1, name=None) # inplace
+paddle.diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
+paddle.diagonal_scatter_(x, y, offset=0, axis1=0, axis2=1, name=None) # inplace
  ```
 参数定义：
 
-- `input(Tensor)`：输入张量，张量的维度至少为2维
-- `src(Tensor)`：嵌入张量，将会被嵌入到输入张量中
+- `x(Tensor)`：输入张量，张量的维度至少为2维
+- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中
 - `offset(int, optional)`：偏移的对角线
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
     - 偏移量小于0，则嵌入对角线下方
-- `dim1(int, optional)`：对角线的第一个维度，默认值为0
-- `dim2(int, optional)`：对角线的第二个维度，默认值为1
+- `axis1(int, optional)`：对角线的第一个维度，默认值为0
+- `axis2(int, optional)`：对角线的第二个维度，默认值为1
 - `name (str，optional)`：具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None
 
- ## 底层OP设计
+
+Tensor.diagonal_scatter
+
+```python
+Tensor.diagonal_scatter(x, offset=0, axis1=0, axis2=1, name=None)
+Tensor.diagonal_scatter_(x, offset=0, axis1=0, axis2=1, name=None) # inplace
+```
+参数定义：
+
+- `x(Tensor)`：嵌入张量，将会被嵌入到输入张量中
+- `offset(int, optional)`：偏移的对角线
+    - 偏移量为0，则嵌入对角线位置
+    - 偏移量大于0，则嵌入对角线上方
+    - 偏移量小于0，则嵌入对角线下方
+- `axis1(int, optional)`：对角线的第一个维度，默认值为0
+- `axis2(int, optional)`：对角线的第二个维度，默认值为1
+- `name (str，optional)`：具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None
+## 底层OP设计
 
 依赖已有的API（fill_diagonal_tensor或diagonal）实现，无需实现新的底层OP
 
- ## API实现方案
+## API实现方案
 在python/paddle/tensor/manipulation.py中增加diagonal_scatter函数
 
 - 方案一：通过调用`paddle.fill_diagonal_tensor_impl`实现对应逻辑
@@ -259,33 +277,33 @@ Tensor.diagonal_scatter_(src, offset=0, dim1=0, dim2=1, name=None) # inplace
 
 单元测试路径：test/lagacy_test/test_diagonal_scatter.py
 
- # 六、测试和验收的考量
+# 六、测试和验收的考量
 
 测试考虑以下case：
 
 - 校验diagonal_scatter答案的正确性，对比torch.diagonal_scatter进行校验
 
-- 检查参数的正确性，比如是否为支持的数据类型，是否在offset/dim1/dim2设置有误时进行报错
+- 检查参数的正确性，比如是否为支持的数据类型，是否在offset/axis1/axis2设置有误时进行报错
 
 - 检查input的维度是否符合大于等于2个维度
 
 - 检查input的slice和src的维度是否相等，这样才能进行覆盖
 
- # 七、可行性分析和排期规划
+# 七、可行性分析和排期规划
 
- 方案实施难度可控，工期上可以满足在当前版本周期内开发完成
-
-
- # 八、影响面
-
- 为已有 API 的增强，对其他模块无影响。
+方案实施难度可控，工期上可以满足在当前版本周期内开发完成
 
 
- # 名词解释
+# 八、影响面
 
- 无
+为已有 API 的增强，对其他模块无影响。
 
- # 附件及参考资料
+
+# 名词解释
+
+无
+
+# 附件及参考资料
 
 [torch.diagonal_scatter](https://pytorch.org/docs/stable/generated/torch.diagonal_scatter.html)
 
