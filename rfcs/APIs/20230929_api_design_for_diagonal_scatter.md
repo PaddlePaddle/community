@@ -23,7 +23,7 @@
 支持Paddle在张量上执行更细粒度的操作
 
  # 二、飞桨现状
-目前飞桨缺少相关功能的实现，但是可以通过飞桨的API paddle.diagonal组合其他函数修改对应位置的值
+目前飞桨有类似功能的API实现，fill_diagonal_tensor，可以直接复用该API，或者通过API paddle.diagonal组合实现该功能
 
  # 三、业内方案调研
 
@@ -225,8 +225,10 @@ Numpy中没有diagonal_scatter API的实现，但是有核心函数numpy.diagona
 
  ## 命名与参数设计
  ```python
-paddle.diagonal_scatter(input, src, offset=0, axis1=0, axis2=1, name=None)
-Tensor.diagonal_scatter(input, src, offset=0, axis1=0, axis2=1, name=None)
+paddle.diagonal_scatter(input, src, offset=0, dim1=0, dim2=1, name=None)
+paddle.diagonal_scatter_(input, src, offset=0, dim1=0, dim2=1, name=None) # inplace
+Tensor.diagonal_scatter(src, offset=0, dim1=0, dim2=1, name=None)
+Tensor.diagonal_scatter_(src, offset=0, dim1=0, dim2=1, name=None) # inplace
  ```
 参数定义：
 
@@ -236,24 +238,20 @@ Tensor.diagonal_scatter(input, src, offset=0, axis1=0, axis2=1, name=None)
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
     - 偏移量小于0，则嵌入对角线下方
-- `axis1(int, optional)`：对角线的第一个维度，默认值为0
-- `axis2(int, optional)`：对角线的第二个维度，默认值为1
+- `dim1(int, optional)`：对角线的第一个维度，默认值为0
+- `dim2(int, optional)`：对角线的第二个维度，默认值为1
 - `name (str，optional)`：具体用法请参见 [Name](https://www.paddlepaddle.org.cn/documentation/docs/zh/api_guides/low_level/program.html#api-guide-name)，一般无需设置，默认值为 None
 
  ## 底层OP设计
 
-依赖已有的API（diagonal）实现，无需实现新的底层OP
+依赖已有的API（fill_diagonal_tensor或diagonal）实现，无需实现新的底层OP
 
  ## API实现方案
 在python/paddle/tensor/manipulation.py中增加diagonal_scatter函数
 
-通过`paddle.diagonal`实现对应逻辑
+- 方案一：通过调用`paddle.fill_diagonal_tensor_impl`实现对应逻辑
 
-```python
-output = deep_clone(input)
-slice = paddle.diagonal(output, offset, axis1, axis2)
-slice.copy_(src)
-```
+- 方案二：clone input张量得到output张量，再对output张量的diagnoal位置上的元素使用src张量元素进行覆盖
 
 ## 代码实现文件路径
 
@@ -267,9 +265,10 @@ slice.copy_(src)
 
 - 校验diagonal_scatter答案的正确性，对比torch.diagonal_scatter进行校验
 
-- 检查参数的正确性，比如是否为支持的数据类型，是否在offset/axis1/axis2设置有误时进行报错
+- 检查参数的正确性，比如是否为支持的数据类型，是否在offset/dim1/dim2设置有误时进行报错
 
 - 检查input的维度是否符合大于等于2个维度
+
 - 检查input的slice和src的维度是否相等，这样才能进行覆盖
 
  # 七、可行性分析和排期规划
