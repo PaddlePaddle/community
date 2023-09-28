@@ -207,3 +207,124 @@
 
 - 熟练掌握 C++，Python
 - 了解分布式训练
+
+### No.101：将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_fused_multi_transformer_op.py/test_fused_multi_transformer_int8_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.102：将paddle内部的fused_embedding_eltwise_layernorm、fusion_transpose_flatten_concat和fused_fc_elementwise_layernorm算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的fused_embedding_eltwise_layernorm/fusion_transpose_flatten_concat/fused_fc_elementwise_layernorm算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_emb_eltwise_layernorm_fuse_pass.py/test_ir_embedding_eltwise_layernorm_fuse_pass.py/test_transpose_flatten_concat_fuse_pass.py/test_fused_fc_elementwise_layernorm_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.103：将paddle内部的skip_layernorm、fc和fused_bias_dropout_residual_layer_norm算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的skip_layernorm/fc/fused_bias_dropout_residual_layer_norm算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_trt_skip_layernorm_fuse_pass.py/test_fc_op.py/test_fused_bias_dropout_residual_layer_norm_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.104：将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的self_dp_attention/fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_fused_vit_attention.py/test_fusion_repeated_fc_relu_op.py/test_fusion_squared_mat_sub_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.105：将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的fusion_gru/fusion_seqconv_eltadd_relu/fusion_seqexpand_concat_fc算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_fusion_gru_op.py/test_fusion_seqconv_eltadd_relu_op.py/test_fusion_seqexpand_concat_fc_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
