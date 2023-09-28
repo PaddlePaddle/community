@@ -358,3 +358,80 @@ Paddle2ONNX 支持将 PaddlePaddle 模型格式转化到 ONNX 模型格式。通
 **可能用到的链接：**
 
 - [Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX.git)
+
+### No.83：PaddleMIX ppdiffusers models模块功能升级同步HF
+
+**任务背景：**
+
+PaddleMIX ppdiffusers 作为飞桨扩散模型基础设施其目标之一是为飞桨开发者提供社区最新的扩散模型能力支持，开源社区目前一些新的能力需要进一步补充跟进。
+
+**详细描述：**
+
+基于ppdiffusers最新代码完成向HF新版本能力的扩充，主要完成 https://github.com/huggingface/diffusers/compare/v0.19.3...v0.21.1 models 模块升级同步
+
+- 保证功能覆盖
+- 保证单测
+
+**提交内容：**
+
+提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
+
+### No.84：新增模型视频生成模型MS-Image2Video+MS-Vid2Vid-XL 
+
+**任务背景：**
+
+视频生成是当下继图片生成之后AIGC的另一热点，相关工作愈加成熟，希望进一步完善飞桨在视频生成领域的能力。
+
+**详细描述：**
+
+基于PaddleMIX ppdiffusers完成[MS-Image2Video](https://huggingface.co/damo-vilab/MS-Image2Video)和[MS-Vid2Vid-XL](https://huggingface.co/damo-vilab/MS-Vid2Vid-XL) 两个视频生成的模型和应用pipeline，保证生成效果的对齐，提供gradio demo
+
+**提交内容：**
+
+提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
+
+### No.85：新增虚拟试衣模型应用 DCI-VTON-Virtual-Try-On
+
+**任务背景：**
+
+虚拟试衣场景任务具有一定的研究和应用价值，希望补充飞桨在该场景任务上的能力。
+
+**详细描述：**
+
+基于PaddleMIX ppdiffusers完成[DCI-VTON-Virtual-Try-On](https://github.com/bcmi/DCI-VTON-Virtual-Try-On#dci-vton-virtual-try-on)模型和应用pipeline，保证生成效果和定量指标对齐，提供gradio demo
+
+**提交内容：**
+
+提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
+
+### No.86：新增图像组合模型应用TF-ICON
+
+**任务背景：**
+
+图像组合尤其是不同domain的图像组合具有一定的应用价值，希望新增tuning free的cross-domain image-guided composition场景任务能力。
+
+**详细描述：**
+
+基于PaddleMIX ppdiffusers完成[TF-ICON](https://github.com/Shilin-LU/TF-ICON#tf-icon-diffusion-based-training-free-cross-domain-image-composition-iccv-2023)模型和应用pipeline，保证生成效果和定量指标对齐，提供gradio demo
+
+**提交内容：**
+
+提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
+
+### No.87：PaddleMIX ppdiffusers新增HF community应用pipeline
+
+**任务背景：**
+
+HF提供了丰富的应用pipeline，其中部分具有一定的应用价值，希望补齐这些应用能力，为飞桨开发者提供社区最新的扩散模型能力支持。
+
+**详细描述：**
+
+基于PaddleMIX ppdiffusers完成以下pipeline，保证生成效果对齐
+
+edict_pipeline.py  https://github.com/huggingface/diffusers/blob/main/examples/community/edict_pipeline.py
+
+pipeline_fabric.py https://github.com/huggingface/diffusers/blob/main/examples/community/pipeline_fabric.py
+
+**提交内容：**
+
+提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
