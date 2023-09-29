@@ -344,7 +344,7 @@ class Poisson(Distribution):
 
 - `kl_divergence` 相对熵计算
 
-相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = - \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$
+相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$
 
 - `sample` 随机采样
 
