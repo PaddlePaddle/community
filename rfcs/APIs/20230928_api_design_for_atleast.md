@@ -1,6 +1,6 @@
 # paddle.atleast_1d/paddle.atleast_2d/paddle.atleast_3d 设计文档
 
-| API 名称 | paddle.paddle.atleast_1d/paddle.atleast_2d/paddle.atleast_3d |
+| API 名称 | paddle.atleast_1d/paddle.atleast_2d/paddle.atleast_3d |
 | - | - |
 | 提交作者 | megemini(柳顺) |
 | 提交时间 | 2023-09-28 |
