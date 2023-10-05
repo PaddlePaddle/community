@@ -21,7 +21,6 @@
 - `sample` 随机采样
 - `prob` 概率密度
 - `log_prob` 对数概率密度
-- `cdf` 累计分布函数
 - `entropy` 熵计算
 - `kl` 两个分布间的kl散度
 
@@ -218,9 +217,6 @@ class Gamma(ExponentialFamily):
         ...
 
     def entropy(self):
-        ...
-
-    def cdf(self, value):
         ...
 
     @property
