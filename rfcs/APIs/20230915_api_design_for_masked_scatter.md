@@ -54,16 +54,14 @@ def masked_scatter(x, mask, value, inplace=False):
             return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
     else:
         """
-        经过测试，静态图模式下(当x的shape中含有-1)广播操作失效, 所以静态图下需要避免这种情况, x的形状必须显式地指定
+        经过测试，静态图模式下(当x的shape中含有-1)paddle.broadcast_to函数失效，但是可以借助乘法来达到广播的效果
         """
-        # make sure mask.shape == x.shape
-        assert -1 not in x.shape, f"in static graph mode, we don't support broadcast the mask to x whose shape has -1, but got x.shape:{x.shape}"
         # make sure the dtype of x and source is the same
         assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
-        mask = paddle.broadcast_to(mask, shape=x.shape)
+        mask_ = (paddle.abs(x) + 1.) * mask > 0
         
-        indexs = tuple(item.squeeze() for item in paddle.where(mask))
-        return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
+        indexs = tuple(item.squeeze() for item in paddle.where(mask_))
+        return paddle.index_put(x, indexs, value.flatten()[:mask_.sum()])
 ```
 ## 初步测试
 ### 动态图测试
@@ -184,7 +182,7 @@ def test_static():
     with paddle.static.program_guard(train_program, startup_program):
         mask_ = paddle.static.data(name='mask', shape=[None, 5], dtype='bool')
         value_ = paddle.static.data(name='value', shape=[None, 5], dtype='float32')
-        data = paddle.static.data(name='X', shape=[3, 4], dtype='float32')
+        data = paddle.static.data(name='X', shape=[None, 4], dtype='float32')
         hidden = paddle.static.nn.fc(data, 5)
         out = masked_scatter(hidden, mask_, value_)
         loss = paddle.mean(out)
@@ -208,28 +206,31 @@ def test_static():
 主要测试以下几种情况：
 #### 正常情况（静态图只有outplace）
 ```
-I0925 19:36:53.425036 10144 program_interpreter.cc:140] New Executor is Running.
-x:  [[0.6100007  0.04530565 0.12533963 0.00868342]
- [0.97731996 0.72944784 0.04382805 0.9545004 ]
- [0.66368145 0.6143798  0.17013946 0.6249167 ]]
-mask:  [[False False  True  True  True]]
-I0925 19:36:53.485648 10144 interpreter_util.cc:605] Standalone Executor is Used.
-res:  [[0.47807267 0.39527717 1.         1.         1.        ]
- [1.4488099  0.22996539 1.         1.         1.        ]
- [0.96345973 0.20303118 1.         1.         1.        ]]
+I1005 20:55:46.745036 72400 interpretercore.cc:237] New Executor is Running.
+W1005 20:55:46.745625 72400 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.0, Runtime API Version: 11.7
+W1005 20:55:46.765377 72400 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+x:  [[0.1934002  0.98766947 0.7015034  0.15250655]
+ [0.16048051 0.04534123 0.6988391  0.22368169]
+ [0.2796441  0.29569423 0.8087764  0.03170063]]
+mask:  [[ True False  True False False]]
+I1005 20:55:51.573920 72400 interpreter_util.cc:518] Standalone Executor is Used.
+res:  [[ 1.          0.84879386  1.         -1.2319866   0.39890465]
+ [ 1.          0.37008268  1.         -0.5776415  -0.19247824]
+ [ 1.          0.6675544   1.         -0.8524722  -0.2765577 ]]
 ```
 #### x的shape中含有-1
 ```
-Traceback (most recent call last):
-  File "D:\PythonProjects\community\test.py", line 126, in <module>
-    test_static()
-  File "D:\PythonProjects\community\test.py", line 79, in test_static
-    out = masked_scatter(hidden, mask_, value_)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\PythonProjects\community\test.py", line 58, in masked_scatter
-    assert -1 not in x.shape, f"in static graph mode, we don't support broadcast the mask to x whose shape has -1, but got x.shape:{x.shape}"
-           ^^^^^^^^^^^^^^^^^
-AssertionError: in static graph mode, we don't support broadcast the mask to x whose shape has -1, but got x.shape:(-1, 5)
+I1005 20:58:03.955381 72956 interpretercore.cc:237] New Executor is Running.
+W1005 20:58:03.955722 72956 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.0, Runtime API Version: 11.7
+W1005 20:58:03.962535 72956 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+x:  [[0.7445243  0.8461412  0.04763601 0.48461103]
+ [0.8466652  0.7928517  0.2364838  0.63883376]
+ [0.25490034 0.3626414  0.27276328 0.12233058]]
+mask:  [[False False  True False False]]
+I1005 20:58:07.203007 72956 interpreter_util.cc:518] Standalone Executor is Used.
+res:  [[ 0.22061607  0.8107873   1.          0.92934763  1.0487965 ]
+ [-0.00330055  0.7640303   1.          1.0978727   1.0327016 ]
+ [-0.00681011  0.21292232  1.          0.44111067  0.20730378]]
 ```
 #### x和value的dtype不一致
 ```
@@ -472,20 +473,30 @@ def masked_scatter(x, mask, value, inplace=False):
     """
     利用现有api实现masked_scatter功能
     """
-    # make sure the mask can be broadcastable to input
-    assert paddle.broadcast_shape(mask.shape, x.shape)==x.shape, f'mask is not be broadcastable to input, mask shape is {mask.shape}, input shape is {x.shape}'
-    mask = paddle.broadcast_to(mask, shape=x.shape)
-    # make sure the true nums in mask is <= the nums of value
-    assert mask.sum() <= value.numel(), 'mask true nums must be <= value size'
-    # make sure the dtype of x and source is the same
-    assert x.dtype == value.dtype, 'input and source must have the same dtype'
+    if paddle.in_dynamic_mode():
+        if mask.shape != x.shape:
+            mask = paddle.broadcast_to(mask, shape=x.shape)
+        # make sure the true nums in mask is <= the nums of value
+        assert mask.sum() <= value.numel(), f'mask true nums must be <= value size, but got mask true nums is {mask.sum().item()}, value size is {value.numel().item()}'
+        # make sure the dtype of x and source is the same
+        assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
 
-    indexs = tuple(item.squeeze() for item in paddle.where(mask))
-    print("index of true value in mask: ", indexs)
-    if inplace and paddle.in_dynamic_mode():
-        return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
+        indexs = tuple(item.squeeze() for item in paddle.where(mask))
+        
+        if inplace:
+            return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
+        else:
+            return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
     else:
-        return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
+        """
+        经过测试，静态图模式下(当x的shape中含有-1)broasdcast_to广播操作失效。但是可以借助乘法来间接实现广播效果
+        """
+        # make sure the dtype of x and source is the same
+        assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
+        mask_ = (paddle.abs(x) + 1.) * mask > 0
+        
+        indexs = tuple(item.squeeze() for item in paddle.where(mask_))
+        return paddle.index_put(x, indexs, value.flatten()[:mask_.sum()])
 ```
 
 # 六、测试和验收的考量
