@@ -229,7 +229,6 @@ paddle.diagonal_scatter
 
  ```python
 paddle.diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
-paddle.diagonal_scatter_(x, y, offset=0, axis1=0, axis2=1, name=None) # inplace
  ```
 参数定义：
 
@@ -248,7 +247,6 @@ Tensor.diagonal_scatter
 
 ```python
 Tensor.diagonal_scatter(x, offset=0, axis1=0, axis2=1, name=None)
-Tensor.diagonal_scatter_(x, offset=0, axis1=0, axis2=1, name=None) # inplace
 ```
 参数定义：
 
