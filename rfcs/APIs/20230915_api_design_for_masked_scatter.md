@@ -58,7 +58,7 @@ def masked_scatter(x, mask, value, inplace=False):
         """
         # make sure the dtype of x and source is the same
         assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
-        mask_ = (paddle.abs(x) + 1.) * mask > 0
+        mask_ = ((x * x) + 1.) * mask > 0
         
         indexs = tuple(item.squeeze() for item in paddle.where(mask_))
         return paddle.index_put(x, indexs, value.flatten()[:mask_.sum()])
@@ -493,7 +493,7 @@ def masked_scatter(x, mask, value, inplace=False):
         """
         # make sure the dtype of x and source is the same
         assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
-        mask_ = (paddle.abs(x) + 1.) * mask > 0
+        mask_ = ((x * x) + 1.) * mask > 0
         
         indexs = tuple(item.squeeze() for item in paddle.where(mask_))
         return paddle.index_put(x, indexs, value.flatten()[:mask_.sum()])
