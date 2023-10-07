@@ -371,8 +371,8 @@ API的设计为:
 Args：
 
 + x(Tensor): 严格为 shape=[M, N] 的 Tensor
-+ p(float, optional): 为p-范数对应的p值，默认为2.0
-+ compute_mode(str, optional): 默认为`use_mm_for_euclid_dist_if_necessary`（组合已有API过程中用到了`paddle.cdist`，当`p=2.0`时，可以设置`compute_mode`利用矩阵运算进行优化）
++ p(float, 可选): 为p-范数对应的p值，默认为2.0
++ compute_mode(str, 可选): 默认为`use_mm_for_euclid_dist_if_necessary`（组合已有API过程中用到了`paddle.cdist`，当`p=2.0`时，可以设置`compute_mode`利用矩阵运算进行优化）
   + `compute_mode=use_mm_for_euclid_dist_if_necessary`时，当p=2.0且M>25时使用矩阵乘法计算距离
   + `compute_mode=use_mm_for_euclid_dist`时，当p=2.0时使用矩阵乘法计算距离
   + `compute_mode=donot_use_mm_for_euclid_dist`时，不使用矩阵乘法计算距离
