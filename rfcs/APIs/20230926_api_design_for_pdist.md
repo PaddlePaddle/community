@@ -376,6 +376,8 @@ API的设计为paddle.pdist(x, p=2.0)，其中 `x` 严格为 shape=[M, N] 的 Te
 
 # 六、测试和验收的考量
 
+单测代码位置，Paddle repo 的 paddle/test/legacy_test/test_pdist.py 目录
+
 测试考虑的case如下：
 
 1. 当`x`、`y` 2D 的 Tensor，并如PyTorch给出合理提示
