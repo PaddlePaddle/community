@@ -20,7 +20,7 @@
 
 ## 3、意义
 
-飞桨支持直接两两计算向量间的距离。
+飞桨支持计算大小为(NxM)的矩阵中，N个向量两两之间的p-norm距离。
 
 # 二、飞桨现状
 
@@ -368,7 +368,11 @@ API的设计为paddle.pdist(x, p=2.0)，其中 `x` 严格为 shape=[M, N] 的 Te
 
 ## API实现方案
 
-参考`PyTorch`与`Scipy`中的设计，组合已有API实现功能
+参考`PyTorch`与`Scipy`中的设计，组合已有API实现功能：
+
+在 Paddle repo 的 ﻿python/paddle/nn/functional/distance.py文件；并在 ﻿python/paddle/nn/functional/init.py中，添加 pdist API，以支持 paddle.Tensor.pdist 的调用方式；
+
+使用的API：`paddle.cdist`,`paddle.tril`,`paddle.masked_select`
 
 # 六、测试和验收的考量
 
