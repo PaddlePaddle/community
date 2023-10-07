@@ -216,6 +216,74 @@ TensorFlow中没有diagonal_scatter API的实现，但是有核心函数tf.linal
 
 Numpy中没有diagonal_scatter API的实现，但是有核心函数numpy.diagonal，可以通过组合来实现对应逻辑
 
+## MindSpore
+
+MindSpore存在对应实现，但是其表现与torch不一致，torch支持任意2D及以上维度矩阵的diagonal_scatter，mindspore只支持方阵的diagonal_scatter
+
+* 因为mindspore的实现思路是构造一个与src矩阵一样的全1矩阵embed，再将embed构造为对角阵与input相乘，保留input的对角元素，如果input不是方阵的话，此处会报错
+
+```python
+@_primexpr
+def _check_diagonal_scatter_shape(diag_shape, src_shape):
+    if diag_shape != src_shape:
+        raise ValueError(f"For diagonal_scatter, the shape of src should equal to the shape of input diagonal,"
+                         f"but got src.shape {src_shape} and diagonal shape {diag_shape}.")
+
+
+def diagonal_scatter(input, src, offset=0, dim1=0, dim2=1):
+    """
+    `dim1` and `dim2` specify the two dimensions of `input`,
+    the elements in these two dimensions will be treated as elements of a matrix,
+    and `src` is embedded on the diagonal of the matrix.
+
+    Args:
+        input (Tensor): Input Tensor, whose dimension is larger than 1.
+        src (Tensor): The source Tensor to embed.
+        offset (int, optional): `offset` controls which diagonal to choose. Default: ``0`` .
+
+            - When `offset` is zero, the diagonal chosen is the main diagonal.
+            - When `offset` is a positive integer, the diagonal chosen is up the main diagonal.
+            - When `offset` is a negative integer, the diagonal chosen is down the main diagonal.
+
+        dim1 (int, optional): Axis to be used as the first axis of the 2-D
+            sub-arrays from which the diagonals should be taken. Default: ``0`` .
+        dim2 (int, optional): Axis to be used as the second axis of the 2-D
+            sub-arrays from which the diagonals should be taken. Default: ``1`` .
+
+    Returns:
+        Tensor after embedding, has the same shape and dtype as `input`.
+
+    Raises:
+        TypeError: If `input` or `src` is not a Tensor.
+        TypeError: If `offset` , `dim1` or `dim2` is not an integer.
+
+    Supported Platforms:
+        ``Ascend`` ``GPU`` ``CPU``
+
+    Examples:
+        >>> import mindspore as ms
+        >>> input = ms.ops.zeros((3,3))
+        >>> src = ms.ops.ones(2)
+        >>> out = ms.ops.diagonal_scatter(input, src, 1, dim1=1, dim2=0)
+        >>> print(out)
+        [[0. 0. 0.]
+         [1. 0. 0.]
+         [0. 1. 0.]]
+    """
+    _check_is_tensor("input", input, "diagonal_scatter")
+    _check_is_tensor("src", src, "diagonal_scatter")
+    _check_is_int(offset, "offset", "diagonal_scatter")
+    _check_is_int(dim1, "dim1", "diagonal_scatter")
+    _check_is_int(dim2, "dim2", "diagonal_scatter")
+    input_diag = input.diagonal(offset, dim1, dim2)
+    _check_diagonal_scatter_shape(input_diag.shape, src.shape)
+    embed = ones_like(src)
+    embed = ops.diag_embed(embed, offset, dim1, dim2)
+    embed = input * embed
+    src = ops.diag_embed(src, offset, dim1, dim2)
+    return input + src - embed
+```
+
 # 四、对比分析
   - PyTorch是在C++ API基础上实现，使用Python调用C++对应的接口
   - Tensorflow、Numpy中没有对应API的实现
