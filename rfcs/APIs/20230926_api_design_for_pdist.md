@@ -364,7 +364,25 @@ Scipy利用现有API组合实现，PyTorch则在底层重写cpp算子。
 
 ## 命名与参数设计
 
-API的设计为paddle.pdist(x, p=2.0)，其中 `x` 严格为 shape=[M, N] 的 Tensor，`p` 为p-范数对应的p值，输出为一行 `Mx(M-1)/2` 列的 Tensor
+API的设计为:
+
+`paddle.pdist(x, p=2.0, compute_mode="use_mm_for_euclid_dist_if_necessary", name=None)`
+
+Args：
+
++ x(Tensor): 严格为 shape=[M, N] 的 Tensor
++ p(float, optional): 为p-范数对应的p值，默认为2.0
++ compute_mode(str, optional): 默认为`use_mm_for_euclid_dist_if_necessary`（组合已有API过程中用到了`paddle.cdist`，当`p=2.0`时，可以设置`compute_mode`利用矩阵运算进行优化）
+  + `compute_mode=use_mm_for_euclid_dist_if_necessary`时，当p=2.0且M>25时使用矩阵乘法计算距离
+  + `compute_mode=use_mm_for_euclid_dist`时，当p=2.0时使用矩阵乘法计算距离
+  + `compute_mode=donot_use_mm_for_euclid_dist`时，不使用矩阵乘法计算距离
++ name(str, 可选): 操作的名称(默认为None)
+
+Return：
+
++ 一行 `Mx(M-1)/2` 列的 Tensor
+
+
 
 ## API实现方案
 
