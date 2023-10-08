@@ -40,7 +40,7 @@ Computes the right arithmetic shift of input by other bits. The input tensor mus
 
 ## 实现方法
 
-从实现方法上，PyTorch是将位运算注册到element_wise系列中实现的，[代码位置](https://github.com/pytorch/pytorch/blob/main/torch/_prims/__init__.py#L1144-L1151)
+从实现方法上，PyTorch是将位运算注册到element_wise系列中实现的，[代码位置](https://github.com/pytorch/pytorch/blob/844ea6408b72cf46871de85cf7a4083629a1ddd8/torch/_inductor/codegen/cpp.py#L1146-L1148)
 
 ```python
 shift_right_arithmetic = _make_elementwise_binary_prim(
@@ -56,11 +56,9 @@ shift_right_logical = _not_impl  # 可见pytorch中仅支持算数位移
 具体元素尺度的实现，[代码位置](https://github.com/pytorch/pytorch/blob/main/torch/_inductor/codegen/common.py#L401-L405)：
 
 ```python
-# TODO(fdrocha): this is currently not being used anywhere,
-# pending on moving triton pin past 972b761
 @staticmethod
-def bitwise_right_shift(x, y):
-    return f"{ExprPrinter.paren(x)} >> {ExprPrinter.paren(y)}"
+def bitwise_right_shift(a, b):
+    return f"decltype({a})({a} >> {b})"
 ```
 
 
