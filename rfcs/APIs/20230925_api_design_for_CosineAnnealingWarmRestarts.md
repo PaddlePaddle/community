@@ -142,7 +142,6 @@ API的实现为一个类，方法组成和lr中其它类相似
 paddle.optimizer.lr.CosineAnnealingWarmRestarts
 ----------------------
 参数
-:::::::::
 
 - `leaning_rate` - 初始化的学习率
 - `T_0` - 第一次重启的迭代次数
