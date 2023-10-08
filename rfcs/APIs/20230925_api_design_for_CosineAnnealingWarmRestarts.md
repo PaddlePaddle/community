@@ -1,4 +1,4 @@
-# paddle.CosineAnnealingWarmRestarts 设计文档
+# paddle.optimizer.lr.CosineAnnealingWarmRestarts 设计文档
 
 | API名称                                                      | paddle.optimizer.lr.CosineAnnealingWarmRestarts |
 | ------------------------------------------------------------ | ----------------------------------- |
@@ -144,7 +144,7 @@ paddle.optimizer.lr.CosineAnnealingWarmRestarts
 参数
 :::::::::
 
-- `leaning_rates` - 初始化的学习率
+- `leaning_rate` - 初始化的学习率
 - `T_0` - 第一次重启的迭代次数
 - `T_mult` - 乘积因子，用于重启后增加`T_i`，默认值为1
 - `eta_min` - 最小学习率，默认值为0
@@ -165,9 +165,13 @@ python端API组合实现
 class CosineAnnealingWarmRestarts(LRScheduler):
     def __init__(self, learning_rate, T_0, T_mult=1, eta_min=0, last_epoch=-1, verbose=False):
         if T_0 <= 0 or not isinstance(T_0, int):
-            raise ValueError("Expected positive integer T_0, but got {}".format(T_0))
+            raise ValueError(
+                f"Expected positive integer T_0, but got {T_0}"
+            )
         if T_mult < 1 or not isinstance(T_mult, int):
-            raise ValueError("Expected integer T_mult >= 1, but got {}".format(T_mult))
+            raise ValueError(
+                f"Expected integer T_mult >= 1, but got {T_mult}"
+            )
         self.T_0 = T_0
         self.T_i = T_0
         self.T_mult = T_mult
@@ -176,7 +180,12 @@ class CosineAnnealingWarmRestarts(LRScheduler):
         super().__init__(learning_rate, last_epoch, verbose)
 
     def get_lr(self):
-        return self.eta_min + (self.base_lr - self.eta_min) * (1 + math.cos(math.pi * self.T_cur / self.T_i)) / 2               
+        return (
+            self.eta_min
+            + (self.base_lr - self.eta_min)
+            * (1 + math.cos(math.pi * self.T_cur / self.T_i))
+            / 2
+        )
 
     def step(self, epoch=None):
         if epoch is None and self.last_epoch < 0:
@@ -190,13 +199,22 @@ class CosineAnnealingWarmRestarts(LRScheduler):
                 self.T_i = self.T_i * self.T_mult
         else:
             if epoch < 0:
-                raise ValueError("Expected non-negative epoch, but got {}".format(epoch))
+                raise ValueError(
+                    f"Expected non-negative epoch, but got {epoch}"
+                )
             if epoch >= self.T_0:
                 if self.T_mult == 1:
                     self.T_cur = epoch % self.T_0
                 else:
-                    n = int(math.log((epoch / self.T_0 * (self.T_mult - 1) + 1), self.T_mult))
-                    self.T_cur = epoch - self.T_0 * (self.T_mult ** n - 1) / (self.T_mult - 1)
+                    n = int(
+                        math.log(
+                            (epoch / self.T_0 * (self.T_mult - 1) + 1),
+                            self.T_mult,
+                        )
+                    )
+                    self.T_cur = epoch - self.T_0 * (self.T_mult**n - 1) / (
+                        self.T_mult - 1
+                    )
                     self.T_i = self.T_0 * self.T_mult ** (n)
             else:
                 self.T_i = self.T_0
