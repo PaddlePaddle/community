@@ -546,7 +546,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
             std::vector<std::string> envs;
             // 解析需要设置的环境变量
             // ...
-            SetFlagsFromEnv(envs);
+            SetFlagsFromEnv(envs, name == "fromenv");
             continue;
         }
         
