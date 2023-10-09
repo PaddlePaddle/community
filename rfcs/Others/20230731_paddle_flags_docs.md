@@ -504,39 +504,42 @@ FlagRegisterer::FlagRegisterer(std::string name,
 实现命令行参数解析，`*pargc` 为参数数量，`*pargv` 为参数字符串数组，相邻的字符串在完整的命令中用空格分隔，其中第一个是运行的程序，大致解析逻辑如下：
 
 ``` C++
-void SetFlagsFromEnv(const std::vector<std::string>& envs) {
-    for (const std::string &env_var_name : envs) {
-        // 获取环境变量 env 的值, 计划实现一个函数 GetValueFromEnv
-        std::string value = GetValueFromEnv(env_var_name);
-        FlagRegistry::Instance()->SetFlagValue(env_var_name, value);
-    }
+$ test --name=paddle --id=1
+
+// test.cc
+PD_DEFINE_string(name, "", "")
+PD_DEFINE_uint32(id, 0, "")
+    
+int main(int argc, char* argv[]) {
+    // argc: 3, argv[]: {"test", "--name=paddle", "--id=1"}
+	ParseCommandLineFlags(&argc, &argv);
+    return 0;
 }
 
+// paddle/utils/flags_native.cc
 void ParseCommandLineFlags(int* pargc, char*** pargv) {
-    // 1. 对 pargc, pargc 进行预处理，移除第一个程序名称
+    // 1. 对 pargc, pargc 进行预处理
     size_t argv_num = *pargc - 1;
     std::vector<std::string> argvs(*pargv + 1, *pargv + *pargc);
     
-    FlagRegistry* const flag_registry = FlagRegistry::Instance();
-    // 2. 遍历每一个 argv, 解析得到每个 flag 的 name 和 value
+    // 2. 遍历每一个 argv, 解析每个 flag 的 name 和 value 并进行修改
   	for (size_t i = 0; i < argv_num; i++) {
         const std::string& argv = argvs[i];
         
         // 检查 argv 格式
         // ...
         
-        // 处理特殊标志 --help
-        if (argv == "--help" or argv == "-help") {
-            // 打印帮助信息
-            // ...
-            exit(1);
-        }
-        
-	    string name, value;
+	    std::string name, value;
         // 解析 name 和 value
         // ...
         
-        // 处理特殊标志 --fromenv 和 --tryfromenv
+        // 处理特殊标志 --help
+        if (name == "help" or name == "h") {
+            FlagRegistry::Instance()->PrintAllFlagHelp(std::cout);
+            exit(1);
+        }
+        
+        // 处理特殊标志 --fromenv=env1,env2,... 和 --tryfromenv=...
         if (name == "fromenv" || name == "tryfromenv") {
             std::vector<std::string> envs;
             // 解析需要设置的环境变量
@@ -545,7 +548,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
             continue;
         }
         
-        flag_registry->SetFlagValue(name, value);
+        FlagRegistry::Instance()->SetFlagValue(name, value);
   	}
 }
 ```
