@@ -525,7 +525,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
     std::vector<std::string> argvs(*pargv + 1, *pargv + *pargc);
     
     // 2. 遍历每一个 argv, 解析每个 flag 的 name 和 value 并进行修改
-  	for (size_t i = 0; i < argv_num; i++) {
+	for (size_t i = 0; i < argv_num; i++) {
         const std::string& argv = argvs[i];
         
         // 检查 argv 格式
@@ -551,7 +551,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
         }
         
         FlagRegistry::Instance()->SetFlagValue(name, value);
-  	}
+	}
 }
 ```
 
