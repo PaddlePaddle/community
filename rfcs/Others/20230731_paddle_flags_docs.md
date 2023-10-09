@@ -527,7 +527,6 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
     // 2. 遍历每一个 argv, 解析每个 flag 的 name 和 value 并进行修改
     for (size_t i = 0; i < argv_num; i++) {
         const std::string& argv = argvs[i];
-        
         // 检查 argv 格式
         // ...
         
@@ -535,7 +534,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
         // 解析 name 和 value
         // ...
         
-        // 处理特殊标志 --help
+        // 处理特殊标志 --help 或 -h
         if (name == "help" or name == "h") {
             FlagRegistry::Instance()->PrintAllFlagHelp(std::cout);
             exit(1);
@@ -549,7 +548,6 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
             SetFlagsFromEnv(envs, name == "fromenv");
             continue;
         }
-        
         FlagRegistry::Instance()->SetFlagValue(name, value);
     }
 }
