@@ -503,12 +503,14 @@ FlagRegisterer::FlagRegisterer(std::string name,
 
 实现命令行参数解析，`*pargc` 为参数数量，`*pargv` 为参数字符串数组，相邻的字符串在完整的命令中用空格分隔，其中第一个是运行的程序，大致解析逻辑如下：
 
-``` C++
+``` bash
 $ test --name=paddle --id=1
+```
 
+``` C++
 // test.cc
-PD_DEFINE_string(name, "", "")
-PD_DEFINE_uint32(id, 0, "")
+PD_DEFINE_string(name, "", "");
+PD_DEFINE_uint32(id, 0, "");
     
 int main(int argc, char* argv[]) {
     // argc: 3, argv[]: {"test", "--name=paddle", "--id=1"}
