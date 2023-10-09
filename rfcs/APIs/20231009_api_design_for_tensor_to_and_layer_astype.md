@@ -19,7 +19,7 @@
 ## 2、功能目标
 
 - `Tensor.to`：对Tensor进行设备类型或数据类型的转换，输入参数需要支持多种形式，需支持多种用法，例如： `x.to('float64')`、`x.to('cpu')`、`x.to('cpu', 'float32')`、`x.to(y)`，同时上述例子均可设置blocking来控制是否同步阻塞拷贝。通过(*args, **kwargs)的参数设置可实现上述所有功能。
-- `Layer.astype`：支持对网络层进行数据类型的转换，例如`Linear.astype('float64')`
+- `Layer.astype`：支持对网络层进行数据类型的转换，例如`Linear.astype('float64')`。
 
 
 
