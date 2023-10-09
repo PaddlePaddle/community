@@ -14,7 +14,7 @@
 丰富Paddle的Tensor相关API，支持更多样的tensor操作
 
 ## 2、功能目标
-实现diagonal_scatter API，能够将src张量值嵌入到input张量中，同时src张量将会沿着input的对角线元素分布，支持axis1和axis2两个维度：
+实现diagonal_scatter API，能够将y张量值嵌入到x张量中，同时y张量将会沿着指定的x的对角线元素分布，支持axis1和axis2两个维度：
 
 - paddle.diagonal_scatter作为独立函数调用
 - Tensor.diagonal_scatter作为Tensor的方法使用
@@ -302,7 +302,7 @@ paddle.diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
 
 - `x(Tensor)`：输入张量，张量的维度至少为2维
 - `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中
-- `offset(int, optional)`：偏移的对角线
+- `offset(int, optional)`：偏移的对角线，默认值为0
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
     - 偏移量小于0，则嵌入对角线下方
@@ -314,12 +314,12 @@ paddle.diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
 Tensor.diagonal_scatter
 
 ```python
-Tensor.diagonal_scatter(x, offset=0, axis1=0, axis2=1, name=None)
+Tensor.diagonal_scatter(y, offset=0, axis1=0, axis2=1, name=None)
 ```
 参数定义：
 
-- `x(Tensor)`：嵌入张量，将会被嵌入到输入张量中
-- `offset(int, optional)`：偏移的对角线
+- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中
+- `offset(int, optional)`：偏移的对角线，默认值为0
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
     - 偏移量小于0，则嵌入对角线下方
@@ -343,7 +343,7 @@ Tensor.diagonal_scatter(x, offset=0, axis1=0, axis2=1, name=None)
 
   - 方案一：通过调用`fill_diagonal_tensor`实现对应逻辑，但是该方法只能在动态图中使用
 
-  - 方案二：调用`paddle.static.setitem`方法，覆盖diagonal_slice的元素，但是该方法在动态图中调用时，只会返回新的tensor，而不是inplace写
+  - 方案二：调用`paddle.static.setitem`方法，覆盖diagonal_slice的元素，但是该方法在静态图中调用时，只会返回新的tensor，而不是直接把嵌入张量y的元素写入diagonal_slice的位置
     - 如果想要调用`paddle.static.setitem(x, index, y)`，通过index来修改输入张量diagonal对应位置的元素，没有现成实现获得diagonal元素对应的index
 
   - 方案三：类似torch实现方案，实现cpp算子逻辑
