@@ -10,7 +10,7 @@
 - 从代码层面了解 PIR 体系的设计
 - 了解 `Pimpl` 设计模式
 - 熟悉 Paddle 代码风格
-- 学习胡乱使用倒叙和插叙的混乱啰嗦的博客风格写作手法
+- ~~学习胡乱使用倒叙和插叙的混乱啰嗦的博客风格写作手法~~
 
 
 由于 PIR 依旧在高频更新, 如果笔者写的有问题, 各位开发者大佬提个PR帮我修改一下, 万分感谢! 本文也穿插了 [pfcc/paddle-code-reading/IR_Dialect/ir_program.md](./ir_program.md) 的相关内容, 在阅读完本文后, 再去阅读 [pfcc/paddle-code-reading/IR_Dialect/ir_program.md](./ir_program.md) 相信各位家人会对 PIR 体系有更深入的了解.
@@ -838,7 +838,7 @@ OpInfo OpInfoImpl::Create(Dialect *dialect,
                           std::vector<InterfaceValue> &&interface_map,
                           const std::vector<TypeId> &trait_set,
                           size_t attributes_num,
-                          const char *attributes_name[],  // NOLINT
+                          const char *attributes_name[],  // NOLINT // <---- 规避代码风格检查
                           VerifyPtr verify) {
   // (1) Malloc memory for interfaces, traits, opinfo_impl.
   size_t interfaces_num = interface_map.size();
@@ -1326,12 +1326,314 @@ void Value::ReplaceAllUsesWith(Value new_value) const {
 ```
 
 
+`Value` 类阅读完毕后, 我们来看 `ValueImpl` 的实现, `ValueImpl` 有一个私有变量 `first_use_offseted_by_kind_` , 类型 `OpOperandImpl *`, 由于 `OpOperandImpl` 类含有 4 个指针, 所以该类是 8-byte 对齐的, 故该类的指针 `OpOperandImpl *` 后三个bit位都是 0, 所以我们可以利于这后三bit位来存额外的数据.
+
+我们将 `kind` 值存在后三位:
+
+- kind = 0~5 时, 代表 positions 0 to 5 inline output(OpInlineResultImpl);
+- kind = 6 时, 代表 position >=6 outline output(OpOutlineResultImpl)
+- kind = 7 为保留位 
+
+```c++
+// 代码位置 paddle/pir/core/value_impl.h
+
+class alignas(8) ValueImpl {
+
+ // ......
+ protected:
+
+  OpOperandImpl *first_use_offseted_by_kind_ = nullptr;
+};
+```
+
+因此, 函数 `OpOperandImpl *first_use()` 返回 `UD链` 的头地址时, 需要将 `first_use_offseted_by_kind_` 后3位置0, 即和 `~0x07` 相与. 而获取 `kind` 的 `kind()` 函数只需要 `first_use_offseted_by_kind_` 的后三位.
 
 
-2023.10.10 我还没写完 555555555, 先提交一版本供审核
+```c++
+// 代码位置 paddle/pir/core/value_impl.h
+class alignas(8) ValueImpl {
+ public:
+
+  OpOperandImpl *first_use() const {
+    return reinterpret_cast<OpOperandImpl *>(
+        reinterpret_cast<uintptr_t>(first_use_offseted_by_kind_) & (~0x07));
+  }
+ 
+ // ......
+
+  uint32_t kind() const {
+    return reinterpret_cast<uintptr_t>(first_use_offseted_by_kind_) & 0x07;
+  }
+
+  // ......
+};
+```
+
+再来看 `ValueImpl` 的构造函数, 传入 `Type` 类型和 `kind` 数. 初始情况下, `UD链` 为空, 于是用空指针 `nullptr` 初始化 `OpOperandImpl *` 指针加上 `kind` 赋值到 `first_use_offseted_by_kind_`.
+
+```c++
+// 代码位置 paddle/pir/core/value_impl.cc
+
+#define OUTLINE_RESULT_IDX 6u
+#define MAX_INLINE_RESULT_IDX (OUTLINE_RESULT_IDX - 1u)
+#define BLOCK_ARG_IDX (OUTLINE_RESULT_IDX + 1u)
+
+// ......
+
+ValueImpl::ValueImpl(Type type, uint32_t kind) {
+  if (kind > BLOCK_ARG_IDX) {
+    LOG(FATAL) << "The kind of value_impl(" << kind
+               << "), is bigger than BLOCK_ARG_IDX(7)";
+  }
+  type_ = type;
+  first_use_offseted_by_kind_ = reinterpret_cast<OpOperandImpl *>(
+      reinterpret_cast<uintptr_t>(nullptr) + kind);
+  VLOG(4) << "Construct a ValueImpl whose's kind is " << kind
+          << ". The offset first_use address is: "
+          << first_use_offseted_by_kind_;
+}
+```
+
+`set_first_use` 函数也是直接将 `first_use` + `offset` 之和赋值给 `first_use_offseted_by_kind_`. `offset` 就是前文提到的 `kind`.
+
+```c++
+// 代码位置 paddle/pir/core/value_impl.cc
+
+void ValueImpl::set_first_use(OpOperandImpl *first_use) {
+  uint32_t offset = kind();
+  first_use_offseted_by_kind_ = reinterpret_cast<OpOperandImpl *>(
+      reinterpret_cast<uintptr_t>(first_use) + offset);
+  VLOG(4) << "The index of this value is " << offset
+          << ". Offset and set first use: " << first_use << " -> "
+          << first_use_offseted_by_kind_ << ".";
+}
+```
+
+注意, 也许是历史遗留问题, 此处的 `kind` 在其他的代码里也许叫 `offset` 或者 `index`, 需要注意对应关系. (可以的话, 之后提个PR修改一下这个变量的名字)
+
+接下来我们看一个单测来了解 `kind` 的含义, `builder.Build` 的模板参数为你要传入的 `Op`, 参数是构造该 `Op` 需要传入的参数
+
+```c++
+  // 代码位置 test/cpp/pir/core/ir_region_test.cc
+  // (1) Init environment.
+  pir::IrContext* ctx = pir::IrContext::Instance();
+
+  // (2) Create an empty program object
+  pir::Program program(ctx);
+  pir::Builder builder = pir::Builder(ctx, program.block());
+
+  // (3) Def a = ConstantOp("2.0"); b = ConstantOp("2.0");
+  pir::FloatAttribute fp_attr = builder.float_attr(2.0f);
+  pir::Float32Type fp32_type = builder.float32_type();
+  pir::OpResult a =
+      builder.Build<pir::ConstantOp>(fp_attr, fp32_type)->result(0);
+  pir::OpResult b =
+      builder.Build<pir::ConstantOp>(fp_attr, fp32_type)->result(0);
+```
+
+来简单看一眼 `Builder.Build` 的源码, 通过 `Op` 的名字从 `IrContext` 中获取 `OpInfo` 来创建一个 `OperationArgument` 对象 `argument`.
+
+
+```c++
+// 代码位置在 paddle/pir/core/builder.h
+template <typename OpTy, typename... Args>
+OpTy Builder::Build(Args &&...args) {
+  OperationArgument argument(context_->GetRegisteredOpInfo(OpTy::name()));
+  OpTy::Build(*this, argument, std::forward<Args>(args)...);
+  Operation *op = Build(std::move(argument));
+  return OpTy(op);
+}
+```
+
+然后调用传入 `Op` 自己(此处是 `ConstantOp` )的 `Build` 函数, 实参是当前对象(`*this`), `argument`, 将可变参数 `args` 转发, 此处的可变参数是`(fp_attr, fp32_type)`.
+
+那就再看一眼 `ConstantOp` 的 `Build` 函数:
+
+
+```c++
+// 代码位置在 paddle/pir/core/builtin_op.cc
+void ConstantOp::Build(Builder &builder,
+                       OperationArgument &argument,
+                       Attribute value,
+                       Type output_type) {
+  argument.AddAttribute("value", value);
+  argument.output_types.push_back(output_type);
+}
+```
+
+就是向 `argument` 的 `AttributeMap attributes` 添加了属性 `value`(此处是 `fp_attr`), 并向 `argument` 的输出类型 `std::vector<Type> output_types` 添加输出类型(此处是 `fp32_type`).
+
+由于 `argument` 是以引用的形式传入, 所以其值也被修改. 之后调用另一个 `Build` 的重载函数去构建 `Op`, 其内部调用了 `Operation::Create` 来创建, 并返回一个 `Operation *` 指针. 此处不去深究 `Insert` 函数做了什么.
+
+
+```c++
+// 代码位置 paddle/pir/core/builder.cc
+Operation *Builder::Build(OperationArgument &&argument) {
+  return Insert(Operation::Create(std::move(argument)));
+}
+```
+
+
+总结一下, `builder.Build<pir::ConstantOp>(fp_attr, fp32_type)` 会创建一个 `Operation` 并返回一个 `Operation *` 的指针.
+
+```c++
+  // 代码位置 test/cpp/pir/core/ir_region_test.cc
+  pir::FloatAttribute fp_attr = builder.float_attr(2.0f);
+  pir::Float32Type fp32_type = builder.float32_type();
+  pir::OpResult a =
+      builder.Build<pir::ConstantOp>(fp_attr, fp32_type)->result(0);
+  pir::OpResult b =
+      builder.Build<pir::ConstantOp>(fp_attr, fp32_type)->result(0);
+```
+
+所以上述代码后两行就是在执行 `Operation::result` 函数
+
+```c++
+  // 代码位置 paddle/pir/core/operation.h
+  OpResult result(uint32_t index) { return op_result_impl(index); }
+  // ......
+  detail::OpResultImpl *op_result_impl(uint32_t index);
+```
+
+我们之前提到了 `op_result_impl` 和 `op_operand_impl` 是通过 `COMPONENT_IMPL` 宏来实现的, 我们将宏的部分实现出来:
+
+
+```c++
+// 宏的位置在 paddle/pir/core/operation.cc 尾部
+
+OpResultImpl *Operation::op_result_impl(uint32_t index) { 
+  int32_t offset = ComputeOpResultOffset(index); 
+  return reinterpret_cast<OpResultImpl *>(  
+      reinterpret_cast<char *>(this) + offset); 
+}                                         
+const OpResultImpl *Operation:: (
+    uint32_t index) const {               
+  int32_t offset = ComputeOpResultOffset(index); 
+  return reinterpret_cast<const OpResultImpl *>(   
+      reinterpret_cast<const char *>(this) + offset); 
+}
+
+OpOperandImpl *Operation::op_operand_impl(uint32_t index) {
+  int32_t offset = ComputeOpOperandOffset(index);               
+  return reinterpret_cast<OpOperandImpl *>(                       
+      reinterpret_cast<char *>(this) + offset);      
+}                                                    
+const OpOperandImpl *Operation::op_operand_impl(           
+    uint32_t index) const {                          
+  int32_t offset = ComputeOpOperandOffset(index);               
+  return reinterpret_cast<const OpOperandImpl *>(                 
+      reinterpret_cast<const char *>(this) + offset);
+}
+```
+
+可以看到第一个 `op_result_impl` 函数的参数就是 `index`, 这个 `index` 就是我们之前在 `ValueImpl` 中提到的低8位 `kind`. 通过传入的 `index` 调用 `ComputeOpResultOffset` 来计算内存中的偏移量 `offset`.
+
+我们来看 `Operation::ComputeOpResultOffset` 函数, 这种计算偏移的方式和 `OpInfo` 中计算偏移的方式类似, 或者说 `Operation` 创建时, 和 `OpInfo` 的创建方式类似, 其内容都会“紧凑”地排布在内存中.
+
+```c++
+// 代码位置 paddle/pir/core/operation.cc
+int32_t Operation::ComputeOpResultOffset(uint32_t index) const {
+  if (index >= num_results_) {
+    LOG(FATAL) << "index exceeds OP op result range.";
+  }
+  if (index < OUTLINE_RESULT_IDX) {
+    return -static_cast<int32_t>((index + 1u) * sizeof(OpInlineResultImpl));
+  }
+  constexpr uint32_t anchor = OUTLINE_RESULT_IDX * sizeof(OpInlineResultImpl);
+  index = index - MAX_INLINE_RESULT_IDX;
+  return -static_cast<int32_t>(index * sizeof(OpOutlineResultImpl) + anchor);
+}
+```
+
+到此, 可以剧透一下, `kind` 或者说 `index` 就是 `Operation` 返回的 `OpResult` 索引, 因为一般 `Op` 一般很少有6个以上(0到5)的输出, 所以 `kind` 只用低3位去表示是够的. 但是如果有 `Op` 有6个以上甚至更多的输出怎么办? 这个问题暂时先不解答, 我们来看看 `Operation` 的创建过程. 可以分为8个小代码块.
+
+
+```c++
+Operation *Operation::Create(const std::vector<Value> &inputs,
+                             const AttributeMap &attributes,
+                             const std::vector<Type> &output_types,
+                             pir::OpInfo op_info,
+                             size_t num_regions,
+                             const std::vector<Block *> &successors) {
+  // 1. Calculate the required memory size for OpResults + Operation +
+  // OpOperands.
+  uint32_t num_results = output_types.size();
+  uint32_t num_operands = inputs.size();
+  uint32_t num_successors = successors.size();
+  uint32_t max_inline_result_num = MAX_INLINE_RESULT_IDX + 1;
+  size_t result_mem_size =
+      num_results > max_inline_result_num
+          ? sizeof(detail::OpOutlineResultImpl) *
+                    (num_results - max_inline_result_num) +
+                sizeof(detail::OpInlineResultImpl) * max_inline_result_num
+          : sizeof(detail::OpInlineResultImpl) * num_results;
+  size_t op_mem_size = sizeof(Operation);
+  size_t operand_mem_size = sizeof(detail::OpOperandImpl) * num_operands;
+  size_t block_operand_size = num_successors * sizeof(detail::BlockOperandImpl);
+  size_t region_mem_size = num_regions * sizeof(Region);
+  size_t base_size = result_mem_size + op_mem_size + operand_mem_size +
+                     region_mem_size + block_operand_size;
+  // 2. Malloc memory.
+  char *base_ptr = reinterpret_cast<char *>(aligned_malloc(base_size, 8));
+  // 3.1. Construct OpResults.
+  for (size_t idx = num_results; idx > 0; idx--) {
+    if (idx > max_inline_result_num) {
+      new (base_ptr)
+          detail::OpOutlineResultImpl(output_types[idx - 1], idx - 1);
+      base_ptr += sizeof(detail::OpOutlineResultImpl);
+    } else {
+      new (base_ptr) detail::OpInlineResultImpl(output_types[idx - 1], idx - 1);
+      base_ptr += sizeof(detail::OpInlineResultImpl);
+    }
+  }
+  // 3.2. Construct Operation.
+  Operation *op = new (base_ptr) Operation(attributes,
+                                           op_info,
+                                           num_results,
+                                           num_operands,
+                                           num_regions,
+                                           num_successors);
+  base_ptr += sizeof(Operation);
+  // 3.3. Construct OpOperands.
+  if ((reinterpret_cast<uintptr_t>(base_ptr) & 0x7) != 0) {
+    IR_THROW("The address of OpOperandImpl must be divisible by 8.");
+  }
+  for (size_t idx = 0; idx < num_operands; idx++) {
+    new (base_ptr) detail::OpOperandImpl(inputs[idx], op);
+    base_ptr += sizeof(detail::OpOperandImpl);
+  }
+  // 3.4. Construct BlockOperands.
+  if (num_successors > 0) {
+    op->block_operands_ =
+        reinterpret_cast<detail::BlockOperandImpl *>(base_ptr);
+    for (size_t idx = 0; idx < num_successors; idx++) {
+      new (base_ptr) detail::BlockOperandImpl(successors[idx], op);
+      base_ptr += sizeof(detail::BlockOperandImpl);
+    }
+  }
+
+  // 3.5. Construct Regions
+  if (num_regions > 0) {
+    op->regions_ = reinterpret_cast<Region *>(base_ptr);
+    for (size_t idx = 0; idx < num_regions; idx++) {
+      new (base_ptr) Region(op);
+      base_ptr += sizeof(Region);
+    }
+  }
+
+  // 0. Verify
+  if (op_info) {
+    op_info.Verify(op);
+  }
+  return op;
+}
+```
 
 
 
+
+
+# 20231011 暂时写到这里
 
 
 
