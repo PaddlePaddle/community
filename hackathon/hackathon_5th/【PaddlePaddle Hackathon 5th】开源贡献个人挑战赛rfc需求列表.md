@@ -65,6 +65,11 @@
 | 50       | 🌟        | 为 Paddle 新增 slice 的 spmd 切分推导规则                | 否                           |
 | 51       | 🌟        | 为 Paddle 新增 flatten 的 spmd 切分推导规则              | 否                           |
 | 52       | 🌟🌟       | 为 Paddle 新增 squeeze 和 unsqueeze 的 spmd 切分推导规则 | 否                           |
+| 101  | 🌟    | 将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel实现从fluid下迁移到phi下 |  否    |
+| 102  | 🌟    | 将paddle内部的fused_embedding_eltwise_layernorm、fusion_transpose_flatten_concat和fused_fc_elementwise_layernorm算子及其kernel实现从fluid下迁移到phi下 | 否     |
+| 103  | 🌟    | 将paddle内部的skip_layernorm、fc和fused_bias_dropout_residual_layer_norm算子及其kernel实现从fluid下迁移到phi下 |  否    |
+| 104  | 🌟    | 将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下 |  否    |
+| 105  | 🌟    | 将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下 |   否   |
 
 ## 科学计算模型复现
 
@@ -127,3 +132,7 @@
 | 98       | 🌟🌟       | 完成PP-YOLOE在华为昇腾平台上的推理优化                       | 是                           |
 | 99       | 🌟🌟       | 基于 Qualcomm SNPE SDK 开发 RMSNorm 算子                     | 是                           |
 | 100      | 🌟        | 基于openKylin OS和X2paddle实现面向AI框架的统一推理接口，实现AI软件的适配与应用 | 是                           |
+| 106  | 🌟    | Paddle模型适配InfiniTensor推理引擎                           | 否 |
+| 107  | 🌟    | 基于InfiniTensor推理引擎的对话类示范应用                     | 否 |
+| 108  | 🌟    | 为InfiniTensor推理引擎添加GeLU算子                           | 否 |
+| 109  | 🌟    | InfiniTensor推理引擎的Windows系统适配                        | 否 |
