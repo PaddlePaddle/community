@@ -170,7 +170,7 @@ pytorch的`Tensor.to`和`module.type`的实现方式对于paddle来说具有较�
 ```python
 class Tensor:
     ...
-    to(
+    def to(
         self,
         *args,
         **kwargs
@@ -188,13 +188,13 @@ class Tensor:
 ```python
 class Layer:
 	...
-	astype(
+	def astype(
 		self,
-		dst_type
+		dtype
 	)
 ```
 
-- `dst_type`可以是`["bfloat16","float16","float32","float64", "int8","int16","int32","int64","uint8","uint16","complex64","complex128", "bool"]`中的任意一个字符串，也可以是`paddle.dtype`
+- `dtype`可以是`["bfloat16","float16","float32","float64", "int8","int16","int32","int64","uint8","uint16","complex64","complex128", "bool"]`中的任意一个字符串，也可以是`paddle.dtype`
 
 
 ## 底层OP设计
@@ -216,6 +216,8 @@ class Layer:
 - tensor切换数据类型和设备。
 - 同步阻塞拷贝测试。
 - layer数据类型的切换测试。
+- tensor切换到与其他tensor的设备与类型。
+- 异常测试，不正确的参数名，输入过多的参数，不正确的设备类型等。
 
 # 七、可行性分析及规划排期
 
