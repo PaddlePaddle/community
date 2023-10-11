@@ -1,6 +1,6 @@
-# paddle.distribution.gamma 设计文档
+# paddle.distribution.Gamma 设计文档
 
-|API名称 | paddle.distribution.gamma | 
+|API名称 | paddle.distribution.Gamma | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | MayYouBeProsperous | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-28 | 
@@ -13,12 +13,22 @@
 ## 1、相关背景
 在当前的 Paddle 框架中，`paddle.distribution` 目录内已经实现了一系列概率分布的 API，为了扩展现有的概率分布方案，本次任务计划实现伽马分布（Gamma Distribution）的 API。
 
+Gamma 概率分布的概率密度函数如下：
+
+$$ f(x)=\frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1}e^{-\beta x},(x \geq 0) $$
+
+$$ \Gamma(\alpha)=\int_{0}^{\infty} x^{\alpha-1} e^{-x} \mathrm{~d} x, (\alpha>0) $$
+
+其中参数 $\alpha$ 称为形状参数，$\beta$ 称为尺度参数。如果一个随机变量 $X$ 呈伽马分布，则可以写作 $X \sim Gamma(\alpha, \beta)$。
+
+
 ## 2、功能目标
-为 Paddle 框架增加 `paddle.distribution.gamma` 的 API，用于伽马分布的概率统计与随机采样。API 包括了如下方法：
+为 Paddle 框架增加 `paddle.distribution.Gamma` 的 API，用于伽马分布的概率统计与随机采样。API 包括了如下方法：
 
 - `mean` 计算均值
 - `variance` 计算方差 
 - `sample` 随机采样
+- `rsample` 重参数化采样
 - `prob` 概率密度
 - `log_prob` 对数概率密度
 - `entropy` 熵计算
@@ -38,7 +48,7 @@ Paddle 框架内定义了 `Distribution` 抽象基类，并且实现了 `Uniform
 在 PyTorch 中，`Gamma` 概率分布是通过继承 `ExponentialFamily` 类实现。
 
 ```python
-torch.distributions.gamma.Gamma(concentration, rate)
+torch.distributions.Gamma(concentration, rate)
 ```
 
 使用上面代码可得到形状参数为 `concentration`、尺度参数为 `rate` 的伽马分布。
@@ -180,7 +190,7 @@ PyTorch 和 TensorFlow 的 `Gamma` 概率分布分别是继承不同类型的父
 paddle 调用 `Gamma` 的形式为：
 
 ```python
-paddle.distribution.gamma.Gamma(concentration, rate)
+paddle.distribution.Gamma(concentration, rate)
 ```
 
 `concentration` 和 `rate` 分别是伽马分布的形状参数和尺度参数。
@@ -258,21 +268,13 @@ paddle 中已实现了概率分布的基类 `Distribution`，以及指数族概�
 
 # 八、影响面
 本次任务涉及以下内容：
-1. 新增 `paddle.distribution.exponential` 模块。
+1. 新增 `paddle.distribution.Gamma` 模块。
 2. 拓展 `paddle.distribution.kl` 模块。
 
 对其他模块无影响。
 
 # 名词解释
-## Gamma分布
-
-Gamma 概率分布的概率密度函数如下：
-
-$$ f(x)=\frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1}e^{-\beta x},(x \geq 0) $$
-
-$$ \Gamma(\alpha)=\int_{0}^{\infty} x^{\alpha-1} e^{-x} \mathrm{~d} x, (\alpha>0) $$
-
-其中参数 $\alpha$ 称为形状参数，$\beta$ 称为尺度参数。如果一个随机变量 $X$ 呈伽马分布，则可以写作 $X \sim Gamma(\alpha, \beta)$。
+无
 
 # 附件及参考资料
 
