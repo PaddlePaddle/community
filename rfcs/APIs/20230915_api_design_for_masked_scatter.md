@@ -25,11 +25,90 @@
 # 二、飞桨现状
 ## 组合实现
 目前paddle缺少相关功能实现。只能通过 paddle 现有的 API 组合实现。主要利用的api如下：
-- `paddle.broadcast_to`：将mask广播成和待填充tensor一样形状。
+
 - `paddle.where`：查找mask中值为true对应位置的索引。
 - `paddle.index_put`：根据索引和值对待填充tensor对应位置进行赋值。
 
-具体代码实现如下：
+`masked_scatter`函数需要支持的一个重要特性是数据自动广播，此处参考了`paddle.where`中对于自动广播的实现。
+
+### paddle.where中广播实现思路
+
+`paddle.where`的源码如下所示：
+
+```python
+def where(condition, x=None, y=None, name=None):
+    if np.isscalar(x):
+        x = paddle.full([1], x, np.array([x]).dtype.name)
+
+    if np.isscalar(y):
+        y = paddle.full([1], y, np.array([y]).dtype.name)
+
+    if x is None and y is None:
+        return nonzero(condition, as_tuple=True)
+
+    if x is None or y is None:
+        raise ValueError("either both or neither of x and y should be given")
+
+    condition_shape = list(condition.shape)
+    x_shape = list(x.shape)
+    y_shape = list(y.shape)
+
+    if x_shape == y_shape and condition_shape == x_shape:
+        broadcast_condition = condition
+        broadcast_x = x
+        broadcast_y = y
+    else:
+        zeros_like_x = paddle.zeros_like(x)
+        zeros_like_y = paddle.zeros_like(y)
+        zeros_like_condition = paddle.zeros_like(condition)
+        zeros_like_condition = paddle.cast(zeros_like_condition, x.dtype)
+        cast_cond = paddle.cast(condition, x.dtype)
+
+        broadcast_zeros = paddle.add(zeros_like_x, zeros_like_y)
+        broadcast_zeros = paddle.add(broadcast_zeros, zeros_like_condition)
+        broadcast_x = paddle.add(x, broadcast_zeros)
+        broadcast_y = paddle.add(y, broadcast_zeros)
+        broadcast_condition = paddle.add(cast_cond, broadcast_zeros)
+        broadcast_condition = paddle.cast(broadcast_condition, 'bool')
+
+    if in_dynamic_or_pir_mode():
+        return _C_ops.where(broadcast_condition, broadcast_x, broadcast_y)
+    else:
+        check_variable_and_dtype(condition, 'condition', ['bool'], 'where')
+        check_variable_and_dtype(
+            x,
+            'x',
+            ['uint16', 'float16', 'float32', 'float64', 'int32', 'int64'],
+            'where',
+        )
+        check_variable_and_dtype(
+            y,
+            'y',
+            ['uint16', 'float16', 'float32', 'float64', 'int32', 'int64'],
+            'where',
+        )
+        helper = LayerHelper("where", **locals())
+        out = helper.create_variable_for_type_inference(dtype=x.dtype)
+
+        helper.append_op(
+            type='where',
+            inputs={
+                'Condition': broadcast_condition,
+                'X': broadcast_x,
+                'Y': broadcast_y,
+            },
+            outputs={'Out': [out]},
+        )
+
+        return out
+```
+
+可以看出，当输入的x和y形状不一致时，先通过`zeros_like`函数分别构造一个跟x、y形状一样的变量`zeros_like_x`、`zeros_like_y`，然后利用`add`函数将他们相加，在相加的过程中利用加法的底层实现已经自动实现了广播，最后得到的`broadcast_zeros`的形状就是最后需要广播到的形状，再拿它和x、y直接相加，就可以在相加过程中自动实现广播。
+
+### masked_scatter的初步实现
+
+初步实现如下：
+
 ```python
 import paddle
 import numpy
@@ -38,30 +117,27 @@ def masked_scatter(x, mask, value, inplace=False):
     """
     利用现有api实现masked_scatter功能
     """
+    # make sure the dtype of x and source is the same
+    assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
+
     if paddle.in_dynamic_mode():
         if mask.shape != x.shape:
             mask = paddle.broadcast_to(mask, shape=x.shape)
         # make sure the true nums in mask is <= the nums of value
         assert mask.sum() <= value.numel(), f'mask true nums must be <= value size, but got mask true nums is {mask.sum().item()}, value size is {value.numel().item()}'
-        # make sure the dtype of x and source is the same
-        assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
 
         indexs = tuple(item.squeeze() for item in paddle.where(mask))
-        
+
         if inplace:
             return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
         else:
             return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
     else:
-        """
-        经过测试，静态图模式下(当x的shape中含有-1)paddle.broadcast_to函数失效，但是可以借助乘法来达到广播的效果
-        """
-        # make sure the dtype of x and source is the same
-        assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
-        mask_ = ((x * x) + 1.) * mask > 0
-        
-        indexs = tuple(item.squeeze() for item in paddle.where(mask_))
-        return paddle.index_put(x, indexs, value.flatten()[:mask_.sum()])
+        zeros_like_x = paddle.zeros_like(x)
+        mask = paddle.add(paddle.cast(mask, x.dtype), zeros_like_x)
+        mask = paddle.cast(mask, "bool")
+        indexs = tuple(item.squeeze() for item in paddle.where(mask))
+        return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
 ```
 ## 初步测试
 ### 动态图测试
@@ -84,7 +160,7 @@ def test_dynamic(inplace=False):
     mask = paddle.to_tensor([1.,0.5,1.,0.5])
     mask = mask>0.6
     print("mask: ", mask)
-    b = paddle.to_tensor([1.,2.,3.,4.,5.,6.,7.])
+    b = paddle.ones([2,4], dtype="float32")
     
     net = Net()
     res = net(a)
@@ -97,78 +173,78 @@ def test_dynamic(inplace=False):
 #### inplace
 
 ```
-a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[ 0.95377302,  0.71991599, -0.64002633, -1.18859971],
-        [ 0.14633510, -0.26224178,  0.84816700,  0.68756837],
-        [ 0.64852357, -0.34401020, -1.08389294, -0.54117757]])
-mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+W1012 16:38:27.197413 12648 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.2, Runtime API Version: 11.7
+W1012 16:38:27.529726 12648 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(gpu:0), stop_gradient=True,
+       [[ 0.42409050,  0.77523839, -2.36436272, -1.23578155],
+        [ 0.44526708, -0.51622814,  0.00783824,  0.44433489],
+        [-1.55585825,  0.72679478,  0.75432545,  0.72628176]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(gpu:0), stop_gradient=True,
        [True , False, True , False])
-res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
-       [[ 1.        ,  0.53523803,  2.        ,  0.58861065],
-        [ 3.        ,  0.24224952,  4.        , -0.35548905],
-        [ 5.        , -0.36515144,  6.        ,  0.64138633]])
+res:  Tensor(shape=[3, 4], dtype=float32, place=Place(gpu:0), stop_gradient=False,
+       [[ 1.        , -2.59757781,  1.        , -2.37750435],
+        [ 1.        , -0.11681330,  1.        ,  0.56991023],
+        [ 1.        ,  2.51356053,  1.        ,  0.67361248]])
 ```
 #### outplace
 ```
-a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[-0.96355069,  0.58669102, -0.23947759,  1.59143174],
-        [-1.01221061,  0.08593263, -0.34094945, -0.47603396],
-        [ 2.30312920,  0.44003361,  0.00515982,  0.79982501]])
-mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+W1012 16:39:25.472004 12380 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.2, Runtime API Version: 11.7
+W1012 16:39:25.473963 12380 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(gpu:0), stop_gradient=True,
+       [[ 0.36675033,  0.45838809,  0.52961969, -0.81227469],
+        [-0.40587279,  0.08904818,  1.51585436,  0.85850716],
+        [ 0.51168704,  0.68378007, -0.01682868, -1.81072354]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(gpu:0), stop_gradient=True,
        [True , False, True , False])
-res:  Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
-       [[ 1.        ,  0.21128452,  2.        ,  1.40798700],
-        [ 3.        , -0.93409020,  4.        ,  0.95187712],
-        [ 5.        ,  2.35421300,  6.        , -1.22600794]])
+res:  Tensor(shape=[3, 4], dtype=float32, place=Place(gpu:0), stop_gradient=False,
+       [[ 1.        ,  0.88243854,  1.        , -0.13420233],
+        [ 1.        , -0.28148487,  1.        ,  1.31290603],
+        [ 1.        ,  1.36912191,  1.        , -1.06872141]])
 ```
 #### mask中true的个数大于value的个数
 ```
-a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[ 0.75833082,  0.04611617, -1.38131642,  1.13807058],
-        [-0.49769101, -0.12536772,  0.79886371, -0.92195636],
-        [ 0.93623048, -0.98690981, -0.26431829, -1.08623803]])
-mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+W1012 16:40:12.676610 17524 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.2, Runtime API Version: 11.7
+W1012 16:40:12.680604 17524 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(gpu:0), stop_gradient=True,
+       [[-1.28732932, -0.50087887,  0.75080359,  0.46962994],
+        [ 0.28776711, -0.14213948,  0.39556077,  1.99971640],
+        [ 0.45063889,  0.72602481,  0.14427330,  0.40330032]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(gpu:0), stop_gradient=True,
        [True , False, True , False])
 Traceback (most recent call last):
-  File "D:\PythonProjects\community\test.py", line 125, in <module>
+  File "D:\PythonProjects\community\test.py", line 153, in <module>
     test_dynamic(False)
-  File "D:\PythonProjects\community\test.py", line 117, in test_dynamic
+  File "D:\PythonProjects\community\test.py", line 145, in test_dynamic
     res = net(a)
-          ^^^^^^
-  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\nn\layer\layers.py", line 1348, in __call__
+  File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\nn\layer\layers.py", line 1343, in __call__
     return self.forward(*inputs, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\PythonProjects\community\test.py", line 105, in forward
+  File "D:\PythonProjects\community\test.py", line 133, in forward
     return masked_scatter(y, mask, b, inplace)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\PythonProjects\community\test.py", line 43, in masked_scatter
+  File "D:\PythonProjects\community\test.py", line 88, in masked_scatter
     assert mask.sum() <= value.numel(), f'mask true nums must be <= value size, but got mask true nums is {mask.sum().item()}, value size is {value.numel().item()}'
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: mask true nums must be <= value size, but got mask true nums is 6, value size is 5
+AssertionError: mask true nums must be <= value size, but got mask true nums is 6, value size is 4
 ```
 #### x和value的dtype不一致
 ```
-a: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
-       [[-2.07125783,  0.27555400,  0.29631290,  0.89497519],
-        [-0.54692996, -0.73247778, -0.26578471,  0.55248821],
-        [ 0.79015601,  0.98371685, -1.17396295, -0.04731252]])
-mask:  Tensor(shape=[4], dtype=bool, place=Place(cpu), stop_gradient=True,
+W1012 16:40:47.663931 18240 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.2, Runtime API Version: 11.7
+W1012 16:40:47.665930 18240 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+a: Tensor(shape=[3, 4], dtype=float32, place=Place(gpu:0), stop_gradient=True,
+       [[-0.15918727, -0.95514601,  0.46210659, -1.34718204],
+        [ 1.31591105,  0.55861431,  0.74736464,  0.02223789],
+        [-2.12608886,  1.51154649, -0.04368414,  1.97998977]])
+mask:  Tensor(shape=[4], dtype=bool, place=Place(gpu:0), stop_gradient=True,
        [True , False, True , False])
 Traceback (most recent call last):
-  File "D:\PythonProjects\community\test.py", line 125, in <module>
+  File "D:\PythonProjects\community\test.py", line 153, in <module>
     test_dynamic(False)
-  File "D:\PythonProjects\community\test.py", line 117, in test_dynamic
+  File "D:\PythonProjects\community\test.py", line 145, in test_dynamic
     res = net(a)
-          ^^^^^^
-  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\nn\layer\layers.py", line 1348, in __call__
+  File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\nn\layer\layers.py", line 1343, in __call__
     return self.forward(*inputs, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\PythonProjects\community\test.py", line 105, in forward
+  File "D:\PythonProjects\community\test.py", line 133, in forward
     return masked_scatter(y, mask, b, inplace)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\PythonProjects\community\test.py", line 45, in masked_scatter
+  File "D:\PythonProjects\community\test.py", line 74, in masked_scatter
     assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
-           ^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: x and value must have the same dtype, but got x dtype is paddle.float32, value dtype is paddle.int32
 ```
 ### 静态图测试
@@ -206,86 +282,82 @@ def test_static():
 主要测试以下几种情况：
 #### 正常情况（静态图只有outplace）
 ```
-I1005 20:55:46.745036 72400 interpretercore.cc:237] New Executor is Running.
-W1005 20:55:46.745625 72400 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.0, Runtime API Version: 11.7
-W1005 20:55:46.765377 72400 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
-x:  [[0.1934002  0.98766947 0.7015034  0.15250655]
- [0.16048051 0.04534123 0.6988391  0.22368169]
- [0.2796441  0.29569423 0.8087764  0.03170063]]
-mask:  [[ True False  True False False]]
-I1005 20:55:51.573920 72400 interpreter_util.cc:518] Standalone Executor is Used.
-res:  [[ 1.          0.84879386  1.         -1.2319866   0.39890465]
- [ 1.          0.37008268  1.         -0.5776415  -0.19247824]
- [ 1.          0.6675544   1.         -0.8524722  -0.2765577 ]]
+I1012 16:51:37.847046 15656 program_interpreter.cc:185] New Executor is Running.
+W1012 16:51:37.847046 15656 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.2, Runtime API Version: 11.7
+W1012 16:51:37.850046 15656 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+x:  [[0.3413213  0.36220944 0.9810611  0.9069664 ]
+ [0.4400902  0.34666905 0.94219476 0.7365747 ]
+ [0.18846968 0.56770104 0.08312963 0.6576356 ]]
+mask:  [[False False False  True  True]]
+I1012 16:51:40.134096 15656 interpreter_util.cc:608] Standalone Executor is Used.
+res:  [[-1.1278851   0.37371185 -0.94038844  1.          1.        ]
+ [-1.0448693   0.36276507 -0.8637674   1.          1.        ]
+ [-0.52354705 -0.11333936 -0.98203325  1.          1.        ]]
 ```
 #### x的shape中含有-1
 ```
-I1005 20:58:03.955381 72956 interpretercore.cc:237] New Executor is Running.
-W1005 20:58:03.955722 72956 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.0, Runtime API Version: 11.7
-W1005 20:58:03.962535 72956 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
-x:  [[0.7445243  0.8461412  0.04763601 0.48461103]
- [0.8466652  0.7928517  0.2364838  0.63883376]
- [0.25490034 0.3626414  0.27276328 0.12233058]]
-mask:  [[False False  True False False]]
-I1005 20:58:07.203007 72956 interpreter_util.cc:518] Standalone Executor is Used.
-res:  [[ 0.22061607  0.8107873   1.          0.92934763  1.0487965 ]
- [-0.00330055  0.7640303   1.          1.0978727   1.0327016 ]
- [-0.00681011  0.21292232  1.          0.44111067  0.20730378]]
+I1012 16:52:50.811165  4360 program_interpreter.cc:185] New Executor is Running.
+W1012 16:52:50.811165  4360 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.2, Runtime API Version: 11.7
+W1012 16:52:50.813164  4360 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+x:  [[0.4929188  0.9807315  0.36060813 0.3813048 ]
+ [0.23349337 0.63630897 0.6916962  0.38356784]
+ [0.7763553  0.49821827 0.8376672  0.56760925]]
+mask:  [[ True False False False  True]]
+I1012 16:52:53.049795  4360 interpreter_util.cc:608] Standalone Executor is Used.
+res:  [[ 1.          0.41184133 -0.7128209  -0.7933337   1.        ]
+ [ 1.          0.04515322 -0.14544843 -0.6089552   1.        ]
+ [ 1.         -0.00228108 -0.21314141 -0.8098481   1.        ]]
 ```
 #### x和value的dtype不一致
 ```
 Traceback (most recent call last):
-  File "D:\PythonProjects\community\test.py", line 125, in <module>
+  File "D:\PythonProjects\community\test.py", line 153, in <module>
     test_static()
-  File "D:\PythonProjects\community\test.py", line 78, in test_static
+  File "D:\PythonProjects\community\test.py", line 106, in test_static
     out = masked_scatter(hidden, mask_, value_)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\PythonProjects\community\test.py", line 60, in masked_scatter
+  File "D:\PythonProjects\community\test.py", line 74, in masked_scatter
     assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
-           ^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: x and value must have the same dtype, but got x dtype is paddle.float32, value dtype is paddle.int32
 ```
 #### mask中true的个数大于value的个数
 ```
-I0925 19:43:28.299003  3496 program_interpreter.cc:140] New Executor is Running.
-x:  [[0.93393874 0.54505134 0.92284834 0.01059747]
- [0.26887837 0.70674247 0.24665648 0.01458587]
- [0.8900972  0.10662988 0.931161   0.7416481 ]]
+I1012 16:55:54.661437 10100 program_interpreter.cc:185] New Executor is Running.
+W1012 16:55:54.662438 10100 gpu_resources.cc:119] Please NOTE: device: 0, GPU Compute Capability: 8.6, Driver API Version: 12.2, Runtime API Version: 11.7
+W1012 16:55:54.664407 10100 gpu_resources.cc:149] device: 0, cuDNN Version: 8.4.
+x:  [[0.84189963 0.24295884 0.33678734 0.6711854 ]
+ [0.9159404  0.03022701 0.44019344 0.14213431]
+ [0.8592184  0.4729605  0.11157154 0.5277734 ]]
 mask:  [[ True  True  True  True  True]]
 Traceback (most recent call last):
-  File "D:\PythonProjects\community\test.py", line 125, in <module>
+  File "D:\PythonProjects\community\test.py", line 153, in <module>
     test_static()
-  File "D:\PythonProjects\community\test.py", line 90, in test_static
+  File "D:\PythonProjects\community\test.py", line 118, in test_static
     loss_data, out= exe.run(train_program, feed={"X": x,"mask": mask, "value":v}, fetch_list=[loss.name, out.name])
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\base\executor.py", line 1635, in run
+  File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\base\executor.py", line 1620, in run
     res = self._run_impl(
-          ^^^^^^^^^^^^^^^
-  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\base\executor.py", line 1842, in _run_impl
+  File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\base\executor.py", line 1827, in _run_impl
     ret = new_exe.run(list(feed.keys()), return_numpy)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\MyAPP\miniconda\Lib\site-packages\paddle\base\executor.py", line 799, in run
+  File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\base\executor.py", line 788, in run
     tensors = self._new_exe.run(feed_names)._move_to_list()
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ValueError: In user code:
 
-    File "D:\PythonProjects\community\test.py", line 125, in <module>
+    File "D:\PythonProjects\community\test.py", line 153, in <module>
       test_static()
-    File "D:\PythonProjects\community\test.py", line 78, in test_static
+    File "D:\PythonProjects\community\test.py", line 106, in test_static
       out = masked_scatter(hidden, mask_, value_)
-    File "D:\PythonProjects\community\test.py", line 64, in masked_scatter
+    File "D:\PythonProjects\community\test.py", line 93, in masked_scatter
       return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
-    File "E:\MyAPP\miniconda\Lib\site-packages\paddle\tensor\manipulation.py", line 4939, in index_put
+    File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\tensor\manipulation.py", line 4936, in index_put
       helper.append_op(
-    File "E:\MyAPP\miniconda\Lib\site-packages\paddle\base\layer_helper.py", line 45, in append_op
+    File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\base\layer_helper.py", line 44, in append_op
       return self.main_program.current_block().append_op(*args, **kwargs)
-    File "E:\MyAPP\miniconda\Lib\site-packages\paddle\base\framework.py", line 4368, in append_op
+    File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\base\framework.py", line 4404, in append_op
       op = Operator(
-    File "E:\MyAPP\miniconda\Lib\site-packages\paddle\base\framework.py", line 2906, in __init__
+    File "E:\MyAPP\miniconda\envs\paddledev\lib\site-packages\paddle\base\framework.py", line 2971, in __init__
       for frame in traceback.extract_stack():
 
-    InvalidArgumentError: The value (10) of the non-singleton dimension does not match the corresponding value (15) in shape for expand_v2 op.
-      [Hint: Expected vec_in_dims[i] == expand_shape[i], but received vec_in_dims[i]:10 != expand_shape[i]:15.] (at ..\paddle/phi/kernels/impl/expand_kernel_impl.h:65)
+    InvalidArgumentError: The value (10) of the non-singleton dimension does not match the corresponding value (15) in shape for expand kernel.
+      [Hint: Expected out_shape[i] == expand_shape[i], but received out_shape[i]:10 != expand_shape[i]:15.] (at C:\home\workspace\Paddle\paddle\phi\kernels\gpu\expand_kernel.cu:57)
       [operator < index_put > error]
 ```
 # 三、业内方案调研
