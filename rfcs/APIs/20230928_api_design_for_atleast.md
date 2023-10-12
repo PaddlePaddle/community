@@ -444,13 +444,14 @@ Out[48]: array([0.3, 1. ])
 
 添加 python 上层接口:
 
-- `paddle.atleast_1d(*inputs)`
-- `paddle.atleast_2d(*inputs)`
-- `paddle.atleast_3d(*inputs)`
+- `paddle.atleast_1d(*inputs, name=None)`
+- `paddle.atleast_2d(*inputs, name=None)`
+- `paddle.atleast_3d(*inputs, name=None)`
 
 参数：
 
-- inputs: (Tensor|list(Tensor)) - 输入的一至多个 Tensor。数据类型支持：float32、float64、int32、int64。
+- inputs: (Tensor|list(Tensor)) - 输入的一至多个 Tensor。数据类型支持：float16, uint16, float32, float64, int8, int16, int32, int64, uint8, complex64, complex128, bfloat16。
+- name: (str|None): Name for this layer. Please refer to :ref:`api_guide_Name`, Default None.
 
 返回：
 
@@ -464,10 +465,10 @@ Tensor 或 Tensor 列表。
 
 利用目前 `Paddle` 已有的 `reshape`、`unsqueeze` 实现 `atleast_Nd` 接口。
 
-- `paddle.atleast_1d(*inputs)`
+- `paddle.atleast_1d(*inputs, name=None)`
 
     ``` python
-    def atleast_1d(*inputs):
+    def atleast_1d(*inputs, name=None):
         res = []
         for tensor in inputs:
             tensor = paddle.to_tensor(tensor)
@@ -483,10 +484,10 @@ Tensor 或 Tensor 列表。
             return res    
     ```
 
-- `paddle.atleast_2d(*inputs)`
+- `paddle.atleast_2d(*inputs, name=None)`
 
     ``` python
-    def atleast_2d(*inputs):
+    def atleast_2d(*inputs, name=None):
         res = []
         for tensor in inputs:
             tensor = paddle.to_tensor(tensor)
@@ -504,10 +505,10 @@ Tensor 或 Tensor 列表。
             return res    
     ```
 
-- `paddle.atleast_3d(*inputs)`
+- `paddle.atleast_3d(*inputs, name=None)`
 
     ``` python
-    def atleast_3d(*inputs):
+    def atleast_3d(*inputs, name=None):
         res = []
         for tensor in inputs:
             tensor = paddle.to_tensor(tensor)
@@ -540,6 +541,7 @@ Tensor 或 Tensor 列表。
 - **参数组合场景**
   - 需要测试单个向量、多个向量、`(向量 ... 向量)`，等方式
   - 需要测试数字与向量混合的方式
+  - 需要测试不同数据类型：float16, uint16, float32, float64, int8, int16, int32, int64, uint8, complex64, complex128, bfloat16
 
 - **计算精度**
   需要保证前向计算的精度正确性，通过 numpy 实现的函数的对比结果
