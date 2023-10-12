@@ -68,7 +68,7 @@ def get_lr(self):
 
 ## 命名与参数设计
 
-API设计为`paddle.optimizer.lr.LinearLR(base_learning_rate,total_steps,start_factor,end_factor,last_epoch=-1,verbose=False)`
+API设计为`paddle.optimizer.lr.LinearLR(learning_rate,total_steps,start_factor,end_factor,last_epoch=-1,verbose=False)`
 
 将默认参数 `total_iters` 改为非默认参数 `total_steps`， 名称上与其他学习率调度器保持一致。
 

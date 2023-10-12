@@ -44,10 +44,11 @@
 | 35       | 🌟🌟       | 为 Paddle 新增 histogramdd API                               | 是                           |
 | 36       | 🌟🌟       | 为 Paddle 新增 matrix_exp API                                | 是                           |
 | 37       | 🌟🌟       | 为 Paddle 新增 householder_product API                       | 是                           |
-| 38       | 🌟🌟🌟      | 为 Paddle 新增 FractionalMaxPool2d / FractionalMaxPool3d API | 是                           |
-| 39       | 🌟🌟🌟      | 为 Paddle 新增 LPPool1D / LPPool2D API                       | 是                           |
-| 40       | 🌟🌟🌟      | 为 Paddle 新增 ASGD API                                      | 是                           |
-| 41       | 🌟🌟🌟      | 为 Paddle 新增 Rprop API                                     | 是                           |
+| 38       | 🌟🌟🌟     | 为 Paddle 新增 FractionalMaxPool2d / FractionalMaxPool3d API | 是                           |
+| 39       | 🌟🌟🌟     | 为 Paddle 新增 LPPool1D / LPPool2D API                       | 是                           |
+| 40       | 🌟🌟🌟     | 为 Paddle 新增 ASGD API                                      | 是                           |
+| 41       | 🌟🌟🌟     | 为 Paddle 新增 Rprop API                                     | 是                           |
+| 110      | 🌟         | 为 Paddle 增强 sparse.matmul API                              | 是                           |
 
 
 ## 框架其他开发任务
@@ -136,3 +137,4 @@
 | 107  | 🌟    | 基于InfiniTensor推理引擎的对话类示范应用                     | 否 |
 | 108  | 🌟    | 为InfiniTensor推理引擎添加GeLU算子                           | 否 |
 | 109  | 🌟    | InfiniTensor推理引擎的Windows系统适配                        | 否 |
+| 111  | 🌟🌟🌟    | 基于PaddleSeg的纤维轮廓识别                        | 否 |
