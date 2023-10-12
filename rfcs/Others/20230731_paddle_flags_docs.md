@@ -331,7 +331,7 @@ class Flag {
         type_(type),
         default_value_(default_value),
         value_(value) {}
-  ~flag() = default;
+  ~Flag() = default;
 
   // Summary: --name_: type_, description_ (default: default_value_)
   std::string Summary() const;
@@ -343,7 +343,7 @@ class Flag {
 
   const std::string name_;         // flag name
   const std::string description_;  // description message
-  const std::string file_;	       // file name where the flag is defined
+  const std::string file_;         // file name where the flag is defined
   const FlagType type_;	           // flag value type
   const void* default_value_;	   // flag default value ptr
   void* value_;	                   // flag current value ptr
@@ -365,7 +365,7 @@ class FlagRegistry {
     return global_registry_;
   }
 
-  void RegisterFlag(flag* flag);
+  void RegisterFlag(Flag* flag);
 
   bool SetFlagValue(const std::string& name, const std::string& value);
 
@@ -376,15 +376,15 @@ class FlagRegistry {
  private:
   FlagRegistry() = default;
 
-  std::map<std::string, flag*> flags_;
+  std::map<std::string, Flag*> flags_;
 
   struct FlagCompare {
-    bool operator()(const flag* flag1, const flag* flag2) const {
+    bool operator()(const Flag* flag1, const Flag* flag2) const {
       return flag1->name_ < flag2->name_;
     }
   };
 
-  std::map<std::string, std::set<flag*, FlagCompare>> flags_by_file_;
+  std::map<std::string, std::set<Flag*, FlagCompare>> flags_by_file_;
 
   std::mutex mutex_;
 };
@@ -393,8 +393,8 @@ class FlagRegistry {
 - `FlagRegistry` 为 flag 注册表类，用于管理所有定义的 flag
 - 只有一个全局单例，外部只能通过 `FlagRegistry::Instance()`  获取
 - 主要数据：
-  - `std::map<std::string, flag*> flags_`：name 到 flag 指针的查找表
-  - `std::map<std::string, std::set<flag*, FlagCompare>> flags_by_file_`：根据定义所在文件区分不同的 flag，`key` 是文件名，`value` 是定义在该文件中的 flag 指针集合（根据 flag name 排序），主要用于在打印所以 flag 是按定义文件进行输出。
+  - `std::map<std::string, Flag*> flags_`：name 到 flag 指针的查找表
+  - `std::map<std::string, std::set<Flag*, FlagCompare>> flags_by_file_`：根据定义所在文件区分不同的 flag，`key` 是文件名，`value` 是定义在该文件中的 flag 指针集合（根据 flag name 排序），主要用于在打印所以 flag 是按定义文件进行输出。
   - `std::mutex mutex_`：互斥锁，在修改 `flags_` 前 lock
 - 主要方法包括：
   - `RegisterFlag`：注册 flag
@@ -443,7 +443,7 @@ FlagRegisterer::FlagRegisterer(std::string name,
                                const T* default_value,
                                T* value) {
   FlagType type = FlagTypeTraits<T>::Type;
-  Flag* flag = new flag(name, help, file, type, default_value, value);
+  Flag* flag = new Flag(name, help, file, type, default_value, value);
   FlagRegistry::Instance()->RegisterFlag(flag);
 }
 ```
