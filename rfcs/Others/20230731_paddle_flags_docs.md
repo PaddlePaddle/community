@@ -455,16 +455,14 @@ FlagRegisterer::FlagRegisterer(std::string name,
 
 ``` C++
 #define PD_DEFINE_VARIABLE(type, name, default_value, description)           \
-  namespace paddle {                                                         \
-  namespace flags {                                                          \
+  namespace paddle_flags {                                                   \
   static const type FLAGS_##name##_default = default_value;                  \
   type FLAGS_##name = default_value;                                         \
   /* Register FLAG */                                                        \
   static ::paddle::flags::FlagRegisterer flag_##name##_registerer(           \
       #name, description, __FILE__, &FLAGS_##name##_default, &FLAGS_##name); \
   }                                                                          \
-  }                                                                          \
-  using paddle::flags::FLAGS_##name
+  using paddle_flags::FLAGS_##name
 
 #define PD_DEFINE_bool(name, val, txt) \
   PD_DEFINE_VARIABLE(bool, name, val, txt)
@@ -483,18 +481,16 @@ FlagRegisterer::FlagRegisterer(std::string name,
 ```
 
 - `PD_DEFINE_VARIABLE`：统一实现不同 type 的 flag 定义和注册过程
-- 全局变量 `FLAGS_##name` 放在了特殊的 `phi::flag##type` 命名空间中，然后通过 using 用法暴露出来
+- 全局变量 `FLAGS_##name` 放在了特殊的 `paddle_flags` 命名空间中，然后通过 using 用法暴露出来
 
 #### `PD_DECLARE_<type>`: flag 声明宏
 
 ``` C++
 #define PD_DECLARE_VARIABLE(type, name) \
-  namespace paddle {                    \
-  namespace flags {                     \
+  namespace paddle_flags {              \
   extern type FLAGS_##name;             \
   }                                     \
-  }                                     \
-  using paddle::flags::FLAGS_##name
+  using paddle_flags::FLAGS_##name
 
 #define PD_DECLARE_bool(name) PD_DECLARE_VARIABLE(bool, name)
 #define PD_DECLARE_int32(name) PD_DECLARE_VARIABLE(int32_t, name)
@@ -636,3 +632,27 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
 ## 七、完成情况
 
 已完成
+
+### PR 合入情况
+
+1. 主要 PR：[Add paddle custom flags support #56256](https://github.com/PaddlePaddle/Paddle/pull/56256)
+   - 将实现的 flags 工具库合入 paddle
+   - 实现切换使用 gflags 的选项
+   - 替换 paddle 中（除了 cinn）所有的 gflags 用法
+   - 相关 cmake 代码的修改
+2. 后续 PR：
+   - 替换 cinn 中 gflags 的用法：[update cinn flags usage #56896](https://github.com/PaddlePaddle/Paddle/pull/56896)
+   - 控制在 Windows 上 phi 下 flag 符号的导出：[export flags defined in phi on windows #56848](https://github.com/PaddlePaddle/Paddle/pull/56848)
+   - 修复引入的命名空间冲突的问题：[fix paddle namespace conflict when using paddle_flags #56913](https://github.com/PaddlePaddle/Paddle/pull/56913)
+   - 修复 Windows 使用 phi 动态库的编译问题：[fix compile errors when using shared phi on windows #56915](https://github.com/PaddlePaddle/Paddle/pull/56915)
+   - 完善报错信息：[refine paddle_flags error message about flag multiple definition #57088](https://github.com/PaddlePaddle/Paddle/pull/57088)
+
+### 重新分析 gflags 依赖问题
+
+![image-20231012153512650](D:\File\PaddlePaddle\community\rfcs\Others\.assert\image-20231012153512650.png)
+
+实现 Paddle flags 工具库后，用户同时使用 gflags 第三方库和 paddle_inference 库（依赖 phi 动态库）时，依赖关系如上图所示，其中 phi 动态库中不再包含 gflags 的全局符号，所以不会再出现[相关背景](#1. 相关背景)中描述的问题。
+
+### 遗留问题
+
+目前由于 brpc 等第三方库依赖了 gflags，后续没有办法完全移除 gflags，但这不会造成新的 gflags 依赖问题，将来可以进一步考虑如何完全移除 gflags 第三方库。
