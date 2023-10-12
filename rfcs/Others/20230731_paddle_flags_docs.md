@@ -51,7 +51,7 @@ void FlagRegistry::RegisterFlag(CommandLineFlag* flag) {
 
 表面上看，这个错误的原因是在 gflags.cc 定义了一个叫 flagfile 的 flag，另外 flag 在定义的同时会在 flag 注册表中进行注册，但是不知道什么原因 `flagfile` 被注册了两次，并且两次注册 flag 所在的文件也相同。
 
-![image-20231012131628081](D:\File\PaddlePaddle\community\rfcs\Others\.assert\image-20231012131628081.png)
+![image](https://github.com/huangjiyi/community/assets/43315610/f8985fa9-7ed1-4494-a539-45da6f2a1eef)
 
 继续深入分析上述问题，如上图所示，假设有一个测试文件 `test.cc`，他同时依赖了 gflags 静态库和 paddle_inference 动态库，同时因为 paddle_inference 又依赖 phi 动态图，因此在编译时需要同时链接这三个库，但是由于 phi 算子库依赖 gflags 静态库，因此 phi 动态库中包含了 gflags 的代码，其中就包含了一些 gflags 全局符号（比如注册表 `FlagRegistry`），然后由于全局符号介入的一个机制，phi 动态库中的 gflags 全局符号会被 gflags 静态库的全局符号覆盖掉，导致 `flagfile` 这个 flag 在同一个注册表重复注册，从而报错。
 
@@ -102,7 +102,7 @@ Paddle 目前在 `paddle/phi/core/flags.h` 中对 gflags 中的 flag 注册宏 `
 
 ref: https://github.com/gflags/gflags
 
-![image-20231012145856958](D:\File\PaddlePaddle\community\rfcs\Others\.assert\image-20231012145856958.png)
+![image](https://github.com/huangjiyi/community/assets/43315610/26328a8b-7470-433a-8b5f-c813215ea67c)
 
 上图中只列出了一些关键数据结构及其关键成员变量和方法
 
@@ -299,7 +299,7 @@ set(C10_USE_GFLAGS ${USE_GFLAGS})
 
 ### 2. 实现方案
 
-![image-20231012150910770](D:\File\PaddlePaddle\community\rfcs\Others\.assert\image-20231012150910770.png)
+![image](https://github.com/huangjiyi/community/assets/43315610/2077f88e-1bce-4912-be7a-5c5e0ac07709)
 
 下面从底层数据结构开始介绍
 
