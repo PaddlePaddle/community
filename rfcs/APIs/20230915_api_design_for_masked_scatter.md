@@ -26,6 +26,8 @@
 ## 组合实现
 目前paddle缺少相关功能实现。只能通过 paddle 现有的 API 组合实现。主要利用的api如下：
 
+- `paddle.broadcast_to`：将输入广播到指定形状
+
 - `paddle.where`：查找mask中值为true对应位置的索引。
 - `paddle.index_put`：根据索引和值对待填充tensor对应位置进行赋值。
 
