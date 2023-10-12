@@ -651,7 +651,7 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
 
 ![image](https://github.com/huangjiyi/community/assets/43315610/4423dd24-4e26-43a9-930f-2708431572f4)
 
-实现 Paddle flags 工具库后，用户同时使用 gflags 第三方库和 paddle_inference 库（依赖 phi 动态库）时，依赖关系如上图所示，其中 phi 动态库中不再包含 gflags 的全局符号，所以不会再出现[相关背景](#1.-相关背景)中描述的问题。
+实现 Paddle flags 工具库后，用户同时使用 gflags 第三方库和 paddle_inference 库（依赖 phi 动态库）时，依赖关系如上图所示，其中 phi 动态库中不再包含 gflags 的全局符号，所以不会再出现相关背景中描述的问题。
 
 ### 遗留问题
 
