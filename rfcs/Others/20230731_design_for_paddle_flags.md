@@ -53,7 +53,7 @@ void FlagRegistry::RegisterFlag(CommandLineFlag* flag) {
 
 ![image](https://github.com/huangjiyi/community/assets/43315610/f8985fa9-7ed1-4494-a539-45da6f2a1eef)
 
-继续深入分析上述问题，如上图所示，假设有一个测试文件 `test.cc`，他同时依赖了 gflags 静态库和 paddle_inference 动态库，同时因为 paddle_inference 又依赖 phi 动态图，因此在编译时需要同时链接这三个库，但是由于 phi 算子库依赖 gflags 静态库，因此 phi 动态库中包含了 gflags 的代码，其中就包含了一些 gflags 全局符号（比如注册表 `FlagRegistry`），然后由于全局符号介入的一个机制，phi 动态库中的 gflags 全局符号会被 gflags 静态库的全局符号覆盖掉，导致 `flagfile` 这个 flag 在同一个注册表重复注册，从而报错。
+继续深入分析上述问题，如上图所示，假设有一个测试文件 `test.cc`，同时依赖了 gflags 静态库和 paddle_inference 动态库，同时因为 paddle_inference 又依赖 phi 动态图，因此在编译时需要同时链接这三个库，但是由于 phi 算子库依赖 gflags 静态库，因此 phi 动态库中包含了 gflags 的代码，其中就包含了一些 gflags 全局符号（比如注册表 `FlagRegistry`），然后由于全局符号介入的一个机制，phi 动态库中的 gflags 全局符号会被 gflags 静态库的全局符号覆盖掉，导致 `flagfile` 这个 flag 在同一个注册表重复注册，从而报错。
 
 所以上述问题的原图是：**gflags** **静态库中的全局符号与** **phi** **动态库中的** **gflags** **全局符号冲突**。
 
@@ -581,6 +581,10 @@ void ParseCommandLineFlags(int* pargc, char*** pargv) {
   - 其他过滤规则打印 flag 信息的 `--helpxxx` 标志
   - `--undefok=flagname,flagname,...`：允许列出的 flag 没有定义而不会报错
   - `--flagfile=filepath`：从指定文件中读取 flag，flagfile 中每一行一个 flag
+
+#### `SetFlagsFromEnv`
+
+考虑到 Paddle 中通过环境变量设置 flag 的用法较多，而这种用法都是通过构造特殊标志 `--fromenv` 传入 `ParseCommandLineFlags` 实现的，因此可以单独实现一个通过环境变量设置 flag 的接口。
 
 #### 报错机制
 
