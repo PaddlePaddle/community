@@ -419,7 +419,7 @@ Variable类似于paddle中的Varibale， 它包含：
 3. `bool is_mutable_`: 表明数据是否会在模型的执行当中被改变；
 4. 数据的大小、对齐等等其他性质。
 
-对于模型中的对权重的使用，我们定义 G`etParameterOp`、`SetParameterOp`。分别从相应模型的哈希表中， 获取、设置相应的权重内容。
+对于模型中的对权重的使用，我们定义 `GetParameterOp`、`SetParameterOp`。分别从相应模型的哈希表中， 获取、设置相应的权重内容。
 其中， `GetParameterOp`接受一个字符串作为属性，意义是从该模型的哈希表中加载该字符串对应的属性，并将其转换为输出。
 `SetParameterOp` 接受一个字符串作为属性，一个张量类型的输入，没有输出。 表示用该属性和张量组成的键值对更新模型权重哈希表。
 
