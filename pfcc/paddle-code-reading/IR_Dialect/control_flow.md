@@ -764,7 +764,7 @@ i, ten = paddle.static.nn.while_loop(cond, body, [i, ten])
 
 ------
 
-![img](./img/1093285453.jpg)
+![img](./img/while_op_detail.jpg)
 
 如图1所示，假设program包含了while_op_1,  while_op_1包含了while_op_2,  while_op_2嵌套包含了while_op_3, .......嵌套包含了while_op_n.......
 
@@ -784,7 +784,7 @@ backward pass 或者每个op的反向创建的接口：需要保证，在每个�
 
 ------
 
-![img](./img/1701037907.jpg)
+![img](./img/while_op_detail2.jpg)
 
 因为子作用域可以访问父作用域中定义的变量， 图2所举的例子中，while_3_op的子block可以访问的变量范围是： program的主block、while_1_op的子block、while_2_op的子block。
 
