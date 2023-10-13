@@ -293,15 +293,15 @@ def diagonal_scatter(input, src, offset=0, dim1=0, dim2=1):
 
 ## 命名与参数设计
 
-paddle.diagonal_scatter
+paddle.diagonal_scatter：将y张量值嵌入到x张量中，同时y张量将会沿着指定的x的对角线元素分布，支持axis1和axis2两个维度，该方法将会返回一个新的张量
 
  ```python
 paddle.diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
  ```
 参数定义：
 
-- `x(Tensor)`：输入张量，张量的维度至少为2维
-- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中
+- `x(Tensor)`：输入张量，张量的维度至少为2维，支持bool、int32、int64、float16、float32、float64数据类型
+- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中，支持bool、int32、int64、float16、float32、float64数据类型
 - `offset(int, optional)`：偏移的对角线，默认值为0
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
@@ -318,7 +318,7 @@ Tensor.diagonal_scatter(y, offset=0, axis1=0, axis2=1, name=None)
 ```
 参数定义：
 
-- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中
+- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中，支持bool、int32、int64、float16、float32、float64数据类型
 - `offset(int, optional)`：偏移的对角线，默认值为0
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
@@ -333,20 +333,43 @@ Tensor.diagonal_scatter(y, offset=0, axis1=0, axis2=1, name=None)
 ## API实现方案
 在python/paddle/tensor/manipulation.py中增加diagonal_scatter函数
 
+1. 对张量x的axis1和axis2维度进行检查，对张量x的diagonal矩阵和张量y的形状进行检查；
+2. 针对动态图和静态图分别进行实现
 - 动态图
-  
-  1. clone输入张量，获得output张量
-  2. 调用diagonal方法，获得output张量对应位置上的张量视图diagonal_slice
-  3. 通过张量索引，将diagonal_slice中的元素都变为嵌入张量
-
-- 静态图（无法仅通过修改python代码实现）
-
-  - 方案一：通过调用`fill_diagonal_tensor`实现对应逻辑，但是该方法只能在动态图中使用
-
-  - 方案二：调用`paddle.static.setitem`方法，覆盖diagonal_slice的元素，但是该方法在静态图中调用时，只会返回新的tensor，而不是直接把嵌入张量y的元素写入diagonal_slice的位置
-    - 如果想要调用`paddle.static.setitem(x, index, y)`，通过index来修改输入张量diagonal对应位置的元素，没有现成实现获得diagonal元素对应的index
-
-  - 方案三：类似torch实现方案，实现cpp算子逻辑
+   - 通过调用`_C_ops.fill_diagonal_tensor(x, y, offset, axis1, axis2)`进行实现
+- 静态图
+   - 通过调用`LayerHelper`实现静态逻辑
+```python
+def diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
+    ... # check x & y shape
+    if in_dynamic_mode():
+        return _C_ops.fill_diagonal_tensor(x, y, offset, axis1, axis2)
+    else:
+        helper = LayerHelper("diagonal_scatter", **locals())
+        check_variable_and_dtype(
+            x,
+            'x',
+            ['float16', 'float32', 'float64', 'int32', 'int64', 'bool'],
+            'paddle.tensor.manipulation.diagonal_scatter',
+        )
+        check_variable_and_dtype(
+            y,
+            'y',
+            ['float16', 'float32', 'float64', 'int32', 'int64', 'bool'],
+            'paddle.tensor.manipulation.diagonal_scatter',
+        )
+        out = helper.create_variable_for_type_inference(x.dtype)
+        helper.append_op(
+            type='fill_diagonal_tensor',
+            inputs={
+                'x': x,
+                'y': y,
+            },
+            outputs={'out': out},
+            attrs={'offset': offset, 'axis1': axis1, 'axis2': axis2},
+        )
+        return out
+```
 
 ## 代码实现文件路径
 
