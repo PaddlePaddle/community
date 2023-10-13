@@ -2,7 +2,8 @@
 
 | 版本  | 作者  | 指导/校验  | 时间       | 主要更新           |
 | ---- | ----- | --------- |---------- | ------------------ |
-| 0.7 | Ryan  | 杰哥      |2023.10.01  | 初版               |
+| 0.7 | [Ryan](https://github.com/drryanhuang)  | [Aurelius84](https://github.com/Aurelius84)      |2023.10.01  | 初版|
+| 1.0 | [Ryan](https://github.com/drryanhuang)  | [Aurelius84](https://github.com/Aurelius84)      |2023.10.13  | 初版|
 
 阅读本指南的收获
 
@@ -253,7 +254,7 @@ class IR_API Parameter {
   Type type_;
 ```
 
-之前杰哥考我, Paddle参数在何时进行内存申请(malloc), 我想应该就是在 `Parameter` 类初始化的时候, 有参构造/拷贝构造和 `operator=` 都重新申请了内存, 并修改了数据起始地址 `void* data_`, 数据长度 `size_t size_` 和 数据类型 `Type type_`.
+(目前参数内存申请依旧是新IR那部分) ~~之前杰哥考我, Paddle参数在何时进行内存申请(malloc), 我想应该就是在 `Parameter` 类初始化的时候, 有参构造/拷贝构造和 `operator=` 都重新申请了内存, 并修改了数据起始地址 `void* data_`, 数据长度 `size_t size_` 和 数据类型 `Type type_`.~~
 
 这里的内存申请过程其实也验证了一句话, `Tensor` 在底层中的存储都是一维的
 
@@ -278,7 +279,46 @@ class IR_API Parameter {
 
 ## 2. 新 IR 体系下的计算图
 
-计算图的有向边是变量(`Value`)，节点是算子(`Operation`).
+
+我们先看一下主框架的计算图中的计算图:
+
+> 目前主框架和编译器分别定义了 `Program` & `Graph` 来描述计算图。
+> 主框架相对历史悠久一点，在 `Program` 中，变量的定义和算子是解藕的，算子通过变量名 (`字符串`) 简接关联到变量。一方面，`计算图有环`。另一方面，效率也不高，要想知道一个变量都被哪些算子关联了，就必须遍历 `block` 中所有算子的所有输入输出，进行字符串比对。在 `Graph` 中，一方面，变量和算子被同时抽象为了计算图节点，这增加了图优化的复杂度。另一方面，`Graph` 内嵌了 `Program` ，图优化不仅要处理图节点的UD链，还得处理图节点内嵌的 `OpDesc` & `VarDesc` 的 `UD链`，进一步增加了图优化的复杂度。
+
+接下来通过以下代码来看主框架中的计算图，算子节点和变量节点都可以通过 `Graph::CreateEmptyNode` 来创建, 通过第二个参数 `ir::Node::Type type` 来指定是创建算子节点还是变量节点. 
+
+```c++
+// 代码位置 paddle/fluid/framework/ir/pass_test.cc
+void BuildCircleGraph(Graph* g) {
+  ir::Node* o1 = g->CreateEmptyNode("op1", Node::Type::kOperation);
+  ir::Node* o2 = g->CreateEmptyNode("op2", Node::Type::kOperation);
+  ir::Node* v1 = g->CreateEmptyNode("var1", Node::Type::kVariable);
+  ir::Node* v2 = g->CreateEmptyNode("var2", Node::Type::kVariable);
+
+  o1->outputs.push_back(v1);
+  o2->inputs.push_back(v1);
+  v1->inputs.push_back(o1);
+  v1->outputs.push_back(o2);
+
+  o2->outputs.push_back(v2);
+  o1->inputs.push_back(v2);
+  v2->inputs.push_back(o2);
+  v2->outputs.push_back(o1);
+}
+```
+
+每个算子(如 `o1`)节点要记录自己的输入和输出, 每个变量也要记录自己的 `inputs` 和 `outputs`, 以上代码建立了一个有环图, 拓扑结构如下:
+
+
+```mermaid
+graph TD;
+    o1 --> v1;
+    v1 --> o2;
+    o2 --> v2;
+    v2 --> o1;
+```
+
+新 IR 体系下计算图的有向边是变量(`Value`)，节点是算子(`Operation`).
 
 算子信息分为四部分：输入(`OpOperandImpl`)、输出(`OpResultImpl`)、属性(`Attribute`)、类型信息(`OpInfo`).
 
@@ -291,7 +331,7 @@ class IR_API Parameter {
                            const std::vector<pir::Type> &output_types,
                            pir::OpInfo op_info,
                            size_t num_regions = 0,
-                           const std::vector<Block *> &successors = {});
+                           const std::vector<Block *> &successors = {}); // 控制流
   static Operation *Create(OperationArgument &&op_argument);
 ```
 
@@ -1548,6 +1588,8 @@ int32_t Operation::ComputeOpResultOffset(uint32_t index) const {
 到此, 可以剧透一下, `kind` 或者说 `index` 就是 `Operation` 返回的 `OpResult` 索引, 因为一般 `Op` 一般很少有6个以上(0到5)的输出, 所以 `kind` 只用低3位去表示是够的. 但是如果有 `Op` 有6个以上甚至更多的输出怎么办? 这个问题暂时先不解答, 我们来看看 `Operation` 的创建过程. 可以分为8个小代码块.
 
 
+第一部分, 计算一个 `Operation` 对象内容所需要的字节数, `max_inline_result_num` 在代码中是个定值, 为 `6`. 在计算 `OpResult` 类型变量的大小时, 如果输出个数 `<=6` 则开辟对应数量的 `OpInlineResultImpl` 内存大小, 如果输出个数 `>6` 则开辟 `6` 个 `OpInlineResultImpl`, 开辟 `输出个数 - 6` 个 `OpOutlineResultImpl`.
+
 ```c++
 Operation *Operation::Create(const std::vector<Value> &inputs,
                              const AttributeMap &attributes,
@@ -1555,6 +1597,7 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
                              pir::OpInfo op_info,
                              size_t num_regions,
                              const std::vector<Block *> &successors) {
+
   // 1. Calculate the required memory size for OpResults + Operation +
   // OpOperands.
   uint32_t num_results = output_types.size();
@@ -1573,8 +1616,20 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
   size_t region_mem_size = num_regions * sizeof(Region);
   size_t base_size = result_mem_size + op_mem_size + operand_mem_size +
                      region_mem_size + block_operand_size;
+```
+
+
+申请刚才计算的内存, 要求地址的低3位为0, 可以被8整除
+```c++
   // 2. Malloc memory.
   char *base_ptr = reinterpret_cast<char *>(aligned_malloc(base_size, 8));
+```
+
+
+
+在指定位置构建对应数量的 `OpOutlineResultImpl` 和 `OpInlineResultImpl` 输出对象.
+
+```c++
   // 3.1. Construct OpResults.
   for (size_t idx = num_results; idx > 0; idx--) {
     if (idx > max_inline_result_num) {
@@ -1586,6 +1641,12 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
       base_ptr += sizeof(detail::OpInlineResultImpl);
     }
   }
+```
+
+
+在指定位置构建一个 `Operation` 对象
+
+```c++
   // 3.2. Construct Operation.
   Operation *op = new (base_ptr) Operation(attributes,
                                            op_info,
@@ -1594,6 +1655,12 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
                                            num_regions,
                                            num_successors);
   base_ptr += sizeof(Operation);
+```
+
+
+在指定位置构建 `OpOperandImpl` 对象, 用来描述输入.
+
+```c++
   // 3.3. Construct OpOperands.
   if ((reinterpret_cast<uintptr_t>(base_ptr) & 0x7) != 0) {
     IR_THROW("The address of OpOperandImpl must be divisible by 8.");
@@ -1602,6 +1669,12 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
     new (base_ptr) detail::OpOperandImpl(inputs[idx], op);
     base_ptr += sizeof(detail::OpOperandImpl);
   }
+```
+
+
+暂时未知
+
+```c++
   // 3.4. Construct BlockOperands.
   if (num_successors > 0) {
     op->block_operands_ =
@@ -1611,7 +1684,12 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
       base_ptr += sizeof(detail::BlockOperandImpl);
     }
   }
+```
 
+
+暂时未知
+
+```c++
   // 3.5. Construct Regions
   if (num_regions > 0) {
     op->regions_ = reinterpret_cast<Region *>(base_ptr);
@@ -1620,7 +1698,11 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
       base_ptr += sizeof(Region);
     }
   }
+```
 
+
+验证
+```c++
   // 0. Verify
   if (op_info) {
     op_info.Verify(op);
@@ -1630,80 +1712,119 @@ Operation *Operation::Create(const std::vector<Value> &inputs,
 ```
 
 
+可以看到 `OpInlineResultImpl` 和 `OpOutlineResultImpl` 在当前版本, 除了 `index` 计算不同, 后者还比前者多了私有变量 `outline_index_`.
+
+```c++
+class OpInlineResultImpl : public OpResultImpl {
+ public:
+  OpInlineResultImpl(Type type, uint32_t result_index)
+      : OpResultImpl(type, result_index) {
+    if (result_index > MAX_INLINE_RESULT_IDX) {
+      throw("Inline result index should not exceed MaxInlineResultIndex(5)");
+    }
+  }
+
+  static bool classof(const ValueImpl &value) {
+    return value.kind() < OUTLINE_RESULT_IDX;
+  }
+
+  uint32_t index() const { return kind(); }
+};
+
+///
+/// \brief OpOutlineResultImpl is the implementation of an operation result
+/// whose index > 5.
+///
+class OpOutlineResultImpl : public OpResultImpl {
+ public:
+  OpOutlineResultImpl(Type type, uint32_t outline_index)
+      : OpResultImpl(type, OUTLINE_RESULT_IDX), outline_index_(outline_index) {}
+
+  static bool classof(const ValueImpl &value) {
+    return value.kind() == OUTLINE_RESULT_IDX;
+  }
+
+  uint32_t index() const { return outline_index_; }
+
+ private:
+  uint32_t outline_index_;
+};
+```
+
+到此, 我们回溯一下, 如果某个 `Op` 有6个以上甚至更多的输出怎么办? 前6个 `OpResult` 是 `OpInlineResult`, 其 `protected` 变量`first_use_offseted_by_kind_` 低3位是对应的索引`0~5`, 第7个输出及以上是 `OpOutlineResultImpl`, 其 `first_use_offseted_by_kind_` 低3位都是6, 且有一个私有变量 `outline_index_` 来记录其索引.
 
 
 
-# 20231011 暂时写到这里
+到此, 我们新 IR 体系下的计算图小节终于介绍完毕.
 
 
 
+## 新 IR 体系下的 `Dialect`
 
+首先要注意 `dialect` 和 `Dialect` 的区别, 注意d小写的只是一个 `namespace`, D大写的是一个类
 
-`dialect` 和 `Dialect` 的区别, 注意d小写的只是一个 `namespace`, D小写的是一个类
-
+```c++
 namespace paddle {
 namespace dialect {
+  // ......
+}  // namespace dialect
+}  // namespace paddle
+```
 
-class OperatorDialect : public pir::Dialect {
+`Dialect` 基本上可以理解为 `namespace`. 在 `Dialect` 中，我们可以定义一系列类型、属性和 Op 等。
+`Dialect` 对象的实例会被加载到全局IrContext中。 
+特定的编译器只需要结合现有的 `Dialect` 并添加自己的扩展或定制即可。
 
+以下是 `BuiltinDialect` 的源码:
 
+```c++
+// 代码位置 paddle/pir/core/builtin_dialect.h
+// Dialect 是一个类
+class IR_API BuiltinDialect : public pir::Dialect {
+ public:
+  explicit BuiltinDialect(pir::IrContext *context);
+  ///
+  /// \brief Each Dialect needs to provide a name function to return the name of
+  /// the Dialect.
+  ///
+  /// \return The name of this Dialect.
+  ///
+  static const char *name() { return "builtin"; }
 
+ private:
+  void initialize();
+};
+```
 
+可以看到在 `BuiltinDialect` 的实现中, 注册了一系列的类型、属性和 Op 等:
 
+```c++
+void BuiltinDialect::initialize() {
+  // Register all built-in types defined in builtin_type.h.
+  RegisterTypes<BFloat16Type,
+                Float16Type,
+                Float32Type,
+                // ......
+                Complex128Type,
+                VectorType>();
 
+  RegisterAttributes<StrAttribute,
+                     BoolAttribute,
+                     // ......
+                     Int64Attribute,
+                     ArrayAttribute,
+                     TypeAttribute>();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## BuiltinDialect、PaddleDialect 的关系
-
+  RegisterOps<ModuleOp,
+              GetParameterOp,
+              SetParameterOp,
+              ShadowOutputOp,
+              CombineOp,
+              SliceOp,
+              SplitOp,
+              ConstantOp>();
+}
+```
 
 
 ## 新 IR 体系下的 IrContext
@@ -1711,3 +1832,7 @@ class OperatorDialect : public pir::Dialect {
 主要位置在 `paddle/pir/core/ir_context.cc` 和 `paddle/pir/core/ir_context.h` 
 
 `IrContext` 是一个全局无参数类，用于存储和管理Type、Attribute等相关数据结构。
+
+## To Be Continued
+
+
