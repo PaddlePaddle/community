@@ -1,1 +1,1 @@
-figures of result
+预测结果生成的图像
