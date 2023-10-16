@@ -1,1 +1,1 @@
-predicted solution of the model
+模型预测的结果
