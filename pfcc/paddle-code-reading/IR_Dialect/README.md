@@ -10,3 +10,5 @@
 + [【方案设计】IR 顶层模型结构表示设计文档<sup>✨New✨</sup>](./ir_program.md)
 + [【代码约定】IR 代码相关约定](./code_convention.md)
 + [【方案设计】IR Program Translator设计文档 🚀](./program_translator.md)
++ [【方案设计】控制流设计文档 🚀](./control_flow.md)
++ [【社区贡献文档】PIR源码阅读指南 🚀](./first_step.md)
