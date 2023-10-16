@@ -519,13 +519,13 @@ Numpy中没有`masked_scatter`API的实现
 
 ## 命名与参数设计
 ```python
-paddle.masked_scatter(x, mask, value)
+paddle.masked_scatter(x, mask, value, name=None)
 
-paddle.masked_scatter_(x, mask, value)
+paddle.masked_scatter_(x, mask, value, name=None)
 
-Tensor.masked_scatter(mask, value)
+Tensor.masked_scatter(mask, value, name=None)
 
-Tensor.masked_scatter_(mask, value)
+Tensor.masked_scatter_(mask, value, name=None)
 ```
 masked_scatter和masked_scatter_分别表示out-place和in-place两种计算形式。
 
@@ -542,34 +542,34 @@ masked_scatter和masked_scatter_分别表示out-place和in-place两种计算形�
 
 在 python/paddle/tensor/manipulation.py 中增加 masked_scatter 以及 masked_scatter_ 函数。初步的实现方案如下：
 ```python
+import paddle
+import numpy
+
 def masked_scatter(x, mask, value, inplace=False):
     """
     利用现有api实现masked_scatter功能
     """
+    # make sure the dtype of x and source is the same
+    assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
+
     if paddle.in_dynamic_mode():
         if mask.shape != x.shape:
             mask = paddle.broadcast_to(mask, shape=x.shape)
         # make sure the true nums in mask is <= the nums of value
         assert mask.sum() <= value.numel(), f'mask true nums must be <= value size, but got mask true nums is {mask.sum().item()}, value size is {value.numel().item()}'
-        # make sure the dtype of x and source is the same
-        assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
 
         indexs = tuple(item.squeeze() for item in paddle.where(mask))
-        
+
         if inplace:
             return paddle.index_put_(x, indexs, value.flatten()[:mask.sum()])
         else:
             return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
     else:
-        """
-        经过测试，静态图模式下(当x的shape中含有-1)broasdcast_to广播操作失效。但是可以借助乘法来间接实现广播效果
-        """
-        # make sure the dtype of x and source is the same
-        assert x.dtype == value.dtype, f'x and value must have the same dtype, but got x dtype is {x.dtype}, value dtype is {value.dtype}'
-        mask_ = ((x * x) + 1.) * mask > 0
-        
-        indexs = tuple(item.squeeze() for item in paddle.where(mask_))
-        return paddle.index_put(x, indexs, value.flatten()[:mask_.sum()])
+        zeros_like_x = paddle.zeros_like(x)
+        mask = paddle.add(paddle.cast(mask, x.dtype), zeros_like_x)
+        mask = paddle.cast(mask, "bool")
+        indexs = tuple(item.squeeze() for item in paddle.where(mask))
+        return paddle.index_put(x, indexs, value.flatten()[:mask.sum()])
 ```
 
 # 六、测试和验收的考量
