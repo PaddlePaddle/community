@@ -76,6 +76,8 @@ equations](https://arxiv.org/abs/2003.06496)中的代码[NSFNet code](https://gi
 | v                 | 0.425% | 0.431%             | 0.077%  |
 | p                 | 0.309% | /                  | 0.038%  |
 
+![image](https://github.com/DUCH714/paddle-community/blob/patch-1/rfcs/Science/53_figure/Kovasznay%20flow.png)
+
 >**Cylinder wake**
 
 | alpha=1 size 4*50 | paper | code(without BFGS) | paddle (DeepXDE) |
