@@ -300,8 +300,8 @@ paddle.diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
  ```
 参数定义：
 
-- `x(Tensor)`：输入张量，张量的维度至少为2维，支持bool、int32、int64、float16、float32、float64数据类型
-- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中，支持bool、int32、int64、float16、float32、float64数据类型
+- `x(Tensor)`：输入张量，张量的维度至少为2维，支持bool、int32、int64、float16、float32、float64、complex64、complex128数据类型
+- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中，支持bool、int32、int64、float16、float32、float64、complex64、complex128数据类型
 - `offset(int, optional)`：偏移的对角线，默认值为0
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
@@ -318,7 +318,7 @@ Tensor.diagonal_scatter(y, offset=0, axis1=0, axis2=1, name=None)
 ```
 参数定义：
 
-- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中，支持bool、int32、int64、float16、float32、float64数据类型
+- `y(Tensor)`：嵌入张量，将会被嵌入到输入张量中，支持bool、int32、int64、float16、float32、float64、complex64、complex128数据类型
 - `offset(int, optional)`：偏移的对角线，默认值为0
     - 偏移量为0，则嵌入对角线位置
     - 偏移量大于0，则嵌入对角线上方
@@ -349,13 +349,14 @@ def diagonal_scatter(x, y, offset=0, axis1=0, axis2=1, name=None)
         check_variable_and_dtype(
             x,
             'x',
-            ['float16', 'float32', 'float64', 'int32', 'int64', 'bool'],
+            ['float16', 'float32', 'float64', 'int32', 'int64', 'bool', 'complex64', 'complex128'],
             'paddle.tensor.manipulation.diagonal_scatter',
         )
         check_variable_and_dtype(
             y,
             'y',
-            ['float16', 'float32', 'float64', 'int32', 'int64', 'bool'],
+            ['float16', 'float32', 'float64', 'int32', 'int64', 'bool',
+            'complex64', 'complex128'],
             'paddle.tensor.manipulation.diagonal_scatter',
         )
         out = helper.create_variable_for_type_inference(x.dtype)
