@@ -80,11 +80,11 @@ equations](https://arxiv.org/abs/2003.06496)中的代码[NSFNet code](https://gi
 
 >**Cylinder wake**
 
-| alpha=1 size 4*50 | paper | code(without BFGS) | paddle (DeepXDE) |
+| alpha=1 size 4*50 t=0 | paper | code(without BFGS) | paddle (DeepXDE) |
 |-------------------|-------|--------------------|------------------|
-| u                 | /     | 0.269              | 0.011            |
-| v                 | /     | 0.985              | 0.047            |
-| p                 | /     | /                  | 0.818            |
+| u                 | /     | 0.00403           | 0.00346            |
+| v                 | /     | 0.0150             | 0.0155            |
+| p                 | /     | /                  | /           |
 ## 6. 可行性分析和排期规划
 
 >202309 :  调研
