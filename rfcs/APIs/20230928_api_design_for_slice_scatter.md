@@ -165,16 +165,16 @@ Torch中默认使用C++实现算子，并且手动添加了对应的反向信息
 
 添加 Python API:
 ```python
-paddle.slice_scatter(input, src, dim=0, start=None, end=None, step=1)
+paddle.slice_scatter(x, y, axis=0, start=None, stop=None, step=1)
 ```
 
 参数表：
 
-- input: (Tensor) 输入的 tensor。数据类型支持 `float16`、`float32`、`float64`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
-- src: (Tensor) 输入的 tensor。数据类型与input一致，形状与`[start:end:step]`构成的slice一致。
-- dim: (int) 将要插入src slice的维度。
+- x: (Tensor) 输入的 tensor。数据类型支持 `float16`、`float32`、`float64`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
+- y: (Tensor) 用于填充的 tensor。数据类型与input一致，形状与`x[*x.shape[:axis], start:end:step, *x.shape[axis+1:]]`取出的slice一致。
+- axis: (int) y的数据将被填充至x的axis维度。
 - start: (Optional[int]) 待插入slice位置的起始index。
-- end: (Optional[int]) 待插入slice位置的结束index。
+- stop: (Optional[int]) 待插入slice位置的结束index。
 - step: (int) 待插入slice的步长。
 
 ## 底层OP设计
