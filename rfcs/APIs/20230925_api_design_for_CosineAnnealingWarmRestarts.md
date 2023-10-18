@@ -143,7 +143,7 @@ paddle.optimizer.lr.CosineAnnealingWarmRestarts
 ----------------------
 参数
 
-- `leaning_rate` - 初始化的学习率
+- `learning_rate` - 初始化的学习率
 - `T_0` - 第一次重启的迭代次数
 - `T_mult` - 乘积因子，用于重启后增加`T_i`，默认值为1
 - `eta_min` - 最小学习率，默认值为0
