@@ -19,8 +19,26 @@ $$ f(x)=\frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1}e^{-\beta x},(x \geq 0
 
 $$ \Gamma(\alpha)=\int_{0}^{\infty} x^{\alpha-1} e^{-x} \mathrm{~d} x, (\alpha>0) $$
 
-其中参数 $\alpha$ 称为形状参数，$\beta$ 称为尺度参数。如果一个随机变量 $X$ 呈伽马分布，则可以写作 $X \sim Gamma(\alpha, \beta)$。
+其中参数 $\alpha$ 称为形状参数， $\beta$ 称为尺度参数。如果一个随机变量 $X$ 呈伽马分布，则可以写作 $X \sim Gamma(\alpha, \beta)$。
 
+
+若 $X \sim Gamma(\alpha, \beta)$ ， 则 $X$ 有以下性质。
+
+期望：
+
+$$E(X) = \frac{\alpha}{\beta}$$
+
+方差：
+
+$$D(X) = \frac{\alpha}{\beta^2}$$
+
+偏度：
+
+$$skewness(X) = \frac{2}{\sqrt{\alpha}}$$
+
+熵：
+
+$$entropy(X) = \alpha - \ln \beta + \ln \Gamma (\alpha) + (1-\alpha)\psi (\alpha) $$
 
 ## 2、功能目标
 为 Paddle 框架增加 `paddle.distribution.Gamma` 的 API，用于伽马分布的概率统计与随机采样。API 包括了如下方法：

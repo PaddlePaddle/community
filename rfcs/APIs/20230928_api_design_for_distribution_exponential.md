@@ -13,11 +13,30 @@
 ## 1、相关背景
 在当前的 Paddle 框架中，`paddle.distribution` 目录内已经实现了一系列概率分布的 API，为了扩展现有的概率分布方案，本次任务计划实现指数分布（Exponential Distribution）的 API。
 
-Exponential 概率分布的概率密度函数如下：
+指数概率分布的概率密度函数如下：
 
-$$ f_{F}(x; \theta) =  \theta e^{- \theta x },  (x \ge 0) $$
+$$ f(x; \theta) =  \theta e^{- \theta x },  (x \ge 0) $$
 
 其中 $\theta > 0$ 是分布的一个参数，常被称为率参数（rate parameter）。如果一个随机变量 $X$ 呈指数分布，则可以写作 $X \sim Exponential(λ)$。
+
+若 $X$ 是服从率参数为 $\lambda$ 的指数分布， $X$ 有以下性质。
+
+期望：
+
+$$E(X) = \frac{1}{\lambda}$$
+
+方差：
+
+$$D(X) = \frac{1}{\lambda^2}$$
+
+偏度：
+
+$$skewness(X) = 2$$
+
+熵：
+
+$$entropy(X) = 1 - ln\lambda$$
+
 
 ## 2、功能目标
 为 Paddle 框架增加 `paddle.distribution.Exponential` 的 API，用于指数分布的概率统计与随机采样。API 包括了如下方法：
