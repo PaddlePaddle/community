@@ -31,11 +31,11 @@ equations](https://arxiv.org/abs/2003.06496)中的代码[NSFNet code](https://gi
 
 ## 2. PaddleScience 现状
 
-> PaddleScience 暂时无法完成训练，从[AIstudio](https://aistudio.baidu.com/studio/project/partial/verify/6832363/fa46b783a28442b88fb7d2756ffddb6c)中的后台任务_nfs1_可以看到，速度的相对误差在O(10^(-2))附近，因此转而使用基于paddle框架的DeepXDE。
+> PaddleScience 暂时无法完成训练，从[AIstudio](https://aistudio.baidu.com/studio/project/partial/verify/6832363/fa46b783a28442b88fb7d2756ffddb6c)中的后台任务_nfs1_可以看到，速度的相对误差在O(10^(-2))附近，因此转而尝试使用基于paddle框架的DeepXDE。
 
 ## 3. 目标调研
 
->论文对纳韦斯托克方程进行了高精度求解，其难点主要在于代码较为陈旧，为基于原PINN而编写的tensorflow v1.0 版本代码，同时训练数据集以及训练网络庞大，单核GPU难以完成相关训练。
+>论文对纳韦斯托克方程进行了高精度求解，其难点主要在于代码较为陈旧，为基于原PINN而编写的tensorflow v1.0 版本代码，同时训练数据集精度高(JHTDB)以及训练网络庞大，单核GPU难以完成相关训练。
 
 ## 4. 设计思路与实现方案
 
@@ -69,23 +69,14 @@ equations](https://arxiv.org/abs/2003.06496)中的代码[NSFNet code](https://gi
 ## 5. 测试和验收的考量
 
 > 精度对齐
-> **Kovasznay flow**
+> **JHTDB**
 
 | alpha=1 size 4*50 | paper  | code(without BFGS) | paddle(DeepXDE)  |
 |-------------------|--------|--------------------|---------|
-| u                 | 0.084% | 0.062%             | 0.015%  |
-| v                 | 0.425% | 0.431%             | 0.077%  |
-| p                 | 0.309% | /                  | 0.038%  |
+| u                 | / | /            | 0.015%  |
+| v                 | /| /             | 0.077%  |
+| p                 | / | /                  | 0.038%  |
 
-![image](https://github.com/DUCH714/paddle-community/blob/patch-1/rfcs/Science/53_figure/Kovasznay%20flow.png)
-
->**Cylinder wake**
-
-| alpha=1 size 4*50 | paper | code(without BFGS) | paddle (DeepXDE) |
-|-------------------|-------|--------------------|------------------|
-| u                 | /     | 0.269              | 0.011            |
-| v                 | /     | 0.985              | 0.047            |
-| p                 | /     | /                  | 0.818            |
 ## 6. 可行性分析和排期规划
 
 >202309 :  调研
