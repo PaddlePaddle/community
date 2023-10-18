@@ -36,6 +36,12 @@ equations](https://arxiv.org/abs/2003.06496)中的代码[NSFNet code](https://gi
 ## 3. 目标调研
 
 >论文对纳韦斯托克方程进行了高精度求解，其难点主要在于代码较为陈旧，为基于原PINN而编写的tensorflow v1.0 版本代码，同时训练数据集精度高(JHTDB)以及训练网络庞大，单核GPU难以完成相关训练。
+>多核并行运算，从NSFnets论文中
+
+"We use 20,000 points inside the domain, 6,644 points on the boundary sampled at each time step, together with 33,524 points at the initial time step to compute the loss function. We set the total number of iterations nit = 150 in one training epoch. There are 10 hidden layers in the VP-NSFnet with 300 neurons per layer."
+
+>可以发现复现论文数据的显存要求要远远高于其在github上的代码中的参数，因此我们要使用[并行训练指南](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/06_distributed_training/cluster_quick_start_collective_cn.html)进行训练。
+
 
 ## 4. 设计思路与实现方案
 
@@ -73,9 +79,9 @@ equations](https://arxiv.org/abs/2003.06496)中的代码[NSFNet code](https://gi
 
 | alpha=1 size 4*50 | paper  | code(without BFGS) | paddle(DeepXDE)  |
 |-------------------|--------|--------------------|---------|
-| u                 | / | /            | 0.015%  |
-| v                 | /| /             | 0.077%  |
-| p                 | / | /                  | 0.038%  |
+| u                 | / | /            | /  |
+| v                 | /| /             |/ |
+| p                 | / | /                  | / |
 
 ## 6. 可行性分析和排期规划
 
