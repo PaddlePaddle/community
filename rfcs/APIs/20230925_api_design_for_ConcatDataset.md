@@ -134,10 +134,9 @@ python端API组合实现
 
 测试考虑的case如下：
 
-- 正确性验证：
-  - 不同 shape；
+- 正确性验证：输入不同 shape 的dataset；
 - 不同计算设备：覆盖 CPU 和 GPU 等实现；
-- 错误检查：输入dataset类型不能是`IterableDataset`。
+- 错误检查：输入dataset类型不能是`IterableDataset`；
 
 # 七、可行性分析及规划排期
 
