@@ -179,19 +179,20 @@ paddle.slice_scatter(x, y, axis=0, start=None, stop=None, step=1)
 
 ## 底层OP设计
 
-直接使用 Python API 实现，无需设计底层 OP。
+使用已有的底层 OP `set_value`实现，无需额外设计。
 
 ## API实现方案
 
 - 使用`paddle.Tensor.clone`拷贝一个Tensor
-- 使用PythonAPI组合，以索引或切片方式在新Tensor上赋值以完成功能。
+- 对于动态图，直接调用`paddle._C_ops.legacy.set_value`对新的Tensor适当位置赋值
+- 对于静态图，使用LayerHelper添加对应的`set_value`Op
 
 # 六、测试和验收的考量
 
 - 覆盖动态图和静态图的测试场景
 - 覆盖 CPU、GPU 两种测试场景
 - 支持各种Tensor精度，FP32、FP64、FP16、INT8、INT16、INT32、INT64
-- 需要检查前向和反向计算的精度正确性，但由于Python 组合方式新增的 API 反向计算已经在各组合 API 单测中分别验证了，因此不必过多关注
+- 需要检查前向和反向计算的精度正确性
 - 处理0维输入数据
 - 处理可选参数不存在或不一致的情况
 
