@@ -4,7 +4,7 @@
 | - | - |
 | 提交作者 | megemini(柳顺) |
 | 提交时间 | 2023-10-06 |
-| 版本号 | V1.0 |
+| 版本号 | V1.1 |
 | 依赖飞桨版本 | develop |
 | 文件名 | 20231006_api_design_for_stack.md |
 
@@ -22,17 +22,10 @@
 将一个 Tensor 根据不同方式堆叠拼接成一个 Tensor，根据不同的轴与操作方式，分别可以有多种 `stack`。该API依赖黑客松其他任务：`atleast_1d / atleast_2d / atleast_3d`，可在该任务完成之后再开发。不同API的调用路径为：
 
 - `paddle.column_stack`，作为独立的函数调用
-- `Tensor.column_stack`，作为 Tensor 的方法使用
 - `paddle.row_stack`，作为独立的函数调用
-- `Tensor.row_stack`，作为 Tensor 的方法使用
 - `paddle.dstack`，作为独立的函数调用
-- `Tensor.dstack`，作为 Tensor 的方法使用
 - `paddle.hstack`，作为独立的函数调用
-- `Tensor.hstack`，作为 Tensor 的方法使用
 - `paddle.vstack`，作为独立的函数调用
-- `Tensor.vstack`，作为 Tensor 的方法使用
-
-**疑问** ： 这些接口为什么会有 `Tensor.XXX` 的方法？一般堆叠都是对多个 Tensor 的操作，另外，`PyTorch`、`Numpy` 也没有类似的使用方法，还请确认一下。 
 
 ## 3、意义
 
@@ -467,7 +460,6 @@ c++ 接口文件在：
 添加 python 上层接口:
 
 - `paddle.column_stack(x, name=None)`
-- `Tensor.column_stack` (有疑问)
 
     - 参数列表
     > x (List of Tensors) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
@@ -477,7 +469,6 @@ c++ 接口文件在：
     > output (Tensor)
 
 - `paddle.row_stack(x, name=None)`
-- `Tensor.row_stack` (有疑问)
 
     - 参数列表
     > x (List of Tensors) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
@@ -487,7 +478,6 @@ c++ 接口文件在：
     > output (Tensor)
 
 - `paddle.dstack(x, name=None)`
-- `Tensor.dstack`  (有疑问)
 
     - 参数列表
     > x (List of Tensors) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
@@ -497,7 +487,6 @@ c++ 接口文件在：
     > output (Tensor)
 
 - `paddle.hstack(x, name=None)`
-- `Tensor.hstack`  (有疑问)
 
     - 参数列表
     > x (List of Tensors) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
@@ -507,7 +496,6 @@ c++ 接口文件在：
     > output (Tensor)
 
 - `paddle.vstack(x, name=None)`
-- `Tensor.vstack`  (有疑问)
 
     - 参数列表
     > x (List of Tensors) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
@@ -524,7 +512,6 @@ c++ 接口文件在：
 
 - 利用目前 `Paddle` 已有的 `concate`、`atleast_1d`、`atleast_2d`、`atleast_3d` 等接口实现。
 - 加入 `Paddle` 公共 API
-- 将 API 绑定为 Tensor 的方法 (有疑问)
 
 具体接口：
 
@@ -597,14 +584,22 @@ c++ 接口文件在：
   常规需覆盖 CPU、GPU 两种测试场景
 
 - **参数组合场景**
+  - 需要测试单个向量输入的方式
   - 需要测试多个向量输入的方式
   - 需要测试向量维度不同的方式
+  - 需要测试缺少堆叠维度的情况
+  - 需要测试多个向量不同 dtype 的方式
+  - 需要测试 hstack 输入的 ndim 为 1 的特殊情况
 
 - **计算精度**
   需要保证前向计算的精度正确性，通过 numpy 实现的函数的对比结果
 
 - **维度测试**
   - Paddle API 支持的最低维度为 0 维，单测中应编写相应的 0 维尺寸测试 case
+  - 需要测试 0D-5D(大于3D) 的情况，
+
+- **异常测试**
+  - 需要测试 stack 的 tensor 维度不一致无法堆叠的情况
 
 # 七、可行性分析及规划排期
 
