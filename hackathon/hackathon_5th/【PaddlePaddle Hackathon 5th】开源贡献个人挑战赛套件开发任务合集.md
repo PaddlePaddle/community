@@ -376,62 +376,42 @@ PaddleMIX ppdiffusers 作为飞桨扩散模型基础设施其目标之一是为�
 
 提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
 
-### No.84：新增模型视频生成模型MS-Image2Video+MS-Vid2Vid-XL 
+### No.84：新增模型视频生成模型MS-Image2Video+MS-Vid2Vid-XL
 
 **任务背景：**
-
 视频生成是当下继图片生成之后AIGC的另一热点，相关工作愈加成熟，希望进一步完善飞桨在视频生成领域的能力。
 
 **详细描述：**
-
-基于PaddleMIX ppdiffusers完成[MS-Image2Video](https://huggingface.co/damo-vilab/MS-Image2Video)和[MS-Vid2Vid-XL](https://huggingface.co/damo-vilab/MS-Vid2Vid-XL) 两个视频生成的模型和应用pipeline，保证生成效果的对齐，提供gradio demo
+* 基于PaddleMIX ppdiffusers完成MS-Image2Video和MS-Vid2Vid-XL的模型转换和前向对齐；转换模型权重进行生成，保证生成效果的对齐；
+* 将对齐的模型应用到pipeline，参考 https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/examples/inference/text_to_video_generation-synth.py；
+* 生成提供gradio demo用于验证串联效果。
 
 **提交内容：**
-
 提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
 
+
 ### No.85：新增虚拟试衣模型应用 DCI-VTON-Virtual-Try-On
-
 **任务背景：**
-
 虚拟试衣场景任务具有一定的研究和应用价值，希望补充飞桨在该场景任务上的能力。
 
 **详细描述：**
-
-基于PaddleMIX ppdiffusers完成[DCI-VTON-Virtual-Try-On](https://github.com/bcmi/DCI-VTON-Virtual-Try-On#dci-vton-virtual-try-on)模型和应用pipeline，保证生成效果和定量指标对齐，提供gradio demo
+* 基于PaddleMIX ppdiffusers完成DI-VTON-Virtual-Try-On模型前向对齐，定量指标对齐[Taming the Power of Diffusion Models for High-Quality Virtual Try-On with Appearance Flow](https://github.com/bcmi/DCI-VTON-Virtual-Try-On#dci-vton-virtual-try-on)的Table 1
+* 将对齐的模型应用到pipeline，参考 https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/examples/inference/text_to_video_generation-synth.py；
+* 实现训练功能，训练Warping Module和Diffusion Model评估对齐原repo。
 
 **提交内容：**
-
 提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
 
+
+
 ### No.86：新增图像组合模型应用TF-ICON
-
 **任务背景：**
-
 图像组合尤其是不同domain的图像组合具有一定的应用价值，希望新增tuning free的cross-domain image-guided composition场景任务能力。
 
 **详细描述：**
-
-基于PaddleMIX ppdiffusers完成[TF-ICON](https://github.com/Shilin-LU/TF-ICON#tf-icon-diffusion-based-training-free-cross-domain-image-composition-iccv-2023)模型和应用pipeline，保证生成效果和定量指标对齐，提供gradio demo
-
-**提交内容：**
-
-提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
-
-### No.87：PaddleMIX ppdiffusers新增HF community应用pipeline
-
-**任务背景：**
-
-HF提供了丰富的应用pipeline，其中部分具有一定的应用价值，希望补齐这些应用能力，为飞桨开发者提供社区最新的扩散模型能力支持。
-
-**详细描述：**
-
-基于PaddleMIX ppdiffusers完成以下pipeline，保证生成效果对齐
-
-edict_pipeline.py  https://github.com/huggingface/diffusers/blob/main/examples/community/edict_pipeline.py
-
-pipeline_fabric.py https://github.com/huggingface/diffusers/blob/main/examples/community/pipeline_fabric.py
+* 基于PaddleMIX ppdiffusers完成TF-ICON模型的前向对齐，使用SD（sd-v2-1_512-ema-pruned）模型权重和TF-ICON Test Benchmark上保证Image Composition的生成效果，且定量指标对齐[TF-ICON: Diffusion-Based Training-Free Cross-Domain Image Composition](https://shilin-lu.github.io/tf-icon.github.io/)的Table 3
+和应用pipeline，参考https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的pipeline实现；
+* 提供gradio demo验证pipeline效果。
 
 **提交内容：**
-
 提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
