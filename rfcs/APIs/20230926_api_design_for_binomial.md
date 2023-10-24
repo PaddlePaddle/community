@@ -4,14 +4,16 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-26 | 
-|版本号 | V1.0 | 
+|版本号 | V1.1 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20230926_api_design_for_binomial.md<br> | 
 
 
 # 一、概述
 ## 1、相关背景
-提升飞桨 API 丰富度, 需要扩充 API `paddle.distribution.binomial`。
+在机器学习中, 概率编程是一个重要的分支, 它常被用于贝叶斯推理和一般的统计推断, 因此需要提升飞桨的概率分布 API 丰富度, 补充 `paddle.distribution.binomial` API  
+Binomial 二项分布是一种最基础的概率分布, 它可以被看作是多次投掷一枚可能是不公平的硬币而得到正面次数的概率分布, 其随机变量的取值结果也可以被看作是一系列彼此独立的伯努利实验结果的和; 它对于分析重复独立试验的结果很有用, 特别是分析在给定特定错误率的情况下达到特定阈值的概率, 因此二项分布也常被用于确定统计量的显著性  
+
 
 ## 2、功能目标
 参考 Paddle 现有 distribution，增加 Binomial 分布类的概率统计与随机采样，包括如下方法：
@@ -24,7 +26,7 @@
 - kl_divergence 相对熵计算
 
 ## 3、意义
-丰富 Paddle 能够提供的分布类型，进一步完善 Paddle 框架。
+丰富 Paddle 能够提供的分布类型，进一步完善 Paddle 框架以用于概率编程。
 
 # 二、飞桨现状
 Paddle 框架内定义了 Distribution 抽象基类，通过继承 Distribution，框架实现了 Uniform、Normal 等概率分布。目前 Paddle 中暂无 Binomial 概率分布，需要单独开发实现，实现思路与其他概率分布的相同。
@@ -425,10 +427,11 @@ class Binomial(
     return assertions
 ```
 
-`tfp.distributions.Binomial` 继承自 `tfp.distribution.DiscreteDistributionMixin` 和 `tfp.distribution.AutoCompositeTensorDistribution`
+`tfp.distributions.Binomial` 继承自 `tfp.distribution.DiscreteDistributionMixin` 和 `tfp.distribution.AutoCompositeTensorDistribution`  
+从 tfp 的注释来看 `DiscreteDistributionMixin` 类表示分布为离散型分布, 在对离散型随机变量的 distribution 进行 transformation 后计算 log_prob 的计算逻辑与连续型随机变量的不同。因为针对连续型随机变量 $X$ 做变换 $Y=T(X)$, $T$是双射, $X$ 的概率密度函数为 $f(\cdot)$ , 则有 $\int_{D} f(y) dy = \int_{T^{-1}(D)} f(x) |\frac{dy}{dx}| dx$ , 因此对于连续型分布变换后的 log_prob(y) 等于 log_prob( $T^{-1}(y)$ ) + inverse_log_det_jacobian(y) 但对于离散型随机变量并不存在 $|\frac{dy}{dx}|$ , 它变换后的 log_prob(y) 就等于 log_prob( $T^{-1}(y)$ )  
 
 # 四、对比分析
-Pytorch 与 Tensorflow 实现方式大体类似，都是通过基本的概率计算得到相应的概率属性。Tensorflow 实现的方法更丰富，测试更为详细。
+Pytorch 与 Tensorflow_probability 实现方式大体类似, 都是通过基本的概率计算得到相应的概率属性。而在 Tensorflow_probability 中 transformed distribution 对离散型随机变量和连续型随机变量的 log_prob 计算方法有所区分, Pytorch 对此目前并未做区分, Paddle 现有 API 目前也并未做区分。 所以建议先不加以区分, 后续如果需要再对所有离散型随机变量统一调整。
 
 # 五、设计思路与实现方案
 
@@ -477,7 +480,7 @@ class Binomial(Distribution):
 
 - `sample` 随机采样
 
-采样方法： 可以利用 `paddle.distribution.bernoulli.sample()`进行采样
+采样方法：使用 BTPE 算法 [BTPE](https://dl.acm.org/doi/pdf/10.1145/42372.42381)  [R语言中的源码](https://github.com/wch/r-source/blob/trunk/src/nmath/rbinom.c)
 
 - `prob` 概率密度
 
@@ -490,13 +493,14 @@ class Binomial(Distribution):
 
 
 # 六、测试和验收的考量
-`Binomial` 类测试以 Numpy 作为基准，验证API的正确性。
-1. 使用 Numpy 实现所有 Binomial 的API，集成为 `BinomialNumpy` 类，用以验证本次任务开发的 API 的正确性。
+`Binomial` 类测试以 Scipy 作为辅助，验证API的正确性。
+1. `mean` 和 `variance` 直接验证即可。
 
-2. 使用同样的参数实例化 `Binomial` 类和 `BinomialNumpy` 类，并调用 `mean`、`variance`、`entropy`、`prob`、`kl_divergence`方法，测试结果是否相等（容许一定误差）。参数 `total_count` 和 `probs` 的支持的数据类型需测试详尽。
+2. `entropy`、`prob`、`log_prob` 分别用 `scipy.stats.binom.entropy`、`scipy.stats.binom.pmf`、`scipy.stats.binom.logpmf` 进行验证。
 
-3. 使用 `Binomial` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。
+3. 使用 `Binomial` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。(参考的是目前 `geometric`、`gumbel`、`laplace`、`lognormal`、`multinomial`、`normal` 的测试方法)
 
+4. `kl_divergence` 通过 `scipy.stats.binom.logpmf` 重写kl散度的计算逻辑来进行验证。
 
 # 七、可行性分析和排期规划
 - 排期规划
