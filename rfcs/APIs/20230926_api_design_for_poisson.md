@@ -303,7 +303,7 @@ class Poisson(
 
 # 四、对比分析
 Pytorch 与 Tensorflow 对分布的具体方法的实现方式基本类似。而在 Tensorflow_probability 中 transformed distribution 对离散型随机变量和连续型随机变量的 log_prob 计算方法有所区分, Pytorch 对此目前并未做区分, Paddle 现有 API 目前也并未做区分。 所以建议先不加以区分离散型和连续型随机变量, 后续如果需要完善 transformed distribution 再对所有离散型随机变量统一调整。  
-对于 Exponential Family , Pytorch 设计的 `ExponentialFamily` 类主要用于通过[Bregman Divergence](https://www.researchgate.net/publication/221126408_Entropies_and_cross-entropies_of_exponential_families)这种统一的方法来计算指数族分布的 entropy 和 kl_divergence , 但继承之后也需要根据理论计算写出每个指数族分布对应的 `natural parameters` 以及其 `log normalizer`, 和 `mean carrier measure` , 通过这三个方法来计算 entropy 和 kl_divergence 。Poisson 分布的 entropy 和 kl_divergence 的无论是直接按定义计算还是用 Bregman Divergence 来计算都没有显式的表达式, 因为涉及到 $[0, \infty) \cap \mathbb{N}$ 的支撑集, 所以此处建议按第五部分描述的方法做近似计算。
+对于 Exponential Family , Pytorch 设计的 `ExponentialFamily` 类主要用于通过[Bregman Divergence](https://www.researchgate.net/publication/221126408_Entropies_and_cross-entropies_of_exponential_families)这种统一的方法来计算指数族分布的 entropy 和 kl_divergence , 但继承之后也需要根据理论计算写出每个指数族分布对应的 `natural parameters` 以及其 `log normalizer`, 和 `mean carrier measure` , 通过这三个方法来计算 entropy 和 kl_divergence 。Poisson 分布的 entropy 和 kl_divergence 的无论是直接按定义计算还是用 Bregman Divergence 来计算都没有显式的表达式, 因为涉及到 $[0, \infty) \cap \mathbb{N}$ 的支撑集, Pytorch 中 Poisson 的 `entropy` 也没有实现完毕( `mean carrier measure` 未实现), 所以此处建议还是先继承基础的 `Distribution` , `entropy` 和 `kl_divergence` 的实现按第五部分描述的方法做近似计算。
 
 
 # 五、设计思路与实现方案
@@ -323,7 +323,7 @@ paddle.distribution.poisson(rate)
 新增 `Poisson` 类
 
 ```python
-class Poisson(ExponentialFamily):
+class Poisson(Distribution):
   def __init__(self, rate):
     super().__init__(batch_shape=self.rate.shape, event_shape=())
     
