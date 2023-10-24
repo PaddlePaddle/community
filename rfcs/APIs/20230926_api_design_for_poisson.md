@@ -4,14 +4,16 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-26 | 
-|版本号 | V1.0 | 
+|版本号 | V1.1 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20230926_api_design_for_poisson.md<br> | 
 
 
 # 一、概述
 ## 1、相关背景
-提升飞桨 API 丰富度, 需要扩充 API `paddle.distribution.poisson`。
+在机器学习中, 概率编程是一个重要的分支, 它常被用于贝叶斯推理和一般的统计推断, 因此需要提升提升飞桨 API 丰富度, 需要扩充 API `paddle.distribution.poisson`  
+Poisson 泊松分布是一种最基础的概率分布, 它用于描述单位时间内随机事件发生的次数的概率分布。如某一服务设施在一定时间内受到的服务请求的次数，电话交换机接到呼叫的次数、汽车站台的候客人数、机器出现的故障数、自然灾害发生的次数、DNA序列的变异数、放射性原子核的衰变数、激光的光子数分布等等  
+
 
 ## 2、功能目标
 参考 Paddle 现有 distribution，增加 Poisson 分布类的概率统计与随机采样，包括如下方法：
@@ -296,10 +298,13 @@ class Poisson(
     return assertions
 ```
 
-`tfp.distributions.Poisson` 继承自 `tfp.distribution.DiscreteDistributionMixin` 和 `tfp.distribution.AutoCompositeTensorDistribution`
+`tfp.distributions.Poisson` 继承自 `tfp.distribution.DiscreteDistributionMixin` 和 `tfp.distribution.AutoCompositeTensorDistribution`  
+从 tfp 的注释来看 `DiscreteDistributionMixin` 类表示分布为离散型分布, 在对离散型随机变量的 distribution 进行 transformation 后计算 log_prob 的计算逻辑与连续型随机变量的不同。因为针对连续型随机变量 $X$ 做变换 $Y=T(X)$, $T$是双射, $X$ 的概率密度函数为 $f(\cdot)$ , 则有 $\int_{D} f(y) dy = \int_{T^{-1}(D)} f(x) |\frac{dy}{dx}| dx$ , 因此对于连续型分布变换后的 log_prob(y) 等于 log_prob( $T^{-1}(y)$ ) + inverse_log_det_jacobian(y) 但对于离散型随机变量并不存在 $|\frac{dy}{dx}|$ , 它变换后的 log_prob(y) 就等于 log_prob( $T^{-1}(y)$ )  
 
 # 四、对比分析
-Pytorch 与 Tensorflow 实现方式大体类似，都是通过基本的概率计算得到相应的概率属性。Tensorflow 实现的方法更丰富，测试更为详细。
+Pytorch 与 Tensorflow 对分布的具体方法的实现方式基本类似。而在 Tensorflow_probability 中 transformed distribution 对离散型随机变量和连续型随机变量的 log_prob 计算方法有所区分, Pytorch 对此目前并未做区分, Paddle 现有 API 目前也并未做区分。 所以建议先不加以区分离散型和连续型随机变量, 后续如果需要完善 transformed distribution 再对所有离散型随机变量统一调整。  
+对于 Exponential Family , Pytorch 设计的 `ExponentialFamily` 类主要用于通过[Bregman Divergence](https://www.researchgate.net/publication/221126408_Entropies_and_cross-entropies_of_exponential_families)这种统一的方法来计算指数族分布的 entropy 和 kl_divergence , 但继承之后也需要根据理论计算写出每个指数族分布对应的 `natural parameters` 以及其 `log normalizer`, 和 `mean carrier measure` , 通过这三个方法来计算 entropy 和 kl_divergence 。Poisson 分布的 entropy 和 kl_divergence 的无论是直接按定义计算还是用 Bregman Divergence 来计算都没有显式的表达式, 因为涉及到 $[0, \infty) \cap \mathbb{N}$ 的支撑集, 所以此处建议按第五部分描述的方法做近似计算。
+
 
 # 五、设计思路与实现方案
 
@@ -318,7 +323,7 @@ paddle.distribution.poisson(rate)
 新增 `Poisson` 类
 
 ```python
-class Poisson(Distribution):
+class Poisson(ExponentialFamily):
   def __init__(self, rate):
     super().__init__(batch_shape=self.rate.shape, event_shape=())
     
@@ -328,45 +333,53 @@ class Poisson(Distribution):
 
 `Poisson` 类的初始化参数是 `rate` ，类包含的方法及实现方案如下：
 
-记参数 `rate`$\lambda$。
+记参数 `rate`$\lambda$ 。 
 
 - `mean` 计算均值
 
-均值的计算方法： $\lambda$
+均值的计算方法： $\lambda$  
 
 - `variance` 计算方差
 
-方差的计算方法： $\lambda$
+方差的计算方法： $\lambda$  
 
 - `entropy` 熵计算
 
-熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$
+熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$  
+整个支撑集为 $[0, \infty) \cap \mathbb{N}$ , $\mathbb{N}$ 为整数集。 近似计算的想法是将泊松分布的右尾部做截取, 即 
+```math
+H = - \sum_{x=0}^{\infty} f(x) \log{f(x)} \approx - \sum_{x=0}^{k} f(x) \log{f(x)}
+```
+在上式中 $k$ 满足 $f(k) < \epsilon$ , $\epsilon$ 足够小。 实际在计算 $k$ 时采用均值偏离方法, 即取 $k = \lfloor\lambda + 30 \sqrt{\lambda}\rfloor$
 
 - `kl_divergence` 相对熵计算
 
-相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$
+相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$  
+对支撑集的近似方法同 `entropy` , 此时对于两个泊松分布求公共近似支撑集, 取 $k = \max \(\lfloor\lambda_1 + 30 \sqrt{\lambda_1}\rfloor, \lfloor\lambda_2 + 30 \sqrt{\lambda_2}\rfloor\) $
 
 - `sample` 随机采样
 
-采样方法： 需要自行设计poisson采样器
+采样方法： 使用 [PD算法](https://dl.acm.org/doi/10.1145/355993.355997) [R语言中的源码](https://github.com/wch/r-source/blob/trunk/src/nmath/rpois.c)
 
 - `prob` 概率密度
 
-概率密度计算方法： $f(x;\lambda) = \frac{e^{-\lambda} \cdot \lambda^x}{x!}$
+概率密度计算方法： $f(x;\lambda) = \frac{e^{-\lambda} \cdot \lambda^x}{x!}$  
 
 - `log_prob` 对数概率密度
 
-对数概率密度计算方法： $\log[f(x;\lambda)] = -\lambda + x \log \lambda - \log (x!)$
+对数概率密度计算方法： $\log[f(x;\lambda)] = -\lambda + x \log \lambda - \log (x!)$  
 
 
 
 # 六、测试和验收的考量
-`Poisson` 类测试以 Numpy 作为基准，验证API的正确性。
-1. 使用 Numpy 实现所有 Poisson 的API，集成为 `PoissonNumpy` 类，用以验证本次任务开发的 API 的正确性。
+`Poisson` 类测试以 Scipy 作为辅助，验证API的正确性。
+1. `mean` 和 `variance` 直接验证即可。
 
-2. 使用同样的参数实例化 `Poisson` 类和 `PoissonNumpy` 类，并调用 `mean`、`variance`、`entropy`、`prob`、`kl_divergence`方法，测试结果是否相等（容许一定误差）。参数 `rate` 的支持的数据类型需测试详尽。
+2. `entropy`、`prob`、`log_prob` 分别用 `scipy.stats.poisson.entropy`、`scipy.stats.poisson.pmf`、`scipy.stats.poisson.logpmf` 进行验证。
 
-3. 使用 `Poisson` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。
+3. 使用 `Poisson` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。(参考的是目前 `geometric`、`gumbel`、`laplace`、`lognormal`、`multinomial`、`normal` 的测试方法)
+
+4. `kl_divergence` 通过 `scipy.stats.binom.logpmf` 重写kl散度的计算逻辑来进行验证。
 
 
 # 七、可行性分析和排期规划
