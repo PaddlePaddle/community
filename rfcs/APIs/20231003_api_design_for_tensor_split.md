@@ -508,13 +508,14 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
 
 添加 python 上层接口:
 
-- `paddle.tensor_split(x, indices_or_sections, axis=0)`
-- `Tensor.tensor_split(indices_or_sections, axis=0)`
+- `paddle.tensor_split(x, indices_or_sections, axis=0, name=None)`
+- `Tensor.tensor_split(indices_or_sections, axis=0, name=None)`
 
     - 参数列表
     > x (Tensor) – 输入的一个 Tensor。数据类型支持：float16, bfloat16, float32, float64, int32, int64, uint8。
     > indices_or_sections (int|list|tuple) – Allows indices_or_sections to be an integer that does not equally divide the axis.
     > axis (int, optional) – dimension along which to split the tensor. Default: 0
+    > name: (str|None): Name for this layer. Please refer to :ref:`api_guide_Name`, Default None.
 
     *注意*： 
     - 经测试，int16, complex64, complex128 数据类型，`split` 函数不支持，另外，uint16 会转换为 bfloat16，因此也不在支持之列。
@@ -523,22 +524,24 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
     - 返回值
     > output (List of Tensors)
 
-- `paddle.hsplit(x, num_or_sections)`
-- `Tensor.hsplit(num_or_sections)`
+- `paddle.hsplit(x, num_or_sections, name=None)`
+- `Tensor.hsplit(num_or_sections, name=None)`
 
     - 参数列表
     > x (Tensor) – 输入的一个 Tensor。数据类型支持：float16, bfloat16, float32, float64, int32, int64, uint8。
     > num_or_sections (int|list|tuple) – If num_or_sections is an int, then num_or_sections indicates the number of equal sized sub-Tensors that the x will be divided into.
+    > name: (str|None): Name for this layer. Please refer to :ref:`api_guide_Name`, Default None.
 
     - 返回值
     > output (List of Tensors)
 
-- `paddle.dsplit(x, num_or_sections)`
-- `Tensor.dsplit(num_or_sections)`
+- `paddle.dsplit(x, num_or_sections, name=None)`
+- `Tensor.dsplit(num_or_sections, name=None)`
 
     - 参数列表
     > x (Tensor) – 输入的一个 Tensor。数据类型支持：float16, bfloat16, float32, float64, int32, int64, uint8。
     > num_or_sections (int|list|tuple) – If num_or_sections is an int, then num_or_sections indicates the number of equal sized sub-Tensors that the x will be divided into.
+    > name: (str|None): Name for this layer. Please refer to :ref:`api_guide_Name`, Default None.
 
     - 返回值
     > output (List of Tensors)
@@ -559,10 +562,10 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
 
 具体接口：
 
-- `paddle.tensor_split(x, indices_or_sections, axis=0)`
+- `paddle.tensor_split(x, indices_or_sections, axis=0, name=None)`
 
     ``` python
-    def tensor_split(x, indices_or_sections, axis=0):
+    def tensor_split(x, indices_or_sections, axis=0, name=None):
         if x.ndim < 1:
             raise ValueError(
                 f"The input tensor's dimension must be greater than 0, but got {x.ndim}"
@@ -610,7 +613,7 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
             )
     ```
 
-- `paddle.hsplit(x, num_or_sections)`
+- `paddle.hsplit(x, num_or_sections, name=None)`
 
     ``` python
 
@@ -619,10 +622,10 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
             raise ValueError(
                 f"The input tensor's dimension must be greater than 0, but got {x.ndim}"
             )
-        return split(x, num_or_sections, axis=1)
+        return split(x, num_or_sections, axis=1, name=name)
     ```
 
-- `paddle.dsplit(x, num_or_sections)`
+- `paddle.dsplit(x, num_or_sections, name=None)`
 
     ``` python
 
@@ -631,7 +634,7 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
             raise ValueError(
                 f"The input tensor's dimension must be greater than 2, but got {x.ndim}"
             )
-        return split(x, num_or_sections, axis=2)
+        return split(x, num_or_sections, axis=2, name=name)
     ```
 
 # 六、测试和验收的考量
