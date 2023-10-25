@@ -1,6 +1,6 @@
 # paddle.sparse.matmul 增强设计文档
 
-|API名称 | addle.sparse.matmul | 
+|API名称 | paddle.sparse.matmul | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | MayYouBeProsperous | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-10-25 | 
