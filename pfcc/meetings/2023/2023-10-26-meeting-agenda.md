@@ -36,11 +36,11 @@
 | [NotHaozi](https://github.com/NotHaozi)       | [xingmingyyj](https://github.com/xingmingyyj)            | [ruoyunbai](https://github.com/ruoyunbai)           |      [xiaoyewww](https://github.com/xiaoyewww)        | [hongtushi](https://github.com/hongtushi)           |      [qiuwenbogdut](https://github.com/qiuwenbogdut)   |
 | [ooooo-create](https://github.com/ooooo-create)   |  [kaedeharai](https://github.com/kaedeharai)   |  [Candy2Tang](https://github.com/Candy2Tang)   |  [MarioLulab](https://github.com/MarioLulab)   |  [Lylin](https://github.com/Lylin)   |  [idontkonwher](https://github.com/idontkonwher)   |
 | [whisky-12](https://github.com/whisky-12)   |  [InsaneOnion](https://github.com/InsaneOnion)   |  [yoyoIcy](https://github.com/yoyoIcy)|  [yuchen202](https://github.com/yuchen202) | [Wong4j](https://github.com/Wong4j)  | [Wanglongzhi2001](https://github.com/Wanglongzhi2001)  | 
-| [silverling](https://github.com/silverling) |  |  |
+| [silverling](https://github.com/silverling) | [Wanglongzhi2001](https://github.com/Wanglongzhi2001)   |  [linzeyang](https://github.com/linzeyang)   |  [NKNaN](https://github.com/NKNaN)|  [Sekiro-x](https://github.com/Sekiro-x) | [lknt](https://github.com/lknt)  | 
 
 # 会议议程
 
-- 新人介绍（5 min）
+- 新人介绍 [Wanglongzhi2001](https://github.com/Wanglongzhi2001) 、[linzeyang](https://github.com/linzeyang)、[NKNaN](https://github.com/NKNaN)、[Sekiro-x](https://github.com/Sekiro-x)、[lknt](https://github.com/lknt) （5 min）
 - [zrr1999](https://github.com/zrr1999) paddlefx 项目介绍及后续计划介绍（10 min）
 - [qiuwenbogdut](https://github.com/qiuwenbogdut) 飞桨框架动态图反向图的可视化 (10 min)
 - [megemini](https://github.com/megemini) 将 xdoctest 引入到飞桨框架工作流 (10 min)
