@@ -28,7 +28,7 @@
 ## PyTorch
 Pytorch 的稀疏矩阵乘法的实现代码的位置在 `pytorch/aten/src/ATen/native/sparse/SparseMatMul.cpp`。
 
-函数 `sparse_matmul_kernel` 在计算稀疏矩阵乘法时，会将两个相乘的矩阵统一为 `CSR` 模式，再进行计算，得到 `CSR` 模式的计算结果。如果想要获得 `COO` 模式的计算结果，函数会将 `CSR` 模式转化为 `COO` 模式。
+函数 `sparse_matmul_kernel` 在计算稀疏矩阵乘法时，会将两个相乘的矩阵统一为 `CSR` 模式，再进行计算，得到 `CSR` 模式的计算结果。如果想要获得 `COO` 模式的计算结果，需将 `CSR` 模式转化为 `COO` 模式。
 
 ```cpp
 template <typename scalar_t>
@@ -44,7 +44,7 @@ void sparse_matmul_kernel(
 ## TensorFlow
 TensorFlow 的稀疏矩阵乘法的实现代码的位置在 `tensorflow\core\kernels\sparse\sparse_mat_mul_op.cc`。
 
-主要使用了 `cudaSparse` 库实现计算。
+主要使用了 `cudaSparse` 库的 `cusparseSpGEMM`实现计算。
 ```cpp
 #if GOOGLE_CUDA && (CUDA_VERSION >= 12000)
     GpuSparse cudaSparse(ctx);
@@ -123,7 +123,7 @@ void MatmulCsrCsrGradKernel(const Context& dev_ctx,
 
 在 `paddle/phi/kernels/sparse/gpu/matmul_grad_kernel.cu` 中实现 `MatmulCooCooGradKernel` 和 `MatmulCsrCsrGradKernel`。
 
-主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要开发 CPU kernel。
+主要通过调用 `cudaSparse` 库中的 `cusparseSpGEMM` 完成计算实现，目前暂不需要开发 CPU kernel。
 
 # 六、测试和验收的考量
 
