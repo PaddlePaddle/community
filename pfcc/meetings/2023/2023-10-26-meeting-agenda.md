@@ -1,16 +1,16 @@
-# Paddle Framework Contributor Club 第二十八次会议
+# Paddle Framework Contributor Club 第十九次会议
 
-- 本次会议时间：2023/09/15 19:00-21:00 (GMT+08:00) 中国标准时间 - 北京
+- 本次会议时间：2022-03-30 19:00
 
 - 本次会议接入方式：
 
-  - 腾讯会议：402-977-749
+  - 腾讯会议：
   - 会议密码：\*\*\*\*（群内通知）
-  - [点击链接入会](https://meeting.tencent.com/dm/07J2XqMo0si5)，或添加至会议列表
+  - [点击链接入会](https://meeting.tencent.com/dm/bik2CWADIACd)，或添加至会议列表
 
-- 本次会议主席：郑必城 （[Zheng-Bicheng](https://github.com/Zheng-Bicheng)）
+- 本次会议主席：詹荣瑞 （[zrr1999](https://github.com/zrr1999)）
 
-- 本次会议副主席：
+- 本次会议副主席：田川 （[gouzil](https://github.com/gouzil)）
 
 - 本次拟参会 Paddle Framework Contributor 列表：
 
@@ -40,9 +40,10 @@
 
 # 会议议程
 
-1. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 简单开个场+介绍一下会议议程(3 min)
-2. 新人自我介绍：[Wong4j](https://github.com/Wong4j)、[Wanglongzhi2001](https://github.com/Wanglongzhi2001)、[silverling](https://github.com/silverling)(2 min)
-3. PFCC成员 [Zheng-Bicheng](https://github.com/Zheng-Bicheng) 分享《Paddle模型在基于Arm的MCU/SOC上落地的思路》 (15 min)
-4. Arm Ecosystem Evangelist [Liliya](https://github.com/Liliyaw) 分享《Arm虚拟硬件赋能Paddle边缘软件生态》 (20 min)
-5. 飞桨研发、大模型推理大佬 [heavengate](https://github.com/heavengate) 分享《飞桨大模型推理部署高性能优化》 (20 min)
-6. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
+- 新人介绍（5 min）
+- [zrr1999](https://github.com/zrr1999) paddlefx 项目介绍及后续计划介绍（10 min）
+- [qiuwenbogdut](https://github.com/qiuwenbogdut) 飞桨框架动态图反向图的可视化 (10 min)
+- [megemini](https://github.com/megemini) 将 xdoctest 引入到飞桨框架工作流 (10 min)
+- [Ligoml](https://github.com/Ligoml) 开源故事征集 (5 min)
+- PFCC 成员自由发言讨论（5 min）
+- 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
