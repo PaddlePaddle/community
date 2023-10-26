@@ -2,9 +2,7 @@
 
 |API名称 | paddle.nn.AdaptiveLogSoftmaxWithLoss             | 
 |---|------------------------------------|
-|提交作者<input type="checkbox" class="rowselector hidden"> | PeachML                            | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2022-03-22                         |
-|修改作者<input type="checkbox" class="rowselector hidden"> | liethann                            | 
+|提交作者<input type="checkbox" class="rowselector hidden"> | liethann                            | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-10-20                         |
 |版本号 | V1.0                               | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop                             | 
@@ -18,6 +16,8 @@
 Paddle需要扩充API,新增 AdaptiveLogSoftmaxWithLoss API，
 调用路径为：`paddle.nn.AdaptiveLogSoftmaxWithLoss` 和 `paddle.nn.functional.adaptive_log_softmax_with_loss`。
 实现Softmax快速近似计算的功能。
+
+## 2、功能目标
 
 ## 3、意义
 在自然语言处理中，当字典维度过大时，embedding 将占据模型大部分参数量。
@@ -298,7 +298,7 @@ def log_prob(self, input: Tensor) -> Tensor:
 # 四、对比分析
 无其它框架实现
 
-# 五、方案设计
+# 五、设计思路与实现方案
 ## 命名与参数设计
 - function API：`paddle.nn.functional.adaptive_log_softmax_with_loss(input, target, head_weight, head_bias, tail_weights, cutoffs, shortlist_size)` 用于训练计算
 
@@ -326,7 +326,7 @@ def log_prob(self, input: Tensor) -> Tensor:
 
 
 # 七、可行性分析及规划排期
-方案主要依赖paddle现有api组合而成。依赖的API中index_fill代码尚未合入，故参考index_fill的pr临时实现index_fill方法，待pr合入后可替换；paddle.gather与torch.gather存在差异，使用paddle.take_along_axis替换实现。
+方案主要依赖paddle现有api组合而成。依赖的API中index_fill代码尚未合入，故参考index_fill的pr临时实现index_fill方法，待pr合入后可替换；paddle.gather与torch.gather存在差异，使用paddle.take_along_axis替换实现。开发已完成。
 
 # 八、影响面
 为独立新增API，对其他模块没有影响
