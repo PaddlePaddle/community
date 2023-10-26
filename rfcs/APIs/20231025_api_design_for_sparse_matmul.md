@@ -44,7 +44,7 @@ void sparse_matmul_kernel(
 ## TensorFlow
 TensorFlow 的稀疏矩阵乘法的实现代码的位置在 `tensorflow\core\kernels\sparse\sparse_mat_mul_op.cc`。
 
-主要使用了 `cudaSparse` 库的 `cusparseSpGEMM`实现计算。
+主要使用了 `cudaSparse` 库的 `cusparseSpGEMM` 实现计算。
 ```cpp
 #if GOOGLE_CUDA && (CUDA_VERSION >= 12000)
     GpuSparse cudaSparse(ctx);
@@ -123,7 +123,7 @@ void MatmulCsrCsrGradKernel(const Context& dev_ctx,
 
 在 `paddle/phi/kernels/sparse/gpu/matmul_grad_kernel.cu` 中实现 `MatmulCooCooGradKernel` 和 `MatmulCsrCsrGradKernel`。
 
-主要通过调用 `cudaSparse` 库中的 `cusparseSpGEMM` 完成计算实现，目前暂不需要开发 CPU kernel。
+主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要开发 CPU kernel。
 
 # 六、测试和验收的考量
 
