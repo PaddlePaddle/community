@@ -123,7 +123,9 @@ void MatmulCsrCsrGradKernel(const Context& dev_ctx,
 
 在 `paddle/phi/kernels/sparse/gpu/matmul_grad_kernel.cu` 中实现 `MatmulCooCooGradKernel` 和 `MatmulCsrCsrGradKernel`。
 
-主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要开发 CPU kernel。
+API 主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要开发 CPU kernel。
+
+`cudaSparse` 库的 `cusparseSpGEMM` 只支持 `CSR*CSR` 模式，在计算 `COO*COO` 模式时，需要进行 `COO` 和 `CSR` 模式之间的转换。
 
 # 六、测试和验收的考量
 
