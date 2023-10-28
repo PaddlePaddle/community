@@ -4,9 +4,12 @@
 | - | - |
 | 提交作者 | megemini(柳顺) |
 | 提交时间 | 2023-10-09 |
-| 版本号 | V1.0 |
+| 版本号 | V2.0 |
 | 依赖飞桨版本 | develop |
 | 文件名 | 20231009_api_design_for_fractional_max_pool.md |
+
+#### 修订记录
+v2.0: 将实现方式由 python 改为 c++
 
 # 一、概述
 
@@ -760,7 +763,17 @@
 
 # 五、设计思路与实现方案
 
-## 命名与参数设计
+本方案共涉及三部分：
+
+- 命名与参数设计 (python API) : `paddle.nn.functional.fractional_max_pool2d`, `paddle.nn.functional.fractional_max_pool3d`
+- 底层 OP 设计
+- python layer 实现 : `paddle.nn.FractionalMaxPool2d`, `paddle.nn.FractionalMaxPool3d`
+
+由于 `fractional max pooling` 与 `adaptive max pooling` 接口特性较为相似，后续设计方案以 `共用 adaptive max pooling 底层算子` 为主要设计思路。
+
+## 命名与参数设计 (python API)
+
+涉及文件：`python/paddle/nn/functional/pooling.py`
 
 添加 python 上层接口:
 
@@ -771,25 +784,19 @@
     paddle.nn.functional.fractional_max_pool2d(
         x:Tensor, 
         output_size:Union[int, list, tuple], 
-        pseudo_random:bool=False, 
-        overlapping:bool=False, 
         return_mask:bool=False,
-        seed:int=None, 
         name:str=None)
     ```
 
     - 参数列表
     > x (Tensor) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
     > output_size (int|list|tuple) – 输出的尺寸。
-    > pseudo_random (bool, optional) – 是否使用伪随机。
-    > overlapping (bool, optional) – 是否考虑池化边界重叠。
     > return_mask (bool, optional) – 是否返回最大值的索引。
-    > seed (int, optional) – 随机种子。
     > name (str, optional) – 操作名称。
 
     - 返回值
-    > output (Tensor)
-
+    > Tensor, return_mask=False
+    > Tensor and mask, return_mask=True
 
 - `paddle.nn.functional.fractional_max_pool3d`
 - `paddle.nn.FractionalMaxPool3d`
@@ -798,166 +805,937 @@
     paddle.nn.functional.fractional_max_pool3d(
         x:Tensor, 
         output_size:Union[int, list, tuple], 
-        pseudo_random:bool=False, 
-        overlapping:bool=False, 
         return_mask:bool=False,
-        seed:int=None, 
         name:str=None)
     ```
 
     - 参数列表
     > x (Tensor) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
     > output_size (int|list|tuple) – 输出的尺寸。
-    > pseudo_random (bool, optional) – 是否使用伪随机。
-    > overlapping (bool, optional) – 是否考虑池化边界重叠。
     > return_mask (bool, optional) – 是否返回最大值的索引。
-    > seed (int, optional) – 随机种子。
     > name (str, optional) – 操作名称。
 
     - 返回值
-    > output (Tensor)
+    > Tensor, return_mask=False
+    > Tensor and mask, return_mask=True
 
 这里重点分析 `paddle.nn.functional.fractional_max_poolNd` 接口的命名与参数设计，`paddle.nn.FractionalMaxPoolNd` 与之类似。
 
+*注意* ： 相较 v1.0 版本的设计文档，这里简化了较多的参数，特说明如下：
+
+- 不使用 `data_format`
+
+    分析目前 pooling 接口主要源文件 `python/paddle/nn/functional/pooling.py`，以 `max_pool2d` 为例：
+
+    - 主要涉及两个底层算子： `max_pool2d_with_index` 和 `pool2d`
+    - 其中 `max_pool2d_with_index` 可以返回 `mask`，`pool2d` 不可以返回 `mask`
+    - 其中 `max_pool2d_with_index` 不支持 `data_format`，`pool2d` 支持 `data_format`
+
+    因此，当使用 `return_mask` 返回 `mask` 时，`data_format must be set to NCHW`。
+    没有一个算子能够完整支持这两个参数，这是目前 pooling 底层算子较大的矛盾。
+
+    由于设计方案以 `共用 adaptive max pooling 底层算子` 为主要设计思路，所以，这里参考 `adaptive max pooling` 的接口：
+
+    `adaptive_max_pool2d(x, output_size, return_mask=False, name=None)`
+
+    不使用 `data_format` 参数。
+
+- 移除 `pseudo_random`, `overlapping`, `seed` 
+
+    由于 `共用 adaptive max pooling 底层算子`，且参考 `PyTorch` 的设计方案，这里将只使用 `伪` 随机的方式生成池化序列，并在 c++ 算子内部实现。
 
 ## 底层 OP 设计
 
-由于赛题要求直接实现 python 接口，所以此处直接使用 python API 实现，无需设计底层 c++ 相关 OP。
+涉及文件：
 
-## API实现方案
+- `paddle/phi/api/yaml/ops.yaml` 算子描述及定义
 
-之前分析过，`fractional max pooling` 的实现主要分为两步：
+    ``` yaml
+    - op : max_pool2d_with_index
+    args : (Tensor x, int[] kernel_size, int[] strides= {1, 1}, int[] paddings = {0, 0}, bool global_pooling = false, bool adaptive = false, bool fractional = false)
+    output : Tensor(out), Tensor(mask)
+    infer_meta :
+        func : MaxPoolWithIndexInferMeta
+    kernel :
+        func : max_pool2d_with_index
+    backward : max_pool2d_with_index_grad
 
-- 生成随机池化序列
-- 根据序列取其中的最大值
-
-### 生成随机池化序列
-
-这里实现 `真` 随机与 `伪` 随机两种方法。
-
-`真` 随机：
-
-``` python
-def random_sequence(input_size, output_size):
-    base = input_size // output_size
-    count = input_size % output_size
-
-    diff = [base] * output_size
-
-    for i in range(count):
-        diff[i] += 1
-
-    diff = np.random.permutation(diff)
-
-    return [0] + np.cumsum(diff).tolist(), diff.tolist()
-```
-
-`伪` 随机：
-
-``` python
-def pseudo_sequence(input_size, output_size, sample):
-    seq = [0] * (output_size + 1)
-    diff = [0] * output_size
-
-    alpha = input_size / output_size
-    base = input_size // output_size
-
-    # 此处根据 tensorflow 实现中的说明，需要考虑的特殊情况
-    u_max1 = (base + 2) / alpha - 1
-    u_max2 = (input_size + 1 - base) / alpha - (output_size - 1)
-    max_u = min(u_max1, u_max2)
-    u = sample * max_u
-
-    # 由于文章中的公式是 math.ceil(alpha * (i + u))
-    # 所以，序列第一个元素肯定为 1, 而在实际运算中，第一个元素需要为 0
-    # 所以，这里需要有 seq 中转一下
-    seq[0] = 1
-    seq[output_size] = input_size + 1
-    for i in range(1, output_size):
-        seq[i] = math.ceil(alpha * (i + u))
-
-    for i in range(output_size):
-        diff[i] = seq[i + 1] - seq[i]
-
-    return [0] + np.cumsum(diff).tolist(), diff
-
-```
-
-### 根据序列取其中的最大值
-
-``` python
-def fractional_max_pool2d(
-    x:Tensor, 
-    output_size:Union[int, list, tuple], 
-    pseudo_random:bool=False, 
-    overlapping:bool=False, 
-    return_mask:bool=False,
-    seed:int=None, 
-    name:str=None):
-
-    if seed is not None:
-        paddle.seed(seed)
-        np.random.seed(seed)
-
-    # [N, C, H, W]
-    batch = x.shape[0]
-    channel = x.shape[1]
-    h_size = x.shape[2]
-    w_size = x.shape[3]
-
-    if pseudo_random:
-        # 假设 output_size 是一个 int
-        sample = np.random.rand()
-        h_seq, _ = pseudo_sequence(h_size, output_size, sample)
-        w_seq, _ = pseudo_sequence(w_size, output_size, sample)
-    else:
-        h_seq, _ = random_sequence(h_size, output_size)
-        w_seq, _ = random_sequence(w_size, output_size)
-
-    output_tensor = paddle.zeros(shape=[batch, channel, output_size, output_size], dtype=x.dtype)
-
-    for _batch in range(batch):
-        for _channel in range(channel):
-            _x = x[_batch, _channel, :, :]
-            _x_h = _pool_along_h(_x, h_seq, overlapping)
-            output_tensor[_batch, _channel, :, :] = _pool_along_w(_x_h, w_seq, overlapping)
-
-    return output_tensor
-
-# 参考 TensorFlow 的 python 测试方法，这里使用纯 python 的方式实现 max pooling
-def _pool_along_h(x, seq, overlapping):
-    output_tensor = paddle.zeros(x.shape[1], dtype=x.dtype)
-    h_max = seq[-1]
-    for i in range(len(seq) - 1):
-        h_start = seq[i]
-        h_end = seq[i+1] + 1 if overlapping else seq[i+1]
-        h_end = min(h_end, h_max)
-        output_tensor = paddle.vstack((output_tensor, paddle.amax(
-            x[h_start:h_end, :], axis=0
-        )))
+    - op : max_pool3d_with_index
+    args : (Tensor x, int[] kernel_size, int[] strides = {1, 1, 1}, int[] paddings = {0, 0, 0}, bool global_pooling = false, bool adaptive = false, bool fractional = false)
+    output : Tensor(out), Tensor(mask)
+    infer_meta :
+        func : MaxPoolWithIndexInferMeta
+    kernel :
+        func : max_pool3d_with_index
+    backward : max_pool3d_with_index_grad    
+    ```
     
-    return output_tensor[1:, :]
+    增加 `bool` 类型 `fractional` 参数，默认为 `false`
 
-def _pool_along_w(x, seq, overlapping):
-    return _pool_along_h(x.T, seq, overlapping).T
+- `paddle/phi/api/yaml/backward.yaml` 算子描述及定义
 
-```
+    ``` yaml
+    - backward_op : max_pool2d_with_index_grad
+    forward : max_pool2d_with_index(Tensor x, int[] kernel_size, int[] strides = {1, 1}, int[] paddings = {0, 0}, bool global_pooling = false, bool adaptive = false, bool fractional = false) -> Tensor(out), Tensor(mask)
+    args : (Tensor x, Tensor mask, Tensor out_grad, int[] kernel_size, int[] strides, int[] paddings, bool global_pooling, bool adaptive, bool fractional)
+    output : Tensor(x_grad)
+    infer_meta :
+        func : MaxPoolWithIndexGradInferMeta
+    kernel :
+        func : max_pool2d_with_index_grad
 
-这里面会用到 `vstack` 函数，会在其他任务中实现，所以这里直接使用了这个函数。
+    - backward_op : max_pool3d_with_index_grad
+    forward : max_pool3d_with_index(Tensor x, int[] kernel_size, int[] strides = {1, 1, 1}, int[] paddings = {0, 0, 0}, bool global_pooling = false, bool adaptive = false, bool fractional = false) -> Tensor(out), Tensor(mask)
+    args : (Tensor x, Tensor mask, Tensor out_grad, int[] kernel_size, int[] strides, int[] paddings, bool global_pooling, bool adaptive, bool fractional)
+    output : Tensor(x_grad)
+    infer_meta :
+        func : MaxPoolWithIndexGradInferMeta
+    kernel :
+        func : max_pool3d_with_index_grad    
+    ```
 
-另外，`output_size` 为 `list/tuple` 的情况，需要单独计算 `h_seq / w_seq`。
+    增加 `bool` 类型 `fractional` 参数，默认为 `false`
 
-如果需要 `return_mask` 则要使用 `argmax`。
+- `paddle/phi/infermeta/unary.h` 算子 InferMeta
 
-最后，`fractional_max_pool3d` 的实现方法类似，这里不再赘述。
+    ``` cpp
+    void MaxPoolWithIndexInferMeta(const MetaTensor& x,
+                                const std::vector<int>& kernel_size,
+                                const std::vector<int>& strides,
+                                const std::vector<int>& paddings,
+                                bool global_pooling,
+                                bool adaptive,
+                                bool fractional,
+                                MetaTensor* out,
+                                MetaTensor* mask,
+                                MetaConfig config = MetaConfig());
+    ```
+    增加 `fractional` 参数
 
+- `paddle/phi/infermeta/unary.cc`
+
+    ``` cpp
+    void MaxPoolWithIndexInferMeta(const MetaTensor& x,
+                                const std::vector<int>& kernel_size,
+                                const std::vector<int>& strides,
+                                const std::vector<int>& paddings,
+                                bool global_pooling,
+                                bool adaptive,
+                                bool fractional,
+                                MetaTensor* out,
+                                MetaTensor* mask,
+                                MetaConfig config) {
+    ...
+    if (adaptive || fractional) {
+        output_shape.insert(
+            output_shape.end(), kernel_size_.begin(), kernel_size_.end());
+    } else {
+        ...
+    }
+    ...
+    }
+    ```
+
+    增加 `fractional` 参数，并且，与 `adaptive` 一样，共用 `kernel_size_` 参数，此参数在此实际为 `output_size`。
+
+- `paddle/phi/infermeta/backward.h`
+
+    ``` cpp
+    void MaxPoolWithIndexGradInferMeta(const MetaTensor& x,
+                                   const MetaTensor& mask,
+                                   const MetaTensor& dout,
+                                   const std::vector<int>& kernel_size,
+                                   const std::vector<int>& strides,
+                                   const std::vector<int>& paddings,
+                                   bool global_pooling,
+                                   bool adaptive,
+                                   bool fractional,
+                                   MetaTensor* dx);
+    ```
+
+    增加 `fractional` 参数。
+
+- `paddle/phi/infermeta/backward.cc`
+
+    ``` cpp
+    void MaxPoolWithIndexGradInferMeta(const MetaTensor& x,
+                                    const MetaTensor& mask,
+                                    const MetaTensor& dout,
+                                    const std::vector<int>& kernel_size,
+                                    const std::vector<int>& strides,
+                                    const std::vector<int>& paddings,
+                                    bool global_pooling,
+                                    bool adaptive,
+                                    bool fractional,
+                                    MetaTensor* dx) {
+    dx->share_meta(x);
+    }
+    ```
+
+    增加 `fractional` 参数。
+
+- `paddle/phi/kernels/pool_kernel.h` 算子 Kernel
+
+    ``` cpp
+    template <typename T, typename Context>
+    void MaxPool2dWithIndexKernel(const Context& ctx,
+                                const DenseTensor& x,
+                                const std::vector<int>& kernel_size,
+                                const std::vector<int>& strides,
+                                const std::vector<int>& paddings,
+                                bool global_pooling,
+                                bool adaptive,
+                                bool fractional,
+                                DenseTensor* out,
+                                DenseTensor* mask);
+
+    template <typename T, typename Context>
+    void MaxPool3dWithIndexKernel(const Context& ctx,
+                                const DenseTensor& x,
+                                const std::vector<int>& kernel_size,
+                                const std::vector<int>& strides,
+                                const std::vector<int>& paddings,
+                                bool global_pooling,
+                                bool adaptive,
+                                bool fractional,
+                                DenseTensor* out,
+                                DenseTensor* mask);
+    ```
+
+    增加 `fractional` 参数。
+
+
+- `paddle/phi/kernels/funcs/pooling.h`
+
+    ``` cpp
+    template <typename Context, typename T1, typename T2>
+    class MaxPool2dWithIndexFunctor {
+    public:
+    void operator()(const Context& context,
+                    const DenseTensor& input,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* output,
+                    DenseTensor* mask);
+    };
+
+    template <typename Context, typename T1, typename T2>
+    class MaxPool2dWithIndexGradFunctor {
+    public:
+    void operator()(const Context& context,
+                    const DenseTensor& output_grad,
+                    const DenseTensor& mask,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* input_grad);
+    };
+
+    template <typename Context, typename T1, typename T2>
+    class MaxPool3dWithIndexFunctor {
+    public:
+    void operator()(const Context& context,
+                    const DenseTensor& input,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* output,
+                    DenseTensor* mask);
+    };
+
+    template <typename Context, typename T1, typename T2>
+    class MaxPool3dWithIndexGradFunctor {
+    public:
+    void operator()(const Context& context,
+                    const DenseTensor& output_grad,
+                    const DenseTensor& mask,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* input_grad);
+    };
+    ```
+
+    增加 `fractional` 参数。
+
+    ``` cpp
+    HOSTDEVICE inline int FractionalStartIndex()
+    HOSTDEVICE inline int FractionalEndIndex()
+    ```
+
+    生成池化序列的方法。
+
+- `paddle/phi/kernels/impl/pool_kernel_impl.h`
+
+    ``` cpp
+    template <typename Context, typename T1, typename T2 = int>
+    void MaxPoolWithIndexRawKernel(const Context& ctx,
+                                const DenseTensor& x,
+                                const std::vector<int>& kernel_size,
+                                const std::vector<int>& strides,
+                                const std::vector<int>& paddings,
+                                bool global_pooling,
+                                bool adaptive,
+                                bool fractional,
+                                DenseTensor* out,
+                                DenseTensor* mask) {
+    std::vector<int> paddings_ = paddings;
+    std::vector<int> kernel_size_ = kernel_size;
+
+    if (global_pooling) {
+        for (size_t i = 0; i < kernel_size_.size(); ++i) {
+        paddings_[i] = 0;
+        kernel_size_[i] = static_cast<int>(x.dims()[i + 2]);
+        }
+    }
+
+    switch (kernel_size_.size()) {
+        case 2: {
+        funcs::MaxPool2dWithIndexFunctor<Context, T1, T2> pool2d_forward;
+        pool2d_forward(ctx,
+                        x,
+                        kernel_size_,
+                        strides,
+                        paddings_,
+                        adaptive,
+                        fractional,
+                        out,
+                        mask);
+        } break;
+        case 3: {
+        funcs::MaxPool3dWithIndexFunctor<Context, T1, T2> pool3d_forward;
+        pool3d_forward(ctx,
+                        x,
+                        kernel_size_,
+                        strides,
+                        paddings_,
+                        adaptive,
+                        fractional,
+                        out,
+                        mask);
+        } break;
+        default: {
+        PADDLE_THROW(
+            errors::InvalidArgument("Pool op only supports 2D and 3D input."));
+        }
+    }
+    }
+
+    template <typename T, typename Context>
+    void MaxPool2dWithIndexKernel(const Context& ctx,
+                                const DenseTensor& x,
+                                const std::vector<int>& kernel_size,
+                                const std::vector<int>& strides,
+                                const std::vector<int>& paddings,
+                                bool global_pooling,
+                                bool adaptive,
+                                bool fractional,
+                                DenseTensor* out,
+                                DenseTensor* mask) {
+    MaxPoolWithIndexRawKernel<Context, T>(ctx,
+                                            x,
+                                            kernel_size,
+                                            strides,
+                                            paddings,
+                                            global_pooling,
+                                            adaptive,
+                                            fractional,
+                                            out,
+                                            mask);
+    }
+
+    template <typename T, typename Context>
+    void MaxPool3dWithIndexKernel(const Context& ctx,
+                                const DenseTensor& x,
+                                const std::vector<int>& kernel_size,
+                                const std::vector<int>& strides,
+                                const std::vector<int>& paddings,
+                                bool global_pooling,
+                                bool adaptive,
+                                bool fractional,
+                                DenseTensor* out,
+                                DenseTensor* mask) {
+    MaxPoolWithIndexRawKernel<Context, T>(ctx,
+                                            x,
+                                            kernel_size,
+                                            strides,
+                                            paddings,
+                                            global_pooling,
+                                            adaptive,
+                                            fractional,
+                                            out,
+                                            mask);
+    }
+
+    ```
+
+    增加 `fractional` 参数，分发方法时带上 `fracional`。
+
+- `paddle/phi/kernels/pool_grad_kernel.h` 反向算子
+
+    ``` cpp
+    template <typename T, typename Context>
+    void MaxPool2dWithIndexGradKernel(const Context& ctx,
+                                    const DenseTensor& x,
+                                    const DenseTensor& mask,
+                                    const DenseTensor& dout,
+                                    const std::vector<int>& kernel_size,
+                                    const std::vector<int>& strides,
+                                    const std::vector<int>& paddings,
+                                    bool global_pooling,
+                                    bool adaptive,
+                                    bool fracional,
+                                    DenseTensor* dx);
+
+    template <typename T, typename Context>
+    void MaxPool3dWithIndexGradKernel(const Context& ctx,
+                                    const DenseTensor& x,
+                                    const DenseTensor& mask,
+                                    const DenseTensor& dout,
+                                    const std::vector<int>& kernel_size,
+                                    const std::vector<int>& strides,
+                                    const std::vector<int>& paddings,
+                                    bool global_pooling,
+                                    bool adaptive,
+                                    bool fracional,
+                                    DenseTensor* dx);
+
+    ```
+
+    增加 `fractional` 参数。
+
+- `paddle/phi/kernels/impl/pool_grad_kernel_impl.h`
+
+    ``` cpp
+    template <typename Context, typename T1, typename T2 = int>
+    void MaxPoolWithIndexGradRawKernel(const Context& ctx,
+                                    const DenseTensor& x UNUSED,
+                                    const DenseTensor& mask,
+                                    const DenseTensor& dout,
+                                    const std::vector<int>& kernel_size,
+                                    const std::vector<int>& strides,
+                                    const std::vector<int>& paddings,
+                                    bool global_pooling,
+                                    bool adaptive,
+                                    bool fractional,
+                                    DenseTensor* dx) {
+    std::vector<int> paddings_ = paddings;
+    std::vector<int> kernel_size_ = kernel_size;
+
+    if (global_pooling) {
+        for (size_t i = 0; i < kernel_size_.size(); ++i) {
+        paddings_[i] = 0;
+        kernel_size_[i] = static_cast<int>(dx->dims()[i + 2]);
+        }
+    }
+
+    if (dx) {
+        ctx.template Alloc<T1>(dx);
+        funcs::set_constant(ctx, dx, 0);
+
+        switch (kernel_size_.size()) {
+        case 2: {
+            funcs::MaxPool2dWithIndexGradFunctor<Context, T1, T2> pool2d_backward;
+            pool2d_backward(ctx,
+                            dout,
+                            mask,
+                            kernel_size_,
+                            strides,
+                            paddings_,
+                            adaptive,
+                            fractional,
+                            dx);
+        } break;
+        case 3: {
+            funcs::MaxPool3dWithIndexGradFunctor<Context, T1, T2> pool3d_backward;
+            pool3d_backward(ctx,
+                            dout,
+                            mask,
+                            kernel_size_,
+                            strides,
+                            paddings_,
+                            adaptive,
+                            fractional,
+                            dx);
+        } break;
+        default: {
+            PADDLE_THROW(
+                errors::InvalidArgument("Pool op only supports 2D and 3D input."));
+        }
+        }
+    }
+    }
+
+    template <typename T, typename Context>
+    void MaxPool2dWithIndexGradKernel(const Context& ctx,
+                                    const DenseTensor& x,
+                                    const DenseTensor& mask,
+                                    const DenseTensor& dout,
+                                    const std::vector<int>& kernel_size,
+                                    const std::vector<int>& strides,
+                                    const std::vector<int>& paddings,
+                                    bool global_pooling,
+                                    bool adaptive,
+                                    bool fractional,
+                                    DenseTensor* dx) {
+    MaxPoolWithIndexGradRawKernel<Context, T>(ctx,
+                                                x,
+                                                mask,
+                                                dout,
+                                                kernel_size,
+                                                strides,
+                                                paddings,
+                                                global_pooling,
+                                                adaptive,
+                                                fractional,
+                                                dx);
+    }
+
+    template <typename T, typename Context>
+    void MaxPool3dWithIndexGradKernel(const Context& ctx,
+                                    const DenseTensor& x,
+                                    const DenseTensor& mask,
+                                    const DenseTensor& dout,
+                                    const std::vector<int>& kernel_size,
+                                    const std::vector<int>& strides,
+                                    const std::vector<int>& paddings,
+                                    bool global_pooling,
+                                    bool adaptive,
+                                    bool fractional,
+                                    DenseTensor* dx) {
+    MaxPoolWithIndexGradRawKernel<Context, T>(ctx,
+                                                x,
+                                                mask,
+                                                dout,
+                                                kernel_size,
+                                                strides,
+                                                paddings,
+                                                global_pooling,
+                                                adaptive,
+                                                fractional,
+                                                dx);
+    }
+    
+    ```
+
+    增加 `fractional` 参数，分发方法时带上 `fracional`。
+
+- `paddle/phi/kernels/funcs/pooling.cc` 算子 CPU 实现
+
+    ``` cpp
+    template <typename T1, typename T2>
+    class MaxPool2dWithIndexFunctor<CPUContext, T1, T2> {
+    public:
+    void operator()(const CPUContext& context,
+                    const DenseTensor& input,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* output,
+                    DenseTensor* mask) {
+    ...
+
+        int hstart = 0, hend = 0;
+        int wstart = 0, wend = 0;
+        for (int i = 0; i < batch_size; i++) {
+        for (int c = 0; c < output_channels; ++c) {
+            for (int ph = 0; ph < output_height; ++ph) {
+            if (adaptive) {
+                hstart = AdaptStartIndex(ph, input_height, output_height);
+                hend = AdaptEndIndex(ph, input_height, output_height);
+            } else if (fractional) {
+                // TODO(megemini)
+            } else {
+                hstart = ph * stride_height - padding_height;
+                hend = std::min(hstart + ksize_height, input_height);
+                hstart = std::max(hstart, 0);
+            }
+            for (int pw = 0; pw < output_width; ++pw) {
+                if (adaptive) {
+                wstart = AdaptStartIndex(pw, input_width, output_width);
+                wend = AdaptEndIndex(pw, input_width, output_width);
+                } else if (fractional) {
+                // TODO(megemini)
+                } else {
+                wstart = pw * stride_width - padding_width;
+                wend = std::min(wstart + ksize_width, input_width);
+                wstart = std::max(wstart, 0);
+                }
+
+        ...
+            }
+            }
+        ...
+        }
+        }
+    }
+    };
+
+    /*
+    * All tensors are in NCHW format.
+    * Ksize, strides, paddings are two elements. These two elements represent
+    * height and width, respectively.
+    */
+    template <typename T1, typename T2>
+    class MaxPool2dWithIndexGradFunctor<CPUContext, T1, T2> {
+    public:
+    void operator()(const CPUContext& context,
+                    const DenseTensor& output_grad,
+                    const DenseTensor& mask,
+                    const std::vector<int>& ksize UNUSED,
+                    const std::vector<int>& strides UNUSED,
+                    const std::vector<int>& paddings UNUSED,
+                    bool adaptive UNUSED,
+                    bool fractional UNUSED,
+                    DenseTensor* input_grad) {
+    };}
+
+    /*
+    * All tensors are in NCDHW format.
+    * Ksize, strides, paddings are three elements. These three elements represent
+    * depth, height and width, respectively.
+    */
+    template <typename T1, typename T2>
+    class MaxPool3dWithIndexFunctor<CPUContext, T1, T2> {
+    public:
+    void operator()(const CPUContext& context,
+                    const DenseTensor& input,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* output,
+                    DenseTensor* mask) {
+        ...
+
+        int dstart = 0, dend = 0;
+        int hstart = 0, hend = 0;
+        int wstart = 0, wend = 0;
+        for (int i = 0; i < batch_size; i++) {
+        for (int c = 0; c < output_channels; ++c) {
+            for (int pd = 0; pd < output_depth; ++pd) {
+            if (adaptive) {
+                dstart = AdaptStartIndex(pd, input_depth, output_depth);
+                dend = AdaptEndIndex(pd, input_depth, output_depth);
+            } else if (fractional) {
+                /* TODO(megemini) */
+            } else {
+                dstart = pd * stride_depth - padding_depth;
+                dend = std::min(dstart + ksize_depth, input_depth);
+                dstart = std::max(dstart, 0);
+            }
+            for (int ph = 0; ph < output_height; ++ph) {
+                if (adaptive) {
+                hstart = AdaptStartIndex(ph, input_height, output_height);
+                hend = AdaptEndIndex(ph, input_height, output_height);
+                } else if (fractional) {
+                /* TODO(megemini) */
+                } else {
+                hstart = ph * stride_height - padding_height;
+                hend = std::min(hstart + ksize_height, input_height);
+                hstart = std::max(hstart, 0);
+                }
+                for (int pw = 0; pw < output_width; ++pw) {
+                if (adaptive) {
+                    wstart = AdaptStartIndex(pw, input_width, output_width);
+                    wend = AdaptEndIndex(pw, input_width, output_width);
+                } else if (fractional) {
+                    // TODO(megemini)
+                } else {
+                    wstart = pw * stride_width - padding_width;
+                    wend = std::min(wstart + ksize_width, input_width);
+                    wstart = std::max(wstart, 0);
+                }
+
+        ...
+            }
+            }
+        ...
+        }
+        }
+    }
+    };}
+
+    /*
+    * All tensors are in NCDHW format.
+    * Ksize, strides, paddings are three elements. These three elements represent
+    * depth, height and width, respectively.
+    */
+    template <typename T1, typename T2>
+    class MaxPool3dWithIndexGradFunctor<CPUContext, T1, T2> {
+    public:
+    void operator()(const CPUContext& context,
+                    const DenseTensor& output_grad,
+                    const DenseTensor& mask,
+                    const std::vector<int>& ksize UNUSED,
+                    const std::vector<int>& strides UNUSED,
+                    const std::vector<int>& paddings UNUSED,
+                    bool adaptive UNUSED,
+                    bool fractional UNUSED,
+                    DenseTensor* input_grad) {
+    };}
+
+    ```
+
+    这里实现主要的 cpu 算子的逻辑（正向与反向），通过 `fractional` 参数生成池化序列，主要逻辑与 `adaptive` 相似。
+    
+    这里没有 `data_format` 参数的设计，建议后续能够统一 `poolNd` 与 `max_poolNd` 的算子实现。
+
+    另外，这里需要再增加一个 `0 < random < 1` 的随机数，以生成 `伪` 随机池化序列，这个随机数需要可以通过 `paddle.seed` 固定住。
+
+- `paddle/phi/kernels/funcs/pooling.cu` 算子 GPU 实现
+
+    ``` cpp
+    template <typename T1, typename T2>
+    __global__ void KernelMaxPool2dWithIdx(const int nthreads,
+                                        const T1* input_data,
+                                        const int channels,
+                                        const int input_height,
+                                        const int input_width,
+                                        const int output_height,
+                                        const int output_width,
+                                        const int ksize_height,
+                                        const int ksize_width,
+                                        const int stride_height,
+                                        const int stride_width,
+                                        const int padding_height,
+                                        const int padding_width,
+                                        bool adaptive,
+                                        bool fractional,
+                                        T1* output_data,
+                                        T2* mask_data,
+                                        FastDivModForPooling divmods) 
+
+    template <typename T1, typename T2>
+    __global__ void KernelMaxPool2DWithIdxGrad(const int nthreads,
+                                            const T1* output_grad,
+                                            const T2* mask_data,
+                                            const int channels,
+                                            const int input_height,
+                                            const int input_width,
+                                            const int output_height,
+                                            const int output_width,
+                                            const int ksize_height,
+                                            const int ksize_width,
+                                            const int stride_height,
+                                            const int stride_width,
+                                            const int padding_height,
+                                            const int padding_width,
+                                            bool adaptive,
+                                            bool fractional,
+                                            T1* input_grad,
+                                            FastDivModForPooling divmods) 
+    /*
+    * All tensors are in NCHW format.
+    * Ksize, strides, paddings are two elements. These two elements represent
+    * height and width, respectively.
+    */
+    template <typename T1, typename T2>
+    class MaxPool2dWithIndexFunctor<phi::GPUContext, T1, T2> {
+    public:
+    void operator()(const phi::GPUContext& context,
+                    const DenseTensor& input,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* output,
+                    DenseTensor* mask)
+    };
+
+    /*
+    * All tensors are in NCHW format.
+    * Ksize, strides, paddings are two elements. These two elements represent
+    * height and width, respectively.
+    */
+    template <typename T1, typename T2>
+    class MaxPool2dWithIndexGradFunctor<phi::GPUContext, T1, T2> {
+    public:
+    void operator()(const phi::GPUContext& context,
+                    const DenseTensor& output_grad,
+                    const DenseTensor& mask,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* input_grad) 
+    };
+
+
+    template <typename T1, typename T2>
+    __global__ void KernelMaxPool3DWithIdx(const int ncd,
+                                        const T1* input_data,
+                                        const int channels,
+                                        const int input_depth,
+                                        const int input_height,
+                                        const int input_width,
+                                        const int output_depth,
+                                        const int output_height,
+                                        const int output_width,
+                                        const int ksize_depth,
+                                        const int ksize_height,
+                                        const int ksize_width,
+                                        const int stride_depth,
+                                        const int stride_height,
+                                        const int stride_width,
+                                        const int padding_depth,
+                                        const int padding_height,
+                                        const int padding_width,
+                                        bool adaptive,
+                                        bool fractional,
+                                        T1* output_data,
+                                        T2* mask_data,
+                                        FastDivModForPooling3D divmods_output) 
+
+    template <typename T1, typename T2>
+    __global__ void KernelMaxPool3DWithIdxGrad(
+                        const int ncd,
+                        const T1* output_grad,
+                        const T2* mask,
+                        const int channels,
+                        const int input_depth,
+                        const int input_height,
+                        const int input_width,
+                        const int output_depth,
+                        const int output_height,
+                        const int output_width,
+                        const int ksize_depth,
+                        const int ksize_height,
+                        const int ksize_width,
+                        const int stride_depth,
+                        const int stride_height,
+                        const int stride_width,
+                        const int padding_depth,
+                        const int padding_height,
+                        const int padding_width,
+                        bool adaptive,
+                        bool fractional,
+                        T1* input_grad,
+                        FastDivModForPooling3D divmods_output) 
+        
+    /*
+    * All tensors are in NCDHW format.
+    * Ksize, strides, paddings are three elements. These three elements represent
+    * depth, height and width, respectively.
+    */
+    template <typename T1, typename T2>
+    class MaxPool3dWithIndexFunctor<phi::GPUContext, T1, T2> {
+    public:
+    void operator()(const phi::GPUContext& context,
+                    const DenseTensor& input,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* output,
+                    DenseTensor* mask)
+    };
+
+    /*
+    * All tensors are in NCDHW format.
+    * Ksize, strides, paddings are three elements. These three elements represent
+    * depth, height and width, respectively.
+    */
+    template <typename T1, typename T2>
+    class MaxPool3dWithIndexGradFunctor<phi::GPUContext, T1, T2> {
+    public:
+    void operator()(const phi::GPUContext& context,
+                    const DenseTensor& output_grad,
+                    const DenseTensor& mask,
+                    const std::vector<int>& ksize,
+                    const std::vector<int>& strides,
+                    const std::vector<int>& paddings,
+                    bool adaptive,
+                    bool fractional,
+                    DenseTensor* input_grad)
+    };
+
+    ```
+
+    主要逻辑与 CPU 算子类似，这里不再赘述，有一个需要单独指出的是，PR：https://github.com/PaddlePaddle/Paddle/pull/45959 中，单独针对 `AdaptiveKernelMaxPool2dWithIdx` 做了优化，本次设计方案暂不进行优化方面的设计。
+
+## python layer 实现
+
+涉及文件：
+
+- `python/paddle/nn/layer/pooling.py`
+
+    ``` python
+    class FractionalMaxPool2D(Layer):
+    """
+    TODO(megemini)
+    """
+
+    def __init__(self, output_size, return_mask=False, name=None):
+        super().__init__()
+        self._output_size = output_size
+        self._return_mask = return_mask
+        self._name = name
+
+    def forward(self, x):
+        return F.fractional_max_pool2d(
+            x,
+            output_size=self._output_size,
+            return_mask=self._return_mask,
+            name=self._name,
+        )
+
+    def extra_repr(self):
+        return (
+            f'output_size={self._output_size}, return_mask={self._return_mask}'
+        )
+
+
+    class FractionalMaxPool3D(Layer):
+        """
+        TODO(megemini)
+        """
+
+        def __init__(self, output_size, return_mask=False, name=None):
+            super().__init__()
+            self._output_size = output_size
+            self._return_mask = return_mask
+            self._name = name
+
+        def forward(self, x):
+            return F.fractional_max_pool3d(
+                x,
+                output_size=self._output_size,
+                return_mask=self._return_mask,
+                name=self._name,
+            )
+
+        def extra_repr(self):
+            return (
+                f'output_size={self._output_size}, return_mask={self._return_mask}'
+            )
+    ```
+
+    主要通过调用相应的方法实现。
 
 # 六、测试和验收的考量
 
 测试考虑的case如下：
 
 - **编程范式场景**
-  常规覆盖动态图和静态图的测试场景
+  - 常规覆盖动态图和静态图的测试场景
+  - 需要测试 C++ 算子
+  - 需要测试 python 接口
 
 - **硬件场景**
   常规需覆盖 CPU、GPU 两种测试场景
@@ -966,8 +1744,6 @@ def _pool_along_w(x, seq, overlapping):
   - 需要测试 2D / 3D 两类接口
   - 需要测试 1 < N_in/N_out < 2, N_in/N_out > 2 的情况
   - 需要测试 output_size 为 int/list/tuple 的情况
-  - 需要测试 random / pseudo_random
-  - 需要测试 overlapping
   - 需要测试 return_mask
   - 需要测试 不同数据类型的场景
   - 需要异常测试，如 N_in/N_out < 1
@@ -980,10 +1756,10 @@ def _pool_along_w(x, seq, overlapping):
 
 # 七、可行性分析及规划排期
 
-- 每个接口开发约 3 个工作日
+- 每个接口开发约 7 个工作日
 - 每个接口测试约 3 个工作日
 
-计划 2~3 周的工作量可以完成接口的开发预测是。
+计划 3～4 周的工作量可以完成接口的开发预测是。
 
 # 八、影响面
 
@@ -1002,125 +1778,3 @@ def _pool_along_w(x, seq, overlapping):
 - [TORCH.NN.FUNCTIONAL.FRACTIONAL_MAX_POOL3D](https://pytorch.org/docs/stable/generated/torch.nn.functional.fractional_max_pool3d.html#torch.nn.functional.fractional_max_pool3d)
 - [tf.raw_ops.FractionalMaxPool](https://tensorflow.google.cn/api_docs/python/tf/raw_ops/FractionalMaxPool?hl=en)
 - [tf.nn.fractional_max_pool](https://tensorflow.google.cn/api_docs/python/tf/nn/fractional_max_pool?hl=en)
-
-# 补充一下
-
-这里有个疑问：是否可以利用 `adaptive max pooling` 的 `方式` 实现 `fractional max pooling`？
-
-之前也分析过：
-
-- `fractional max pooling` : `a = ceiling(alpha(i+u)), 1 < alpha = N_in/N_out < 2, 0 < u < 1`
-- `adaptive max pooling` : `a = ceiling(alpha(i+1)), 1 < alpha = N_in/N_out < 2`
-
-也就是说，`adaptive max pooling` 可以看作 `fractional max pooling` 的一种特例？不知道我这里理解的是否有问题？
-
-如果有一个 `伪` 序列的生成方式：
-
-``` python
-def pseudo_sequence(input_size, output_size, sample):
-    alpha = input_size / output_size
-    start_idx = []
-    end_idx = []
-    for i in range(output_size):
-        start_idx.append(math.floor(alpha * (i)))
-        end_idx.append(math.ceil(alpha * (i + sample)))
-
-    return start_idx, end_idx
-
-```
-
-其中 `sample = 1` 是否就是 `adaptive max pooling`？
-
-我理解的 `fractional max pooling` 其实只要通过 `1221112112...` 这种方式实现 `fractional` 缩小尺寸就达到目的了。
-
-如果实现类似 `PyTorch` 的方式，只有一个 `伪` 序列，是不是就足够了？因为文章中也提到，`伪` 序列是更 `faithfully` 的一种方式。
-
-只是，这里的序列也不是完全符合 `1221112112...`：
-
-``` python
-In [191]: diffs = []
-     ...: for i in range(1, 11):
-     ...:     start_idx, end_idx = pr(input_size, output_size, i/10)
-     ...:     start_idx = np.array(start_idx)
-     ...:     end_idx = np.array(end_idx)
-     ...:     diff = end_idx - start_idx
-     ...:     diffs.append(diff)
-     ...:     if np.any(diff <= 0):
-     ...:         print('error', i)
-     ...:     print(i)
-     ...:     print(start_idx)
-     ...:     print(end_idx)
-     ...:     print(diff)
-     ...: 
-1
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 1  2  3  5  6  8  9 10 12 13 15 16 17 19 20 21 23 24]
-[1 1 1 1 1 2 1 1 1 1 2 1 1 1 1 1 1 1]
-2
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 1  2  4  5  6  8  9 10 12 13 15 16 17 19 20 22 23 24]
-[1 1 2 1 1 2 1 1 1 1 2 1 1 1 1 2 1 1]
-3
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23 25]
-[1 1 2 1 1 2 1 2 1 1 2 1 2 1 1 2 1 2]
-4
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 1  2  4  5  7  8  9 11 12 14 15 16 18 19 20 22 23 25]
-[1 1 2 1 2 2 1 2 1 2 2 1 2 1 1 2 1 2]
-5
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 1  3  4  5  7  8 10 11 12 14 15 16 18 19 21 22 23 25]
-[1 2 2 1 2 2 2 2 1 2 2 1 2 1 2 2 1 2]
-6
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 1  3  4  5  7  8 10 11 12 14 15 17 18 19 21 22 24 25]
-[1 2 2 1 2 2 2 2 1 2 2 2 2 1 2 2 2 2]
-7
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 1  3  4  6  7  8 10 11 13 14 15 17 18 20 21 22 24 25]
-[1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2]
-8
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 2  3  4  6  7  9 10 11 13 14 15 17 18 20 21 22 24 25]
-[2 2 2 2 2 3 2 2 2 2 2 2 2 2 2 2 2 2]
-9
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 2  3  5  6  7  9 10 11 13 14 16 17 18 20 21 23 24 25]
-[2 2 3 2 2 3 2 2 2 2 3 2 2 2 2 3 2 2]
-10
-[ 0  1  2  4  5  6  8  9 11 12 13 15 16 18 19 20 22 23]
-[ 2  3  5  6  7  9 10 12 13 14 16 17 19 20 21 23 24 25]
-[2 2 3 2 2 3 2 3 2 2 3 2 3 2 2 3 2 2]
-```
-
-目前 Paddle 的 `adaptive max pooling` 生成序列的文件：
-
-- `paddle/phi/kernels/funcs/pooling.h`
-
-    ``` cpp
-    /* used for adaptive pool to calculate start and end index of each divided grid
-    */
-    HOSTDEVICE inline int AdaptStartIndex(int ph, int input_size, int output_size) {
-    return static_cast<int>(
-        floor(static_cast<float>(ph * input_size) / output_size));
-    }
-
-    HOSTDEVICE inline int AdaptEndIndex(int ph, int input_size, int output_size) {
-    return static_cast<int>(
-        ceil(static_cast<float>((ph + 1) * input_size) / output_size));
-    }
-
-    ```
-
-是不是 `AdaptEndIndex` 增加一个参数，把 `1` 换成随机数，便可以给 `adaptive max pooling` 和 `fractional max pooling` 使用？
-
-具体实现的时候，不需要单独实现 `fractional max pooling`，只需要在目前的代码上修改 `adaptive max pooling` 并作分流？
-
-以上是我对目前实现方式的一点补充思考，之所以有这种想法，主要是因为，目前如果以纯 python 实现 `fractional max pooling`，感觉跟其他池化方法不太搭 ... ...
-
-还有很多不完善的地方，希望能够讨论一下 ～
-
-谢谢！
-
-
