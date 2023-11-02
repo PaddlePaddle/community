@@ -268,7 +268,11 @@ API的设计为:
 
 ## 底层OP设计
 
-直接在python层实现
+目前暂时直接在python层实现（实现与lapack中相同的算法），以下为同样可行的方案(具体可见[issue中的讨论](https://github.com/PaddlePaddle/community/pull/703#discussion_r1369615670)):
+
+> 在cpp层实现，直接调用lapack，此方法需要再引入一些外部lapack函数，并封装到`lapack_function`中（因为paddle中还没引入`orgqr`等lapack包，相关的qr分解并没有使用lapack而是调了eigen和cusolve来做），最后写cpp kernel调用对应的`lapack_function`实现，再封装为python API。
+
+
 
 ## API实现方案
 
