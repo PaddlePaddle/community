@@ -1,17 +1,18 @@
-# paddle.distribution.continuous_bernoullin 设计文档
+# paddle.distribution.continuous_bernoulli 设计文档
 
 |API名称 | paddle.distribution.continuous_bernoulli | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-27 | 
-|版本号 | V1.0 | 
+|版本号 | V1.1 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20230927_api_design_for_continuous_bernoulli.md<br> | 
 
 
 # 一、概述
 ## 1、相关背景
-提升飞桨 API 丰富度, 需要扩充 API `paddle.distribution.continuous_bernoulli`。
+连续伯努利分布是一种定义在 $[0, 1]$ 闭区间上的概率分布, 它具有一个描述分布函数的形状的参数 $\lambda \in (0, 1)$, 该参数对连续伯努利概率密度函数的影响如下: $f(x|\lambda) \propto \lambda^x (1 - \lambda)^{1-x}$。它属于指数分布族, 可以被看作连续版的伯努利分布。而在机器学习中, 伯努利分布可以推导出二元数据的交叉熵损失, 于是连续伯努利分布就可以为连续型数据提供一种类似交叉熵的损失衡量方法。例如在 VAE 中, 若数据非二元分布而是分布在 $[0, 1]$ 区间上, [The continuous Bernoulli: fixing a pervasive error in
+variational autoencoders](https://proceedings.neurips.cc/paper_files/paper/2019/file/f82798ec8909d23e55679ee26bb26437-Paper.pdf)指出: 如果用传统做法先将其转化为二元 $\{0, 1\}$ 分布, 再将先验分布选择为普通的伯努利分布, 这样的做法是不能够很好的用统计理论来进行解释的, 因为在非监督学习中为了fit模型去修改数据这样的做法本身就有问题, 会丢失很多信息等等。 于是这篇论文提出了这种新的分布作为 VAE 的先验分布用以处理连续型数据。因此为提升飞桨的概率分布 API 丰富度, 从而为更多的机器学习应用提供可能, 需要扩充 API `paddle.distribution.continuous_bernoulli`。
 
 ## 2、功能目标
 参考 Paddle 现有 distribution，增加 ContinuousBernoulli 分布类的概率统计与随机采样，包括如下方法：
@@ -646,7 +647,7 @@ class ContinuousBernoulli(distribution.AutoCompositeTensorDistribution):
 `tfp.distributions.ContinuousBernoulli` 继承自 `tfp.distribution.AutoCompositeTensorDistribution`
 
 # 四、对比分析
-Pytorch 与 Tensorflow 实现方式大体类似，都是通过基本的概率计算得到相应的概率属性。Tensorflow 实现的方法更丰富，测试更为详细。
+由于连续伯努利的分布函数以及密度函数都有显示表达式，Pytorch 与 Tensorflow 对其实现方式大体类似，都是通过基本的概率计算得到相应的概率属性。对于 Exponential Family , Pytorch 设计的 `ExponentialFamily` 类主要用于通过[Bregman Divergence](https://www.researchgate.net/publication/221126408_Entropies_and_cross-entropies_of_exponential_families)这种统一的方法来计算指数族分布的 entropy 和 kl_divergence , 但继承之后也需要根据理论计算写出每个指数族分布对应的 `natural parameters` 以及其 `log normalizer`, 和 `mean carrier measure` , 通过这三个方法来计算 entropy 和 kl_divergence 。Poisson 分布的 entropy 和 kl_divergence 的无论是直接按定义计算还是用 Bregman Divergence 来计算都没有显式的表达式, 因为涉及到 $[0, \infty) \cap \mathbb{N}$ 的支撑集, Pytorch 中 Poisson 的 `entropy` 也没有实现完毕( `mean carrier measure` 未实现), 所以此处建议还是先继承基础的 `Distribution` , `entropy` 和 `kl_divergence` 的实现按第五部分描述的方法直接将进行计算。另外，由于概率分布的数值计算在 `probs` = 0.5 附近不稳定(根据表达式0.5是一个奇点), 而 Pytorch 与 Tensorflow 的处理方式类似, Pytorch 基于 probs 来计算, 通过传入参数 `lims` 让用户可以自己定义不稳定区域的范围, 在不稳定区域内利用泰勒展开做近似计算, Tensorflow 则是基于 logits 来计算, 而 Tensorflow 对不稳定区域的范围无法让用户自定义。 此外 Pytorch 的计算代码更加直观简洁。
 
 # 五、设计思路与实现方案
 
@@ -666,7 +667,7 @@ paddle.distribution.continuous_bernoulli(probs)
 
 ```python
 class ContinuousBernoulli(Distribution):
-  def __init__(self, probs):
+  def __init__(self, probs, eps=1e-4):
     super().__init__(batch_shape=self.probs.shape, event_shape=())
     
     ...
@@ -675,7 +676,7 @@ class ContinuousBernoulli(Distribution):
 
 `ContinuousBernoulli` 类的初始化参数是 `probs` ，类包含的方法及实现方案如下：
 
-记参数 `probs`$=\lambda$。
+记参数 `probs`$=\lambda$, `eps` 为非稳定计算区域范围: $[0.5-eps, 0.5+eps]$
 
 - `mean` 计算均值
 
@@ -763,9 +764,9 @@ F^{-1}(x;\lambda) =
 
 
 # 六、测试和验收的考量
-`ContinuousBernoulli` 类测试以 Torch 作为基准，验证API的正确性。
+`ContinuousBernoulli` 类测试以 Numpy 作为基准，用 Numpy 实现所有 API , 以验证正确性。
 
-1. 使用同样的参数实例化 `ContinuousBernoulli` 类和 `ContinuousBernoulliTorch` 类，并调用 `mean`、`variance`、`entropy`、`log_prob`、`kl_divergence`等方法，测试结果是否相等（容许一定误差）。参数 `rate` 的支持的数据类型需测试详尽。
+1. 使用同样的参数实例化 `ContinuousBernoulli` 类和 `ContinuousBernoulli_np` 类，并调用 `mean`、`variance`、`entropy`、`log_prob`、`cdf`、`icdf`、`kl_divergence`等方法，测试结果是否相等（容许一定误差）。
 
 2. 使用 `ContinuousBernoulli` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。
 
