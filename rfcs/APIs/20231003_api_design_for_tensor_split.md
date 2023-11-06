@@ -84,9 +84,35 @@
 - `Paddle` 的 `split` 函数签名为： `split(x, num_or_sections, axis=0, name=None)`
 - `PyTorch` 的 `split` 函数签名伪：`split(tensor: torch.Tensor, split_size_or_sections: Union[int, List[int]], dim: int = 0) -> List[torch.Tensor]`
 
-其中 `Numpy` 的 `indices_or_sections`、 `Paddle` 的 `num_or_sections`、 `PyTorch` 的 `split_size_or_sections` 作用一致，都是上文中引用中指出的拆分数量或方式。
+其中 `Numpy` 的 `indices_or_sections`、 `Paddle` 的 `num_or_sections`、 `PyTorch` 的 `split_size_or_sections` 作用一致，都是上文中引用中指出的拆分数量或方式，但是具体含义略有不同：
 
-这里重点说一下 `Paddle` 与 `PyTorch` 的 `split` 的区别：如果分割参数为 `int`，`Paddle` 要求此输入的 tensor 能够整除此数值，而 `PyTorch` 不需要。
+- `num_or_sections`  数量或分片长度
+  - `int` 表示拆分数量
+  - `list` 表示每个分片长度
+
+- `indices_or_sections` 数量或切分索引位置
+  - `int` 表示拆分数量
+  - `list` 表示切分的索引位置
+
+这里引用 `Paddle` 对于 `split` 单元测试中对于两者转换的方法：
+
+- `Paddle/test/legacy_test/test_splits_api.py`
+``` python
+def func_ref(func, x, num_or_sections):
+    # Convert the num_or_sections in paddle to indices_or_sections in numpy
+    # Do not support -1
+    if isinstance(num_or_sections, int):
+        indices_or_sections = num_or_sections
+    else:
+        indices_or_sections = np.cumsum(num_or_sections)[:-1]
+    return func(x, indices_or_sections)
+```
+
+其中 func 为 `Numpy` 对应的方法，如 `numpy.vsplit`。当拆分方式为 `list` 时，`indices_or_sections` 为 `num_or_sections` 使用 `np.cumsum` 的结果。
+
+如，`num_or_sections=[2, 1, 3]` 则 `indices_or_sections=[2, 3]`。
+
+这里再重点说一下 `Paddle` 与 `PyTorch` 的 `split` 的区别：如果分割参数为 `int`，`Paddle` 要求此输入的 tensor 能够整除此数值，而 `PyTorch` 不需要。
 
 - `Paddle`
 
@@ -503,6 +529,17 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
   - `tensor_split` 可以 `越界`，由此，分割参数中不能有 `-1`。
 
 考虑 `hsplit`, `dsplit` 通过 `split` 方式实现，签名的主要参数参考 `split` 函数(`num_or_sections`)，`tensor_split` 则单独实现，通过签名(`indices_or_sections`)体现差异化。
+
+其中：
+
+- `num_or_sections`  数量或分片长度
+  - `int` 表示拆分数量
+  - `list` 表示每个分片长度
+
+- `indices_or_sections` 数量或切分索引位置
+  - `int` 表示拆分数量
+  - `list` 表示切分的索引位置
+
 
 ## 命名与参数设计
 
