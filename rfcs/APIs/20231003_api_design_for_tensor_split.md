@@ -583,8 +583,6 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
     - 返回值
     > output (List of Tensors)
 
-另外，这几个接口均无需 `name` 参数，因为输出可能为多个 Tensor。
-
 *说明* 这里参数说明只简单的描述了主要不同点，`equal sized or not`。
 
 ## 底层 OP 设计
