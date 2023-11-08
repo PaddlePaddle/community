@@ -34,7 +34,7 @@
 
 **投票规则：** 从社区内选举产生，提前两周进行候选人征集，征集完成后，在社区内，进行投票产生。投票人（给飞桨社区做出过代码贡献的社区开发者）人数需要超过20人，才可以开展投票。对于选举票，每名投票人有三张选票。得票数量最多的5名候选人成为委员。
 
-### 饶青锋（GitHub ID：[WilliamQf-AI]https://github.com/WilliamQf-AI）
+### 饶青锋（GitHub ID：[WilliamQf-AI](https://github.com/WilliamQf-AI)）
 
 - 自我介绍：c++、python工程师，基于paddle落地了多个生产项目
 - 参加宣言：吃水不忘挖井人，取之于开源，用之于开源，回馈于开源
