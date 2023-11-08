@@ -4,7 +4,7 @@
 | - | - |
 | 提交作者 | megemini(柳顺) |
 | 提交时间 | 2023-10-03 |
-| 版本号 | V1.1 |
+| 版本号 | V1.2 |
 | 依赖飞桨版本 | develop |
 | 文件名 | 20231003_api_design_for_tensor_split.md |
 
@@ -86,7 +86,7 @@
 
 其中 `Numpy` 的 `indices_or_sections`、 `Paddle` 的 `num_or_sections`、 `PyTorch` 的 `split_size_or_sections` 作用一致，都是上文中引用中指出的拆分数量或方式，但是具体含义略有不同：
 
-- `num_or_sections`  数量或分片长度
+- `num_or_sections`, `split_size_or_sections`  数量或分片长度
   - `int` 表示拆分数量
   - `list` 表示每个分片长度
 
@@ -514,25 +514,25 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
 
 上一章指出：
 
-- `PyTorch` 的实现方式：`tensor_split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `tensor_split` 实现，`split` 的签名与其他几个函数也不相同。
-- `TensorFlow`, `Numpy` 的实现方式：`split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `split` 实现，`Numpy` 单独实现了 `array_split` 函数。
-- `Paddle` 的实现方式：`split`, `vsplit` 为一组，都是通过 `split` 实现。
+- `PyTorch` 的实现方式：`tensor_split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `tensor_split` (indices_or_sections) 实现，`split` 的签名 (split_size_or_sections) 与其他几个函数也不相同。
+- `TensorFlow`, `Numpy` 的实现方式：`split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `split` (indices_or_sections) 实现，`Numpy` 单独实现了 `array_split` 函数 (indices_or_sections)。
+- `Paddle` 的实现方式：`split`, `vsplit` 为一组，都是通过 `split` (num_or_sections) 实现。
 
-因此，本次设计 `split` 与 `tensor_split` 的主要不同：
+因此，本次设计 `split` (num_or_sections) 与 `tensor_split` (indices_or_sections) 的主要不同：
 
 分割参数为 `int`：
-  - `split`，包括对应的 `vsplit`, `dsplit`, `hsplit` 为一组 API，是 `等分` 方式分割。
-  - `tensor_split` 可以 `不等分`。
+  - `split` (num_or_sections)，包括对应的 `vsplit`, `dsplit`, `hsplit` 为一组 API，是 `等分` 方式分割。
+  - `tensor_split` (indices_or_sections) 可以 `不等分`。
 
 分割参数为 `list|tuple`：
-  - `split`，包括对应的 `vsplit`, `dsplit`, `hsplit` 为一组 API，输入 `不能越界`，即，list 或 tuple 的长度不能超过输入 Tensor 待分割的维度的大小，且参数中可以有一个 `-1`。
-  - `tensor_split` 可以 `越界`，由此，分割参数中不能有 `-1`。
+  - `split` (num_or_sections)，包括对应的 `vsplit`, `dsplit`, `hsplit` 为一组 API，表示每个分片长度，输入 `不能越界`，即，list 或 tuple 的长度不能超过输入 Tensor 待分割的维度的大小，且参数中可以有一个 `-1`。
+  - `tensor_split` (indices_or_sections) 表示切分的索引位置，可以 `越界`，由此，分割参数中不能有 `-1`。
 
-考虑 `hsplit`, `dsplit` 通过 `split` 方式实现，签名的主要参数参考 `split` 函数(`num_or_sections`)，`tensor_split` 则单独实现，通过签名(`indices_or_sections`)体现差异化。
+考虑 `hsplit`, `dsplit` 通过 `split` 方式实现，签名的主要参数参考 `split` (num_or_sections) 函数，`tensor_split` 则单独实现，通过签名(indices_or_sections) 体现差异化。
 
 其中：
 
-- `num_or_sections`  数量或分片长度
+- `num_or_sections`, `split_size_or_sections`  数量或分片长度
   - `int` 表示拆分数量
   - `list` 表示每个分片长度
 
