@@ -37,7 +37,7 @@
 ### 饶青锋（GitHub ID：[WilliamQf-AI]https://github.com/WilliamQf-AI）
 
 - 自我介绍：c++、python工程师，基于paddle落地了多个生产项目
-- 参加宣言：吃水不忘挖井人，取之于开源，用之于开源，回馈于开源
+- 参加宣言：吃水不忘挖井人，取之于开源，回馈于开源
 
 ### 王涛（GitHub ID：）
 
