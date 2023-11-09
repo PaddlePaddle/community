@@ -6,7 +6,7 @@
 
 **任务背景：**
 
-目前飞桨的开源套件如PaddelClas、PaddleNLP、PaddleSeg、PaddleDetection、Paddle3D、PaddleOCR等，都支持了动转静训练功能，但是并非所有的模型都接入了`--to_static`策略，随着PaddleSOT 功能的完善和上线，动转静训练成功率大幅度提升，故此挑战赛旨在对开源套件中所有模型进行动转静训练策略推全。
+目前飞桨的开源套件如PaddelClas、PaddleNLP、PaddleSeg、PaddleDetection、Paddle3D、PaddleOCR等，都支持了动转静训练功能，但是并非所有的模型都接入了`--to_static`策略，随着PaddleSOT 功能的完善和上线，动转静训练成功率大幅度提升，故此挑战赛旨在对开源套件中所有模型进行动转静训练策略推全。本题完成一个方向即可获得1颗🌟，一共可获得6颗🌟。
 
 **详细描述：**
 
@@ -38,7 +38,7 @@
 **详细描述：**
 
 1. 版面分析和OCR后，使用minidocx创建docx文档，libxlsxwriter生成excel。
-2. 提交PR到PPOCR。
+2. 在[ppstruncture的推理代码](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/deploy/cpp_infer/src/paddlestructure.cpp)上增加相关功能，提交PR到PPOCR。
 
 **提交内容：**
 
@@ -142,11 +142,11 @@ DocTr++版面矫正在文档比对、关键字提取、合同篡改确认等重�
 **详细描述：**
 
 1. 下载[动态图模型](https://github.com/PaddlePaddle/Paddle3D/tree/develop/docs/models/bevfusion)，进行静态图导出
-2. 基于导出的模型进行python链条的部署和C++部署的验证。（代码结构可以参考：https://github.com/PaddlePaddle/Paddle3D/tree/develop/deploy/petr）
+2. 基于导出的模型进行python链条的部署和C++部署的验证，代码结构可以参考[PETR推理部署](https://github.com/PaddlePaddle/Paddle3D/tree/develop/deploy/petr)。
 
 **提交内容：**
 
-参照其他部署文件，提交部署内容到[Paddle3D/develop/deploy/](https://github.com/PaddlePaddle/Paddle3D/tree/develop/deploy/petr）)bevfusion文件夹下。
+参照其他部署文件，提交部署内容到[Paddle3D/develop/deploy/](https://github.com/PaddlePaddle/Paddle3D/tree/develop/deploy)bevfusion文件夹下。
 
 ### No.72：新增模型TaskMatrix 
 
