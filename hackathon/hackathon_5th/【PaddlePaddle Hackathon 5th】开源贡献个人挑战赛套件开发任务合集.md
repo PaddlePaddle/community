@@ -388,7 +388,7 @@ PaddleMIX ppdiffusers 作为飞桨扩散模型基础设施其目标之一是为�
 视频生成是当下继图片生成之后AIGC的另一热点，相关工作愈加成熟，希望进一步完善飞桨在视频生成领域的能力。
 
 **详细描述：**
-* 基于PaddleMIX ppdiffusers完成MS-Image2Video和MS-Vid2Vid-XL的模型转换和前向对齐,转换模型权重进行生成，保证生成效果的对齐；
+* 基于 PaddleMIX ppdiffusers 完成 MS-Image2Video 和 MS-Vid2Vid-XL 的模型转换和前向对齐，转换模型权重进行生成，保证生成效果的对齐；
 * 模型转换可使用工具[PaConvert](https://github.com/PaddlePaddle/PaConvert)
 * 模型对齐可使用工具[PaDiff](https://github.com/PaddlePaddle/PaDiff)
 * 将对齐的模型应用到pipeline，参考 https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/examples/inference/text_to_video_generation-synth.py；
