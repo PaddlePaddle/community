@@ -74,7 +74,7 @@
 - 自我介绍：
 - 参加宣言：
 
-### 陈龙（GitHub ID：）
+### 陈龙（GitHub ID：[mrcangye](https://github.com/mrcangye)）
 
-- 自我介绍：
-- 参加宣言：
+- 自我介绍：百度飞桨开发者技术专家（PPDE），Paddle、PaddleScience、PaddleOCR、docs代码仓库贡献者
+- 参加宣言：携手开源，共创未来！我愿为开源社区的繁荣与发展贡献自己的力量，推动协作创新，共建开源生态。
