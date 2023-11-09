@@ -38,7 +38,7 @@
 **详细描述：**
 
 1. 版面分析和OCR后，使用minidocx创建docx文档，libxlsxwriter生成excel。
-2. 在[ppstruncture的推理代码](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/deploy/cpp_infer/src/paddlestructure.cpp)上增加相关功能，提交PR到PPOCR。
+2. 在[ppstruncture的推理代码](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/deploy/cpp_infer/src/paddlestructure.cpp)上增加相关功能，提交PR到PaddleOCR。
 
 **提交内容：**
 
