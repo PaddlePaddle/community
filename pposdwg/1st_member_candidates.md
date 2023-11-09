@@ -49,7 +49,7 @@
 - 自我介绍：
 - 参加宣言：
 
-### 饶玉田（GitHub ID：）
+### 饶玉田（GitHub ID：[raoyutian](https://github.com/raoyutian)）
 
 - 自我介绍：飞桨开发者技术专家（PPDE），PaddleOCR、PaddleSeg贡献者，优化代码并封装了飞桨的几个CV模块的SDK库，提供C++\C#\PYTHON\GO\RUST\JAVA等调用的SDK类库。
 - 参加宣言：让更多的企业和个人使用开源技术，促进飞桨开源技术落地应用。
