@@ -41,7 +41,7 @@
 
 ### 王涛（GitHub ID：[bltcn](https://github.com/bltcn)）
 
-- 自我介绍：全栈开发人员，一直关于paddle整个产品栈，并试验了很多项目
+- 自我介绍：全栈开发人员，一直关注paddle整个产品栈，并试验了很多项目
 - 参加宣言：一直在薅paddle的羊毛，也希望能为paddle做做贡献
 
 ### 李永超（GitHub ID：）
