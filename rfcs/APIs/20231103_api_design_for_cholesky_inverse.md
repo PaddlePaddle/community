@@ -144,7 +144,7 @@ Scipy 使用wrapper的方式调用lapack库的 ``zpotri_``, ``cpotri_``, ``dpotr
     - **name** (str, 可选) - 具体用法请参见 :ref:`api_guide_Name` ，一般无需设置，默认值为None。
 
 - Returns
-    - Tensor, 如果upper为True, 返回$(U^{T}U)^{-1}$，否则返回$(LL^{T})^{-1}$
+    - Tensor, 如果upper为True, 返回 $(U^TU)^{-1}$ ，否则返回 $(LL^T)^{-1}$
 
 ## 底层OP设计
 优先考虑实现与PyTorch结果对齐
