@@ -39,10 +39,10 @@
 - 自我介绍：c++、python工程师，基于paddle落地了多个生产项目
 - 参加宣言：吃水不忘挖井人，取之于开源，回馈于开源
 
-### 王涛（GitHub ID：）
+### 王涛（GitHub ID：[bltcn](https://github.com/bltcn)）
 
-- 自我介绍：
-- 参加宣言：
+- 自我介绍：全栈开发人员，一直关注paddle整个产品栈，并试验了很多项目
+- 参加宣言：一直在薅paddle的羊毛，也希望能为paddle做做贡献
 
 ### 李永超（GitHub ID：）
 
