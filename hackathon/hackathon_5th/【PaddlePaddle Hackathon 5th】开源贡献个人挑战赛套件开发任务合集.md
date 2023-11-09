@@ -445,7 +445,7 @@ HF提供了丰富的应用pipeline，其中部分具有一定的应用价值，�
 
 **完成步骤：**
 - 研究 PaddleMIX 项目以及 ppdiffusers 模块的代码结构和功能
-- 参考 edict_pipeline.py  https://github.com/huggingface/diffusers/blob/main/examples/community/edict_pipeline.py 基于 ppdiffusers https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的pipeline实现,完成对齐。
+- 参考 edict_pipeline.py  https://github.com/huggingface/diffusers/blob/main/examples/community/edict_pipeline.py 基于 ppdiffusers https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的 pipeline 实现，完成对齐。
 - 参考 pipeline_fabric.py https://github.com/huggingface/diffusers/blob/main/examples/community/pipeline_fabric.py 基于 ppdiffusers https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的pipeline实现,完成对齐。
 
 
