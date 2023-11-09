@@ -59,10 +59,10 @@
 - 自我介绍：
 - 参加宣言：
 
-### 张一乔（GitHub ID：）
+### 张一乔（GitHub ID：[Liyulingyue](https://github.com/Liyulingyue)）
 
-- 自我介绍：
-- 参加宣言：
+- 自我介绍：飞桨开发者技术专家（PPDE），飞桨仓库Committer，混迹于AiStudio和飞桨社区的各个角落，致力于创造有趣的项目。
+- 参加宣言：世界上最美好的一些事情，比如开源，总是真正自由并且富有创造力的！
 
 ### 郑必城（GitHub ID：）
 
