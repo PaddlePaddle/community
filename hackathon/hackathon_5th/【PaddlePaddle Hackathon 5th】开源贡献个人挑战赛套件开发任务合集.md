@@ -133,7 +133,7 @@ DocTr++版面矫正在文档比对、关键字提取、合同篡改确认等重�
 1. 对PP-YOLO-E+_crn_l、RT-DETR-L模型新增实例分割头，且在COCO数据集上达到较同样level模型的更高的精度。
 2. 打通基于python的部署，文档齐全。
 
-### No.71：新增 bevfusion 部署链条 
+### No.71：新增 bevfusion 部署链条
 
 **任务背景：**
 
@@ -148,7 +148,7 @@ DocTr++版面矫正在文档比对、关键字提取、合同篡改确认等重�
 
 参照其他部署文件，提交部署内容到[Paddle3D/develop/deploy/](https://github.com/PaddlePaddle/Paddle3D/tree/develop/deploy)bevfusion文件夹下。
 
-### No.72：新增模型TaskMatrix 
+### No.72：新增模型TaskMatrix
 
 **任务背景：**
 
@@ -289,7 +289,7 @@ minigpt-4量化能力评估，[代码](https://github.com/salesforce/LAVIS/tree/
 
 - 将已接入appflow的应用以及对应的模型添加单测，应用+模型数量：12个
 - 参考https://github.com/PaddlePaddle/PaddleMIX/blob/develop/tests/models/test_blip2.py ，添加groudingdino、sam模型的单测：2个，
-- 添加应用单测：10个 
+- 添加应用单测：10个
   - [自动标注（AutoLabel）](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/applications/Automatic_label/README.md/#自动标注autolabel)
   - [文图生成（Text-to-Image Generation）](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/applications/text2image/README.md/#文图生成text-to-image-generation)
   - [文本引导的图像放大（Text-Guided Image Upscaling）](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/applications/image2image/README.md/#文本引导的图像放大text-guided-image-upscaling)
@@ -367,10 +367,14 @@ PaddleMIX ppdiffusers 作为飞桨扩散模型基础设施其目标之一是为�
 
 **详细描述：**
 
-基于ppdiffusers最新代码完成向HF新版本能力的扩充，主要完成 https://github.com/huggingface/diffusers/compare/v0.19.3...v0.21.1 models 模块升级同步
+将 PaddleMIX 中的 ppdiffusers 代码升级以支持 Hugging Face (HF) 的新版本能力。具体是升级 models 模块以同步到 HF 版本 v0.19.3 到 v0.21.1 之间的变更。确保功能覆盖和单元测试的有效性。
 
-- 保证功能覆盖
-- 保证单测
+
+**完成步骤：**
+- 研究 PaddleMIX 项目以及 ppdiffusers 模块的代码结构和功能
+- 阅读 HF Diffusers 项目的文档和代码，了解其新版本 v0.19.3 到 v0.21.1 之间 models 的变更，包括新功能和改进。可参考 https://github.com/huggingface/diffusers/compare/v0.19.3...v0.21.1
+- 根据 HF Diffusers 新版本的变更，将 models 模块的代码升级到最新版本。
+- 更新 ppdiffusers 中与 models 模块相关的单元测试，保证单元测试通过。
 
 **提交内容：**
 
@@ -384,9 +388,13 @@ PaddleMIX ppdiffusers 作为飞桨扩散模型基础设施其目标之一是为�
 视频生成是当下继图片生成之后AIGC的另一热点，相关工作愈加成熟，希望进一步完善飞桨在视频生成领域的能力。
 
 **详细描述：**
-* 基于PaddleMIX ppdiffusers完成MS-Image2Video和MS-Vid2Vid-XL的模型转换和前向对齐；转换模型权重进行生成，保证生成效果的对齐；
+* 基于 PaddleMIX ppdiffusers 完成 MS-Image2Video 和 MS-Vid2Vid-XL 的模型转换和前向对齐，转换模型权重进行生成，保证生成效果的对齐；
+* 模型转换可使用工具[PaConvert](https://github.com/PaddlePaddle/PaConvert)
+* 模型对齐可使用工具[PaDiff](https://github.com/PaddlePaddle/PaDiff)
 * 将对齐的模型应用到pipeline，参考 https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/examples/inference/text_to_video_generation-synth.py；
-* 生成提供gradio demo用于验证串联效果。
+* 生成提供gradio demo用于验证串联效果。可参考[Gradio应用介绍](https://aistudio.baidu.com/projectdetail/6536645)
+
+
 
 **提交内容：**
 提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
@@ -398,8 +406,11 @@ PaddleMIX ppdiffusers 作为飞桨扩散模型基础设施其目标之一是为�
 
 **详细描述：**
 * 基于PaddleMIX ppdiffusers完成DI-VTON-Virtual-Try-On模型前向对齐，定量指标对齐[Taming the Power of Diffusion Models for High-Quality Virtual Try-On with Appearance Flow](https://github.com/bcmi/DCI-VTON-Virtual-Try-On#dci-vton-virtual-try-on)的Table 1
+* 模型转换可使用工具[PaConvert](https://github.com/PaddlePaddle/PaConvert)
+* 模型对齐可使用工具[PaDiff](https://github.com/PaddlePaddle/PaDiff)
 * 将对齐的模型应用到pipeline，参考 https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/examples/inference/text_to_video_generation-synth.py；
 * 实现训练功能，训练Warping Module和Diffusion Model评估对齐原repo。
+
 
 **提交内容：**
 提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
@@ -412,8 +423,12 @@ PaddleMIX ppdiffusers 作为飞桨扩散模型基础设施其目标之一是为�
 
 **详细描述：**
 * 基于PaddleMIX ppdiffusers完成TF-ICON模型的前向对齐，使用SD（sd-v2-1_512-ema-pruned）模型权重和TF-ICON Test Benchmark上保证Image Composition的生成效果，且定量指标对齐[TF-ICON: Diffusion-Based Training-Free Cross-Domain Image Composition](https://shilin-lu.github.io/tf-icon.github.io/)的Table 3
-和应用pipeline，参考https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的pipeline实现；
-* 提供gradio demo验证pipeline效果。
+和应用pipeline。
+* 模型转换可使用工具[PaConvert](https://github.com/PaddlePaddle/PaConvert)
+* 模型对齐可使用工具[PaDiff](https://github.com/PaddlePaddle/PaDiff)
+* 应用pipeline可参考https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的pipeline实现
+* 提供gradio demo验证pipeline效果。可参考[Gradio应用介绍](https://aistudio.baidu.com/projectdetail/6536645)
+
 
 **提交内容：**
 提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
@@ -428,10 +443,12 @@ HF提供了丰富的应用pipeline，其中部分具有一定的应用价值，�
 
 基于PaddleMIX ppdiffusers完成以下pipeline，保证生成效果对齐
 
-edict_pipeline.py  https://github.com/huggingface/diffusers/blob/main/examples/community/edict_pipeline.py
+**完成步骤：**
+- 研究 PaddleMIX 项目以及 ppdiffusers 模块的代码结构和功能
+- 参考 edict_pipeline.py  https://github.com/huggingface/diffusers/blob/main/examples/community/edict_pipeline.py 基于 ppdiffusers https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的 pipeline 实现，完成对齐。
+- 参考 pipeline_fabric.py https://github.com/huggingface/diffusers/blob/main/examples/community/pipeline_fabric.py 基于 ppdiffusers https://github.com/PaddlePaddle/PaddleMIX/tree/develop/ppdiffusers/examples/community 下的 pipeline 实现，完成对齐。
 
-pipeline_fabric.py https://github.com/huggingface/diffusers/blob/main/examples/community/pipeline_fabric.py
 
 **提交内容：**
 
-提交到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
+提交 edict_pipeline.py、pipeline_fabric.py 到 https://github.com/PaddlePaddle/PaddleMIX/tree/develop
