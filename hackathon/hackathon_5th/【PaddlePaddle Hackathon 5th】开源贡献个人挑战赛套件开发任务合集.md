@@ -451,4 +451,4 @@ HF提供了丰富的应用pipeline，其中部分具有一定的应用价值，�
 
 **提交内容：**
 
-提交edict_pipeline.py、pipeline_fabric.py到https://github.com/PaddlePaddle/PaddleMIX/tree/develop
+提交 edict_pipeline.py、pipeline_fabric.py 到 https://github.com/PaddlePaddle/PaddleMIX/tree/develop
