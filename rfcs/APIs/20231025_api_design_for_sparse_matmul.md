@@ -26,41 +26,43 @@
 
 # 三、业内方案调研
 ## PyTorch
-Pytorch 的稀疏矩阵乘法的实现代码的位置在 `pytorch/aten/src/ATen/native/sparse/SparseMatMul.cpp`。
 
-函数 `sparse_matmul_kernel` 在计算稀疏矩阵乘法时，会将两个相乘的矩阵统一为 `CSR` 模式，再进行计算，得到 `CSR` 模式的计算结果。如果想要获得 `COO` 模式的计算结果，需将 `CSR` 模式转化为 `COO` 模式。
+Pytorch 中实现了 `CSR*CSR` 计算模式的 kernel 。在计算 `Sparse * Sparse` 时，会将两个相乘的矩阵统一为 `CSR` 模式，再调用 kernel 进行计算得到 `CSR` 计算结果，最后将计算结果转换 `COO` 模式，API 调用方式如下：
 
-```cpp
-template <typename scalar_t>
-void sparse_matmul_kernel(
-    Tensor& output,
-    const Tensor& mat1,
-    const Tensor& mat2) {
-        ...
-}
+```python
+torch.sparse.mm
+torch.mm
 ```
 
+CPU 版本的 kernel 为 `sparse_matmul_kernel` ，其代码的位置在 `pytorch/aten/src/ATen/native/sparse/SparseMatMul.cpp`。
+
+CPU kernel 实现了 [论文](https://doi.org/10.1007/BF02070824) 中的稀疏矩阵算法。
+
+GPU 版本的 kernel 为 `sparse_sparse_matmul_cuda_kernel` ，其代码的位置在 `pytorch/aten/src/ATen/native/sparse/cuda/SparseMatMul.cu`。
+
+GPU kernel 使用了 cuda 实现计算，当 `cudaSparse` 库可用时，kernel 调用 `cusparseSpGEMM` 进行矩阵运算，否则会调用 `thrust` 进行矩阵运算。
 
 ## TensorFlow
-TensorFlow 的稀疏矩阵乘法的实现代码的位置在 `tensorflow\core\kernels\sparse\sparse_mat_mul_op.cc`。
+TensorFlow 中的 `SparseTensor` 使用了 `COO` 模式存储稀疏矩阵，为了支持 `CSR` 模式的稀疏矩阵，专门设计了 `CSRSparseMatrix`。
 
-主要使用了 `cudaSparse` 库的 `cusparseSpGEMM` 实现计算。
-```cpp
-#if GOOGLE_CUDA && (CUDA_VERSION >= 12000)
-    GpuSparse cudaSparse(ctx);
-    OP_REQUIRES_OK(ctx, cudaSparse.Initialize());
-   
-    ...
+TensorFlow 中没有 `COO*COO` 计算模式的直接实现。
 
-    OP_REQUIRES_OK(ctx,
-                   cudaSparse.SpGEMM_compute<T>(matA, matB, matC, gemmDesc, &bufferSize2, nullptr));
+`CSR*CSR` 计算模式的 API 调用方式如下：
+```python
+tensorflow.python.ops.linalg.sparse.sparse_matrix_sparse_mat_mul
 ```
+
+算子实现代码的位置在 `tensorflow\core\kernels\sparse\sparse_mat_mul_op.cc`，包含 CPU 版本的 `CSRSparseMatMulCPUOp` 和 GPU 版本的 `CSRSparseMatMulGPUOp`。
+
+`CSRSparseMatMulCPUOp` 使用了 `Eigen` 库实现计算；`CSRSparseMatMulGPUOp`使用了 `cudaSparse` 库的 `cusparseSpGEMM` 实现计算。
 
 
 # 四、对比分析
-PyTorch 中实现了 `CSR*CSR` 模式的稀疏矩阵乘法计算，在其他模式 `CSR*COO`、`COO*COO` 的计算时，会进行稀疏矩阵模式的转换。
+PyTorch 同时支持 `CSR*CSR`、`COO*COO` 计算模式，其底层只实现了 `CSR*CSR` 模式的稀疏矩阵乘法计算，在计算 `COO*COO` 模式时，底层代码会进行稀疏矩阵模式的转换。
 
-TensorFlow 中是调用了 `cudaSparse` 库完成稀疏矩阵乘法计算。
+TensorFlow 只支持 `CSR*CSR` 计算模式。
+
+PyTorch 和 TensorFlow 在使用 GPU 进行稀疏矩阵乘法计算时，都调用了 `cudaSparse` 库。
 
 Paddle 中已经有部分的稀疏矩阵乘法 API，代码位置在 `paddle/phi/kernels/sparse/gpu/matmul_kernel.cu`，主要是通过`cudaSparse` 库完成计算。
 
@@ -127,6 +129,9 @@ API 主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要�
 
 `cudaSparse` 库的 `cusparseSpGEMM` 只支持 `CSR*CSR` 模式，在计算 `COO*COO` 模式时，需要进行 `COO` 和 `CSR` 模式之间的转换。
 
+反向算计算方式：
+
+
 # 六、测试和验收的考量
 
 在 `test/legacy_test/test_sparse_matmul_op.py` 中补充对 `COO*COO`、`CSR*CSR` 计算模式的测试。参照 `TestMatmul` 类，测试 2 维和 3 维稀疏矩阵的乘法计算。
@@ -147,3 +152,4 @@ API 主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要�
 # 附件及参考资料
 
 [The API reference guide for cuSPARSE](https://docs.nvidia.com/cuda/cusparse/)
+[CSR Sparse Matrix](https://github.com/tensorflow/community/blob/master/rfcs/20200519-csr-sparse-matrix.md)
