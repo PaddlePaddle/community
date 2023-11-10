@@ -64,10 +64,10 @@
 - 自我介绍：飞桨开发者技术专家（PPDE），飞桨仓库Committer，混迹于AiStudio和飞桨社区的各个角落，致力于创造有趣的项目。
 - 参加宣言：世界上最美好的一些事情，比如开源，总是真正自由并且富有创造力的！
 
-### 郑必城（GitHub ID：）
+### 郑必城（GitHub ID： [Zheng-Bicheng](https://github.com/Zheng-Bicheng)）
 
-- 自我介绍：
-- 参加宣言：
+- 自我介绍：PFCC、PPDE、Arm Ambassador，为Padlle2ONNX、FastDeploy、PaddlePaddle贡献过W行代码
+- 参加宣言：不求最好, 但愿更好, 尽心尽力就是成功。
 
 ### 汪昕（GitHub ID：）
 
