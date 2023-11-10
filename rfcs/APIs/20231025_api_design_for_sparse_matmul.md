@@ -129,8 +129,10 @@ API 主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要�
 
 `cudaSparse` 库的 `cusparseSpGEMM` 只支持 `CSR*CSR` 模式，在计算 `COO*COO` 模式时，需要进行 `COO` 和 `CSR` 模式之间的转换。
 
-反向算计算方式：
+反向算子计算方式如下：
+
 $dx = dout * y'$
+
 $dy = x' * dout$
 
 # 六、测试和验收的考量
