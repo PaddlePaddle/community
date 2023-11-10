@@ -69,10 +69,10 @@
 - 自我介绍：
 - 参加宣言：
 
-### 汪昕（GitHub ID：）
+### 汪昕（GitHub ID：[GreatV](https://github.com/GreatV)）
 
-- 自我介绍：
-- 参加宣言：
+- 自我介绍：飞桨开发者技术专家（PPDE），Paddle仓库Committer，算法工程师，欢乐开源爱好者。
+- 参加宣言：欢乐开源，欢乐成长。
 
 ### 陈龙（GitHub ID：[mrcangye](https://github.com/mrcangye)）
 
