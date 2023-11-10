@@ -57,7 +57,7 @@
 ### 金友至（GitHub ID：[jinyouzhi](https://github.com/jinyouzhi)）
 
 - 自我介绍：AI框架工程师，Paddle、PaddleFleetX代码仓库贡献者，PFCC成员。现供职于某半导体厂商加速计算产品线，主打摸资本主义的鱼，支援社会主义框架建设。
-- 参加宣言：相信开源事业能够团结最广大的用户和开发者共同促进技术进步，进而打破垄断和封锁，构建一个真正国际化全球化的社区。
+- 参加宣言：相信开源事业能够团结最广大的用户和开发者共同促进技术进步，进而打破垄断和封锁，构建一个国际化社区。
 
 ### 张一乔（GitHub ID：[Liyulingyue](https://github.com/Liyulingyue)）
 
