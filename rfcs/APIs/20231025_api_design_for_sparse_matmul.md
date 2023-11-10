@@ -36,7 +36,7 @@ torch.mm
 
 CPU 版本的 kernel 为 `sparse_matmul_kernel` ，其代码的位置在 `pytorch/aten/src/ATen/native/sparse/SparseMatMul.cpp`。
 
-CPU kernel 实现了 [论文](https://doi.org/10.1007/BF02070824) 中的稀疏矩阵算法。
+CPU kernel 实现了 [Sparse matrix multiplication package (SMMP)](https://doi.org/10.1007/BF02070824) 论文中的稀疏矩阵乘法算法。
 
 GPU 版本的 kernel 为 `sparse_sparse_matmul_cuda_kernel` ，其代码的位置在 `pytorch/aten/src/ATen/native/sparse/cuda/SparseMatMul.cu`。
 
@@ -130,7 +130,8 @@ API 主要通过调用 `cudaSparse` 库完成计算实现，目前暂不需要�
 `cudaSparse` 库的 `cusparseSpGEMM` 只支持 `CSR*CSR` 模式，在计算 `COO*COO` 模式时，需要进行 `COO` 和 `CSR` 模式之间的转换。
 
 反向算计算方式：
-
+$dx = dout * y'$
+$dy = x' * dout$
 
 # 六、测试和验收的考量
 
