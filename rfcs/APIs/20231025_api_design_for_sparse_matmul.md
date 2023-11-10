@@ -27,7 +27,7 @@
 # 三、业内方案调研
 ## PyTorch
 
-Pytorch 中实现了 `CSR*CSR` 计算模式的 kernel 。在计算 `Sparse * Sparse` 时，会将两个相乘的矩阵统一为 `CSR` 模式，再调用 kernel 进行计算得到 `CSR` 计算结果，最后将计算结果转换 `COO` 模式，API 调用方式如下：
+Pytorch 在计算 `Sparse * Sparse` 时，会将两个相乘的矩阵统一为 `CSR` 模式，再调用 `CSR*CSR` 计算模式的 kernel， 计算得到 `CSR` 计算结果，最后将计算结果转换 `COO` 模式，API 调用方式如下：
 
 ```python
 torch.sparse.mm
