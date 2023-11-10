@@ -66,8 +66,8 @@
 
 ### 郑必城（GitHub ID： [Zheng-Bicheng](https://github.com/Zheng-Bicheng)）
 
-- 自我介绍：PFCC、PPDE、Arm Ambassador，为Padlle2ONNX、FastDeploy、PaddlePaddle贡献过W行代码
-- 参加宣言：不求最好, 但愿更好, 尽心尽力就是成功。
+- 自我介绍：PFCC、PPDE、Arm Ambassador，为Padlle2ONNX、FastDeploy、PaddlePaddle贡献过万行代码。
+- 参加宣言：不求最好，但愿更好，尽心尽力就是成功。
 
 ### 汪昕（GitHub ID：）
 
