@@ -137,7 +137,7 @@ $dy = x' * dout$
 
 # 六、测试和验收的考量
 
-在 `test/legacy_test/test_sparse_matmul_op.py` 中补充对 `COO*COO`、`CSR*CSR` 计算模式的测试。参照 `TestMatmul` 类，测试 2 维和 3 维稀疏矩阵的乘法计算。
+在 `test/legacy_test/test_sparse_matmul_op.py` 中补充对 `COO*COO`、`CSR*CSR` 计算模式的测试。参照 `TestMatmul` 类，测试 2 维稀疏矩阵的乘法计算。
 
 # 七、可行性分析和排期规划
 
