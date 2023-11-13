@@ -20,7 +20,7 @@
 
 幂平均池化每个窗口的计算过程：
 
-![39_1](https://github.com/WintersMontagne10335/doing/assets/118546135/eb928fe6-fff8-4c69-855a-82c933466583)
+![img_LPPool_0.png](image/img_LPPool_0.png)
 
 ## 2、功能目标
 
@@ -143,10 +143,11 @@ def lp_pool1d(
 
 `LPPool1d` 的公式如下:
 
-![image](https://github.com/WintersMontagne10335/doing/assets/118546135/14e5652f-521c-4b2c-bda4-7857e481ec34)
+![img_LPPool_1.png](image/img_LPPool_1.png)
 
 `AVGPool1d` 的公式如下:
-![image](https://github.com/WintersMontagne10335/doing/assets/118546135/9927757c-4c50-40aa-9e8a-ac3be01b54b0)
+
+![img_LPPool_2.png](image/img_LPPool_2.png)
 
 对比可知，`LPool1d` 开方符号下的部分，是变形的累加池化，而累加池化又可以通过平均池化的结果乘以 `kernel_size` 来实现。所以，`PyTorch` 基于 `AVGPool1d` ，并与 `mul` 等相组合，实现了 `LPool1d` 。
  
