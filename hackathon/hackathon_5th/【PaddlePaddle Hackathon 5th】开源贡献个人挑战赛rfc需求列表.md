@@ -44,10 +44,11 @@
 | 35       | 🌟🌟       | 为 Paddle 新增 histogramdd API                               | 是                           |
 | 36       | 🌟🌟       | 为 Paddle 新增 matrix_exp API                                | 是                           |
 | 37       | 🌟🌟       | 为 Paddle 新增 householder_product API                       | 是                           |
-| 38       | 🌟🌟🌟      | 为 Paddle 新增 FractionalMaxPool2d / FractionalMaxPool3d API | 是                           |
-| 39       | 🌟🌟🌟      | 为 Paddle 新增 LPPool1D / LPPool2D API                       | 是                           |
-| 40       | 🌟🌟🌟      | 为 Paddle 新增 ASGD API                                      | 是                           |
-| 41       | 🌟🌟🌟      | 为 Paddle 新增 Rprop API                                     | 是                           |
+| 38       | 🌟🌟🌟     | 为 Paddle 新增 FractionalMaxPool2d / FractionalMaxPool3d API | 是                           |
+| 39       | 🌟🌟🌟     | 为 Paddle 新增 LPPool1D / LPPool2D API                       | 是                           |
+| 40       | 🌟🌟🌟     | 为 Paddle 新增 ASGD API                                      | 是                           |
+| 41       | 🌟🌟🌟     | 为 Paddle 新增 Rprop API                                     | 是                           |
+| 110      | 🌟         | 为 Paddle 增强 sparse.matmul API                              | 是                           |
 
 
 ## 框架其他开发任务
@@ -65,6 +66,11 @@
 | 50       | 🌟        | 为 Paddle 新增 slice 的 spmd 切分推导规则                | 否                           |
 | 51       | 🌟        | 为 Paddle 新增 flatten 的 spmd 切分推导规则              | 否                           |
 | 52       | 🌟🌟       | 为 Paddle 新增 squeeze 和 unsqueeze 的 spmd 切分推导规则 | 否                           |
+| 101  | 🌟    | 将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel实现从fluid下迁移到phi下 |  否    |
+| 102  | 🌟    | 将paddle内部的fused_embedding_eltwise_layernorm、fusion_transpose_flatten_concat和fused_fc_elementwise_layernorm算子及其kernel实现从fluid下迁移到phi下 | 否     |
+| 103  | 🌟    | 将paddle内部的skip_layernorm、fc和fused_bias_dropout_residual_layer_norm算子及其kernel实现从fluid下迁移到phi下 |  否    |
+| 104  | 🌟    | 将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下 |  否    |
+| 105  | 🌟    | 将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下 |   否   |
 
 ## 科学计算模型复现
 
@@ -85,17 +91,17 @@
 
 | **序号** | **难度** | **任务 ISSUE**                                               | **是否需要提交rfc** |
 | -------- | -------- | ------------------------------------------------------------ | ---------------------------- |
-| 64       | 🌟        | 全套件模型接入动转静训练功能                      | 是                           |
+| 64       | 🌟🌟🌟🌟🌟🌟        | 全套件模型接入动转静训练功能                      | 是                           |
 | 65       | 🌟        | 版面恢复功能（恢复为docx或者excel）的c++版        | 是                           |
-| 66       | 🌟        | 生僻词模型训练                                    | 是                           |
+| 66       | 🌟🌟      | 生僻词模型训练                                    | 是                           |
 | 67       | 🌟🌟       | 版面矫正网络DocTr++论文复现                       | 是                           |
 | 68       | 🌟🌟       | 轻量语义分割网络PIDNet                            | 是                           |
 | 69       | 🌟        | 分类大模型--人体视觉任务SOLIDER                   | 是                           |
-| 70       | 🌟        | DET重点模型支持实例分割                           | 是                           |
+| 70       | 🌟🌟        | DET重点模型支持实例分割                           | 是                           |
 | 71       | 🌟        | 新增 bevfusion 部署链条                           | 是                           |
 | 72       | 🌟🌟       | 新增模型TaskMatrix                                | 是                           |
-| 73       | 🌟🌟       | 新增模型Tree of Thoughts                          | 是                           |
-| 74       | 🌟🌟       | RetroMAE训练                                      | 是                           |
+| 73       | 🌟🌟🌟       | 新增模型Tree of Thoughts                          | 是                           |
+| 74       | 🌟🌟🌟       | RetroMAE训练                                      | 是                           |
 | 75       | 🌟🌟       | 新增模型InstructBlip                              | 是                           |
 | 76       | 🌟        | 新增数据集训练和评估 (coco retrieval)             | 是                           |
 | 77       | 🌟🌟🌟      | 新增模型kosmos2                                   | 是                           |
@@ -127,3 +133,8 @@
 | 98       | 🌟🌟       | 完成PP-YOLOE在华为昇腾平台上的推理优化                       | 是                           |
 | 99       | 🌟🌟       | 基于 Qualcomm SNPE SDK 开发 RMSNorm 算子                     | 是                           |
 | 100      | 🌟        | 基于openKylin OS和X2paddle实现面向AI框架的统一推理接口，实现AI软件的适配与应用 | 是                           |
+| 106  | 🌟    | Paddle模型适配InfiniTensor推理引擎                           | 否 |
+| 107  | 🌟    | 基于InfiniTensor推理引擎的对话类示范应用                     | 否 |
+| 108  | 🌟    | 为InfiniTensor推理引擎添加GeLU算子                           | 否 |
+| 109  | 🌟    | InfiniTensor推理引擎的Windows系统适配                        | 否 |
+| 111  | 🌟🌟🌟    | 基于PaddleSeg的纤维轮廓识别                        | 否 |

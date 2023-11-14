@@ -943,3 +943,23 @@ Rprop优化器是在A direct adaptive method for faster backpropagation learning
 - 了解 Paddle 动静态图下 Optimize pass过程
 - 熟练掌握 C++ 、CUDA、Python
 - 熟悉 Rprop 优化器算法原理和适用场景
+
+### No.110：为 Paddle 增强 sparse.matmul API
+
+**详细描述：**
+
+稀疏API `paddle.sparse.matmul` 可支持 `COO*Dense`、`COO*COO`、`CSR*Dense`、`CSR*CSR` 四种计算模式，当前已支持 `COO*Dense`、`CSR*Dense` 两种，还剩余 `COO*COO`、`CSR*CSR` 两种计算模式需开发，一共需要开发其GPU的前反向kernel共4个，需要调用底层CUDA库`cusparse`。目前暂不需要开发 CPU kernel。
+
+
+**提交内容：**
+
+- API 的增强设计文档，并提 PR 至 community repo 的 [rfcs/APIs](https://github.com/PaddlePaddle/community/tree/master/rfcs/APIs) 目录；
+- Python 实现代码 & 英文 API 文档，在 Paddle repo 的[paddle/sparse/binary.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/sparse/binary.py) 文件；
+- CUDA 实现代码，头文件为 [phi/kernels/sparse/matmul_kernel.h](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/phi/kernels/sparse/matmul_kernel.h)，cu文件为 [phi/kernels/sparse/gpu/matmul_kernel.cu](https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/phi/kernels/sparse/gpu/matmul_kernel.cu)
+- 补充新增功能单测代码，原单测为[test/legacy_test/test_sparse_matmul_op.py](https://github.com/PaddlePaddle/Paddle/blob/develop/test/legacy_test/test_sparse_matmul_op.py)中，在原单测的基础上补充新增功能的测试，需重新增强设计`class TestMatmul`，以支持更多的稀疏格式测试
+- 中文 API 文档，在 docs repo 的 [docs/api/paddle](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle) 目录，文档中需要说明增强后的格式支持情况以及增加相应的示例代码
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+- 熟悉CUDA库cusparse的调用方式
