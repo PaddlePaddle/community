@@ -13,7 +13,7 @@
 
 ## 会议议程
 
-- 飞桨开源产品负责人张军（GitHub ID：[jzhang533](https://github.com/jzhang533)） 介绍飞桨开源发展工作组基本情况，详见 [PaddlePaddle OpenSource Development Working Group](https://github.com/PaddlePaddle/community/tree/master/pposdwg)
+- 飞桨开源产品负责人张军（GitHub ID：[jzhang533](https://github.com/jzhang533)） 介绍飞桨开源发展工作组基本情况，详见 [PaddlePaddle OpenSource Development Working Group](https://github.com/PaddlePaddle/community/tree/master/pposdwg) 以及 [介绍材料](https://www.canva.cn/design/DAFzuXdkbeA/n6_WqVzLhnqM1PzQgry9VQ/view?utm_content=DAFzuXdkbeA&utm_campaign=designshare&utm_medium=link&utm_source=editor)。
 - 候选人陈述，每人3-5min，候选人列表详见 [1st_member_candidates](https://github.com/PaddlePaddle/community/blob/master/pposdwg/1st_member_candidates.md)
 - 选举投票环节，现场发布投票问卷，参会成员投票后，公示投票结果
 - 宣布飞桨开源发展工作组成立，后续组织第一次工作组会议agenda
