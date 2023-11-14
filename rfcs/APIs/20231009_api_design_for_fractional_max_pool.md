@@ -1669,6 +1669,245 @@ v2.0: 将实现方式由 python 改为 c++
 
     主要逻辑与 CPU 算子类似，这里不再赘述，有一个需要单独指出的是，PR：https://github.com/PaddlePaddle/Paddle/pull/45959 中，单独针对 `AdaptiveKernelMaxPool2dWithIdx` 做了优化，本次设计方案暂不进行优化方面的设计。
 
+### 池化序列的生成方法
+
+这里编写了一个简化的程序，以演示如何生成 fractional 的池化序列：
+
+``` cpp
+#include <iostream>
+#include <math.h>
+
+inline int AdaptStartIndex(int ph, int input_size, int output_size) {
+  return static_cast<int>(
+      floor(static_cast<float>(ph * input_size) / output_size));
+}
+
+inline int AdaptEndIndex(int ph, int input_size, int output_size) {
+  return static_cast<int>(
+      ceil(static_cast<float>((ph + 1) * input_size) / output_size));
+}
+
+inline int FractionalStartIndex(int ph, double alpha, double u) {
+  return static_cast<int>(
+      // subtract `1` for index from `0`
+      ceil(alpha * (ph + u) - 1));
+}
+
+inline int FractionalEndIndex(int ph, double alpha, double u) {
+  return static_cast<int>(
+      // subtract `1` for index from `0`
+      ceil(alpha * (ph + 1 + u) - 1)) ;
+}
+
+
+int main()
+{
+    int input_height = 32;
+    int output_height = 25;
+    for (int ph = 0; ph < output_height; ++ph) {
+
+        int hstart = AdaptStartIndex(ph, input_height, output_height);
+        int hend = AdaptEndIndex(ph, input_height, output_height);
+
+        std::cout << "------------" << std::endl;
+        std::cout << "ph " << ph << std::endl;
+        std::cout << "hstart " << hstart << " hend " << hend << " diff " << hend - hstart << std::endl;
+    }
+
+    std::cout << "====================" << std::endl;
+
+    double alpha = static_cast<double>(input_height) / output_height;
+    int base = input_height / output_height;
+
+    double u_max1 = (base + 2) / alpha - 1;
+    double u_max2 = (input_height + 1 - base) / alpha - (output_height - 1);
+    double max_u = std::min(u_max1, u_max2);
+
+    double u = 0.8 * max_u;
+
+    for (int ph = 0; ph < output_height; ++ph) {
+
+        int hstart = FractionalStartIndex(ph, alpha, u);
+        int hend = FractionalEndIndex(ph, alpha, u);
+        hend = std::min(hend, input_height);
+
+        std::cout << "------------" << std::endl;
+        std::cout << "ph " << ph << std::endl;
+        std::cout << "hstart " << hstart << " hend " << hend << " diff " << hend - hstart << std::endl;
+    }
+
+    std::cout << "alpha is " << alpha << " u is " << u << " max u is " << max_u << std::endl;
+}
+
+```
+
+运行后得到结果：
+
+``` shell
+$> g++ n38_index.cc -Wall && ./a.out
+------------
+ph 0
+hstart 0 hend 2 diff 2
+------------
+ph 1
+hstart 1 hend 3 diff 2
+------------
+ph 2
+hstart 2 hend 4 diff 2
+------------
+ph 3
+hstart 3 hend 6 diff 3
+------------
+ph 4
+hstart 5 hend 7 diff 2
+------------
+ph 5
+hstart 6 hend 8 diff 2
+------------
+ph 6
+hstart 7 hend 9 diff 2
+------------
+ph 7
+hstart 8 hend 11 diff 3
+------------
+ph 8
+hstart 10 hend 12 diff 2
+------------
+ph 9
+hstart 11 hend 13 diff 2
+------------
+ph 10
+hstart 12 hend 15 diff 3
+------------
+ph 11
+hstart 14 hend 16 diff 2
+------------
+ph 12
+hstart 15 hend 17 diff 2
+------------
+ph 13
+hstart 16 hend 18 diff 2
+------------
+ph 14
+hstart 17 hend 20 diff 3
+------------
+ph 15
+hstart 19 hend 21 diff 2
+------------
+ph 16
+hstart 20 hend 22 diff 2
+------------
+ph 17
+hstart 21 hend 24 diff 3
+------------
+ph 18
+hstart 23 hend 25 diff 2
+------------
+ph 19
+hstart 24 hend 26 diff 2
+------------
+ph 20
+hstart 25 hend 27 diff 2
+------------
+ph 21
+hstart 26 hend 29 diff 3
+------------
+ph 22
+hstart 28 hend 30 diff 2
+------------
+ph 23
+hstart 29 hend 31 diff 2
+------------
+ph 24
+hstart 30 hend 32 diff 2
+====================
+------------
+ph 0
+hstart 1 hend 2 diff 1
+------------
+ph 1
+hstart 2 hend 3 diff 1
+------------
+ph 2
+hstart 3 hend 4 diff 1
+------------
+ph 3
+hstart 4 hend 6 diff 2
+------------
+ph 4
+hstart 6 hend 7 diff 1
+------------
+ph 5
+hstart 7 hend 8 diff 1
+------------
+ph 6
+hstart 8 hend 9 diff 1
+------------
+ph 7
+hstart 9 hend 11 diff 2
+------------
+ph 8
+hstart 11 hend 12 diff 1
+------------
+ph 9
+hstart 12 hend 13 diff 1
+------------
+ph 10
+hstart 13 hend 15 diff 2
+------------
+ph 11
+hstart 15 hend 16 diff 1
+------------
+ph 12
+hstart 16 hend 17 diff 1
+------------
+ph 13
+hstart 17 hend 18 diff 1
+------------
+ph 14
+hstart 18 hend 20 diff 2
+------------
+ph 15
+hstart 20 hend 21 diff 1
+------------
+ph 16
+hstart 21 hend 22 diff 1
+------------
+ph 17
+hstart 22 hend 24 diff 2
+------------
+ph 18
+hstart 24 hend 25 diff 1
+------------
+ph 19
+hstart 25 hend 26 diff 1
+------------
+ph 20
+hstart 26 hend 27 diff 1
+------------
+ph 21
+hstart 27 hend 29 diff 2
+------------
+ph 22
+hstart 29 hend 30 diff 1
+------------
+ph 23
+hstart 30 hend 31 diff 1
+------------
+ph 24
+hstart 31 hend 32 diff 1
+alpha is 1.28 u is 0.8 max u is 1
+
+```
+
+可以看到
+- adaptive 的池化序列为 `2...3...` 的样式，fractional 的池化序列为 `1...2...` 的样式。
+- adaptive 的池化序列存在 index 交叉，而 fractional 不存在交叉。
+
+另外:
+- `FractionalStrartIndex` 和 `FractionalEndIndex` 需要减去 `1`，因为根据论文中的算法要求，使用 `ceil`，将使 index 从 `1` 开始，所以这里需要减去 `1`。
+- `hend = std::min(hend, input_height);` 这里需要与 input 比对取小值，同样是由于 `ceil` 导致。
+
 ## python layer 实现
 
 涉及文件：
