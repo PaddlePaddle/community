@@ -748,6 +748,7 @@ v2.0: 将实现方式由 python 改为 c++
     这是 `PyTorch` 与 `TensorFlow` 最大的不同点。文章中的 `fractional` 根据 `N_in/N_out` 得出，也就是说，只需要这两个参数即可。
     `PyTorch` 提供了 `kernel_size`、`output_size`、`output_ratio` 这三个参数，这三个参数都可以影响 `N_in/N_out`，这更像是传统池化的方法。
     `TensorFlow` 只提供了 `pooling_ratio`，利用这个参数即可得到 `N_out`，而且提供了 `overlapping` 参数，利用这个参数可以影响 `kernel_size`。而且，由此可以看出，`TensorFlow` 实现的 `fractional max pooling` 更具有一般性，而 `adaptive max pooling` 则可以看作 `fractional max pooling` 的一种特例。
+    `PyTorch` 只利用随机序列作为 stride，而不是同时将其作为 kernel 进行池化，`TensorFlow` 将随机序列既作为 stride 同时也作为 kernel 进行池化，更符合论文中的描述方式，所以，这里以 `TensorFlow` 的方式进行实现。
 
     - `fractional max pooling` : `a = ceiling(alpha(i+u)), 1 < alpha = N_in/N_out < 2, 0 < u < 1`
     - `adaptive max pooling` : `a = ceiling(alpha(i+1)), 1 < alpha = N_in/N_out < 2`
