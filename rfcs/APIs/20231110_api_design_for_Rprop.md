@@ -289,12 +289,10 @@ TODO:LaTeX公式
 
     ``` python
     paddle.optimizer.Rprop(
-        delta = 0.01,
-        delta_min = 1e-6,
-        delta_max = 50,
+        learning_rate = 0.01,
+        learning_rate_range = (1e-5, 50),
         parameters = None,
-        eta_negative = 0.5,
-        eta_positive = 1.2,
+        etas = (0.5, 1.2),
         grad_clip = None,
         name = None
     ):
@@ -302,12 +300,10 @@ TODO:LaTeX公式
 
     |参数名|类型|描述|
     |---|---|---|
-    |delta|float|used to update ``Parameter``|
-    |delta_min|float|delta cannot be smaller than delta_min|
-    |delta_max|float|delta cannot be larger than delta_max|
+    |learning_rate|float|used to update ``Parameter``|
+    |learning_rate_range|tuple|learning_rate cannot be smaller than the first element of the tuple; learning_rate cannot be larger than the second element of the tuple|
     |parameters|list, tuple|list / tuple of ``Tensor`` to update to minimize ``loss``|
-    |eta_negative|float|multiplicative decrease factor|
-    |eta_positive|float|multiplicative increase factor|
+    |etas|tuple|the first element of the tuple is the multiplicative decrease factor; the second element of the tuple is the multiplicative increase factor|
     |grad_clip|GradientClipBase|gradient cliping strategy|
     |name|str|normally there is no need for user to set this property|
 
