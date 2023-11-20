@@ -20,6 +20,10 @@
 - 在 `Rprop` 中，每一个可优化的权重，都对应着一个单独的学习率，这些学习率在程序执行过程中不断地更新
 - 误差函数梯度，并不通过值直接作用于权重值的变化，而是通过符号及符号的变化影响步长，进而间接地影响权重值的变化
 
+伪代码如下：
+
+![img_Rprop_0.png](image/img_Rprop_0.png)
+
 ## 2、功能目标
 
 新增 `Rprop` API。
@@ -248,7 +252,7 @@ def _single_tensor_rprop(
 
 这里与原论文的实现略有不同，原论文中，当上次的梯度符号与本次梯度符号相反时，会对权重值做一个“回溯”的操作，即
 
-TODO:LaTeX公式
+![img_Rprop_1.png](image/img_Rprop_1.png)
 
 `PyTorch` 无此操作。
 
@@ -309,15 +313,229 @@ TODO:LaTeX公式
 
 ## 底层 OP 设计
 
-TODO
+- paddle/phi/api/yaml/ops.yaml
 
-做完底层实现后补充。
+```yaml
+- op : rprop_
+  args : (Tensor param, Tensor grad, Tensor prev, Tensor learning_rate, Tensor master_param, Tensor learning_rate_range, Tensor etas, bool multi_precision=false)
+  output : Tensor(param_out), Tensor(prev_out), Tensor(learning_rate_out), Tensor(master_param_out)
+  infer_meta :
+    func : RpropInferMeta
+  kernel :
+    func : rprop
+    data_type : param
+  data_transform :
+    support_trans_dtype : learning_rate
+  optional : master_param, master_param_out
+  inplace : (param -> param_out), (prev -> prev_out), (learning_rate -> learning_rate_out), (master_param -> master_param_out)
+```
+
+`infer_meta` 分发到了 `RpropInferMeta`，`kernel` 分发到了 `rprop`（`rprop` 分别做了 `CPU` 和 `GPU` 的实现）。
+
+- paddle/phi/infermeta/multiary.cc
+
+```C++
+void RpropInferMeta(const MetaTensor& param,
+                    const MetaTensor& grad,
+                    const MetaTensor& prev,
+                    const MetaTensor& learning_rate,
+                    const MetaTensor& master_param,
+                    const MetaTensor& learning_rate_range,
+                    const MetaTensor& etas,
+                    bool multi_precision,
+                    MetaTensor* param_out,
+                    MetaTensor* prev_out,
+                    MetaTensor* learning_rate_out,
+                    MetaTensor* master_param_out) {
+  PADDLE_ENFORCE_NOT_NULL(
+      param_out,
+      phi::errors::InvalidArgument(
+          "Output(ParamOut) of RpropOp should not be null."));
+
+  param_out->set_dims(param.dims());
+  param_out->set_dtype(param.dtype());
+  prev_out->set_dims(prev.dims());
+  prev_out->set_dtype(prev.dtype());
+  learning_rate_out->set_dims(learning_rate.dims());
+  learning_rate_out->set_dtype(learning_rate.dtype());
+  if (multi_precision) {
+    master_param_out->set_dims(master_param.dims());
+    if (DataType::FLOAT16 == master_param.dtype() ||
+        DataType::BFLOAT16 == master_param.dtype()) {
+      master_param_out->set_dtype(DataType::FLOAT32);
+    } else {
+      master_param_out->set_dtype(master_param.dtype());
+    }
+  }
+}
+```
+
+- paddle/phi/kernels/cpu/rprop_kernel.cc
+
+```C++
+template <typename T, typename Context>
+void RpropKernelCPUImpl(const Context& dev_ctx,
+                        const DenseTensor& param,
+                        const DenseTensor& grad,
+                        const DenseTensor& prev,
+                        const DenseTensor& learning_rate,
+                        const DenseTensor& learning_rate_range,
+                        const DenseTensor& etas,
+                        DenseTensor* param_out,
+                        DenseTensor* prev_out,
+                        DenseTensor* learning_rate_out) {
+  auto param_eigen = EigenVector<T>::Flatten(param);
+  auto prev_eigen = EigenVector<T>::Flatten(prev);
+  auto param_out_eigen = EigenVector<T>::Flatten(*param_out);
+  auto prev_out_eigen = EigenVector<T>::Flatten(*prev_out);
+  auto learning_rate_out_eigen = EigenVector<T>::Flatten(*learning_rate_out);
+  auto learning_rate_min = learning_rate_range.data<T>()[0];
+  auto learning_rate_max = learning_rate_range.data<T>()[1];
+  auto eta_negative = etas.data<T>()[0];
+  auto eta_positive = etas.data<T>()[1];
+
+  DenseTensor* grad_tensor = new DenseTensor();
+  grad_tensor->Resize(grad.dims());
+  dev_ctx.template Alloc<T>(grad_tensor);
+  phi::Copy<Context>(dev_ctx, grad, dev_ctx.GetPlace(), true, grad_tensor);
+  auto grad_eigen = EigenVector<T>::Flatten(*grad_tensor);
+
+  DenseTensor* product_tensor = new DenseTensor();
+  product_tensor->Resize(grad.dims());
+  dev_ctx.template Alloc<T>(product_tensor);
+  auto product_eigen = EigenVector<T>::Flatten(*product_tensor);
+
+  DenseTensor* learning_rate_tensor = new DenseTensor();
+  learning_rate_tensor->Resize(learning_rate.dims());
+  dev_ctx.template Alloc<T>(learning_rate_tensor);
+  phi::Copy<Context>(
+      dev_ctx, learning_rate, dev_ctx.GetPlace(), true, learning_rate_tensor);
+  auto learning_rate_eigen = EigenVector<T>::Flatten(*learning_rate_tensor);
+
+  DenseTensor* eta_tensor = new DenseTensor();
+  eta_tensor->Resize(learning_rate.dims());
+  dev_ctx.template Alloc<T>(eta_tensor);
+  auto eta_eigen = EigenVector<T>::Flatten(*eta_tensor);
+
+  product_eigen = grad_eigen * prev_eigen;
+  T* product_data = product_tensor->data<T>();
+  T* grad_data = grad_tensor->data<T>();
+  T* eta_data = eta_tensor->data<T>();
+  T zero = static_cast<T>(0);
+  T one = static_cast<T>(1);
+  for (int i = 0, n = product_tensor->numel(); i < n; i++) {
+    if (product_data[i] > zero) {
+      eta_data[i] = eta_positive;
+    } else if (product_data[i] == zero) {
+      eta_data[i] = one;
+    } else if (product_data[i] < zero) {
+      grad_data[i] = zero;
+      eta_data[i] = eta_negative;
+    }
+  }
+
+  learning_rate_eigen = learning_rate_eigen * eta_eigen;
+  T* learning_rate_data = learning_rate_tensor->data<T>();
+  for (int i = 0, n = learning_rate_tensor->numel(); i < n; i++) {
+    if (learning_rate_data[i] > learning_rate_max) {
+      learning_rate_data[i] = learning_rate_max;
+    } else if (learning_rate_data[i] < learning_rate_min) {
+      learning_rate_data[i] = learning_rate_min;
+    }
+  }
+
+  param_out_eigen = param_eigen - grad_eigen.sign() * learning_rate_eigen;
+  prev_out_eigen = grad_eigen;
+  learning_rate_out_eigen = learning_rate_eigen;
+  phi::Copy<Context>(dev_ctx, *grad_tensor, dev_ctx.GetPlace(), true, prev_out);
+  phi::Copy<Context>(dev_ctx,
+                     *learning_rate_tensor,
+                     dev_ctx.GetPlace(),
+                     true,
+                     learning_rate_out);
+}
+```
+
+用 `Eigen` 实现 `rprop` `CPU` 端逻辑。
+
+- paddle/phi/kernels/gpu/rprop_kernel.cu
+
+```cuda
+template <typename T, typename MT>
+__global__ void RpropKernelGPUImpl(const T* param,
+                                   const T* grad,
+                                   const T* prev,
+                                   const T* learning_rate,
+                                   const MT* master_param,
+                                   const T* learning_rate_range,
+                                   const T* etas,
+                                   int num,
+                                   T* param_out,
+                                   T* prev_out,
+                                   T* learning_rate_out,
+                                   MT* master_param_out) {
+  MT learning_rate_min_data = static_cast<MT>(learning_rate_range[0]);
+  MT learning_rate_max_data = static_cast<MT>(learning_rate_range[1]);
+  MT eta_negative_data = static_cast<MT>(etas[0]);
+  MT eta_positive_data = static_cast<MT>(etas[1]);
+  MT zero_data = static_cast<MT>(0);
+  MT one_data = static_cast<MT>(1);
+  MT negative_one_data = static_cast<MT>(-1);
+
+  CUDA_KERNEL_LOOP(i, num) {
+    MT param_data = master_param ? master_param[i] : static_cast<MT>(param[i]);
+    MT grad_data = static_cast<MT>(grad[i]);
+    MT prev_data = static_cast<MT>(prev[i]);
+    MT learning_rate_data = static_cast<MT>(learning_rate[i]);
+    MT product_data = grad_data * prev_data;
+
+    MT eta_data = one_data;
+    if (product_data > zero_data) {
+      eta_data = eta_positive_data;
+    } else if (product_data < zero_data) {
+      grad_data = zero_data;
+      eta_data = eta_negative_data;
+    }
+
+    learning_rate_data = learning_rate_data * eta_data;
+    if (learning_rate_data > learning_rate_max_data) {
+      learning_rate_data = learning_rate_max_data;
+    } else if (learning_rate_data < learning_rate_min_data) {
+      learning_rate_data = learning_rate_min_data;
+    }
+
+    MT grad_sign_data = zero_data;
+    if (grad_data > zero_data) {
+      grad_sign_data = one_data;
+    } else if (grad_data < zero_data) {
+      grad_sign_data = negative_one_data;
+    }
+
+    param_data = param_data - grad_sign_data * learning_rate_data;
+    prev_data = grad_data;
+
+    param_out[i] = static_cast<T>(param_data);
+    prev_out[i] = static_cast<T>(prev_data);
+    learning_rate_out[i] = static_cast<T>(learning_rate_data);
+    if (master_param_out) {
+      master_param_out[i] = param_data;
+    }
+  }
+}
+```
+
+`GPU` 端实现的基本逻辑与 `CPU` 端相同。
 
 ## API实现方案
 
-- `paddle.optimizer.Rprop`
+实现步骤：
 
-TODO
+1. Python 端逻辑
+2. rprop CPU 与 GPU 端逻辑
+3. RpropInferMeta
+4. ops.yaml
+5. 单元测试
+6. 文档
 
 # 六、测试和验收的考量
 
