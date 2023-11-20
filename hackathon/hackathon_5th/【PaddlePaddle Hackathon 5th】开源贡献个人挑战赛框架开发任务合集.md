@@ -156,7 +156,7 @@
 
 - 正向推导，根据输入的切分状态推导输出的切分状态
 - 逆向推导，根据输出的切分状态推导输入的切分状态
-- 可参考 paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules) 和 tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/slice_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
+- 可参考 [**切分推导规则参考文档**](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/spmd_rules.md)，paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules，可参考 split)，tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/slice_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
 
 **提交内容：**
 
@@ -176,7 +176,7 @@
 
 - 正向推导，根据输入的切分状态推导输出的切分状态
 - 逆向推导，根据输出的切分状态推导输入的切分状态
-- 可参考 paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules) 和 tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions) 和 pytorch 中x相关的实现逻辑 (pytorch/torch/distributed/_tensor/ops)
+- 可参考 [**切分推导规则参考文档**](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/spmd_rules.md)，paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules)，tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions) 和 pytorch 中相关的实现逻辑 (pytorch/torch/distributed/_tensor/ops)
 
 **提交内容：**
 
@@ -196,7 +196,7 @@
 
 - 正向推导，根据输入的切分状态推导输出的切分状态
 - 逆向推导，根据输出的切分状态推导输入的切分状态
-- 可参考 paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules) 和 tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/squeeze_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
+- 可参考 [**切分推导规则参考文档**](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/spmd_rules.md)，paddle 中现有的切分推导规则 (Paddle/paddle/phi/infermeta/spmd_rules)，tensorflow (tensorflow/tensorflow/dtensor/mlir/expansions/squeeze_spmd_expander.cc) 和 pytorch 中的实现逻辑 (pytorch/torch/distributed/_tensor/ops/tensor_ops.py)
 
 **提交内容：**
 
@@ -207,3 +207,124 @@
 
 - 熟练掌握 C++，Python
 - 了解分布式训练
+
+### No.101：将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的fused_multi_transformer/fused_multi_transformer_int8算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_fused_multi_transformer_op.py/test_fused_multi_transformer_int8_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.102：将paddle内部的fused_embedding_eltwise_layernorm、fusion_transpose_flatten_concat和fused_fc_elementwise_layernorm算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的fused_embedding_eltwise_layernorm/fusion_transpose_flatten_concat/fused_fc_elementwise_layernorm算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_emb_eltwise_layernorm_fuse_pass.py/test_ir_embedding_eltwise_layernorm_fuse_pass.py/test_transpose_flatten_concat_fuse_pass.py/test_fused_fc_elementwise_layernorm_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.103：将paddle内部的skip_layernorm、fc和fused_bias_dropout_residual_layer_norm算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的skip_layernorm/fc/fused_bias_dropout_residual_layer_norm算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_trt_skip_layernorm_fuse_pass.py/test_fc_op.py/test_fused_bias_dropout_residual_layer_norm_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.104：将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的self_dp_attention/fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_fused_vit_attention.py/test_fusion_repeated_fc_relu_op.py/test_fusion_squared_mat_sub_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.105：将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+将paddle内部的fusion_gru/fusion_seqconv_eltadd_relu/fusion_seqexpand_concat_fc算子及其kernel从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置fused_ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测test_fusion_gru_op.py/test_fusion_seqconv_eltadd_relu_op.py/test_fusion_seqexpand_concat_fc_op.py运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+**提交内容：**
+
+- kernel迁移到 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/pull/56846/files#diff-2b738e4c56d8686ac926760061fbf0e7d2131dd26ed086b60dcb4821fa332203)/fusion目录下
+- 算子定义在fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+

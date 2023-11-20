@@ -643,3 +643,134 @@ profiler.stop()  ######  这里停止 profiler
 - 部署
 - 熟练掌握C++、Python开发，了解AI算法
 
+### No.106: Paddle模型适配InfiniTensor推理引擎
+
+**任务背景：**
+
+将Paddle的模型利用InfiniTensor实现推理
+
+**详细描述：**
+
+1. 将Paddle模型库中不少于三个模型导入到InfiniTensor推理引擎中，完成推理任务，并在现有数据集上对推理结果进行正确性验证
+
+2. InfiniTensor基于ONNX的推理参考 InfiniTensor/examples/python
+
+3. InfiniTensor 已支持模型列表参考 [https://github.com/InfiniTensor/InfiniTensor/issues/145](https://github.com/InfiniTensor/InfiniTensor/issues/145)
+
+**提交内容：**
+
+以PR形式提交至InfiniTensor/examples/python 目录下，并提供开发流程文档
+
+### No.107：基于InfiniTensor推理引擎的对话类示范应用
+
+**任务背景：**
+
+基于InfiniTensor搭建一个对话类示范应用
+
+**详细描述：**
+
+1. 利用GPT2或类似的生成类模型基于InfiniTensor推理引擎实现一个对话类应用，可以通过python命令行交互界面进行对话
+
+2. InfiniTensor基于ONNX的推理参考 InfiniTensor/examples/python
+
+3. InfiniTensor 已支持模型列表参考 [https://github.com/InfiniTensor/InfiniTensor/issues/145](https://github.com/InfiniTensor/InfiniTensor/issues/145)
+
+**提交内容：**
+
+以PR形式提交至 InfiniTensor/examples/python 目录下，并提供开发流程文档
+
+### No.108：为InfiniTensor推理引擎添加GeLU算子
+
+**任务背景：**
+
+为InfiniTensor添加GeLU算子
+
+**详细描述：**
+
+1. 添加GeLU算子的上层接口、Operator定义、Kernel实现、正确性测试等
+
+2. 算子开发流程参考文档：[https://github.com/InfiniTensor/InfiniTensor/issues/144](https://github.com/InfiniTensor/InfiniTensor/issues/144)
+
+**提交内容：**
+
+参考算子开发流程中的规范将代码以PR形式提交至InfiniTensor仓库的对应目录
+
+### No.109：InfiniTensor推理引擎的Windows系统适配
+
+**任务背景：**
+
+在Windows+GPU环境上适配InfiniTensor推理引擎
+
+**详细描述：**
+
+1. 在Windows+NVIDIA GPU上编译成功InfiniTensor推理引擎，并可以运行测试代码
+
+2. 测试代码参考InfiniTensor/examples/python, InfiniTensor/test/core, InfiniTensor/test/cuda
+
+3. Linux系统编译流程参考文档：https://github.com/InfiniTensor/InfiniTensor/issues/144
+
+4. 禁止使用 wsl、docker 等虚拟环境绕过Windows系统
+
+**提交内容：**
+
+编译流程相关代码及部署文档以PR形式提交至InfiniTensor仓库的对应目录
+
+### No.111：基于PaddleSeg的纤维轮廓识别
+
+**技术标签：**
+
+深度学习，Python，图像分割
+
+**详细描述：**
+
+**情况1：对于图中所有纤维，要精确地给出纤维轮廓，并且边缘要平滑且与原图吻合，边缘不能带有明显齿轮状。**
+
+**错误**输出示意图：
+
+![img](./img/111_1.png)
+
+**正确**输出示意图：
+
+![img](./img/111_2.png)
+
+**情况2：对于有交叉的纤维，要各自识别正确。例如，如同所示，是3根相互交叉的纤维，最后也要预测为3根纤维。中间围成的一个类似三角形区域（镂空区域），是背景，不是纤维的一部分。**
+
+![img](./img/111_3.png)
+
+**情况3：与情况2相似，对于一根纤维，中间打结围城的镂空区域，不是纤维的一部分。**
+
+![img](./img/111_4.png)
+
+**数据集：**
+
+训练集：包含1000张原始图片，数据集不提供标注信息，可以结合 Labelme等标注工具构建训练数据。
+
+测试集：评审前公开。
+
+**标签：**
+
+标签名：fiber
+
+标签数量：1个
+
+**方案建议：**
+
+基于PaddleSeg中的相关模型微调
+
+**评分方式（根据以下几项综合评估）：**
+
+测试集分割掩码**边缘平直且吻合**（人眼观察评分，分数占比50%）。
+
+测试集mIoU，需大于**80%**（分数占比30%）。
+
+技术方案的可用性和可扩展性、产业落地价值和影响、项目作为教程的详细程度（分数占比20%）。
+
+**提交内容：**
+
+AI Studio海光异构算力专区项目（遵从[模板规范](https://aistudio.baidu.com/aistudio/projectdetail/5520056#tdsub)），全部代码和使用数据需开源，效果完整可复现。
+
+**技术要求：**
+
+熟练掌握 Python 开发
+
+熟悉图像分割算法
