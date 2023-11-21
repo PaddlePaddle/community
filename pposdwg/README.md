@@ -26,7 +26,7 @@
     - 谢新飞（GitHub ID：[Tulip-hua](https://github.com/Tulip-hua)）
 
 - 工作组产生记录
-    - pfcc/meetings/2023/2023-11-16-meeting-minutes.md
+    - [Paddle Framework Contributor Club 第三十次特别会议](https://github.com/PaddlePaddle/community/blob/master/pfcc/meetings/2023/2023-11-16-meeting-minutes.md)
 
 ## 致谢
 感谢各位成员对飞桨社区做出的贡献。
