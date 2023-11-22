@@ -256,7 +256,7 @@ PyTorch通过底层调用lapack包来实现householder_product，Scipy中也是�
 
 API的设计为:
 
-- torch.linalg.householder_product(x, tau, name=None)
+- paddle.linalg.householder_product(x, tau, name=None)
 
 其中
 
