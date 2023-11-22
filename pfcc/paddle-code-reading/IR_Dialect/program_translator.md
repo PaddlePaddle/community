@@ -295,7 +295,7 @@ void ProgramTranslator::Translate() {
 
   for (size_t block_idx = 0; block_idx < legacy_program_->Size(); block_idx++) {
     const BlockDesc& block = legacy_program_->Block(block_idx);
-    SetStopGradientAttributeForAllValue(block);
+    SetStopGradientAttributeForAllValue(block); // 将 OpDesc 逐个翻译为 Operation
   }
 
   for (size_t block_idx = 0; block_idx < legacy_program_->Size(); block_idx++) {
@@ -317,7 +317,7 @@ void ProgramTranslator::Translate() {
 
 ```c++
 void ProgramTranslator::InsertOperationToSingleBlock(const BlockDesc& block) {
-  auto& op_translator = OpTranslator::instance();
+  auto& op_translator = OpTranslator::instance(); // OpTranslator 是一个单例
   for (auto op : block.AllOps()) {
     OpTranslateFn& fn = op_translator[op->Type()];
     if (op->Type() == "shadow_output") {
@@ -456,7 +456,7 @@ ir::Operation* OpTranscriber::operator()(ir::IrContext* ctx,
                                          TranslationContext* param_map,
                                          const OpDesc& op_desc,
                                          ir::Program* program) {
-  auto op_info = this->LoopkUpOpInfo(ctx, op_desc);
+  auto op_info = this->LoopkUpOpInfo(ctx, op_desc); // 根据 Op name 获取 op info
   auto* op_info_concept =
       op_info.GetInterfaceImpl<dialect::OpYamlInfoInterface>();
 
@@ -469,25 +469,26 @@ ir::Operation* OpTranscriber::operator()(ir::IrContext* ctx,
   this->InsertSliceOperationForInput(
       ctx, param_map, op_desc, input_infos, program);
 
-  auto op_inputs = this->GenerateOperationInput(
+
+  auto op_inputs = this->GenerateOperationInput( // 获取 Input
       ctx, param_map, op_desc, op_info.name(), input_infos, program);
 
   OpOutputMapping arg_to_idx;
   OpOutputTypeList op_output_types;
   std::tie(op_output_types, arg_to_idx) =
-      this->GenerateOperationOutput(ctx, op_desc, output_infos);
+      this->GenerateOperationOutput(ctx, op_desc, output_infos); // 获取 output_types
 
   auto attribute_map =
-      this->TranslateOpAttribute(ctx, op_info.name(), attr_infos, op_desc);
+      this->TranslateOpAttribute(ctx, op_info.name(), attr_infos, op_desc); // 获取 attributes
   VLOG(4) << "[general op][" << op_desc.Type() << "] preparation end.";
 
   ir::Operation* operation =
-      ir::Operation::Create(op_inputs, attribute_map, op_output_types, op_info);
+      ir::Operation::Create(op_inputs, attribute_map, op_output_types, op_info); // 创建 operation
   VLOG(4) << "[general op][" << op_desc.Type() << "] opearation creation end.";
-  program->block()->push_back(operation);
+  program->block()->push_back(operation); // 插入到 program 中？为什么在这里插入？
 
   VLOG(4) << "[general op][" << op_desc.Type() << "] opearation insertion end.";
-  this->RecordOpResultMapping(ctx, param_map, op_desc, operation, arg_to_idx);
+  this->RecordOpResultMapping(ctx, param_map, op_desc, operation, arg_to_idx); // 记录 Var 和 value 的对应关系
 
   return operation;
 }
@@ -608,31 +609,34 @@ tensor<-1x2048x7x7xf32>
 OpCompatInfo 用于处理动静定义不一致的问题，通过扫描 op_compat.yaml 生成，其接口如下：
 
 ```c++
-  std::string operator[](const std::string& op_type) {
+  std::string operator[](const std::string& op_type) { // 从 OpDesc.name 得到规范化的 Op 名字，方便查询 OpInfo
     if (op_name_mappings.find(op_type) == op_name_mappings.end()) {
       return op_type;
     }
     return op_name_mappings.at(op_type);
   }
 
-  bool HasMutableAttribute(const std::string& op_type) {
+  bool HasMutableAttribute(const std::string& op_type) { // 查询某个 Op 是否有可变 attribute
     return (op_mutable_attributes.find(op_type) != op_mutable_attributes.end());
   }
 
-  const std::unordered_set<std::string>* GetMutableAttributes(
+  const std::unordered_set<std::string>* GetMutableAttributes( // 查询 Op 有哪些可变 attribute
       const std::string& op_type) {
     if (!HasMutableAttribute(op_type)) return nullptr;
     return &op_mutable_attributes.at(op_type);
   }
 
+  // 查询 Op 的可变 attribute 可能对应 OpDesc 里的哪些 Argument, 如 shape 会对应 ShapeTensor ShapeTensorList
   const MutableAttributeInfo& GetMutableAttributeInfos(
       const std::string& op_type, const std::string& arg_name) {
     return op_mutable_attribute_infos.at(op_type).at(arg_name);
   }
 
+  // 查询 Op 的 argument 对应 OpDesc 里的哪个 argument
   std::string GetLegacyArgName(const std::string& op_type,
                                const std::string& arg_name);
 
+  // 查询 Op 的 attribute 对应 OpDesc 里的哪个 attribute
   std::string GetLegacyAttrName(const std::string& op_type,
                                 const std::string& arg_name);
 ```
@@ -786,13 +790,13 @@ TypeTranslator::TypeTranslator() {
 
 
 ```c++
-class AttributeVisitor;
+class AttributeVisitor; // framework::Attribute 是 paddle::variant 类型，因此需要通过 visitor 访问
 
 class AttributeTranslator {
  private:
   AttributeTranslator();
-  AttributeVisitor* general_visitor;
-  std::unordered_map<std::string, AttributeVisitor*> special_visitors;
+  AttributeVisitor* general_visitor; // 通用转换方式
+  std::unordered_map<std::string, AttributeVisitor*> special_visitors; // 对特定类型的转换方式
 
  public:
   AttributeTranslator(const AttributeTranslator&) = delete;
