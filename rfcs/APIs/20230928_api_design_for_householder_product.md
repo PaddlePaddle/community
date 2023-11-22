@@ -256,11 +256,11 @@ PyTorch通过底层调用lapack包来实现householder_product，Scipy中也是�
 
 API的设计为:
 
-- torch.linalg.householder_product(A, tau, name=None)
+- paddle.linalg.householder_product(x, tau, name=None)
 
 其中
 
-+ A(Tensor)：shape 为 (*,m,n),至少为2维。
++ x(Tensor)：shape 为 (*,m,n),至少为2维。
 + tau(Tensor)：shape 为 (*,k)，至少1维。
 + name(str)：表示算子名称，与其他算子统一，默认为None。
 
