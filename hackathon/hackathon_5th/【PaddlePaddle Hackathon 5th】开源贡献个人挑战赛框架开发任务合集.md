@@ -328,3 +328,31 @@ https://github.com/PaddlePaddle/Paddle/pull/56846
 
 https://github.com/PaddlePaddle/Paddle/pull/56846
 
+
+### No.112：将paddle内部的read_file、fused_gemm_epilogue算子及其kernel实现从fluid下迁移到phi下；添加identity_loss的yaml配置
+
+**详细描述：**
+
+将paddle内部的read_file、fused_gemm_epilogue算子及其kernel实现从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置yaml文件生成op定义。read_file配置在ops.yaml文件内，fused_gemm_epilogue配置在fused_ops.yaml内。
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测 test_read_file.py 和 test_fused_gemm_epilogue_op.py 运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+添加identity_loss的yaml配置，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置ops.yaml自定生成op定义
+
+**提交内容：**
+
+- read_file迁移到paddle/phi/kernels目录下，fused_gemm_epilogue迁移到paddle/phi/kernels/fusion目录下
+- 算子定义在ops.yaml和fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
