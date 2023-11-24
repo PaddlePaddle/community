@@ -71,6 +71,7 @@
 | 103  | 🌟    | 将paddle内部的skip_layernorm、fc和fused_bias_dropout_residual_layer_norm算子及其kernel实现从fluid下迁移到phi下 |  否    |
 | 104  | 🌟    | 将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下 |  否    |
 | 105  | 🌟    | 将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下 |   否   |
+| 112  | 🌟    | 将paddle内部的read_file、fused_gemm_epilogue算子及其kernel实现从fluid下迁移到phi下；添加identity_loss的yaml配置 |   否   |
 
 ## 科学计算模型复现
 
