@@ -46,4 +46,10 @@
 |plato-xl| model_zoo | 
 |tinybert| model_zoo | 
 |uie| model_zoo | 
-
+|bloom| llm |
+|chatglm| llm |
+|chatglm2| llm |
+|ernie-3.5-se| llm |
+|glm| llm |
+|gpt-3| llm |
+|llama| llm |
