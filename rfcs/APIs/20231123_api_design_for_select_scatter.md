@@ -40,7 +40,7 @@ output = select_scatter(x, value, dim=0, index=0)
 # [[1, 2],
 #  [0, 0]]
 ```
-
+此外，paddle底层已经实现了`set_value_with_tensor`以及`set_value`两个c op，能够通过start，stop，以及step等参数来设置Tensor指定位置的值。
 
 # 三、业内方案调研
 ### pytorch
@@ -110,7 +110,7 @@ Tensorflow 没有提供 `select_scatter` 的API。
 
 # 四、对比分析
 
- PyTorch 是使用 C++ API 实现的，Python 端直接调用 C++ 接口，性能较好。尽管paddle能够通过算子组合实现该api，但是使用slice来 setitem 性能较差，并且无法达到非inplace的效果。因此计划在实现paddle的`select_scatter`时实现相关c++ kernel
+ PyTorch 是使用 C++ API 实现的，Python 端直接调用 C++ 接口，性能较好。尽管paddle能够通过算子组合实现该api，但是使用slice来 setitem 性能较差，并且无法达到非inplace的效果。因此计划在实现paddle的`select_scatter`时不直接使用slice来 setitem，而是根据输入来定义setitem使用的底层C op `set_value_with_tensor`所需要的输入和属性，直接调用该接口。
 
 # 五、设计思路与实现方案
 
@@ -118,14 +118,14 @@ Tensorflow 没有提供 `select_scatter` 的API。
 在python/paddle/tensor/manipulation.py添加python API
 
 ```python
-def select_scatter(src, value, axis, index)->Tensor
+def select_scatter(x, value, axis, index)->Tensor
 ```
 
 其中
 
- **src**(Tensor) - 输入 Tensor , 支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
+ **x**(Tensor) - 输入 Tensor , 支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`、`complex64`、`complex64`。
 
- **value**(Tensor) - 需要嵌入到输入 Tensor 的 Tensor 值 , 支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`。
+ **value**(Tensor) - 需要嵌入到输入 Tensor 的 Tensor 值 , 支持 `bool`、`float16`、`float32`、`float64`、`uint8`、`int8`、`int16`、`int32`、`int64`、`bfloat16`、`complex64`、`complex64`。
 
 **axis** (int) – 需要嵌入到src Tensor的维度。
 
