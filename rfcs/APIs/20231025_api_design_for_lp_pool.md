@@ -20,7 +20,7 @@
 
 幂平均池化每个窗口的计算过程：
 
-![39_1](https://github.com/WintersMontagne10335/doing/assets/118546135/eb928fe6-fff8-4c69-855a-82c933466583)
+![img_LPPool_0.png](image/img_LPPool_0.png)
 
 ## 2、功能目标
 
