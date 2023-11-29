@@ -133,39 +133,13 @@ def select_scatter(src, value, axis, index)->Tensor
 
 ## 底层OP设计
 
-前项计算的c++ kernel
-
-```c++
-template <typename T, typename Context>
-void SelectScatterKernel(const Context& dev_ctx,
-                        const DenseTensor& src,
-                        const DenseTensor& value,
-                        int axis,
-                        int index,
-                        DenseTensor* out);
-```
-
-反向计算的c++ kernel
-
-```c++
-template <typename T, typename Context>
-void SelectScatterGradKernel(const Context& dev_ctx,
-                            const DenseTensor& src,
-                            const DenseTensor& value,
-                            const DenseTensor& out_grad,
-                            int axis,
-                            int index,
-                            DenseTensor* src_grad,
-                            DenseTensor* value_grad);
-```
+直接调用paddle现有的`set_value_with_tensor`的C op。
 
 
 
 ## API实现方案
 
-分别针对GPU和CPU实现前向和反向计算api，具体实现方案可以参考`paddle.put_along_axis kernel`的实现，将axis前后的维度分别合并从而将src tensor转为一个三维的tensor，举个例子，比如src是一个 shape 为 [2,3,4,5,6] 的tensor，value是 shape 为 [2,3,5,6] 的 tensor ，axis是2，那么在实际实现时将src变为[6,4,30]的tensor，value变为 [6,30] 的tensor，然后再根据 $src[i, index, j]=value[i, j]$ 使用`memcpy（cudamemcpy）`来赋值。
-
-在计算反向时，src_grad先拷贝自输入的grad，然后根据公式 $src\_grad[i, index, j]=0$ 来将使用value的位置的梯度改为0。而 $value\_grad[i,j]= grad[i,index,j]$
+根据输入的axis和index预处理好 `set_value_with_tensor` 所需要的 `start, stop, step, axis` 等输入参数，如何直接调用 `set_value_with_tensor` 将`src`的第`axis`维的`index`的数据改成`value`
 
 # 六、测试和验收的考量
 - 覆盖动态图和静态图的测试场景。
@@ -180,10 +154,10 @@ void SelectScatterGradKernel(const Context& dev_ctx,
 
 - 数据类型的测试：float64、float32、bfloat16等。
 
-- 错误测试：value与src数据类型不一致、src删除axis维度后与value的形状不一致。
+- 错误测试：src删除axis维度后与value的形状不一致。
 
 # 七、可行性分析和排期规划
-将put_along_axis的实现作为参考，工期上可以满足在当前版本周期内开发完成。
+直接调用`set_value_with_tensor`算子的kernel，工期上可以满足在当前版本周期内开发完成。
 
 # 八、影响面
 为独立新增API，对其他模块没有影响。
