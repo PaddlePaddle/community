@@ -118,7 +118,7 @@ Tensorflow 没有提供 `select_scatter` 的API。
 在python/paddle/tensor/manipulation.py添加python API
 
 ```python
-def select_scatter(x, value, axis, index)->Tensor
+def select_scatter(x, value, axis, index, name=None)->Tensor
 ```
 
 其中
@@ -130,6 +130,8 @@ def select_scatter(x, value, axis, index)->Tensor
 **axis** (int) – 需要嵌入到src Tensor的维度。
 
 **index** (int) – 选择的索引。
+
+**name** (str|None): 层的名称(optional)。
 
 ## 底层OP设计
 
