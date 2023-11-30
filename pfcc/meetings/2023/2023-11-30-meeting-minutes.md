@@ -31,7 +31,7 @@
 
 ### 5、《使用 EB SDK 制作游戏》的分享
 
-[liyulingyue](https://github.com/Liyulingyue) 
+[liyulingyue](https://github.com/Liyulingyue)介绍了他之前基于EB-SDK进行开发的工作。
 
 ### 下次会议安排
 
