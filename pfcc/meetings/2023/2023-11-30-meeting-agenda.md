@@ -49,5 +49,5 @@
 2. [shiyutang](https://github.com/shiyutang)  分享《基于ERNIE-Bot-agent框架和开发》 (20 min)
 4. [liyulingyue](https://github.com/Liyulingyue) 分享《使用 EB SDK 制作游戏》 (20 min)
 5. [sunzhongkai588](https://github.com/sunzhongkai588) 宣传 [pfcc.blog](https://pfcc.blog/) 网站，并征集稿件 (10 min)
-6. [Ligoml](https://github.com/Ligoml) 发布2023年下半年飞桨开源之星征集 (5 min)
+6. [Ligoml](https://github.com/Ligoml) 发布2023年下半年飞桨开源之星征集，详见 [issue](https://github.com/PaddlePaddle/community/issues/765) (5 min)
 7. 确定下次会议的主席与副主席，以及召开时间和部分议题预告 (5 min)
