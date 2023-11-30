@@ -36,12 +36,18 @@
 | [NotHaozi](https://github.com/NotHaozi)       | [xingmingyyj](https://github.com/xingmingyyj)            | [ruoyunbai](https://github.com/ruoyunbai)           |      [xiaoyewww](https://github.com/xiaoyewww)        | [hongtushi](https://github.com/hongtushi)           |      [qiuwenbogdut](https://github.com/qiuwenbogdut)   |
 | [ooooo-create](https://github.com/ooooo-create)   |  [kaedeharai](https://github.com/kaedeharai)   |  [Candy2Tang](https://github.com/Candy2Tang)   |  [MarioLulab](https://github.com/MarioLulab)   |  [Lylin](https://github.com/Lylin)   |  [idontkonwher](https://github.com/idontkonwher)   |
 | [whisky-12](https://github.com/whisky-12)   |  [InsaneOnion](https://github.com/InsaneOnion)   |  [yoyoIcy](https://github.com/yoyoIcy)|  [yuchen202](https://github.com/yuchen202) | [Wong4j](https://github.com/Wong4j)  | [Wanglongzhi2001](https://github.com/Wanglongzhi2001)  | 
-| [silverling](https://github.com/silverling) |  [linzeyang](https://github.com/linzeyang)   |  [NKNaN](https://github.com/NKNaN)|  [Sekiro-x](https://github.com/Sekiro-x) | [lknt](https://github.com/lknt)  | [shiyutang](https://github.com/shiyutang)
+| [silverling](https://github.com/silverling) |  [linzeyang](https://github.com/linzeyang)   |  [NKNaN](https://github.com/NKNaN)|  [Sekiro-x](https://github.com/Sekiro-x) | [lknt](https://github.com/lknt)  | [BernieHuang2008](https://github.com/BernieHuang2008)  | 
+| [xusuyong](https://github.com/xusuyong)  | [zlynna](https://github.com/zlynna)  | [zyt1024](https://github.com/zyt1024)  | [wenxiaohahaha](https://github.com/wenxiaohahaha) | [YibinLiu666](https://github.com/YibinLiu666)  | [YSF-A](https://github.com/YSF-A) |
+| [entired](https://github.com/entired)  | [kevincheng2](https://github.com/kevincheng2)  | [Xinyu302](https://github.com/Xinyu302)  | [DanGuge](https://github.com/DanGuge) | [shiyutang](https://github.com/shiyutang)  | [cocoshe](https://github.com/cocoshe) |
+| [ranchongzhi](https://github.com/ranchongzhi)  | [](https://github.com/)  | [](https://github.com/)  | [](https://github.com/) | [](https://github.com/)  | [](https://github.com/) |
+| [](https://github.com/)  | [](https://github.com/)  | [](https://github.com/)  | [](https://github.com/) | [](https://github.com/)  | [](https://github.com/) |
+
 
 ## 会议议程
 
-1. [shiyutang](https://github.com/shiyutang) 介绍会议议程(3 min)
+1. 新人介绍：[BernieHuang2008](https://github.com/BernieHuang2008)、[xusuyong](https://github.com/xusuyong)、[zlynna](https://github.com/zlynna)、[zyt1024](https://github.com/zyt1024)、[wenxiaohahaha](https://github.com/wenxiaohahaha)、[YibinLiu666](https://github.com/YibinLiu666)、[YSF-A](https://github.com/YSF-A)、[entired](https://github.com/entired)、[kevincheng2](https://github.com/kevincheng2)、[Xinyu302](https://github.com/Xinyu302)、[DanGuge](https://github.com/DanGuge)、[cocoshe](https://github.com/cocoshe)、[ranchongzhi](https://github.com/ranchongzhi) (5 min)
 2. [shiyutang](https://github.com/shiyutang)  分享《基于ERNIE-Bot-agent框架和开发》 (20 min)
-4. [liyulingyue](https://github.com/Liyulingyue) 分享使用 EB SDK 制作游戏 (20 min)
-5. [sunzhongkai588](https://github.com/sunzhongkai588)宣传 pfcc.blog 网站，并征集稿件 (20 min)
-6. 确定下次会议的主席与副主席，以及召开时间和部分议题预告（5 min）
+4. [liyulingyue](https://github.com/Liyulingyue) 分享《使用 EB SDK 制作游戏》 (20 min)
+5. [sunzhongkai588](https://github.com/sunzhongkai588) 宣传 [pfcc.blog](https://pfcc.blog/) 网站，并征集稿件 (10 min)
+6. [Ligoml](https://github.com/Ligoml) 发布2023年下半年飞桨开源之星征集 (5 min)
+7. 确定下次会议的主席与副主席，以及召开时间和部分议题预告 (5 min)
