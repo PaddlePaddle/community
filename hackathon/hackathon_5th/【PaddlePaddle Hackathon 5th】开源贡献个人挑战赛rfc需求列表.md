@@ -139,3 +139,4 @@
 | 108  | 🌟    | 为InfiniTensor推理引擎添加GeLU算子                           | 否 |
 | 109  | 🌟    | InfiniTensor推理引擎的Windows系统适配                        | 否 |
 | 111  | 🌟🌟🌟    | 基于PaddleSeg的纤维轮廓识别                        | 否 |
+| 113  | 🌟   | OpenVINO 开放任务            | 否 |
