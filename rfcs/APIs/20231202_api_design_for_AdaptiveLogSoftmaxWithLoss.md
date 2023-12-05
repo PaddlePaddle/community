@@ -23,13 +23,7 @@ Paddle需要扩充API,新增 AdaptiveLogSoftmaxWithLoss API，
 
 adaptive_log_softmax_with_loss的计算分步骤如下
 
-$$\text{head_output} = \text{linear}(\text{input}, \text{head_weight}, \text{head_bias})$$
-
-$$\text{head_logprob} = \text{log_softmax}(\text{head_output}, \text{axis}=1)$$
-
-$$\text{output} += \text{take_along_axis}(\text{head_logprob}, \text{gather_inds.unsqueeze(1)}, \text{axis}=1).\text{squeeze()}$$ 
-
-$$\text{loss} = -\text{output.mean()}$$
+![image](https://github.com/PaddlePaddle/community/assets/69072522/3d43f3e9-deb0-4d52-96be-2cd85a104b90)
 
 ## 3、意义
 
