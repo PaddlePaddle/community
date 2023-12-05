@@ -49,6 +49,15 @@
 | 40       | 🌟🌟🌟     | 为 Paddle 新增 ASGD API                                      | 是                           |
 | 41       | 🌟🌟🌟     | 为 Paddle 新增 Rprop API                                     | 是                           |
 | 110      | 🌟         | 为 Paddle 增强 sparse.matmul API                              | 是                           |
+| 114  | 🌟    | 为paddle.nn.functional.embedding增加参数max_norm/norm_type/scale_grad_by_freq |   否   |
+| 115  | 🌟    | 为paddle.linalg.norm进行功能对齐与功能增强 |   否   |
+| 116  | 🌟    | 为paddle.nn.LSTM/RNNBase/paddle.quantile/nanquantile功能增强 |   否   |
+| 117  | 🌟    | 为paddle.histogram/paddle.nn.functional.threshold进行功能对齐与功能增强 |   否   |
+| 118  | 🌟    | 为paddle.nn.functional.upsample/paddle.nn.initializer.XavierNormal/XavierUniform/KaimingNormal/KaimingUniform进行功能增强 |   否   |
+| 119  | 🌟    | 为paddle.io.RandomSampler/random_split/Layer.clear_gradients进行功能增强 |   否   |
+| 120  | 🌟    | 为paddle.round/paddle.nn.functional.max_pool1d/max_pool2d/max_pool3d进行功能增强 |   否   |
+| 121  | 🌟    | 为paddle.nn.functional.max_unpool1d/max_unpool2d/max_unpool3d/paddle.nn.functional.kl_div进行功能增强 |   否   |
+| 122  | 🌟    | 为paddle.nn.functional.max_pool1d/max_pool2d/max_pool3d/paddle.signal.stft进行功能增强 |   否   |
 
 
 ## 框架其他开发任务
