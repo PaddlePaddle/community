@@ -56,8 +56,8 @@
 | 118  | 🌟    | 为paddle.nn.functional.upsample/paddle.nn.initializer.XavierNormal/XavierUniform/KaimingNormal/KaimingUniform进行功能增强 |   否   |
 | 119  | 🌟    | 为paddle.io.RandomSampler/random_split/Layer.clear_gradients进行功能增强 |   否   |
 | 120  | 🌟    | 为paddle.round/paddle.nn.functional.max_pool1d/max_pool2d/max_pool3d进行功能增强 |   否   |
-| 121  | 🌟    | 为paddle.nn.functional.max_unpool1d/max_unpool2d/max_unpool3d/paddle.nn.functional.kl_div进行功能增强或Bug修复 |   否   |
-| 122  | 🌟    | 为paddle.nn.functional.max_pool1d/max_pool2d/max_pool3d/paddle.signal.stft进行Bug修复 |   否   |
+| 121  | 🌟    | 为paddle.nn.functional.max_unpool1d/max_unpool2d/max_unpool3d/paddle.nn.functional.kl_div进行功能增强 |   否   |
+| 122  | 🌟    | 为paddle.nn.functional.max_pool1d/max_pool2d/max_pool3d/paddle.signal.stft进行功能增强 |   否   |
 
 
 ## 框架其他开发任务
