@@ -23,18 +23,17 @@ Paddle需要扩充API,新增 AdaptiveLogSoftmaxWithLoss API，
 
 adaptive_log_softmax_with_loss的计算分步骤如下
 
-$\text{head_output} = \text{linear}(\text{input}, \text{head_weight}, \text{head_bias})$
+$$\text{head_output} = \text{linear}(\text{input}, \text{head_weight}, \text{head_bias})$$
 
-$\text{head_logprob} = \text{log_softmax}(\text{head_output}, \text{axis}=1)$ 
+$$\text{head_logprob} = \text{log_softmax}(\text{head_output}, \text{axis}=1)$$
 
-$\text{output} += \text{take_along_axis}(\text{head_logprob}, \text{gather_inds.unsqueeze(1)}, \text{axis}=1).\text{squeeze()}$ 
+$$\text{output} += \text{take_along_axis}(\text{head_logprob}, \text{gather_inds.unsqueeze(1)}, \text{axis}=1).\text{squeeze()}$$ 
 
-$\text{loss} = -\text{output.mean()}$
+$$\text{loss} = -\text{output.mean()}$$
 
 ## 3、意义
-在自然语言处理中，当字典维度过大时，embedding 将占据模型大部分参数量。
-例如机器翻译任务中，词表维度大约是2^17，embedding维度取1024，那么就会产生将近1亿参数量，
-如果不共享embedding矩阵和softmax映射的矩阵，将会再多出1亿参数量。
+
+在自然语言处理中，当字典维度过大时，embedding 可能会占据模型较大部分的参数量。
 
 这样会引起常见的两个问题：
 
