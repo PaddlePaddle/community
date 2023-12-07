@@ -3,10 +3,14 @@
 | API 名称 | tensor_split / hsplit / dsplit |
 | - | - |
 | 提交作者 | megemini(柳顺) |
-| 提交时间 | 2023-10-03 |
-| 版本号 | V1.2 |
+| 提交时间 | 2023-12-07 |
+| 版本号 | V2.0 |
 | 依赖飞桨版本 | develop |
 | 文件名 | 20231003_api_design_for_tensor_split.md |
+
+**修改历史**
+v2.0
+- 将 `vsplit`, `hsplit`, `dsplit` 通过 `tensor_split` 实现  
 
 # 一、概述
 
