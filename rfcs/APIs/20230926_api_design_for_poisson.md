@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-26 | 
-|版本号 | V1.1 | 
+|版本号 | V1.2 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20230926_api_design_for_poisson.md<br> | 
 
@@ -317,7 +317,36 @@ paddle.distribution.poisson(rate)
 例如，随机变量 $X$ 服从 Poisson 分布，即 $X \sim Poisson(\lambda)$ ，对应的参数 `rate`$=\lambda$。
 
 ## 底层OP设计
-本次任务的设计思路与已有概率分布保持一致，不涉及底层 OP 的开发。
+底层需要新增OP - binomial_op 二项分布采样。
+
+1. 涉及到修改或新增的文件有：
+```
+paddle/phi/api/yaml/ops.yaml
+paddle/phi/infermeta/binary.cc
+paddle/phi/infermeta/binary.h
+paddle/phi/kernels/binomial_kernel.h
+paddle/phi/kernels/cpu/binomial_kernel.cc
+paddle/phi/kernels/funcs/binomial_functor.h
+paddle/phi/kernels/gpu/binomial_kernel.cu
+python/paddle/tensor/random.py
+test/legacy_test/test_binomial_op.py
+```
+
+2.二项分布采样OP的API设计：
+
+c++ API：
+- 入参：count，prob，均为 Tensor 类型，且需要保持形状一致；cpu kernel可接受 float，double 类型，gpu kernel可接受 float，double，float16，bfloat16 类型。
+- 返回类型：Tensor，数据类型为 int64。
+
+python API:
+- 入参：count，prob，均为 Tensor 类型，形状可以不一致，但需要能够 broadcast 为相同的形状。
+- 返回类型：Tensor，数据类型为 int64。
+
+3.二项分布采样OP实现：
+
+cpu_kernel 与 gpu_kernel 的实现相似，都是在 $n\cdot\min{(p, 1-p)}<10$ 时利用 uniform 随机变量进行逆采样，在 $n\cdot\min{(p, 1-p)}>=10$ 时通过 BTRS 算法进行采样。
+
+gpu_kernel 的写法参照 ``poisson_kernel.cu`` ，用 ``CUDA_KERNEL_LOOP_TYPE`` 对输入的两个 Tensor 进行逐元素迭代，计算得到对应位置的采样结果。
 
 ## API实现方案
 新增 `Poisson` 类
@@ -359,7 +388,7 @@ H = - \sum_{x=0}^{\infty} f(x) \log{f(x)} \approx - \sum_{x=0}^{k} f(x) \log{f(x
 
 - `sample` 随机采样
 
-采样方法： 使用 [PD算法](https://dl.acm.org/doi/10.1145/355993.355997) [R语言中的源码](https://github.com/wch/r-source/blob/trunk/src/nmath/rpois.c)
+采样方法： 实现 ``paddle.binomial`` 原生采样方法后直接调用。
 
 - `prob` 概率密度
 
@@ -411,3 +440,5 @@ $$f(x;\lambda) = \frac{e^{-\lambda} \lambda^x}{x!}$$
 2. [Pytorch 的 Poisson 文档](https://pytorch.org/docs/stable/distributions.html#poisson)
 
 3. [Numpy 的 Poisson 文档](https://numpy.org/doc/1.21/reference/random/generated/numpy.random.poisson.html)
+
+4. [BTRS算法](https://research.wu.ac.at/files/18967500/document.pdf)
