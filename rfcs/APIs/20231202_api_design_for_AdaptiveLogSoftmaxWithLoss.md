@@ -23,7 +23,23 @@ Paddle需要扩充API,新增 AdaptiveLogSoftmaxWithLoss API，
 
 adaptive_log_softmax_with_loss的计算分步骤如下
 
-![image](https://github.com/PaddlePaddle/community/assets/69072522/3d43f3e9-deb0-4d52-96be-2cd85a104b90)
+1. ![image](https://github.com/PaddlePaddle/community/assets/69072522/3f17c9fd-212a-444c-9a87-2a975c452940)
+
+   （将输入 `input` 通过线性变换映射到一个高维空间，其中 `head_weight` 是学习到的权重，`head_bias` 是偏置项。这个映射允许模型学习类别之间的复杂关系。）
+
+2. ![image](https://github.com/PaddlePaddle/community/assets/69072522/893286a4-9c78-4e7f-b5f0-ec152ef69267) 
+
+   （ 将线性变换后的结果进行 softmax 操作，得到每个类别的概率分布，然后取对数。这有助于解决数值稳定性的问题，并且对数概率更容易处理。）
+
+3. ![image](https://github.com/PaddlePaddle/community/assets/69072522/b6987bfb-e1a6-4193-9c12-818b9cc2a76c) 
+
+   （从 `head_logprob` 中选择与给定类别索引 `gather_inds` 相对应的对数概率，然后将其累加到 `output` 中。这一步是为了计算 adaptive softmax 损失，其中仅关注一小部分类别的对数概率。）
+
+4. ![image](https://github.com/PaddlePaddle/community/assets/69072522/e0b6e756-a6d3-46d5-b0bb-240e3847a05f)
+
+   （将累加的对数概率取负值并求平均，得到损失值。这是一个常见的负对数似然损失，用于衡量模型输出与真实标签之间的差异。）
+
+这个函数不止输出`loss`，还输出`output`，表示经过 log softmax 转换后的对数概率的累加值，即每个类别的对数概率的总和。可能用于其他需要基于类别概率进行决策或分析的需求
 
 ## 3、意义
 
@@ -335,14 +351,19 @@ function API：`paddle.nn.functional.adaptive_log_softmax_with_loss(input, label
 计算逻辑参考pytorch实现，并基于paddle API进行重组与封装：
 - function API：`paddle.nn.functional.adaptive_log_softmax_with_loss(input, label, head_weight, tail_weights, cutoffs, head_bias=None)`，使用已有api进行组合实现，
 
-- layer层类API：`paddle.nn.AdaptiveLogSoftmaxWithLoss(in_features, n_classes, cutoffs, div_value=4.0, head_bias=False, name=None)`，包含两个主要方法：
-    - forward(self, input, target)，用于训练，返回为`output` 和 `loss`
-    - predict(self, input), 用于预测，其计算与forward共享权重但是计算逻辑存在差异，故使用已有API组合实现的方式单独实现
+- layer API：`paddle.nn.AdaptiveLogSoftmaxWithLoss(self, in_features, n_classes, cutoffs, div_value=4.0, head_bias=False, name=None)`，包含两个主要方法：
+    - `forward(self, input, label)`，用于训练，返回为`output` 和 `loss`
+    - `predict(self, input)`，用于预测，其计算与forward共享权重但是计算逻辑存在差异，故使用已有API组合实现的方式单独实现
 
 # 六、测试和验收的考量
 测试考虑的case如下：
 
 - 数值正确性（CPU、GPU、动态图、静态图）
+  - 对`log_prob`(前置函数)，log_prob的各类总和概率为1，即`paddle.exp(logprob_out).sum(1)=paddle.ones([4])`
+  - 对`forward`
+    - `output`为各类别概率即`output=log_prob.gather(y.unsqueeze(1), 1).slice([1], [0], [1]).squeeze()`
+    - `loss`为`loss=nll_loss(log_prob, y)`，其中`nll_loss`已经实现
+  - 对`predict`，有`predict=log_prob.argmax(axis=1)`
 - 错误检查：`cutoff`的唯一性，数据类型，数值大于零小于`n_classes - 1`
 - 错误检查：`input`尺寸与`in_features`一致
 
