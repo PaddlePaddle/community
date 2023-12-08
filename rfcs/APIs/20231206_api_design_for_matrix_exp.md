@@ -756,6 +756,20 @@ API 设计为 `paddle.linalg.matrix_exp(x, name=None)`。
 
 ## API实现方案
 
+参考论文 《Computing the Matrix Exponential with an Optimized Taylor Polynomial Approximation》 https://www.mdpi.com/2227-7390/7/12/1174
+
+对比 PyTorch 的实现方式与 Pade 近似算法：
+
+> In combination with scaling and squaring, this yields a procedure to compute the matrix exponential up to the desired accuracy at lower computational cost than the standard Padé method for a wide range of matrices. Based on estimates of the form $$\left \| A^k \right \| ^ {1/k}$$ and the use of scaling and squaring, we have presented a modification of our algorithm to reduce overscaling that is still more efficient than state-of-the-art implementations with a slightly lower accuracy for some matrices but higher accuracy for others. The loss in accuracy can be attributed to possible overscalings due to a reduced number of norm estimations compared with Padé methods.
+
+对于一些矩阵在相应的精度下 PyTorch 的算法效率更高，但仍存在一些精度降低的情况。
+
+从之前的调研可以看到，Scipy, TensorFlow, Eigen 都使用的是 Pade 近似，参考资料较多，实现方式较主流。
+
+PyTorch 的实现基于上述论文，发表于 2019 年，参考资料较少。
+
+基于此，本次实现基于 Pade 近似的方式，并且考虑到算子兼容情况，使用 python 的实现方式。
+
 该 API 实现于 `python/paddle/tensor/linalg.py`.
 
 涉及到的 paddle api 主要有：
@@ -779,6 +793,102 @@ API 设计为 `paddle.linalg.matrix_exp(x, name=None)`。
 - paddle.linalg.solve
 - paddle.static.nn.cond
 - paddle.static.nn.while_loop
+
+实现的主要逻辑伪代码：
+
+``` python
+def matrix_exp(x, name=None):
+    # step 1. convert to tensor if necessary
+    mat_a = paddle.to_tensor(x)
+
+    # step 2. check tensor
+    # check dtype
+    if dtype not in ['float32', 'float64']:
+        raise ValueError(
+            f"The input tensor's dtype must be float32 or float64, but got {dtype}"
+        )
+
+    # check tensor dim
+    if mat_a.ndim < 2:
+        raise ValueError('The input tensor must be at least two-dimensional')
+
+    if mat_a.shape[-1] != mat_a.shape[-2]:
+        raise ValueError('Last 2 dimensions of the tensor must be square')
+
+    # step 3. compute uv
+    l1_norm = paddle.unsqueeze(
+        paddle.max(paddle.sum(paddle.abs(mat_a), axis=mat_a.ndim - 2), axis=-1),
+        axis=[-1, -2],
+    )
+    maxnorm = ... # a number const
+    squarings = paddle.floor(
+        paddle.log(l1_norm / maxnorm)
+        / paddle.log(paddle.full((), 2.0, dtype))
+    )
+    squarings = paddle.maximum(squarings, paddle.zeros_like(squarings))
+    u, v = _matrix_uv_func(mat_a, l1_norm, squarings, dtype)
+
+    # step 4. compute result
+    if paddle.isfinite(paddle.max(l1_norm)):
+      result = paddle.linalg.solve(-u + v, u + v)
+    else:
+      result = paddle.full(mat_a.shape, np.nan, dtype)
+
+    max_squarings = paddle.max(squarings)
+    i = 0
+    while i < max_squarings:
+      result = paddle.matmul(result, result)
+      i += 1
+
+    return result
+```
+
+其中，`_matrix_uv_func` 用于计算 u/v，以 float32 为例：
+
+``` python
+def _matrix_uv_float32(mat_a, l1_norm, squarings, dtype):
+    mat_i = paddle.eye(mat_a.shape[-1], dtype=dtype)
+    mat_a2 = paddle.matmul(mat_a, mat_a)
+    mat_a4 = paddle.matmul(mat_a2, mat_a2)
+    mat_a6 = paddle.matmul(mat_a4, mat_a2)
+
+    u3, v3 = _matrix_exp_pade3(mat_a, mat_i, mat_a2, dtype)
+    u5, v5 = _matrix_exp_pade5(mat_a, mat_i, mat_a2, mat_a4, dtype)
+    u7, v7 = _matrix_exp_pade7(
+        mat_a
+        / paddle.cast(
+            paddle.pow(paddle.full((), 2.0, dtype), squarings),
+            dtype,
+        ),
+        mat_i,
+        mat_a2,
+        mat_a4,
+        mat_a6,
+        dtype,
+    )
+
+    if l1_norm < 4.258730016922831e-001:
+      u, v = u3, v3
+    elif l1_norm < 1.880152677804762e000:
+      u, v = u5, v5
+    else:
+      u, v = u7, v7
+
+    return u, v
+```
+
+其中 pade 近似，如 `_matrix_exp_pade3`：
+
+``` python
+def _matrix_exp_pade3(mat_a, mat_i, mat_a2, dtype):
+    """3rd-order Pade approximant."""
+    b = [120.0, 60.0, 12.0]
+    b = [paddle.full((), x, dtype) for x in b]
+    tmp = mat_a2 + b[1] * mat_i
+    mat_u = paddle.matmul(mat_a, tmp)
+    mat_v = b[2] * mat_a + b[0] * mat_i
+    return mat_u, mat_v
+```
 
 另外，由于该API需要考虑动静统一问题，故需要验证其在静态图中能否正常工作。（该工作会在单测中进行）
 
