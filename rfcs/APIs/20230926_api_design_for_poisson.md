@@ -411,5 +411,3 @@ $$f(x;\lambda) = \frac{e^{-\lambda} \lambda^x}{x!}$$
 2. [Pytorch 的 Poisson 文档](https://pytorch.org/docs/stable/distributions.html#poisson)
 
 3. [Numpy 的 Poisson 文档](https://numpy.org/doc/1.21/reference/random/generated/numpy.random.poisson.html)
-
-4. [BTRS算法](https://research.wu.ac.at/files/18967500/document.pdf)
