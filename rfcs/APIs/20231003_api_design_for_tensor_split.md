@@ -156,8 +156,7 @@ def vsplit(x, num_or_sections, name=None):
     return split(x, num_or_sections, axis=0, name=name)
 ```
 
-可以看到，`paddle.vsplit` 通过 `split` 实现，因此，本文涉及到的 `paddle.hsplit`, `paddle.dsplit` 同样需要通过 `split` 实现，尤其需要注意分割数需要整除的问题。
-
+可以看到，`paddle.vsplit` 通过 `split` 实现。
 
 # 三、业内方案调研
 
@@ -512,25 +511,35 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
 
 `TensorFlow`、`Numpy` 的 `hsplit`、`dsplit` 均通过 `split` 实现，而 `PyTorch` 的相应接口通过 `tensor_split` 实现。
 
-另一方面，`hsplit`、`dsplit`、`vsplit` 是一组功能类似的接口，`Paddle` 通过 `split` 接口实现了 `vsplit` 函数，因此，可以考虑与 `TensorFlow`、`Numpy` 相同的方式，使用 `split` 接口实现。
+总结一下：
+
+- `PyTorch` 的实现方式：`tensor_split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `tensor_split` (indices_or_sections) 实现，`split` 的签名 (split_size_or_sections) 与其他几个函数也不相同。
+
+- `TensorFlow`, `Numpy` 的实现方式：`split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `split` (indices_or_sections) 实现，`Numpy` 单独实现了 `array_split` 函数 (indices_or_sections)。
+
+- `Paddle` 的实现方式：`split`, `vsplit` 为一组，都是通过 `split` (num_or_sections) 实现。
+
+可以看到，主流方案中 `vsplit`, `dsplit`, `hsplit` 为一组接口，虽然底层实现可能不同。
 
 # 五、设计思路与实现方案
 
-上一章指出：
+上一章指出，`Paddle` 的 `split`, `vsplit` 为一组，都是通过 `split` (num_or_sections) 实现，但是，由于 `Paddle` 的 `vsplit` 与主流实现方案 (indices_or_sections) 不同，因此：
 
-- `PyTorch` 的实现方式：`tensor_split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `tensor_split` (indices_or_sections) 实现，`split` 的签名 (split_size_or_sections) 与其他几个函数也不相同。
-- `TensorFlow`, `Numpy` 的实现方式：`split`, `vsplit`, `dsplit`, `hsplit` 为一组，都是通过 `split` (indices_or_sections) 实现，`Numpy` 单独实现了 `array_split` 函数 (indices_or_sections)。
-- `Paddle` 的实现方式：`split`, `vsplit` 为一组，都是通过 `split` (num_or_sections) 实现。
+**重要提示**
+此次设计方案，修改 `vsplit` 的实现方式，使 `vsplit`, `hsplit`, `dsplit` 为一组接口，此处 `vsplit` 的修改为不兼容方式，其中：
+
+- `int` 输入，之前为等分，修改后可以为可以不等分
+- `list|tuple` 的 int 数组输入，之前是分片长度，修改后为 indices 末位索引
 
 为实现与主流方案对齐，此次将 `vsplit`, `hsplit`, `dsplit` 与 `tensor_split` 设计为一组 API，其中 `vsplit`, `hsplit`, `dsplit` 通过 `tensor_split` 实现， `split` 为单独的 API。
 
-因此，本次设计 `split` (num_or_sections) 与 `tensor_split` (num_or_indices) 的主要不同：
+本次设计 `split` (num_or_sections) 与 `tensor_split` (num_or_indices) 的主要不同：
 
 分割参数为 `int`：
   - `split` (num_or_sections) 是 `等分` 方式分割。
   - `tensor_split` (num_or_indices) 包括对应的 `vsplit`, `dsplit`, `hsplit` 为一组 API， 可以 `不等分`。
 
-分割参数为 `list|tuple`：
+分割参数为 `list|tuple` int 数组：
   - `split` (num_or_sections)，表示每个分片长度，输入 `不能越界`，即，list 或 tuple 的长度不能超过输入 Tensor 待分割的维度的大小，且参数中可以有一个 `-1`。
   - `tensor_split` (num_or_indices) 包括对应的 `vsplit`, `dsplit`, `hsplit` 为一组 API 表示切分的索引位置，可以 `越界`。
 
@@ -546,6 +555,8 @@ dsplit = tf_export.tf_export('experimental.numpy.dsplit', v1=[])(
   - `int` 表示拆分数量
   - `list` 表示切分的索引位置
 
+特别需要注意的是，这里使用 `num_or_indices` 而不是 `indices_or_sections`。
+切分参数支持 `int / int数组` 的输入，语义上，`int` 表示切分数量(num)，`int数组` 表示末位索引位置(indices)，参数名 `indices_or_sections` 并不完全符合这个语义，所以这里改成 `num_or_indices`。
 
 ## 命名与参数设计
 
