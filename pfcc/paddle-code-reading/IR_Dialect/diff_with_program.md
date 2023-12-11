@@ -43,7 +43,7 @@
 在新的 `IR` 体系下，我们将 `ProgramDesc & Graph `合二为一，统一为了 `pir::Program` 。 `Desc` 类相关的接口和 `Graph` 类相关的接口，大多数都有等价的接口可以使用；其中 `pir::Program` 定义在 `paddle/pir/core/program.h` 中，同时 `core` 目录下也包含了 `Paddle IR` 核心的基础组件，比如 `Operation` 、 `Value` 、 `OpResult` 等；
 
 ### 3.设计层面
-在设计层面，现存的 `ProgramDesc` 中的算子定义，大部分是由预定义的 Yaml 文件和自动代码生成技术完成的，具体可以参考[paddle代码自动生成机制讲解](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/code_gen/code_gen_ops.md)，所有的算子描述信息都会注册进 `OpInfoMap` 全局表中，以「并集」的方式描述 `InferShape` 、 `OpMaker` 等逻辑；
+在设计层面，现存的 `ProgramDesc` 中的算子定义，大部分是由预定义的 Yaml 文件和自动代码生成技术完成的，具体可以参考[《飞桨代码自动生成机制》](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/code_gen/code_gen_ops.md)，所有的算子描述信息都会注册进 `OpInfoMap` 全局表中，以「并集」的方式描述 `InferShape` 、 `OpMaker` 等逻辑；
 
 在新的 `Paddle IR` 中，我们抽象了一套高度可扩展的基础组件，包括 `Type` 、 `Attrbute` 、 `Op` 、 `Trait` 和 `Interface` ；并引入了 `Dialect` 的概念来对 `Type` 、 `Attribtue` 、 `Op` 做模块化管理， 比如 `BuiltinDialect` 、 `PaddleDialect` 、 `CinnDialect` 等等。一个 `Dialect` 里面包含了一系列的 `Type` 、 `Attribtue` 、 `Op` 的定义。相应的，每个 `Type` 、 `Attribtue` 、 `Op` 都是定义在某个唯一的 `Dialect` 里面。对整个 `IR` 框架而言， `Dialect` 是可以随意插拔的。 `Dialect` 也是可以任意扩展的。只要派生自相应的基类、定义所以所拥有的 `Type` 、 `Attrbute` 、 `Op` 即可。详见[《IR 顶层模型结构表示设计文》之方案要点](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/ir_program.md#3-%E6%96%B9%E6%A1%88%E8%A6%81%E7%82%B9)
 
