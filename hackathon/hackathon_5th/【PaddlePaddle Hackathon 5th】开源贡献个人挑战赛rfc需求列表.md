@@ -81,6 +81,8 @@
 | 104  | 🌟    | 将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下 |  否    |
 | 105  | 🌟    | 将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下 |   否   |
 | 112  | 🌟    | 将paddle内部的read_file、fused_gemm_epilogue算子及其kernel实现从fluid下迁移到phi下；添加identity_loss的yaml配置 |   否   |
+| 123  | 🌟    | 结合paddle现有的动半架构，新增缺少的跨mesh下的reshard转换函数 |   否   |
+| 124  | 🌟    | 结合paddle现有的动半架构，新增缺少的跨mesh下多对一和一对多的reshard转换函数 |   否   |
 
 ## 科学计算模型复现
 
