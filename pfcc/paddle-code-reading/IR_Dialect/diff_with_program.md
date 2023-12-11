@@ -47,6 +47,12 @@
 
 在新的 `Paddle IR` 中，我们抽象了一套高度可扩展的基础组件，包括 `Type` 、 `Attrbute` 、 `Op` 、 `Trait` 和 `Interface` ；并引入了 `Dialect` 的概念来对 `Type` 、 `Attribtue` 、 `Op` 做模块化管理， 比如 `BuiltinDialect` 、 `PaddleDialect` 、 `CinnDialect` 等等。一个 `Dialect` 里面包含了一系列的 `Type` 、 `Attribtue` 、 `Op` 的定义。相应的，每个 `Type` 、 `Attribtue` 、 `Op` 都是定义在某个唯一的 `Dialect` 里面。对整个 `IR` 框架而言， `Dialect` 是可以随意插拔的。 `Dialect` 也是可以任意扩展的。只要派生自相应的基类、定义所以所拥有的 `Type` 、 `Attrbute` 、 `Op` 即可。详见[《IR 顶层模型结构表示设计文》之方案要点](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/ir_program.md#3-%E6%96%B9%E6%A1%88%E8%A6%81%E7%82%B9)
 
+同时，新的 `Paddle IR` 在 Python API 上同样采用了预定义的 Yaml 文件和自动代码生成技术，实现了极致化的动静统一，并降低了维护成本。详见[《从 CodeGen 视角看 PIR 组网 API》](https://github.com/MarioLulab/Camp/blob/2f281f1e567b34a6bb0e52b68b77b8911023c42e/Docs/03_NewIRAPI_AutoDiffAndCoreComponentRefinement/CodeReading/Over_view_PIR_construct_API_As_CodeGen_perspective.md)。
+
+<p align="center">
+<img src="./img/pir_api.png" width=70%>
+</p>
+
 ### 4.协议层面
 在协议层面，现存的 `ProgramDesc` 是基于 `Protobuf` 协议，在 `framework.proto` 文件中定义所有框架核心概念的和类体系的原型，也是模型 `Save/Load` 序列化和反序列化过程的基础。
 在新的 `Paddle IR` 中，不在依赖 `Protobuf` 协议，仅依赖于 `pir/core` 中定义的基础组件。另外，在表示层我们引入了 `Printer` 和 `Parser` 模块，以支持 `pir::Program` 的打印、序列化和反序列化过程；详见[《Pir Parser实现》](https://github.com/PFCCLab/Camp/blob/main/Docs/01_PIR_OpTestFixingAndProgramTranslatorRefinement/pir_parser_implementation_sharing.md)
