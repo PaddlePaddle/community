@@ -9,7 +9,7 @@
 
 ## 二、差异性
 <p align="center">
-<img src="./img/diff.png">
+<img src="./img/diff.png" width=70%>
 </p>
 
 ### 1.概念层面
@@ -23,7 +23,7 @@
 * `Value` 表示计算图中的有向边：用来将两个 `Operaton` 关联起来，描述了程序中的 `UD链` （即 `Use-Define` 链）； `OpResult` 表示定义端，定义了一个 `Value` ， `OpOperand` 表示使用端，描述了对一个 `Value` 的使用。
 
 <p align="center">
-<img src="./img/arch2.png">
+<img src="./img/arch2.png" width=70%>
 </p>
 
 ### 2.接口层面
@@ -52,7 +52,7 @@
 在新的 `Paddle IR` 中，不在依赖 `Protobuf` 协议，仅依赖于 `pir/core` 中定义的基础组件。另外，在表示层我们引入了 `Printer` 和 `Parser` 模块，以支持 `pir::Program` 的打印、序列化和反序列化过程；详见[《Pir Parser实现》](https://github.com/PFCCLab/Camp/blob/main/Docs/01_PIR_OpTestFixingAndProgramTranslatorRefinement/pir_parser_implementation_sharing.md)
 
 <p align="center">
-<img src="./img/parser.jpeg">
+<img src="./img/parser.jpeg" width=70%>
 </p>
 
 ### 5.执行层面
@@ -60,12 +60,12 @@
 在执行层面，新的 `Paddle IR` 不涉及到 `PHI` 算子库 `Kernel` 层的变动，但在执行器层新引入了 `PirInterPreterCore` 组件，用于实现 `Paddle IR` 下的解释、调度和执行，具体定义在 `paddle/fluid/framework/new_executor/pir_interpreter.h` 中。
 
 <p align="center">
-<img src="./img/kernel_program.png">
+<img src="./img/kernel_program.png" width=70%>
 </p>
 
 ### 6.调试层面
 
-在调试层面，新的 `Paddle IR` 处于功能高频迭代中。为了保持新、旧IR的兼容性和流畅切换，我们引入了 `ProgramTranslator` 模块，承担对 `ProgramDesc` → `pir::Program` 的等价转换，详见[ProgramTranslator设计文档](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/program_translator.md)。此外，我们在执行器、 `Python API` 层也均进行了迁移和适配，可以通过如下 `FLAGS` 定向开启，详见 `paddle/phi/core/flags.cc` ：
+在调试层面，新的 `Paddle IR` 处于功能高频迭代中。为了保持新、旧IR的兼容性和流畅切换，我们引入了 `ProgramTranslator` 模块，承担对 `ProgramDesc` → `pir::Program` 的等价转换，详见[《ProgramTranslator设计文档》](./program_translator.md)。此外，我们在执行器、 `Python API` 层也均进行了迁移和适配，可以通过如下 `FLAGS` 定向开启，详见 `paddle/phi/core/flags.cc` ：
 
 * `FLAGS_enable_pir_in_executor` ：是否在执行器层开启 `Paddle IR` ，默认为 `False`
 * `FLAGS_enable_pir_api` ：是否在 `Python API` 端开启 `Paddle IR` ，开启后在静态图模式下将直接生成新 `IR` 表示，默认为 `False`
