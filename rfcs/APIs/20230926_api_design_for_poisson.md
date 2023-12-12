@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-26 | 
-|版本号 | V1.1 | 
+|版本号 | V1.2 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20230926_api_design_for_poisson.md<br> | 
 
@@ -317,7 +317,7 @@ paddle.distribution.poisson(rate)
 例如，随机变量 $X$ 服从 Poisson 分布，即 $X \sim Poisson(\lambda)$ ，对应的参数 `rate`$=\lambda$。
 
 ## 底层OP设计
-本次任务的设计思路与已有概率分布保持一致，不涉及底层 OP 的开发。
+本API实现不涉及底层OP设计。
 
 ## API实现方案
 新增 `Poisson` 类
@@ -359,7 +359,7 @@ H = - \sum_{x=0}^{\infty} f(x) \log{f(x)} \approx - \sum_{x=0}^{k} f(x) \log{f(x
 
 - `sample` 随机采样
 
-采样方法： 使用 [PD算法](https://dl.acm.org/doi/10.1145/355993.355997) [R语言中的源码](https://github.com/wch/r-source/blob/trunk/src/nmath/rpois.c)
+采样方法： 使用 ``paddle.poisson`` 原生采样方法。
 
 - `prob` 概率密度
 
