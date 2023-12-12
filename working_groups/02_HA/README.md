@@ -9,7 +9,7 @@ PPWG-HAT的职责包括：促进代码贡献、促进适配的技术交流和进
 
 # 2）代码仓库
 
-百度基于[ 飞桨框架](https://github.com/PaddlePaddle/Paddle)和[ 飞桨自定义硬件接入](https://github.com/PaddlePaddle/PaddleCustomDevice)两个代码仓库，与硬件厂商开展适配工作，共同建设飞桨框架。。
+百度基于[飞桨框架](https://github.com/PaddlePaddle/Paddle)和[飞桨自定义硬件接入](https://github.com/PaddlePaddle/PaddleCustomDevice)两个代码仓库，与硬件厂商开展适配工作，共同建设飞桨框架。。
 
 # 3）定期沟通机制
 
