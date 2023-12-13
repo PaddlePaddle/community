@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-27 | 
-|版本号 | V1.0 | 
+|版本号 | V1.1 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20230927_api_design_for_multivariate_normal.md<br> | 
 
@@ -346,17 +346,19 @@ class MultivariateNormalTriL(
 `tfp.distributions.MultivariateNormalTriL` 继承自 `tfp.distribution.mvn_linear_operator.MultivariateNormalLinearOperator`
 
 # 四、对比分析
-Pytorch 与 Tensorflow 实现方式大体类似，都是通过基本的概率计算得到相应的概率属性。
+Pytorch 的 `MultivariateNormal` 类支持用户输入 `covariance_matrix` ， `precision_matrix` ， `scale_tril` 其中任意一种矩阵用来表示多元正态分布的方差，类中的计算将输入的任意一种转化为 `scale_tril` 然后进行计算，速度更快。而 Tf 中则是根据不同的输入矩阵类型设计了不同的类，如： `tfp.distributions.MultivariateNormalTriL` ， `tfp.distributions.MultivariateNormalFullCovariance` ， `tfp.distributions.MultivariateNormalDiag` 等。Pytorch 的设计简洁，能够涵盖的情况更广，因此参照 Pytorch 进行本 API 设计。
 
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
 ```python
-paddle.distribution.multivariate_normal(loc, sacle)
+paddle.distribution.multivariate_normal(loc, covariance_matrix=None, precision_matrix=None, scale_tril=None)
 ```
-参数 `loc`，`sacle`为 MultivariateNormal 分布的参数。
+- 参数 `loc`，`covariance_matrix` 为 MultivariateNormal 分布的参数。
+- 参数 `precision_matrix` ， `scale_tril` 均与 `covariance_matrix` 可以相互转化，是一对一映射关系：`precision_matrix` 是 `covariance_matrix` 的逆矩阵， `scale_tril` 是 `covariance_matrix` 的cholesky分解矩阵（下三角形）。
 
-例如，随机变量 $X$ 服从 MultivariateNormal 分布，即 $X \sim MVN(\mu, \Sigma)$ ，对应的参数 `loc`$=\mu$，`sacle`$=\Sigma$。
+例如，随机变量 $X$ 服从 MultivariateNormal 分布，即 $X \sim MVN(\mu, \Sigma)$ ，对应的参数 `loc`$=\mu$，`covariance_matrix`$=\Sigma$。  
+而 `precision_matrix`$={\Sigma}^{-1}$ ， 若令 `scale_tril`$=A$ ，则 $A A^{\intercal} = \Sigma$，。
 
 ## 底层OP设计
 本次任务的设计思路与已有概率分布保持一致，不涉及底层 OP 的开发。
@@ -366,14 +368,18 @@ paddle.distribution.multivariate_normal(loc, sacle)
 
 ```python
 class MultivariateNormal(Distribution):
-  def __init__(self, loc, scale):
-    super().__init__(batch_shape=self.loc.shape, event_shape=())
+  def __init__(self, loc, covariance_matrix=None, precision_matrix=None, scale_tril=None):
+    super().__init__(batch_shape = paddle.broadcast_shape(
+                                     covariance_matrix.shape[:-2], loc.shape[:-1]
+                                 ),
+                     event_shape = loc.expand(batch_shape+[-1]).shape[-1:]
+                    ))
     
     ...
     
 ```
 
-`MultivariateNormal` 类的初始化参数是 `loc`，`sacle` ，类包含的方法及实现方案如下：
+`MultivariateNormal` 类的初始化参数是 `loc` 以及 `covariance_matrix`，`precision_matrix`，`scale_tril` 三者中的任意一个，类包含的方法及实现方案如下：
 
 记参数 `loc`$=\mu$，`sacle`$=\Sigma$。
 
@@ -387,11 +393,41 @@ class MultivariateNormal(Distribution):
 
 - `entropy` 熵计算
 
-熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$
+熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$  
+```math
+\begin{aligned}
+H &= -\int_x f(x) \log f(x) dx \\
+& = -\int_{x \in \mathbb{R}^n} f(x) \{ -\frac{n}{2}\log(2\pi) -\frac{1}{2} (x-\mu)^{\intercal} \Sigma^{-1} (x-\mu) - \frac{1}{2}\log (\det\Sigma) \} dx \\
+& = -\int_{x \in \mathbb{R}^n} f(x) \{ -\frac{n}{2}\log(2\pi) -\frac{1}{2} [A^{-1}(x-\mu)]^{\intercal}[A^{-1}(x-\mu)] - \log (\det A) \} dx \\
+& = \frac{n}{2} \log(2\pi) + \log {\det A} + \frac{1}{2}\int_{x \in \mathbb{R}^n}   [A^{-1}(x-\mu)]^{\intercal}[A^{-1}(x-\mu)] f(x) dx\\
+& = \frac{n}{2} \log(2\pi) + \log {\det A} +  \frac{1}{2} \mathbb{E}[(X-\mu)^{\intercal} \Sigma^{-1} (X - \mu)] \\
+& =  \frac{n}{2} \log(2\pi) + \log {\det A} +  \frac{1}{2} \mathbb{E}[tr[(X-\mu)^{\intercal} \Sigma^{-1} (X - \mu)] ] \\
+& =  \frac{n}{2} \log(2\pi) + \log {\det A} +  \frac{1}{2}  \mathbb{E}[tr[\Sigma^{-1} (X - \mu) (X-\mu)^{\intercal}]] \\
+& = \frac{n}{2} \log(2\pi) + \log {\det A} +  \frac{1}{2} tr[\mathbb{E}[\Sigma^{-1} (X - \mu) (X-\mu)^{\intercal}]] \\
+& = \frac{n}{2} \log(2\pi) + \log {\det A} +  \frac{1}{2} tr[\Sigma^{-1} \mathbb{E}[ (X - \mu) (X-\mu)^{\intercal}]] \\
+& =  \frac{n}{2} \log(2\pi) + \log {\det A} + \frac{1}{2} tr[\Sigma^{-1} \Sigma] \\
+& = \frac{n}{2} \log(2\pi) + \log {\det A} + \frac{n}{2}
+\end{aligned}
+```
+其中 $A$ 指 `scale_tril`。
 
 - `kl_divergence` 相对熵计算
 
-相对熵的计算方法： $D_{KL}(\mu_1, \mu_2, \Sigma_1, \Sigma_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$
+相对熵的计算方法： $D_{KL}(\mu_1, \mu_2, \Sigma_1, \Sigma_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$  
+```math
+\begin{aligned}
+\mathcal{D}_{KL}(f_1|| f_2) &= \int_x f_1(x)\log\frac{f_1(x)}{f_2(x)} dx \\
+& = \int_{x \in \mathbb{R}^n} f_1(x)\left\{\left[ -\frac{n}{2} \log(2\pi) - \log(\det A_1) - \frac{1}{2}(x-\mu_1)^{\intercal} \Sigma_1^{-1} (x - \mu_1) \right] + \left[ \frac{n}{2} \log(2\pi) + \log(\det A_2) + \frac{1}{2}(x-\mu_2)^{\intercal} \Sigma_21^{-1} (x - \mu_2)\right]\right\} dx \\
+& = \log(\det A_2) - \log(\det A_1) +\frac{1}{2}\mathbb{E}_1[(X-\mu_2)^{\intercal} \Sigma_2^{-1} (X - \mu_2)] -\frac{n}{2} \\
+& = \log(\det A_2) - \log(\det A_1) +\frac{1}{2}tr [\Sigma_2^{-1}\mathbb{E}_1[ (X - \mu_2) (X-\mu_2)^{\intercal} ]] -\frac{n}{2} \\
+& = \log(\det A_2) - \log(\det A_1) -\frac{n}{2} +\frac{1}{2}tr [\Sigma_2^{-1}\mathbb{E}_1[ XX^{\intercal} -X \mu_2^{\intercal} - \mu_2 X^{\intercal} + \mu_2\mu_2^{\intercal}]] \\
+& = \log(\det A_2) - \log(\det A_1) -\frac{n}{2} +\frac{1}{2}tr [\Sigma_2^{-1} [ Var_1(X) + \mathbb{E}_1(X)\mathbb{E}_1(X)^{\intercal} -\mu_1\mu_2^{\intercal} - \mu_2 \mu_1^{\intercal} + \mu_2\mu_2^{\intercal}]] \\
+& = \log(\det A_2) - \log(\det A_1) -\frac{n}{2} +\frac{1}{2}tr [\Sigma_2^{-1} [ \Sigma_1 + \mu_1\mu_1^{\intercal} -\mu_1\mu_2^{\intercal} - \mu_2 \mu_1^{\intercal} + \mu_2\mu_2^{\intercal}]] \\
+& =  \log(\det A_2) - \log(\det A_1) -\frac{n}{2} +\frac{1}{2}tr [\Sigma_2^{-1} \Sigma_1 + (\mu_1 - \mu_2)^{\intercal} \Sigma_2^{-1}  (\mu_1 - \mu_2)] \\
+& =  \log(\det A_2) - \log(\det A_1) -\frac{n}{2} +\frac{1}{2}[tr [\Sigma_2^{-1} \Sigma_1] + (\mu_1 - \mu_2)^{\intercal} \Sigma_2^{-1}  (\mu_1 - \mu_2)] \\
+\end{aligned}
+```
+其中 $A$ 指 `scale_tril`。
 
 - `sample` 随机采样
 
@@ -411,12 +447,10 @@ class MultivariateNormal(Distribution):
 
 
 # 六、测试和验收的考量
-`MultivariateNormal` 类测试以 Numpy 作为基准，验证API的正确性。
-1. 使用 Numpy 实现所有 MultivariateNormal 的API，集成为 `MultivariateNormalNumpy` 类，用以验证本次任务开发的 API 的正确性。
+`MultivariateNormal` 类测试以 scipy.stats.multivariate_normal 作为基准，验证API的正确性。
+1. 使用 scipy.stats.multivariate_normal 的相关方法，验证 `mean`、`variance`、`entropy`、`log_prob`、`kl_divergence` 方法的结果是否一致（容许一定误差）。
 
-2. 使用同样的参数实例化 `MultivariateNormal` 类和 `MultivariateNormalNumpy` 类，并调用 `mean`、`variance`、`entropy`、`log_prob`、`kl_divergence`等方法，测试结果是否相等（容许一定误差）。参数 `rate` 的支持的数据类型需测试详尽。
-
-3. 使用 `MultivariateNormal` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。
+2. 使用 `MultivariateNormal` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。
 
 
 # 七、可行性分析和排期规划
