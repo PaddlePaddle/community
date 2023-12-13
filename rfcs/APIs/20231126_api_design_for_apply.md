@@ -76,6 +76,7 @@ tensor.apply_(callable)
 
 ## API实现方案
 采取与 pytorch 相似的设计
+### 动态图
 在 tensor_patch_methods 内增加 apply 和 apply_ 的两个 api，对于求梯度的 tensor 则无法使用 apply 并报错
 ```
 @framework.dygraph_only
@@ -145,13 +146,62 @@ static PyObject* tensor_apply_(TensorObject* self,
   RETURN_PY_NONE
   EAGER_CATCH_AND_THROW_RETURN_NULL
 }
+```
+
+### 静态图
+
+Legacy IR 在 python/paddle/base/framework.py 的 Variable 下添加 apply 函数
+```
+def apply(self, func):
+    if not self.stop_gradient:
+        raise RuntimeError(
+            "Cannot apply function on a tensor that required gradient."
+        )
+    try:
+        return func(self)
+    except:
+        raise ValueError(f"The PyFunc {func.__name__} could not be applied")
+```
+
+PIR 则在 paddle/fluid/pybind/pir.cc 中实现 apply 并 bind 到 Value 上
 
 ```
+pir::OpResult apply(Value self, py::object func) {
+  py::gil_scoped_acquire gil;
+  PyObject *py_func = func.release().ptr();
+  Py_INCREF(py_func);
+  PyObject *res = nullptr;
+  try {
+    py::object obj = py::cast(self);
+    PyObject *tmp_self = obj.release().ptr();
+    Py_INCREF(tmp_self);
+    res = PyObject_CallFunctionObjArgs(py_func, tmp_self, nullptr);
+    Py_DECREF(tmp_self);
+  } catch (std::exception &e) {
+    PADDLE_THROW(phi::errors::Unavailable(
+        "Hook function of Tensor raises an exception: %s.", e.what()));
+  } catch (...) {
+    PADDLE_THROW(phi::errors::Fatal(
+        "Hook function of Tensor raises an unknown exception."));
+  }
+  if (res == Py_None) {
+    return self.dyn_cast<OpResult>();
+  }
+  auto out = CastPyArg2Value(res, "apply", 0);
+  Py_DECREF(py_func);
+  Py_DECREF(res);
+  return out.dyn_cast<OpResult>();
+}
+```
+
+
+
 # 六、测试和验收的考量
 
 - 单测代码，apply api 测试
 - inplace 测试
 - 对 stop_gradient=False 的 tensor 报错测试
+- 动转静下测试
 
 # 七、可行性分析和排期规划
 
