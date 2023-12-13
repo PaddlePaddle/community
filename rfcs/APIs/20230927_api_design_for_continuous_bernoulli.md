@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-27 | 
-|版本号 | V1.1 | 
+|版本号 | V1.2 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20230927_api_design_for_continuous_bernoulli.md<br> | 
 
@@ -653,9 +653,10 @@ class ContinuousBernoulli(distribution.AutoCompositeTensorDistribution):
 
 ## 命名与参数设计
 ```python
-paddle.distribution.continuous_bernoulli(probs)
+paddle.distribution.continuous_bernoulli(probability, eps=0.02)
 ```
-参数 `probs` 为 ContinuousBernoulli 分布的参数。
+- 参数 `probability` 为 ContinuousBernoulli 分布的参数。
+- 参数 `eps` 表示非稳定计算区域的带宽，非稳定计算区域为 $[0.5 - eps, 0.5 + eps]$
 
 例如，随机变量 $X$ 服从 ContinuousBernoulli 分布，即 $X \sim ContinuousBernoulli(\lambda)$ ，对应的参数 `probs`$=\lambda$。
 
@@ -667,14 +668,14 @@ paddle.distribution.continuous_bernoulli(probs)
 
 ```python
 class ContinuousBernoulli(Distribution):
-  def __init__(self, probs, eps=1e-4):
-    super().__init__(batch_shape=self.probs.shape, event_shape=())
+  def __init__(self, probability, eps=0.02):
+    super().__init__(batch_shape=self.probability.shape, event_shape=())
     
     ...
     
 ```
 
-`ContinuousBernoulli` 类的初始化参数是 `probs` ，类包含的方法及实现方案如下：
+`ContinuousBernoulli` 类的初始化参数是 `probability` 和 `eps` ，类包含的方法及实现方案如下：
 
 记参数 `probs`$=\lambda$, `eps` 为非稳定计算区域范围: $[0.5-eps, 0.5+eps]$
 
