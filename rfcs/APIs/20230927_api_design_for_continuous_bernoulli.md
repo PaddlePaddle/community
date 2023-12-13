@@ -691,6 +691,10 @@ E(X) =
 \end{aligned}
 \right.
 ```
+在非稳定计算区域做泰勒展开：
+```math
+E(X) = \frac{1}{2} + \frac{1}{3}(\lambda - 0.5) + \frac{16}{45}(\lambda - 0.5)^2
+```
 
 - `variance` 计算方差
 
@@ -704,14 +708,36 @@ Var(X) =
 \end{aligned}
 \right.
 ```
+在非稳定计算区域做泰勒展开：
+```math
+Var(X) = \frac{1}{12} + \frac{1}{15}(\lambda - 0.5)^2 + \frac{128}{945}(\lambda - 0.5)^4
+```
 
 - `entropy` 熵计算
 
-熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$
+熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$  
+```math
+\begin{aligned}
+H &= -\int_x C(\lambda) \lambda^x (1-\lambda)^{1-x} \log\{C(\lambda) \lambda^x (1-\lambda)^{1-x}\} dx \\
+& = -\int_0^1 C \lambda^x (1-\lambda)^{1-x} \left[ \log C + x \log \lambda + (1 -x) \log (1 - \lambda)\right] dx \\
+& = -\left[ C \log C \int_0^1 \lambda^x (1-\lambda)^{1-x} dx + C \log \lambda \int_0^1 x \lambda^x (1-\lambda)^{1-x} + C \log(1 - \lambda) \int_0^1 (1-x) \lambda^x (1-\lambda)^{1-x} \right] \\
+& = - \left[ \log C + \mathbb{E}(X) \log \lambda + \mathbb{E}(1 - X) \log(1 - \lambda) \right] \\
+& = -\log C + \left[ \log (1 - \lambda) -\log \lambda \right] \mathbb{E}(X)  - \log(1 - \lambda) 
+\end{aligned}
+```
 
 - `kl_divergence` 相对熵计算
 
-相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$
+相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$  
+```math
+\begin{aligned}
+\mathcal{D}_{KL}(p_1|| p_2) &= \int_x p_1(x)\log\frac{p_1(x)}{p_2(x)} dx \\
+& = \int_0^1 C_1 \lambda_1^x (1-\lambda_1)^{1-x} \{\log[C_1 \lambda_1^x (1-\lambda_1)^{1-x}] - \log[C_2 \lambda_2^x (1-\lambda_2)^{1-x}]\} dx \\
+& = -H - [C_1 \log C_2 \int_0^1 \lambda_1^x (1-\lambda_1)^{1-x} dx + C_1 \log \lambda_2 \int_0^1 x \lambda_1^x (1-\lambda_1)^{1-x} dx + C_1 \log (1-\lambda_2) \int_0^1 (1-x) \lambda_1^x (1-\lambda_1)^{1-x} dx] \\
+& = -H - [\log C_2 + \log \lambda_2 \mathbb{E}_1(X) + \log (1-\lambda_2)  \mathbb{E}_1(1-X)  ] \\
+& = - H - \{\log C_2 + [\log \lambda_2 -  \log (1-\lambda_2)]  \mathbb{E}_1(X) +  \log (1-\lambda_2)  \}
+\end{aligned}
+```
 
 - `sample` 随机采样
 
@@ -732,6 +758,10 @@ C(\lambda) =
 &\frac{2\tanh^{-1}(1-2\lambda)}{1 - 2\lambda} & \text{ otherwise}
 \end{aligned}
 \right.
+```
+$C$ 在非稳定计算区域做泰勒展开：
+```math
+C = 2 + \frac{4}{3}(\lambda - 0.5)^2 + \frac{104}{45}(\lambda - 0.5)^4
 ```
 
 - `log_prob` 对数概率密度
