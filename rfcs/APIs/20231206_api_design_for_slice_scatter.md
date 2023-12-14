@@ -260,21 +260,19 @@ def _get_slice_scatter_const(x_shape, axis, start, end, step):
 
 # 五、设计思路与实现方案
 
-此次使用 python 直接实现接口。通过前面对 PyTorch 与 MindSpore 的对比可以看到，如果使用 PyTorch 的方法，需要将输入先分割后拼接，效率可能较低。
-
-因此，此次使用 scatter 的方式实现接口。
+paddle 目前的 `set_value` 算子已经支持 `axes`, `starts`, `ends`, `steps` 等参数，因此，可以使用 `set_value` 算子实现 `slice_scatter` ，由于要求输入 `x` 与 `values` 具有相同的 `ndim`，因此，不需要使用 `decrease_axes` 等参数。
 
 ## 命名与参数设计
 
 添加 Python API:
 ```python
-paddle.slice_scatter(x, src, axis=0, start=None, stop=None, step=1, name=None)
+paddle.slice_scatter(x, values, axis=0, start=None, stop=None, step=1, name=None)
 ```
 
 参数表：
 
 - x: (Tensor) 输入的 tensor。数据类型支持 `float32`、`float64`。
-- src: (Tensor) 用于填充的 tensor。数据类型与input一致，形状与`x[*x.shape[:axis], start:end:step, *x.shape[axis+1:]]`取出的slice一致。
+- values: (Tensor) 用于填充的 tensor。数据类型与input一致，形状与`x[*x.shape[:axis], start:end:step, *x.shape[axis+1:]]`取出的slice一致。
 - axis: (int) y的数据将被填充至x的axis维度。
 - start: (Optional[int]) 待插入slice位置的起始index。
 - stop: (Optional[int]) 待插入slice位置的结束index。
@@ -287,53 +285,82 @@ paddle.slice_scatter(x, src, axis=0, start=None, stop=None, step=1, name=None)
 
 ## API实现方案
 
-此次使用 scatter 的方式实现接口，但是由于 `paddle.scatter` 缺少 `axis` 参数，因此需要内部进行转换：
+此次使用 `set_value` 算子实现接口：
 
 ``` python
-
-def slice_scatter(x, src, axis=0, start=None, stop=None, step=1, name=None):
+def slice_scatter(x, values, axis=0, start=None, stop=None, step=1, name=None):
     
-    if x.ndim != src.ndim:
+    if x.ndim != values.ndim:
         raise ValueError(
-            f"The input and src should have save dimension, but got input of {x.ndim} and src of {src.ndim}."
+            f"The input x and values should have save dimension, but got input of {x.ndim} and values of {values.ndim}."
         )
 
-    input_shape = x.shape
-    src_shape = src.shape
+    x_shape = x.shape
+    values_shape = values.shape
 
-    index = list(range(start or 0, stop or input_shape[axis], step))
-    
-    exp_shape = [*input_shape[:axis], len(index), *input_shape[axis+1:]]
-    if exp_shape != src_shape:
+    index = list(range(start or 0, stop or x_shape[axis], step))
+    exp_shape = [*x_shape[:axis], len(index), *x_shape[axis+1:]]
+    if exp_shape != values_shape:
         raise ValueError(
-            "The src.shape should be same of [*input_shape[:axis], len(index), *input_shape[axis+1:]],"
-            f"but got src.shape of {src.shape} and slice shape {exp_shape}."
+            "The values.shape should be same of [*x_shape[:axis], len(index), *x_shape[axis+1:]],"
+            f"but got values.shape of {values.shape} and slice shape {exp_shape}."
         )
 
-    index = paddle.to_tensor(index, dtype='int64')
-    if axis == 0:
-        index_transpose = None
-        return paddle.scatter(x, index, src, overwrite=True)
+    starts = [start]
+    ends = [stop]
+    steps = [step]
+    axes = [axis]
+    none_axes = []
+    decrease_axes = []
+    inputs = {'Input': x}
+    attrs = {
+        'axes': axes,
+        'starts': starts,
+        'ends': ends,
+        'steps': steps,
+        'decrease_axes': decrease_axes,
+        'none_axes': none_axes,
+    }
 
+    dtype = x.dtype
+    attrs['dtype'] = dtype
+
+    values = values.astype(dtype)
+    inputs["ValueTensor"] = values
+
+    if in_dynamic_or_pir_mode():
+        return _C_ops.set_value_with_tensor(
+            x,
+            values,
+            starts,
+            ends,
+            steps,
+            axes,
+            decrease_axes,
+            none_axes,
+        )
     else:
-        index_transpose = list(range(x.ndim))
-        index_transpose[0], index_transpose[axis] = index_transpose[axis], index_transpose[0]
+        helper = LayerHelper('select_scatter', **locals())
+        output = helper.create_variable_for_type_inference(dtype=x.dtype)
+        cur_block = default_main_program().current_block()
+        cur_block.append_op(
+            type="set_value",
+            inputs=inputs,
+            outputs={'Out': output},
+            attrs=attrs,
+            inplace_map={"Input": "Out"},
+        )
 
-        x = paddle.transpose(x, index_transpose)
-        src = paddle.transpose(src, index_transpose)
-
-        return paddle.transpose(paddle.scatter(x, index, src, overwrite=True), index_transpose)
-
+        return output
 ```
 
 有几点说明：
 
 - x 与 src 需要有相同的 ndim
-- src_shape 需要与 slice 的 exp_shape 一致
-- 因为 paddle.scatter 没有 axis 参数，所以需要 transpose
+- values_shape 需要与 slice 的 exp_shape 一致
 - 参数 axis/start/stop/step 不支持 list。因为，多个 axis 的话可能导致 slice 的 shape 错误。
   比如，x 为 [8, 8], src 为 [8, 2]，则 axis 只能为 1。
-- 由于依赖 paddle.scatter，而此接口只支持 float32 和 float64，因此，具体支持的数据类型待验证。
+
 
 # 六、测试和验收的考量
 
