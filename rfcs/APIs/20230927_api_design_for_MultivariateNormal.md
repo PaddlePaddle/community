@@ -1,17 +1,17 @@
-# paddle.distribution.multivariate_normal 设计文档
+# paddle.distribution.MultivariateNormal 设计文档
 
-|API名称 | paddle.distribution.multivariate_normal | 
+|API名称 | paddle.distribution.MultivariateNormal | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-27 | 
 |版本号 | V1.1 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
-|文件名 | 20230927_api_design_for_multivariate_normal.md<br> | 
+|文件名 | 20230927_api_design_for_MultivariateNormal.md<br> | 
 
 
 # 一、概述
 ## 1、相关背景
-提升飞桨 API 丰富度, 需要扩充 API `paddle.distribution.multivariate_normal`。
+提升飞桨 API 丰富度, 需要扩充 API `paddle.distribution.MultivariateNormal`。
 
 ## 2、功能目标
 参考 Paddle 现有 distribution，增加 MultivariateNormal 分布类的概率统计与随机采样，包括如下方法：
@@ -352,7 +352,7 @@ Pytorch 的 `MultivariateNormal` 类支持用户输入 `covariance_matrix` ， `
 
 ## 命名与参数设计
 ```python
-paddle.distribution.multivariate_normal(loc, covariance_matrix=None, precision_matrix=None, scale_tril=None)
+paddle.distribution.MultivariateNormal(loc, covariance_matrix=None, precision_matrix=None, scale_tril=None)
 ```
 - 参数 `loc`，`covariance_matrix` 为 MultivariateNormal 分布的参数。
 - 参数 `precision_matrix` ， `scale_tril` 均与 `covariance_matrix` 可以相互转化，是一对一映射关系：`precision_matrix` 是 `covariance_matrix` 的逆矩阵， `scale_tril` 是 `covariance_matrix` 的cholesky分解矩阵（下三角形）。
