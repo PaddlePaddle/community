@@ -260,19 +260,19 @@ def _get_slice_scatter_const(x_shape, axis, start, end, step):
 
 # 五、设计思路与实现方案
 
-paddle 目前的 `set_value` 算子已经支持 `axes`, `starts`, `ends`, `steps` 等参数，因此，可以使用 `set_value` 算子实现 `slice_scatter` ，由于要求输入 `x` 与 `values` 具有相同的 `ndim`，因此，不需要使用 `decrease_axes` 等参数。
+paddle 目前的 `set_value` 算子已经支持 `axes`, `starts`, `ends`, `steps` 等参数，因此，可以使用 `set_value` 算子实现 `slice_scatter` ，由于要求输入 `x` 与 `value` 具有相同的 `ndim`，因此，不需要使用 `decrease_axes` 等参数。
 
 ## 命名与参数设计
 
 添加 Python API:
 ```python
-paddle.slice_scatter(x, values, axis=0, start=None, stop=None, step=1, name=None)
+paddle.slice_scatter(x, value, axis=0, start=None, stop=None, step=1, name=None)
 ```
 
 参数表：
 
 - x: (Tensor) 输入的 tensor。数据类型支持 `float32`、`float64`。
-- values: (Tensor) 用于填充的 tensor。数据类型与input一致，形状与`x[*x.shape[:axis], start:end:step, *x.shape[axis+1:]]`取出的slice一致。
+- value: (Tensor) 用于填充的 tensor。数据类型与input一致，形状与`x[*x.shape[:axis], start:end:step, *x.shape[axis+1:]]`取出的slice一致。
 - axis: (int) y的数据将被填充至x的axis维度。
 - start: (Optional[int]) 待插入slice位置的起始index。
 - stop: (Optional[int]) 待插入slice位置的结束index。
@@ -288,22 +288,22 @@ paddle.slice_scatter(x, values, axis=0, start=None, stop=None, step=1, name=None
 此次使用 `set_value` 算子实现接口：
 
 ``` python
-def slice_scatter(x, values, axis=0, start=None, stop=None, step=1, name=None):
+def slice_scatter(x, value, axis=0, start=None, stop=None, step=1, name=None):
     
-    if x.ndim != values.ndim:
+    if x.ndim != value.ndim:
         raise ValueError(
-            f"The input x and values should have save dimension, but got input of {x.ndim} and values of {values.ndim}."
+            f"The input x and value should have save dimension, but got input of {x.ndim} and value of {value.ndim}."
         )
 
     x_shape = x.shape
-    values_shape = values.shape
+    value_shape = value.shape
 
     index = list(range(start or 0, stop or x_shape[axis], step))
     exp_shape = [*x_shape[:axis], len(index), *x_shape[axis+1:]]
-    if exp_shape != values_shape:
+    if exp_shape != value_shape:
         raise ValueError(
-            "The values.shape should be same of [*x_shape[:axis], len(index), *x_shape[axis+1:]],"
-            f"but got values.shape of {values.shape} and slice shape {exp_shape}."
+            "The value.shape should be same of [*x_shape[:axis], len(index), *x_shape[axis+1:]],"
+            f"but got value.shape of {value.shape} and slice shape {exp_shape}."
         )
 
     starts = [start]
@@ -325,13 +325,13 @@ def slice_scatter(x, values, axis=0, start=None, stop=None, step=1, name=None):
     dtype = x.dtype
     attrs['dtype'] = dtype
 
-    values = values.astype(dtype)
-    inputs["ValueTensor"] = values
+    value = value.astype(dtype)
+    inputs["ValueTensor"] = value
 
     if in_dynamic_or_pir_mode():
         return _C_ops.set_value_with_tensor(
             x,
-            values,
+            value,
             starts,
             ends,
             steps,
