@@ -340,7 +340,7 @@ def slice_scatter(x, values, axis=0, start=None, stop=None, step=1, name=None):
             none_axes,
         )
     else:
-        helper = LayerHelper('select_scatter', **locals())
+        helper = LayerHelper('slice_scatter', **locals())
         output = helper.create_variable_for_type_inference(dtype=x.dtype)
         cur_block = default_main_program().current_block()
         cur_block.append_op(
