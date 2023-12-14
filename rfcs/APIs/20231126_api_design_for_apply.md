@@ -75,7 +75,8 @@ tensor.apply_(callable)
 无需实现底层 OP 及 Kernel
 
 ## API实现方案
-采取与 pytorch 相似的设计
+采取与 pytorch 相似的设计，以下对应的实现其本质都是在 C++ 端调用 python 函数，可以看作是 python 函数 f 作用在张量 x 上，即 python 中 f(x) 的调用。因此该方案对 GPU 上的 tensor 也同样支持。
+
 ### 动态图
 在 tensor_patch_methods 内增加 apply 和 apply_ 的两个 api，对于求梯度的 tensor 则无法使用 apply 并报错
 ```
@@ -99,7 +100,6 @@ def apply_(self, func):
         )
     self._apply_(func)
 
-@framework.dygraph_only
 def apply(self, func):
     """
     Apply the python function to the tensor.
@@ -193,8 +193,6 @@ pir::OpResult apply(Value self, py::object func) {
   return out.dyn_cast<OpResult>();
 }
 ```
-
-
 
 # 六、测试和验收的考量
 
