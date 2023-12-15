@@ -653,7 +653,7 @@ class ContinuousBernoulli(distribution.AutoCompositeTensorDistribution):
 
 ## 命名与参数设计
 ```python
-paddle.distribution.ContinuousBernoulli(probs=None, lims=(0.499, 0.501))
+paddle.distribution.ContinuousBernoulli(probs, lims=(0.499, 0.501))
 ```
 - 参数 `probs` 为 ContinuousBernoulli 分布的参数。
 - 参数 `lims` 表示非稳定计算区域。
