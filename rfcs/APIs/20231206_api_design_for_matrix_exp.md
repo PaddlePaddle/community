@@ -892,6 +892,103 @@ def _matrix_exp_pade3(mat_a, mat_i, mat_a2, dtype):
 
 另外，由于该API需要考虑动静统一问题，故需要验证其在静态图中能否正常工作。（该工作会在单测中进行）
 
+## 测试对比
+
+此次对比了 PyTorch, Tensorflow, Scipy 以及 Paddle(python 实现方案) 性能与精度误差。
+
+### 性能对比
+
+测试使用 `%timeit` 命令，主机为 i5-12400，ubuntu 22.04，gpu 为 nvidia p106：
+
+``` python
+In [67]: torch.__version__
+Out[67]: '2.1.1+cpu'
+
+In [68]: tf.__version__
+Out[68]: '2.13.1'
+
+In [70]: scipy.__version__
+Out[70]: '1.10.1'
+
+```
+
+其中 scipy 与 PyTorch 没有 gpu 特别优化，Paddle 与 Tensorflow 可以使用 gpu 。
+
+如：
+``` python
+In [34]: %timeit me_torch = torch.linalg.matrix_exp(m_torch)
+129 µs ± 1.7 µs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+
+In [35]: %timeit me_tf = tf.linalg.expm(m_tf)
+5.39 ms ± 44.9 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+
+In [36]: %timeit me_scipy = scipy.linalg.expm(m)
+109 µs ± 1.4 µs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
+
+In [37]: %timeit me_paddle = matrix_exp(m_paddle)
+1.57 ms ± 6.62 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
+
+```
+
+| 框架 | 2\*2 | 48\*48 | 8\*32\*32\*32 |
+| - | - | - | - |
+| Scipy | 33.3 µs ± 424 ns | 109 µs ± 1.4 µs | 12.5 ms ± 158 |
+| PyTorch(cpu) | 48.6 µs ± 543 ns | 129 µs ± 1.7 µs | 11.8 ms ± 117 µs |
+| Tensorflow(cpu) | 3.17 ms ± 69.9 µs | 3.74 ms ± 33.8 µs | 38.8 ms ± 1.99 ms |
+| Tensorflow(gpu) | 4.8 ms ± 69 µs | 5.39 ms ± 44.9 µs | 20.4 ms ± 898 µs |
+| Paddle(cpu) | 598 µs ± 9.21 µs | 1.1 ms ± 15.6 µs | 49.6 ms ± 809 µs |
+| Paddle(gpu) | 1.01 ms ± 7.66 µs | 1.57 ms ± 6.62 µs | 14.8 ms ± 9.86 µs |
+
+
+结论：
+- torch 与 scipy 速度最快，在一个量级
+- tensorflow 与 paddle 速度在一个量级，慢于 torch 和 scipy
+- 2000 元素量级以内， torch 比 scipy 慢
+- 200000 元素量级， torch 比 scipy 快
+- paddle 比 torch 慢较多
+- paddle 比 tensorflow 快
+- 当元素量级增大之后，这几者之间的差距在缩小
+- 2000 元素量级以内，使用 cpu 要快于 gpu
+- 200000 元素量级，gpu 要快于 cpu
+
+
+分析主要原因：
+
+- paddle 用 python 实现的，torch 用 c++ 实现，因此 torch 快于 paddle
+- 至于 torch 算法导致的性能提升，可能不大。因为 scipy 也是用的 pade 近似，与 paddle 一样，scipy 快的主要原因应该是用 Cython 实现了较耗时的操作。另外，torch 本身框架也会消耗一部分时间。
+- 当元素量级增大之后，各框架底层算子的性能，如 solve，起主导作用，几者像差不大。
+- 当元素量级增大之后，gpu 性能得到体现，要快于 cpu 。
+
+### 精度对比
+
+这里对比 Paddle, PyTorch, Tensorflow 对比 Scipy 的精度，输入为 48\*48 元素。
+
+使用相对误差与绝对误差：
+
+``` python
+In [46]: def max_diff(a, b):
+    ...:     return np.max(np.abs(a-b))
+    ...: 
+
+In [47]: def max_rela(a, b):
+    ...:     diff = np.abs(a-b)
+    ...:     return np.max(diff/np.abs(a))
+
+```
+
+| 框架 | max_rela | max_diff |
+| - | - | - |
+| PyTorch | 3.4541124397028097e-15 | 1.7285346984863281e-06 |
+| Tensorflow | 3.995791166252789e-14 | 2.3484230041503906e-05 |
+| Paddle | 4.0382001292068676e-14 | 2.384185791015625e-05 |
+
+结论：
+
+- 三者相对 Scipy 精度相差不大
+
+另外，当输入增大时，精度误差同步增大。
+
+
 # 六、测试和验收的考量
 参考：[新增API 测试及验收规范](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/dev_guides/api_contributing_guides/api_accpetance_criteria_cn.html)
 可考虑以下场景：
