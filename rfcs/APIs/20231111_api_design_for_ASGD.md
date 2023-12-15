@@ -348,7 +348,7 @@ weight_decay是冗余的。
 
 ## 命名与参数设计
 
-添加 python 上层接口:
+### 添加 python 上层接口
 
 - `paddle.optimizer.ASGD`
 
@@ -371,6 +371,53 @@ weight_decay是冗余的。
     |weight_decay|float, WeightDecayRegularizer|the strategy of regularization|
     |grad_clip|GradientClipBase|gradient cliping strategy|
     |name|str|normally there is no need for user to set this property|
+
+### 重要函数设计
+- `_create_accumulators`
+
+    ``` Python
+    def _create_accumulators(self, block, parameters)
+    ```
+
+    |参数名|描述|
+    |---|---|
+    |block|the block in which the loss tensor is present|
+    |parameters|list of parameter tensors for the optimizer|
+
+    本函数的作用为：
+  
+      0. 对 multi_precision 的处理
+      1. 获取保存的 y 与 d
+
+- `_append_optimize_op`
+
+    ```Python
+    def _append_optimize_op(self, block, param_and_grad)
+    ```
+    
+    |参数名|描述|
+    |---|---|
+    |block|the block in which the loss tensor is present|
+    |param_and_grad|parameters and gradients|
+
+    本函数的作用为：
+  
+      将 optimize_op 添加到 block 并返回所有添加的 optimize_op
+
+- `_update_param_group`
+
+    ```Python
+    def _update_param_group(self, parameters)
+    ```
+    
+    |参数名|描述|
+    |---|---|
+    |parameters|The extra group of Tensors to be optimzed with different optimization options. Only used in child class|
+    
+    本函数的作用为：
+
+      当 _append_optimize_op 的参数 param_and_grad 为 dict 类型时，更新 param_and_grad 为 param_and_grad.get('params')
+
 
 ## 底层 OP 设计
 
