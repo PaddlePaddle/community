@@ -305,11 +305,11 @@ def _single_tensor_rprop(
 
     |参数名|类型|描述|
     |---|---|---|
-    |learning_rate|float, Tensor, LearningRateDecay|The initial learning rate used to update ``Parameter``. It can be a float value, a ``Tensor`` with a float type or a LearningRateDecay. The default value is 0.001.|
+    |learning_rate|float, Tensor, LearningRateDecay|The initial learning rate used to update `Parameter`. It can be a float value, a `Tensor` with a float type or a LearningRateDecay. The default value is 0.001.|
     |learning_rate_range|tuple|The range of learning rate. Learning rate cannot be smaller than the first element of the tuple; learning rate cannot be larger than the second element of the tuple|
-    |parameters|list, tuple|List/Tuple of ``Tensor`` to update to minimize ``loss``. This parameter is required in dygraph mode. The default value is None in static graph mode, at this time all parameters will be updated.|
+    |parameters|list, tuple|List/Tuple of `Tensor` to update to minimize `loss`. This parameter is required in dygraph mode. The default value is None in static graph mode, at this time all parameters will be updated.|
     |etas|tuple|Tuple used to update learning rate. The first element of the tuple is the multiplicative decrease factor; the second element of the tuple is the multiplicative increase factor|
-    |grad_clip|GradientClipBase|Gradient clipping strategy, it's an instance of some derived class of ``GradientClipBase`` . There are three clipping strategies ( `api_paddle_nn_ClipGradByGlobalNorm` , `api_paddle_nn_ClipGradByNorm` , `api_paddle_nn_ClipGradByValue` ). Default None, meaning there is no gradient clipping.|
+    |grad_clip|GradientClipBase|Gradient clipping strategy, it's an instance of some derived class of `GradientClipBase` . There are three clipping strategies ( `api_paddle_nn_ClipGradByGlobalNorm` , `api_paddle_nn_ClipGradByNorm` , `api_paddle_nn_ClipGradByValue` ). Default None, meaning there is no gradient clipping.|
     |multi_precision|bool|In mixed precision training scenarios based on GPU, this parameter is mainly used to ensure the numerical stability of gradient updates. When it is set to True, the optimizer will save a backup of FP32 type parameters with an equal value for FP16 type parameters. When updating gradients, first increase the gradient type to FP32, and then assign it to the FP32 type parameter backup. Finally, the updated FP32 type value will be converted to FP16 type first, and then assigned to the actual FP16 type parameters participating in the calculation. The default value is False|
     |name|str|The default value is None. Normally there is no need for user to set this property. For more information, please refer to `api_guide_Name` .|
 
