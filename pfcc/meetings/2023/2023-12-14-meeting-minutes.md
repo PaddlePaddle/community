@@ -18,23 +18,23 @@
 
 ### 2、快乐开源总览
 
-[sunzhongkai588](https://github.com/sunzhongkai588) 介绍了快乐开源的玩法从入门到进阶
+[sunzhongkai588](https://github.com/sunzhongkai588) 介绍了快乐开源的玩法从入门到进阶，快速的参与到自己动手发布任务
 
 - 快乐开源总览：https://github.com/PaddlePaddle/Paddle/issues/56689
 
 ### 3、开源活动讲解
 
-1. [MarioLulab](https://github.com/MarioLulab) 讲解快乐开源活动《新IR Python API适配升级》
-
-    - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/58067
-
-2. [Galaxy1458](https://github.com/Galaxy1458) 讲解快乐开源活动《[cmake治理]删除paddle_test多余无用依赖》
+1. [Galaxy1458](https://github.com/Galaxy1458) 讲解快乐开源活动《[cmake治理]删除paddle_test多余无用依赖》，并鼓励参与
     - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/60013
 
-3. [xingmingyyj](https://github.com/xingmingyyj) 讲解快乐开源活动《PIR算子推全和单测修复》
+2. [MarioLulab](https://github.com/MarioLulab) 讲解快乐开源活动《新IR Python API适配升级》，并鼓励参与
+    - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/58067
+
+
+3. [xingmingyyj](https://github.com/xingmingyyj) 讲解快乐开源活动《PIR算子推全和单测修复》，并鼓励参与
     - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/59382
 
-4. [SigureMo](https://github.com/SigureMo) 讲解快乐开源活动《PyTorch 和 Paddle 仓库模型导出成功率对比任务》
+4. [SigureMo](https://github.com/SigureMo) 讲解快乐开源活动《PyTorch 和 Paddle 仓库模型导出成功率对比任务》，并鼓励参与
     - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/58985
 
 
