@@ -1,0 +1,43 @@
+# Paddle Framework Contributor Club 第三十一次会议纪要
+
+## 会议概况
+
+- 本次会议时间：2022-12-14 19:00
+- 会议地点：线上会议
+- 参会人：本次会议共有20余名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席（[shiyutang](https://github.com/shiyutang)）主持。
+- 会议主题：《快乐开源》
+
+
+## 会议分享与讨论
+
+以下为本次会议的主要内容：
+
+### 1、新成员的自我介绍
+
+新同学进行了介绍，欢迎新同学的加入！
+
+### 2、快乐开源总览
+
+[sunzhongkai588](https://github.com/sunzhongkai588) 介绍了快乐开源的玩法从入门到进阶
+
+- 快乐开源总览：https://github.com/PaddlePaddle/Paddle/issues/56689
+
+### 3、开源活动讲解
+
+1. [MarioLulab](https://github.com/MarioLulab) 讲解快乐开源活动《新IR Python API适配升级》
+
+    - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/58067
+
+2. [Galaxy1458](https://github.com/Galaxy1458) 讲解快乐开源活动《[cmake治理]删除paddle_test多余无用依赖》
+    - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/60013
+
+3. [xingmingyyj](https://github.com/xingmingyyj) 讲解快乐开源活动《PIR算子推全和单测修复》
+    - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/59382
+
+4. [SigureMo](https://github.com/SigureMo) 讲解快乐开源活动《PyTorch 和 Paddle 仓库模型导出成功率对比任务》
+    - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/58985
+
+
+### 下次会议安排
+
+确定下次会议的时间为两周后的同一个时间段。主席[待定]()，副主席[待定]()，主题待定。
