@@ -24,17 +24,17 @@
 
 ### 3、开源活动讲解
 
-1. [Galaxy1458](https://github.com/Galaxy1458) 讲解快乐开源活动《[cmake治理]删除paddle_test多余无用依赖》，并鼓励参与
+1. [Galaxy1458](https://github.com/Galaxy1458) 讲解快乐开源活动《[cmake治理]删除paddle_test多余无用依赖》，解答疑问并鼓励参与
     - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/60013
 
-2. [MarioLulab](https://github.com/MarioLulab) 讲解快乐开源活动《新IR Python API适配升级》，并鼓励参与
+2. [MarioLulab](https://github.com/MarioLulab) 讲解快乐开源活动《新IR Python API适配升级》，解答疑问并鼓励参与
     - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/58067
 
 
-3. [xingmingyyj](https://github.com/xingmingyyj) 讲解快乐开源活动《PIR算子推全和单测修复》，并鼓励参与
+3. [xingmingyyj](https://github.com/xingmingyyj) 讲解快乐开源活动《PIR算子推全和单测修复》，解答疑问并鼓励参与
     - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/59382
 
-4. [SigureMo](https://github.com/SigureMo) 讲解快乐开源活动《PyTorch 和 Paddle 仓库模型导出成功率对比任务》，并鼓励参与
+4. [SigureMo](https://github.com/SigureMo) 讲解快乐开源活动《PyTorch 和 Paddle 仓库模型导出成功率对比任务》，解答疑问并鼓励参与
     - 活动地址：https://github.com/PaddlePaddle/Paddle/issues/58985
 
 
