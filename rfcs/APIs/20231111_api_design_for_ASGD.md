@@ -24,7 +24,7 @@
 其中，基本版本的伪代码如下：
 ![img_ASGD_0.png](image/img_ASGD_0.png)
 
-`n` 为样本的数量。 $y_i$ 为第 `i` 个样本上一次的梯度信息。 $f_i^{'}(x)$ 为第 `i` 个样本本次计算得到的梯度信息。`x` 为要更新的参数。 $\alpha$ 为学习率。
+`n` 为一个完成epoch所需迭代的数量。 $y_i$ 为第 `i` 个样本上一次的梯度信息。 $f_i^{'}(x)$ 为第 `i` 个样本本次计算得到的梯度信息。`x` 为要更新的参数。 $\alpha$ 为学习率。
 
 核心步骤为：
 
@@ -32,6 +32,16 @@
     2. 随机采样
     3. 用本次计算得到的第 i 个样本的梯度信息，替换上一次的梯度信息
     4. 更新参数
+
+优化版本的伪代码如下：
+![img_ASGD_1.png](image/img_ASGD_1.png)
+
+论文提出了一种针对特定梯度结构的分析优化方法，并在上面的伪代码中，将其应用在了线性参数模型。因为这种方法不具有普遍性，本 API 中不会实现，这里不再赘述。
+
+除此之外，优化版本有两个点可以应用到本 API 的实现中：
+
+    1. 增加 Weight Decay
+    2. 为了避免初始更新幅度太小，在训练的第一个 epoch，对迭代次数 m 取平均，而不是对 n 取平均
 
 ## 2、功能目标
 
@@ -286,7 +296,7 @@ def _single_tensor_asgd(
 对比论文中 `ASGD` 的实现，有两个关键之处不同：
 
     1. 论文中的实现保存了上一次计算的梯度信息，并让它参与到了权重参数的更新过程；PyTorch 的实现中，虽然上一次计算的梯度信息被保留到了 ax ，但是在权重参数的更新过程中，并没有用到 ax。
-    2. 论文中的实现，是对样本数量 n 求平均；而 PyTorch 是对迭代的次数求平均。
+    2. 从第二个epoch开始：论文中的实现，是对 batch 的数量求平均；而 PyTorch 是对迭代的次数求平均。
 
 详细实现请见上文：概述->相关背景。
 
@@ -341,11 +351,6 @@ weight_decay是冗余的。
 目前，主流深度学习框架仅有 `Pytorch` 实现了该算子，且实现还是存在很大问题的。所以暂不做对比分析。设计、实现均以原论文为准。
 
 # 五、设计思路与实现方案
-
-原论文实现分为了两个部分：基础版本；对基础版本的优化。
-
-本设计文档仅涉及基础版本的实现，优化会另分一个 `PR` 出来。
-
 ## 命名与参数设计
 
 ### 添加 python 上层接口
@@ -354,8 +359,8 @@ weight_decay是冗余的。
 
     ``` python
     paddle.optimizer.ASGD(
-        batch_num,
         learning_rate=0.001,
+        batch_num=1,
         parameters=None,
         weight_decay=None,
         grad_clip=None,
@@ -365,8 +370,8 @@ weight_decay是冗余的。
 
     |参数名|类型|描述|
     |---|---|---|
-    |batch_num|int|the amount of data in a batch|
     |learning_rate|float, Tensor, LearningRateDecay|the learning rate used to update ``Parameter``|
+    |batch_num|int|the number of batches needed to complete one epoch|
     |parameters|list, tuple|list / tuple of ``Tensor`` to update to minimize ``loss``|
     |weight_decay|float, WeightDecayRegularizer|the strategy of regularization|
     |grad_clip|GradientClipBase|gradient cliping strategy|
@@ -387,7 +392,7 @@ weight_decay是冗余的。
     本函数的作用为：
   
       0. 对 multi_precision 的处理
-      1. 获取保存的 y 与 d
+      1. 获取保存的 y、 d 和 m
 
 - `_append_optimize_op`
 
@@ -421,15 +426,151 @@ weight_decay是冗余的。
 
 ## 底层 OP 设计
 
-TODO
+- paddle/phi/api/yaml/ops.yaml
 
-做完底层实现后补充。
+```yaml
+- op : asgd_
+  args : (Tensor param, Tensor learning_rate, Tensor grad, Tensor d, Tensor y, Tensor n, Tensor master_param, bool multi_precision=false)
+  output : Tensor(param_out), Tensor(d_out), Tensor(y_out), Tensor(master_param_out)
+  infer_meta :
+    func : ASGDInferMeta
+  kernel :
+    func : asgd
+    data_type : param
+  data_transform :
+    support_trans_dtype : learning_rate, n
+  optional : master_param, master_param_out
+  inplace : (param -> param_out), (d -> d_out), (y -> y_out), (master_param -> master_param_out)
+```
+
+`infer_meta` 分发到了 `ASGDInferMeta`，`kernel` 分发到了 `asgd`（`asgd` 分别做了 `CPU` 和 `GPU` 的实现）。
+
+- paddle/phi/infermeta/multiary.cc
+
+```C++
+void ASGDInferMeta(const MetaTensor& param,
+                   const MetaTensor& learning_rate,
+                   const MetaTensor& grad,
+                   const MetaTensor& d,
+                   const MetaTensor& y,
+                   const MetaTensor& n,
+                   const MetaTensor& master_param,
+                   bool multi_precision,
+                   MetaTensor* param_out,
+                   MetaTensor* d_out,
+                   MetaTensor* y_out,
+                   MetaTensor* master_param_out) {
+  PADDLE_ENFORCE_NOT_NULL(
+      param_out,
+      phi::errors::InvalidArgument(
+          "Output(ParamOut) of ASGDOp should not be null."));
+
+  PADDLE_ENFORCE_NOT_NULL(d_out,
+                          phi::errors::InvalidArgument(
+                              "Output(DOut) of ASGDOp should not be null."));
+
+  PADDLE_ENFORCE_NOT_NULL(y_out,
+                          phi::errors::InvalidArgument(
+                              "Output(YOut) of ASGDOp should not be null."));
+
+  param_out->set_dims(param.dims());
+  param_out->set_dtype(param.dtype());
+  d_out->set_dims(d.dims());
+  d_out->set_dtype(d.dtype());
+  y_out->set_dims(y.dims());
+  y_out->set_dtype(y.dtype());
+  if (multi_precision) {
+    master_param_out->set_dims(master_param.dims());
+    if (DataType::FLOAT16 == master_param.dtype() ||
+        DataType::BFLOAT16 == master_param.dtype()) {
+      master_param_out->set_dtype(DataType::FLOAT32);
+    } else {
+      master_param_out->set_dtype(master_param.dtype());
+    }
+  }
+}
+```
+
+- paddle/phi/kernels/cpu/asgd_kernel.cc
+
+```C++
+template <typename T, typename Context>
+void ASGDKernelCPUImpl(const Context& dev_ctx,
+                       const DenseTensor& param,
+                       const DenseTensor& learning_rate,
+                       const DenseTensor& grad,
+                       const DenseTensor& d,
+                       const DenseTensor& y,
+                       const DenseTensor& n,
+                       DenseTensor* param_out,
+                       DenseTensor* d_out,
+                       DenseTensor* y_out) {
+  auto param_eigen = EigenVector<T>::Flatten(param);
+  auto grad_eigen = EigenVector<T>::Flatten(grad);
+  auto d_eigen = EigenVector<T>::Flatten(d);
+  auto y_eigen = EigenVector<T>::Flatten(y);
+  auto param_out_eigen = EigenVector<T>::Flatten(*param_out);
+  auto d_out_eigen = EigenVector<T>::Flatten(*d_out);
+  auto y_out_eigen = EigenVector<T>::Flatten(*y_out);
+  T learning_rate_T = learning_rate.data<T>()[0];
+  T n_T = n.data<T>()[0];
+
+  d_out_eigen = d_eigen - y_eigen + grad_eigen;
+  y_out_eigen = grad_eigen;
+  param_out_eigen = param_eigen - (learning_rate_T / n_T) * d_out_eigen;
+}
+```
+
+用 `Eigen` 实现 `asgd` `CPU` 端逻辑。
+
+- paddle/phi/kernels/gpu/asgd_kernel.cu
+
+```cuda
+template <typename T, typename MT>
+__global__ void ASGDKernelGPUImpl(const T* param,
+                                  const T* learning_rate,
+                                  const T* grad,
+                                  const T* d,
+                                  const T* y,
+                                  const T* n,
+                                  const MT* master_param,
+                                  int num,
+                                  T* param_out,
+                                  T* d_out,
+                                  T* y_out,
+                                  MT* master_param_out) {
+  MT learning_rate_MT = static_cast<MT>(learning_rate[0]);
+  MT n_MT = static_cast<MT>(n[0]);
+  CUDA_KERNEL_LOOP(i, num) {
+    MT param_data = master_param ? master_param[i] : static_cast<MT>(param[i]);
+    MT grad_data = static_cast<MT>(grad[i]);
+    MT d_data = static_cast<MT>(d[i]);
+    MT y_data = static_cast<MT>(y[i]);
+    d_data = d_data - y_data + grad_data;
+    y_data = grad_data;
+    param_data = param_data - (learning_rate_MT / n_MT) * d_data;
+    param_out[i] = static_cast<T>(param_data);
+    d_out[i] = static_cast<T>(d_data);
+    y_out[i] = static_cast<T>(y_data);
+    if (master_param_out) {
+      master_param_out[i] = param_data;
+    }
+  }
+}
+```
+
+`GPU` 端实现的基本逻辑与 `CPU` 端相同。
 
 ## API实现方案
 
-- `paddle.optimizer.ASGD`
+实现步骤：
 
-TODO
+    1. Python 端逻辑
+    2. asgd CPU 与 GPU 端逻辑
+    3. ASGDInferMeta
+    4. ops.yaml
+    5. 单元测试
+    6. 文档
 
 # 六、测试和验收的考量
 
