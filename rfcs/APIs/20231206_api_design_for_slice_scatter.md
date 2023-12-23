@@ -325,9 +325,9 @@ def slice_scatter(x, value, axes, starts, ends, strides, name=None):
 - 覆盖动态图和静态图的测试场景
 - 覆盖 CPU、GPU 两种测试场景
 - 支持各种Tensor精度，FP32、FP64 等（待验证）
-- 需要检查前向和反向计算的精度正确性
-- 处理0维输入数据
-- 处理可选参数不存在或不一致的情况
+- 需要检查计算正确性
+- 需要检查多维的情况
+- 需要检查 broadcast 情况
 
 # 七、可行性分析和排期规划
 
