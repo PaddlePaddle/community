@@ -24,7 +24,7 @@ $\gamma(a, x) = \int_0^x t^{a-1} e^{-t} dt $
 上不完全伽马函数 $\Gamma(a,x)$ 的定义域为 $a>0$， $x \geq 0$，值域为 $(0,\Gamma(a)]$。
 下不完全伽马函数 $\gamma(a,x)$ 的定义域为 $a>0$， $x \geq 0$，值域为 $[0,\Gamma(a))$，其中 $\Gamma(a)$ 是伽马函数的值。
 
-相应的 API 需要输入两个参数 `input` 与 `other`，对应上式的 $a$ 和 $x$；
+相应的 API 需要输入两个参数 `x` 与 `a`，对应上式的 $x$ 和 $a$；
 
 ## 3、意义
 
@@ -364,64 +364,64 @@ XlaOp Igamma(XlaOp a, XlaOp x) {
 
 ```python
 paddle.igamma(
-    input: Tensor,
-    other: Tensor,
+    x: Tensor,
+    a: Tensor,
     name: str | None = None
 )
 ```
 
 ```python
 paddle.igammac(
-    input: Tensor,
-    other: Tensor,
+    x: Tensor,
+    a: Tensor,
     name: str | None = None
 )
 ```
 
 ```python
 paddle.igamma_(
-    input: Tensor,
-    other: Tensor,
+    x: Tensor,
+    a: Tensor,
     name: str | None = None
 )
 ```
 
 ```python
 paddle.igammac_(
-    input: Tensor,
-    other: Tensor,
+    x: Tensor,
+    a: Tensor,
     name: str | None = None
 )
 ```
 
 ```python
 paddle.Tensor.igamma(
-    other: Tensor
+    a: Tensor
 )
 ```
 
 ```python
 paddle.Tensor.igammac(
-    other: Tensor
+    a: Tensor
 )
 ```
 
 ```python
 paddle.Tensor.igamma_(
-    other: Tensor
+    a: Tensor
 )
 ```
 
 ```python
 paddle.Tensor.igammac_(
-    other: Tensor
+    a: Tensor
 )
 ```
 
 ## 底层OP设计
 Kernel部分CPU实现添加在 `paddle/phi/kernels/cpu/igamma_kernel.cc` 和 `paddle/phi/kernels/cpu/igammac_kernel.cc`，
 Kernel部分GPU实现添加在 `paddle/phi/kernels/gpu/igamma_kernel.cu` 和 `paddle/phi/kernels/gpu/igammac_kernel.cu`，
-输入 CPU 支持 float16, bfloat16, float32, float64，GPU支持 float32, float64,
+输入支持 float32, float64,
 对于底层 OP 主要分为三部分，由于 `igamma` 和 `igammac`是互补关系，所以实际上可复用代码很多，
 因此底层OP设计仅以`igammac`为例。
 
@@ -444,10 +444,10 @@ $\Gamma(a, x) = \int_x^{\infty} t^{a-1} e^{-t} dt $
 ### igamma
 对于 igamma 、 igamma_ 、igammac 和 igammac_ 有类似的API，下面列出了`igamma`的情况。
 
-具体的API为`paddle.igamma(input, other, name = None)`和`paddle.Tensor.igamma(input, other)`
+具体的API为`paddle.igamma(x, a, name = None)`和`paddle.Tensor.igamma(x, a)`
 
-- input: 输入张量，即公式中的 $a$, CPU 支持 float16, bfloat16, float32, float64，GPU支持 float32, float64
-- other: 输入张量，即公式中的 $x$, CPU 支持 float16, bfloat16, float32, float64，GPU支持 float32, float64
+- x: 输入张量，即公式中的 $x$, 支持 float32, float64
+- a: 输入张量，即公式中的 $a$, 支持 float32, float64
 
 
 例如将一维张量 $[3, 5]$ 和一维张量 $[2, 7]$ 输入，则计算结果如下：
@@ -460,7 +460,7 @@ $\Gamma(a, x) = [\int_2^{\infty} t^{2} e^{-t} dt, \int_7^{\infty} t^{4} e^{-t} d
 测试需要考虑的 case 如下：
 
 - 输出数值结果的一致性和数据类型是否正确，使用 scipy 作为参考标准
-- 对不同 dtype 的输入数据 `input` 和 `other` 进行计算精度检验，与PyTorch保持一致
+- 对不同 dtype 的输入数据 `x` 和 `a` 进行计算精度检验，与PyTorch保持一致
 - 输入输出的容错性与错误提示信息
 - 输出 Dtype 错误或不兼容时抛出异常
 - 保证调用属性时是可以被正常找到的
