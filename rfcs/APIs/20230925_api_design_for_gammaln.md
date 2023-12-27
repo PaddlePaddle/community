@@ -184,6 +184,8 @@ double lgam_sgn(double x, int *sign)
 
 Pytorch中直接使用的是C++标准库中的 `std::lgamma`，代码如下：
 
+- CPU版本
+
 ```C++
   Vectorized<T> map(T (*const f)(T)) const {
     Vectorized<T> ret;
@@ -196,7 +198,11 @@ Pytorch中直接使用的是C++标准库中的 `std::lgamma`，代码如下：
   Vectorized<T> lgamma() const {
     return map(std::lgamma);
   }
+```
 
+- GPU版本
+
+```C++
   const auto lgamma_string = jiterator_stringify(
   template <typename T>
   T lgamma_kernel(T a) {
