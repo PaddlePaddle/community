@@ -119,7 +119,7 @@ function fn_reduce_max_broadcast_to_subtract_exp_reduce_sum_broadcast_to_0_divid
 如下是backend::Compiler进行Codegen时的核心分支逻辑，其是所有硬件的顶层模块，会根据不同的target生成对应的硬件相关的Code。
 
 <p align="center">
-<img src="./img/codegen.png">
+<img src="./img/codegen.png" width=70%>
 </p>
 
 ```c++

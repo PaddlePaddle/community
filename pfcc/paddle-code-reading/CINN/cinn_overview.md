@@ -38,7 +38,7 @@ class CINNSoftmaxSubGraphNet(paddle.nn.Layer):
 ```
 
 <p align="center">
-<img src="./img/softmax.png">
+<img src="./img/softmax.png" width=50%>
 </p>
 
 

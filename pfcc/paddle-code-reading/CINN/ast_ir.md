@@ -182,7 +182,7 @@ enum OpPatternKind {
 以PirCompiler为主体功能的界面，真正承担 Dialect Op → Compute AST 工作是由OpLower来做的。之前为了隔离旧IR下的OpLower逻辑，升级为了模版继承，源码实现在`paddle/cinn/hlir/framework/pir/op_lowering_impl.cc` 。
 
 <p align="center">
-<img src="./img/op_lower.png">
+<img src="./img/op_lower.png" width=70%>
 </p>
 
 OpLower 对外提供的核心接口主要为Lower，返回的是GrouOp对应的LoweredFunc函数列表。近期为了支持动态shape，徐彬也新增了BucketLower接口。
