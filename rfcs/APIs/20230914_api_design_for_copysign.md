@@ -196,6 +196,37 @@ NPY_NO_EXPORT void
 
 PyTorch和Numpy实现方式基本一致，都是底层调用cpp的math库实现`copysign`，PyTorch可进行backward。
 
+paddle的promotion机制暂时正在建设中，故现仅考虑输入的两个元素的类型相同的情况，下面是对竞品面对不同输入类型的行为记录（pytorch和numpy均不支持complex类型）：
+
+| x                | y                | np.copysign(x,y)/torch.copysign(x,y) | grad_x(grad_y) |
+| ---------------- | ---------------- | ------------------------------------ | -------------- |
+| np.uint8         | np.uint8         | np.float16                           | /              |
+| torch.uint8      | torch.uint8      | torch.float32                        | /              |
+| np.int8          | np.int8          | np.float16                           | /              |
+| torch.int8       | torch.int8       | torch.float32                        | /              |
+| np.int16         | np.int16         | np.float32                           | /              |
+| torch.int16      | torch.int16      | torch.float32                        | /              |
+| np.int32         | np.int32         | np.float64                           | /              |
+| torch.int32      | torch.int32      | torch.float32                        | /              |
+| np.int64         | np.int64         | np.float64                           | /              |
+| torch.int64      | torch.int64      | torch.float32                        | /              |
+| np.float16       | np.float16       | np.float16                           | /              |
+| torch.float16    | torch.float16    | torch.float16                        | torch.float16  |
+| np.float32       | np.float32       | np.float32                           | /              |
+| torch.float32    | torch.float32    | torch.float32                        | torch.float32  |
+| np.float64       | np.float64       | np.float64                           | /              |
+| torch.float64    | torch.float64    | torch.float64                        | torch.float64  |
+| np.complex64     | np.complex64     | /                                    | /              |
+| torch.complex64  | torch.complex64  | /                                    | /              |
+| np.complex128    | np.complex128    | /                                    | /              |
+| torch.complex128 | torch.complex128 | /                                    | /              |
+| np.bool          | np.bool          | np.float16                           | /              |
+| torch.bool       | torch.bool       | torch.float32                        | /              |
+| torch.bfloat16   | torch.bfloat16   | torch.bfloat16                       | torch.bfloat16 |
+
++ 可以发现，在整型输入时，numpy和pytorch的行为略有不同：pytorch面对整型输入，均保持`float32`作为输出，而numpy在整型输入时，仅当dtype为`int16`时，输出的dtype与pytorch对齐（均为`float32`）。
++ 另外，pytorch支持整型(包括bool)的反向传播（但是paddle目前似乎并未对此作限制）。对于浮点数，输入和输出类型保持一致。
+
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
@@ -214,43 +245,40 @@ API的设计为:
 
 ## 底层OP设计
 
-参考PyTorch与Numpy中的设计，调用底层cpp实现OP，反向 kernel impl 大致如下：
+参考`elementwise_compute`类型的其他op，支持broadcast。
 
-```cpp
-template<typename T>
-struct CopySignGradFunctor {
-    CopySignGradFunctor(const T* x_data, const T* y_data, const T* dout, T* dx, int64_t numel)
-    : x_data_(x_data), y_data_(y_data), dout_(dout), dx_(dx), numel_(numel) {}
+**需要进一步确认的点：**
 
-    // backward 逻辑如下
-    HOSTDEVICE void operator()(int64_t idx) const {
-        if (x_data_[idx] == T(0)) dx_[idx] = T(0);
-        else dx_[idx] = T(dout_[idx]) * (T(std::copysign(x_data_[idx], y_data_[idx]) / x_data_[idx]));
-    }
++ 竞品均直接采用cpp标准库中的`std::copysign`来实现Functor，然而这个库函数在接收整型输入时，自动会进行promotion为浮点数：
 
-    const T* x_data_;
-    const T* y_data_;
-    const T* dout_;
-    T* dx_;
-    int64_t numel_;
-};
+  ```cpp
+  #ifndef __CORRECT_ISO_CPP11_MATH_H_PROTO_FP
+  
+  constexpr float
+  copysign(float __x, float __y)
+  { return __builtin_copysignf(__x, __y); }
+   
+  constexpr long double
+  copysign(long double __x, long double __y)
+  { return __builtin_copysignl(__x, __y); }
+  #endif
+   
+  #ifndef __CORRECT_ISO_CPP11_MATH_H_PROTO_INT
+  template<typename _Tp, typename _Up>
+  constexpr typename __gnu_cxx::__promote_2<_Tp, _Up>::__type
+  copysign(_Tp __x, _Up __y)
+  {
+  typedef typename __gnu_cxx::__promote_2<_Tp, _Up>::__type __type;
+  return copysign(__type(__x), __type(__y));
+  }
+  #endif
+  ```
 
-template <typename T, typename Context>
-void CopySignGradKernel(const Context& dev_ctx,
-                   const DenseTensor& x,
-                   const DenseTensor& y,
-                   const DenseTensor& out_grad,
-                   DenseTensor* x_grad) {
-    dev_ctx.template Alloc<T>(x_grad);
-    auto x_data = x.data<T>(), y_data = y.data<T>(), out_grad_data = out_grad.data<T>();
-    auto x_grad_data = x_grad->data<T>();
-    phi::funcs::ForRange<Context> for_range(dev_ctx, x.numel());
-    phi::CopySignGradFunctor<T> functor(x_data, y_data, out_grad_data, x_grad_data, x.numel());
-    for_range(functor);
-}
-```
+  而且numpy和pytorch遇到整型输入，得到输出dtype常常不同，需要确定paddle的实现。
 
++ 反向传播的dtype是否一直保持不变？如果是，那么遇到dtype为整型的时（paddle没有严格限制反向传播过程的dtype不能为整型，pytorch有强制限制反向传播过程不能为整型），求梯度会有f(x,y)得到float类型，就变了。paddle目前支持反向传播过程中数据类型发生变化吗？
 
+单从功能上来看，`copysign`实现的逻辑比较简单：取第一个变量的绝对值的大小，取第二个变量符号，两者拼接。感觉从功能上来看，可以不拘泥于跟竞品一样调用标准库的`std::copysign`，而是直接在Functor中判断来实现，而且输入和输出dtype保持相同。
 
 ## API实现方案
 
