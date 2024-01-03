@@ -225,7 +225,7 @@ paddle的promotion机制暂时正在建设中，故现仅考虑输入的两个�
 | torch.bfloat16   | torch.bfloat16   | torch.bfloat16                       | torch.bfloat16 |
 
 + 可以发现，在整型输入时，numpy和pytorch的行为略有不同：pytorch面对整型输入，均保持`float32`作为输出，而numpy在整型输入时，仅当dtype为`int16`时，输出的dtype与pytorch对齐（均为`float32`）。
-+ 另外，pytorch支持整型(包括bool)的反向传播（但是paddle目前似乎并未对此作限制）。对于浮点数，输入和输出类型保持一致。
++ 另外，pytorch不支持整型(包括bool)的反向传播（但是paddle目前似乎并未对此作限制）。对于浮点数，输入和输出类型保持一致。
 
 # 五、设计思路与实现方案
 
