@@ -1078,7 +1078,7 @@ PD_REGISTER_KERNEL(bitwise_and,
                                  arg_type);
      ```
 
-     从这里其实就可以知道，我们在算子注册的时候，输入变量的类型为什么必须严格带`const`，而且常常需要`DenseTensor`的指针了把。因为要在这里对上，才能顺利地把参数类型信息存到`args_def`中去。
+     从这里其实就可以知道，我们在算子注册的时候，输入变量的类型为什么必须严格带`const`，而且常常需要`DenseTensor`的指针了吧。因为要在这里对上，才能顺利地把参数类型信息存到`args_def`中去。
 
      具体例子中，我们有输入相关的`std::type_index(typeid(const DenseTensor&)), std::type_index(typeid(const DenseTensor&))`这两个参数，都是走这个：
 
@@ -1386,13 +1386,59 @@ PD_REGISTER_KERNEL(bitwise_and,
 
 
 
+## 文中的一些QA：
 
+Q1：
 
+> 然后构造`Kernel`对象：
+>
+> ```cpp
+>   explicit Kernel(KernelFn fn, void* variadic_fn)
+>       : fn_(fn), variadic_fn_(variadic_fn) {
+>     if (variadic_fn == nullptr) {
+>       kernel_registered_type_ = KernelRegisteredType::STRUCTURE;
+>     } else {
+>       kernel_registered_type_ = KernelRegisteredType::FUNCTION;
+>     }
+>   }
+> ```
+>
+> 可以发现，主要是存了一下传入的`fn`和`variadic_fn`，因为`variadic_fn`不为空，所以`kernel_registered_type_`赋值为`KernelRegisteredType::FUNCTION`（看到这里涉及`structure`和`function`，猜测这块可能是兼容老的op体系用的？老的fluid体系为结构体算子，新的phi体系算子为函数式算子）
 
+A1：
 
+> 这个猜测是对的。
 
+Q2：
 
+> ​     （思考：对一个输入tensor而言，他的backend（或者说，处在这个位置的参数的backend意味着什么？）这是否意味着，在调用算子进行计算的时候，框架自动对其backend进行检测？有的也对输出的dtype进行修改，可能这里会调整kernel允许输出的类别？譬如什么都不加，就是输入`T`输出`T`，加入类似于`kernel->OutputAt(0).SetDataType(phi::DataType::BOOL);`这种就是输入`T`，输出`bool`）
 
+A2：
 
+> 因为默认情况下我们认为所有输入和输出信息比如dtype或者backend这种一般是一致的，但并不是所有算子都是这样，有的存在这些信息不一致的情况，所以这里可以对其进行修改，修改后框架会对Tensor做相应的变换以满足处理条件
 
+Q3：
+
+> ```
+> kernel->InputAt(0).SetDataType(phi::DataType::BOOL);
+> kernel->OutputAt(0).SetDataType(phi::DataType::BOOL);
+> ```
+>
+> 在.cc或者.cu中注册时，这样修改了第0个输入的Tensor和第0个输出的Tensor，是不是意味着调度的时候会预先检查输入和输出的dtype呢？
+>
+> 如果是的话，想问如果注册的时候限定了layout是如何做限制的呢？毕竟我们调用的时候就是传入一个`paddle.to_tensor([1,2,3])`这样的tensor，看上去不带什么layout的信息。
+
+A3：
+
+> 你可以理解成是一种检查，但实际情况比较复杂，需要根据这里的信息判断是否要做transform，具体需要熟悉了调度流程才会明白，layout的话其实我们现在一般都是用的ALL_LAYOUT，也就是默认情况，只有一些sparse kernel会对其进行修改，设置成SPARSE_COO等格式，以满足sparse kernel的执行条件
+
+Q4：
+
+> \#define PD_EXPAND(x) x
+>
+> 看样子它直接返回了输入？具体为什么加这个，还不太清楚。它包了一层`_PD_REGISTER_2TA_KERNEL`
+
+A4：
+
+> 这里加这个主要是由于嵌套宏有时候无法正常展开，比如带有##连接的时候，多使用一个额外的宏包裹一下，比如这里的PD_EXPAND，可以让嵌套宏能够正常展开。嵌套宏展开比较复杂，不同平台不同编译器的处理情况可能不一样，可以提交一个pr把所有PD_EXPAND删了，看看ci上会不会有什么问题
 
