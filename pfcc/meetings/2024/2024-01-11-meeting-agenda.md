@@ -13,6 +13,6 @@
 
 ## 会议议程
 
-1. 新人介绍：[于天池](https://github.com/DUCH714) 、[冯时超](https://github.com/fsczz) (5 min)
+1. 新人介绍：[DUCH714](https://github.com/DUCH714) 、[fsczz](https://github.com/fsczz) (5 min)
 2. [sunzhongkai588](https://github.com/sunzhongkai588) [Docs 文档吐槽大会 💬](https://github.com/PaddlePaddle/Paddle/issues/60686) (15 - 20 min)
 3. PFCC 成员自由发言与讨论（5 min）
