@@ -328,3 +328,81 @@ https://github.com/PaddlePaddle/Paddle/pull/56846
 
 https://github.com/PaddlePaddle/Paddle/pull/56846
 
+
+### No.112：将paddle内部的read_file、fused_gemm_epilogue算子及其kernel实现从fluid下迁移到phi下；添加identity_loss的yaml配置
+
+**详细描述：**
+
+将paddle内部的read_file、fused_gemm_epilogue算子及其kernel实现从fluid下迁移到phi下，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置yaml文件生成op定义。read_file配置在ops.yaml文件内，fused_gemm_epilogue配置在fused_ops.yaml内。
+- 将对应的kernel迁移到phi下
+- 迁移前后保证单测 test_read_file.py 和 test_fused_gemm_epilogue_op.py 运行成功
+- 开启FLAGS_enable_new_ir_in_executor=1，单测也可以运行成功
+
+添加identity_loss的yaml配置，包括如下工作：
+
+- 将fluid下的手写op定义删除，配置ops.yaml自定生成op定义
+
+**提交内容：**
+
+- read_file迁移到paddle/phi/kernels目录下，fused_gemm_epilogue迁移到paddle/phi/kernels/fusion目录下
+- 算子定义在ops.yaml和fused_ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/56846
+
+### No.123：结合paddle现有的动半架构，新增缺少的跨mesh下的reshard转换函数
+
+**详细描述：**
+
+在paddle的动半架构下，设计开发reshard模块，当输入输出的分布式状态不匹配时，插入合适的通信操作进行转换，包括以下工作：
+
+- 为了支持流水并行场景，新增跨mesh下的replicated状态到partial状态的转换。
+- 为了支持流水并行场景，新增对应的跨mesh下的partial状态到replicated状态的转换。
+- 以上功能，需要加对应单测保证功能正确性。
+
+
+**提交内容：**
+
+- 在paddle/phi/core/distributed/auto_parallel/reshard目录下，新增RToPCrossMeshReshardFunction
+- 在paddle/phi/core/distributed/auto_parallel/reshard目录下，新增PToRCrossMeshReshardFunction
+- 对应单测写在test/auto_parallel目录下
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/58550
+
+### No.124：结合paddle现有的动半架构，新增缺少的跨mesh下多对一和一对多的reshard转换函数
+
+**详细描述：**
+
+在paddle的动半架构下，设计开发reshard模块，当输入输出的分布式状态不匹配时，插入合适的通信操作进行转换，包括以下工作：
+
+- 为了支持流水并行场景下，在一个进程上打印全量数据，新增任意状态到replicated状态的转换
+- 为了支持流水并行场景下，在一个进程上打印全量数据，新增replicated状态到任意状态的转换
+- 以上功能，需要加对应单测保证功能正确性。
+
+
+**提交内容：**
+
+- 在paddle/phi/core/distributed/auto_parallel/reshard目录下，新增XToRReshardFunction
+- 在paddle/phi/core/distributed/auto_parallel/reshard目录下，新增RToXReshardFunction
+- 对应单测写在test/auto_parallel目录下
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考PR：**
+
+https://github.com/PaddlePaddle/Paddle/pull/57432
