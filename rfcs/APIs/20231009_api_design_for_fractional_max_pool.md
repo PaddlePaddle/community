@@ -3,13 +3,14 @@
 | API 名称 | FractionalMaxPool2d / FractionalMaxPool3d |
 | - | - |
 | 提交作者 | megemini(柳顺) |
-| 提交时间 | 2023-10-09 |
-| 版本号 | V2.0 |
+| 提交时间 | 2024-01-12 |
+| 版本号 | V2.1 |
 | 依赖飞桨版本 | develop |
 | 文件名 | 20231009_api_design_for_fractional_max_pool.md |
 
 #### 修订记录
 v2.0: 将实现方式由 python 改为 c++
+v2.1: 修改接口签名
 
 # 一、概述
 
@@ -783,8 +784,10 @@ v2.0: 将实现方式由 python 改为 c++
 
     ``` python
     paddle.nn.functional.fractional_max_pool2d(
-        x:Tensor, 
+        x:Tensor,
         output_size:Union[int, list, tuple], 
+        kernel_size:Optional[Union[int, list, tuple]]=None,
+        random_u:Optional[float]=None,
         return_mask:bool=False,
         name:str=None)
     ```
@@ -792,6 +795,8 @@ v2.0: 将实现方式由 python 改为 c++
     - 参数列表
     > x (Tensor) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
     > output_size (int|list|tuple) – 输出的尺寸。
+    > kernel_size (int|list|tuple, optional) – 核大小。
+    > random_u (float, optional) – 随机序列所需随机数。
     > return_mask (bool, optional) – 是否返回最大值的索引。
     > name (str, optional) – 操作名称。
 
@@ -804,8 +809,10 @@ v2.0: 将实现方式由 python 改为 c++
     
     ``` python
     paddle.nn.functional.fractional_max_pool3d(
-        x:Tensor, 
+        x:Tensor,
         output_size:Union[int, list, tuple], 
+        kernel_size:Optional[Union[int, list, tuple]]=None,
+        random_u:Optional[float]=None,
         return_mask:bool=False,
         name:str=None)
     ```
@@ -813,6 +820,8 @@ v2.0: 将实现方式由 python 改为 c++
     - 参数列表
     > x (Tensor) – 输入的一个 Tensor。数据类型支持：float32、float64、int32、int64。
     > output_size (int|list|tuple) – 输出的尺寸。
+    > kernel_size (int|list|tuple, optional) – 核大小。
+    > random_u (float, optional) – 随机序列所需随机数。
     > return_mask (bool, optional) – 是否返回最大值的索引。
     > name (str, optional) – 操作名称。
 
@@ -843,9 +852,26 @@ v2.0: 将实现方式由 python 改为 c++
 
 - 移除 `pseudo_random`, `overlapping`, `seed` 
 
-    由于 `共用 adaptive max pooling 底层算子`，且参考 `PyTorch` 的设计方案，这里将只使用 `伪` 随机的方式生成池化序列，并在 c++ 算子内部实现。
+    参考 `PyTorch` 的设计方案，这里将只使用 `伪` 随机的方式生成池化序列，并在 c++ 算子内部实现。
+
+*注意* ： 相较 v2.0 版本的设计文档，这里增加多个参数，特说明如下：
+
+- `kernel_size`
+
+    此参数默认为 `None`，表示使用 `disjoint（non-overlapping）` 模式。
+    当此参数不为 `None` 时，使用 `overlapping` 模式，与 PyTorch 的实现保持一致。此处参考 Fractional Max-Pool 作者 Benjamin Graham 的解释：
+
+    > Hello. My original implementation (for sparse ConvNets) generated regions using this code:https://github.com/btgraham/SparseConvNet-archived/blob/bdde325c28f64b895cebfdbe301a2ddca7870174/SparseConvNet/Regions.cu#L31
+
+    并与作者提供的代码保持一致。
+
+- `random_u`
+
+    增加随机序列所需的随机数参数，以方便进行复现。
 
 ## 底层 OP 设计
+
+> *注意* 以下具体实现以实际代码为准。
 
 涉及文件：
 
@@ -1921,49 +1947,18 @@ alpha is 1.28 u is 0.8 max u is 1
     TODO(megemini)
     """
 
-    def __init__(self, output_size, return_mask=False, name=None):
-        super().__init__()
-        self._output_size = output_size
-        self._return_mask = return_mask
-        self._name = name
-
-    def forward(self, x):
-        return F.fractional_max_pool2d(
-            x,
-            output_size=self._output_size,
-            return_mask=self._return_mask,
-            name=self._name,
-        )
-
-    def extra_repr(self):
-        return (
-            f'output_size={self._output_size}, return_mask={self._return_mask}'
-        )
-
+        def __init__(self, output_size, kernel_size=None, random_u=None, return_mask=False, name=None):
+            super().__init__()
+            ...
 
     class FractionalMaxPool3D(Layer):
-        """
-        TODO(megemini)
-        """
+    """
+    TODO(megemini)
+    """
 
-        def __init__(self, output_size, return_mask=False, name=None):
+        def __init__(self, output_size, kernel_size=None, random_u=None, return_mask=False, name=None):
             super().__init__()
-            self._output_size = output_size
-            self._return_mask = return_mask
-            self._name = name
-
-        def forward(self, x):
-            return F.fractional_max_pool3d(
-                x,
-                output_size=self._output_size,
-                return_mask=self._return_mask,
-                name=self._name,
-            )
-
-        def extra_repr(self):
-            return (
-                f'output_size={self._output_size}, return_mask={self._return_mask}'
-            )
+            ...
     ```
 
     主要通过调用相应的方法实现。
