@@ -3,7 +3,7 @@ Welcome to the PaddlePaddle community! This is the starting point for joining an
 
 ## Community Events
 - Please check our most recent community events in [pinned issues](https://github.com/PaddlePaddle/Paddle/issues).
-- We have bi-week online Paddle framework contributor meetup, see details here: [PFCC](./pfcc).
+- We have bi-week online Paddle contributor meetup, see details here: [PFCC](./pfcc).
 - Explore heartwarming community stories on our blog:  [blog](https://pfcc.blog/).
 
 ##  Governance
@@ -11,7 +11,7 @@ PaddlePaddle adopts a hierarchical technical governance structure, please view r
 
 We have implemented several mechanisms to enhance community engagement and decision-making.
 - [PaddlePaddle OpenSource Development Working Group](./pposdwg/README.md)
-- [Paddle Framework Contributor Club](./pfcc/README.md)
+- [Paddle Future Contributor Club](./pfcc/README.md)
 - [PaddlePaddle SIGs](./ppsigs/README.md)
 
 ## Contribution
