@@ -56,6 +56,16 @@
 
    - 地址：https://github.com/PaddlePaddle/Paddle/issues/60686#issuecomment-1886357944
 
+### 3、TODO：
+
+1. 对官网未开源的工具链进行开源，整体梳理一遍工作流程 [sunzhongkai588](https://github.com/sunzhongkai588) [SigureMo](https://github.com/SigureMo)
+
+2. 以 blog 或其他方式，定期同步飞桨内部研发的研发进展 [jzhang533](https://github.com/jzhang533)
+
+3. 文档结构优化，清理过时文档（或许可以发动社区的方式进行清理） [sunzhongkai588](https://github.com/sunzhongkai588)
+
+4. 文档 2.0 重构计划（中英文文档同步开发、实现参数检查..） [SigureMo](https://github.com/SigureMo)
+
 ### 下次会议安排
 
-确定下次会议的时间为两周后的同一个时间段。主席[待定]()，副主席[待定]()，主题待定。
+确定下次会议的时间为两周后的同一个时间段。主席[Turingg](https://github.com/Turingg)，主题待定。
