@@ -48,6 +48,8 @@
    解决办法：在相应的方法或类前添加 TEST_API，[示例PR](https://github.com/PaddlePaddle/Paddle/pull/59477)
    ![ffc34f67e5271cf6ccc6de3688508250](https://github.com/PaddlePaddle/community/assets/55453380/a210466b-e40f-4dd6-b03d-aacde7d1d6c9)
 
-
+### 5. 在编译阶段出现already defined in libpaddle.lib(libpaddle.dll)
+   ![image](https://github.com/PaddlePaddle/community/assets/55453380/c6252eb4-e83a-40fd-a6bf-1d54152b1e72)    
+   解决办法：删除paddle_test多余依赖，原则上paddle_test不需要依赖除了单测的符号（这类DEPS往往以test_, _tester, test_开头）外的其他DEPS
 
 
