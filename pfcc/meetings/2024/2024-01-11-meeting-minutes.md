@@ -4,7 +4,7 @@
 
 - 本次会议时间：2024-01-11 19:00
 - 会议地点：线上会议
-- 参会人：本次会议共有 18 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席（[Ligoml](https://github.com/Ligoml)）主持。
+- 参会人：本次会议共有 18 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席（[sunzhongkai588](https://github.com/sunzhongkai588)）主持。
 - 会议主题：《Docs 吐槽大会》
 
 ## 会议分享与讨论
@@ -56,6 +56,16 @@
 
    - 地址：https://github.com/PaddlePaddle/Paddle/issues/60686#issuecomment-1886357944
 
+### 3、TODO：
+
+1. 对官网未开源的工具链进行开源，整体梳理一遍工作流程 [sunzhongkai588](https://github.com/sunzhongkai588) [SigureMo](https://github.com/SigureMo)
+
+2. 以 blog 或其他方式，定期同步飞桨内部研发的研发进展 [jzhang533](https://github.com/jzhang533)
+
+3. 文档结构优化，清理过时文档（或许可以发动社区的方式进行清理） [sunzhongkai588](https://github.com/sunzhongkai588)
+
+4. 文档 2.0 重构计划（中英文文档同步开发、实现参数检查..） [SigureMo](https://github.com/SigureMo)
+
 ### 下次会议安排
 
-确定下次会议的时间为两周后的同一个时间段。主席[待定]()，副主席[待定]()，主题待定。
+确定下次会议的时间为两周后的同一个时间段。主席[Turingg](https://github.com/Turingg)，主题待定。
