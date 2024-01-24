@@ -364,6 +364,7 @@ weight_decay是冗余的。
         parameters=None,
         weight_decay=None,
         grad_clip=None,
+        multi_precision=False,
         name=None
     )
     ```
@@ -375,6 +376,7 @@ weight_decay是冗余的。
     |parameters|list, tuple|list / tuple of ``Tensor`` to update to minimize ``loss``|
     |weight_decay|float, WeightDecayRegularizer|the strategy of regularization|
     |grad_clip|GradientClipBase|gradient cliping strategy|
+    |multi_precision|bool|In mixed precision training scenarios based on GPU,this parameter is mainly used to ensure the numerical stability of gradient updates|
     |name|str|normally there is no need for user to set this property|
 
 ### 重要函数设计
