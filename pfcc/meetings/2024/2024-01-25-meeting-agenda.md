@@ -10,11 +10,8 @@
 ## 会议议程
 
 1. 新人介绍：[Tsaiyue](https://github.com/Tsaiyue)（5 min）
-
 2. [@sunzhongkai](https://github.com/sunzhongkai588) [【HACKATHON 6th Code Camp】黑客松护航计划集训营](https://github.com/PaddlePaddle/Paddle/issues/61006)的详情以及细节介绍 （10-15min）
-
 3. [@tink2123](https://github.com/tink2123) [PaddleOCR 算法模型挑战赛](https://competition.atomgit.com/competitionInfo?id=d25e62a0d7f27876a8c4219bfc0be90e)活动介绍 （10 ～ 15min）
-
 4. [@sanbuphy](https://github.com/sanbuphy) Pytorch Conference 系列翻译活动（社区开发者个人项目） （10-15min）
-
-5. PFCC 成员自由发言讨论（5 min）
+5. [飞桨社区开源发展工作组](https://github.com/PaddlePaddle/community/tree/master/pposdwg) 2024 Q1 例会预告及议题征集。
+6. PFCC 成员自由发言讨论（5 min）
