@@ -233,7 +233,8 @@ if __name__ == '__main__':
 4. 迭代训练过程不一样，动态图按顺序执行前向、后向 和 优化器阶段，静态图使用执行器执行trace后的整个计算图。这里体现出两者的本质区别：训练的每次迭代之间，动态图可以不一样，静态图必然一样
 
 打开代码中`dump_prog`函数的注释，可以得到计算图，方便与后面的分布式计算图对照
-![picture 1](images/单卡计算图.png) 
+
+![picture 1](images/paddle_distributed_primer_pic1.jpg) 
 
 ## 2.2 分布式编程
 编程前需要了解分布式编程中相比单卡多考虑的因素：并行策略、组网时对通信的处理 和 通信方式，更能清楚原理
@@ -248,23 +249,29 @@ if __name__ == '__main__':
 
 NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除了支持常用的两两之间 send/recv 外(流水线并行场景中使用)，还支持一些多卡之间的通信+计算接口。以下图片均来源于[NCCL官方文档](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html)
 * Broadcast。在 数据并行参数初始化 和 group sharded同步参数 等场景中使用
-![picture 2](images/xxxxxx.png) 
+
+![picture 2](images/paddle_distributed_primer_pic2.jpg) 
 
 * AllGather。在 模型并行等场景中使用
-![picture 3](images/xxxxxx.png) 
+
+![picture 3](images/paddle_distributed_primer_pic3.jpg) 
 
 * AllReduce。在 数据并行梯度累加 和 模型并行 等场景中使用
-![picture 4](images/xxxxxx.png) 
+
+![picture 4](images/paddle_distributed_primer_pic4.jpg) 
 
 * Reduce。在 group sharded归并参数梯度 等场景中使用
-![picture 5](images/xxxxxx.png) 
+
+![picture 5](images/paddle_distributed_primer_pic5.jpg) 
 
 * ReduceScatter。在 group sharded归并参数梯度 等场景中使用
-![picture 7](images/xxxxxx.png) 
+
+![picture 6](images/paddle_distributed_primer_pic6.jpg) 
 
 从上面各接口的原理看，能够发现 AllReduce = ReduceScatter + AllGather，这也是下面 group sharded 策略实现的基础
 下图说明了 ReduceScatter 和 AllGather 的实现方式，主流是基于Ring的实现方法，也就得到 AllReduce 的实现方式
-![picture 8](images/xxxxxx.png) 
+
+![picture 7](images/paddle_distributed_primer_pic7.jpg) 
 
 
 ### 2.2.2 组网时对通信的处理
@@ -280,7 +287,8 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 
 #### 2.2.3.1 数据并行
 顾名思义，数据并行是在数据之间实现并行，例如使用上面单卡编程的模型，假设单卡最多运行的 batch_size=32，现在用2卡实现总的 batch_size=64 的效果
-![picture 9](images/xxxxxx.png) 
+
+![picture 8](images/paddle_distributed_primer_pic8.jpg) 
 
 使用等价原则，假设这2个卡(或n个卡)是1个大的卡，则可以推出第1/3步需要通信：
 1. 各卡的训练参数要一致。初始化后同步为一致的训练参数
@@ -289,13 +297,16 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 4. 优化器使用最终梯度更新训练参数，不需要通信
 
 从导出的计算图上可以验证（在后面的编程代码中会说明计算图如何得到）
-![picture 10](images/xxxxxx.png) 
-![picture 11](images/xxxxxx.png) 
+
+![picture 9](images/paddle_distributed_primer_pic9.jpg) 
+
+![picture 10](images/paddle_distributed_primer_pic10.jpg) 
 
 
 #### 2.2.3.2 group sharded
 是数据并行的变种，由[《ZeRO: Memory Optimizations Toward Training Trillion Parameter Models》](https://arxiv.org/abs/1910.02054)论文提出，其又细分为3种并行策略(stage1/2/3)，分别对应 pytorch中的 OSS、SDP 和 FSDP（[Fully Sharded Data Parallel](https://engineering.fb.com/2021/07/15/open-source/fsdp/)）。其思想可用下图说明（图片来源于论文），本质上是去除数据并行中的冗余计算以降低单卡中的显存占用，从而支持更大的模型或更大的batch_size。去除量从stage1/2/3 递增，且stage3会增大参数同步的通信量。
-![picture 12](images/xxxxxx.png) 
+
+![picture 11](images/paddle_distributed_primer_pic11.jpg) 
 
 * 说明
   * all_reduce = reduce_scatter + all_gather
@@ -308,8 +319,10 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
     3. 各卡的后向计算梯度时不需要通信，但2个卡得到的梯度需要求平均才是最终梯度
     4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
     5. 因如上这1点，每个训练参数的更新分散在不同的卡上，所以在更新后，对每个训练参数增加同步通信(c_broadcast op)，确保所有卡的训练参数是一样的（整体视角上等价于all_gather）
-![picture 13](images/xxxxxx.png) 
-![picture 14](images/xxxxxx.png) 
+
+![picture 12](images/paddle_distributed_primer_pic12.jpg) 
+
+![picture 13](images/paddle_distributed_primer_pic13.jpg) 
 
 * stage2(SDP/ZeRO-2)：full weight forward + full weight backword + reduce_scatter grad + shard optimizer state + part update weight + all_gather weight
 使用等价原则，可以推出和数据并行类似，在3/4/5点不一样，在1/3/5需要通信：
@@ -324,19 +337,24 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
     2. 各卡的网络定义一致，但训练参数分散在不同的卡上，单卡只有部分层的参数。在前/后向计算时，需要互相通信同步参数（等价于all_gather）
     3. 各卡的后向计算梯度时不需要通信，但2个卡上训练参数的梯度只执行reduce操作，即只放到有对应训练参数的卡上并平均，通过参数root_id 确定，不放到其它卡（整体视角上等价于reduce或reduce_scatter）
     4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
-![picture 15](images/xxxxxx.png) 
-![picture 16](images/xxxxxx.png) 
+
+![picture 14](images/paddle_distributed_primer_pic14.jpg) 
+
+![picture 15](images/paddle_distributed_primer_pic15.jpg) 
 
 
 #### 2.2.3.3 模型并行
 模型并行是在模型参数间实现并行，即将属于同一层的参数划分到不同的卡上进行并行计算，将单卡存不下的参数用多卡来存储。例如使用上面单卡编程的模型，假设单卡最多支持1.5B的参数量进行训练，则2卡可以支持近3B的参数。因为Linear3的参数量(256*10)很小，这里没有切分，只切分了Linear1和Linear2的参数。另外注意，模型并行中，多卡输入的数据要是一样的
-![picture 17](images/xxxxxx.png) 
+
+![picture 16](images/paddle_distributed_primer_pic16.jpg) 
 
 * matmul参数按列切的原理
-![picture 18](images/xxxxxx.png) 
+
+![picture 17](images/paddle_distributed_primer_pic17.jpg) 
 
 * matmul参数按行切的原理
-![picture 19](images/xxxxxx.png) 
+
+![picture 18](images/paddle_distributed_primer_pic18.jpg) 
 
 使用等价原则，假设这2个卡(或n个卡)是1个大的卡，则可以推出第1/2/3步需要通信：
 1. 各卡的训练参数为按模型切分后的参数。对于切分的参数，分别初始化；对于没有切分的参数，则初始化后同步为一致的训练参数
@@ -345,12 +363,15 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 4. 优化器使用各卡上的梯度更新训练参数，不需要通信
 
 从导出的计算图上可以验证
-![picture 20](images/xxxxxx.png) 
-![picture 21](images/xxxxxx.png) 
+
+![picture 19](images/paddle_distributed_primer_pic19.jpg) 
+
+![picture 20](images/paddle_distributed_primer_pic20.jpg) 
 
 #### 2.2.3.4 流水线并行
 流水线并行是在模型层间实现并行，即以层为粒度将不同的层及参数划分到不同的卡上进行并行计算，将单卡存不下的参数用多卡来存储。例如使用上面单卡编程的模型，将Linear1和Linear2切分到0号卡上，Linear3和Relu切分到1号卡上。另外注意，流水线并行中，loss层和准确率计算都在前向计算的最后1卡上，只有这张卡能获取到loss数值
-![picture 22](images/xxxxxx.png) 
+
+![picture 21](images/paddle_distributed_primer_pic21.jpg) 
 
 使用等价原则，假设这2个卡(或n个卡)是1个大的卡，则可以推出第2/3步需要通信：
 1. 各卡的训练参数为按流水线切分后的参数。分别初始化，不用同步通信
@@ -370,50 +391,63 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 3. 1F1B 流水线并行。interleave 并行需要等所有的microbatch前向完成后，才会开始后向计算，1F1B 则是当一个microbatch的前向完成后，立即进入后向计算。从理论上看，后向完成后就可以释放中间变量。由于1F1B 的后向完成要比interleave 早，因此也会减少峰值显存的需求，实测 1F1B 方式相比 interleave  方式峰值显存可以节省 37.5%
 
 从导出的计算图上可以验证，如下为1F1B的计算图
-![picture 23](images/xxxxxx.png) 
-![picture 24](images/xxxxxx.png) 
+
+![picture 22](images/paddle_distributed_primer_pic22.jpg) 
+
+![picture 23](images/paddle_distributed_primer_pic23.jpg) 
 
 
 #### 2.2.3.5 序列并行 sequential parallel
 ##### 2.2.3.5.1 背景
-此并行策略由Nvidia Megatron的论文提出，是针对 Transformer 模型结构提出的一种特定并行策略，非通用并行策略
+此并行策略由[Nvidia Megatron的论文](https://arxiv.org/pdf/2205.05198.pdf)提出，是针对 Transformer 模型结构提出的一种特定并行策略，非通用并行策略
 其目的是在模型并行的基础上，进一步降低 Transformer 模型结构在单卡上的显存占用，从这个角度看，也可以看成是模型并行在Transformer上的一种扩展。以下说明是论文的简要描述，图片来源于论文
-![picture 25](images/xxxxxx.png) 
+
+![picture 24](images/paddle_distributed_primer_pic24.jpg) 
+
+![picture 25](images/paddle_distributed_primer_pic25.jpg) 
 
 
 而基于GPT3各种尺寸的模型测试中，中间变量(Activations)的显存占用大于训练参数和优化器参数的显存占用
-![picture 26](images/xxxxxx.png) 
+
+![picture 26](images/paddle_distributed_primer_pic26.jpg) 
 
 所以具体来说，序列并行是在模型并行降低单卡训练参数和优化器参数显存占用的基础上，进一步减低中间变量(Activations)的显存占用，故以下公式均只描述中间变量的显存占用
 
 ##### 2.2.3.5.2 优化方法
 没有任何并行策略时，单卡上单个Transformer Layer的中间变量(Activations)显存占用为
-![picture 27](images/xxxxxx.png) 
+
+![picture 27](images/paddle_distributed_primer_pic27.jpg) 
 
 以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，则为： 2736MB/卡/Layer。L=96，总的为 256.5GB/卡
 使用 模型并行 后，单卡上单个Transformer Layer的中间变量能够降低为
-![picture 28](images/xxxxxx.png) 
+
+![picture 28](images/paddle_distributed_primer_pic28.jpg) 
 
 以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： 552MB/卡/Layer。L=96，总的为 51.75GB/卡
 原因是模型并行作用于矩阵乘相关的层上，这些层内中间变量的占用也能够缩小到 1/t，t为模型并行数量，但是这些层之外的LayerNorm、Dropout相关的中间变量的空间不能缩小
-![picture 29](images/xxxxxx.png) 
+
+![picture 29](images/paddle_distributed_primer_pic29.jpg) 
 
 图中的 f 代表通信算子，f' 是 f 对偶的通信算子，f正向为空，反向为all_reduce；f'正向为all_reduce，反向为空
 使用 模型并行+序列并行 后，单卡上单个Transformer Layer的中间变量能够降低为
-![picture 30](images/xxxxxx.png) 
+
+![picture 30](images/paddle_distributed_primer_pic30.jpg) 
 
 以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： 342MB/卡/Layer。L=96，总的为 32.0625GB/卡
 原因是在模型并行外的其它位置(LayerNorm、Dropout)也实现了并行，即按 sequence_length 维度进行切分，故称为 sequential parallel。这些中间变量也能够缩小到 1/t，本质是去除了这些中间变量的冗余计算
-![picture 31](images/xxxxxx.png) 
+
+![picture 31](images/paddle_distributed_primer_pic31.jpg) 
 
 从更微观的角度看是LayerNorm、Dropout只在 hidden_size 维度上进行计算，所以对sequence_length 维度的切分不影响它们
 同时这里也改进了通信，图中的 g 代表通信算子，g' 是 g 对偶的通信算子，g正向为all_gather，反向为reduce_scatter；g'正向为reduce_scatter，反向为all_gather，由上面通信部分的表述 all_reduce = all_gather + reduce_scatter，所以相比模型并行不增加通信量
-![picture 32](images/xxxxxx.png) 
+
+![picture 32](images/paddle_distributed_primer_pic32.jpg) 
 
 ##### 2.2.3.5.3 进一步的优化
 使用 模型并行+序列并行 后，由上面公式4，在GPT3 175B等大模型中（尤其是随着sequence_length的增加），括号中第1项相对于第2项较小，所以如果能去掉第2项，可以进一步大幅减少显存占用
 第2项来源于attention层中的softmax+dropout的中间变量，如果在这里使用recompute，即不保存这些中间变量，则可以达到目的
-![picture 33](images/xxxxxx.png) 
+
+![picture 33](images/paddle_distributed_primer_pic33.jpg) 
 
 以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： **102MB**/卡/Layer。L=96，总的为 9.5625GB/卡。且只增加2.7%左右的计算量
 如果使用完全recompute的方案，可以得到中间变量占用 2sbh，为 **48MB**/卡/Layer，但是会增加数十倍计算量。即通过上面的优化，只增加很少的计算，显存占用已经接近理想值
