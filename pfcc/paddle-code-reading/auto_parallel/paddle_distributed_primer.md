@@ -1,10 +1,10 @@
 # 飞桨分布式Primer
 # 1. 分布式要解决的问题
-引用wikipedia：A distributed system is a system whose components are located on different networked computers, which communicate and coordinate their actions by passing messages to one another. Distributed computing is a field of computer science that studies distributed systems. The components of a distributed system interact with one another in order to achieve a common goal. 
-引用百度百科：分布式计算是计算机科学中一个研究方向，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分，然后把这些部分分配给多个计算机进行处理，最后把这些计算结果综合起来得到最终的结果
-在计算机科学中，“分布式” 的概念已经存在了许多年，解决的场景和领域多集中在 分布式计算 和 分布式存储，如 03/04年时开创性的 MapReduce 和 Google File System 论文，奠定了后来开源界最著名的通用分布式存储和计算系统 Hadoop 的理论基础
-即从技术角度上看，分布式是当数据规模达到一定程度时使用多台机器来协同 存储 和 计算 的一种通用技术。具体在深度学习场景中，因为往往使用加速硬件(GPU)来计算和存储数据，所以分布式在此场景中要解决的问题是 使用多个加速硬件(下面简称多卡，有可能在多机上)  来训练/推理单个加速硬件(下面简称单卡)承受不了的模型，存储上主要是解决显存问题，计算上是多卡并行加速的问题，这里的多卡并行加速会有多种方法和策略。同时由分布式的定义，分布式改变的是计算和存储的过程，不会也不应该改变结果。即在深度学习场景中也需要遵循等价原则：分布式多卡的计算的结果要等于足够大单卡的计算结果。后面可以看到各种分布式策略的设计考虑都是基于此推出
-下面主要以用户视角来描述飞桨分布式，所以通过用户编程的例子来刨析飞桨分布式的实现原理和设计
+> wikipedia：A distributed system is a system whose components are located on different networked computers, which communicate and coordinate their actions by passing messages to one another. Distributed computing is a field of computer science that studies distributed systems. The components of a distributed system interact with one another in order to achieve a common goal.  
+> 百度百科：分布式计算是计算机科学中一个研究方向，它研究如何把一个需要非常巨大的计算能力才能解决的问题分成许多小的部分，然后把这些部分分配给多个计算机进行处理，最后把这些计算结果综合起来得到最终的结果。  
+在计算机科学中，“分布式” 的概念已经存在了许多年，解决的场景和领域多集中在 分布式计算 和 分布式存储，例如开源界最著名的通用分布式存储和计算系统 Hadoop。  
+从技术角度上看，分布式是当数据规模达到一定程度时使用多台机器来协同 存储 和 计算 的一种通用技术。具体在深度学习场景中，因为往往使用加速硬件(GPU)来计算和存储数据，所以分布式在此场景中要解决的问题是 使用多个加速硬件(下面简称多卡，有可能在多机上)  来训练/推理单个加速硬件(下面简称单卡)承受不了的模型，存储上主要是解决显存问题，计算上是多卡并行加速的问题，这里的多卡并行加速会有多种方法和策略。同时由分布式的定义，分布式改变的是计算和存储的过程，不会也不应该改变结果。即在深度学习场景中也需要遵循等价原则：分布式多卡的计算的结果要等于足够大单卡的计算结果。后面可以看到各种分布式策略的设计考虑都是基于此推出。  
+下面主要以用户视角来描述飞桨分布式，所以通过用户编程的例子来刨析飞桨分布式的实现原理和设计。  
 
 # 2. 飞桨分布式编程
 在深度学习中，单卡编程和分布式编程需要考虑的因素及区别如下，以飞桨接口为例
@@ -244,6 +244,7 @@ if __name__ == '__main__':
 * 有中心通信为 每个卡之间的通信都需要经过某个中心节点。读数据时从中心节点读或通过中心节点知道数据地址再读；写数据时向中心发起写请求，由中心负责更新
 
 深度学习中当前的分布式模型训练基本都在多卡GPU上运行，在GPU上是使用前者方案，即使用 NCCL 来通信。后者当前只在静态图数据并行时使用
+
 NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除了支持常用的两两之间 send/recv 外(流水线并行场景中使用)，还支持一些多卡之间的通信+计算接口。以下图片均来源于[NCCL官方文档](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html)
 * Broadcast。在 数据并行参数初始化 和 group sharded同步参数 等场景中使用
 ![picture 2](images/xxxxxx.png) 
@@ -268,9 +269,9 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 ### 2.2.2 组网时对通信的处理
 即用户在定义网络时，考虑到此网络在多个卡上运行时，如何定义网络中的通信以实现期望的并行策略。有3类方式：
 1. 用户手动加通信算子。即 手动并行，需完整定义出网络中的通信（不能部分定义），最为灵活，但需要用户对分布式训练过程有相当程度的了解，深度学习框架只负责执行
-  * 示例：比如在 [LLaMA2 的手动并行模型定义](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/llama/modeling.py)中，经常能够看到 fleet.meta_parallel.ColumnParallelLinear/RowParallelLinear 等API，ColumnParallelLinear 在需要gather output的场景下会调用到 mp_ops._c_concat -> _legacy_C_ops.c_concat -> CConcatOpCUDAKernel::Compute -> ProcessGroup::AllGather -> ProcessGroupNCCL::AllGather -> NCCLCommContext::AllGather -> phi::dynload::ncclAllGather，即最后调用到上面描述的NCCL中的AllGather接口
+    * 示例：比如在 [LLaMA2 的手动并行模型定义](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/llama/modeling.py)中，经常能够看到 fleet.meta_parallel.ColumnParallelLinear/RowParallelLinear 等API，ColumnParallelLinear 在需要gather output的场景下会调用到 mp_ops._c_concat -> _legacy_C_ops.c_concat -> CConcatOpCUDAKernel::Compute -> ProcessGroup::AllGather -> ProcessGroupNCCL::AllGather -> NCCLCommContext::AllGather -> phi::dynload::ncclAllGather，即最后调用到上面描述的NCCL中的AllGather接口
 2. 用户标记通信。即 半自动并行，用户在网络中某些关键地方标记需要通信（可以部分定义），然后由深度学习框架推断出网络中剩余其它部分的通信，并且尽量为最优（达到同样的目标时尽量减少通信量）
-  * 示例：比如在 [LLaMA2 半自动并行模型定义](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/llama/modeling_auto.py)中，经常能够看到 fleet.auto.shard_tensor（实际为 paddle.distributed.auto_parallel.shard_tensor），有如 fleet.auto.shard_tensor(self.gate_proj.weight, *get_dist_attr([None, "mp"], self.ipp))  则是在标记MLP层中 gate_proj 线性层训练参数按列切分为模型并行，同时考虑了流水线并行，整层放到预先指定的流水线并行卡上
+    * 示例：比如在 [LLaMA2 半自动并行模型定义](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/llama/modeling_auto.py)中，经常能够看到 fleet.auto.shard_tensor（实际为 paddle.distributed.auto_parallel.shard_tensor），有如 fleet.auto.shard_tensor(self.gate_proj.weight, *get_dist_attr([None, "mp"], self.ipp))  则是在标记MLP层中 gate_proj 线性层训练参数按列切分为模型并行，同时考虑了流水线并行，整层放到预先指定的流水线并行卡上
 3. 用户不管，都交由深度学习框架处理。即 全自动并行，用户只用写单卡组网，没有额外的标记和手工加通信，由深度学习框架根据当前硬件环境、网络定义 和 可选的并行策略 完全推断网络中所有的通信，并且尽量为最优（达到同样的目标时减少通信量）。此方法因为需要知道整个计算图的信息才能进行优化，当前只能在静态图下实现
 
 ### 2.2.3 并行策略
@@ -301,27 +302,27 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 * 数据并行：    full weight forward + full weight backword + all_reduce grad + full optimizer state + full update weight
 * stage1(OSS/ZeRO-1)：full weight forward + full weight backword + all_reduce grad + shard optimizer state + part update weight + all_gather weight
 使用等价原则，可以推出和数据并行类似，在4/5点不一样，在1/3/5需要通信：
-1. 各卡的训练参数要一致。初始化后同步为一致的训练参数
-2. 各卡的网络定义一致，前向计算(含loss)不需要通信
-3. 各卡的后向计算梯度时不需要通信，但2个卡得到的梯度需要求平均才是最终梯度
-4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
-5. 因如上这1点，每个训练参数的更新分散在不同的卡上，所以在更新后，对每个训练参数增加同步通信(c_broadcast op)，确保所有卡的训练参数是一样的（整体视角上等价于all_gather）
+    1. 各卡的训练参数要一致。初始化后同步为一致的训练参数
+    2. 各卡的网络定义一致，前向计算(含loss)不需要通信
+    3. 各卡的后向计算梯度时不需要通信，但2个卡得到的梯度需要求平均才是最终梯度
+    4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
+    5. 因如上这1点，每个训练参数的更新分散在不同的卡上，所以在更新后，对每个训练参数增加同步通信(c_broadcast op)，确保所有卡的训练参数是一样的（整体视角上等价于all_gather）
 ![picture 13](images/xxxxxx.png) 
 ![picture 14](images/xxxxxx.png) 
 
 * stage2(SDP/ZeRO-2)：full weight forward + full weight backword + reduce_scatter grad + shard optimizer state + part update weight + all_gather weight
 使用等价原则，可以推出和数据并行类似，在3/4/5点不一样，在1/3/5需要通信：
-1. 各卡的训练参数要一致。初始化后同步为一致的训练参数
-2. 各卡的网络定义一致，前向计算(含loss)不需要通信
-3. 各卡的后向计算梯度时不需要通信，但2个卡上训练参数的梯度只执行reduce操作，即只放到有对应训练参数的卡上并平均，通过参数root_id 确定，不放到其它卡（整体视角上等价于reduce或reduce_scatter）
-4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
-5. 因如上这1点，每个训练参数的更新分散在不同的卡上，所以在更新后，对每个训练参数增加同步通信(c_broadcast op)，确保所有卡的训练参数是一样的（整体视角上等价于all_gather）
+    1. 各卡的训练参数要一致。初始化后同步为一致的训练参数
+    2. 各卡的网络定义一致，前向计算(含loss)不需要通信
+    3. 各卡的后向计算梯度时不需要通信，但2个卡上训练参数的梯度只执行reduce操作，即只放到有对应训练参数的卡上并平均，通过参数root_id 确定，不放到其它卡（整体视角上等价于reduce或reduce_scatter）
+    4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
+    5. 因如上这1点，每个训练参数的更新分散在不同的卡上，所以在更新后，对每个训练参数增加同步通信(c_broadcast op)，确保所有卡的训练参数是一样的（整体视角上等价于all_gather）
 * stage3(FSDP/ZeRO-3)：all_gather weight forward(each layer) + all_gather weight backword(each layer) + reduce_scatter grad + shard optimizer state + part update weight
 和数据并行差别较大，使用等价原则可以推出，在第2/3步需要通信：
-1. 各卡只初始化所负责的训练参数，初始化后不用同步
-2. 各卡的网络定义一致，但训练参数分散在不同的卡上，单卡只有部分层的参数。在前/后向计算时，需要互相通信同步参数（等价于all_gather）
-3. 各卡的后向计算梯度时不需要通信，但2个卡上训练参数的梯度只执行reduce操作，即只放到有对应训练参数的卡上并平均，通过参数root_id 确定，不放到其它卡（整体视角上等价于reduce或reduce_scatter）
-4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
+    1. 各卡只初始化所负责的训练参数，初始化后不用同步
+    2. 各卡的网络定义一致，但训练参数分散在不同的卡上，单卡只有部分层的参数。在前/后向计算时，需要互相通信同步参数（等价于all_gather）
+    3. 各卡的后向计算梯度时不需要通信，但2个卡上训练参数的梯度只执行reduce操作，即只放到有对应训练参数的卡上并平均，通过参数root_id 确定，不放到其它卡（整体视角上等价于reduce或reduce_scatter）
+    4. 优化器更新划分到本卡的优化器参数，进而只更新特定的训练参数，不需要通信
 ![picture 15](images/xxxxxx.png) 
 ![picture 16](images/xxxxxx.png) 
 
@@ -358,6 +359,7 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 
 流水线并行细分有多种实现，原理和示意图参考[另一篇文档](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/static_graph_pipelining.md)，这里说明下各自的优缺点：
 1. 朴素流水线并行。实现较为简易明了，但缺点比较明显：
+
     a. 低GPU利用率。 在任意时刻，有且仅有一个GPU在工作，其他GPU都空闲
     b. 计算和通信没有重叠。在发送前向传播的中间结果或者反向传播的中间结果时，GPU也是空闲的
     c. 部分卡显存占用时间过长。GPU0从第0步开始就需要保存整个batch中后向计算所需的中间变量，直至第3步后向梯度计算完成
@@ -441,8 +443,8 @@ python -m paddle.distributed.launch --gpus=0,1 --log_dir logs xxxxxx.py
 5. 分布式数据加载。数据采样器使用分布式采样器
 6. 每个batch迭代训练。过程同单卡，只有流水线并行比较特殊，因为要实现1F1B这种特殊的执行顺序，其使用 model.train_batch 将前向、后向和优化器封装执行
 
+##### 2.2.4.1.1 动手-数据并行示例代码
 ```python
-# 动手-数据并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -550,8 +552,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.1.2 动手-group sharded并行示例代码
 ```python
-# 动手-group sharded并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -653,8 +655,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.1.3 动手-模型并行示例代码
 ```python
-# 动手-模型并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -770,8 +772,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.1.4 动手-流水线并行示例代码
 ```python
-# 动手-流水线并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -886,8 +888,8 @@ if __name__ == '__main__':
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
 | 单卡运行 | 否 | 否 | 不需要 | 不需要 | 不需要 | 常规 |
 | 数据并行 | 否 | 否 | 需要 | 需要 | 需要 | 常规 |
-| 模型并行 | 是 | 否 | 需要 | 需要 | 需要 | 常规 |
-| 流水线并行 | 是 | 是 | 需要 | 需要 | 需要 | 特殊 |
+| 模型并行 | **是** | 否 | 需要 | 需要 | 需要 | 常规 |
+| 流水线并行 | **是** | **是** | 需要 | 需要 | 需要 | **特殊** |
 | group_sharded(fsdp) | 否 | 否 | 需要 | 需要 | 需要 | 常规 |
 
 
@@ -898,8 +900,8 @@ if __name__ == '__main__':
 3. 需配置好ProcessMesh，用于标记时使用。不能额外配置分布式策略，优势是使用方便，劣势是流水线并行的特殊优化策略不能支持，如不能流水线并行中的1F1B和F-then-B策略
 4. 其它如 优化器、数据加载 及 每个batch迭代训练 都和单卡程序一样。只有部分计算准确率的API还不支持 DistTensor，如需计算准确率暂时需要修改，这些API都支持后就和单卡编程一样
 
+##### 2.2.4.2.1 动半-数据并行示例代码
 ```python
-# 动半-数据并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -998,8 +1000,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.2.2 动半-模型并行示例代码
 ```python
-# 动半-模型并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1103,8 +1105,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.2.3 动半-流水线并行示例代码
 ```python
-# 动半-流水线并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1202,17 +1204,17 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.2.4 动半-group sharded并行示例代码
 ```python
-# 动半-group sharded并行示例代码
 # 后续完善
 ```
 
 | 动态图手动各并行策略 | 是否修改__init__ | 是否修改forward | 初始化分布式环境&设置分布式策略 | 封装模型和优化器 | 分布式数据加载和采样 | 迭代训练过程 |
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
 | 单卡运行 | 否 | 否 | 不需要 | 不需要 | 不需要 | 常规 |
-| 数据并行 | 否 | 是 | 不需要 | 不需要 | 不需要 | 常规 |
-| 模型并行 | 否 | 是 | 不需要 | 不需要 | 不需要 | 常规 |
-| 流水线并行 | 否 | 是 | 不需要 | 不需要 | 不需要 | 常规 |
+| 数据并行 | 否 | **是** | 不需要 | 不需要 | 不需要 | 常规 |
+| 模型并行 | 否 | **是** | 不需要 | 不需要 | 不需要 | 常规 |
+| 流水线并行 | 否 | **是** | 不需要 | 不需要 | 不需要 | 常规 |
 | group_sharded(fsdp) | 待补 | 待补 | 待补 | 待补 | 待补 |待补 |
 
 因为飞桨支持动转静，所以我们有两种方法实现静半的各种并行策略，一种是在动半的代码基础上加上动转静接口，即以动半编程而以静半方式运行；一种是使用原生静半接口编程并运行，这里给出第1种方法的代码，后1种方法的代码在下1节介绍
@@ -1220,8 +1222,8 @@ if __name__ == '__main__':
 1. import paddle.distributed.to_static 并用此封装模型、loss函数、优化器 和 data_loader
 2. 因为静半是前向、后向和优化器一起运行，所以迭代训练过程相比动半的代码要修改为整体运行，不能分开运行
 
+##### 2.2.4.2.5 动半转静半-数据并行示例代码
 ```python
-# 动半转静半-数据并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1325,8 +1327,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.2.6 动半转静半-模型并行示例代码
 ```python
-# 动半转静半-模型并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1435,8 +1437,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.2.7 动半转静半-流水线并行示例代码
 ```python
-# 动半转静半-流水线并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1546,8 +1548,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.2.8 动半转静半-group sharded并行示例代码
 ```python
-# 动半转静半-group sharded并行示例代码
 # 后续完善
 ```
 
@@ -1560,8 +1562,8 @@ if __name__ == '__main__':
 5. 分布式数据加载。因为不同分布式策略读取的数据有差异，DataLoader也需要通过Engine来封装得到
 6. 每个batch迭代训练。和单卡区别是调用 Engine.run，其中调用了执行器。同时只有流水线并行比较特殊，因为loss只在前向最后1个卡上有，所以需要额外判读打印。1F1B这种特殊的执行顺序，已经在静态图编译期trace和应用分布式策略变换计算图时生成，同样调用Engine.run执行即可，故和其它计算图执行没有区别
 
+##### 2.2.4.3.1 静半-数据并行示例代码
 ```python
-# 静半-数据并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1672,8 +1674,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.3.2 静半-group sharded并行示例代码
 ```python
-# 静半-group sharded并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1787,8 +1789,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.3.3 静半-模型并行示例代码
 ```python
-# 静半-模型并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -1907,8 +1909,8 @@ if __name__ == '__main__':
     train_model()
 ```
 
+##### 2.2.4.3.4 静半-流水线并行示例代码
 ```python
-# 静半-流水线并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -2036,8 +2038,8 @@ if __name__ == '__main__':
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
 | 单卡运行 | 否 | 否 | 不需要 | 不需要 | 不需要 | 常规执行器 |
 | 数据并行 | 否 | 否 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行 |
-| 模型并行 | 否 | 是 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行 |
-| 流水线并行 | 否 | 是 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行，loss特殊处理 |
+| 模型并行 | 否 | **是** | 需要 | 需要，用Engine | 需要，用Engine | Engine执行 |
+| 流水线并行 | 否 | **是** | 需要 | 需要，用Engine | 需要，用Engine | **Engine执行，loss特殊处理** |
 | group_sharded(fsdp) | 否 | 否 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行 |
 
 # 3. 更多问题和讨论
