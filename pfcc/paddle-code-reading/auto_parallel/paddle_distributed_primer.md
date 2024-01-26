@@ -32,8 +32,8 @@ python xxxxxx.py
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
-# 导入模型文件
-from paddle.io import Dataset, DistributedBatchSampler, DataLoader
+# 导入数据加载和数据保存接口
+from paddle.io import Dataset, BatchSampler, DataLoader
 
 base_lr = 0.1   # 学习率
 momentum_rate = 0.9 # 冲量
@@ -90,8 +90,8 @@ def train_model():
     
     dataset = RandomDataset(batch_num * batch_size)
     # 设置批采样器，用于数据并行训练
-    sampler = DistributedBatchSampler(dataset,
-                                      batch_size=batch_size,shuffle=False, drop_last=True)
+    sampler = BatchSampler(dataset,
+                        batch_size=batch_size,shuffle=False, drop_last=True)
     train_loader = DataLoader(dataset,
                             batch_sampler=sampler,
                             num_workers=1)
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 import numpy as np
 import paddle
 # 导入数据加载和数据保存接口
-from paddle.io import Dataset, DistributedBatchSampler, DataLoader
+from paddle.io import Dataset, BatchSampler, DataLoader
 from paddle.base import core
 from paddle.base.framework import IrGraph
 def dump_prog(program, file_name):
@@ -202,8 +202,8 @@ def train_model():
 
     dataset = RandomDataset(batch_num * batch_size)
     # 设置批采样器，用于数据并行训练
-    sampler = DistributedBatchSampler(dataset,
-                                      batch_size=batch_size,shuffle=False, drop_last=True)
+    sampler = BatchSampler(dataset,
+                        batch_size=batch_size,shuffle=False, drop_last=True)
     train_loader = DataLoader(dataset,
                             batch_sampler=sampler,
                             num_workers=1)
@@ -226,12 +226,13 @@ if __name__ == '__main__':
 ```
 
 从如上代码可以看到，动态图和静态图编程的主要区别：
-1. 静态图需要加paddle.enable_static()。因默认为动态图模式
+1. 静态图需要加paddle.enable_static()。因飞桨默认为动态图模式
 2. 静态图 optimizer 初始化不带 model.parameters()。因这时拿不到模型参数
-3. 静态图有编译期trace。基于此可以做很多优化，是静态图相比动态图的性能有优势的原因
+3. 静态图有编译期trace。trace后得到前向、后向和优化器整个计算图，基于此可以做很多优化，是静态图相比动态图的性能有优势的原因
 4. 迭代训练过程不一样，动态图按顺序执行前向、后向 和 优化器阶段，静态图使用执行器执行trace后的整个计算图。这里体现出两者的本质区别：训练的每次迭代之间，动态图可以不一样，静态图必然一样
 
-![picture 1](images/单卡计算图，方便与后面的分布式计算图对照.png) 
+打开代码中`dump_prog`函数的注释，可以得到计算图，方便与后面的分布式计算图对照
+![picture 1](images/单卡计算图.png) 
 
 ## 2.2 分布式编程
 编程前需要了解分布式编程中相比单卡多考虑的因素：并行策略、组网时对通信的处理 和 通信方式，更能清楚原理
@@ -241,8 +242,9 @@ if __name__ == '__main__':
 在传输这些数据时有2大类通信方式：无中心通信 和 有中心通信
 * 无中心通信为 每个卡两两之间都可以进行通信，互相读或写数据，写的时候往往会触发状态改变(保持副本或数据同步等)，需要额外操作
 * 有中心通信为 每个卡之间的通信都需要经过某个中心节点。读数据时从中心节点读或通过中心节点知道数据地址再读；写数据时向中心发起写请求，由中心负责更新
+
 深度学习中当前的分布式模型训练基本都在多卡GPU上运行，在GPU上是使用前者方案，即使用 NCCL 来通信。后者当前只在静态图数据并行时使用
-NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除了支持常用的两两之间 send/recv 外(流水线并行场景中使用)，还支持一些多卡之间的通信+计算接口。以下图片均来源于NCCL官方文档
+NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除了支持常用的两两之间 send/recv 外(流水线并行场景中使用)，还支持一些多卡之间的通信+计算接口。以下图片均来源于[NCCL官方文档](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html)
 * Broadcast。在 数据并行参数初始化 和 group sharded同步参数 等场景中使用
 ![picture 2](images/xxxxxx.png) 
 
@@ -266,13 +268,13 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 ### 2.2.2 组网时对通信的处理
 即用户在定义网络时，考虑到此网络在多个卡上运行时，如何定义网络中的通信以实现期望的并行策略。有3类方式：
 1. 用户手动加通信算子。即 手动并行，需完整定义出网络中的通信（不能部分定义），最为灵活，但需要用户对分布式训练过程有相当程度的了解，深度学习框架只负责执行
-  * 示例：比如在 LLaMA2 的手动并行模型定义中，经常能够看到 fleet.meta_parallel.ColumnParallelLinear/RowParallelLinear 等API，ColumnParallelLinear 在需要gather output的场景下会调用到 mp_ops._c_concat -> _legacy_C_ops.c_concat -> CConcatOpCUDAKernel::Compute -> ProcessGroup::AllGather -> ProcessGroupNCCL::AllGather -> NCCLCommContext::AllGather -> phi::dynload::ncclAllGather，即最后调用到上面描述的NCCL中的AllGather接口
+  * 示例：比如在 [LLaMA2 的手动并行模型定义](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/llama/modeling.py)中，经常能够看到 fleet.meta_parallel.ColumnParallelLinear/RowParallelLinear 等API，ColumnParallelLinear 在需要gather output的场景下会调用到 mp_ops._c_concat -> _legacy_C_ops.c_concat -> CConcatOpCUDAKernel::Compute -> ProcessGroup::AllGather -> ProcessGroupNCCL::AllGather -> NCCLCommContext::AllGather -> phi::dynload::ncclAllGather，即最后调用到上面描述的NCCL中的AllGather接口
 2. 用户标记通信。即 半自动并行，用户在网络中某些关键地方标记需要通信（可以部分定义），然后由深度学习框架推断出网络中剩余其它部分的通信，并且尽量为最优（达到同样的目标时尽量减少通信量）
-  * 示例：比如在 LLaMA2 半自动并行模型定义中，经常能够看到 fleet.auto.shard_tensor（实际为 paddle.distributed.auto_parallel.shard_tensor），有如 fleet.auto.shard_tensor(self.gate_proj.weight, *get_dist_attr([None, "mp"], self.ipp))  则是在标记MLP层中 gate_proj 线性层训练参数按列切分为模型并行，同时考虑了流水线并行，整层放到预先指定的流水线并行卡上
+  * 示例：比如在 [LLaMA2 半自动并行模型定义](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/llama/modeling_auto.py)中，经常能够看到 fleet.auto.shard_tensor（实际为 paddle.distributed.auto_parallel.shard_tensor），有如 fleet.auto.shard_tensor(self.gate_proj.weight, *get_dist_attr([None, "mp"], self.ipp))  则是在标记MLP层中 gate_proj 线性层训练参数按列切分为模型并行，同时考虑了流水线并行，整层放到预先指定的流水线并行卡上
 3. 用户不管，都交由深度学习框架处理。即 全自动并行，用户只用写单卡组网，没有额外的标记和手工加通信，由深度学习框架根据当前硬件环境、网络定义 和 可选的并行策略 完全推断网络中所有的通信，并且尽量为最优（达到同样的目标时减少通信量）。此方法因为需要知道整个计算图的信息才能进行优化，当前只能在静态图下实现
 
 ### 2.2.3 并行策略
-下面介绍的并行策略在另一篇文档中有详细的描述，这里更多是说明这些并行策略在哪些地方需要通信，以及需要什么样的通信，并使用等价原则，分布式多卡的计算的结果要等于足够大单卡的计算结果，可以推出如下各种并行策略的实现方式
+下面介绍的并行策略在[另一篇文档](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/static_graph_pipelining.md)中有详细的描述，这里更多是说明这些并行策略在哪些地方需要通信，以及需要什么样的通信，并使用等价原则：分布式多卡的计算的结果要等于足够大单卡的计算结果，可以推出如下各种并行策略的实现方式
 
 #### 2.2.3.1 数据并行
 顾名思义，数据并行是在数据之间实现并行，例如使用上面单卡编程的模型，假设单卡最多运行的 batch_size=32，现在用2卡实现总的 batch_size=64 的效果
@@ -283,13 +285,14 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 2. 各卡的网络定义一致，前向计算(含loss)不需要通信
 3. 各卡的后向计算梯度时也不需要通信，但2个卡得到的梯度需要通信求平均才是最终梯度
 4. 优化器使用最终梯度更新训练参数，不需要通信
+
 从导出的计算图上可以验证（在后面的编程代码中会说明计算图如何得到）
 ![picture 10](images/xxxxxx.png) 
 ![picture 11](images/xxxxxx.png) 
 
 
 #### 2.2.3.2 group sharded
-是数据并行的变种，由《ZeRO: Memory Optimizations Toward Training Trillion Parameter Models》论文提出，其又细分为3种并行策略(stage1~3)，分别对应 pytorch中的 OSS、SDP 和 FSDP（Fully Sharded Data Parallel）。其思想可用下图说明（图片来源于论文），本质上是去除数据并行中的冗余计算以降低单卡中的显存占用，从而支持更大的模型或更大的batch_size。去除量从stage1~3 递增，且stage3会增大参数同步的通信量。
+是数据并行的变种，由[《ZeRO: Memory Optimizations Toward Training Trillion Parameter Models》](https://arxiv.org/abs/1910.02054)论文提出，其又细分为3种并行策略(stage1/2/3)，分别对应 pytorch中的 OSS、SDP 和 FSDP（[Fully Sharded Data Parallel](https://engineering.fb.com/2021/07/15/open-source/fsdp/)）。其思想可用下图说明（图片来源于论文），本质上是去除数据并行中的冗余计算以降低单卡中的显存占用，从而支持更大的模型或更大的batch_size。去除量从stage1/2/3 递增，且stage3会增大参数同步的通信量。
 ![picture 12](images/xxxxxx.png) 
 
 * 说明
@@ -338,6 +341,7 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 2. 各卡的网络使用切分后的网络，即网络层数量不变，但参数的shape为切分后的shape，上面此例中前向计算第2个matmul因计算出来的结果为partial状态，需要allreduce后才是正确的结果
 3. 各卡的后向计算梯度时，只有第1个matmul的输入数据的梯度需要allreduce加和(因为用在了2条路上)，其余梯度不需要通信，因为对于切分的参数，其梯度只有1份；对于没有切分的参数，虽然会有多份梯度计算结果，但每份都一样，等价于通信求平均。所以不需要通信
 4. 优化器使用各卡上的梯度更新训练参数，不需要通信
+
 从导出的计算图上可以验证
 ![picture 20](images/xxxxxx.png) 
 ![picture 21](images/xxxxxx.png) 
@@ -354,9 +358,9 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 
 流水线并行细分有多种实现，原理和示意图参考[另一篇文档](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/static_graph_pipelining.md)，这里说明下各自的优缺点：
 1. 朴素流水线并行。实现较为简易明了，但缺点比较明显：
-  a. 低GPU利用率。 在任意时刻，有且仅有一个GPU在工作，其他GPU都空闲
-  b. 计算和通信没有重叠。在发送前向传播的中间结果或者反向传播的中间结果时，GPU也是空闲的
-  c. 部分卡显存占用时间过长。GPU0从第0步开始就需要保存整个batch中后向计算所需的中间变量，直至第3步后向梯度计算完成
+    a. 低GPU利用率。 在任意时刻，有且仅有一个GPU在工作，其他GPU都空闲
+    b. 计算和通信没有重叠。在发送前向传播的中间结果或者反向传播的中间结果时，GPU也是空闲的
+    c. 部分卡显存占用时间过长。GPU0从第0步开始就需要保存整个batch中后向计算所需的中间变量，直至第3步后向梯度计算完成
 
 2. interleave 流水线并行（也称F-then-B）。将1个batch划分为2个microbatch，然后依次送入GPU0 和 GPU1计算前向和后向，2个microbatch计算出来的梯度需要求平均才是最终梯度。在此过程中，每个timestep上花费的时间要比朴素层并行更短，因为每个GPU仅需要处理microbatch，整体性能会相比朴素流水线更好，并可以解决朴素流水线并行的缺点a和缺点b，缺点c有缓解但还是存在
 
@@ -767,7 +771,7 @@ if __name__ == '__main__':
 ```
 
 ```python
-# 动手-数据并行示例代码
+# 动手-流水线并行示例代码
 # -*- coding: UTF-8 -*-
 import numpy as np
 import paddle
@@ -818,12 +822,6 @@ class SimpleNet(PipelineLayer):
             LayerDesc(paddle.nn.ReLU),
         ]
         super().__init__(layers=decs, loss_fn=paddle.nn.CrossEntropyLoss(), **kwargs)
-    #def forward(self, x):
-    #   x = self.linear1(x)
-    #   x = self.linear2(x)
-    #   x = self.linear3(x)
-    #   x = self.relu(x)
-    #   return x
 
 # 设置分布式策略
 dist_strategy = fleet.DistributedStrategy()
@@ -886,41 +884,11 @@ if __name__ == '__main__':
 
 | 动态图手动各并行策略 | 是否修改__init__ | 是否修改forward | 初始化分布式环境&设置分布式策略 | 封装模型和优化器 | 分布式数据加载和采样 | 迭代训练过程 |
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-单卡运行
-否
-否
-不需要
-不需要
-不需要
-常规
-数据并行
-否
-否
-需要
-需要
-需要
-常规
-模型并行
-是
-否
-需要
-需要
-需要
-常规
-流水线并行
-是
-是
-需要
-需要
-需要
-特殊
-group_sharded(fsdp)
-否
-否
-需要
-需要
-需要
-常规
+| 单卡运行 | 否 | 否 | 不需要 | 不需要 | 不需要 | 常规 |
+| 数据并行 | 否 | 否 | 需要 | 需要 | 需要 | 常规 |
+| 模型并行 | 是 | 否 | 需要 | 需要 | 需要 | 常规 |
+| 流水线并行 | 是 | 是 | 需要 | 需要 | 需要 | 特殊 |
+| group_sharded(fsdp) | 否 | 否 | 需要 | 需要 | 需要 | 常规 |
 
 
 #### 2.2.4.2 动态图半自动(动半)实现的各种并行策略
@@ -1234,48 +1202,19 @@ if __name__ == '__main__':
     train_model()
 ```
 
-动态图手动各并行策略
-是否修改__init__
-是否修改forward
-初始化分布式环境&设置分布式策略
-封装模型和优化器
-分布式数据加载和采样
-迭代训练过程
-单卡运行
-否
-否
-不需要
-不需要
-不需要
-常规
-数据并行
-否
-是
-不需要
-不需要
-不需要
-常规
-模型并行
-否
-是
-不需要
-不需要
-不需要
-常规
-流水线并行
-否
-是
-不需要
-不需要
-不需要
-常规
-group_sharded(fsdp)
-待补
-待补
-待补
-待补
-待补
-待补
+```python
+# 动半-group sharded并行示例代码
+# 后续完善
+```
+
+| 动态图手动各并行策略 | 是否修改__init__ | 是否修改forward | 初始化分布式环境&设置分布式策略 | 封装模型和优化器 | 分布式数据加载和采样 | 迭代训练过程 |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| 单卡运行 | 否 | 否 | 不需要 | 不需要 | 不需要 | 常规 |
+| 数据并行 | 否 | 是 | 不需要 | 不需要 | 不需要 | 常规 |
+| 模型并行 | 否 | 是 | 不需要 | 不需要 | 不需要 | 常规 |
+| 流水线并行 | 否 | 是 | 不需要 | 不需要 | 不需要 | 常规 |
+| group_sharded(fsdp) | 待补 | 待补 | 待补 | 待补 | 待补 |待补 |
+
 因为飞桨支持动转静，所以我们有两种方法实现静半的各种并行策略，一种是在动半的代码基础上加上动转静接口，即以动半编程而以静半方式运行；一种是使用原生静半接口编程并运行，这里给出第1种方法的代码，后1种方法的代码在下1节介绍
 对比代码，可以看到使用动转静的方式需要修改：
 1. import paddle.distributed.to_static 并用此封装模型、loss函数、优化器 和 data_loader
@@ -1605,7 +1544,12 @@ def train_model():
 # 启动训练
 if __name__ == '__main__':
     train_model()
+```
 
+```python
+# 动半转静半-group sharded并行示例代码
+# 后续完善
+```
 
 #### 2.2.4.3 静态图半自动(静半)实现的各种并行策略
 使用原生静半接口开发的分布式编程代码相比于单卡编程代码需要添加：
@@ -1962,6 +1906,7 @@ def train_model():
 if __name__ == '__main__':
     train_model()
 ```
+
 ```python
 # 静半-流水线并行示例代码
 # -*- coding: UTF-8 -*-
@@ -2087,52 +2032,17 @@ if __name__ == '__main__':
     train_model()
 ```
 
-静态图半自动各并行策略
-是否修改__init__
-是否修改forward
-初始化分布式环境&设置分布式策略
-封装模型和优化器
-分布式数据加载和采样
-迭代训练过程
-单卡运行
-否
-否
-不需要
-不需要
-不需要
-常规执行器
-数据并行
-否
-否
-需要
-需要，用Engine
-需要，用Engine
-Engine执行
-模型并行
-否
-是
-需要
-需要，用Engine
-需要，用Engine
-Engine执行
-流水线并行
-否
-是
-需要
-需要，用Engine
-需要，用Engine
-Engine执行，loss特殊处理
-group_sharded(fsdp)
-否
-否
-需要
-需要，用Engine
-需要，用Engine
-Engine执行
+| 静态图半自动各并行策略 | 是否修改__init__ | 是否修改forward | 初始化分布式环境&设置分布式策略 | 封装模型和优化器 | 分布式数据加载和采样 | 迭代训练过程 |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| 单卡运行 | 否 | 否 | 不需要 | 不需要 | 不需要 | 常规执行器 |
+| 数据并行 | 否 | 否 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行 |
+| 模型并行 | 否 | 是 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行 |
+| 流水线并行 | 否 | 是 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行，loss特殊处理 |
+| group_sharded(fsdp) | 否 | 否 | 需要 | 需要，用Engine | 需要，用Engine | Engine执行 |
 
 # 3. 更多问题和讨论
-1. 当前的实现是不是最好了？如何更好？
-2. 当前深度学习领域的分布式处于什么样的阶段？
+1. 如上的实现是不是最好了？如何更好？
+2. 深度学习领域的分布式处于什么样的阶段？
 
 # 4. 附录
 1. 文档中示例代码均可直接运行，运行需要安装Paddle，如果为pip安装参考Paddle官网。如果使用源码编译安装，则需要执行
@@ -2144,6 +2054,7 @@ cd Paddle && mkdir build && cd build
 
 ```shell
 #!/bin/bash
+# 示例使用python3.10版本，如使用其它python版本可以酌情修改，但建议最好使用 python3.8及以上
 
 export CCACHE_DIR=~/.ccache
 export CACHE_DIR=~/.cache
@@ -2168,5 +2079,5 @@ fi
 ```
 
 # 5. 参考链接
-* NCCL docs
-* NCCL Operations
+* [NCCL docs](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html)
+* [NCCL Operations](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/operations.html)
