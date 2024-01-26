@@ -30,6 +30,7 @@
    - 每周开发时间至少要有25h
    - 注意项目介绍，人数以及锁定营员（锁定说明已被录取，不需要再报名）
    - 提交简历的时候最好附上之前参与的开源项目或者在社区参与开源项目的PR链接
+   - 截止日期为2月8日
 
 ### 3、[@tink2123](https://github.com/tink2123) [PaddleOCR 算法模型挑战赛](https://competition.atomgit.com/competitionInfo?id=d25e62a0d7f27876a8c4219bfc0be90e)活动介绍
 
@@ -109,6 +110,17 @@
 
 ### 6、自由讨论时间
 
-1. 飞桨新开了个小红书账号：飞桨xiaoxiao
+1. 飞桨新开了个小红书账号：飞桨xiaoxiao，大家可以关注
 2. Pytorch Conference 系列翻译活动产生的原因
 
+### TODO
+    
+1. 新人介绍：[Tsaiyue](https://github.com/Tsaiyue)
+2. [@sunzhongkai](https://github.com/sunzhongkai588) [【HACKATHON 6th Code Camp】黑客松护航计划集训营](https://github.com/PaddlePaddle/Paddle/issues/61006)的详情以及细节介绍
+3. [@tink2123](https://github.com/tink2123) [PaddleOCR 算法模型挑战赛](https://competition.atomgit.com/competitionInfo?id=d25e62a0d7f27876a8c4219bfc0be90e)活动介绍
+4. [@sanbuphy](https://github.com/sanbuphy)介绍 Pytorch Conference 系列翻译活动（社区开发者个人项目）
+5. [飞桨社区开源发展工作组](https://github.com/PaddlePaddle/community/tree/master/pposdwg) 2024 Q1 例会预告及议题征集。
+6. PFCC 成员自由发言讨论
+
+###下次会议安排
+确定下次会议的时间为两周后的同一个时间段。主席待定，主题待定。
