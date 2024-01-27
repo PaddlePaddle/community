@@ -6,8 +6,6 @@
 
     - TBD
 
-- 
-
 
 ## 会议议程
 
@@ -15,4 +13,5 @@
 2. 飞桨开源社区 2023 年概要回顾
 3. 提案讨论：[更新PFCC的名称](https://github.com/PaddlePaddle/community/issues/805)
 4. 提案讨论：[第六期飞桨黑客松活动设立社区监督小组](https://github.com/PaddlePaddle/community/issues/804)
-5. 近期飞桨开源面临的挑战讨论
+5. 讨论近期飞桨开源面临的挑战
+6. 讨论将部分Paddle开源仓库交给社区维护
