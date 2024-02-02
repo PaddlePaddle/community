@@ -1,6 +1,6 @@
-# Paddle Future Contributor Club
+# Paddle Framework Contributor Club
 
-Paddle Future Contributor Club (PFCC) 是一个有兴趣、正在、或者已经为[飞桨开源项目](https://github.com/PaddlePaddle/Paddle/)做开源贡献的贡献者成立的虚拟组织，在这里，飞桨开源项目的贡献者进行讨论、交流和分享，并为飞桨开源项目做出持续的贡献。
+Paddle Framework Contributor Club (PFCC) 是一个有兴趣、正在、或者已经为[飞桨开源项目](https://github.com/PaddlePaddle/Paddle/)做开源贡献的贡献者成立的虚拟组织，在这里，飞桨开源项目的贡献者进行讨论、交流和分享，并为飞桨开源项目做出持续的贡献。
 
 # PFCC的构成
 

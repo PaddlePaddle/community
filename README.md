@@ -11,8 +11,9 @@ PaddlePaddle adopts a hierarchical technical governance structure, please view r
 
 We have implemented several mechanisms to enhance community engagement and decision-making.
 - [PaddlePaddle OpenSource Development Working Group](./pposdwg/README.md)
-- [Paddle Future Contributor Club](./pfcc/README.md)
+- [Paddle Framework Contributor Club](./pfcc/README.md)
 - [PaddlePaddle SIGs](./ppsigs/README.md)
+- [Paddle2ONNX PMC](https://github.com/PaddlePaddle/Paddle2ONNX/issues/1185)
 
 ## Contribution
 - RFCs are listed [here](./rfcs), you can also poropose new ideas by creating new RFC.
