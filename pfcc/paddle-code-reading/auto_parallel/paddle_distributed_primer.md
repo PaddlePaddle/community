@@ -382,13 +382,13 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
     a. 低GPU利用率。 在任意时刻，有且仅有一个GPU在工作，其他GPU都空闲。  
     b. 计算和通信没有重叠。在发送前向传播的中间结果或者反向传播的中间结果时，GPU也是空闲的。 
     c. 部分卡显存占用时间过长。GPU0从第0步开始就需要保存整个batch中后向计算所需的中间变量，直至第3步后向梯度计算完成。 
-![picture 25](images/paddle_distributed_primer_pic34.jpg) 
+![picture 34](images/paddle_distributed_primer_pic34.jpg) 
 
 2. interleave 流水线并行（也称F-then-B）。将1个 batch 划分为2个 microbatch，然后依次送入GPU0 和 GPU1计算前向和后向，2个 microbatch 计算出来的梯度需要求平均才是最终梯度。在此过程中，每个 timestep 上花费的时间要比朴素层并行更短，因为每个 GPU 仅需要处理 microbatch，整体性能会相比朴素流水线更好，并可以解决朴素流水线并行的缺点a 和缺点b，缺点c 有缓解但还是存在。
-![picture 25](images/paddle_distributed_primer_pic35.jpg) 
+![picture 35](images/paddle_distributed_primer_pic35.jpg) 
 
 3. 1F1B 流水线并行。interleave 并行需要等所有的 microbatch 前向完成后，才会开始后向计算，1F1B 则是当一个 microbatch 的前向完成后，立即进入后向计算。从理论上看，后向完成后就可以释放中间变量。由于1F1B 的后向完成要比interleave 早，因此也会减少峰值显存的需求，实测 1F1B 方式相比 interleave  方式峰值显存可以节省 37.5%。
-![picture 25](images/paddle_distributed_primer_pic36.jpg) 
+![picture 36](images/paddle_distributed_primer_pic36.jpg) 
 
 从导出的计算图上可以验证，如下为1F1B的计算图
 
