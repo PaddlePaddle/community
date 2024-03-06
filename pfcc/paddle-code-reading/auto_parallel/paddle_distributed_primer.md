@@ -377,7 +377,7 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 3. 各卡的后向计算梯度时也和前向一样，发送到其它卡的数据通过send完成，从其它卡接收数据通过recv完成，计算的梯度即为最终梯度。
 4. 优化器使用各卡上的梯度更新训练参数，不需要通信。
 
-流水线并行细分有多种实现，原理和示意图参考[另一篇文档](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/static_graph_pipelining.md)，这里说明下各自的优缺点：
+流水线并行细分有多种实现，如下示意图来源于[飞桨官网](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/06_distributed_training/pipeline_parallel_cn.html)，这里说明下各自的优缺点：
 1. 朴素流水线并行。实现较为简易明了，但缺点比较明显：
     a. 低GPU利用率。 在任意时刻，有且仅有一个GPU在工作，其他GPU都空闲。  
     b. 计算和通信没有重叠。在发送前向传播的中间结果或者反向传播的中间结果时，GPU也是空闲的。 
