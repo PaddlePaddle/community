@@ -8,9 +8,9 @@
 下面主要以用户视角来描述飞桨分布式，所以通过用户编程的例子来刨析飞桨分布式的实现原理和设计。
 
 # 2. 飞桨分布式编程
-在深度学习中，单卡编程和分布式编程需要考虑的因素及区别如下，以飞桨接口为例
-* 单卡编程。因不用考虑通信问题，所以只用根据 编程模式使用相关的接口即可。而且当前大多数基础接口是动/静态图统一的，除非使用原生静态图接口编程，其它可以一律使用基础接口编程，然后在两种模式上运行
-* 分布式编程。需要考虑通信，故比单卡编程要多考虑 并行策略、组网时对通信的处理 和 通信方式 因素 
+在深度学习中，单卡编程和分布式编程需要考虑的因素及区别如下，以飞桨接口为例：
+* 单卡编程。因不用考虑通信问题，所以只用根据 编程模式使用相关的接口即可。而且当前大多数基础接口是动/静态图统一的，除非使用原生静态图接口编程，其它可以一律使用基础接口编程，然后在两种模式上运行。
+* 分布式编程。需要考虑通信，细化到代码中，比单卡编程要多考虑 并行策略、组网时对通信的处理 和 通信方式 因素。
 
 ![picture 0](images/paddle_distributed_primer_pic0.jpg) 
 
@@ -377,15 +377,18 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 3. 各卡的后向计算梯度时也和前向一样，发送到其它卡的数据通过send完成，从其它卡接收数据通过recv完成，计算的梯度即为最终梯度。
 4. 优化器使用各卡上的梯度更新训练参数，不需要通信。
 
-流水线并行细分有多种实现，原理和示意图参考[另一篇文档](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/auto_parallel/static_graph_pipelining.md)，这里说明下各自的优缺点：
+流水线并行细分有多种实现，如下示意图来源于[飞桨官网](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/06_distributed_training/pipeline_parallel_cn.html)，这里说明下各自的优缺点：
 1. 朴素流水线并行。实现较为简易明了，但缺点比较明显：
     a. 低GPU利用率。 在任意时刻，有且仅有一个GPU在工作，其他GPU都空闲。  
     b. 计算和通信没有重叠。在发送前向传播的中间结果或者反向传播的中间结果时，GPU也是空闲的。 
     c. 部分卡显存占用时间过长。GPU0从第0步开始就需要保存整个batch中后向计算所需的中间变量，直至第3步后向梯度计算完成。 
+![picture 34](images/paddle_distributed_primer_pic34.jpg) 
 
 2. interleave 流水线并行（也称F-then-B）。将1个 batch 划分为2个 microbatch，然后依次送入GPU0 和 GPU1计算前向和后向，2个 microbatch 计算出来的梯度需要求平均才是最终梯度。在此过程中，每个 timestep 上花费的时间要比朴素层并行更短，因为每个 GPU 仅需要处理 microbatch，整体性能会相比朴素流水线更好，并可以解决朴素流水线并行的缺点a 和缺点b，缺点c 有缓解但还是存在。
+![picture 35](images/paddle_distributed_primer_pic35.jpg) 
 
 3. 1F1B 流水线并行。interleave 并行需要等所有的 microbatch 前向完成后，才会开始后向计算，1F1B 则是当一个 microbatch 的前向完成后，立即进入后向计算。从理论上看，后向完成后就可以释放中间变量。由于1F1B 的后向完成要比interleave 早，因此也会减少峰值显存的需求，实测 1F1B 方式相比 interleave  方式峰值显存可以节省 37.5%。
+![picture 36](images/paddle_distributed_primer_pic36.jpg) 
 
 从导出的计算图上可以验证，如下为1F1B的计算图
 
@@ -411,26 +414,26 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 所以具体来说，序列并行是在模型并行降低单卡训练参数和优化器参数显存占用的基础上，进一步减低中间变量(Activations)的显存占用，故以下公式均只描述中间变量的显存占用。
 
 ##### 2.2.3.5.2 优化方法
-没有任何并行策略时，单卡上单个Transformer Layer的中间变量(Activations)显存占用为
+没有任何并行策略时，单卡上单个Transformer Layer的中间变量(Activations)显存占用为：
 
 ![picture 27](images/paddle_distributed_primer_pic27.jpg) 
 
-以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，则为： 2736MB/卡/Layer。L=96，总的为 256.5GB/卡
-使用 模型并行后，单卡上单个 Transformer Layer 的中间变量能够降低为
+以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，则为： 2736MB/卡/Layer。L=96，总的为 256.5GB/卡。
+使用 模型并行后，单卡上单个 Transformer Layer 的中间变量能够降低为：
 
 ![picture 28](images/paddle_distributed_primer_pic28.jpg) 
 
-以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： 552MB/卡/Layer。L=96，总的为 51.75GB/卡
+以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： 552MB/卡/Layer。L=96，总的为 51.75GB/卡。
 原因是模型并行作用于矩阵乘相关的层上，这些层内中间变量的占用也能够缩小到 1/t，t为模型并行数量，但是这些层之外的 LayerNorm、Dropout 相关的中间变量的空间不能缩小。
 
 ![picture 29](images/paddle_distributed_primer_pic29.jpg) 
 
-图中的 f 代表通信算子，f' 是 f 对偶的通信算子，f正向为空，反向为all_reduce；f'正向为all_reduce，反向为空
-使用 模型并行+序列并行 后，单卡上单个Transformer Layer的中间变量能够降低为
+图中的 f 代表通信算子，f' 是 f 对偶的通信算子，f正向为空，反向为all_reduce；f'正向为all_reduce，反向为空。
+使用 模型并行+序列并行 后，单卡上单个Transformer Layer的中间变量能够降低为：
 
 ![picture 30](images/paddle_distributed_primer_pic30.jpg) 
 
-以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： 342MB/卡/Layer。L=96，总的为 32.0625GB/卡
+以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： 342MB/卡/Layer。L=96，总的为 32.0625GB/卡。
 原因是在模型并行外的其它位置(LayerNorm、Dropout)也实现了并行，即按 sequence_length 维度进行切分，故称为 sequential parallel。这些中间变量也能够缩小到 1/t，本质是去除了这些中间变量的冗余计算。
 
 ![picture 31](images/paddle_distributed_primer_pic31.jpg) 
@@ -441,13 +444,13 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 ![picture 32](images/paddle_distributed_primer_pic32.jpg) 
 
 ##### 2.2.3.5.3 进一步的优化
-使用 模型并行+序列并行 后，由上面公式4，在GPT3 175B等大模型中（尤其是随着sequence_length的增加），括号中第1项相对于第2项较小，所以如果能去掉第2项，可以进一步大幅减少显存占用
-第2项来源于attention层中的softmax+dropout的中间变量，如果在这里使用recompute，即不保存这些中间变量，则可以达到目的
+使用 模型并行+序列并行 后，由上面公式4，在GPT3 175B等大模型中（尤其是随着sequence_length的增加），括号中第1项相对于第2项较小，所以如果能去掉第2项，可以进一步大幅减少显存占用。
+第2项来源于attention层中的softmax+dropout的中间变量，如果在这里使用recompute，即不保存这些中间变量，则可以达到目的。
 
 ![picture 33](images/paddle_distributed_primer_pic33.jpg) 
 
-以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： **102MB**/卡/Layer。L=96，总的为 9.5625GB/卡。且只增加2.7%左右的计算量
-如果使用完全recompute的方案，可以得到中间变量占用 2sbh，为 **48MB**/卡/Layer，但是会增加数十倍计算量。即通过上面的优化，只增加很少的计算，显存占用已经接近理想值
+以 GPT3 175B为例，使用fp16/bf16训练，a=96，s=2048，h=12288，b=1，t=8，则为： **102MB**/卡/Layer。L=96，总的为 9.5625GB/卡。且只增加2.7%左右的计算量。
+如果使用完全recompute的方案，可以得到中间变量占用 2sbh，为 **48MB**/卡/Layer，但是会增加数十倍计算量。即通过上面的优化，只增加很少的计算，显存占用已经接近理想值。
 总结
 | 以GPT3 175B为例 | 单卡单Layer占用(MB) | 单卡所有Layer占用(GB) | 通信增加 | 计算增加 |
 | ---- | ---- | ---- | ---- | ---- |
@@ -459,7 +462,7 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 
 ### 2.2.4 分布式编程代码
 清楚分布式编程相比单卡编程要多考虑的3方面因素后，使用相关API可以在相同组网结构上写出分布式训练程序。
-如下示例代码都在GPU上运行，使用无中心通信(NCCL)，按照动/静态图  + 组网对通信的处理 + 并行策略 的组合进行说明
+如下示例代码都在GPU上运行，使用无中心通信(NCCL)，按照动/静态图  + 组网对通信的处理 + 并行策略 的组合进行说明。
 因为静态图手动方式已经不再使用，所以主要描述：
 * 动态图 + 手动加通信算子 + 各种并行策略，即 基于动态图手动(简称动手)实现的各种并行策略。
 * 动态图 + 用户标记通信 + 各种并行策略，即 基于动态图半自动(简称动半)实现的各种并行策略，此方式需要安装Paddle v2.6及以上版本。
