@@ -467,7 +467,10 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 * 动态图 + 手动加通信算子 + 各种并行策略，即 基于动态图手动(简称动手)实现的各种并行策略。
 * 动态图 + 用户标记通信 + 各种并行策略，即 基于动态图半自动(简称动半)实现的各种并行策略，此方式需要安装Paddle v2.6及以上版本。
 * 静态图 + 用户标记通信 + 各种并行策略，即 基于静态图半自动(简称静半)实现的各种并行策略。
+```shell
+# 如下代码执行方式均为，假设在0号和1号卡上执行，日志打印到logs目录中
 python -m paddle.distributed.launch --gpus=0,1 --log_dir logs xxxxxx.py 
+```
 
 #### 2.2.4.1 动态图手动(动手)实现的各种并行策略
 动手上分布式编程代码相比于单卡编程代码需要添加：
@@ -2113,6 +2116,17 @@ then
     python -m pip uninstall paddlepaddle_gpu -y
     python -m pip install python/dist/paddlepaddle_gpu-0.0.0-cp310-cp310-linux_x86_64.whl
 fi
+```
+
+2. 单卡代码和分布式代码的执行方式
+```shell
+# 单卡代码执行方式
+python xxxxxx.py
+```
+
+```shell
+# 分布式代码执行方式，假设在0号和1号卡上执行，日志打印到logs目录中
+python -m paddle.distributed.launch --gpus=0,1 --log_dir logs xxxxxx.py 
 ```
 
 # 5. 参考链接
