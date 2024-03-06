@@ -2124,6 +2124,7 @@ fi
 # 单卡代码执行方式
 python xxxxxx.py
 ```
+
 ```shell
 # 分布式代码执行方式，假设在0号和1号卡上执行，日志打印到logs目录中
 python -m paddle.distributed.launch --gpus=0,1 --log_dir logs xxxxxx.py 
