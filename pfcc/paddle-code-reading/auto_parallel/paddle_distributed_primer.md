@@ -472,7 +472,6 @@ NCCL 中定义的通信接口和深度学习的场景和需求比较契合，除
 python -m paddle.distributed.launch --gpus=0,1 --log_dir logs xxxxxx.py 
 ```
 
-
 #### 2.2.4.1 动态图手动(动手)实现的各种并行策略
 动手上分布式编程代码相比于单卡编程代码需要添加：
 1. import 分布式相关API。主要是 paddle.distributed.fleet/get_rank。
