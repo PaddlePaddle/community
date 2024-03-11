@@ -1,18 +1,18 @@
-# paddle.distribution.continuous_bernoulli 设计文档
+# paddle.distribution.ContinuousBernoulli 设计文档
 
-|API名称 | paddle.distribution.continuous_bernoulli | 
+|API名称 | paddle.distribution.ContinuousBernoulli | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2023-09-27 | 
-|版本号 | V1.1 | 
+|版本号 | V1.2 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
-|文件名 | 20230927_api_design_for_continuous_bernoulli.md<br> | 
+|文件名 | 20230927_api_design_for_ContinuousBernoulli.md<br> | 
 
 
 # 一、概述
 ## 1、相关背景
 连续伯努利分布是一种定义在 $[0, 1]$ 闭区间上的概率分布, 它具有一个描述分布函数的形状的参数 $\lambda \in (0, 1)$, 该参数对连续伯努利概率密度函数的影响如下: $f(x|\lambda) \propto \lambda^x (1 - \lambda)^{1-x}$。它属于指数分布族, 可以被看作连续版的伯努利分布。而在机器学习中, 伯努利分布可以推导出二元数据的交叉熵损失, 于是连续伯努利分布就可以为连续型数据提供一种类似交叉熵的损失衡量方法。例如在 VAE 中, 若数据非二元分布而是分布在 $[0, 1]$ 区间上, [The continuous Bernoulli: fixing a pervasive error in
-variational autoencoders](https://proceedings.neurips.cc/paper_files/paper/2019/file/f82798ec8909d23e55679ee26bb26437-Paper.pdf)指出: 如果用传统做法先将其转化为二元 $\{0, 1\}$ 分布, 再将先验分布选择为普通的伯努利分布, 这样的做法是不能够很好的用统计理论来进行解释的, 因为在非监督学习中为了fit模型去修改数据这样的做法本身就有问题, 会丢失很多信息等等。 于是这篇论文提出了这种新的分布作为 VAE 的先验分布用以处理连续型数据。因此为提升飞桨的概率分布 API 丰富度, 从而为更多的机器学习应用提供可能, 需要扩充 API `paddle.distribution.continuous_bernoulli`。
+variational autoencoders](https://proceedings.neurips.cc/paper_files/paper/2019/file/f82798ec8909d23e55679ee26bb26437-Paper.pdf)指出: 如果用传统做法先将其转化为二元 $\{0, 1\}$ 分布, 再将先验分布选择为普通的伯努利分布, 这样的做法是不能够很好的用统计理论来进行解释的, 因为在非监督学习中为了fit模型去修改数据这样的做法本身就有问题, 会丢失很多信息等等。 于是这篇论文提出了这种新的分布作为 VAE 的先验分布用以处理连续型数据。因此为提升飞桨的概率分布 API 丰富度, 从而为更多的机器学习应用提供可能, 需要扩充 API `paddle.distribution.ContinuousBernoulli`。
 
 ## 2、功能目标
 参考 Paddle 现有 distribution，增加 ContinuousBernoulli 分布类的概率统计与随机采样，包括如下方法：
@@ -653,9 +653,10 @@ class ContinuousBernoulli(distribution.AutoCompositeTensorDistribution):
 
 ## 命名与参数设计
 ```python
-paddle.distribution.continuous_bernoulli(probs)
+paddle.distribution.ContinuousBernoulli(probs, lims=(0.499, 0.501))
 ```
-参数 `probs` 为 ContinuousBernoulli 分布的参数。
+- 参数 `probs` 为 ContinuousBernoulli 分布的参数。
+- 参数 `lims` 表示非稳定计算区域。
 
 例如，随机变量 $X$ 服从 ContinuousBernoulli 分布，即 $X \sim ContinuousBernoulli(\lambda)$ ，对应的参数 `probs`$=\lambda$。
 
@@ -667,16 +668,16 @@ paddle.distribution.continuous_bernoulli(probs)
 
 ```python
 class ContinuousBernoulli(Distribution):
-  def __init__(self, probs, eps=1e-4):
+  def __init__(self, probs, lims=(0.499, 0.501)):
     super().__init__(batch_shape=self.probs.shape, event_shape=())
     
     ...
     
 ```
 
-`ContinuousBernoulli` 类的初始化参数是 `probs` ，类包含的方法及实现方案如下：
+`ContinuousBernoulli` 类的初始化参数是 `probs` 和 `lims` ，类包含的方法及实现方案如下：
 
-记参数 `probs`$=\lambda$, `eps` 为非稳定计算区域范围: $[0.5-eps, 0.5+eps]$
+记参数 `probs`$=\lambda$, `lims` 为非稳定计算区域范围。
 
 - `mean` 计算均值
 
@@ -689,6 +690,10 @@ E(X) =
 &\frac{\lambda}{2\lambda - 1} + \frac{1}{2\tanh^{-1}(1-2\lambda)} & \text{ otherwise}
 \end{aligned}
 \right.
+```
+在非稳定计算区域做泰勒展开：
+```math
+E(X) = \frac{1}{2} + \frac{1}{3}(\lambda - 0.5) + \frac{16}{45}(\lambda - 0.5)^2
 ```
 
 - `variance` 计算方差
@@ -703,14 +708,36 @@ Var(X) =
 \end{aligned}
 \right.
 ```
+在非稳定计算区域做泰勒展开：
+```math
+Var(X) = \frac{1}{12} + \frac{1}{15}(\lambda - 0.5)^2 + \frac{128}{945}(\lambda - 0.5)^4
+```
 
 - `entropy` 熵计算
 
-熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$
+熵的计算方法： $H = - \sum_x f(x) \log{f(x)}$  
+```math
+\begin{aligned}
+H &= -\int_x C(\lambda) \lambda^x (1-\lambda)^{1-x} \log\{C(\lambda) \lambda^x (1-\lambda)^{1-x}\} dx \\
+& = -\int_0^1 C \lambda^x (1-\lambda)^{1-x} \left[ \log C + x \log \lambda + (1 -x) \log (1 - \lambda)\right] dx \\
+& = -\left[ C \log C \int_0^1 \lambda^x (1-\lambda)^{1-x} dx + C \log \lambda \int_0^1 x \lambda^x (1-\lambda)^{1-x} + C \log(1 - \lambda) \int_0^1 (1-x) \lambda^x (1-\lambda)^{1-x} \right] \\
+& = - \left[ \log C + \mathbb{E}(X) \log \lambda + \mathbb{E}(1 - X) \log(1 - \lambda) \right] \\
+& = -\log C + \left[ \log (1 - \lambda) -\log \lambda \right] \mathbb{E}(X)  - \log(1 - \lambda) 
+\end{aligned}
+```
 
 - `kl_divergence` 相对熵计算
 
-相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$
+相对熵的计算方法： $D_{KL}(\lambda_1, \lambda_2) = \sum_x f_1(x) \log{\frac{f_1(x)}{f_2(x)}}$  
+```math
+\begin{aligned}
+\mathcal{D}_{KL}(p_1|| p_2) &= \int_x p_1(x)\log\frac{p_1(x)}{p_2(x)} dx \\
+& = \int_0^1 C_1 \lambda_1^x (1-\lambda_1)^{1-x} \{\log[C_1 \lambda_1^x (1-\lambda_1)^{1-x}] - \log[C_2 \lambda_2^x (1-\lambda_2)^{1-x}]\} dx \\
+& = -H - [C_1 \log C_2 \int_0^1 \lambda_1^x (1-\lambda_1)^{1-x} dx + C_1 \log \lambda_2 \int_0^1 x \lambda_1^x (1-\lambda_1)^{1-x} dx + C_1 \log (1-\lambda_2) \int_0^1 (1-x) \lambda_1^x (1-\lambda_1)^{1-x} dx] \\
+& = -H - [\log C_2 + \log \lambda_2 \mathbb{E}_1(X) + \log (1-\lambda_2)  \mathbb{E}_1(1-X)  ] \\
+& = - H - \{\log C_2 + [\log \lambda_2 -  \log (1-\lambda_2)]  \mathbb{E}_1(X) +  \log (1-\lambda_2)  \}
+\end{aligned}
+```
 
 - `sample` 随机采样
 
@@ -731,6 +758,10 @@ C(\lambda) =
 &\frac{2\tanh^{-1}(1-2\lambda)}{1 - 2\lambda} & \text{ otherwise}
 \end{aligned}
 \right.
+```
+$C$ 在非稳定计算区域做泰勒展开：
+```math
+C = 2 + \frac{4}{3}(\lambda - 0.5)^2 + \frac{104}{45}(\lambda - 0.5)^4
 ```
 
 - `log_prob` 对数概率密度

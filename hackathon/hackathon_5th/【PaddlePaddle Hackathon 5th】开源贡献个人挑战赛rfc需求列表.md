@@ -49,6 +49,15 @@
 | 40       | 🌟🌟🌟     | 为 Paddle 新增 ASGD API                                      | 是                           |
 | 41       | 🌟🌟🌟     | 为 Paddle 新增 Rprop API                                     | 是                           |
 | 110      | 🌟         | 为 Paddle 增强 sparse.matmul API                              | 是                           |
+| 114  | 🌟    | 为paddle.nn.functional.embedding增加参数max_norm/norm_type/scale_grad_by_freq |   否   |
+| 115  | 🌟    | 为paddle.linalg.norm进行功能对齐与功能增强 |   否   |
+| 116  | 🌟    | 为paddle.nn.LSTM/RNNBase/paddle.quantile/nanquantile功能增强 |   否   |
+| 117  | 🌟    | 为paddle.histogram/paddle.nn.functional.threshold进行功能对齐与功能增强 |   否   |
+| 118  | 🌟    | 为paddle.nn.functional.upsample/paddle.nn.initializer.XavierNormal/XavierUniform/KaimingNormal/KaimingUniform进行功能增强 |   否   |
+| 119  | 🌟    | 为paddle.io.RandomSampler/random_split/Layer.clear_gradients进行功能增强 |   否   |
+| 120  | 🌟    | 为paddle.round/paddle.nn.functional.max_pool1d/max_pool2d/max_pool3d进行功能增强 |   否   |
+| 121  | 🌟    | 为paddle.nn.functional.max_unpool1d/max_unpool2d/max_unpool3d/paddle.nn.functional.kl_div进行功能增强 |   否   |
+| 122  | 🌟    | 为paddle.nn.functional.max_pool1d/max_pool2d/max_pool3d/paddle.signal.stft进行功能增强 |   否   |
 
 
 ## 框架其他开发任务
@@ -72,6 +81,8 @@
 | 104  | 🌟    | 将paddle内部的self_dp_attention和fusion_repeated_fc_relu/fusion_squared_mat_sub算子及其kernel实现从fluid下迁移到phi下 |  否    |
 | 105  | 🌟    | 将paddle内部的fusion_gru、fusion_seqconv_eltadd_relu和fusion_seqexpand_concat_fc算子及其kernel实现从fluid下迁移到phi下 |   否   |
 | 112  | 🌟    | 将paddle内部的read_file、fused_gemm_epilogue算子及其kernel实现从fluid下迁移到phi下；添加identity_loss的yaml配置 |   否   |
+| 123  | 🌟    | 结合paddle现有的动半架构，新增缺少的跨mesh下的reshard转换函数 |   否   |
+| 124  | 🌟    | 结合paddle现有的动半架构，新增缺少的跨mesh下多对一和一对多的reshard转换函数 |   否   |
 
 ## 科学计算模型复现
 
@@ -139,3 +150,4 @@
 | 108  | 🌟    | 为InfiniTensor推理引擎添加GeLU算子                           | 否 |
 | 109  | 🌟    | InfiniTensor推理引擎的Windows系统适配                        | 否 |
 | 111  | 🌟🌟🌟    | 基于PaddleSeg的纤维轮廓识别                        | 否 |
+| 113  | 🌟   | OpenVINO 开放任务            | 否 |

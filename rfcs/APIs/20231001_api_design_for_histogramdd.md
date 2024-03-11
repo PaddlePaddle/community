@@ -381,13 +381,14 @@ PyTorch底层用cpp实现kernel，Numpy通过API在Python层直接实现。
 
 API的设计为:
 
-- paddle.histogramdd(sample, bins, range=None, density=False, weights=None，name=None)
+- paddle.histogramdd(x, bins, ranges=None, density=False, weights=None，name=None)
 
 其中
 
-+ sample(Tensor) - 输入的多维 tensor
++ x(Tensor) - 输入的多维 tensor
 + bins(Tensor[], int[], int) 若为`Tensor[]`，则定义了bin的边缘序列；若为`int[]`，则每个值分别定义了每个维度的等宽bin的数量；若为`int`，则定义了所有维度的等宽bin的数量。
-+ range(*sequence of python:float*)：规定了bin的最左端和最右端，也就是范围。若为None则以所有输入的最小值和最大值作为边界。
++ ranges(*sequence of python:float*)：规定了bin的最左端和最右端，也就是范围。若为None则以所有输入的最小值和最大值作为边界。
+
 + density (bool) – 默认为 False , 结果将包含每个bin中的计数。如果设置为 True ，则每个计数（重量）将除以总计数，然后除以其所在bin的范围宽度。
 + weight(Tensor): 默认所有输入权重为1，他的shape必须与输入sample除去最内部维度的shape相同，例如当sample的shape为[M,N]时，weight的shape必须为[M]。
 + name(str, 可选）- 操作的名称(默认值为None）。
