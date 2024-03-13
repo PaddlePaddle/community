@@ -5,7 +5,7 @@
   - 会议密码：\*\*\*\*（群内通知）
   - [点击链接入会](https://meeting.tencent.com/dm/2E4v2wYmmdaJ)，或添加至会议列表
 - 本次会议主席：孙钟恺（[sunzhongkai588](https://github.com/sunzhongkai588)）
-- 本次会议副主席：空缺
+- 本次会议副主席：许明雪
 
 ## 会议议程
 
@@ -25,7 +25,7 @@
   - Meeting Password: \*\*\*\* (Notification will be shared within the WeChat group or via email.)
   - Click the link to join the meeting or to add it to your meeting list: https://meeting.tencent.com/dm/2E4v2wYmmdaJ 
 - Chair of the Meeting: Sun Zhongkai ([sunzhongkai588](https://github.com/sunzhongkai588))
-- Vice Chair of the Meeting: Position currently vacant.
+- Vice Chair of the Meeting: Mingxue (Mercy) Xu ([Mingxue-Xu](https://github.com/Mingxue-Xu))
 
 ## Meeting Agenda
 
