@@ -278,15 +278,27 @@ alluxio.user.client.cache.size=10GB
 
 # 实验对比分析
 
-![](https://biv2smz4em.feishu.cn/space/api/box/stream/download/asynccode/?code=OWZlNzViZTBjOTkzODRiN2ZhMzQ4NWJkZDE1MzU5M2JfT2dNcnVQYm9oNmR2TUZlN2prSnFabUFxN3VXQnhicEdfVG9rZW46WHpPcmJZVFdJb1RZNWF4SVpxemM1bVE2blFmXzE3MTAxNTgyMzU6MTcxMDE2MTgzNV9WNA)
+下表概述了使用不同存储和缓存方法训练 AI 模型的时间。这些时间是在训练 Resnet50/Imagenet-mini 数据集时记录的。
+
+| Method                       | Duration (hours) |
+|------------------------------|------------------|
+| Alluxio fuse kernel cache    | 17.37            |
+| Alluxio fuse userspace cache | 16.65            |
+| Ossfs                        | 16.25            |
+| Local training               | 15.47            |
+
 
 方案一：从云存储中下载到本地训练
+
+在列出的方法中，它是最快的。但需要注意的是，这个测量不包括将数据集下载到本地环境所需的时间。如果我们包括数据下载时间，那么总时间可能会根据网络速度和数据集大小显著增加。
 
 优点：不需要依赖额外的组件
 
 缺点：CPU、GPU空转时间长；无法训练大数据模型（本地存储不够）；多次IO，性能差；需要手动检验数据集完整
 
 方案二：使用Ossfs挂载到本地，进行训练
+
+OSSFS 略快可以归因于几个与阿里云的优化：OSSFS 针对阿里云的基础设施进行了优化，可能导致更好的网络性能和在访问存储在阿里云对象存储服务（OSS）中的数据时更低的延迟。
 
 优点：适配阿里云服务器性能好；支持缓存设置；多客户端提供了一致性策略
 
