@@ -1,4 +1,4 @@
-此文档展示 **PaddlePaddle Hackathon 第六期活动——开源贡献个人挑战赛科学计算方向任务** 详细介绍，更多详见 [PaddlePaddle Hackathon 说明]()。
+此文档展示 **PaddlePaddle Hackathon 第六期活动——开源贡献个人挑战赛科学计算方向任务** 详细介绍，更多详见 [PaddlePaddle Hackathon 说明](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/10_contribution/hackathon_cn.md)。
 
 ## 任务开发流程与验收标准
 
@@ -8,7 +8,7 @@
 2. 复现整体流程和验收标准可以参考：https://paddlescience-docs.readthedocs.io/zh/latest/zh/reproduction/#21 ，复现完成后需供必要的训练产物，包括训练结束后保存的打印信息日志文件、`.pdparams`格式的模型权重参数文件（可用网盘的方式提交）、**撰写的案例文档。**
 3. 理解复现流程后，可以参考 PaddleScience 开发文档：https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/ ，了解各个模块如何进行开发、修改，以及参考API文档，了解各个现有API的功能和作用：https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/ 。
 4. 案例文档撰写格式可参考 https://paddlescience-docs.readthedocs.io/zh/latest/zh/examples/darcy2d/ ，最终合入后会被渲染并展示在 [PaddleScience 官网文档](https://paddlescience-docs.readthedocs.io/zh/latest/zh/examples/volterra_ide/)。
-5. **如在复现过程中出现需添加的功能无法兼容现有 PaddleScience API 体系（**[**PaddleScience API 文档**](https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/)﻿**），则可与论文复现指导人说明情况，并视情况允许直接基于 Paddle API 进行复现。**
+5. **如在复现过程中出现需添加的功能无法兼容现有 PaddleScience API 体系（[PaddleScience API 文档](https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/)﻿），则可与论文复现指导人说明情况，并视情况允许直接基于 Paddle API 进行复现。**
 6. 若参考代码为 pytorch，则复现过程可以尝试使用 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 辅助完成代码转换工作，然后可以尝试使用 [PaDiff](https://github.com/PaddlePaddle/PaDiff) 工具辅助完成前反向精度对齐，从而提高复现效率。
 
 ### 验收标准
@@ -17,7 +17,7 @@
 
 ## 【开源贡献个人挑战赛-科学计算方向】任务详情
 
-### NO.37 CausalPINN 代码复现
+### NO.36 CausalPINN 代码复现
 
 **论文链接：**
 
@@ -31,7 +31,7 @@ https://www.researchgate.net/profile/Sifan-Wang-9/publication/378139236_Respecti
 
 https://github.com/PredictiveIntelligenceLab/CausalPINNs/tree/main/NS
 
-### NO.38 GraphCastNet 代码迁移至 PaddleScience
+### NO.37 GraphCastNet 代码迁移至 PaddleScience
 
 **论文链接：**
 https://arxiv.org/pdf/2212.12794.pdf
@@ -44,7 +44,7 @@ https://arxiv.org/pdf/2212.12794.pdf
 
 https://github.com/PaddlePaddle/PaddleScience/tree/develop/jointContribution/graphcast
 
-### NO.39 LDCast 代码复现
+### NO.38 LDCast 代码复现
 
 **论文链接：**
 
@@ -62,7 +62,7 @@ https://arxiv.org/abs/2304.12891
 
 https://github.com/MeteoSwiss/ldcast
 
-### NO.40 XPINN 迁移至 PaddleScience
+### NO.39 XPINN 迁移至 PaddleScience
 
 **案例链接：**
 
@@ -72,7 +72,7 @@ https://github.com/PaddlePaddle/PaddleScience/tree/develop/jointContribution/XPI
 
 理解 XPINN 的执行流程，将 XPINN 案例使用 PaddleScience API 实现，训练精度和原有代码保持一致，同时为 XPINN 撰写与 examples 下其余案例同样格式的文档。
 
-### NO.41 SDGD 优化器实现
+### NO.40 SDGD 优化器实现
 
 **论文链接：**
 
@@ -88,7 +88,7 @@ https://arxiv.org/pdf/2307.12306.pdf
 
 <img src="./img/41_1.png" width = "800" />
 
-### NO.42 PIRATENETS 代码复现
+### NO.41 PIRATENETS 代码复现
 
 **论文链接：**
 
@@ -102,7 +102,7 @@ https://arxiv.org/pdf/2402.00326.pdf
 
 根据论文结构图与损失函数公式、给出的训练配置，使用 PaddleScience API 实现 PIRATENETS 模型结构并在 2+案例上复现精度，代码合并至 examples
 
-### NO.43 AlphaGeometry 几何推理模型
+### NO.42 AlphaGeometry 几何推理模型
 
 **论文链接：**
 
