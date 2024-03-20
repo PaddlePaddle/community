@@ -1,4 +1,4 @@
-此文档展示 **PaddlePaddle Hackathon 第六期活动——开源贡献个人挑战赛框架开发任务** 详细介绍，更多详见 [PaddlePaddle Hackathon 说明]()。
+此文档展示 **PaddlePaddle Hackathon 第六期活动——开源贡献个人挑战赛框架开发任务** 详细介绍，更多详见 [PaddlePaddle Hackathon 说明](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/10_contribution/hackathon_cn.md)。
 
 ## 【开源贡献个人挑战赛-API 开发】任务详情
 
