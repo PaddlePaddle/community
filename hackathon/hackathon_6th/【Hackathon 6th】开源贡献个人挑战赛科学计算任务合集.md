@@ -4,12 +4,12 @@
 
 ### 开发流程
 
-1. **要求基于** **PaddleScience 套件进行开发**，开发文档参考：https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/。
-2. 复现整体流程和验收标准可以参考：https://paddlescience-docs.readthedocs.io/zh/latest/zh/reproduction/#21，复现完成后需供必要的训练产物，包括训练结束后保存的打印信息日志文件、`.pdparams`格式的模型权重参数文件（可用网盘的方式提交）、**撰写的案例文档。**
-3. 理解复现流程后，可以参考 PaddleScience 开发文档：https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/，了解各个模块如何进行开发、修改，以及参考API文档，了解各个现有API的功能和作用：https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/。
-4. 案例文档撰写格式可参考 https://paddlescience-docs.readthedocs.io/zh/latest/zh/examples/darcy2d/，最终合入后会被渲染并展示在 [PaddleScience 官网文档](https://paddlescience-docs.readthedocs.io/zh/latest/zh/examples/volterra_ide/)。
+1. **要求基于** **PaddleScience 套件进行开发**，开发文档参考：https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/ 。
+2. 复现整体流程和验收标准可以参考：https://paddlescience-docs.readthedocs.io/zh/latest/zh/reproduction/#21 ，复现完成后需供必要的训练产物，包括训练结束后保存的打印信息日志文件、`.pdparams`格式的模型权重参数文件（可用网盘的方式提交）、**撰写的案例文档。**
+3. 理解复现流程后，可以参考 PaddleScience 开发文档：https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/ ，了解各个模块如何进行开发、修改，以及参考API文档，了解各个现有API的功能和作用：https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/ 。
+4. 案例文档撰写格式可参考 https://paddlescience-docs.readthedocs.io/zh/latest/zh/examples/darcy2d/ ，最终合入后会被渲染并展示在 [PaddleScience 官网文档](https://paddlescience-docs.readthedocs.io/zh/latest/zh/examples/volterra_ide/)。
 5. **如在复现过程中出现需添加的功能无法兼容现有 PaddleScience API 体系（**[**PaddleScience API 文档**](https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/)﻿**），则可与论文复现指导人说明情况，并视情况允许直接基于 Paddle API 进行复现。**
-6. 若参考代码为 pytorch，则复现过程可以尝试使用 PaConvert（https://github.com/PaddlePaddle/PaConvert）辅助完成代码转换工作，然后可以尝试使用 PaDiff（https://github.com/PaddlePaddle/PaDiff）工具辅助完成前反向精度对齐，从而提高复现效率。
+6. 若参考代码为 pytorch，则复现过程可以尝试使用 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 辅助完成代码转换工作，然后可以尝试使用 [PaDiff](https://github.com/PaddlePaddle/PaDiff) 工具辅助完成前反向精度对齐，从而提高复现效率。
 
 ### 验收标准
 
@@ -86,7 +86,7 @@ https://arxiv.org/pdf/2307.12306.pdf
 
 根据论文公式和实验条件，用 paddle 实现 SDGD 优化器，支持单机训练和多卡并行训练，最终在 Allen-Cahn 问题上，复现出红框中的四个精度。
 
-![img](./img/41_1.png)
+<img src="./img/41_1.png" width = "800" />
 
 ### NO.42 PIRATENETS 代码复现
 
