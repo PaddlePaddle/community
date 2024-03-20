@@ -1,4 +1,4 @@
-此文档展示 **PaddlePaddle Hackathon 第六期活动——开源贡献个人挑战赛框架开发任务** 详细介绍，更多详见 [PaddlePaddle Hackathon 说明]()。
+此文档展示 **PaddlePaddle Hackathon 第六期活动——开源贡献个人挑战赛框架开发任务** 详细介绍，更多详见 [PaddlePaddle Hackathon 说明](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/10_contribution/hackathon_cn.md)。
 
 ## 【开源贡献个人挑战赛-API 开发】任务详情
 
@@ -48,13 +48,12 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 使用 Cholesky 因子 U 计算对称正定矩阵的逆矩阵：返回矩阵`inv`。使用 LAPACK 例程`dpotri`和`spotri`(以及相应的 MAGMA 例程)计算逆。
 
   - 下三角矩阵
-    $$
-    inv = (uu^T)^{-1}
-    $$
+    
+    $$inv = (uu^T)^{-1}$$
+    
   - 上三角矩阵
-    $$
-    inv = (u^Tu)^{-1}
-    $$
+    
+    $$inv = (u^Tu)^{-1}$$
 
 - 调用形式
   - paddle.cholesky_inverse , 作为独立的函数调用
@@ -72,11 +71,11 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 熟练掌握 Cholesky 数学语言以及线性代数中矩阵相关运算
 - 熟练掌握 Python
 
-### NO.3 为 Paddle 新增 / ZeroPad3D API
+### NO.3 为 Paddle 新增 ZeroPad1D / ZeroPad3D / block_diag  API
 
-**详细描述：**
+**详细描述(ZeroPad1D/ ZeroPad3D）：**
 
-- 用零填充输入张量边界，1D 填充最后一个维度，3D 填充最后三个维度即可。
+- 用零填充输入张量边界，1D填充最后一个维度，3D填充最后三个维度即可。
 - 调用形式
   - paddle.nn.ZeroPad1d
   - paddle.nn.ZeroPad3d
@@ -84,36 +83,30 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 **提交内容：**
 
 - API 的设计文档，并提 PR 至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/APIs 目录
-- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/math.py)paddle/nn/layer 目录新增 padding.py 文件
+- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/math.py)paddle/nn/layer目录新增padding.py文件
 - 单测代码，Paddle repo 的 [test/legacy_test](https://github.com/PaddlePaddle/Paddle/tree/develop/test/legacy_test)目录
-- 中文 API 文档，在 docs repo 的 [docs/api/paddle/](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/) 目录
+- 中文API文档，在 docs repo 的 [docs/api/paddle/](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/) 目录
 
-**技术要求：**
+**详细描述(block_diag)：**
 
-- 熟练掌握 python
-- 熟练掌握矩阵操作
-
-### NO.4 为 Paddle 新增 block_diag / block_diag API
-
-**详细描述：**
-
-- 从提供的张量列表中创建一个块对角矩阵,返回一个二维张量，所有输入张量按顺序排列，使得它们的左上角和右下角对角相邻。所有其他元素都被设置为 0
+- 从提供的张量列表中创建一个块对角矩阵,返回一个二维张量，所有输入张量按顺序排列，使得它们的左上角和右下角对角相邻。所有其他元素都被设置为0
 - 调用形式
-  - paddle.block_diag, 作为独立的函数调用
+  - paddle.block_diag , 作为独立的函数调用
 
 **提交内容：**
 
 - API 的设计文档，并提 PR 至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/APIs 目录
-- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/math.py)paddle/tensor/manipulation.py 文件。
+- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/math.py)paddle/tensor/manipulation.py文件。
 - 单测代码，Paddle repo 的 [test/legacy_test](https://github.com/PaddlePaddle/Paddle/tree/develop/test/legacy_test)目录
-- 中文 API 文档，在 docs repo 的 [docs/api/paddle/](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/) 目录
+- 中文API文档，在 docs repo 的 [docs/api/paddle/](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/) 目录
 
 **技术要求：**
 
-- 熟练掌握 c++，了解 Paddle 算子开发流程
-- 熟练掌握 Python
+- 熟练掌握python
+- 熟练掌握矩阵操作
+- 熟练掌握c++，了解 Paddle 算子开发流程
 
-### NO.5 为 Paddle 新增 ormqr API
+### NO.4 为 Paddle 新增 ormqr API
 
 **详细描述：**
 
@@ -135,7 +128,7 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 了解 Paddle 算子开发流程；
 - 熟练掌握 Python；
 
-### NO.6 为 Paddle 新增 Chi2 / LKJCholesky API
+### NO.5 为 Paddle 新增 Chi2 / LKJCholesky API
 
 **详细描述：**
 
@@ -156,7 +149,7 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 熟练掌握 Python
 - 熟悉卡方分布和 LJK 分布。
 
-### NO.7 为 Paddle 新增 MultivariateNormal / StudentT API
+### NO.6 为 Paddle 新增 MultivariateNormal / StudentT API
 
 **详细描述：**
 
@@ -177,7 +170,7 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 熟练掌握 Python
 - 熟悉多变量正态分布和 t 分布。
 
-### NO.8 为 Paddle 新增 PolynomialLR / sinc / sinc\_ API
+### NO.7 为 Paddle 新增 PolynomialLR / sinc / sinc\_ API
 
 **详细描述：**
 
@@ -188,7 +181,7 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 **提交内容：**
 
 - API 的设计文档，并提 PR 至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/APIs 目录
-- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 python/paddle/optimizer/lr.py 中实现 PolynomialDecay 类（注意命名有风格变化）；在 python/paddle/tensor/math.py 中实现 sinc、sinc* API，并在 python/paddle/tensor/init.py 中，添加 sinc、sinc* API，
+- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 python/paddle/optimizer/lr.py 中实现 PolynomialDecay 类（注意命名有风格变化）；在 python/paddle/tensor/math.py 中实现 sinc、sinc\_ API，并在 python/paddle/tensor/init.py 中，添加 sinc、sinc\_ API，
 - 单测代码，在 Paddle repo 的 [test/](https://github.com/PaddlePaddle/Paddle/tree/develop/test)目录
 - 中文 API 文档，在 docs repo 的[docs/api/paddle](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle)目录
 
@@ -197,7 +190,7 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 了解 Paddle 算子开发流程
 - 熟练掌握 Python
 
-### NO.9 为 Paddle 新增 FeatureAlphaDropout API
+### NO.8 为 Paddle 新增 FeatureAlphaDropout API
 
 **详细描述：**
 
@@ -215,7 +208,7 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 了解 Paddle 算子开发流程
 - 熟练掌握 Python
 
-### NO.10 为 Paddle 新增 cartesian_prod API
+### NO.9 为 Paddle 新增 cartesian_prod API
 
 **详细描述：**
 
@@ -233,7 +226,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 了解 Paddle 算子开发流程
 - 熟练掌握 Python
 
-### NO.11 为 Paddle 新增 isposinf / isneginf / isreal / isin API
+### NO.10 为 Paddle 新增 isposinf / isneginf / isreal / isin API
 
 **详细描述：**
 
@@ -254,7 +247,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 了解 Paddle 算子开发流程
 - 熟练掌握 Python
 
-### NO.12 为 Paddle 新增 bernoulli\_ / log_normal\_ / log_normal API
+### NO.11 为 Paddle 新增 bernoulli\_ / log_normal\_ / log_normal API
 
 **详细描述：**
 
@@ -282,7 +275,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 bernoulli / log_normal 函数的计算原理和适用场景；
 - 熟练掌握 C++，Python
 
-### NO.13 为 Paddle 新增 lu_solve API
+### NO.12 为 Paddle 新增 lu_solve API
 
 **详细描述：**
 
@@ -302,7 +295,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 lapack/cublas 库；
 - 熟练掌握 Python。
 
-### NO.14 为 Paddle 新增 RAdam / NAdam API
+### NO.13 为 Paddle 新增 RAdam / NAdam API
 
 **详细描述：**
 
@@ -321,7 +314,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 Adam 系列优化器原理，了解飞桨当前优化器体系实现逻辑；
 - 熟练掌握 Python。
 
-### NO.15 为 Paddle 新增 tensorinv / tensorsolve API
+### NO.14 为 Paddle 新增 tensorinv / tensorsolve API
 
 **详细描述：**
 
@@ -343,7 +336,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 lapack/cublas 库；
 - 熟练掌握 Python。
 
-### NO.16 为 Paddle 新增 ldl_factor / ldl_solve API
+### NO.15 为 Paddle 新增 ldl_factor / ldl_solve API
 
 **详细描述：**
 
@@ -369,15 +362,13 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 
 - 调研时关注 torch.linalg.ldl_factor 和 torch.linalg.ldl_factor_ex
 
-### NO.17 为 Paddle 新增 LPPool1D / LPPool2D API
+### NO.16 为 Paddle 新增 LPPool1D / LPPool2D API
 
-**详细描述：（\*\***第四期的题目，如现在没有 fluid 目录了\***\*）**
+**详细描述：（第四期的题目，如现在没有 fluid 目录了）**
 
 - 用于求解一维的幂平均池化 (power-average pooling)
   - 每个窗口的计算过程：
-    $$
-    f(X) = \sqrt[p]{\sum_{x \in X} x^p}
-    $$
+    $$f(X) = \sqrt[p]{\sum_{x \in X} x^p}$$
     - 当 p=∞ 时等同于最大池化
     - 当 p=1 时等同于累加池化
 - 调用形式
@@ -406,7 +397,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 c++
 - 了解 cuda 编程
 
-### NO.18 为 Paddle 新增 sparse.mask_as API
+### NO.17 为 Paddle 新增 sparse.mask_as API
 
 **详细描述：**
 
@@ -429,7 +420,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉稀疏 Tensor 的 concat 计算逻辑；
 - 熟练掌握 Python、C++、CUDA 代码编写。
 
-### NO.19 为 Paddle 新增 sparse.concat API
+### NO.18 为 Paddle 新增 sparse.concat API
 
 **详细描述：**
 
@@ -450,7 +441,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 稀疏 Tensor 的 concat 计算逻辑；
 - 熟练掌握 Python、C++、CUDA 代码编写。
 
-### NO.20 为 Paddle 新增 sparse.stack API
+### NO.19 为 Paddle 新增 sparse.stack API
 
 **详细描述：**
 
@@ -471,7 +462,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 稀疏 Tensor 的 stack 计算逻辑；
 - 熟练掌握 Python、C++、CUDA 代码编写。
 
-### NO.21 为 Paddle 新增 sparse.nn.Conv2DTranspose / Conv3DTranspose API
+### NO.20 为 Paddle 新增 sparse.nn.Conv2DTranspose / Conv3DTranspose API
 
 **详细描述：**
 
@@ -494,7 +485,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 稀疏 Tensor 的 卷积 计算逻辑；
 - 熟练掌握 Python、C++、CUDA 代码编写。
 
-### NO.22 为 Paddle 新增 sparse.nn.InverseConv2D / InverseConv3D API
+### NO.21 为 Paddle 新增 sparse.nn.InverseConv2D / InverseConv3D API
 
 **详细描述：**
 
@@ -517,7 +508,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 稀疏 Tensor 的 卷积 计算逻辑；
 - 熟练掌握 Python、C++、CUDA 代码编写。
 
-### NO.23 为 Paddle 增强 sparse.add / subtract / multiply / divide API
+### NO.22 为 Paddle 增强 sparse.add / subtract / multiply / divide API
 
 **详细描述：**
 
@@ -548,7 +539,7 @@ paddle.cartesian_prod 作为独立的函数调用，对给定的张量序列进�
 - 熟悉 稀疏 Tensor 的 加减乘除（Sparse [ +-*/ ] Sparse） 计算逻辑；
 - 熟练掌握 Python、C++、CUDA 代码编写，重点掌握 CUDA 代码的编写
 
-### NO.24 为 paddle.nn.functional.embedding/paddle.nn.Embedding 增加参数 max_norm/norm_type/scale_grad_by_freq
+### NO.23 为 paddle.nn.functional.embedding/paddle.nn.Embedding 增加参数 max_norm/norm_type/scale_grad_by_freq
 
 **详细描述：**
 
@@ -568,7 +559,7 @@ torch.nn.functional.embedding 支持 max_norm/norm_type/scale_grad_by_freq 参�
 
 Pytorch 对应 API 参考：torch.nn.functional.embedding/torch.nn.Embedding
 
-### NO.25 为 paddle.nn.LSTM/RNNBase /paddle.quantile/nanquantile 功能增强
+### NO.24 为 paddle.nn.LSTM/RNNBase /paddle.quantile/nanquantile 功能增强
 
 **详细描述：**
 
@@ -600,7 +591,7 @@ Pytorch 对应 API 参考：torch.nn.functional.embedding/torch.nn.Embedding
 
 Pytorch 对应 API 参考：torch.nn.LSTM/torch.nn.RNNBase/torch.quantile/torch.nanquantile
 
-### NO.26 为 paddle.histogram/paddle.nn.functional.threshold 进行功能对齐与功能增强
+### NO.25 为 paddle.histogram/paddle.nn.functional.threshold 进行功能对齐与功能增强
 
 **详细描述：**
 
@@ -630,7 +621,7 @@ Pytorch 对应 API 参考：torch.nn.LSTM/torch.nn.RNNBase/torch.quantile/torch.
 
 Pytorch 对应 API 参考： torch.histogram/torch.nn.functional.threshold
 
-### NO.27 为 paddle.view/paddle.nn.initializer.XavierNormal / XavierUniform / KaimingNormal / KaimingUniform 进行功能增强
+### NO.26 为 paddle.view/paddle.nn.initializer.XavierNormal / XavierUniform / KaimingNormal / KaimingUniform 进行功能增强
 
 **详细描述：**
 
@@ -663,7 +654,7 @@ x.contiguous().view([8, -1])
 
 Pytorch 对应 API 参考： torch.nn.init.xavier_normal\_ / torch.nn.init.xavier_uniform\_ / torch.nn.init.kaiming_normal\_ / torch.nn.init.kaiming_uniform\_
 
-### NO.28 为 paddle.io.RandomSampler/random_split / Layer.clear_gradients 进行功能增强
+### NO.27 为 paddle.io.RandomSampler/random_split / Layer.clear_gradients 进行功能增强
 
 **详细描述：**
 
@@ -687,7 +678,7 @@ Pytorch 对应 API 参考： torch.nn.init.xavier_normal\_ / torch.nn.init.xavie
 
 Pytorch 对应 API 参考： torch.utils.data.RandomSampler/torch.utils.data.random_split/torch.nn.Module.zero_grad
 
-### NO.29 为 paddle.round / paddle.nn.functional.max_pool1d / max_pool2d/max_pool3d 进行功能增强
+### NO.28 为 paddle.round / paddle.nn.functional.max_pool1d / max_pool2d/max_pool3d 进行功能增强
 
 **详细描述：**
 
@@ -710,7 +701,7 @@ Pytorch 对应 API 参考： torch.utils.data.RandomSampler/torch.utils.data.ran
 
 Pytorch 对应 API 参考： torch.round / torch.nn.functional.max_pool1d / max_pool2d / max_pool3d
 
-### NO.30 为 paddle.nn.functional.max_unpool1d / max_unpool2d / max_unpool3d/paddle.nn.functional.kl_div 进行功能增强
+### NO.29 为 paddle.nn.functional.max_unpool1d / max_unpool2d / max_unpool3d/paddle.nn.functional.kl_div 进行功能增强
 
 **详细描述：**
 
@@ -734,7 +725,7 @@ Pytorch 对应 API 参考： torch.round / torch.nn.functional.max_pool1d / max_
 
 Pytorch 对应 API 参考： torch.nn.functional.max_unpool1d / max_unpool2d / max_unpool3d / torch.nn.functional.kl_div
 
-### NO.31 为 paddle.nn.functional.max_pool1d / max_pool2d / max_pool3d / paddle.signal.stft 进行功能增强
+### NO.30 为 paddle.nn.functional.max_pool1d / max_pool2d / max_pool3d / paddle.signal.stft 进行功能增强
 
 **详细描述：**
 
@@ -757,7 +748,7 @@ Pytorch 对应 API 参考： torch.nn.functional.max_unpool1d / max_unpool2d / m
 
 Pytorch 对应 API 参考： torch.nn.functional.max_pool1d / max_pool2d / max_pool3d / torch.stft
 
-### NO.32 paddle Normal 分布支持复数
+### NO.31 paddle Normal 分布支持复数
 
 **详细描述：**
 
@@ -775,7 +766,7 @@ Normal（Gaussian）作为最常见的分布之一，paddle 目前不支持生�
 - 熟悉 Normal 分布的算法原理和适用场景
 - 熟练掌握 Python，c++
 
-### NO.33 paddle Adam 优化器支持复数
+### NO.32 paddle Adam 优化器支持复数
 
 **详细描述：**
 
@@ -796,7 +787,7 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 
 ## 【开源贡献个人挑战赛-分布式】任务详情
 
-### NO.34 支持动态图流水并行设定多个损失函数，并返回多个 loss
+### NO.33 支持动态图流水并行设定多个损失函数，并返回多个 loss
 
 **详细描述：**
 
@@ -819,7 +810,7 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 - [Paddle 流水并行原理介绍及使用方法](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/06_distributed_training/pipeline_parallel_cn.html)
 - [Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM](https://arxiv.org/pdf/2104.04473.pdf)
 
-### NO.35 支持动态图流水并行时返回 micro batch 的 loss
+### NO.34 支持动态图流水并行时返回 micro batch 的 loss
 
 **详细描述：**
 
@@ -842,7 +833,7 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 - [Paddle 流水并行原理介绍及使用方法](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/06_distributed_training/pipeline_parallel_cn.html)
 - [Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM](https://arxiv.org/pdf/2104.04473.pdf)
 
-### NO.36 前向重计算函数在 `use_reentrant == True` 时支持以关键字参数的方式传入 Tensor
+### NO.35 前向重计算函数在 `use_reentrant == True` 时支持以关键字参数的方式传入 Tensor
 
 **详细描述：**
 
