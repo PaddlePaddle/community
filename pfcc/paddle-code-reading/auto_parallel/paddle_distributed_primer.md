@@ -908,12 +908,6 @@ def train_model():
             #loss = paddle.nn.functional.cross_entropy(input=out, label=label)
             loss = model.train_batch([img, label], optimizer)
             avg_loss = paddle.mean(x=loss)
-            #acc_top1 = paddle.metric.accuracy(input=out, label=label, k=1)
-            #acc_top5 = paddle.metric.accuracy(input=out, label=label, k=5)
-
-            #avg_loss.backward()
-            #optimizer.step()
-            #model.clear_gradients()
 
             if batch_id % 5 == 0:
                 print("[Epoch %d, batch %d] loss: %.5f" % (eop, batch_id, avg_loss))
