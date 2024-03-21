@@ -911,9 +911,9 @@ def train_model():
             #acc_top1 = paddle.metric.accuracy(input=out, label=label, k=1)
             #acc_top5 = paddle.metric.accuracy(input=out, label=label, k=5)
 
-            avg_loss.backward()
-            optimizer.step()
-            model.clear_gradients()
+            #avg_loss.backward()
+            #optimizer.step()
+            #model.clear_gradients()
 
             if batch_id % 5 == 0:
                 print("[Epoch %d, batch %d] loss: %.5f" % (eop, batch_id, avg_loss))
