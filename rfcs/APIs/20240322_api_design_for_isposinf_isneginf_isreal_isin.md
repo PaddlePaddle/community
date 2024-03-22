@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2024-03-22 | 
-|版本号 | 此设计文档的版本号，如V1.0 | 
+|版本号 | V1.0 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20240322_api_design_for_isposinf_isneginf_isreal_isin.md<br> | 
 
