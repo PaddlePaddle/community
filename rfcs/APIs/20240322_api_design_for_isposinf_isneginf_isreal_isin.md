@@ -35,6 +35,12 @@ PyTorch 中的 torch.isneginf API文档 (https://pytorch.org/docs/stable/generat
 PyTorch 中的 torch.isreal API文档 (https://pytorch.org/docs/stable/generated/torch.isreal.html#torch-isreal)
 PyTorch 中的 torch.isin API文档 (https://pytorch.org/docs/stable/generated/torch.isin.html#torch-isin)
 
+### Numpy
+Numpy 中的 numpy.isposinf API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isposinf.html)
+Numpy 中的 numpy.isneginf API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isneginf.html)
+Numpy 中的 numpy.isreal API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isreal.html)
+Numpy 中的 numpy.isin API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isin.html)
+
 ### 实现方法
 - isposinf
     - pytorch
