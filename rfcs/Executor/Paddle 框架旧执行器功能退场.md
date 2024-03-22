@@ -3,7 +3,7 @@
 |任务名称|Paddle 框架旧执行器功能退场|
 |------|------|
 |提交作者|@ccsuzzh (张正海)|
-|提交时间|2023-05-01|
+|提交时间|2024-03-22|
 |版本号|v0.1|
 |依赖飞桨版本|develop|
 |文件名| Paddle 框架旧执行器功能退场.md|
@@ -29,7 +29,12 @@
 
 ### ParallelExecutor 执行器
 
-在python/paddle/base/compiler.py中`ExecutionStrategy`、`BuildStrategy`仍然使用的是ParallelExecutor的执行策略和构建策略，在paddle/fluid/pybind/parallel_executor.cc中绑定，涉及到的API 有static.BuildStrategy()、static.ExecutionStrategy()。该执行器相关的python端代码暂时保留（不确定这个两个API是否已经废除）。而ParallelExecutor底层的实现类在paddle/fluid/framework/parallel_executor.cc，而在该执行器中实际调用的也是SSAGraphExecutor，针对不同的构建策略和硬件设备使用了不同的SSAGraphExecutor（其中涉及到的派生相关执行器有：AsyncSSAGraphExecutor、ParallelSSAGraphExecutor、ThreadedSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor），而另一个派生类执行器ScopeBufferedSSAGraphExecutor，也通过DropLocalExeScopes和NeedCreateLocalExeScope API来控制是否使用。
+#### 1、Python端
+在python/paddle/base/compiler.py中`ExecutionStrategy`、`BuildStrategy`仍然使用的是ParallelExecutor的执行策略和构建策略，在paddle/fluid/pybind/parallel_executor.cc中绑定，涉及到的API 有static.BuildStrategy()、static.ExecutionStrategy()。该执行器相关的python端代码暂时保留（不确定这个两个API是否考虑废除）。在目前Executor代码中，已经移除了ParallelExecutor的执行入口，默认就是使用StandaloneExecutor。
+
+#### 2、C++端
+ParallelExecutor底层的实现类在paddle/fluid/framework/parallel_executor.cc，而在该执行器中实际调用的也是SSAGraphExecutor，针对不同的构建策略和硬件设备使用了不同的SSAGraphExecutor（其中涉及到的派生相关执行器有：AsyncSSAGraphExecutor、ParallelSSAGraphExecutor、ThreadedSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor），而另一个派生类执行器ScopeBufferedSSAGraphExecutor，也通过DropLocalExeScopes和NeedCreateLocalExeScope API来控制是否使用。
+
 
 ### SSAGraphExecutor 执行器
 
@@ -39,24 +44,45 @@ SSAGraphExecutor 执行器在paddle/fluid/framework/ssagraph_executor.cc中，�
 
 
 
-### 存量代码`clang-tidy`扫描结果调研
-
 
 
 ## 四、可行性分析与排期计划
 
-Paddle 框架旧执行器功能退场可分为如下几步，安装不同执行器进行：
+Paddle 框架旧执行器功能退场可分为如下几步进行：
 
-### 1.1 移除与执行器相关的 Python 端类
+### 1. 移除旧执行器相关单元测试
+
+执行器类型|相关单元测试文件
+:------:|:------
+ParallelExecutor|cinn_launch_context_test.cc
+ParallelExecutor|share_varinfo_into_cinn_pass_test.cc
+ParallelExecutor|test_reference_count_pass_last_lived_ops.cc
+ParallelExecutor|seresnext_test_base.py
+ParallelExecutor|test_fuse_all_reduce_pass.py
+ParallelExecutor|test_fuse_elewise_add_act_pass.py
+ParallelExecutor|test_fuse_optimizer_pass.py
+ParallelExecutor|test_fuse_relu_depthwise_conv_pass.py
+ParallelExecutor|test_ir_inplace_pass.py
+ParallelExecutor|test_ir_memory_optimize_pass.py
+ParallelExecutor|test_ir_memory_optimize_transformer.py
+ParallelExecutor|test_mix_precision_all_reduce_fuse.py
+ParallelExecutor|test_parallel_executor_run_cinn.py
+ParallelExecutor|test_parallel_executor_seresnext_base_cpu.py
+ParallelExecutor|test_parallel_executor_seresnext_base_gpu.py
+ParallelExecutor|test_parallel_executor_seresnext_with_fuse_all_reduce_cpu.py
+ParallelExecutor|test_parallel_executor_seresnext_with_fuse_all_reduce_gpu.py
+ParallelExecutor|test_parallel_executor_seresnext_with_reduce_cpu.py
+ParallelExecutor|test_parallel_executor_seresnext_with_reduce_gpu.py
+ParallelExecutor|test_parallel_executor_transformer_auto_growth.py
+ParallelExecutor|test_parallel_executor_transformer.py
+ParallelExecutor|test_py_func_op.py
+ParallelExecutor|test_standalone_executor.py
+ParallelExecutor|test_parallel_executor_transformer.py
+
+### 2.1 移除与执行器相关的 Python 端类
 
 
-
-### 1.2 移除与执行器相关的 C++ 端类
-
-
-
-### 2. 移除相关函数和单元测试
-
+### 2.2 移除与执行器相关的 C++ 端类
 
 
 ### 3. 删除CMakeLists.txt中执行器对应编译依赖
@@ -75,11 +101,10 @@ Paddle 框架旧执行器功能退场可分为如下几步，安装不同执行�
 
 - 对用户的影响
 
-  用户对于框架内部代码风格的变动不会有任何感知，不会有任何影响。
+  框架默认使用新的执行器，移除旧执行器不会有任何影响。
 
 - 对 Paddle 框架开发者的影响
-
-  代码风格更加统一，代码更加稳健，副作用是可能造成 `pre-commit` 运行缓慢。
+  架构更加清晰、代码库更加有条理性，为内外部开发者提供更好的二次开发环境。
 
 ## 参考资料
 
