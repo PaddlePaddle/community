@@ -1,6 +1,6 @@
 # paddle.isposinf，paddle.isneginf，paddle.isreal，paddle.isin 设计文档
 
-|API名称 | 新增API名称 | 
+|API名称 | paddle.isposinf /paddle.isneginf /paddle.isreal /paddle.isin | 
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2024-03-22 | 
