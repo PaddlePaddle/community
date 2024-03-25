@@ -3,10 +3,10 @@
 | API名称      | paddle.cartesian_prod                     |
 | ------------ | --------------------------------------- |
 | 提交作者     | NetPunk                                 |
-| 提交时间     | 2023-09-26                              |
+| 提交时间     | 2024-03-21                              |
 | 版本号       | V1.0                                    |
 | 依赖飞桨版本 | develop                                 |
-| 文件名       | 20220926_api_design_for_cartesian_prod.md |
+| 文件名       | 20240321_api_design_for_cartesian_prod.md |
 
 # 一、概述
 
