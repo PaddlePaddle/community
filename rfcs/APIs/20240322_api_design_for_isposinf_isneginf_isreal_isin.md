@@ -476,16 +476,16 @@ paddle.isin
 
 ## API实现方案
 1. paddle.isposinf
-利用 paddle.isinf 与 paddle.signbit 组合实现
+利用 paddle.isinf 与 paddle.signbit 组合实现 **(目前 paddle.signbit 中调用了 Tensor.numpy() 只能用于动态图，若需 paddle.isposinf 也能用于静态图，需要升级 paddle.signbit)**
 
 2. paddle.isneginf
-利用 paddle.isinf 与 paddle.signbit 组合实现
+利用 paddle.isinf 与 paddle.signbit 组合实现 **(目前 paddle.signbit 中调用了 Tensor.numpy() 只能用于动态图，若需 paddle.isposinf 也能用于静态图，需要升级 paddle.signbit)**
 
 3. paddle.isreal
 利用Tensor数据类型判断和 paddle.imag 实现
 
 4. paddle.isin
-参考 pytorch 在 _decompose 中的设计：当test_elements元素个数较少时直接进行暴力搜索，较多时则采取基于排序的算法（利用 flatten，concat，index_put_，searchsorted等API组合实现）。暂时去掉 assume_unique 参数，因为当前 paddle 的 argsort kernel 使用的是 std::sort 的不稳定排序，与 pytorch 和 numpy 的结果就会存在差异。若后期需要加 assume_unique 参数并用 argsort 实现 isin，则需要先实现 stable 的 argsort。
+参考 pytorch 在 _decompose 中的设计：当test_elements元素个数较少时直接进行暴力搜索，较多时则采取基于排序的算法（利用 flatten，concat，index_put_，searchsorted等API组合实现）。暂时去掉 assume_unique 参数，因为**当前 paddle 的 argsort kernel 使用的是 std::sort 的不稳定排序，与 pytorch 和 numpy 的结果就会存在差异。若后期需要加 assume_unique 参数并用 argsort 实现 isin，则需要先实现 stable 的 argsort。**
 
 # 六、测试和验收的考量
 
