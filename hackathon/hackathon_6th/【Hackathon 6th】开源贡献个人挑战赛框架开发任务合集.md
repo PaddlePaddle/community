@@ -170,13 +170,11 @@ AdaptiveLogSoftmaxWithLoss 来源于 [Efficient softmax approximation for GPUs](
 - 熟练掌握 Python
 - 熟悉多变量正态分布和 t 分布。
 
-### NO.7 为 Paddle 新增 PolynomialLR / sinc / sinc\_ API
+### NO.7 为 Paddle 新增 sinc / sinc\_ API
 
 **详细描述：**
 
-内容一：Polynomial 学习率实现，新增 `paddle.optimizer.lr.Polynomial`。
-
-内容二：计算输入的归一化 sinc 函数。需要实现`paddle.sinc、Tensor.sinc`，及对应的 inplace 函数（`paddle.sinc_、Tensor.sinc_`）。
+计算输入的归一化 sinc 函数。需要实现`paddle.sinc、Tensor.sinc`，及对应的 inplace 函数（`paddle.sinc_、Tensor.sinc_`）。
 
 **提交内容：**
 
