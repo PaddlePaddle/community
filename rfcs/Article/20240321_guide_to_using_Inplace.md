@@ -2,7 +2,7 @@
 
 ## 1. 引言
 
-在深度学习领域，框架的选择对模型的训练效率和资源消耗有着直接的影响。PaddlePaddle（飞桨）是一个由百度开发的全面、灵活和高效的深度学习平台。本文旨在介绍和分享 Paddle Inplace 机制的使用指南和学习心得，帮助读者更好地利用这一机制优化内存使用和提升模型训练效率。
+在深度学习领域，框架的选择对模型的训练效率和资源消耗有着直接的影响。PaddlePaddle（飞桨）是一个由百度开发的全面、灵活和高效的深度学习平台。本文旨在介绍和分享 Paddle Inplace 机制的使用指南，帮助读者更好地利用这一机制优化内存使用和提升模型训练效率。
 
 ## 2. Inplace 相关的基本概念
 
@@ -26,11 +26,11 @@ Paddle Inplace 操作通过直接在原地更新数据，减少了显存的占�
 
 ## 3. Inplace 的使用
 
-在了解了 Inplace 操作的基本概念后，我们接下来介绍如何在 PaddlePaddle 中使用 Inplace 操作。PaddlePaddle 提供了一系列支持 Inplace 操作的 API，如 `paddle.add_()`、`paddle.nn.functional.add_` 等。这些 API 的命名规则是在操作名后加下划线，表示该操作是 Inplace 形式的。
+在了解了 Inplace 操作的基本概念后，我们接下来介绍如何在 PaddlePaddle 中使用 Inplace 操作。PaddlePaddle 提供了一系列支持 Inplace 操作的 API，如 `paddle.add_()`、`paddle.nn.functional.relu_` 等。这些 API 的命名规则是在操作名后加下划线，表示该操作是 Inplace 形式的。
 
 ### 3.1 基本数学运算
 
-基本数学运算是深度学习模型中最常用的操作之一。PaddlePaddle 提供了一系列支持 Inplace 形式的数学运算 API，如 `paddle.add_()`、`paddle.sub_()`、`paddle.mul_()`、`paddle.div_()` 等。这些 API 可以直接在原地更新数据，避免了额外的内存分配。
+基本数学运算是深度学习模型中最常用的操作之一。PaddlePaddle 提供了一系列支持 Inplace 形式的数学运算 API，如 `add_()` 、`subtract_` 等。这些 API 可以直接在原地更新数据，避免了额外的内存分配。
 
 ```python
 import paddle
@@ -50,7 +50,7 @@ print(x)
 # Tensor([[-4., -4.], [-4., -4.]])
 ```
 
-使用 Inplace 操作的优势是可以节省内存使用,特别是在处理大型张量时。但需要注意, Inplac e会直接修改原始数据,因此在某些场景下可能会导致数据丢失或错误的计算结果,需要谨慎使用。
+使用 Inplace 操作的优势是可以节省内存使用,特别是在处理大型张量时。但需要注意, Inplace 会直接修改原始数据,因此在某些场景下可能会导致数据丢失或错误的计算结果,需要谨慎使用。
 
 ### 3.2 逐元素操作
 
