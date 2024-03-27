@@ -40,13 +40,22 @@ PaddleScience 套件中有完善的套件模块，比如数据加载、网络架
 
 1. 预训练模型加载
 
-准备 PaddleScience 可用的预训练模型。
+制作 PaddleScience 可用的预训练模型。
 
 2. 数据集加载
 
-在 `ppsci.dataset` 中实现一个新的数据加载类，读取数据集并构建图结构。
-
-
+在 `ppsci.data.dataset` 中实现一个新的数据加载类 `GraphGridMeshDataset`，读取数据集并构建图结构。
+```
+dataloader_cfg = {
+    "dataset": {
+        "name": "GraphGridMeshDataset",
+        "file_path": cfg.DATASET_PATH,
+        "input_keys": ... ,
+        "label_keys": ... ,
+        "alias_dict": ... ,
+    },
+}
+```
 3. 模型构建
 
 在 `ppsci.arc` 中实现 `GraphCastNet` 模型，并用以下形式调用模型。
@@ -94,4 +103,4 @@ solver.predict( ... )
 2024.05.08~2024.05.15 完成案例文档的编写。
 
 ## 7. 影响面
-在`ppsci.dataset` 模块中增加数据加载类，在`ppsci.arch` 模块中增加新模型。
+在`ppsci.data.dataset` 模块中增加数据加载类，在`ppsci.arch` 模块中增加新模型。
