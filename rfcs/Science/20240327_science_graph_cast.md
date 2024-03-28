@@ -1,4 +1,4 @@
-# XPINN 迁移至 PaddleScience
+# GraphCastNet 代码迁移至 PaddleScience
 
 |              |                    |
 | ------------ | -----------------  |
