@@ -10,11 +10,16 @@
 
 ### 2.1 View 形式的操作
 
-在深度学习框架中，view 形式的操作得到的结果变量与原始变量共享数据存储，但拥有不同的元数据（如形状或步长）。这意味着，虽然两个变量在逻辑上是独立的，但它们实际上指向同一块内存区域。View 操作的一个典型例子是改变 Tensor 的形状。通过这种方式，可以在不增加额外内存负担的情况下，灵活地重组数据的维度。
+在深度学习框架中, 一个 Tensor 由两部分组成:元数据(meta data)和数值数据区域(numerical data)。元数据包括数据类型、形状等描述数据的信息, 而数值数据区域则实际存储了数值数据。
+
+进行 View 形式操作时,得到的结果变量与原始变量在Python视角下是两个不同的Tensor对象。但是,新旧Tensor共享相同的数值数据区域。View 操作的一个典型例子是改变 Tensor 的形状。通过这种方式，可以在不增加额外内存负担的情况下，灵活地重组数据的维度。
+
 
 ### 2.2 Inplace 形式的操作
 
-与 view 形式的操作相比，inplace形式的操作进一步深化了对内存的优化。在进行 inplace 操作时，操作直接在原始数据上进行修改，不仅共享数据存储，连元数据也保持不变。换言之，inplace 操作实际上是在原地更新数据，避免了任何额外内存的分配。这种操作对于优化内存使用和加速计算过程尤为重要，因为它消除了不必要的数据复制和内存分配开销。例如，`paddle.add_(a, b)` 就是一个inplace操作，它将 a 和 b 的和直接存储回 a，而不需要为结果分配新的内存空间。
+与 View 形式的操作相比,inplace形式的操作进一步深化了对内存的优化。在进行 inplace 操作时,输入和输出是同一个Tensor对象,它们共享完全相同的元数据(meta data)和数值数据区域(numerical data)。换言之,inplace操作直接在原地修改了Tensor的数值数据,避免了额外内存的分配。这种操作对于优化内存使用和加速计算过程尤为重要，因为它消除了不必要的数据复制和内存分配开销。例如，`paddle.add_(a, b)` 就是一个inplace操作，它将 a 和 b 的和直接存储回 a，而不需要为结果分配新的内存空间。
+
+
 
 ### 2.3 普通的操作
 
@@ -23,6 +28,11 @@
 Paddle Inplace 操作通过直接在原地更新数据，减少了显存的占用，降低了内存分配和数据拷贝的时间开销，从而提高了模型训练的效率。在实际应用中，这一机制尤其对于显存资源有限的场景至关重要，因为它允许更大或更复杂的模型在有限的硬件资源上进行训练。
 
 需要注意的是，虽然 Inplace 操作带来了显著的性能提升，但也需谨慎使用。因为 Inplace 操作会修改原始数据，某些场景下使用可能会导致数据丢失或错误的计算结果。
+
+![picture 0](images/4e95c08593efdbf45c00b112e8baf2cfb2d1c4c0a6c11c1893b5c43ab656eb99.jpg)  
+
+上图中给出了三种不同操作方式有关的内存管理示例。在 View 操作中，新的 Tensor 对象与原始 Tensor 共享相同的数值数据区域。在 Inplace 操作中，输入和输出是同一个 Tensor 对象，它们共享完全相同的数值数据区域。而在普通操作中，操作的输入和输出是完全独立的，需要为结果分配新的内存空间。
+
 
 ## 3. Inplace 的使用
 
@@ -56,7 +66,9 @@ print(x)
 
 该示例中的 `relu_` 是一种逐元素的 Inplace 操作。它对张量中的每个元素应用ReLU激活函数,并直接覆盖原始元素值。
 
-对于像 ReLU 这种简单的元素 wise 操作,使用 Inplace 方式可以避免创建新的临时张量,从而减少内存开销。但同时也要注意,如果原始张量在后续还需要使用,就不应该进行 Inplace 操作。
+对于像 ReLU 这种简单的逐元素(element-wise)操作, 使用 Inplace 方式可以避免创建新的临时张量,从而减少内存开销。但同时也要注意, 如果原始张量在后续还需要使用,就不应该进行 Inplace 操作。
+
+类似 ReLU 操作都是独立对每个元素进行操作, 不涉及元素之间的相互影响, 因此往往可以通过 Inplace 的方式高效计算, 避免创建临时张量。
 
 ```python
 import paddle
@@ -77,22 +89,41 @@ print(x)
 
 ### 3.3 线性代数计算
 
-PaddlePaddle 提供了一系列支持 Inplace 形式的线性代数计算 API，如 `add_()`、`multiply_()` 等。这些 API 可以直接在原地更新数据，避免了额外的内存分配。
+PaddlePaddle 提供了一系列支持 Inplace 形式的线性代数计算 API，如 `transpose_()`、`t_()` 等。这些 API 可以直接在原地更新数据，避免了额外的内存分配。
 
 ```python
 import paddle
 
-# 创建两个张量
-x = paddle.to_tensor([[1, 2], [3, 4]], dtype='float32')
-y = paddle.to_tensor([[5, 6], [7, 8]], dtype='float32')
+# 创建一个3x4的矩阵
+X = paddle.arange(12).reshape([3, 4])
+# Original X:
+# Tensor(shape=[3, 4], dtype=int64, place=Place(cpu), stop_gradient=True,
+#        [[0 , 1 , 2 , 3 ],
+#         [4 , 5 , 6 , 7 ],
+#         [8 , 9 , 10, 11]])
+# Inplace转置
+X.transpose_([1, 0])
+print(f"X after inplace transpose:\n{X}") 
+# X after inplace transpose:
+# Tensor(shape=[4, 3], dtype=int64, place=Place(cpu), stop_gradient=True,
+#        [[0 , 4 , 8 ],
+#         [1 , 5 , 9 ],
+#         [2 , 6 , 10],
+#         [3 , 7 , 11]])
 
-# Inplace矩阵相加
-x.add_(y)
-print(x)
-# Tensor(shape=[2, 2], dtype=float32, place=Place(cpu), stop_gradient=True,
-#        [[6. , 8. ],
-#         [10., 12.]])
+# 与非Inplace对比  
+Y = X.transpose([1, 0])
+print(f"Y after non-inplace transpose:\n{Y}")
+# Y after non-inplace transpose:
+# Tensor(shape=[3, 4], dtype=int64, place=Place(cpu), stop_gradient=True,
+#        [[0 , 1 , 2 , 3 ],
+#         [4 , 5 , 6 , 7 ],
+#         [8 , 9 , 10, 11]])
 ```
+
+`transpose_` 的参数是要交换的两个维度的索引。在这个例子中0表示行维度,1表示列维度,所以transpose_([1, 0])的效果是行列交换,实现矩阵转置。
+
+通过使用 transpose_ 的 Inplace 版本,我们避免了为转置结果分配新的内存空间, 直接在原地修改了X的数据,从而节省了内存使用。
 
 ## 4. Inplace 的实际应用
 
@@ -167,13 +198,9 @@ ValueError: (InvalidArgument) Leaf Var () that doesn't stop gradient can't use i
   [Hint: Expected !autograd_meta->StopGradient() && IsLeafTensor(target) == false, but received !autograd_meta->StopGradient() && IsLeafTensor(target):1 != false:0.] (at /Users/paddle/xly/workspace/f4429c34-48ba-44c2-9571-abaff039446b/Paddle/paddle/fluid/eager/utils.cc:200)
 ```
 
-叶子节点不可使用 Inplace 操作,主要是由于动态图机制下自动微分的计算原理所决定的。
+在Paddle的动态图机制下,叶子节点(Leaf Tensor)指的是整个计算图的输入张量, 通常就是模型的可训练权重或输入数据。
 
-在Paddle的动态图机制下,叶子节点 (Leaf Tensor) 指的是需要计算梯度的输入张量,它们是整个计算图的起点。为了能够正确完成反向传播,Paddle 需要记录叶子节点的数值, 并在前向计算时构建完整的计算图。
-
-如果对叶子节点执行 Inplace 操作,则会直接修改其数值,这就破坏了自动微分所需的初始条件,从而导致梯度计算错误。因此,Paddle 不允许在叶子节点上使用 Inplace 操作。
-
-具体来说,在执行反向传播时,Paddle 会首先基于叶子节点的数据,按照计算图的顺序重放整个前向计算过程,同时利用动态图中保存的中间结果进行梯度计算。如果叶子节点的值在前向计算阶段就被修改了,那么重放前向过程的起点就失真了,导致整个梯度计算出现偏差。
+对于需要计算梯度并更新的权重张量来说, 在梯度计算和应用更新前, 它们必须保持数值不变,以确保计算的准确性。如果说权重在被梯度更新之前就被 inplace 操作修改了，那显然训练得到的权重是不正确的。
 
 为了避免这种情况发生,Paddle 在执行 Inplace 操作前,会先检查当前张量是否为叶子节点。如果是,就会抛出错误,阻止 Inplace 操作的执行。这样可以确保自动微分过程的正确性。
 
