@@ -1,0 +1,49 @@
+{
+  "version": "x.x.x",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "dog",
+      "points": [
+        [
+          10.599999999999994,
+          9.200000000000001
+        ],
+        [
+          73.7,
+          6.499999999999998
+        ],
+        [
+          74.6,
+          70.3
+        ],
+        [
+          10.699999999999996,
+          73.89999999999999
+        ]
+      ],
+      "group_id": null,
+      "shape_type": "polygon",
+      "flags": {}
+    },
+    {
+      "label": "dog",
+      "points": [
+        [
+          10.799999999999997,
+          6.499999999999998
+        ],
+        [
+          75.6,
+          73.69999999999999
+        ]
+      ],
+      "group_id": null,
+      "shape_type": "rectangle",
+      "flags": {}
+    }
+  ],
+  "imagePath": "xxx.jpg",
+  "imageHeight": 75,
+  "imageWidth": 86
+}
