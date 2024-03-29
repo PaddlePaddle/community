@@ -30,16 +30,16 @@
 # 三、业内方案调研
 
 ### PyTorch
-PyTorch 中的 torch.isposinf API文档 (https://pytorch.org/docs/stable/generated/torch.isposinf.html#torch-isposinf)
-PyTorch 中的 torch.isneginf API文档 (https://pytorch.org/docs/stable/generated/torch.isneginf.html#torch-isneginf)
-PyTorch 中的 torch.isreal API文档 (https://pytorch.org/docs/stable/generated/torch.isreal.html#torch-isreal)
-PyTorch 中的 torch.isin API文档 (https://pytorch.org/docs/stable/generated/torch.isin.html#torch-isin)
+- PyTorch 中的 torch.isposinf [API文档](https://pytorch.org/docs/stable/generated/torch.isposinf.html#torch-isposinf)
+- PyTorch 中的 torch.isneginf [API文档](https://pytorch.org/docs/stable/generated/torch.isneginf.html#torch-isneginf)
+- PyTorch 中的 torch.isreal [API文档](https://pytorch.org/docs/stable/generated/torch.isreal.html#torch-isreal)
+- PyTorch 中的 torch.isin [API文档](https://pytorch.org/docs/stable/generated/torch.isin.html#torch-isin)
 
 ### Numpy
-Numpy 中的 numpy.isposinf API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isposinf.html)
-Numpy 中的 numpy.isneginf API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isneginf.html)
-Numpy 中的 numpy.isreal API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isreal.html)
-Numpy 中的 numpy.isin API文档 (https://numpy.org/doc/stable/reference/generated/numpy.isin.html)
+- Numpy 中的 numpy.isposinf [API文档](https://numpy.org/doc/stable/reference/generated/numpy.isposinf.html)
+- Numpy 中的 numpy.isneginf [API文档](https://numpy.org/doc/stable/reference/generated/numpy.isneginf.html)
+- Numpy 中的 numpy.isreal [API文档](https://numpy.org/doc/stable/reference/generated/numpy.isreal.html)
+- Numpy 中的 numpy.isin [API文档](https://numpy.org/doc/stable/reference/generated/numpy.isin.html)
 
 ### 实现方法
 - isposinf
@@ -476,10 +476,10 @@ paddle.isin
 
 ## API实现方案
 1. paddle.isposinf
-利用 paddle.isinf 与 paddle.signbit 组合实现 **(目前 paddle.signbit 中调用了 Tensor.numpy() 只能用于动态图，若需 paddle.isposinf 也能用于静态图，需要升级 paddle.signbit)**
+利用 paddle.isinf 与 paddle.signbit 组合实现。**(目前 paddle.signbit 中调用了 Tensor.numpy() 只能用于动态图，需先升级 paddle.signbit 使其也能用于静态图)**
 
 2. paddle.isneginf
-利用 paddle.isinf 与 paddle.signbit 组合实现 **(目前 paddle.signbit 中调用了 Tensor.numpy() 只能用于动态图，若需 paddle.isposinf 也能用于静态图，需要升级 paddle.signbit)**
+利用 paddle.isinf 与 paddle.signbit 组合实现。**(目前 paddle.signbit 中调用了 Tensor.numpy() 只能用于动态图，需先升级 paddle.signbit 使其也能用于静态图)**
 
 3. paddle.isreal
 利用Tensor数据类型判断和 paddle.imag 实现
@@ -491,11 +491,11 @@ paddle.isin
 
 测试case：
 
-paddle.isposinf，paddle.isneginf，paddle.isin：
+paddle.isposinf，paddle.isneginf
 - 正确性验证：可以与 NumPy 的结果对齐；
   - 不同 shape；
   - 前向计算；
-  - 计算dtype类型：验证 `float64`，`int32`等；
+  - 计算dtype类型：验证 `float32`，`float64`，`int32`，`int64`（paddle.signbit 在 CPU 上的 kernel 没有注册 `float16`）；
 - 不同计算设备：覆盖 CPU 和 GPU 等实现；
 - 错误检查：输入类型异常。
 
@@ -503,7 +503,15 @@ paddle.isreal：
 - 正确性验证：可以与 NumPy 的结果对齐；
   - 不同 shape；
   - 前向计算；
-  - 计算dtype类型：验证 `float64`，`int32`，`complex64`等；
+  - 计算dtype类型：验证 `float16`，`float32`，`float64`，`bool`，`int16`，`int32`，`int64`，`uint16`，`complex64`，`complex128`(paddle.ones_like 支持 `float16`，`float32`，`float64`，`bool`，`int16`，`int32`，`int64`，`uint16`)；
+- 不同计算设备：覆盖 CPU 和 GPU 等实现；
+- 错误检查：输入类型异常。
+
+paddle.isin：
+- 正确性验证：可以与 NumPy 的结果对齐；
+  - 不同 shape；
+  - 前向计算；
+  - 计算dtype类型：验证 `float32`，`float64`，`int32`，`int64`(paddle.searchsorted 支持这些类型)；
 - 不同计算设备：覆盖 CPU 和 GPU 等实现；
 - 错误检查：输入类型异常。
 
