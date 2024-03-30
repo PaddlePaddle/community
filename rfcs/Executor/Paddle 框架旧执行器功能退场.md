@@ -3,7 +3,7 @@
 |任务名称|Paddle 框架旧执行器功能退场|
 |------|------|
 |提交作者|@ccsuzzh (张正海)|
-|提交时间|2024-03-22|
+|提交时间|2024-03-23|
 |版本号|v0.1|
 |依赖飞桨版本|develop|
 |文件名| Paddle 框架旧执行器功能退场.md|
@@ -25,25 +25,24 @@
 
 根据飞桨代码库 `develop` 分支，目前存在如下旧执行器：ParallelExecutor、SSAGraphExecutor（其派生相关执行器：AsyncSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor、ParallelSSAGraphExecutor、ScopeBufferedSSAGraphExecutor、ThreadedSSAGraphExecutor）、AsyncExecutor。
 
-## 三、旧执行器代码分析
+## 三、旧执行器遗留代码分析
 
 ### ParallelExecutor 执行器
 
 #### 1、Python端
-在python/paddle/base/compiler.py中`ExecutionStrategy`、`BuildStrategy`仍然使用的是ParallelExecutor的执行策略和构建策略，在paddle/fluid/pybind/parallel_executor.cc中绑定，涉及到的API 有static.BuildStrategy()、static.ExecutionStrategy()。该执行器相关的python端代码暂时保留（不确定这个两个API是否考虑废除）。在目前Executor代码中，已经移除了ParallelExecutor的执行入口，默认就是使用StandaloneExecutor。
+目前已经移除了相关API，不再对外暴露。但在python/paddle/base/compiler.py中`ExecutionStrategy`、`BuildStrategy`仍然使用的是ParallelExecutor的执行策略和构建策略，在paddle/fluid/pybind/parallel_executor.cc中绑定，涉及到的API 有static.BuildStrategy()、static.ExecutionStrategy()。该执行器相关的python端代码暂时保留（不确定这个两个API是否考虑直接删除，根据[PR53668](https://github.com/PaddlePaddle/Paddle/pull/53668)，未来可能会重构它们去使用StandaloneExecutor)。
 
 #### 2、C++端
-ParallelExecutor底层的实现类在paddle/fluid/framework/parallel_executor.cc，而在该执行器中实际调用的也是SSAGraphExecutor，针对不同的构建策略和硬件设备使用了不同的SSAGraphExecutor（其中涉及到的派生相关执行器有：AsyncSSAGraphExecutor、ParallelSSAGraphExecutor、ThreadedSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor），而另一个派生类执行器ScopeBufferedSSAGraphExecutor，也通过DropLocalExeScopes和NeedCreateLocalExeScope API来控制是否使用。
+ParallelExecutor底层的实现类在paddle/fluid/framework/parallel_executor.cc，而在该执行器中实际调用的也是SSAGraphExecutor，针对不同的构建策略和硬件设备使用了不同的SSAGraphExecutor（其中涉及到的派生相关执行器有：AsyncSSAGraphExecutor、ParallelSSAGraphExecutor、ThreadedSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor），而另一个派生类执行器ScopeBufferedSSAGraphExecutor，也通过DropLocalExeScopes和NeedCreateLocalExeScope函数来控制是否使用。
 
 
 ### SSAGraphExecutor 执行器
 
-SSAGraphExecutor 执行器在paddle/fluid/framework/ssagraph_executor.cc中，其派生类有：AsyncSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor、ParallelSSAGraphExecutor、ScopeBufferedSSAGraphExecutor、ThreadedSSAGraphExecutor。它们作为ParallelExecutor 执行器中核心，并没有暴露到python端，需要与ParallelExecutor 执行器一并移除。
+SSAGraphExecutor 执行器在paddle/fluid/framework/ssagraph_executor.cc中，其派生类有：AsyncSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor、ParallelSSAGraphExecutor、ScopeBufferedSSAGraphExecutor、ThreadedSSAGraphExecutor。它们才是ParallelExecutor 执行器的核心部分，需要与ParallelExecutor 执行器一并移除。
 
 ### AsyncExecutor 执行器
 
-
-
+AsyncExecutor 执行器在Python端的API和单元测试已经删除，所以只需要清理C++端的残留代码。另外，其中涉及到的DataFeedDesc相关类暂时保留。
 
 
 ## 四、可行性分析与排期计划
@@ -79,18 +78,15 @@ ParallelExecutor|test_py_func_op.py
 ParallelExecutor|test_standalone_executor.py
 ParallelExecutor|test_parallel_executor_transformer.py
 
-### 2.1 移除与执行器相关的 Python 端类
+### 2. 移除与执行器相关的 Python 端类和函数
 
+### 3.1 移除与执行器相关的 C++ 端类和函数
 
-### 2.2 移除与执行器相关的 C++ 端类
+### 3.2 移除执行器相关联的模块(如有)
 
+- 移除ParallelExecutor 执行器的`OpHandle`组件
 
-### 3. 删除CMakeLists.txt中执行器对应编译依赖
-
-
-### 4. 移除执行器相关联的模块(如有)
-
-
+### 3.3 删除CMakeLists.txt中执行器对应编译依赖
 
 ## 五、测试和验收的考量
 
