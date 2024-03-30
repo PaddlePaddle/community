@@ -49,6 +49,10 @@ AsyncExecutor 执行器在Python端的API和单元测试已经删除，所以只
 
 Paddle 框架旧执行器功能退场可分为如下几步进行：
 
+- 移除旧执行器在pybind中的绑定，彻底解除python端对旧执行器的依赖，同时屏蔽掉旧执行器相关联的python单元测试，如果实验PR通过CI，则可以进行下一步操作。
+- 移除`CINN`中旧执行器分支的代码，单元测试，`FLAGS_enable_pe_launch_cinn`。（涉及的文件有：share_varinfo_into_cinn_pass.cc、cinn_launch_context_test.cc、cinn_launch_context.cc、cinn_launch_context.h、cinn_launch_op.h、cinn_launch_op_test.cc、cinn_compiler.cc、paddle/common/flags.cc等）
+- 移除旧执行器的底层实现类以及其派生类。
+
 ### 1. 移除旧执行器相关单元测试
 
 执行器类型|相关单元测试文件
@@ -76,7 +80,6 @@ ParallelExecutor|test_parallel_executor_transformer_auto_growth.py
 ParallelExecutor|test_parallel_executor_transformer.py
 ParallelExecutor|test_py_func_op.py
 ParallelExecutor|test_standalone_executor.py
-ParallelExecutor|test_parallel_executor_transformer.py
 
 ### 2. 移除与执行器相关的 Python 端类和函数
 
@@ -106,3 +109,4 @@ ParallelExecutor|test_parallel_executor_transformer.py
 
 1. [飞桨静态图执行流程](https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading/static_graph_execution)
 2. [飞桨全新执行器升级](https://www.paddlepaddle.org.cn/documentation/docs/zh/release_note_cn.html#jingtaituxinzhixingqiquanmianshangxian)
+3. [Paddle 训练框架应用 CINN 进行编译优化加速](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/cinn/paddle2cinn_intro_cn.md)
