@@ -49,47 +49,52 @@ AsyncExecutor 执行器在Python端的API和单元测试已经删除，所以只
 
 Paddle 框架旧执行器功能退场可分为如下几步进行：
 
-- 移除旧执行器在pybind中的绑定，彻底解除python端对旧执行器的依赖，同时屏蔽掉旧执行器相关联的python单元测试，如果实验PR通过CI，则可以进行下一步操作。
-- 移除`CINN`中旧执行器分支的代码，单元测试，`FLAGS_enable_pe_launch_cinn`。（涉及的文件有：share_varinfo_into_cinn_pass.cc、cinn_launch_context_test.cc、cinn_launch_context.cc、cinn_launch_context.h、cinn_launch_op.h、cinn_launch_op_test.cc、cinn_compiler.cc、paddle/common/flags.cc等）
-- 移除旧执行器的底层实现类以及其派生类。
+### 1. 移除 CINN 中旧执行器相关代码
 
-### 1. 移除旧执行器相关单元测试
+目前 CINN 执行器在 Paddle 框架中已经完成迁移，其中涉及旧执行器相关代码全部集中在C++端可以直接退场，主要分为以下几个部分：
 
-执行器类型|相关单元测试文件
-:------:|:------
-ParallelExecutor|cinn_launch_context_test.cc
-ParallelExecutor|share_varinfo_into_cinn_pass_test.cc
-ParallelExecutor|test_reference_count_pass_last_lived_ops.cc
-ParallelExecutor|seresnext_test_base.py
-ParallelExecutor|test_fuse_all_reduce_pass.py
-ParallelExecutor|test_fuse_elewise_add_act_pass.py
-ParallelExecutor|test_fuse_optimizer_pass.py
-ParallelExecutor|test_fuse_relu_depthwise_conv_pass.py
-ParallelExecutor|test_ir_inplace_pass.py
-ParallelExecutor|test_ir_memory_optimize_pass.py
-ParallelExecutor|test_ir_memory_optimize_transformer.py
-ParallelExecutor|test_mix_precision_all_reduce_fuse.py
-ParallelExecutor|test_parallel_executor_run_cinn.py
-ParallelExecutor|test_parallel_executor_seresnext_base_cpu.py
-ParallelExecutor|test_parallel_executor_seresnext_base_gpu.py
-ParallelExecutor|test_parallel_executor_seresnext_with_fuse_all_reduce_cpu.py
-ParallelExecutor|test_parallel_executor_seresnext_with_fuse_all_reduce_gpu.py
-ParallelExecutor|test_parallel_executor_seresnext_with_reduce_cpu.py
-ParallelExecutor|test_parallel_executor_seresnext_with_reduce_gpu.py
-ParallelExecutor|test_parallel_executor_transformer_auto_growth.py
-ParallelExecutor|test_parallel_executor_transformer.py
-ParallelExecutor|test_py_func_op.py
-ParallelExecutor|test_standalone_executor.py
+- 移除旧执行器分支代码
+- 移除share_varinfo_into_cinn_pass
+- 移除旧执行器相关单测代码
+- 移除旧执行器flag：FLAGS_enable_pe_launch_cinn
+- CMakeLists.txt 删除对应编译依赖
 
-### 2. 移除与执行器相关的 Python 端类和函数
+### 2. 移除旧执行器相关 Python 端代码（待细化）
 
-### 3.1 移除与执行器相关的 C++ 端类和函数
+- 移除旧执行器在 pybind 中的绑定，解除python端对旧执行器的依赖(此处有两个API`BuildStrategy`和`CompiledProgram`的去留问题需要研发大哥确认。如果是去除，则移除相关API的代码；如果是保留，则从旧执行器中提出相关的模块进行兼容)
+- 移除旧执行器相关的python单测
 
-### 3.2 移除执行器相关联的模块(如有)
+|相关单元测试统计
+:------
+cinn_launch_context_test.cc
+share_varinfo_into_cinn_pass_test.cc
+test_reference_count_pass_last_lived_ops.cc
+seresnext_test_base.py
+test_fuse_all_reduce_pass.py
+test_fuse_elewise_add_act_pass.py
+test_fuse_optimizer_pass.py
+test_fuse_relu_depthwise_conv_pass.py
+test_ir_inplace_pass.py
+test_ir_memory_optimize_pass.py
+test_ir_memory_optimize_transformer.py
+test_mix_precision_all_reduce_fuse.py
+test_parallel_executor_run_cinn.py
+test_parallel_executor_seresnext_base_cpu.py
+test_parallel_executor_seresnext_base_gpu.py
+test_parallel_executor_seresnext_with_fuse_all_reduce_cpu.py
+test_parallel_executor_seresnext_with_fuse_all_reduce_gpu.py
+test_parallel_executor_seresnext_with_reduce_cpu.py
+test_parallel_executor_seresnext_with_reduce_gpu.py
+test_parallel_executor_transformer_auto_growth.py
+test_parallel_executor_transformer.py
+test_py_func_op.py
+test_standalone_executor.py
 
-- 移除ParallelExecutor 执行器的`OpHandle`组件
+### 3. 移除旧执行器相关 C++ 端代码（待细化）
 
-### 3.3 删除CMakeLists.txt中执行器对应编译依赖
+- 移除`ParallelExecutor`执行器的`OpHandle`组件
+- 移除旧执行器的底层实现类以及其派生类
+- CMakeLists.txt 删除对应编译依赖
 
 ## 五、测试和验收的考量
 
