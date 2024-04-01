@@ -18,9 +18,9 @@
 
 1. 广义时空域分解： XPINN 提供在 $C^0$ 或者更规则的边界上的高度不规则的、凸与非凸的时空域分解。
 
-2. 可扩展到任意的微分方程：基于 XPINN 的方法的域分解方法可以扩展到任何类型的偏微分方程。
+2. 可扩展到任意的微分方程：基于 XPINN 方法的域分解方法可以扩展到任何类型的偏微分方程。
 
-3. 简单的界面条件：XPINN可以轻松扩展到任何复杂的几何形状，以及更高的维度上。
+3. 简单的界面条件：XPINN 可以轻松扩展到任何复杂的几何形状，以及更高的维度上。
 
 ### 1.2 功能目标
 
@@ -38,7 +38,7 @@ PaddleScience 套件中有完善的套件模块，比如数据加载、网络架
 
 [PR 535](https://github.com/PaddlePaddle/community/pull/535) 使用 Paddle 复现了 XPINN 案例，本次任务将在此基础上，使用 PaddleScience API 实现把 XPINN 案例，总体难度不大。
 
-可能存在的难点是 XPINN 模型代码需要做较多修改才能接入 PaddleScience 模型架构中。
+可能存在的难点是 XPINN 算法的实现。
 
 ## 4. 设计思路与实现方案
 
@@ -51,7 +51,6 @@ $$ \Delta u = f(x, y), x,y \in \Omega \subset R^2$$
 $$ r =1.5+0.14 sin(4θ)+0.12 cos(6θ)+0.09 cos(5θ) $$
 
 上述区域被分为三个不规则的、非凸的子域训练求解，数据集中包含三个子域的数据点。
-
 
 1. 数据集加载
 
@@ -71,11 +70,7 @@ train_dataloader_cfg = {
 
 2. 模型构建
 
-在 `ppsci.arc` 中实现 `XPINN` 模型，并用以下形式调用模型。
-
-```python
-model = ppsci.arch.XPINN
-```
+参考原案例，实现神经网络模型。
 
 3. 参数和超参数设定
 
@@ -84,13 +79,14 @@ model = ppsci.arch.XPINN
 4. 优化器构建
 
 优化器使用 Adam 优化器。
+
 ```python
 optimizer = ppsci.optimizer.Adam(cfg.TRAIN.learning_rate)(model)
 ```
 
 5. 约束构建
 
-使用监督约束 `SupervisedConstraint` 构建约束，损失函数需要自行定义。
+使用监督约束 `SupervisedConstraint` 构建约束，损失函数需要自行定义。实现 XPINN 算法，在损失函数中调用计算损失。
 
 ```python
 sup_constraint = ppsci.constraint.SupervisedConstraint(
@@ -104,6 +100,7 @@ constraint = {sup_constraint.name: sup_constraint}
 6. 评估器构建
 
 评价指标 metric 为 L2 正则化函数。
+
 ```python
 sup_validator = ppsci.validate.SupervisedValidator(
     eval_dataloader_cfg,
@@ -133,9 +130,9 @@ solver.eval()
 
 实验复现精度与 paddle 一致：
 
-|	  |	paddle|
+|   | paddle|
 |---|---|
-|Test Loss	| 2.138322e-01 |
+|Test Loss | 2.138322e-01 |
 
 ## 6. 可行性分析和排期规划
 
@@ -145,4 +142,4 @@ solver.eval()
 
 ## 7. 影响面
 
-在`ppsci.arch` 模块中增加新模型。
+无
