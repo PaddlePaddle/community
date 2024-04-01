@@ -154,7 +154,7 @@ print(c)
 #  [16 17 18 19]
 #  [20 21 22 23]]
 
-# 先选取第二个2x3子张量,再在次内部选取第一维度为0的元素
+# 在子张量 a[1,:,:] 的基础上, 选取第一维度为 0 的所有元素。
 d = a[1,...,0]  
 print(d)
 # Tensor Output: [12 16 20]
@@ -212,6 +212,8 @@ print(c)
 # Tensor Output:
 # [[[0, 1, 2]], 
 #  [[3, 4, 5]]]
+print(c.shape)
+# [2, 1, 3]
 
 # 同时在多个位置增加大小为1的维度
 d = a[None, :, None, :]
@@ -219,6 +221,8 @@ print(d)
 # Tensor Output: 
 # [[[[0, 1, 2]],
 #   [[3, 4, 5]]]]
+print(d.shape)
+# [1, 2, 1, 3] 
 
 # None和np.newaxis是等价的
 e = a[np.newaxis, :, np.newaxis, :]
@@ -256,6 +260,10 @@ print(h)
 None 索引操作为处理不同形状的 Tensor 数据提供了很大的方便,能够灵活地对 Tensor 的维度进行调整, 使之满足后续计算的需求, 非常实用。
 
 > 注意：在动态图模式下，通过基础索引取值时，输出将是原 Tensor 的 view，即如果对输出 Tensor 再进行修改，会影响原 Tensor 的值。而在静态图模式下，输出是一个新的 Tensor。由于在两种模式下存在差异，请谨慎使用这个特性。
+> 
+> 下图给出了 View 的示意图。一个 Tensor 由元数据（meta data）和数据组成，View 操作下的输入 Tensor 和输出 Tensor 共享数值数据。
+
+![picture 0](images/348bea9b76cf5dc89bfc4bb9e62d39b6b16cc8e5c49c62bf2532b0fe336515d6.jpg)  
 
 
 ## 4. 高级索引
@@ -264,7 +272,7 @@ None 索引操作为处理不同形状的 Tensor 数据提供了很大的方便,
 
 ### 4.1 使用整数数组索引
 
-整形数组索引允许使用非0维的Tensor/Ndarray或Python List对另一个Tensor进行索引。它支持任意选择Tensor中的元素并重新组合,非常灵活。
+整形数组索引允许使用非0-size的Tensor/Ndarray或Python List对另一个Tensor进行索引。它支持任意选择Tensor中的元素并重新组合,非常灵活。
 
 ```python
 a = paddle.arange(8).reshape((4,2))
@@ -295,7 +303,7 @@ f = a[[0,2,1], [0]]  # 在不同轴使用不同的整形数组索引
 
 1. 当索引为布尔型的Tensor/Ndarray/List时:
     - 索引的rank必须小于或等于被索引Tensor的rank
-    - 引的每一维度大小必须与被索引Tensor对应维度相同
+    - 索引的每一维度大小必须与被索引Tensor对应维度相同
 
 ```python 
 a = paddle.arange(8).reshape((4,2))
@@ -326,7 +334,7 @@ print(d)
 #   [4, 5], 
 #   [6, 7]]]
 
-e = a[False]  # 无元素被选取,返回0维Shape Tensor  
+e = a[False]  # 无元素被选取,返回0-size Tensor  
 print(e)
 # Tensor Output: []
 ```
@@ -340,12 +348,12 @@ print(d)
 #   [4, 5], 
 #   [6, 7]]]
 
-e = a[False]  # 无元素被选取,返回0维Shape Tensor  
+e = a[False]  # 无元素被选取,返回0-size Tensor  
 print(e)
 # Tensor Output: []
 ```
 
-需要注意的是,如果在布尔索引过程中没有任何元素被选中,输出将是一个 0 维 Shape Tensor,不包含具体数据。
+需要注意的是,如果在布尔索引过程中没有任何元素被选中,输出将是一个 0-size Tensor,不包含具体数据。
 
 布尔索引为数据选取提供了方便的掩码功能,能精确选取满足条件的元素。通过合理构造掩码 Tensor/列表,可以高效完成一些数据过滤、子集采样等任务。
 
@@ -381,6 +389,8 @@ print(c)
 # Tensor Output: [[[4, 5, 6, 7],
 #                  [8, 9,10,11], 
 #                 [12,13,14,15]]]
+print(c.shape)
+# [2, 3, 4]
 
 # 高级索引不相邻,新维度将在最外层
 d = a[:,[1],:,[2,1,0]]
@@ -388,6 +398,8 @@ print(d)
 # Tensor Output: [[[14,18,22]],
 #                 [[13,17,21]],
 #                 [[12,16,20]]]
+print(d.shape)
+# [3, 1, 3]
 ```
 
 可见, 联合索引极大拓展了张量索引的能力和表现力, 能够高效完成对高维数据的复杂选取操作, 是数据处理和模型开发中一种非常强大的工具。
@@ -398,12 +410,12 @@ print(d)
 
 索引赋值是指在索引操作中,将一个值或一个数组赋值给被选取的元素。这种操作可以用于更新部分数据,填充缺失值,或者实现一些特定的数据处理需求。
 
-前面介绍的基础索引和高级索引都支持索引赋值操作, 只需要在索引表达式的右侧赋值即可。
+前面介绍的基础索引、高级索引和联合索引都支持索引赋值操作, 只需要在索引表达式的右侧赋值即可。
 
 ```python 
 a = paddle.ones((2,3,4))
 a[:,:,2] = 10  # value是Python标量
-a[:,:,1] = paddle.full([], 2) # value是0维标量Tensor  
+a[:,:,1] = paddle.full([], 2) # value是0-size Tensor  
 a[:,:,3] = paddle.full([2,1], 5) # value是形状为[2,1]的Tensor,可广播到[2,3]
 print(a)
 # Tensor(shape=[2, 3, 4], dtype=float32, place=Place(cpu), stop_gradient=True,
@@ -445,6 +457,47 @@ with paddle.static.program_guard(paddle.static.Program()):
 #   [ 1.  1.  1.  1.]]]
 ```
 
+对于复杂的索引赋值操作, 比如 `:` 或者多个维度的索引, 我们需要结合 `slice` 和 `paddle.static.setitem` 来实现。
+
+```python
+with paddle.static.program_guard(paddle.static.Program()):
+    a = paddle.ones((2, 3, 4), dtype='float32')
+    # a[:, 1, 2] = 10
+    b = paddle.static.setitem(a, (slice(None), 1, 2), 10)
+
+    cpu = paddle.static.cpu_places(1)
+    exe = paddle.static.Executor(cpu[0])
+    exe.run(paddle.static.default_startup_program())
+    outs = exe.run(fetch_list=[b])
+    print(outs[0])
+# [[[ 1.  1.  1.  1.]
+#   [ 1.  1. 10.  1.]
+#   [ 1.  1.  1.  1.]]
+
+#  [[ 1.  1.  1.  1.]
+#   [ 1.  1. 10.  1.]
+#   [ 1.  1.  1.  1.]]]
+
+with paddle.static.program_guard(paddle.static.Program()):
+    a = paddle.ones((2, 3, 4), dtype='float32')
+    # a[0, 1, 1:3] = 10
+    b = paddle.static.setitem(a, (0, 1, slice(1, 3)), 10)
+
+    cpu = paddle.static.cpu_places(1)
+    exe = paddle.static.Executor(cpu[0])
+    exe.run(paddle.static.default_startup_program())
+    outs = exe.run(fetch_list=[b])
+    print(outs[0])
+# [[[ 1.  1.  1.  1.]
+#   [ 1. 10. 10.  1.]
+#   [ 1.  1.  1.  1.]]
+
+#  [[ 1.  1.  1.  1.]
+#   [ 1.  1.  1.  1.]
+#   [ 1.  1.  1.  1.]]]
+```
+
+
 ### 5.3 不同数据类型的处理
 
 如果赋值的 value 和 x 数据类型不同, 赋值操作将采用x的数据类型。所以当 value 类型位数较高时, 可能会导致数据截断。 实际使用中应当避免这种情况。
@@ -475,7 +528,7 @@ print(a)
 在 Paddle 中, 索引操作是可以自动求导的, 系统会根据索引操作的输入输出自动计算出正确的梯度。 具体来说,对于一个形状为 (M, N) 的 Tensor a, 执行索引 b = a[index], 其中 index 的形状为 (X, Y), 则反向传播时会有以下规则:
 
 1. 前向传播 假设 a 对应前向输出为 Out,则有: Out.shape = (X, Y, N) 其中, Out[i,j,:] 就是 a[index[i,j]] 的值。
-2.反向传播 假设 Out 对应的梯度为 dOut, 下面的代码可以表达这个过程： 
+2. 反向传播 假设 Out 对应的梯度为 dOut, 下面的代码可以表达这个过程： 
 
 ```
 da = paddle.zeros_like(a) # 初始化 a 的梯度为 0 
@@ -553,8 +606,9 @@ pred_classes = outputs['class']
 # 选择置信度较高的边界框
 confidence_threshold = 0.8
 selected_indices = paddle.nonzero(pred_scores > confidence_threshold)
-selected_boxes = paddle.index_select(pred_boxes, selected_indices)
-selected_classes = paddle.index_select(pred_classes, selected_indices)
+selected_indices = paddle.squeeze(selected_indices, axis=1)
+selected_boxes = pred_boxes[selected_indices]
+selected_classes = pred_classes[selected_indices]
 
 # 输出感兴趣区域的边界框和类别信息
 print("Selected Boxes:", selected_boxes)
@@ -590,13 +644,55 @@ print("Selected Classes:", selected_classes)
 
 在上述示例中，我们首先模拟了一个目标检测模型的输出，包括边界框、得分和类别信息。然后，我们根据置信度阈值选择置信度较高的边界框，并提取对应的类别信息。这里使用了索引操作，非常方便地实现了感兴趣区域的提取。这是目标检测任务中索引操作的一个典型应用。
 
+### 7.3 NLP 中的索引应用
+
+最近大模型如 GPT、Llama 等模型的出现，使得 NLP 领域的自然语言处理任务取得了巨大的进展。在 NLP 中，索引操作也是非常常见的。
+
+假设我们在使用 Llama 模型进行序列到序列的任务，例如机器翻译或文本摘要。 在这种情况下，输入数据的长度会有很大变化，而我们需要动态地根据每个输入的特征选择或变换 Tensor。同时，为了效率，我们可能需要在一个批次内处理多个这样的输入。
+
+在处理不同长度的序列时，一个常见的问题是如何构造一个统一的批次来最小化填充，因为过多的填充可能会影响模型的性能。一个高级技巧是使用动态索引和masking来只处理序列的有效部分，从而避免无关数据的干扰。
+
+考虑一个场景，我们需要从一批文本中选择那些包含特定关键词的句子，并将它们作为 LLama 模型的输入。同时，我们可能需要根据模型的输出对数据进行进一步的切片和筛选。
+
+```python
+import paddle
+import paddle.nn.functional as F
+
+# 假设data_tensor包含了一个批次的句子编码，shape为[batch_size, seq_length, feature_dim]
+# lengths_tensor包含了每个句子的实际长度
+batch_size, seq_length, feature_dim = 32, 100, 768
+data_tensor = paddle.randn((batch_size, seq_length, feature_dim))
+lengths_tensor = paddle.randint(low=10, high=100, shape=[batch_size])
+
+# 动态创建mask，标记每个句子的有效部分
+seq_range = paddle.arange(seq_length)
+mask = seq_range < lengths_tensor.unsqueeze(-1)  # Broadcasting来创建mask
+
+# 应用mask过滤无效部分，先将无效部分设置为0或者其他标记值
+masked_data = paddle.where(mask.unsqueeze(-1), data_tensor, paddle.to_tensor(0.))
+
+# 假设我们只处理长度大于某个值的数据
+threshold = 50
+long_seq_indices = paddle.nonzero(lengths_tensor > threshold).flatten()
+
+# 选择长度大于threshold的序列
+selected_data = masked_data[long_seq_indices]
+
+# 对选中的数据进行处理，比如计算平均特征值
+selected_data_mean = paddle.mean(selected_data, axis=1)
+
+print(selected_data_mean.shape)  # 结果形状应该是 [满足条件的batch_size, feature_dim]
+```
+
+上面的代码很好的展示了如何使用索引操作处理 NLP 中的序列数据。我们首先根据每个句子的实际长度创建一个 mask，然后使用 mask 过滤无效部分。接着，我们根据长度阈值选择满足条件的句子，并对这些句子进行进一步的处理。这种索引操作非常灵活，可以帮助我们高效地处理不同长度的序列数据。
+
 ## 8. 学习心得
 
-索引操作是深度学习中非常重要的一部分，它可以帮助我们高效地处理和操作数据。个人认为，索引操作对于初学者来说是一个比较难以理解的概念，因为它涉及到很多细节和技巧。特别是在处理高纬度数据时，我们要清楚每个纬度的含义。比如一个四纬的图像张量 [B, C, H, W]。B 代表 batch size，C 代表 channel，H 代表 height，W 代表 width。如果对第一个纬度取索引 0，那就是取出第一个 batch 的数据。如果对第二个纬度取索引 0，那就是取出第一个 channel 的数据。同时对第一个和第二个纬度取索引 [0, 0]，那就是取出第一个 batch 的第一个 channel 的数据。这样一层一层的索引下去，我们就可以取出我们想要的数据。我们也可以结合空间来进行理解，比如一个二维的张量就是一个平面，三维的张量就是一个立方体，四维的张量就是一个立方体的堆叠。这样我们就可以更好的理解索引操作。纸上得来终觉浅，绝知此事要躬行。学习索引操作，最重要的是多动手实践，多写代码，写多了就会熟练了。
+索引操作是深度学习中非常重要的一部分，它可以帮助我们高效地处理和操作数据。个人认为，索引操作对于初学者来说是一个比较难以理解的概念，因为它涉及到很多细节和技巧。特别是在处理高维度数据时，我们要清楚每个维度的含义。比如一个四纬的图像张量 [B, C, H, W]。B 代表 batch size，C 代表 channel，H 代表 height，W 代表 width。如果对第一个维度取索引 0，那就是取出第一个 batch 的数据。如果对第二个维度取索引 0，那就是取出第一个 channel 的数据。同时对第一个和第二个维度取索引 [0, 0]，那就是取出第一个 batch 的第一个 channel 的数据。这样一层一层的索引下去，我们就可以取出我们想要的数据。我们也可以结合空间来进行理解，比如一个二维的张量就是一个平面，三维的张量就是一个立方体，四维的张量就是一个立方体的堆叠。这样我们就可以更好的理解索引操作。纸上得来终觉浅，绝知此事要躬行。学习索引操作，最重要的是多动手实践，多写代码，写多了就会熟练了。
 
 ## 9. 总结
 
-索引操作是深度学习中非常重要的一部分，它可以帮助我们高效地处理和操作数据。本文从基础索引、高级索引、索引赋值、索引的梯度传播等方面介绍了索引操作的基本概念和使用方法，并结合实际案例展示了索引在不同领域的应用。希本本文的内容能够帮助大家更好地理解和使用索引操作，提高数据处理和模型开发的效率。
+索引操作是深度学习中非常重要的一部分，它可以帮助我们高效地处理和操作数据。本文从基础索引、高级索引、索引赋值、索引的梯度传播等方面介绍了索引操作的基本概念和使用方法，并结合实际案例展示了索引在不同领域的应用。希望本文的内容能够帮助大家更好地理解和使用索引操作，提高数据处理和模型开发的效率。
 
 ## 参考文献
 
