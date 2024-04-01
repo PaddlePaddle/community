@@ -682,6 +682,7 @@ selected_data = masked_data[long_seq_indices]
 selected_data_mean = paddle.mean(selected_data, axis=1)
 
 print(selected_data_mean.shape)  # 结果形状应该是 [满足条件的batch_size, feature_dim]
+# [18, 768]
 ```
 
 上面的代码很好的展示了如何使用索引操作处理 NLP 中的序列数据。我们首先根据每个句子的实际长度创建一个 mask，然后使用 mask 过滤无效部分。接着，我们根据长度阈值选择满足条件的句子，并对这些句子进行进一步的处理。这种索引操作非常灵活，可以帮助我们高效地处理不同长度的序列数据。
