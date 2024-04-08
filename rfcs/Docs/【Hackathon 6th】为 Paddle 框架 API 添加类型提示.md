@@ -18,13 +18,13 @@ Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep
 
 ## 2、功能目标
 
-正确完成 Paddle 开放 API 的类型标注，但不做 Paddle 类型标注的完备性说明。
+正确完成 Paddle 开放 API 的类型标注，但不声明 Paddle 类型标注的完备性。
 
 > **说明**： 类型标注是个循序渐进的过程，且存在较多私有 API 与 c++ 接口，此次任务无法保证完成以上所有接口的类型标注，故此，不做 Paddle 类型标注的完备性说明。
 
 ### 2.1 typing 模块
 
-为 Paddle 添加 `typing` 模块，并作为开放 API 的一部分。
+此目标为 Paddle 添加 `typing` 模块，并作为开放 API 的一部分。
 
 功能特性类似：
 
@@ -41,13 +41,13 @@ Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep
 
 ### 2.2 开放 API 的类型标注
 
-比目标需要：
+此目标需要：
 
 - 对现存 Paddle 代码的开放 API 进行类型标注。
 
     Paddle 目前开放 API 有 1500 个左右，需要分批次对其进行类型标注。可以参考 [paddlepaddle-stubs Roadmap](https://github.com/orgs/cattidea/projects/3/views/1) ，将 API 分为 `P1 ～ P5` 多个等级分批完成。
 
-- 修改或对齐 API 中 docstring 的类型说明，与实际的标注类型。
+- 修改或对齐 API 中 docstring 的类型说明，与实际的标注类型一致。
 
 此目标的完成，应保证主流 IDE，如 vscode，的类型提示功能可以正常使用。
 
@@ -58,11 +58,11 @@ Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep
 
 此目标 **不涉及** ：
 
-- 添加类型检查测试用例(`typing` 模块除外)
+- 添加 API 的类型检查测试用例 (`typing` 模块除外)
 
 ### 2.3 CI 流水线
 
-更新 CI 流水线，对以下代码进行类型检查：
+此目标需要更新 CI 流水线，对以下代码进行类型检查：
 
 - `typing` 模块的测试用例
 - 旧/新 API 的示例代码
@@ -70,20 +70,26 @@ Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep
 
 此目标 **涉及**：
 
-- 静态类型检查 (`staic type checking`)。使用工具 [mypy](https://mypy.readthedocs.io/en/stable/)
+- 静态类型检查 (`staic type checking`)。使用工具 [mypy](https://mypy.readthedocs.io/en/stable/) 。
 
 此目标 **不涉及** ：
 
-- 运行时类型检查 (`runtime type checking`)，如工具 [beartype](https://beartype.readthedocs.io/en/latest/)
+- 运行时类型检查 (`runtime type checking`)，如工具 [beartype](https://beartype.readthedocs.io/en/latest/) 。
 - 整个 Paddle 包的类型检查。
 
 ### 2.4 文档建设
 
-在 Paddle 的 `docs` 中添加 `typing` 模块的中英文文档。
+此目标需要：
 
-在 Paddle 的 `docs` 中添加文档 `《Paddle 中的类型提示》` 。用以帮助 Paddle 的开发者，正确标注 API 中的类型；使用 Paddle 的开发者，正确使用 `typing` 模块。
+- 在 Paddle 的 `docs` 中添加 `typing` 模块的中英文文档。
 
-在 Paddle 的 `docs` 中添加文档 `《Paddle 类型提示 Q&A》` ，并不断更新。类型标注在具体操作过程中难免产生各类问题 (参考 [Static types in Python, oh my(py)!
+- 在 Paddle 的 `docs` 中添加文档 `《Paddle 中的类型提示》` 。
+  
+  用以帮助 Paddle 的开发者，正确标注 API 中的类型；使用 Paddle 的开发者，正确使用 `typing` 模块。
+
+- 在 Paddle 的 `docs` 中添加文档 `《Paddle 类型提示 Q&A》` ，并不断更新。
+  
+  类型标注在具体操作过程中难免产生各类问题 (参考 [Static types in Python, oh my(py)!
 ](https://blog.zulip.com/2016/10/13/static-types-in-python-oh-mypy/)，mypy 的各类 issue 促成了其早期发展)，《Q&A》可以方便的帮助开发者定位问题。
 
 ### 2.5 后续任务
@@ -122,7 +128,7 @@ Paddle 目前没有 `Type Hints` 功能，但是存在第三方的尝试，如�
 
 - `type annotation`
 
-  `类型标注`，常与 `type hint` 混用，也可作为 `动词` 专门指代标注类型这个动作。
+  `类型标注`，常与 `type hint` 混用，也可作为 `动词` 专门指代 `标注类型` 这个动作。
 
 - `type checking`
 
@@ -153,7 +159,7 @@ Paddle 目前没有 `Type Hints` 功能，但是存在第三方的尝试，如�
 
   - 底层支撑接口
   - 上层开放接口
-  - 开发者的使用
+  - 开发者使用接口
 
   对于 `pure python` 的包，以上三者通常都是使用 Pyhton 完成开发的，因此，可以方便的使用工具进行类型检查。
 
@@ -174,12 +180,14 @@ Paddle 目前没有 `Type Hints` 功能，但是存在第三方的尝试，如�
 
   进而，深度学习框架对于数据的 `shape`，`dtype` 关注要远多与其他类型的软件，并且部分信息需要在代码运行过程中获取，而 Python 对于 `shape`，`dtype` 等的类型检查支持不够完善，如 [PEP 646 – Variadic Generics](https://peps.python.org/pep-0646/) 仍然处于 `accepted; may not be implemented yet` 的状态，也就催生了诸如 `nptyping`, `jaxtyping` 此类第三方工具的开发与使用。
 
-最后，本方案采用 `Inline type annotation + Stub files in package` 的方式，类似 PyTorch 的实现方式。基本原则为：
+因此，此次任务不涉及整个 Paddle 包的类型检查，不涉及动态类型检查，不声明 Paddle 具有类型检查的完备性。
+
+最后，本方案采用 `Inline type annotation + Stub files in package` 的方式，类似 PyTorch 的实现方案。基本原则为：
 
 - 非 Python 接口，提供 `stub` 标注文件
-- Python 接口，使用 `inline` 方式
+- Python 接口，使用 `inline` 方式标注
 
-> **说明** 竞品分析等内容，[Type Hinting for Tensor of Paddle](https://github.com/jiamingkong/community/blob/4bde11a8a861c8aae4bdb1284579e00d4799f7b9/rfcs/type-hinting/type_hinting_for_paddle_tensor.md) 已有较详细的阐述，本文不再赘述。
+> **说明** 竞品分析与实现方案等内容，[Type Hinting for Tensor of Paddle](https://github.com/jiamingkong/community/blob/4bde11a8a861c8aae4bdb1284579e00d4799f7b9/rfcs/type-hinting/type_hinting_for_paddle_tensor.md) 已有较详细的阐述，本文不再赘述。
 
 ## 1、总揽
   
@@ -213,27 +221,27 @@ Paddle 的类型标注体系，由底层而上，可以划分为：
   - Paddle 中引入 `Paddle/python/paddle/__init__.pyi` 和 `Paddle/python/paddle/py.typed` 文件，作为 `paddle.Tensor` 的类型 `stub` 。
     此阶段可以只做文件的引入，后续完善接口和文档。
   - Paddle docs 中添加文档 `《Paddle 中的类型提示》` 。
-  - Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例文件` 的类型检查。
+  - Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例代码` 的类型检查。
 
-- **第二阶段**，接口的类型标注，以及 Paddle 的 docs 中文档《Paddle 类型提示 Q&A》
+- **第二阶段**，开放接口的类型标注
 
   此阶段承担了 Paddle 类型标注的主要工作，需要开源社区的广泛参与共同完成。
 
   此阶段的工作及输出件：
 
-  - 完成标注的开放 API 。
+  - 完成开放 API 的类型标注。
   - Paddle docs 中添加并不断完善文档 `《Paddle 类型提示 Q&A》` 。
 
 - **第三阶段**，CI 中引入对于单元测试文件的类型检查
   
   在上述第二阶段中，并未引入类型标注的 `单元测试`，这是出于以下考虑：
 
-  - 类型标注工作量太大，如果再引入 `单元测试`，不具备短期完成的条件。
-  - 目前 Paddle 的接口都有单元测试文件，单元测试本应对于接口的类型做完备测试，因此，通过静态检查这些单元测试文件，即可达到类型检测的目的。
+  - 类型标注工作量太大，如果再引入 `单元测试`，不具备开源社区协作与短期完成的条件。
+  - 目前 Paddle 的接口都有单元测试文件，单元测试本身应对于接口的类型做完备测试，因此，通过静态检查这些单元测试文件，即可达到类型检测的目的。
 
-  但是，由于第二阶段中的类型检查只针对 `示例代码`，难免出现毗漏，因此，此阶段在 CI 中引入单元测试文件的类型检查后，需要跟踪并修改其中错误。
+  但是，由于第二阶段中的类型检查只针对 `示例代码`，难免在此出现毗漏，因此，此阶段在 CI 中引入单元测试文件的类型检查后，需要跟踪并修改其中错误。
 
-  另外，`示例代码` 的类型检查，与 `单元测试` 的类型检查，(可能) 需要制定不同的 `mypy` 配置文件。
+  另外，`示例代码` 的类型检查，与 `单元测试` 的类型检查，需要制定不同的 `mypy` 配置文件。
 
   此阶段的输出件：
 
@@ -268,10 +276,12 @@ Python 软件包在进行类型标注的过程中，通常会使用到一些相�
 
 实现路径 `Paddle/python/paddle/typing/__init__.py`。
 
-由于 `类型` 仅相当于 Python 中的一种特殊变量，因此，需要单独为其提供 docstring。具体实现方式可参考 Numpy 的：
+由于 `类型` 相当于 Python 中的一种特殊变量，因此，需要单独为其提供 docstring。具体实现方式可参考 Numpy 的：
 
 - `/numpy/_typing`
 - `/numpy/typing/__init__.py`
+
+Paddle 的 docs 中需要能够正确渲染 `typing` 模块的中英文文档。
 
 #### 2.1.3 `typing` 模块测试用例
   
@@ -298,7 +308,7 @@ Python 软件包在进行类型标注的过程中，通常会使用到一些相�
 
 本方案采用 `Inline type annotation + Stub files in package` 的方式，不同于 [Type Hinting for Tensor of Paddle](https://github.com/jiamingkong/community/blob/4bde11a8a861c8aae4bdb1284579e00d4799f7b9/rfcs/type-hinting/type_hinting_for_paddle_tensor.md) 中讨论的 `代理文件` 方式，主要基于以下考虑：
 
-- 代理文件会破坏现有的 Paddle 生态中的类型标注文件
+- 代理文件会破坏现有的 Paddle 生态中的类型标注
 
   如，Paddle 内部代码中 `/paddle/audio/backends/backend.py`：
 
@@ -326,19 +336,9 @@ Python 软件包在进行类型标注的过程中，通常会使用到一些相�
   
   如果全面使用此类方式，则将有可能影响代码的可维护性，产生逻辑混乱。
 
-- 未搜索到 `stub` 文件影响性能的相关资料
+- 未搜索到 `stub` 文件影响性能的相关问题或资料，因此不考虑性能问题
 
-基于以上原因，本方案在 `Paddle/python/paddle/__init__.pyi` 中直接生成 `Tensor` 的类型标注。
-
-另外，`paddlepaddle-stubs/paddle-stubs/__init__.pyi` 中，通过:
-
-``` python
-from ._typing import Tensor as Tensor
-```
-
-将 `_typing` 的 `Tensor` 作为 `paddle.Tensor` 的类型标注，与本方案的作用相同。
-
-此方式不影响目前已有的类型标注代码，基本形式如：
+基于以上原因，本方案在 `Paddle/python/paddle/__init__.pyi` 中直接生成 `Tensor` 的类型标注。基本形式如：
 
 ``` python
 
@@ -367,9 +367,17 @@ __all__ = [
 
 ```
 
-此文件可以使用模板的方式生成，参考 `pytorch/torch/_C/__init__.pyi.in` 。
+另外，`paddlepaddle-stubs/paddle-stubs/__init__.pyi` 中，通过:
 
-对于一些 C++ 的接口，如上述 `cast` 方法，需要同时提取接口的 docstring 并插入，以提供完整的类型提示与文档提示功能。
+``` python
+from ._typing import Tensor as Tensor
+```
+
+将 `_typing` 的 `Tensor` 作为 `paddle.Tensor` 的类型标注，与本方案的作用相同。
+
+此方式不影响目前已有的类型标注代码，此文件可以使用模板的方式生成，参考 `pytorch/torch/_C/__init__.pyi.in` 。
+
+对于一些 C++ 或 patch 的接口，如上述 `cast` 方法，需要同时提取接口的 docstring 并插入，以提供完整的类型提示与文档提示功能。
 
 对于 Python 接口，则可以通过 `明确` 引入的方式直接导入此处，如使用 `from a import b as b` ，或上述的 `__all__` 的方式。
 
@@ -377,19 +385,21 @@ __all__ = [
 
 此文件作为类型提示的标识文件，直接创建即可。
 
-另外，Paddle 在打包时，需要将上述几个文件打包进去，由此需要修改打包脚本等文件。
+另外，Paddle 在打包时，需要将上述几个文件打包进去，由此需要修改打包脚本 `setup.py` 等文件。
 
 ### 2.3 Paddle docs 中添加文档 `《Paddle 中的类型提示》`
 
 `《Paddle 中的类型提示》` 此文档辅助开发者进行 Paddle 的类型标注，为后续工作提供参考基础。
 
-### 2.4 Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例文件` 的类型检查
+实现路径为 `文档 > 贡献指南 > 规范和参考信息 > 《Paddle 中的类型提示》` 。
+
+### 2.4 Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例代码` 的类型检查
 
 此文件与 [2.1.3 `typing` 模块测试用例](#213-typing-模块测试用例) 中的 `Paddle/test/test_typing.py` 可以是同一个文件。
 
 脚本需要：
 
-- 抽取变动的 API 的 docstring
+- 抽取 `git diff` 的 API 的 docstring
 - 抽取 docstring 中的 `示例代码`
 - 对示例代码进行静态类型检查
 
@@ -457,20 +467,161 @@ __all__ = [
   - `paddle.cost_model.*`
   - `paddle._C_ops.*`
 
-以上可作为批次任务的依据，但并非均要此次全部完成，如 `paddle._C_ops.*`。
+以上可作为批次任务的依据，但并非需要此次任务全部完成，如 `paddle._C_ops.*`，可作为后续补充任务。
 
 各接口需要完成以下工作：
 
 - 完成类型标注
-- 通过 [2.4](#24-paddle-的-ci-中引入-mypy-对于-api-中-docstring-的-示例文件-的类型检查) CI 对于接口中示例代码的类型检查
+- 通过 [2.4](#24-paddle-的-ci-中引入-mypy-对于-api-中-docstring-的-示例代码-的类型检查) CI 对于接口中示例代码的类型检查
 - 修改并对齐 docstring 中的类型说明
 
-标注过程中需要引入并不断完善 Paddle 的 docs 中文档《Paddle 类型提示 Q&A》。
+标注过程中需要引入并不断完善 Paddle 的 docs 中文档《Paddle 类型提示 Q&A》 (或者是 《Paddle 中的类型提示》 的 `Q&A` 部分)。
 
-此阶段的输出件：
+目前存在较多的自动化标注工具，如 ([Automate annotation of legacy code](https://mypy.readthedocs.io/en/stable/existing_code.html))：
 
-- 完成标注的开放 API 。
-- Paddle docs 中添加文档 `《Paddle 类型提示 Q&A》` 。
+- [MonkeyType](https://monkeytype.readthedocs.io/en/latest/index.html)
+- [autotyping](https://github.com/JelleZijlstra/autotyping)
+- [PyAnnotate](https://github.com/dropbox/pyannotate)
 
-由于工作量较大，需要开源社区协同完成。
+此阶段开始前，可以先挑取部分 API ，使用上述工具，或手动，进行标注。经过流程验证并形成最佳实践后，指导开源社区进行协同完成。
 
+## 4、第三阶段 (推荐)
+
+此阶段在 Paddle 的 CI 中引入 `mypy` 对于 API `单元测试` 文件的类型检查。
+
+完成 `单元测试` 文件的类型检查，可以进一步验证并加强 Paddle 中类型标注的正确性。
+
+- 实现路径 `Paddle/test/test_typing.py`，同 [2.1.3](#213-typing-模块测试用例)。
+
+- `mypy` 配置文件 `Paddle/test/mypy.ini`。
+
+类型标注是个循序渐进的过程，如发现引入 API `单元测试` 文件的类型检查出现较多问题，有可能需要再启动一次开源社区的协同修改工作，因此，此阶段为 `推荐` 完成，并存在 `不确定风险` 。
+
+## 5、第四阶段 (推荐)
+
+此阶段主要完善以上阶段中的遗漏工作，如有需要，可进行私有接口的标注工作，主要如 `_C_ops` 等接口的标注。此类接口通过 `stub` 方式实现，如 `Paddle/python/paddle/_C_ops.pyi`。
+
+此阶段为 `推荐` 完成，需要视前面工作的完成进度而定。
+
+# 四、测试和验收的考量
+
+- Paddle 中引入 `typing` 模块
+  
+  需要添加测试用例，CI 中通过测试。
+
+- Paddle 中引入 `Paddle/python/paddle/__init__.pyi` 和 `Paddle/python/paddle/py.typed` 文件，作为 `paddle.Tensor` 的类型 `stub`
+
+  需要保证 CI 能够正确执行对于类型的检查。
+
+- Paddle 的 docs 中添加文档 `《Paddle 中的类型提示》`
+
+  需要能够指导开发者使用 `typing` 模块，并进行类型标注。
+
+- Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例代码` 的类型检查
+
+  需要 CI 能够正确检查 API 中的示例代码。
+
+- 完成开放 API 的类型标注
+
+  需要能够通过 CI 中对于示例代码的类型检查。
+
+- Paddle 的 CI 中引入 `mypy` 对于 API `单元测试` 文件的类型检查
+
+  需要 CI 能够正确检查单元测试文件中的代码。
+
+# 五、排期规划
+
+1. Paddle 中引入 `typing` 模块
+2. Paddle 中引入 `Paddle/python/paddle/__init__.pyi` 文件和 `Paddle/python/paddle/py.typed` 文件
+3. Paddle docs 中添加文档 `《Paddle 中的类型提示》`
+4. Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例代码` 的类型检查
+5. 分批次完成开放接口的类型标注 (*)
+6. Paddle 的 CI 中引入 `mypy` 对于 API `单元测试` 文件的类型检查
+7. 分批次修复开放接口的类型标注 (**)
+8. 私有 API 的类型标注 (*)
+
+以上任务依次进行，其中：
+
+- 任务 `5, 8` 需要开源社区协作完成。
+- 任务 `7` 需要视任务 `6` 的检查结果而定是否进行，如需进行，评估是否通过开源社区完成。
+- 任务 `1, 2, 3, 4, 6` 为单独任务。
+
+# 六、影响面
+
+1. Paddle 中引入 `typing` 模块
+
+    **对用户的影响：** 用户可以使用 `typing` 模块提供的接口
+
+    **对开发者的影响：** 开发者可以使用 `typing` 模块标注 Paddle 内部模块
+
+    **对框架架构的影响：** Paddle 框架中增加 `typing` 模块与相应接口；Paddle 的 docs 中增加中英文文档
+
+    **其他风险：** `typing` 模块需要在后续工作中不断完善；Paddle 的 docs 需要能够渲染 `typing` 模块的文档
+
+2. Paddle 中引入 `Paddle/python/paddle/__init__.pyi` 文件和 `Paddle/python/paddle/py.typed` 文件
+  
+    **对用户的影响：** 用户可以使用 `Tensor` 进行类型标注
+
+    **对开发者的影响：** 开发者可以使用 `Tensor` 对 Paddle 内部模块进行类型标注
+
+    **对框架架构的影响：** Paddle 增加 `stub` 文件
+
+    **其他风险：** `Tensor` 以及此 `stub` 文件需要在后续工作中不断完善
+
+3. Paddle docs 中添加文档 `《Paddle 中的类型提示》`
+
+    **对用户的影响：** 用户可以参考文档进行类型标注
+
+    **对开发者的影响：** 开发者可以参考文档对 Paddle 内部模块进行类型标注
+
+    **对框架架构的影响：** Paddle 的 docs 中增加相应文档
+
+4. Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例代码` 的类型检查
+
+    **对用户的影响：** 不涉及
+
+    **对开发者的影响：** 开发者需要能够通过此 CI 检查
+
+    **对框架架构的影响：** Paddle 增加新的 CI 流水线任务
+
+    **其他风险：** `示例代码` 中可能出现接口依赖问题，需要提前规划，或另行规避
+
+5. 分批次完成开放接口的类型标注
+
+    **对用户的影响：** 用户可以使用完整的开放 API 的类型标注
+
+    **对开发者的影响：** 开发者的新增 API 需要进行类型标注，并通过 CI 检查
+
+    **对框架架构的影响：** Paddle 中开放 API 需完成类型标注
+
+    **其他风险：** 有可能出现接口依赖问题，需要提前规划，或另行规避
+
+6. Paddle 的 CI 中引入 `mypy` 对于 API `单元测试` 文件的类型检查
+
+    **对用户的影响：** 不涉及
+
+    **对开发者的影响：** 开发者需要能够通过此 CI 检查
+
+    **对框架架构的影响：** Paddle 增加新的 CI 流水线任务
+
+    **其他风险：** `单元测试` 中可能出现接口依赖问题，需要提前规划，或另行规避
+
+7. 分批次修复开放接口的类型标注
+
+    **对用户的影响：** 不涉及
+
+    **对开发者的影响：** 不涉及
+
+    **对框架架构的影响：** 修改并完善 `typing` 模块；修改错误类型标注或用例
+
+    **其他风险：** 此任务依赖任务 `6` 的检查结果
+
+8. 私有 API 的类型标注
+
+    **对用户的影响：** 用户可以使用私有 API 的类型标注
+
+    **对开发者的影响：** 开发者的新增 API 需要进行类型标注，并通过 CI 检查
+
+    **对框架架构的影响：** Paddle 中私有 API 完成类型标注
+
+    **其他风险：** 有可能出现接口依赖问题，需要提前规划，或另行规避
