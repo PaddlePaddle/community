@@ -263,8 +263,8 @@ None 索引操作为处理不同形状的 Tensor 数据提供了很大的方便,
 > 
 > 下图给出了 View 的示意图。一个 Tensor 由元数据（meta data）和数据组成，View 操作下的输入 Tensor 和输出 Tensor 共享数值数据。
 
-![picture 0](images/348bea9b76cf5dc89bfc4bb9e62d39b6b16cc8e5c49c62bf2532b0fe336515d6.jpg)  
 
+<img width="350" alt="1e95c8c0bce08b4402c51de5d3e3032d97c57fa5a54b1185acb087c4da0c4672" src="images/348bea9b76cf5dc89bfc4bb9e62d39b6b16cc8e5c49c62bf2532b0fe336515d6.jpg">
 
 ## 4. 高级索引
 
