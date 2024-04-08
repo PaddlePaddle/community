@@ -317,9 +317,107 @@ def _get_cache_prim(cls: Primitive) -> Primitive:
 
 ```
 
+通过调用 C++接口，实现了 ormqr 操作，具体[代码](https://gitee.com/mindspore/mindspore/blob/master/mindspore/ccsrc/plugin/device/gpu/kernel/math/ormqr_gpu_kernel.cc)参考如下：
+
+```
+void OrmqrGpuKernelMod::RunOrmqr(T *d_a, T *tau, T *d_c, size_t lda, int *dev_info, T *output_y) {
+  int lwork = 0;
+  if constexpr (std::is_same_v<T, float>) {
+    CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(
+      cusolverDnSormqr_bufferSize(handle_, side_, trans_, m_, n_, x_n_, d_a, lda, tau, d_c, m_, &lwork),
+      "cusolver query ormqr work size failed.");
+  } else if constexpr (std::is_same_v<T, double>) {
+    CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(
+      cusolverDnDormqr_bufferSize(handle_, side_, trans_, m_, n_, x_n_, d_a, lda, tau, d_c, m_, &lwork),
+      "cusolver query ormqr work size failed.");
+  } else {
+    if constexpr (std::is_same_v<T, Complex<float>>) {
+      trans_ = transpose_ ? CUBLAS_OP_C : CUBLAS_OP_N;
+      CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(
+        cusolverDnCunmqr_bufferSize(handle_, side_, trans_, m_, n_, x_n_, reinterpret_cast<cuComplex *>(d_a), lda,
+                                    reinterpret_cast<cuComplex *>(tau), reinterpret_cast<cuComplex *>(d_c), m_, &lwork),
+        "cusolver query ormqr work size failed.");
+    }
+    if constexpr (std::is_same_v<T, Complex<double>>) {
+      trans_ = transpose_ ? CUBLAS_OP_C : CUBLAS_OP_N;
+      CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(
+        cusolverDnZunmqr_bufferSize(handle_, side_, trans_, m_, n_, x_n_, reinterpret_cast<cuDoubleComplex *>(d_a), lda,
+                                    reinterpret_cast<cuDoubleComplex *>(tau), reinterpret_cast<cuDoubleComplex *>(d_c),
+                                    m_, &lwork),
+        "cusolver query ormqr work size failed.");
+    }
+  }
+
+  void *d_work = device::gpu::GPUMemoryAllocator::GetInstance().AllocTensorMem(sizeof(T) * lwork);
+  if (d_work == nullptr) {
+    MS_LOG(ERROR) << "For '" << kernel_name_ << "', the memory of d_work alloc failed.";
+  }
+  if constexpr (std::is_same_v<T, float>) {
+    CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(cusolverDnSormqr(handle_, side_, trans_, m_, n_, x_n_, d_a, lda, tau, d_c,
+                                                            m_, static_cast<T *>(d_work), lwork, dev_info),
+                                           "cusolver ormqr failed.");
+  } else if constexpr (std::is_same_v<T, double>) {
+    CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(cusolverDnDormqr(handle_, side_, trans_, m_, n_, tau_n_, d_a, lda, tau, d_c,
+                                                            m_, static_cast<T *>(d_work), lwork, dev_info),
+                                           "cusolver ormqr failed.");
+  } else {
+    if constexpr (std::is_same_v<T, Complex<float>>) {
+      trans_ = transpose_ ? CUBLAS_OP_C : CUBLAS_OP_N;
+      CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(
+        cusolverDnCunmqr(handle_, side_, trans_, m_, n_, x_n_, reinterpret_cast<cuComplex *>(d_a), lda,
+                         reinterpret_cast<cuComplex *>(tau), reinterpret_cast<cuComplex *>(d_c), m_,
+                         reinterpret_cast<cuComplex *>(d_work), lwork, dev_info),
+        "cusolver ormqr failed.");
+    }
+    if constexpr (std::is_same_v<T, Complex<double>>) {
+      trans_ = transpose_ ? CUBLAS_OP_C : CUBLAS_OP_N;
+      CHECK_CUSOLVER_RET_WITH_EXCEPT_NOTRACE(
+        cusolverDnZunmqr(handle_, side_, trans_, m_, n_, x_n_, reinterpret_cast<cuDoubleComplex *>(d_a), lda,
+                         reinterpret_cast<cuDoubleComplex *>(tau), reinterpret_cast<cuDoubleComplex *>(d_c), m_,
+                         reinterpret_cast<cuDoubleComplex *>(d_work), lwork, dev_info),
+        "cusolver ormqr failed.");
+    }
+  }
+
+  CHECK_CUDA_RET_WITH_EXCEPT_NOTRACE(cudaMemcpyAsync(output_y, d_c, sizeof(T) * m_ * n_, cudaMemcpyDeviceToDevice,
+                                                     reinterpret_cast<cudaStream_t>(cuda_stream_)),
+                                     "cuda memcpy output A failed!");
+  device::gpu::GPUMemoryAllocator::GetInstance().FreeTensorMem(d_work);
+}
+
+void OrmqrGpuKernelMod::CheckResult(int *dev_info) {
+  std::vector<int> info_gpu(batch_size_, 0);
+  CHECK_CUDA_RET_WITH_EXCEPT_NOTRACE(
+    cudaMemcpyAsync(info_gpu.data(), dev_info, sizeof(int) * batch_size_, cudaMemcpyDeviceToHost,
+                    reinterpret_cast<cudaStream_t>(cuda_stream_)),
+    "Copy device result failed");
+  for (size_t i = 0; i < info_gpu.size(); ++i) {
+    if (info_gpu[i] != 0) {
+      MS_LOG(INFO) << "For '" << kernel_name_ << "', the compute result has wrong value. The " << -info_gpu[i]
+                   << "th parameter is wrong (not counting handle) in batch " << i << " data.";
+    }
+  }
+}
+
+template <typename T>
+void OrmqrGpuKernelMod::LaunchOrmqr(T *d_input_x, T *input_tau, T *d_input_other, T *d_output_y, int *dev_info) {
+  size_t lda = m_;
+  if (side_ == CUBLAS_SIDE_RIGHT) {
+    lda = n_;
+  }
+  for (size_t batch = 0; batch < batch_size_; ++batch) {
+    RunOrmqr(d_input_x + batch * x_m_ * x_n_, input_tau + batch * tau_n_, d_input_other + batch * m_ * n_, lda,
+             dev_info + batch, d_output_y + batch * m_ * n_);
+  }
+
+  CheckResult(dev_info);
+}
+
+```
+
 # 四、对比分析
 
-在 Pytorch 以及 MindSpore 框架中，他们对于 ormqr 算子的实现方式不同，Pytorch 中使用的是 c++实现，而 MindSpore 中使用的是 python 实现。
+在 Pytorch 以及 MindSpore 框架中，他们对于 ormqr 算子的实现方式不同，Pytorch 中通过对 LAPAC 的 ormqr 进行封装来提供 ormqr 接口，而 MindSpore 则是自行使用 C++代码设计 ormqr 底层操作。
 
 # 五、设计思路与实现方案
 
