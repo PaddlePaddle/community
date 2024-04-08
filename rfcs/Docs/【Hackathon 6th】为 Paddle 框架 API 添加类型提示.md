@@ -35,9 +35,9 @@ Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep
 
 具体需要实现：
 
-- `typing` 模块代码，实现路径 `Paddle/python/paddle/typing/*`
+- `typing` 模块代码
 - `typing` 模块文档
-- `typing` 模块测试用例，实现路径 `Paddle/test/typing/*`
+- `typing` 模块测试用例
 
 ### 2.2 开放 API 的类型标注
 
@@ -174,6 +174,13 @@ Paddle 目前没有 `Type Hints` 功能，但是存在第三方的尝试，如�
 
   进而，深度学习框架对于数据的 `shape`，`dtype` 关注要远多与其他类型的软件，并且部分信息需要在代码运行过程中获取，而 Python 对于 `shape`，`dtype` 等的类型检查支持不够完善，如 [PEP 646 – Variadic Generics](https://peps.python.org/pep-0646/) 仍然处于 `accepted; may not be implemented yet` 的状态，也就催生了诸如 `nptyping`, `jaxtyping` 此类第三方工具的开发与使用。
 
+最后，本方案采用 `Inline type annotation + Stub files in package` 的方式，类似 PyTorch 的实现方式。基本原则为：
+
+- 非 Python 接口，提供 `stub` 标注文件
+- Python 接口，使用 `inline` 方式
+
+> **说明** 竞品分析等内容，[Type Hinting for Tensor of Paddle](https://github.com/jiamingkong/community/blob/4bde11a8a861c8aae4bdb1284579e00d4799f7b9/rfcs/type-hinting/type_hinting_for_paddle_tensor.md) 已有较详细的阐述，本文不再赘述。
+
 ## 1、总揽
   
 Paddle 的类型标注体系，由底层而上，可以划分为：
@@ -198,93 +205,26 @@ Paddle 的类型标注体系，由底层而上，可以划分为：
 
 结合上文 [2、功能目标](#2功能目标) ，将整个工作拆分为以下几个阶段：
 
-- 第一阶段，基础能力的引入
+- **第一阶段**，基础能力的引入
 
   此阶段需要完成基础类型的引入和标注，主要完成以下工作及输出件：
 
   - Paddle 中引入 `typing` 模块，添加测试用例，添加 docs 文档。
-  - Paddle 中引入 `Paddle/python/paddle/__init__.pyi` 文件，作为 `paddle.Tensor` 的类型 `stub` 。此阶段可以只做文件的引入，后续完善接口和文档。
-  - Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例文件` 的类型检查。
+  - Paddle 中引入 `Paddle/python/paddle/__init__.pyi` 和 `Paddle/python/paddle/py.typed` 文件，作为 `paddle.Tensor` 的类型 `stub` 。
+    此阶段可以只做文件的引入，后续完善接口和文档。
   - Paddle docs 中添加文档 `《Paddle 中的类型提示》` 。
+  - Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例文件` 的类型检查。
 
-- 第二阶段，接口的类型标注，以及 Paddle 的 docs 中文档《Paddle 类型提示 Q&A》不断完善
+- **第二阶段**，接口的类型标注，以及 Paddle 的 docs 中文档《Paddle 类型提示 Q&A》
 
-  此阶段分批次完成开放接口的类型标注，主要划分依据为 [paddlepaddle-stubs Roadmap](https://github.com/orgs/cattidea/projects/3/views/1) ，将 API 分为 `P1 ～ P5` ：
+  此阶段承担了 Paddle 类型标注的主要工作，需要开源社区的广泛参与共同完成。
 
-  - `P1`
-    - `paddle.nn.layer.*`
-    - `paddle.vision.transforms.transforms.*`
-    - `paddle.nn.initializer.*`
-    - `paddle.optimizer.*`
-    - `paddle.Model`
-    - `paddle.vision.models.*`
-    - `paddle.nn.Layer`
-
-  - `P2`
-    - `paddle.vision.datasets.*`
-    - `paddle.metric.*`
-    - `paddle.Tensor`
-    - `paddle.regularizer.*`
-    - `paddle.vision.transforms.functional*`
-    - `paddle.static.*`
-
-  - `P3`
-    - `paddle.hub.*`
-    - `paddle.linalg.*`
-    - `paddle.signal.*`
-    - `paddle.callbacks.*`
-    - `paddle.onnx.*`
-    - `paddle.nn.functional.*`
-    - `paddle.io.*`
-    - `paddle.distribution.*`
-    - `paddle.device.*`
-    - `paddle.autograd.*`
-    - `paddle.amp.*`
-    - `paddle.fft.*`
-
-  - `P4`
-    - `paddle.incubate.*`
-    - `paddle.sysconfig.*`
-    - `paddle.utils.*`
-    - `paddle.text.*`
-    - `paddle.tensor.*`
-    - `paddle.sparse.*`
-    - `paddle.profiler.*`
-    - `paddle.nn.quant.*`
-    - `paddle.nn.utils.*`
-    - `paddle.jit.*`
-    - `paddle.distributed.*`
-    - `paddle.compat.*`
-
-  - `P5`
-    - `paddle.inference.*`
-    - `paddle.proto.*`
-    - `paddle.common_ops_import.*`
-    - `paddle.check_import_scipy.*`
-    - `paddle.batch.*`
-    - `paddle.reader.*`
-    - `paddle.hapi.*`
-    - `paddle.framework.*`
-    - `paddle.dataset.*`
-    - `paddle.cost_model.*`
-    - `paddle._C_ops.*`
-
-  以上可作为批次任务的依据，但并非均要此次全部完成，如 `paddle._C_ops.*`。
-
-  各接口需要完成以下工作：
-
-  - 完成类型标注
-  - 通过 CI 对于接口中示例的类型检查
-  - 修改并对齐 docstring 中的类型说明
-
-  标注过程中需要引入并不断完善 Paddle 的 docs 中文档《Paddle 类型提示 Q&A》。
-
-  此阶段的输出件：
+  此阶段的工作及输出件：
 
   - 完成标注的开放 API 。
-  - Paddle docs 中添加文档 `《Paddle 类型提示 Q&A》` 。
+  - Paddle docs 中添加并不断完善文档 `《Paddle 类型提示 Q&A》` 。
 
-- 第三阶段，CI 中引入对于单元测试文件的类型检查
+- **第三阶段**，CI 中引入对于单元测试文件的类型检查
   
   在上述第二阶段中，并未引入类型标注的 `单元测试`，这是出于以下考虑：
 
@@ -300,18 +240,237 @@ Paddle 的类型标注体系，由底层而上，可以划分为：
   - Paddle 的 CI 中引入 `mypy` 对于 API `单元测试` 文件的类型检查。
   - 修改并完善开放接口的标注。
 
-- 第四阶段，收尾阶段
+- **第四阶段**，收尾阶段
 
   此阶段主要完善以上阶段中的遗漏工作，如有需要，可进行私有接口的标注工作。
 
 ## 2、第一阶段
 
+此阶段需要完成基础类型的引入和标注。
 
+### 2.1 Paddle 中引入 `typing` 模块
 
+Python 软件包在进行类型标注的过程中，通常会使用到一些相同或相似的数据类型，因此，有必要引入 `typing` 模块统一管理与维护。并且，`typing` 模块可以作为开放 API 的一部分，以方便使用 Paddle 的开发者在自己的项目中使用类型提示。
 
+本方案参考 [paddle-stubs/_typing](https://github.com/cattidea/paddlepaddle-stubs/tree/main/paddle-stubs/_typing) 引入 `typing` 模块。
 
+#### 2.1.1 `typing` 模块代码
 
+实现路径 `Paddle/python/paddle/typing/*`，具体可包括：
 
+- `basic.py`，数字、嵌套序列等
+- `device.py`，设备，`CPU`，`GPU` 等
+- `dtype.py`，数据类型，`uint8`，`float32` 等
+- `layout.py`，数据布局，`NCHW`，`NHCW` 等
+- `shape.py`，数据形状，`ShapeLike` 等
 
+#### 2.1.2 `typing` 模块文档
 
+实现路径 `Paddle/python/paddle/typing/__init__.py`。
+
+由于 `类型` 仅相当于 Python 中的一种特殊变量，因此，需要单独为其提供 docstring。具体实现方式可参考 Numpy 的：
+
+- `/numpy/_typing`
+- `/numpy/typing/__init__.py`
+
+#### 2.1.3 `typing` 模块测试用例
+  
+- 测试脚本
+
+  实现路径 `Paddle/test/test_typing.py`。脚本可在 CI 中调用，通过 `mypy` 的 API 进行测试。
+
+  第一阶段只需要实现 `typing` 模块的检查即可，后续如需检查其他内容，通过调用不同的配置，可更新此文件。
+
+- 测试内容
+
+  实现路径 `Paddle/test/typing/*`。参考 PyTorch 与 Numpy 的测试方式，这里可以包括：
+
+  - `mypy.ini` 文件，`mypy` 的配置文件。
+  - `pass` 目录，正常的类型检查，如 `a: ArrayLike = [1, 2, 3]`
+  - `fail` 目录，错误的类型参数，如 `a: ArrayLike = (i for i in range(10))`
+  - `reveal` 目录，检查返回值的类型，如 `ar_iter = np.lib.Arrayterator(AR_i8);assert_type(ar_iter.var, npt.NDArray[np.int64])`
+
+### 2.2 Paddle 中引入 `Paddle/python/paddle/__init__.pyi` 文件和 `Paddle/python/paddle/py.typed` 文件
+
+#### 2.2.1 `Paddle/python/paddle/__init__.pyi` 文件
+
+`Paddle/python/paddle/__init__.pyi` 文件主要为 `Tensor` 的 `stub` 标注文件。
+
+本方案采用 `Inline type annotation + Stub files in package` 的方式，不同于 [Type Hinting for Tensor of Paddle](https://github.com/jiamingkong/community/blob/4bde11a8a861c8aae4bdb1284579e00d4799f7b9/rfcs/type-hinting/type_hinting_for_paddle_tensor.md) 中讨论的 `代理文件` 方式，主要基于以下考虑：
+
+- 代理文件会破坏现有的 Paddle 生态中的类型标注文件
+
+  如，Paddle 内部代码中 `/paddle/audio/backends/backend.py`：
+
+  ``` python
+    def save(
+        filepath: str,
+        src: paddle.Tensor,
+        sample_rate: int,
+        channels_first: bool = True,
+        encoding: Optional[str] = None,
+        bits_per_sample: Optional[int] = 16,
+    ):
+  ```
+
+  使用 `paddle.Tensor` 作为类型，而在其他软件中，也多以这种方式存在。如果使用代理文件，则需要修改目前已有的类型标注。Paddle 内部可以通过规范统一修改，但是仍会影响其他外部开发者已有的源代码。
+
+- 代理文件会影响代码的逻辑与可维护性
+
+  如，使用代理文件，需要在目前源码中添加：
+
+  ``` python
+    if typing.TYPE_CHECKING:
+        from .tensor_proxy import Tensor
+  ```
+  
+  如果全面使用此类方式，则将有可能影响代码的可维护性，产生逻辑混乱。
+
+- 未搜索到 `stub` 文件影响性能的相关资料
+
+基于以上原因，本方案在 `Paddle/python/paddle/__init__.pyi` 中直接生成 `Tensor` 的类型标注。
+
+另外，`paddlepaddle-stubs/paddle-stubs/__init__.pyi` 中，通过:
+
+``` python
+from ._typing import Tensor as Tensor
+```
+
+将 `_typing` 的 `Tensor` 作为 `paddle.Tensor` 的类型标注，与本方案的作用相同。
+
+此方式不影响目前已有的类型标注代码，基本形式如：
+
+``` python
+
+from __future__ import annotations
+from typing_extensions import TypeAlias
+
+class dtype:
+    def __init__(self, arg0: int) -> None: ...
+
+DTypeLike: TypeAlias = dtype | str
+
+class Tensor:
+    def cast(self, dtype: DTypeLike) -> Tensor: 
+        """ cast docstring ... """ # 通过脚本生成，从代码中抽取 docstring 插入此处
+    ...
+
+from .tensor.creation import (
+    to_tensor,
+    ...
+)
+
+__all__ = [
+    "to_tensor",
+    ...
+]
+
+```
+
+此文件可以使用模板的方式生成，参考 `pytorch/torch/_C/__init__.pyi.in` 。
+
+对于一些 C++ 的接口，如上述 `cast` 方法，需要同时提取接口的 docstring 并插入，以提供完整的类型提示与文档提示功能。
+
+对于 Python 接口，则可以通过 `明确` 引入的方式直接导入此处，如使用 `from a import b as b` ，或上述的 `__all__` 的方式。
+
+#### 2.2.2 `Paddle/python/paddle/py.typed` 文件
+
+此文件作为类型提示的标识文件，直接创建即可。
+
+另外，Paddle 在打包时，需要将上述几个文件打包进去，由此需要修改打包脚本等文件。
+
+### 2.3 Paddle docs 中添加文档 `《Paddle 中的类型提示》`
+
+`《Paddle 中的类型提示》` 此文档辅助开发者进行 Paddle 的类型标注，为后续工作提供参考基础。
+
+### 2.4 Paddle 的 CI 中引入 `mypy` 对于 API 中 docstring 的 `示例文件` 的类型检查
+
+此文件与 [2.1.3 `typing` 模块测试用例](#213-typing-模块测试用例) 中的 `Paddle/test/test_typing.py` 可以是同一个文件。
+
+脚本需要：
+
+- 抽取变动的 API 的 docstring
+- 抽取 docstring 中的 `示例代码`
+- 对示例代码进行静态类型检查
+
+此任务完成后，可进行后续的 Paddle 代码标注工作。
+
+## 3、第二阶段
+
+此阶段分批次完成开放接口的类型标注，主要划分依据为 [paddlepaddle-stubs Roadmap](https://github.com/orgs/cattidea/projects/3/views/1) ，将 API 分为 `P1 ～ P5` ：
+
+- `P1`
+  - `paddle.nn.layer.*`
+  - `paddle.vision.transforms.transforms.*`
+  - `paddle.nn.initializer.*`
+  - `paddle.optimizer.*`
+  - `paddle.Model`
+  - `paddle.vision.models.*`
+  - `paddle.nn.Layer`
+
+- `P2`
+  - `paddle.vision.datasets.*`
+  - `paddle.metric.*`
+  - `paddle.Tensor`
+  - `paddle.regularizer.*`
+  - `paddle.vision.transforms.functional*`
+  - `paddle.static.*`
+
+- `P3`
+  - `paddle.hub.*`
+  - `paddle.linalg.*`
+  - `paddle.signal.*`
+  - `paddle.callbacks.*`
+  - `paddle.onnx.*`
+  - `paddle.nn.functional.*`
+  - `paddle.io.*`
+  - `paddle.distribution.*`
+  - `paddle.device.*`
+  - `paddle.autograd.*`
+  - `paddle.amp.*`
+  - `paddle.fft.*`
+
+- `P4`
+  - `paddle.incubate.*`
+  - `paddle.sysconfig.*`
+  - `paddle.utils.*`
+  - `paddle.text.*`
+  - `paddle.tensor.*`
+  - `paddle.sparse.*`
+  - `paddle.profiler.*`
+  - `paddle.nn.quant.*`
+  - `paddle.nn.utils.*`
+  - `paddle.jit.*`
+  - `paddle.distributed.*`
+  - `paddle.compat.*`
+
+- `P5`
+  - `paddle.inference.*`
+  - `paddle.proto.*`
+  - `paddle.common_ops_import.*`
+  - `paddle.check_import_scipy.*`
+  - `paddle.batch.*`
+  - `paddle.reader.*`
+  - `paddle.hapi.*`
+  - `paddle.framework.*`
+  - `paddle.dataset.*`
+  - `paddle.cost_model.*`
+  - `paddle._C_ops.*`
+
+以上可作为批次任务的依据，但并非均要此次全部完成，如 `paddle._C_ops.*`。
+
+各接口需要完成以下工作：
+
+- 完成类型标注
+- 通过 [2.4](#24-paddle-的-ci-中引入-mypy-对于-api-中-docstring-的-示例文件-的类型检查) CI 对于接口中示例代码的类型检查
+- 修改并对齐 docstring 中的类型说明
+
+标注过程中需要引入并不断完善 Paddle 的 docs 中文档《Paddle 类型提示 Q&A》。
+
+此阶段的输出件：
+
+- 完成标注的开放 API 。
+- Paddle docs 中添加文档 `《Paddle 类型提示 Q&A》` 。
+
+由于工作量较大，需要开源社区协同完成。
 
