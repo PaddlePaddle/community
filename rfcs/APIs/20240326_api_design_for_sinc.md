@@ -106,9 +106,12 @@ Numpy 中的 numpy.sinc API文档 (https://numpy.org/doc/stable/reference/genera
     ```
 
     ```python
-    def sinc_(x, name=None):
-      y = math.pi * paddle.where(x == 0, 1.0e-20, x)
-      return paddle.divide_(y.sin(), y)
+    def sinc(x, name=None):
+      paddle.where_(x != 0, x, paddle.full_like(x, 1.0e-20))
+      paddle.multiply_(x, paddle.to_tensor(math.pi, dtype=x.dtype))
+      paddle.sin_(x)
+      tmp = paddle.asin(x)
+      return paddle.divide_(x, tmp)
     ```
 
 
