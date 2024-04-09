@@ -192,6 +192,119 @@ def update_step(self, gradient, variable, learning_rate):
 
   PyTorch 使用 `momentum_decay` 与一个系数  `0.96` 和 `step` 组合计算，TensorFlow 只与 `step` 相关
 
+对比 Paddle 与 PyTorch 对于优化器在接口参数设计上的区别：
+
+- Adam 优化器 (参考 Paddle docs/guides/model_convert/convert_from_pytorch/api_difference/optimizer/torch.optim.Adam.md)
+
+| PyTorch                             | PaddlePaddle | 备注                                                                    |
+| ----------------------------------- | ------------ | ----------------------------------------------------------------------- |
+| params     | parameters           | 表示指定优化器需要优化的参数，仅参数名不一致。                      |
+| lr     | learning_rate       | 学习率，用于参数更新的计算。仅参数名不一致。                          |
+| betas     | beta1、beta2       | 一阶矩估计的指数衰减率。PyTorch 为元祖形式，Paddle 为分开的两个参数。默认值分别一致。                          |
+| eps       | epsilon        | 保持数值稳定性的短浮点类型值。仅参数名不一致。                           |
+| weight_decay           | weight_decay     | 表示权重衰减系数，参数默认值不一致, PyTorch 默认为`0`， Paddle 默认为`None`，Paddle 需保持与 PyTorch 一致。         |
+| amsgrad   | -    | 是否使用该算法的 AMSGrad 变体。Paddle 无此参数，暂无转写方式。                       |
+| foreach           | -     | 是否使用优化器的 foreach 实现。Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。         |
+| maximize           | -     | 根据目标最大化参数，而不是最小化。Paddle 无此参数，暂无转写方式。         |
+| capturable           | -     | 在 CUDA 图中捕获此实例是否安全。Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。         |
+| differentiable      | -     | 是否应通过训练中的优化器步骤进行自动微分。Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。         |
+| fused      | -     | 是否使用融合实现（仅限 CUDA）。Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。         |
+| -          | grad_clip            | 梯度裁剪的策略。 PyTorch 无此参数，Paddle 保持默认即可。       |
+| -          | lazy_mode            | 设为 True 时，仅更新当前具有梯度的元素。PyTorch 无此参数，Paddle 保持默认即可。       |
+| -          | multi_precision            | 是否在权重更新期间使用 multi-precision。PyTorch 无此参数，Paddle 保持默认即可。       |
+| -          | use_multi_tensor            | 是否使用 multi-tensor 策略一次性更新所有参数。PyTorch 无此参数，Paddle 保持默认即可。       |
+
+- RMSprop 优化器 (参考 Paddle docs/guides/model_convert/convert_from_pytorch/api_difference/optimizer/torch.optim.RMSprop.md)
+
+| PyTorch                             | PaddlePaddle | 备注                                                                    |
+| ----------------------------------- | ------------ | ----------------------------------------------------------------------- |
+| params     | parameters           | 表示指定优化器需要优化的参数，仅参数名不一致。                      |
+| lr     | learning_rate       | 学习率，用于参数更新的计算。PyTorch 默认为`0.01`，Paddle 无默认值，Paddle 需保持与 PyTorch 一致。          |
+| alpha     | rho       | 平滑常数。参数默认值不一致, PyTorch 默认为`0.99`，PyTorch 默认为`0.95`，Paddle 需保持与 PyTorch 一致。     |
+| eps       | epsilon        | 保持数值稳定性的短浮点类型值。参数默认值不一致, PyTorch 默认为`1e-08`，PyTorch 默认为`1e-06`，Paddle 需保持与 PyTorch 一致。  |
+| weight_decay           | weight_decay     | 表示权重衰减系数。参数默认值不一致, PyTorch 默认为`0`， Paddle 默认为`None`，Paddle 需保持与 PyTorch 一致。         |
+| momentum   | momentum   | 动量因子。参数完全一致。                       |
+| centered   | centered   | 如果为 True，则通过梯度的估计方差，对梯度进行归一化。参数完全一致。                       |
+| maximize           | -     | 根据目标最大化参数，而不是最小化。Paddle 无此参数，暂无转写方式。         |
+| differentiable      | -     | 是否应通过训练中的优化器步骤进行自动微分。Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。         |
+| -          | grad_clip            | 梯度裁剪的策略。 PyTorch 无此参数，Paddle 保持默认即可。       |
+
+通过上述两个优化器参数的对比可以看到：
+
+- Paddle 的参数设计为：
+
+  ``` python
+  class Optimizer:
+      def __init__(
+          self,
+          learning_rate,
+          parameters=None,
+          weight_decay=None,
+          grad_clip=None,
+          name=None,
+      ):
+  ```
+
+  通用参数
+  - parameters，网络参数
+  - learning_rate，学习率
+  - weight_decay，权重衰减
+  - grad_clip，梯度裁剪
+
+  特定参数
+  - beta, rho, ...，特殊作用系数
+  - epsilon，稳定作用系数
+  - 其他
+
+- PyTorch 的参数设计为：
+
+  ``` python
+  class Optimizer:
+      def __init__(self, params: ParamsT, defaults: Dict[str, Any]) -> None:
+  ```
+
+  通用参数
+  - param，网络参数
+
+  特定参数
+  - defaults，参数默认值，如 lr 等
+  - differentiable，自动微分
+  - 其他
+
+后续参数设计需要与 Paddle 现有优化器保持一致。对比 PyTorch ，针对 `NAdam` :
+
+``` python
+torch.optim.NAdam(
+  params,
+  lr=0.002,
+  betas=(0.9, 0.999),
+  eps=1e-08,
+  weight_decay=0,
+  momentum_decay=0.004,
+  decoupled_weight_decay=False,
+  *,
+  foreach=None,
+  capturable=False,
+  differentiable=False)
+```
+
+**需要** 的参数：
+
+- parameters，网络参数
+- learning_rate，学习率
+- beta1，一阶矩估计的指数衰减率
+- beta2，二阶矩估计的指数衰减率
+- epsilon，稳定作用系数
+- momentum_decay，动量衰减率
+- weight_decay，权重衰减
+- grad_clip，梯度裁剪
+
+**不需要** 的参数：
+
+- decoupled_weight_decay，Adam 或 AdamW 对于 weight_decay 的处理方式。Paddle 有单独的 `LRScheduler` 处理 weight_decay ，因此，此处不需要此参数。
+- foreach，是否使用优化器的 foreach 实现。参考上面的表格，Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。
+- capturable，在 CUDA 图中捕获此实例是否安全。参考上面的表格，Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。
+- differentiable，是否应通过训练中的优化器步骤进行自动微分。参考上面的表格，Paddle 无此参数，一般对网络训练结果影响不大，可直接删除。
 
 # 五、设计思路与实现方案
 
@@ -421,20 +534,27 @@ param 0.1197
 - 文档
 
 # 六、测试和验收的考量
-测试考虑的case如下：
+测试需考虑测试 `nadam op`，以及 `NAdam API` 。
+
+其中 `nadam op` 需要继承自 `from op_test import OpTest`：
 
 - **编程范式场景**
-  常规覆盖动态图和静态图的测试场景
+  常规覆盖动态图和静态图的测试场景。
 
 - **硬件场景**
-  常规需覆盖 CPU、GPU 两种测试场景
+  常规需覆盖 CPU、GPU 两种测试场景。
+
+- **输入参数**
+  常规覆盖默认参数，常用参数，错误参数。
 
 - **输出正确性**
-  输出数值结果的一致性和数据类型是否正确，使用 PyTorch 作为参考标准
+  输出数值结果的一致性和数据类型是否正确，设计 `nadam_step` 函数，比对 `1` 步，`多` 步的计算结果。
 
 - **计算精度**
-  需要保证 `前向/后向` 计算的精度正确性，使用 PyTorch 作为参考标准
+  需要保证 `前向/后向` 计算的精度正确性；需要比对 `_multi_precision` 的计算精度。
 
+- **API 的正确调用**
+  需要覆盖动态图和静态图的测试场景； CPU、GPU 两种测试场景；`前向/后向` 正确运行。
 
 # 七、可行性分析和排期规划
 - 第一周，实现相关代码
