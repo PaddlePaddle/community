@@ -91,13 +91,26 @@ Numpy 中的 numpy.sinc API文档 (https://numpy.org/doc/stable/reference/genera
     - x: (Tensor) 支持任意维度的 Tensor。数据类型支持 float16，float32，float64。
     - name: (Optional[str]) op 名称
 
-计算逻辑使用 paddle.sin 和 paddle.where 组合实现。
-
 ## 底层OP设计
 
 不涉及底层OP
 
 ## API实现方案
+
+计算逻辑使用 paddle.sin 和 paddle.where 组合实现。
+
+    ```python
+    def sinc(x, name=None):
+      y = math.pi * paddle.where(x == 0, 1.0e-20, x)
+      return paddle.sin(y)/y
+    ```
+
+    ```python
+    def sinc_(x, name=None):
+      y = math.pi * paddle.where(x == 0, 1.0e-20, x)
+      return paddle.divide_(y.sin(), y)
+    ```
+
 
 # 六、测试和验收的考量
 测试case：
