@@ -119,7 +119,7 @@ paddle.sinc, paddle.sinc_：
 - 正确性验证：可以与 NumPy 的结果对齐；
   - 不同 shape；
   - 前向计算；
-  - 计算dtype类型：验证 `float64`，`float32`等；
+  - 计算dtype类型：验证 `float16`，`float32`，`float64`；
 - 不同计算设备：覆盖 CPU 和 GPU 等实现；
 - 错误检查：输入数据类型不支持。
 
