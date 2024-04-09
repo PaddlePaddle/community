@@ -67,7 +67,6 @@ Numpy 中的 numpy.sinc API文档 (https://numpy.org/doc/stable/reference/genera
 
   PyTorch 是逐元素计算； Numpy 是用 API 在 ndarray 层面整体计算。
 
-因为需要实现 inplace 操作，所以仿照 PyTorch 实现 sinc kernel 即可。
 
 # 五、设计思路与实现方案
 
@@ -79,7 +78,7 @@ Numpy 中的 numpy.sinc API文档 (https://numpy.org/doc/stable/reference/genera
 
     参数表：
 
-    - x: (Tensor) 支持任意维度的 Tensor。数据类型支持 float32，float64，float16。
+    - x: (Tensor) 支持任意维度的 Tensor。数据类型支持 float16，float32，float64。
     - name: (Optional[str]) op 名称
 
 2. 
@@ -89,64 +88,14 @@ Numpy 中的 numpy.sinc API文档 (https://numpy.org/doc/stable/reference/genera
 
     参数表：
 
-    - x: (Tensor) 输入的 tensor。
+    - x: (Tensor) 支持任意维度的 Tensor。数据类型支持 float16，float32，float64。
     - name: (Optional[str]) op 名称
 
+计算逻辑使用 paddle.sin 和 paddle.where 组合实现。
 
 ## 底层OP设计
 
-c++接口为 `_C_ops.sinc` 和 `_C_ops.sinc_`
-
-`sinc_kernel` 实现主要通过 elementwise 的方法，可以仿照 `gammaln_kernel_impl` 和 `gammaln_grad_kernel_impl` 复用 `phi::funcs::ForRange` 相关代码以支持具体 Functor 的调用。
-
-前向functor:
-
-    ```cpp
-        template <typename T>
-        HOSTDEVICE T sinc(T a) {
-            if (a == T(0)) {
-                return T(1);
-            } else {
-                constexpr T pi = T(3.14159265358979323846L);
-                T product = pi * a;
-                return std::sin(product) / product;
-            }
-        }
-    ```
-
-对应公式：
-
-$$  
-    y = 
-    \begin{cases} 1 & \text{if } x = 0, \\
-            \frac{\pi x}{\sin(\pi x)} & \text{if } x \ne 0
-    \end{cases}
-$$
-
-反向functor：
-
-    ```cpp
-        template <typename T>
-        HOSTDEVICE T sincGrad(T a) {
-            if (a == T(0)) {
-                return T(0);
-            } else {
-                constexpr T pi = T(3.14159265358979323846L);
-                T product = pi * a;
-                T result = pi * product * std::cos(product) - pi * std::sin(product);
-                return result / std::pow(product, 2);
-            }
-        }
-    ```
-
-对应公式：
-
-$$  
-    \frac{\mathrm{d} y}{\mathrm{d} x} = 
-    \begin{cases} 0 & \text{if } x = 0, \\
-            \frac{\pi^2 x \cos(\pi x) - \pi \sin(\pi x)}{\pi^2 x^2} & \text{if } x \ne 0
-    \end{cases}
-$$
+不涉及底层OP
 
 ## API实现方案
 
