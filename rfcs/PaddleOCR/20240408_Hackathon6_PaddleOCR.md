@@ -13,29 +13,30 @@
 以PaddleOCR 项目为例，该套件有非常多的使用者，在 issue 区的讨论也很多。甚至有不少 issue 已经是长期存在的 issue。这些 issue 缺少诊断，复现，以及修复。因此，期望能够挑选部分长期存在的，讨论较多的issue，能够进行分析、复现并解决。
 
 ## 二、现状
-当前的PaddleOCR Issue中存在的问题主要由以下几部分组成：
-1. **多语言OCR开发**
-2. **兼容性问题**
-3. **OCR结果的准确性和数据缺失**
-4. **参考文档缺失或不明确**
+我们对前70条Issue进行了统计和分类，部分统计结果见附件。根据这些Issue，当前的PaddleOCR Issue中存在的问题主要由以下几部分组成：
+1. **多语言OCR开发**:当前有很多用户希望基于他们工 作所使用到的语言、他们的母语环境训练特定语言的OCR识别模型，但由于文档缺失/依赖不明确等问题，导致训练工作并不顺利、训练后的模型准确性较低。
+2. **兼容性问题**：由于平台、GPU环境、文档缺失、依赖不明确的问题，导致部分用户无法在自己的电脑上运行PaddleOCR，因此需要针对该问题进行完善，例如明确依赖关系、指出不同平台的依赖性。
+3. **OCR结果的准确性和数据缺失**：在不同的环境下，训练、导出、推理都可能带来一定的精度损失，部分用户的Issue中表明OCR推理有时候会存在丢失特定区域文字的现象。
+4. **参考文档缺失或不明确**：在代码的开发过程中，文档工作没有被很好的跟进，从而导致用户无法获得完整的代码功能说明，并给用户的推理、训练工作带来较大的阻碍。
 5. **其他未解决的BUG**
-我们对前70条Issue进行了统计和分类，部分统计结果见附件。
+   
+
 
 ## 三、任务列表
 根据统计结果，我们挑选了部分长期存在的issue，进行复现和解决。该列表如下所示：
 
 |Issue|说明|建议|
 |---|---|---|
-|10760|关于模型微调和cuda版本不匹配的问题||
-|10685|更新Backbone后无法运行，解决了一部分|跑通此逻辑，梳理相关文档|
-|10288|打包后GPU模式下无法运行|需要查验|
-|10197|关于模型自动下载的问题，和解码问题||
-|6559|内存泄露||
-|11149|训练问题|可以针对此问题增加文档说明|
-|11551|导出报错||
-|10499|文本检测训练完进行单张图片预测时发现漏检内容||
-|8743|Code doesn't work with numpy>=1.24|升级一下对基础依赖的适配|
-|11441|训练时的shape问题，可以增加一下README||
+|https://github.com/PaddlePaddle/PaddleOCR/issues/10760|关于模型微调和cuda版本不匹配的问题||
+|https://github.com/PaddlePaddle/PaddleOCR/issues/10685|更新Backbone后无法运行，解决了一部分|跑通此逻辑，梳理相关文档|
+|https://github.com/PaddlePaddle/PaddleOCR/issues/10288|打包后GPU模式下无法运行|需要查验|
+|https://github.com/PaddlePaddle/PaddleOCR/issues/10197|关于模型自动下载的问题，和解码问题||
+|https://github.com/PaddlePaddle/PaddleOCR/issues/6559|内存泄露||
+|https://github.com/PaddlePaddle/PaddleOCR/issues/11149|训练问题|可以针对此问题增加文档说明|
+|https://github.com/PaddlePaddle/PaddleOCR/issues/11551|导出报错||
+|https://github.com/PaddlePaddle/PaddleOCR/issues/10499|文本检测训练完进行单张图片预测时发现漏检内容||
+|https://github.com/PaddlePaddle/PaddleOCR/issues/8743|Code doesn't work with numpy>=1.24|升级一下对基础依赖的适配|
+|https://github.com/PaddlePaddle/PaddleOCR/issues/11441|训练时的shape问题，可以增加一下README||
 
 ## 四、预期时间和验收标准
 预期工作计划如下：
