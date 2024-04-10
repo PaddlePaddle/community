@@ -5,7 +5,7 @@
 |提交作者|Liyulingyue、GreatV|
 |提交时间|2024-04-08|
 |版本号|v0.1|
-|依赖飞桨版本|Unknow|
+|依赖飞桨版本|2.6|
 |文件名| 20240408_Hackathon6_PaddleOCR.md|
 
 ## 一、概述
