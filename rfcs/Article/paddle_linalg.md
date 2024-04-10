@@ -99,11 +99,11 @@ compressed_image.save('compressed_image.jpg')
 
 代码中使用的原图片：
 
-<img src="images/lenna.png" alt="lenna" style="zoom:50%;" />
+<img width =250 src="images/lenna.png" alt="lenna" />
 
 压缩后的图片：
 
-<img src="images/compressed_image.jpg" alt="compressed_image" style="zoom:50%;" />
+<img width=250 src="images/compressed_image.jpg" alt="compressed_image"  />
 
 压缩后的图片看起来和原来的图像并没有很大的区别，但压缩后的文件的大小比原来的图片小很多：
 
