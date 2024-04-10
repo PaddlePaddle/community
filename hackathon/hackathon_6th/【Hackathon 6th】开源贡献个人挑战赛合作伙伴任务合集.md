@@ -276,7 +276,10 @@ Paddle2.6.0 中移除了很多 API 接口且部分 op 的输出大小产生了�
   $ ./paddle_tests --gtest_filter=PaddleFuzzyOpTest/FrontEndFuzzyOpTest.testOpFuzzy/*set_value8*
 ```
 
-预留：赛题 6：CPU 赛题，后续提供
-难度：2 星
-预留：赛题 7：CPU 赛题，后续提供
-难度：3 星
+### No.48（预留）：CPU 赛题，后续提供
+
+...
+
+### No.49（预留）：CPU 赛题，后续提供
+
+...
