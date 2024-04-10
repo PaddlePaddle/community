@@ -857,7 +857,7 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 **详细描述：**
 
 - 在模型的开发调试过程中，计算图的可视化是一个很重要的基础设施，但是paddle目前的pir program 不支持可视化。
-- 你的任务是在增加一个工具函数，利用paddle已有的networkx库，根据pir的program，可以可视化展示计算图，并且提供输出为.dot文件的方法
+- 你的任务是增加一个工具函数，利用paddle已有的networkx库，根据pir的program，可以可视化展示计算图，并且提供输出为.dot文件的方法
 
 **提交内容：**
 
