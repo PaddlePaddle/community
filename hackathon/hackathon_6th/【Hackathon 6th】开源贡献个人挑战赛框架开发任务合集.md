@@ -870,4 +870,4 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 
 **参考资料：**
 
-- [networkx]([https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/06_distributed_training/data_parallel/recompute_cn.html](https://networkx.org/documentation/latest/tutorial.html))
+- [networkx](https://networkx.org/documentation/latest/tutorial.html)
