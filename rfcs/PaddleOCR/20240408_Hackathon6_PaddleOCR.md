@@ -59,11 +59,16 @@ OCR Issue列表与描述：
 
 |序号|isssue|描述|分类|进度|难度|
 |:------:|:------:|------|:------:|:------:|:------:|
-|1|https://github.com/PaddlePaddle/PaddleOCR/issues/11031|阿拉伯语数据集训练出现问题|多语言训练|已基本解决|普通|
-|2|https://github.com/PaddlePaddle/PaddleOCR/issues/11079|Mac M2 上无法运行|硬件兼容性问题|未解决|具有挑战性|
-|3|https://github.com/PaddlePaddle/PaddleOCR/issues/10270|PPStructure版面分析得到的结果，bbox里OCR的结果缺失最后一行|结果的准确性|已解决|-|
-|4|https://github.com/PaddlePaddle/PaddleOCR/issues/11815|pubtab_dataset 加载模型图片时会堵塞|疑似bug|未解决|适中|
-|5|https://github.com/PaddlePaddle/PaddleOCR/issues/8761|表格识别模型微调训练效果比较差|结果的准确性|待确认|适中|
+|1|https://github.com/PaddlePaddle/PaddleOCR/issues/11031|阿拉伯语数据集训练出现问题|多语言OCR开发|已基本解决|普通|
+
+|2|https://github.com/PaddlePaddle/PaddleOCR/issues/11079|Mac M2 上无法运行|兼容性问题|未解决|具有挑战性|
+
+|3|https://github.com/PaddlePaddle/PaddleOCR/issues/10270|PPStructure版面分析得到的结果，bbox里OCR的结果缺失最后一行|OCR结果的准确性和数据缺失|已解决|-|
+
+|4|https://github.com/PaddlePaddle/PaddleOCR/issues/11815|pubtab_dataset 加载模型图片时会堵塞|其他未解决的BUG|未解决|适中|
+
+|5|https://github.com/PaddlePaddle/PaddleOCR/issues/8761|表格识别模型微调训练效果比较差|OCR结果的准确性和数据缺失|待确认|适中|
+
 |6|https://github.com/PaddlePaddle/PaddleOCR/issues/10265|PaddleOCR无法和yolov8共同安装|兼容性|基本解决&待验证|普通|
 |7|https://github.com/PaddlePaddle/PaddleOCR/issues/11639|PaddleOCR内存泄露|内存泄露|进行中|具有挑战性|
 |8|https://github.com/PaddlePaddle/PaddleOCR/issues/11056|PPOCRLabel运行出bug|bug|未解决|适中|
@@ -92,7 +97,8 @@ OCR Issue列表与描述：
 |31|https://github.com/PaddlePaddle/PaddleOCR/issues/11849|ch_PP-OCRv4_rec_hgnet.yml 用这个模型转换成onnx进行识别，速度超级慢|模型性能|基本解决|适中|
 |32|https://github.com/PaddlePaddle/PaddleOCR/issues/11763|从哪下载 ubuntu20.04 libpaddle_inference|安装下载|基本解决|普通|
 |33|https://github.com/PaddlePaddle/PaddleOCR/issues/11149|ppocrv4训练，配置文件有误|更新文档|未解决&待验证|适中|
-|34|https://github.com/PaddlePaddle/PaddleOCR/issues/6559|使用gpu=True没有预测结果|兼容性|进行中|适中|
+|34|https://github.com/PaddlePaddle/PaddleOCR/issues/10775|使用gpu=True没有预测结果|兼容性问题|进行中|适中|
+
 |35|https://github.com/PaddlePaddle/PaddleOCR/issues/10438|使用命令行没有预测结果|硬件兼容性|未解决|适中|
 |36|https://github.com/PaddlePaddle/PaddleOCR/issues/11551|导出报错|文档|未解决|普通|
 |37|https://github.com/PaddlePaddle/PaddleOCR/issues/10499|文本检测训练完进行单张图片预测时发现漏检内容|未解决|适中|
