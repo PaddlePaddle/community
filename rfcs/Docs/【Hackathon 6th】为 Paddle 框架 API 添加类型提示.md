@@ -204,6 +204,23 @@ Paddle 目前没有 `Type Hints` 功能，但是存在第三方的尝试，如�
 - 非 Python 接口，提供 `stub` 标注文件
 - Python 接口，使用 `inline` 方式标注
 
+标注的基本原则为：**在不违背 Paddle 最低支持版本 `3.8` 语法的基础上，尽可能使用新版本 typing 特性**，如有必要，使用 `typing_extension` 模块。
+
+如，标注中使用 `Union` 的情况，在参数中使用 `|` 代替，同时需要引入 `from __future__ import annotations`:
+
+``` python
+from __future__ import annotations
+def test(a: int | str): ...
+```
+
+而在 `TypeAlias` 中仍使用 `Union` ：
+
+``` python
+from typing_extensions import TypeAlias
+from typing import Union
+t: TypeAlias = Union[int, str]
+```
+
 > **说明** 竞品分析与实现方案等内容，[Type Hinting for Tensor of Paddle](https://github.com/jiamingkong/community/blob/4bde11a8a861c8aae4bdb1284579e00d4799f7b9/rfcs/type-hinting/type_hinting_for_paddle_tensor.md) 已有较详细的阐述，本文不再赘述。
 
 ## 1、总览
