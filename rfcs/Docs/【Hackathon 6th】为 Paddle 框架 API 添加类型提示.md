@@ -21,7 +21,7 @@
 
 ## 1、相关背景
 
-Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep-0484) 正式规范了 `类型提示` 功能，以帮助开发者提高代码质量，Python 目前 (`3.12` 版本) 已经完成的相关 `PEP` 有 `21` 个，具体可以参考 [Typing PEPs](https://peps.python.org/topic/typing/) 。经过前期的几个版本迭代，Python 的 `类型提示` 功能已经受到开发者的广泛认可。Paddle 目前支持的 Python 版本 `3.8` 已经可以较好的支持 `类型提示`，本文旨在阐述 Paddle 引入 `类型提示` 的可行性与具体方案。
+Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep-0484) 正式规范了 `类型提示` 功能，以帮助开发者提高代码质量，Python 目前 (`3.12` 版本) 已经完成的相关 `PEP` 有 `21` 个，具体可以参考 [Typing PEPs](https://peps.python.org/topic/typing/) 。经过前期的几个版本迭代，Python 的 `类型提示` 功能已经受到开发者的广泛认可。Paddle 目前最低支持的 Python 版本 `3.8` 已经可以较好的支持 `类型提示`，本文旨在阐述 Paddle 引入 `类型提示` 的可行性与具体方案。
 
 本文档为 [【Hackathon 6th】Fundable Projects](https://github.com/PaddlePaddle/Paddle/issues/62908) 中 [为 Paddle 框架 API 添加类型提示（Type Hints）](https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_6th/%E3%80%90Hackathon%206th%E3%80%91FundableProject%E4%BB%BB%E5%8A%A1%E5%90%88%E9%9B%86.md#%E4%B8%80%E4%B8%BA-paddle-%E6%A1%86%E6%9E%B6-api-%E6%B7%BB%E5%8A%A0%E7%B1%BB%E5%9E%8B%E6%8F%90%E7%A4%BAtype-hints) 的实现方案。
 
