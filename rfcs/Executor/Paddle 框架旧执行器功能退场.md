@@ -36,15 +36,56 @@
 `ExecutionStrategy`在新执行器中已经被废弃可以直接移除相应代码，官方文档也需同步删除。
 
 ##### 1.2 解除`BuildStrategy()`依赖
-通过对`BuildStrategy`进一步调研发现，存在许多地方直接依赖`BuildStrategy`，并不能直接将其移除。考虑删除`BuildStrategy`中无用的属性，将其与`ParallelExecutor`解耦后再迁移到别的地方进行兼容，最后官方文档中`BuildStrategy`也需同步更新。
+通过对`BuildStrategy`调研发现，存在许多内部API依赖`BuildStrategy`接口，并不能直接将其移除,所以只考虑移除`BuildStrategy`中废弃的属性移除，将其与`ParallelExecutor`解耦后再迁移到别的地方进行兼容，废弃的属性在官方文档中也需同步更新。
 
-目前`BuildStrategy`存在依赖的地方如下：
-- 在`jit.to_static()`中作为参数传入，其`build_cinn_pass`属性用来控制是否使用CINN编译。
-- 在分布式`DistributedStrategy`API中被用于实现一些特定功能，如`fp16_allreduce`、`fuse_all_reduce_ops`等。
-- 在`static.CompiledProgram`中作为参数传入，在编译`program`或`graph`支持选择一些特殊的编译策略。
+针对`BuildStrategy`调研情况如下：
+属性名称 | 依赖情况
+:------:|:------
+_clear_finalized|`fleet.distributed_optimizer.minimize`
+reduce_strategy|`fleet.DistributedStrategy`,`static.CompiledProgram`
+gradient_scale_strategy|无
+debug_graphviz_path|无
+enable_sequential_execution|`fleet.DistributedStrategy`,`static.CompiledProgram`
+remove_unnecessary_lock|无
+num_trainers|`fleet.collective.CollectiveOptimizer`,`static.CompiledProgram`
+trainers_endpoints|`fleet.collective.CollectiveOptimizer`,`static.CompiledProgram`
+trainer_id|`fleet.DistributedStrategy`
+nccl_comm_num|`fleet.init`,`fleet.collective.CollectiveOptimizer`,`fleet.DistributedStrategy`,`static.CompiledProgram`
+bkcl_comm_num|无
+use_hierarchical_allreduce|`fleet.collective.CollectiveOptimizer`,`fleet.DistributedStrategy`,`static.CompiledProgram`
+hierarchical_allreduce_inter_nranks|`fleet.collective.CollectiveOptimizer`,`fleet.DistributedStrategy`,`static.CompiledProgram`
+build_cinn_pass|`jit.to_static`
+fuse_elewise_add_act_ops|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+fuse_gemm_epilogue|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+fuse_dot_product_attention|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+fuse_adamw|`FuseAdamWPass`
+fused_attention|`FusedAttentionPass`
+fused_feedforward|`FusedFeedforwardPass`
+sequential_run|`static.Executor()`
+fuse_resunit|`FuseResUnitPass`
+fuse_bn_act_ops|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+fuse_bn_add_act_ops|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+enable_auto_fusion|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+fuse_relu_depthwise_conv|`FuseReluDepthwiseConvPass`,`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+fuse_broadcast_ops|`test_fleet_distributed_strategy.py`
+fuse_all_optimizer_ops|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+sync_batch_norm|`fleet.collective.CollectiveOptimizer`,`fleet.DistributedStrategy`,`static.CompiledProgram`
+memory_optimize|`test_memory_reuse_exclude_feed_var.py`,`ir_memory_optimize_net_base.py`,`test_distributed_strategy.py`
+is_distribution|`static.CompiledProgram`
+async_mode|`fleet.DistributedStrategy`
+enable_inplace|`static.Executor()`,`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+enable_addto|`static.Executor()`
+fuse_all_reduce_ops|`fleet.DistributedStrategy`,`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`,`fleet.meta_optimizers.ShardingOptimizer`
+enable_backward_optimizer_op_deps|`fleet.collective.CollectiveOptimizer`
+cache_runtime_context|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+mkldnn_enabled_op_types|无
+fix_op_run_order|`test_cuda_graph_static_mode.py`
+allow_cuda_graph_capture|`static.Executor()`
+_copy|`fleet.distributed_optimizer.minimize`,`fleet.meta_optimizers.RawProgramOptimizer`
+_finalize_strategy_and_create_passes|`test_pass_builder.py`
 
 ##### 1.3 解除`CompiledProgram()`依赖
-在新执行器动转静的API`add_build_strategy_for`中仍然复用`CompiledProgram`接口实现，而其内部的真正实现函数`_compile_data_parallel`与ParallelExecutor直接绑定，因此需要将这个部分功能从ParallelExecutor中提取出来兼容，完成兼容后python端就不再依赖ParallelExecutor。
+在动转静过程中，会通过一系列IR Pass将静态图Program转化成IR Graph，这个过程会调用`static.CompiledProgram`接口来实现，其内部的真正实现函数`_compile_data_parallel`与ParallelExecutor直接绑定。在动转静支持新执行器时并没有将这部分功能从ParallelExecutor中解耦，而是直接复用。所以现在需要将其从ParallelExecutor中完成解耦，方便后续ParallelExecutor退场。
 
 #### 2、C++端
 
@@ -52,7 +93,7 @@
 目前 CINN 已经迁移到 Paddle 框架中并且支持了ParallelExecutor作为它的一种执行方式，所以首先需要将其从 CINN 中退场。
 
 ##### 2.2 迁移 ParallelExecutor 编译模块
-由于ParallelExecutor旧执行器中compile功能并没有在框架中彻底废除，因此需要将这部分代码从提取出来进行兼容。完成完成兼容后，意味着ParallelExecutor与python端彻底解绑，不再依赖ParallelExecutor中的任何代码。
+ParallelExecutor 中主要包含两大功能：1、编译IR graph，2、执行SSA graph。编译功能通过pybind与`static.CompiledProgram`绑定并不能直接移除（原因见1.3），因此需要将这部分代码进行迁移。完成迁移后，ParallelExecutor便与python端彻底解绑，可以开始真正的退场工作。
 
 ##### 2.3 实现类和组件全面退场
 ParallelExecutor底层的实现类在paddle/fluid/framework/parallel_executor.cc，而在该执行器中实际调用的也是SSAGraphExecutor，针对不同的构建策略和硬件设备使用了不同的SSAGraphExecutor（其中涉及到的派生相关执行器有：AsyncSSAGraphExecutor、ParallelSSAGraphExecutor、ThreadedSSAGraphExecutor、BindThreadedSSAGraphExecutor、FastThreadedSSAGraphExecutor），而另一个派生类执行器ScopeBufferedSSAGraphExecutor，也通过DropLocalExeScopes和NeedCreateLocalExeScope函数来控制是否使用，同时相关组件也需要同步移除。
@@ -64,7 +105,7 @@ SSAGraphExecutor 执行器在paddle/fluid/framework/ssagraph_executor.cc中，�
 
 ### AsyncExecutor 执行器
 
-AsyncExecutor 执行器在Python端的API和单元测试已经删除，所以只需要清理C++端的残留代码。另外，其中涉及到的DataFeedDesc相关类暂时保留。
+AsyncExecutor 执行器在Python端的API和单元测试已经删除，所以只需要清理C++端的残留代码。另外，其中涉及到的DataFeedDesc相关类是由`data_feed.proto`文件自动生成的，并且`paddle.distributed.xxxDataset`等系列API都对其有依赖不能移除。
 
 
 ## 四、可行性分析与排期计划
@@ -82,7 +123,7 @@ Paddle 框架旧执行器功能退场可分为如下几步进行：
 :------:|:------
 部分删除|cinn_launch_context_test.cc
 直接删除|share_varinfo_into_cinn_pass_test.cc
-直接删除|test_reference_count_pass_last_lived_ops.cc
+部分删除|test_reference_count_pass_last_lived_ops.cc
 直接删除|seresnext_test_base.py
 直接删除|test_fuse_all_reduce_pass.py
 部分删除|test_fuse_elewise_add_act_pass.py
@@ -103,9 +144,11 @@ Paddle 框架旧执行器功能退场可分为如下几步进行：
 直接删除|test_parallel_executor_transformer.py
 部分删除|test_py_func_op.py
 部分删除|test_standalone_executor.py
+部分删除|test_weight_decay.py
 
-### 2、完成旧执行器中compile功能的迁移
-为了兼容python端的`BuildStrategy`和`CompiledProgram`API，需要将其旧执行器的pybind的代码迁移到新的地方重新绑定，同时还需要提取出ParallelExecutor的comilpe功能到新的地方兼容。完成C++端代码迁移后，只需要将python端的绑定切换至新绑定的模块即可。
+### 2、完成`ParallelExecutor`编译模块迁移
+- 迁移`ParallelExecutor`编译模块至新地方兼容，并重新在`static.CompiledProgram`中绑定
+- 移除`BuildStrategy`废弃属性（详见3.1.2），再重新通过pybind绑定，官网文档也需同步更新
 
 ### 3、移除`ExecutionStrategy`
 主要清理python端的`ExecutionStrategy`代码，解除与C++端依赖，官方文档也需同步删除，而C++端的实现代码后续跟随`ParallelExecutor`执行器代码一并删除。
@@ -113,14 +156,18 @@ Paddle 框架旧执行器功能退场可分为如下几步进行：
 ### 4、CINN 中旧执行器代码退场
 目前 CINN 在 Paddle 框架中已经完成迁移，并且兼容了旧执行器，其中涉及旧执行器相关代码全部集中在C++端可以直接退场，主要分为以下几个部分：
 - 移除旧执行器分支代码
-- 移除share_varinfo_into_cinn_pass
+- 移除`share_varinfo_into_cinn_pass`
 - 移除旧执行器相关单测代码(如有)
 - 移除旧执行器flag`FLAGS_enable_pe_launch_cinn`
 - CMakeLists.txt 删除对应编译依赖
 
-### 5、移除旧执行器相关代码
+### 5、移除`ParallelExecutor`执行器相关代码
 - 移除`ParallelExecutor`执行器的`OpHandle`组件
-- 移除旧执行器的底层实现类以及其派生类
+- 移除`ParallelExecutor`的底层实现类以及其派生类
+- CMakeLists.txt 删除对应编译依赖
+
+### 6、移除`AsyncExecutor`执行器相关代码
+- 移除`AsyncExecutor`的底层实现类以及与其相关的派生类
 - CMakeLists.txt 删除对应编译依赖
 
 ## 五、测试和验收的考量
