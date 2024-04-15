@@ -73,8 +73,9 @@ class Chi2(Gamma):
 - paddle.distribution.chi2
 在 Pytorch 的chi2是通过继承Gamma实现的，chi2分布实际上等价于Gamma(alpha=0.5*df, beta=0.5)，在Paddle中已经有了[Gamma](https://github.com/PaddlePaddle/Paddle/blob/fba5029777f79c289003a24dbf736fdb6465d92a/python/paddle/distribution/gamma.py#L24)可以用相似的思路构造一下即可。
 
+----------------------------------------
+- paddle.distribution.LKJCholesky
 
-- 
 
 # 五、设计思路与实现方案
 
