@@ -1,8 +1,8 @@
-# paddle_ormqr 设计文档
+# paddle.distribution chi2/LKJCholesky 设计文档
 
 | API 名称     | paddle.distribution.chi2 / paddle.distribution.LKJCholesky                     |
 | ------------ | -------------------------------- |
-| 提交作者     | Cmcamdy                     |
+| 提交作者     | cmcamdy                     |
 | 提交时间     | 2024-04-15                       |
 | 版本号       | V1.0                             |
 | 依赖飞桨版本 | develop                          |
