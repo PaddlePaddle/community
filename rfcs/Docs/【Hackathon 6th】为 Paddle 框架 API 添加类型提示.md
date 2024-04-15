@@ -31,7 +31,7 @@ Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep
 
 > **说明**： 类型标注是个循序渐进的过程，且存在较多私有 API 与 c++ 接口，此次任务无法保证完成以上所有接口的类型标注，故此，不做 Paddle 类型标注的完备性说明。
 
-### 2.1 _typing 模块
+### 2.1 `_typing` 模块
 
 此目标为 Paddle 添加 `_typing` 模块，并作为私有 API 的一部分。
 
@@ -40,7 +40,7 @@ Python 在 3.5 版本通过 [PEP 484 – Type Hints](https://peps.python.org/pep
 - PyTorch 中的 `torch/types.py`
 - Numpy 中的 [Typing (numpy.typing)](https://numpy.org/devdocs/reference/typing.html)
 
-`_typing` 模块包含 Paddle 中用到的特殊类型，如 `dtype`，`device` 等，具体实现可参考 @SigureMo 的 [paddle-stubs/_typing](https://github.com/cattidea/paddlepaddle-stubs/tree/main/paddle-stubs/_typing)。
+`_typing` 模块包含 Paddle 中用到的特殊类型，如 `dtype`、`device` 等，具体实现可参考 @SigureMo 的 [paddle-stubs/_typing](https://github.com/cattidea/paddlepaddle-stubs/tree/main/paddle-stubs/_typing)。
 
 具体需要实现：
 
@@ -555,11 +555,11 @@ from ._typing import Tensor as Tensor
 
 1. Paddle 中引入 `_typing` 模块
 
-    **对用户的影响：** 用户可以使用 `_typing` 模块提供的接口
+    **对用户的影响：** 无影响
 
     **对开发者的影响：** 开发者可以使用 `_typing` 模块标注 Paddle 内部模块
 
-    **对框架架构的影响：** Paddle 框架中增加 `_typing` 模块与相应接口
+    **对框架架构的影响：** Paddle 框架中增加 `_typing` 模块
 
     **其他风险：** `_typing` 模块需要在后续工作中不断完善
 
