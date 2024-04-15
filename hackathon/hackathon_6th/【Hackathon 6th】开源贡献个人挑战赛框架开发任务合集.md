@@ -851,3 +851,46 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 **参考资料：**
 
 - [Paddle 前向重计算原理及使用方法](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/06_distributed_training/data_parallel/recompute_cn.html)
+
+
+## 【开源贡献个人挑战赛-框架其他】任务详情
+
+### NO.50 将 PyLayer 机制迁移至 PIR 体系下
+
+**详细描述：**
+
+飞桨的动态图 PyLayer 向用户提供了一种「高度灵活且便利」的自定义网络层前、反向计算的机制，比如存在一些用户自定义的计算逻辑，无法通过飞桨 现有的某个 API 或某些 API 组合实现，故可以借助 PyLayer 来实现用户的「idea」。在[之前的工作中](https://github.com/PaddlePaddle/Paddle/issues/54120)，飞桨的动态图中的 [PyLayer 机制](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/api/paddle/autograd/PyLayer_cn.html)能够与飞桨的[动转静@to_staitc](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/jit/index_cn.html) 互通，支持模型中 PyLayer 的自定义层能够被 @to_static 感知并正确地生成静态图 Program，支撑[转静训练](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/jit/basic_usage_cn.html#erdongzhuanjingxunlian)和[导出推理](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/jit/basic_usage_cn.html#sandongzhuanjingmoxingbaocunhejiazai)。
+
+`PyLayer` 支持 `@to_static` 的思路是使用 Paddle 基于 AST 的动转静转写工具，获取动态图 `PyLayer` 的正反向逻辑，分别创建前向 block 和反向 block，并创建静态图 PyLayer Op。这工作的基础便是设计并实现了静态图 PyLayer Op，其功能是能够运行用户创建的前向 block 和反向 block。
+
+目前静态图 PyLayer Op 仍是基于旧 IR，但从 Paddle 2.6 版本开始，Paddle 团队引入 PIR 作为静态图 IR。随着 PIR 底层机制的日益完善，我们可以把  PyLayer 机制迁移至 PIR 体系下，进一步支持动转静等相关工作，保证 Paddle 的完备性和高效性。
+
+在这个任务中你将收获：
+
+- 学习 PyLayer 旧 IR 体系代码和 PIR 体系核心机制代码，掌握开源套件开发基本知识
+- 熟悉 Paddle 中控制流算子相关知识
+- 熟悉 Paddle 中自动微分机制
+- 熟悉 Paddle 中动转静原理和工具的相关知识
+
+主框架将获得收益：
+
+- 完善动转静机制
+- 完善控制流算子正反向机制
+
+**提交内容：**
+
+- 完成 PyLayer Op 的「前向」PIR 适配
+- 完成 PyLayer Op 的「反向」PIR 适配
+- PIR 体系下的 PyLayer Op 能支持动转静训练
+- PIR 体系下的 PyLayer Op 能支持导出推理
+
+**技术要求：**
+
+- 熟悉 Paddle 动转静的基本原理
+- 熟悉 PyLayer 执行机制
+- 熟悉控制流算子执行机制
+- 熟悉 PIR 基本组件与 API 层次 
+- 熟练掌握 C++, Python
+
+**参考资料：**
+https://github.com/PaddlePaddle/Paddle/issues/60688
