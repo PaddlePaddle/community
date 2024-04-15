@@ -852,7 +852,6 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 
 - [Paddle 前向重计算原理及使用方法](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/06_distributed_training/data_parallel/recompute_cn.html)
 
-
 ## 【开源贡献个人挑战赛-框架其他】任务详情
 
 ### NO.50 将 PyLayer 机制迁移至 PIR 体系下
@@ -894,3 +893,23 @@ Adam 优化器出自 [Adam 论文](https://arxiv.org/abs/1412.6980) 的第二节
 
 **参考资料：**
 https://github.com/PaddlePaddle/Paddle/issues/60688
+
+### NO.51 PIR 计算图支持可视化
+
+**详细描述：**
+
+- 在模型的开发调试过程中，计算图的可视化是一个很重要的基础设施，飞桨当前的 pir program 不支持可视化。
+- 你的任务是增加一个工具函数，利用飞桨已有的 networkx 库，根据 pir program，可视化展示计算图，并且提供输出为.dot文件的方法
+
+**提交内容：**
+
+- 实现代码 & PR 描述：实现上述功能，并在 PR 描述中说明实现方法和性能数据。
+
+**技术要求：**
+
+- 熟悉模型的 pir 表示
+- 熟悉 python
+
+**参考资料：**
+
+- [networkx](https://networkx.org/documentation/latest/tutorial.html)
