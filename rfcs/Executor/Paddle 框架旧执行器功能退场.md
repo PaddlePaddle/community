@@ -145,6 +145,8 @@ Paddle 框架旧执行器功能退场可分为如下几步进行：
 部分删除|test_py_func_op.py
 部分删除|test_standalone_executor.py
 部分删除|test_weight_decay.py
+直接删除|seresnext_test_base.py
+直接删除|parallel_executor_test_base.py
 
 ### 2、完成`ParallelExecutor`编译模块迁移
 - 迁移`ParallelExecutor`编译模块至新地方兼容，并重新在`static.CompiledProgram`中绑定
