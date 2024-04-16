@@ -913,3 +913,91 @@ https://github.com/PaddlePaddle/Paddle/issues/60688
 **参考资料：**
 
 - [networkx](https://networkx.org/documentation/latest/tutorial.html)
+
+### NO.52 将paddle内部的dequantize/quantize/dequantize_linear/quantize_linear/dequantize_abs_max算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+包括如下工作：
+- 将fluid下的手写op定义删除，配置ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证相关算子的单测运行成功，单测目录是test/legacy_test/
+
+**提交内容：**
+
+- kernel迁移到paddle/phi/kernels目录下
+- 算子定义在ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考资料：**
+
+- [【PaddlePaddle Hackathon 5th】开源贡献个人挑战赛](https://github.com/PaddlePaddle/Paddle/issues/57262) 第102-105题相关PR。
+
+### NO.53 将paddle内部的fake_channel_wise_dequantize_max_abs/fake_channel_wise_quantize_abs_max/fake_channel_wise_quantize_dequantize_abs_max/fake_dequantize_max_abs算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+包括如下工作：
+- 将fluid下的手写op定义删除，配置ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证相关算子的单测运行成功，单测目录是test/legacy_test/
+
+**提交内容：**
+
+- kernel迁移到paddle/phi/kernels目录下
+- 算子定义在ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考资料：**
+
+- [【PaddlePaddle Hackathon 5th】开源贡献个人挑战赛](https://github.com/PaddlePaddle/Paddle/issues/57262) 第102-105题相关PR。
+
+### NO.54 将paddle内部的fake_quantize_abs_max/fake_quantize_moving_average_abs_max/fake_quantize_range_abs_max算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+包括如下工作：
+- 将fluid下的手写op定义删除，配置ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证相关算子的单测运行成功，单测目录是test/legacy_test/
+
+**提交内容：**
+
+- kernel迁移到paddle/phi/kernels目录下
+- 算子定义在ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考资料：**
+
+- [【PaddlePaddle Hackathon 5th】开源贡献个人挑战赛](https://github.com/PaddlePaddle/Paddle/issues/57262) 第102-105题相关PR。
+
+### NO.55 将paddle内部的fake_quantize_dequantize_abs_max/fake_quantize_dequantize_moving_average_abs_max/dequantize_log算子及其kernel实现从fluid下迁移到phi下
+
+**详细描述：**
+
+包括如下工作：
+- 将fluid下的手写op定义删除，配置ops.yaml自定生成op定义
+- 将对应的kernel迁移到phi下
+- 迁移前后保证相关算子的单测运行成功，单测目录是test/legacy_test/
+
+**提交内容：**
+
+- kernel迁移到paddle/phi/kernels目录下
+- 算子定义在ops.yaml下配置
+
+**技术要求：**
+
+- 熟练掌握 C++，Python
+
+**参考资料：**
+
+- [【PaddlePaddle Hackathon 5th】开源贡献个人挑战赛](https://github.com/PaddlePaddle/Paddle/issues/57262) 第102-105题相关PR。

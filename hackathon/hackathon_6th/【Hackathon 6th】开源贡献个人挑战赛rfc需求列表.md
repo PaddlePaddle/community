@@ -39,6 +39,10 @@
 |  35  |   ⭐   | 前向重计算函数在 use_reentrant == True 时支持以关键字参数的方式传入 Tensor                                 |        否        |
 |  50  |   ⭐   | 将 PyLayer 机制迁移至 PIR 体系下                                 |        否        |
 |  51  |   ⭐️   | PIR 计算图可视化                   |        是        |
+|  52  |   ⭐️   | 将paddle内部的dequantize/quantize/dequantize_linear/quantize_linear/dequantize_abs_max算子及其kernel实现从fluid下迁移到phi下                   |        否        |
+|  53  |   ⭐️   | 将paddle内部的fake_channel_wise_dequantize_max_abs/fake_channel_wise_quantize_abs_max/fake_channel_wise_quantize_dequantize_abs_max/fake_dequantize_max_abs算子及其kernel实现从fluid下迁移到phi下                   |        否        |
+|  54  |   ⭐️   | 将paddle内部的fake_quantize_abs_max/fake_quantize_moving_average_abs_max/fake_quantize_range_abs_max算子及其kernel实现从fluid下迁移到phi下                   |        否        |
+|  55  |   ⭐️   | 将paddle内部的fake_quantize_dequantize_abs_max/fake_quantize_dequantize_moving_average_abs_max/dequantize_log算子及其kernel实现从fluid下迁移到phi下                   |        否        |
 
 ## 科学计算模型复现
 
