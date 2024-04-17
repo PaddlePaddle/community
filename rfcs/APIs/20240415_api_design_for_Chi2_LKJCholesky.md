@@ -518,7 +518,6 @@ $$
 $$
 z_{ij} = 
 \begin{cases}
-1 & , \text{if } i = 0\ \text{or}\ j=0 \\
 \sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } & , \text{if } i>0  \text{ and } j > 0 
 \end{cases}
 $$
