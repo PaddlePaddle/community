@@ -550,7 +550,13 @@ paddle.distribution.LKJCholesky(dim, concentration=1.0, sample_method = 'onion')
 参数表：
 - `dim (int)`: 目标相关矩阵的维度。
 - `concentration (float, optional)`: 集中参数，默认为1.0。这个参数控制了生成的相关矩阵的分布。concentration 越大，生成的矩阵越接近单位矩阵。
-- `sample_method (str)`:不同采样策略，可选项有：`onion` 和 `cvine`
+- `sample_method (str)`:不同采样策略，可选项有：`onion` 和 `cvine`. 这两种sample方法都在<sup>[1]</sup>中提出，并且在相关矩阵上提供相同的分布。但是它们在如何生成样本方面是不同的。默认为“onion”。
+
+### References
+
+<div id="references">
+[1] Generating random correlation matrices based on vines and extended onion method, Daniel Lewandowski, Dorota Kurowicka, Harry Joe
+</div>
 
 ## 底层 OP 设计
 
