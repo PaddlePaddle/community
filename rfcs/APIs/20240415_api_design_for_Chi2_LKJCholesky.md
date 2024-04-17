@@ -519,7 +519,7 @@ $$
 z_{ij} = 
 \begin{cases}
  1                                  &, \text{if } i = 0\ or\ j=0    \\
- \sqrt{\prod^{j}_{k=0} (1-r_{ik}^2)} &, \text{if i>0  and j > 0}    \\
+ \sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } &, \text{if i>0  and j > 0}    \\
 \end{cases}
 $$
 
