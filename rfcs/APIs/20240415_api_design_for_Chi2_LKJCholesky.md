@@ -516,14 +516,11 @@ $$
 - 对于矩阵 $R$中的每个元素，计算其累积乘积的平方根，并进行必要的填充：
 
 $$
-z_{ij} = 
-\begin{cases}
-\sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } & , \text{if } i>0  \text{ and } j > 0 
-\end{cases}
+z_{ij} = 1  \quad \text{if } i = 0\ \text{or}\ j=0 
 $$
 
 $$
-\sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } , \text{if } i>0  \text{ and } j > 0
+z_{ij} = \sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } \quad  \text{if } i>0  \text{ and } j > 0
 $$
 
 - 这里， $z_{ij}$表示在考虑到变量 $i$和变量 $j$之间的直接依赖关系时。
