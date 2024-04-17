@@ -457,13 +457,14 @@ $$
 
 3. 将这个下三角矩阵的每一行归一化到单位超球面上，得到 $U_{\text{hypersphere}}$，
 其中
+
 $$
 U_{\text{hypersphere},i,j} = \frac{U_{\text{normal},i,j}}{||U_{\text{normal},i}||}
 $$
 
 4. 用零填充 $U_{\text{hypersphere}}$ 的第一行。
 
-5. 计算 $ W $ 矩阵，它是 $U_{\text{hypersphere}}$ 和 $\sqrt{Y}$ 的哈达玛积（即元素相乘）。$W = \sqrt{Y} \cdot U_{\text{hypersphere}}$
+5. 计算 $W$ 矩阵，它是 $U_{\text{hypersphere}}$ 和 $\sqrt{Y}$ 的哈达玛积（即元素相乘）。$W = \sqrt{Y} \cdot U_{\text{hypersphere}}$
 
 $$
 O_{i,j} = 
