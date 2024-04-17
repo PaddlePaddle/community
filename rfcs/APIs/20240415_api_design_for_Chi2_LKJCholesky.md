@@ -519,12 +519,12 @@ $$
 z_{ij} = 
 \begin{cases}
 1 & , \text{if } i = 0\ \text{or}\ j=0 \\
-\sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } & , \text{if } i>0  \text{ and } j > 0 \\
+\sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } & , \text{if } i>0  \text{ and } j > 0 
 \end{cases}
 $$
 
 $$
-\sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } ,\text{if } i>0  \text{ and } j > 0
+\sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } , \text{if } i>0  \text{ and } j > 0
 $$
 
 - 这里， $z_{ij}$表示在考虑到变量 $i$和变量 $j$之间的直接依赖关系时。
