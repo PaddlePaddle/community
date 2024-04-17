@@ -443,9 +443,9 @@ class LKJCholesky(Distribution):
 
 ## onion
 
-1.$Y \sim \text{Beta}(\alpha, \beta)$
+1. $Y \sim \text{Beta}(\alpha, \beta)$
 
-2.$U_{\text{normal}}$是一个下三角矩阵，
+2. $U_{\text{normal}}$ 是一个下三角矩阵，
 $$
 U_{\text{normal}} = 
 \begin{cases} 
@@ -453,15 +453,15 @@ U_{\text{normal}} =
     0, & \text{if } i \leq j \\
 \end{cases}
 $$
-3. 将这个下三角矩阵的每一行归一化到单位超球面上，得到$U_{\text{hypersphere}}$，
+3. 将这个下三角矩阵的每一行归一化到单位超球面上，得到 $U_{\text{hypersphere}}$，
 其中
 $$
 U_{\text{hypersphere},i,j} = \frac{U_{\text{normal},i,j}}{||U_{\text{normal},i}||}
 $$
 
-4. 用零填充$U_{\text{hypersphere}}$的第一行。
+4. 用零填充 $U_{\text{hypersphere}}$ 的第一行。
 
-5. 计算$W$矩阵，它是$U_{\text{hypersphere}}$和$\sqrt{Y}$的哈达玛积（即元素相乘）。$W = \sqrt{Y} \cdot U_{\text{hypersphere}}$
+5. 计算 $ W $ 矩阵，它是 $U_{\text{hypersphere}}$ 和 $\sqrt{Y}$ 的哈达玛积（即元素相乘）。$W = \sqrt{Y} \cdot U_{\text{hypersphere}}$
 
 $$
 O_{i,j} = 
@@ -472,7 +472,7 @@ O_{i,j} =
 \end{cases}
 $$
 
-其中$i$和$j$是矩阵的行索引和列索引，$U_{i,*}$表示$U$矩阵的第$i$行。这个过程生成的$O$矩阵是一个随机正交矩阵，它的行向量是彼此正交的，并且都有单位长度。
+其中 $ i $ 和 $ j $ 是矩阵的行索引和列索引，$ U_{i,*} $ 表示 $ U $ 矩阵的第 $ i $ 行。这个过程生成的 $ O $ 矩阵是一个随机正交矩阵，它的行向量是彼此正交的，并且都有单位长度。
 
 
 
@@ -523,7 +523,7 @@ $$
 
 4.最终矩阵的构造
 
--$out_{ij} =  z_{ij} * r_{ij}$
+- $out_{ij} =  z_{ij} * r_{ij}$
 
 
 
