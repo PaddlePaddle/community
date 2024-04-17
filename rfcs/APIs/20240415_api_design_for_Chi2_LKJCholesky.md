@@ -446,6 +446,7 @@ class LKJCholesky(Distribution):
 1. $Y \sim \text{Beta}(\alpha, \beta)$
 
 2. $U_{\text{normal}}$ 是一个下三角矩阵，
+
 $$
 U_{\text{normal}} = 
 \begin{cases} 
@@ -453,6 +454,7 @@ U_{\text{normal}} =
     0, & \text{if } i \leq j \\
 \end{cases}
 $$
+
 3. 将这个下三角矩阵的每一行归一化到单位超球面上，得到 $U_{\text{hypersphere}}$，
 其中
 $$
