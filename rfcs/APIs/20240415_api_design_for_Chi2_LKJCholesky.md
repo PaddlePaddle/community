@@ -519,15 +519,15 @@ $$
 z_{ij} = 
 \begin{cases}
  1                                  &, \text{if } i = 0\ or\ j=0    \\
- \sqrt{ \prod_{k=0}^{j} (1-r_{ik}^2) } &, \text{if i>0  and j > 0}    \\
+ \sqrt{ \prod{_{k=0}^{j}} (1-r_{ik}^2) } &, \text{if i>0  and j > 0}    \\
 \end{cases}
 $$
 
-- 这里，$z_{ij}$表示在考虑到变量$i$和变量$j$之间的直接依赖关系时。
+- 这里，$z_{ij}$表示在考虑到变量 $i$和变量 $j$之间的直接依赖关系时。
 
 4.最终矩阵的构造
 
-- $O_{ij} =  z_{ij} * r_{ij}$
+- $$O_{ij} =  z_{ij} * r_{ij}$$
 
 
 
