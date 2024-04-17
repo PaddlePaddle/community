@@ -29,11 +29,11 @@ print(vector, vector.shape)
 
 这里vector是一个一维张量,有3个元素,对应shape为[3]。
 
-以上从数学角度上区分了 0-d Tensor 和 1-d Tensor，在物理学中,标量和向量是两个基本的物理量概念。标量只有一个数值, 没有方向; 而向量除了数值外, 还附带一个确定的方向。
+以上从数学角度上区分了 0-d Tensor 和 1-d Tensor，在物理学中,标量和矢量是两个基本的物理量概念。标量只有一个数值, 没有方向; 而矢量除了数值外, 还附带一个确定的方向。
 
 0-d Tensor对应着物理学中的标量概念。一个 0-d Tensor, 如 3.14、2.78 等, 仅仅表示一个单一的数值, 没有任何其他维度的信息。它可以表示一些简单的物理量,如温度、质量、电荷等。
 
-而 1-d Tensor 则对应着向量的概念。即使只有1个元素, 如 [5.0], 它也不是一个纯标量, 而是一个有确定方向的向量。这个方向在物理意义上可能对应 xyz 三个空间坐标中的某个轴, 或者表示力、速度、电场强度等有方向性的物理量。
+而 1-d Tensor 则对应着矢量的概念。即使只有1个元素, 如 [5.0], 它也不是一个纯标量, 而是一个有确定方向的向量。这个方向在物理意义上可能表示力、速度、电场强度等有方向性的物理量。
 
 尽管在代码实现上, 0-d 和 1-d Tensor 可能没有太大的区别, 但它们对应的数学和物理概念是不同的。作为开发者,明确这种区别将有助于写出更加符合数学规范、更加符合物理意义的代码,从而减少逻辑错误和调试成本。
 
@@ -43,7 +43,7 @@ print(vector, vector.shape)
 
 ### 2.1 潜在的纬度错误
 
-标量张量与仅含有一个元素的向量张量容易造成混淆，它们的元素个数相同，但在数学定义上完全不同。若将其形状表示为 `shape=[1]`，则无法区分标量张量和向量张量，这与数学语义和行业通用的计算规则相悖，可能导致模型出现意料之外的错误，并增加开发调试成本。
+标量张量与仅含有一个元素的向量张量容易造成混淆，它们的元素个数相同，但在数学定义上完全不同。若将其形状表示为 `shape=[1]`，则无法区分标量和向量，这与数学语义和行业通用的计算规则相悖，可能导致模型出现意料之外的错误，并增加开发调试成本。
 
 由于 0-d 和 1-d Tensor 在数学上有着本质区别, 很多 API 在处理这两种情况时的行为也不尽相同。如果不加区分地混用,就可能导致 API 的行为出现异常。
 
@@ -53,10 +53,10 @@ import torch
 
 x = torch.tensor(3.14) 
 out = torch.stack([x, x])
-print(out.shape)  # 输出 torch.Size([2])  没有新增维度
+print(out.shape)  # 输出 torch.Size([2])  没有新增维度，符合预期
 ```
 
-如果 Paddle 不支持 0-d Tensor 而是直接用 1-d Tensor 来表示, 就需要额外判断 x 是否为 1D，是就需要补 squeeze 来矫正结果以对齐 pytorch，不是就可和 Pytorch 相同。
+如果 Paddle 不支持 0-d Tensor 而是直接用 1-d Tensor 来表示, 就需要额外判断 x 是否为 1D，是就需要补 squeeze 来矫正结果以对齐 pytorch，不是就可和 Pytorch 相同。直接使用 1-d Tensor 来表示 0-d Tensor, 就会导致这种情况下的 API 行为不一致。
 
 
 ### 2.2 代码可读性降低
@@ -75,7 +75,7 @@ print(out.shape)  # 输出 torch.Size([2])  没有新增维度
 
 对于所有的 elementwise 一元运算(如 tanh、relu 等)和二元运算 (如 add、sub、multiply 等), 理应支持 0-d Tensor 作为输入或通过广播机制与高维Tensor进行计算。同时, 复合运算如 Linear(相当于matmul+add)也应支持 0维输入。
 
-Paddle 已经支持了大部分逐元素计算类的运算:
+Paddle 已经支持了全部逐元素计算类的运算:
 
 ```python
 import paddle
@@ -165,25 +165,43 @@ print(y.shape) # []
 
 ### 3.5 索引切片操作
 
-无论是使用标量索引、切片还是 gather/scatter 等, 只要最终索引个数等于输入Tensor的维数, 就应当输出0维Tensor。下面的代码展示了这种情况:
+在使用索引切片的时候，应当支持输入和输出是 0-d Tensor 的情况。
+
+使用标量作为索引的时候, 输入0-D时，应该与int标量索引的效果一致，具有降维效果，以下是一个例子:
 
 ```python
-# 标量索引
-x = paddle.rand([3, 2, 4])
-y = x[0, 0, 0] # 0维输出
-print(y.shape) # []
+import paddle
 
-# 切片索引 
-z = x[0, :, 0] # 1维输出  
-w = x[0, 0, :] # 1维输出
-
-# gather
-idx = paddle.to_tensor([0, 1])
-y = paddle.gather(x, idx, axis=0) 
-print(y.shape) # [2, 3, 2, 4]
+x = paddle.to_tensor([1, 2, 3])
+y = x[paddle.to_tensor(0)] 
+print(y)
+# Tensor(shape=[], dtype=int64, place=Place(cpu), stop_gradient=True,
+#        1)
 ```
 
-在这个例子中, y 是 x 的一个标量索引, 因此适合用 0-d Tensor 来表示。z 和 w 是 x 的切片索引, 因此适合用 1-d Tensor 来表示。最后, y 是 x 的 gather 操作, 输出是一个 4 维 Tensor, 因此不适合用 0-d Tensor 来表示。
+当索引的输出应当支持 0-d Tensor 时, 例如3-D Tensor取[0, 0, 0]，降3维应输出 0D, 以下是一个例子:
+
+```python
+x = paddle.to_tensor([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+y = x[0, 0, 0]
+
+print(y)
+# Tensor(shape=[], dtype=int64, place=Place(cpu), stop_gradient=True,
+#        1)
+```
+
+同理，gather、scatter等类似功能API应具有相同效果，下面的例子展示了gather的 0维 输入和输出：
+
+```python
+x = paddle.to_tensor([0, 1, 2, 3])
+index = paddle.to_tensor(0)
+# index 是 0-d Tensor
+y = paddle.gather(x, index)
+# 输出是 0-d Tensor
+print(y)
+# Tensor(shape=[], dtype=int64, place=Place(cpu), stop_gradient=True,
+#        0)
+```
 
 ### 3.6 标量属性输入
 
@@ -255,7 +273,7 @@ print(loss.shape)  # []
 
 在深度学习框架中,0维Tensor虽然形式简单,但具有重要的概念意义和实际应用价值。它不仅对应数学和物理上的标量概念,也是各种标量计算和控制流程的基础表示形式。
 
-支持 0-d Tensor的使用,可以让框架更加贴合数学规范,让代码更加简洁优雅。同时,它也是实现很多实用功能的基石。框架要避免在处理0维和1维Tensor时产生行为分歧,尽量与其他主流框架保持一致,方便模型和算子在不同框架间的移植。当下 Paddle 已经支持了大部分适合使用 0-d Tensor 的场景, 让用户能够方便地使用 0-d Tensor。
+支持 0-d Tensor的使用,可以让框架更加贴合数学规范,让代码更加简洁优雅。同时,它也是实现很多实用功能的基石。框架要避免在处理0维和1维Tensor时产生行为分歧, 尽量与其他主流框架保持一致, 方便模型和算子在不同框架间的移植。当下 Paddle 框架中已经全面支持 0-D Tensor，并实际上已成为后续新增算子的开发规范，让用户能够方便地使用 0-d Tensor。
 
 ## 参考文献
 
