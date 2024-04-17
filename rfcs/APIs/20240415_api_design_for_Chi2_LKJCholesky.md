@@ -428,13 +428,105 @@ class LKJCholesky(Distribution):
 
 ----------------------------------------
 - `paddle.distribution.LKJCholesky`
-    - `Pytorch`和`numpyro` 的`LKJCholesky`实现逻辑基本一致，区别是numpyro多了`sample method`的选择：`_onion`和`_cvine`。 `paddle` 中考虑实现后者
+    - `Pytorch`和`numpyro` 的`LKJCholesky`实现逻辑基本一致，区别是numpyro多了`sample method`的选择：`_onion`和`_cvine`。 `paddle` 中考虑实现后者。
 
 # 五、设计思路与实现方案
 
 `paddle` 目前的算子已经支持`Gamma`,基于此实现`chi2`即可。
 
 参考`Pytorch`和`numpyro`中的实现方案实现LKJCholesky。
+
+`Pytorch`中实现的`sample_method`只有`onion`，而`numpyro`则是实现了`onion`和`cvine`，相关实现的`sample`方法参考的是：https://ms.mcmaster.ca/canty/seminars/Joe_vinecorr_print.pdf
+
+下面是这两种`sample_method`所对应的构造方法.
+
+
+## onion
+
+1. $Y \sim \text{Beta}(\alpha, \beta)$
+
+2. $U_{\text{normal}}$ 是一个下三角矩阵，
+$$
+U_{\text{normal}} = 
+\begin{cases} 
+    \mathcal{N}(0,1), & \text{if } i > j \\
+    0, & \text{if } i \leq j \\
+\end{cases}
+$$
+3. 将这个下三角矩阵的每一行归一化到单位超球面上，得到 $U_{\text{hypersphere}}$，
+其中
+
+ $$
+ U_{\text{hypersphere},i,j} = \frac{U_{\text{normal},i,j}}{||U_{\text{normal},i}||}
+ $$
+4. 用零填充 $U_{\text{hypersphere}}$ 的第一行。
+
+5. 计算 $ W $ 矩阵，它是 $U_{\text{hypersphere}}$ 和 $\sqrt{Y}$ 的哈达玛积（即元素相乘）。$W = \sqrt{Y} \cdot U_{\text{hypersphere}}$
+
+$$
+O_{i,j} = 
+\begin{cases} 
+    \sqrt{Y} \cdot U_{\text{hypersphere},i,j} , & \text{if } i > j \\
+    \sqrt{1 - \sum_{k < i} W_{i,k}^2}, & \text{if } i = j \\
+    0, & \text{if } i < j
+\end{cases}
+$$
+
+其中 $ i $ 和 $ j $ 是矩阵的行索引和列索引，$ U_{i,*} $ 表示 $ U $ 矩阵的第 $ i $ 行。这个过程生成的 $ O $ 矩阵是一个随机正交矩阵，它的行向量是彼此正交的，并且都有单位长度。
+
+
+
+## cvine
+- 
+
+1.部分相关系数的生成
+
+- 对于每一对变量，我们首先需要生成它们之间的部分相关系数。这可以通过从Beta分布中采样获得：
+
+$$
+Y \sim \text{Beta}(\beta, \beta)
+$$
+
+- 然后，将Beta分布的采样结果转换到$[-1, 1]$区间以获取部分相关系数：
+
+$$
+r_{ij} = 2y_{ij} - 1
+$$
+
+2.构造下三角矩阵
+
+- 将这些部分相关系数填充到一个下三角矩阵中，其中$i > j$的元素对应于变量$i$和变量$j$之间的部分相关系数：
+
+$$
+R = 
+\begin{bmatrix}
+1 & 0 & \cdots & 0 \\
+r_{21} & 1 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+r_{n1} & r_{n2} & \cdots & 1
+\end{bmatrix}
+$$
+
+3.计算累积乘积的平方根
+
+- 对于矩阵$R$中的每个元素，计算其累积乘积的平方根，并进行必要的填充：
+
+$$
+z_{ij} = 
+\begin{cases}
+ 1 &, \text{if } i = 0\ or\ j=0 \\
+ \sqrt{\prod_{k=0}^{j}(1-r_{ik}^2)} &, \text{if i>0  and j > 0} \\
+\end{cases}
+$$
+
+- 这里，$z_{ij}$表示在考虑到变量$i$和变量$j$之间的直接依赖关系时。
+
+4.最终矩阵的构造
+
+- $out_{ij} =  z_{ij} * r_{ij}$
+
+
+
 
 
 ## 命名与参数设计
