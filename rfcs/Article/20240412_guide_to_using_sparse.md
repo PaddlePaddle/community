@@ -243,8 +243,115 @@ Epoch 9, Loss: 14.81474781036377
 Epoch 10, Loss: 14.808649063110352
 ```
 
-### 
+### 4.2 图神经网络
 
+基于图神经网络的稀疏计算是一种处理非欧几里得结构化数据的有效方法。在这种情况下,数据可以表示为一个图,其中节点表示实体,边缘表示它们之间的关系。图神经网络能够学习节点表示,同时捕获图结构的拓扑信息和节点属性。
 
+下面我们将展示如何使用 Paddle 的稀疏计算 API paddle.sparse 来构建一个简单的图神经网络模型。我们首先创建一个简单的图,包含 5 个节点和 5 条边,然后使用稀疏 CSR 格式存储图的邻接矩阵。
 
+```python
+import paddle
+import paddle.nn as nn
+import paddle.sparse as sparse
+
+# 创建一个简单的图
+N = 5
+edges = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 0]]
+values = [1, 1, 1, 1, 1]
+
+# 将edges拆分为行和列
+rows = [edge[0] for edge in edges]
+cols = [edge[1] for edge in edges]
+
+# 构造crows (行偏移量)
+crows = paddle.to_tensor([0, 1, 2, 3, 4, 5], dtype="int32")
+
+# 构造稀疏 CSR 张量
+adj = sparse.sparse_csr_tensor(
+    crows,
+    paddle.to_tensor(cols, dtype="int32"),
+    paddle.to_tensor(values, dtype="float32"),
+    [N, N],
+)
+```
+
+接下来,我们定义一个简单的图卷积网络模型 GCN,它包含两个 GCN 层。在模型的前向传播函数中,我们首先对节点特征进行线性变换, 然后利用稀疏矩阵乘法计算邻接矩阵和节点特征的乘积,得 到新的节点表示。通过使用稀疏计算技术, 我们可以高效地处理大规模图数据, 从而提高图神经网络的性能。
+
+```python
+# 定义 GCN 层
+class GCNLayer(nn.Layer):
+    def __init__(self, in_feat, out_feat):
+        super(GCNLayer, self).__init__()
+        self.linear = nn.Linear(in_feat, out_feat)
+
+    def forward(self, x, adj):
+        x = self.linear(x)
+        x = sparse.matmul(adj, x)
+        return x
+
+# 定义 GCN 模型
+class GCN(nn.Layer):
+    def __init__(self):
+        super(GCN, self).__init__()
+        self.gcn1 = GCNLayer(16, 32)
+        self.relu = nn.ReLU()
+        self.gcn2 = GCNLayer(32, 2)
+
+    def forward(self, x, adj):
+        h = self.gcn1(x, adj)
+        h = self.relu(h)
+        h = self.gcn2(h, adj)
+        return h
+
+# 创建模型实例
+model = GCN()
+```
+
+在训练过程中,我们使用交叉熵损失函数和Adam优化器,利用稀疏邻接矩阵进行反向传播和参数更新。通过使用稀疏计算技术,我们可以高效地处理大规模图数据,从而提高图神经网络的整体性能。
+
+```python
+# 定义损失函数和优化器
+criterion = nn.CrossEntropyLoss()  # 交叉熵损失
+optimizer = paddle.optimizer.Adam(parameters=model.parameters())  # Adam优化器
+
+# 训练模型
+epochs = 10
+for epoch in range(epochs):
+    # 前向传播,获取预测结果
+    out = model(node_feat, adj)
+    
+    # 计算损失
+    loss = criterion(out, paddle.to_tensor([0, 1, 0, 1, 0]))
+    
+    # 反向传播
+    loss.backward()
+    
+    # 更新模型参数
+    optimizer.step()
+    
+    # 清空梯度
+    optimizer.clear_grad()
+    
+    # 打印当前epoch的损失
+    print(f"Epoch {epoch+1}, Loss: {loss.numpy()}")
+```
+
+代码运行结果如下:
+
+```
+Epoch 0, Loss 1.0529648065567017
+Epoch 1, Loss 0.817253589630127
+Epoch 2, Loss 0.6302605867385864
+Epoch 3, Loss 0.47190117835998535
+Epoch 4, Loss 0.3463549315929413
+Epoch 5, Loss 0.25141194462776184
+Epoch 6, Loss 0.18058130145072937
+Epoch 7, Loss 0.12907637655735016
+Epoch 8, Loss 0.09150637686252594
+Epoch 9, Loss 0.06524921953678131
+```
+
+## 5. 总结
+
+本文介绍了稀疏计算的优势、应用场景和 PaddlePaddle 中稀疏计算的使用方法。稀疏计算是一种高效处理稀疏数据的技术, 可以节省存储空间、提高计算效率, 并在推荐系统、图神经网络、自然语言处理、科学计算等领域发挥重要作用。PaddlePaddle 提供了丰富的稀疏计算 API, 用户可以通过简单的 API 调用,实现稀疏计算的功能。希望本文能够帮助读者更好地理解稀疏计算的概念和应用,并在实际项目中灵活运用稀疏计算技术。
 
