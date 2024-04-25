@@ -15,14 +15,21 @@
 
 PaddlePaddle支持的主要稀疏格式包括：
 
-- COO格式（Coordinate Format）：用坐标表示非零元素的稀疏矩阵，包括三个数组：行索引、列索引和值。
-- CSR格式（Compressed Sparse Row）：将稀疏矩阵的行压缩，以节省存储空间。
+- COO格式（Coordinate Format）：此格式使用坐标来表示稀疏矩阵中的非零元素，涉及三个数组：行索引、列索引和值。
+- CSR格式（Compressed Sparse Row）：此格式通过压缩稀疏矩阵的行来节省存储空间。它包含三个数组，即Index Pointers，indices和Data数组。
+
+具体内容将在下面详细解释。
 
 COO格式：
 
 ![COO Matrix](images/coo.gif)
 
 COO格式存储三个数组：行索引（Row）、列索引（Column）以及值（Data）数组。使用Data数组中的元素的索引分别去访问Row数组和Column数组就可以得到该元素在原来矩阵中的位置。
+
+在`paddle.sparse`的COO实现中，使用了两个列表：
+
+- 二维列表`indices`，包含行索引和列索引；
+- 一维列表`values`，包含元素的值。
 
 使用paddle代码保存上面的稀疏矩阵：
 
@@ -84,6 +91,12 @@ CSR格式也存储三个数组，分别是Index Pointers，indices以及Data数�
 
 例如，第一个index pointers对是`[0,2]`，那么这是表示稀疏矩阵第0行（0在Index Pointers数组中的索引是0）中元素的信息，并且表示第0行中共有两个非零元素。而使用`Indices[0,2]`可以获得这两个元素的列索引，使用`Data[0,2]`获取这两个元素具体的值。
 
+在`paddle.sparse`的CSR实现中，我们也使用了三个列表：
+
+- 一维列表`crows`对应于Index Pointers数组；
+- 一维列表`cols`对应于indices数组；
+- 一维列表`values`对应于Data数组。
+
 使用paddle代码存储上述的稀疏矩阵：
 
 ```python
@@ -134,31 +147,18 @@ Paddle提供了与稠密计算高度一致的稀疏计算接口，易于上手�
 首先实现一个生成随机稀疏矩阵的函数：
 
 ```python
-import numpy as np
-import paddle.sparse as sparse
+import paddle
+# 生成随机sparse tensor
 def random_sparse_tensor(shape, density, sparse_type='coo'):
-    rows = shape[0]
-    columns = shape[1]
-    total_elements = rows * columns
-    num_nonzero_elements = int(total_elements * density)
-    
-    # 随机生成非零元素的切片
-    nonzero_indices = np.random.choice(total_elements, num_nonzero_elements, replace=False)
-    
-    # 转换为行和列
-    row_indices = nonzero_indices // columns
-    column_indices = nonzero_indices % columns
-    
-    values = np.random.rand(num_nonzero_elements)
-    
-    indices = []
-    indices.append(row_indices.tolist())
-    indices.append(column_indices.tolist())
-
+    dense_tensor = paddle.randn(shape)
+    dropout = paddle.nn.Dropout(p=density)
+    dense_tensor = dropout(dense_tensor)
     if sparse_type == 'coo':
-        return sparse.sparse_coo_tensor(indices, values.tolist(), shape)
+        sparse_tensor = dense_tensor.to_sparse_coo(sparse_dim=dense_tensor.dim())
     elif sparse_type == 'csr':
-        return sparse.sparse_coo_tensor(indices, values.tolist(), shape).to_dense().to_sparse_csr()
+        sparse_tensor = dense_tensor.to_sparse_csr()
+
+    return sparse_tensor
 ```
 
 以下是一些简单的示例，演示如何使用稀疏张量进行矩阵运算：
@@ -280,7 +280,9 @@ class SparseBasicBlock(paddle.nn.Layer):	# 继承的类还是原来的paddle.nn.
 
 可见，ResNet 稀疏网络的代码和常规 ResNet 网络代码几乎没有差别。通过增加 import 路径替换，原网络代码基本都无需改动。通过 `from paddle.sparse import nn`，则可保持与原来的`nn.*`写法一致，更易于上手。
 
-## 3. 3D点云 CenterPoint
+## 3. Paddle 稀疏计算实战案例
+
+在本节中，我们将以3D点云CenterPoint模型为实例，进行深入探讨。
 
 ### 3.1 CenterPoint简介
 
