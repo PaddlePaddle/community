@@ -41,7 +41,7 @@ PaddleRec、PaddleGAN、PaddleVideo、PaddleYOLO)
 
 ## 3、意义
 
-- 动转静 SOT 项目支持动态 Shape
+- 对开源套件中所有模型进⾏动转静训练策略推全
 
 # 二、飞桨现状
 
