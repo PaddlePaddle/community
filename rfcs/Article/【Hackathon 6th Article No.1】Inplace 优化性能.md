@@ -142,24 +142,76 @@ Inplace 操作虽然可以优化内存使用，减少数据复制从而提高执
 ```python
 import paddle
 
-# 创建一个叶子张量并设置requires_grad=True
+# 启用动态图模式
+paddle.set_device('cpu')  # 也可以选择'gpu'如果你的系统支持
+paddle.disable_static()
+
+# 创建一个可计算梯度的张量
 x = paddle.to_tensor([1.0, 2.0, 3.0], stop_gradient=False)
 
-# 尝试进行Inplace操作
-try:
-    x[0] = 999.0  # 尝试Inplace修改
-except RuntimeError as e:
-    print(f"发生错误: {e}")
+# 执行原地操作
+x.sin_()  # 将x的值替换为sin(x)的结果
+
+# 输出修改后的x值
+print("In-place modified x:", x.numpy())
+
+# 定义一个简单的损失函数，例如平方和
+loss = paddle.sum(x**2)
+
+# 进行反向传播计算梯度
+loss.backward()
+
+# 输出梯度
+print("Gradient of x after backward:", x.grad.numpy())
+
 ```
 
-上述代码在执行 x[0] = 999.0 时会抛出如下错误:
+错误信息明确指出了“叶子变量不应该停止梯度计算并且不能使用原地策略”，这表明当张量被用于梯度计算时，进行原地操作可能会导致前向传递的值被覆盖，从而无法在反向传播时正确地重建计算图。
+即，原地操作 sin_() 在计算图中的叶子节点上不能直接使用，因为它会影响梯度计算。
+在PaddlePaddle中，对于原地修改（in-place）操作，如果是叶子节点（leaf tensor）并且需要计算梯度，通常是不允许直接进行原地操作的，因为这会影响梯度的正确计算。
 
 ```python
-ValueError: (InvalidArgument) Leaf Tensor (generated_tensor_400) that doesn't stop gradient can't use inplace strategy.
-  [Hint: Expected egr::EagerUtils::IsLeafTensor(tensor) && !egr::EagerUtils::autograd_meta(&tensor)->StopGradient() == false, but received egr::EagerUtils::IsLeafTensor(tensor) && !egr::EagerUtils::autograd_meta(&tensor)->StopGradient():1 != false:0.] (at ..\paddle\fluid\pybind\eager_method.cc:1586)
+ValueError: (InvalidArgument) Leaf Var (generated_tensor_0) that doesn't stop gradient can't use inplace strategy.
+  [Hint: Expected !autograd_meta->StopGradient() && IsLeafTensor(target) == false, but received !autograd_meta->StopGradient() && IsLeafTensor(target):1 != false:0.] (at ..\paddle\fluid\eager\utils.cc:233)
 ```
 
-在这个例子中，我们尝试对叶子张量 `x` 进行Inplace修改。因为 `x` 设置了 `requires_grad=True`，这种修改会直接影响到梯度的计算。在 PaddlePaddle 中，这通常会引发错误，因为框架试图保护梯度计算的完整性。
+要在PaddlePaddle中正确使用原地操作且仍然可以计算梯度，可以通过非叶子节点进行。这通常意味着在原地操作前应该有其他操作产生一个非叶子节点。下面是一个修改后的示例，展示如何正确地进行这种操作：
+
+```python
+import paddle
+
+# 启用动态图模式
+paddle.set_device('cpu')  # 可以选择'gpu'如果你的系统支持
+paddle.disable_static()
+
+# 创建一个可计算梯度的张量
+x = paddle.to_tensor([1.0, 2.0, 3.0], stop_gradient=False)
+
+# 首先进行非原地的操作，生成非叶子节点
+y = paddle.sin(x)
+
+# 现在对y进行原地操作，例如原地加上一个常数
+y += 1.0  # 原地修改y的值
+
+# 输出修改后的y值
+print("In-place modified y:", y.numpy())
+
+# 定义一个简单的损失函数，例如y的平方和
+loss = paddle.sum(y**2)
+
+# 进行反向传播计算梯度
+loss.backward()
+
+# 输出x的梯度
+print("Gradient of x after backward:", x.grad.numpy())
+
+```
+
+在这个例子中，我们先对 x 进行了一个非原地的 sin 操作，得到了一个新的张量 y。然后对 y 进行了原地操作，如原地加1。这样，即便进行了原地修改，x 的梯度计算也不会受到影响，因为 y 不是一个叶子节点。
+
+这个例子展示了如何在需要计算梯度的场景中安全地使用原地操作。务必注意，在 PaddlePaddle 中，这通常会引发错误，因为框架试图保护梯度计算的完整性：直接在需要梯度的叶子张量上进行原地操作通常是不被允许的，因为这会破坏梯度计算的基础。
+
+
 ### 2. 对后续计算（如求梯度）中仍要需要用到的值，不能使用 Inplace 操作。
 
 在反向传播（求梯度阶段）过程中，如果需要使用某个张量的值，那么对这个张量进行 Inplace 操作会破坏需要用于梯度计算的原始数据。此情况包含上一情况。
@@ -194,36 +246,75 @@ ValueError: (InvalidArgument) Leaf Tensor (generated_tensor_0) that doesn't stop
   [Hint: Expected egr::EagerUtils::IsLeafTensor(tensor) && !egr::EagerUtils::autograd_meta(&tensor)->StopGradient() == false, but received egr::EagerUtils::IsLeafTensor(tensor) && !egr::EagerUtils::autograd_meta(&tensor)->StopGradient():1 != false:0.] (at ..\paddle\fluid\pybind\eager_method.cc:1586)
 ```
 
-### 3. （需要注意）中间变量的重新赋值、运算，会导致计算结果错误。
-需要注意函数中间变量的重新赋值、运算，会导致计算结果错误。
+
+### 3. PaddlePaddle保护梯度计算过程
+
+求梯度依赖前向输入的的场景是可以进行inplace操作的，例如sin_(x)这种, 反向虽然仍然需要x，但是paddle做了特殊处理，可以保证反向梯度计算是正确的
 
 ```python
+# 导入paddle模块
 import paddle
 
-# 创建一个张量
-x = paddle.to_tensor([1.0, 2.0, 3.0], stop_gradient=False)
-y = x * x  # y是x的函数
+# 设置PaddlePaddle的运行设备为CPU，可以通过更改参数设置为'gpu'来使用GPU（如果系统支持）
+paddle.set_device('cpu')
 
-# 尝试对x进行Inplace操作
-try:
-    x *= 2  # 这会影响到y对x的梯度计算
-except RuntimeError as e:
-    print(f"发生错误: {e}")
+# 关闭PaddlePaddle的静态图模式，启用动态图模式以便更灵活地处理数据
+paddle.disable_static()
 
-# 进行反向传播
-y.sum().backward()
+# 创建一个维度为[3, 4]的张量，其元素随机初始化，并设置为可进行梯度计算
+a = paddle.randn([3, 4])
+a.stop_gradient = False
+
+# 计算张量a中每个元素的正弦值，并将结果存储在新的变量x中
+x = paddle.sin(a)
+
+# 输出计算正弦值后的张量x
+print("x after sin operation:", x.numpy())
+
+# 对x应用原地正弦操作，更新x的数据，并将结果引用赋给y
+y = x.sin_()
+
+# 输出进行原地操作后的x和y的值，由于是原地操作，x和y引用相同的数据
+print("In-place modified x:", x.numpy())
+print("y:", y.numpy())
+print(y is x)  # 输出True，验证y和x是否指向相同的内存地址
+
+# 对x进行反向传播，计算关于a的梯度
+y.backward()
+
+# 输出张量a的梯度
+print("Gradient of a after backward:", a.grad)
+
 ```
 
-在这个例子中，`y = x * x`，我们尝试对 `x` 进行Inplace操作 `x *= 2`。从数学角度来看，`y` 对 `x` 的梯度（偏导数）是 `∂y/∂x = 2x`。如果我们在计算 `y` 之后，但在执行反向传播之前修改了 `x` 的值，那么原始的 `x` 值（用于梯度计算的值）就会丢失，导致不能正确计算梯度。
 
-原始梯度计算需要 `x` 的原始值：
+```python
+x after sin operation: [[-0.9797215  -0.62150306  0.150662    0.907488  ]
+ [-0.9947523  -0.59465826 -0.73188174 -0.98445815]
+ [-0.78979075 -0.38565105  0.96159416  0.9507534 ]]
+In-place modified x: [[-0.8303422  -0.5822578   0.15009268  0.7879595 ]
+ [-0.83862406 -0.5602257  -0.66827065 -0.8329724 ]
+ [-0.710206   -0.37616244  0.82010484  0.8138535 ]]
+y: [[-0.8303422  -0.5822578   0.15009268  0.7879595 ]
+ [-0.83862406 -0.5602257  -0.66827065 -0.8329724 ]
+ [-0.710206   -0.37616244  0.82010484  0.8138535 ]]
+True
+Gradient of a after backward: Tensor(shape=[3, 4], dtype=float32, place=Place(cpu), stop_gradient=False,
+       [[-0.11165375,  0.63691705,  0.97738659,  0.25865343],
+        [ 0.05573082,  0.66596758,  0.50692940,  0.09717280],
+        [-0.43181324,  0.85487992,  0.15705840,  0.18010177]])
+```
 
-$$
-\frac{∂y}{∂x} = 2x
-$$
+实际上，是否可以进行 inplace 操作（即原地修改数据）并且还能正确地进行梯度计算，取决于特定操作和深度学习框架的内部机制。
 
-但是，如果 `x` 被Inplace修改，那么我们实际上就在尝试用新的 `x` 值来计算梯度，这会导致梯度计算错误。
-### PaddlePaddle保护梯度计算过程
+对于 PaddlePaddle 来说，像 `sin_()` 这样的 inplace 操作在某些情况下确实能正确计算梯度，这是因为 PaddlePaddle 在执行反向传播时，对于一些特定的函数，框架有能力保存必要的中间状态或者已经实现了一些策略来正确地处理这些情况。这意味着，对于这些特定操作，PaddlePaddle 确实进行了某种形式的特殊处理，允许在不损失梯度计算正确性的前提下进行原地修改。
+
+然而，这种特殊处理并不是所有操作都有的，而且具体实现可能因框架版本和具体操作而异。在很多情况下，原地操作可能会导致计算梯度时遇到问题，特别是如果该操作需要依赖原始值来计算梯度时。如果在反向传播之前修改了涉及梯度计算的变量，那么可能会因为丢失了原始数据而导致梯度计算错误。
+
+因此，通常建议在深度学习编程中谨慎使用 inplace 操作，除非你确信这样做不会影响梯度的计算，或者框架文档明确指出可以安全进行此类操作。如果不确定，最安全的做法是使用非 inplace 的版本，例如使用 `sin()` 替代 `sin_()`，以避免可能的问题。在实际应用中，最好是查阅最新的框架文档或进行一些实验来验证操作的效果。
+
+
+# 小结
 
 PaddlePaddle 的自动依赖检测机制，在实践中，如果尝试执行这些会影响梯度计算的 Inplace 操作，会被识别为潜在的风险，因此会抛出一个错误，阻止操作的执行，以保护梯度信息不被破坏，确保模型训练的准确性和稳定性。
 
@@ -233,8 +324,7 @@ PaddlePaddle 的自动依赖检测机制，在实践中，如果尝试执行这�
 
 这种机制使得 PaddlePaddle 在保证效率优化的同时，也极大地提升了模型训练过程中的安全性和稳定性。
 
-开发者在使用 Inplace 操作时，应当谨慎，并确保这些操作不会影响到梯度计算。
-# 小结
+开发者在使用 Inplace 操作时，还是尽量应当谨慎，并确保这些操作不会影响到梯度计算。
 
 PaddlePaddle的Inplace机制是一个强大的工具，可以帮助开发者有效地管理内存，提高程序运行效率。通过本指南的介绍和示例代码，希望可以帮助您更好地理解和使用这一机制。在实际应用中，合理利用Inplace操作可以使模型训练过程更加高效和节省资源。
 
