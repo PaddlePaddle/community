@@ -15,8 +15,8 @@
 
 PaddlePaddle支持的主要稀疏格式包括：
 
-- COO格式（Coordinate Format）：此格式使用坐标来表示稀疏矩阵中的非零元素，涉及三个数组：行索引、列索引和值。
-- CSR格式（Compressed Sparse Row）：此格式通过压缩稀疏矩阵的行来节省存储空间。它包含三个数组，即Index Pointers，indices和Data数组。
+- COO格式（Coordinate Format）：此格式使用坐标来表示稀疏矩阵中的非零元素，涉及三个数组：行坐标、列坐标和值数组。
+- CSR格式（Compressed Sparse Row）：此格式通过压缩稀疏矩阵的行来节省存储空间。它包含三个数组，即行指针信息、列坐标和值数组。
 
 具体内容将在下面详细解释。
 
@@ -24,11 +24,13 @@ COO格式：
 
 ![COO Matrix](images/coo.gif)
 
-COO格式存储三个数组：行索引（Row）、列索引（Column）以及值（Data）数组。使用Data数组中的元素的索引分别去访问Row数组和Column数组就可以得到该元素在原来矩阵中的位置。
+> 图片来源：https://matteding.github.io/2019/04/25/sparse-matrices/
+
+COO格式存储三个数组：行坐标（Row）、列坐标（Column）以及值（Data）数组。使用Data数组中的元素的索引分别去访问Row数组和Column数组就可以得到该元素在原来矩阵中的位置。
 
 在`paddle.sparse`的COO实现中，使用了两个列表：
 
-- 二维列表`indices`，包含行索引和列索引；
+- 二维列表`indices`，包含行坐标和列坐标；
 - 一维列表`values`，包含元素的值。
 
 使用paddle代码保存上面的稀疏矩阵：
@@ -36,8 +38,8 @@ COO格式存储三个数组：行索引（Row）、列索引（Column）以及�
 ```python
 import paddle
 indices = [
-    [1, 3, 0, 2, 4], # 行索引
-    [1, 4, 2, 3, 3]	 # 列索引
+    [1, 3, 0, 2, 4], # 行坐标
+    [1, 4, 2, 3, 3]	 # 列坐标
 ]
 values = [2, 5, 9, 1, 6] # 值
 shape = [6, 7]
@@ -78,24 +80,28 @@ CSR格式：
 
 ![](images/csr.gif)
 
-CSR格式也存储三个数组，分别是Index Pointers，indices以及Data数组。
+> 图片来源：https://matteding.github.io/2019/04/25/sparse-matrices/
 
-* Index Pointers数组中相邻的两个元素可以确定两个信息。
+CSR格式也存储三个数组，分别是行指针信息（Index Pointers），列坐标（indices）以及值（Data）数组。
 
-  * 首先，它们在数组中的位置（索引对中第一个元素的索引）是行号。
+* 行指针信息数组中相邻的两个元素，假设它们的坐标分别是r和r+1，值分别为a和b，那么可以确定：
 
-  * 其次，这些值表示Indices数组的 [start: stop] 切片，它们的差是每行中非零元素的个数。使用指针查找索引以确定数据中每个元素的列。
+  * 指针对中第一个元素的坐标r是稀疏矩阵行号。
 
-* Indices数组记录了每个元素的列索引。
-* Data数组记录了元素的值
+  * 它们的差（b-a）是矩阵第r行中非零元素的个数。
 
-例如，第一个index pointers对是`[0,2]`，那么这是表示稀疏矩阵第0行（0在Index Pointers数组中的索引是0）中元素的信息，并且表示第0行中共有两个非零元素。而使用`Indices[0,2]`可以获得这两个元素的列索引，使用`Data[0,2]`获取这两个元素具体的值。
+  * 若a不等于b，可以用a和b两个值构造一个切片[a:b]，那么使用该切片访问列坐标数组就可以得到第r行中非零元素的列坐标；若使用该切片访问值数组就可以得到第r行中非零元素的值。
+
+* 列坐标数组记录了非零元素的列坐标。
+* 值数组记录了非零元素的值
+
+例如，第一个行指针对是`[0,2]`，那么这是表示稀疏矩阵第0行（0在行指针信息数组中的索引是0）中元素的信息，并且表示第0行中共有两个非零元素。而使用`Indices[0,2]`可以获得这两个元素的列坐标，使用`Data[0,2]`获取这两个元素具体的值。
 
 在`paddle.sparse`的CSR实现中，我们也使用了三个列表：
 
-- 一维列表`crows`对应于Index Pointers数组；
-- 一维列表`cols`对应于indices数组；
-- 一维列表`values`对应于Data数组。
+- 一维列表`crows`对应于行指针信息数组；
+- 一维列表`cols`对应于列坐标数组；
+- 一维列表`values`对应于值数组。
 
 使用paddle代码存储上述的稀疏矩阵：
 
@@ -151,10 +157,9 @@ import paddle
 # 生成随机sparse tensor
 def random_sparse_tensor(shape, density, sparse_type='coo'):
     dense_tensor = paddle.randn(shape)
-    dropout = paddle.nn.Dropout(p=density)
-    dense_tensor = dropout(dense_tensor)
+    dense_tensor = paddle.nn.functional.dropout(dense_tensor, p=density)
     if sparse_type == 'coo':
-        sparse_tensor = dense_tensor.to_sparse_coo(sparse_dim=dense_tensor.dim())
+        sparse_tensor = dense_tensor.to_sparse_coo(sparse_dim=dense_tensor.ndim)
     elif sparse_type == 'csr':
         sparse_tensor = dense_tensor.to_sparse_csr()
 
@@ -491,7 +496,7 @@ python tools/train.py --config configs/centerpoint/centerpoint_pillars_02voxel_n
 
 ## 4. 总结
 
-本文详细介绍了稀疏计算在Paddle中的使用,主要包括以下几个方面:
+本文详细介绍了稀疏计算在Paddle中的使用，主要包括以下几个方面:
 
 1. 稀疏格式介绍与Paddle支持的稀疏格式
    - 介绍了常见的稀疏格式包括COO、DOK、LIL、CSR、CSC和DIA格式
@@ -500,14 +505,14 @@ python tools/train.py --config configs/centerpoint/centerpoint_pillars_02voxel_n
 
 2. Paddle的稀疏调用体验与示例
    - 演示了如何使用Paddle的稀疏张量进行基本的矩阵运算
-   - 提供了稀疏3D ResNet网络的代码示例,说明与稠密网络代码的高度一致性
+   - 提供了稀疏3D ResNet网络的代码示例，说明与稠密网络代码的高度一致性
 
 3. 3D点云CenterPoint模型
    - 介绍了CenterPoint模型在3D目标检测与跟踪任务中的应用场景
    - 阐述了Paddle3D实现的CenterPoint模型相对于原论文的优化之处
    - 给出了使用Paddle3D库实现CenterPoint的详细代码示例,包括数据预处理、模型定义、优化器设置和训练过程等
 
-总的来说,本文介绍了Paddle对稀疏计算的支持,为开发者使用Paddle开发稀疏算法应用提供了一些例子。同时,还以3D点云处理任务中的CenterPoint模型为例,展示了Paddle在实际任务中的应用。
+总的来说，本文介绍了Paddle对稀疏计算的支持，为开发者使用Paddle开发稀疏算法应用提供了一些例子。同时，还以3D点云处理任务中的CenterPoint模型为例，展示了Paddle在实际任务中的应用。
 
 
 
