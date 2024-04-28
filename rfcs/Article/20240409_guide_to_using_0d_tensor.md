@@ -56,9 +56,7 @@ out = torch.stack([x, x])
 print(out.shape)  # 输出 torch.Size([2])  0D升为1D，符合预期
 ```
 
-如果 Paddle 不支持 0-d Tensor 而是直接用 1-d Tensor 来表示, 就需要额外判断 x 是否为 1D，是就需要补 squeeze 来矫正结果以对齐 pytorch，不是就可和 Pytorch 相同。支持 0-D 的 paddle 可以有更更加简洁的代码实现。
-
-假如paddle不支持0D，则写法为：
+如果 Paddle 不支持 0-d Tensor，就需要额外判断 x 是否为 1D，然后补squeeze来矫正结果，这造成了代码的冗余与可读性降低。写法如下：
 
 ```python
 import paddle
@@ -73,7 +71,7 @@ else:
     out = paddle.stack([x[0], x[0]])
 ```
 
-假如paddle支持0D，则写法为：
+如果 Paddle 支持 0-d Tensor，就无需增加这些额外判断的代码，代码可与其他深度学习框架（例如Pytorch）完全一致。写法如下：
 
 ```
 import paddle
@@ -84,7 +82,7 @@ out = paddle.stack([x, x])
 print(out.shape)
 ```
 
-
+由上可看出，支持0-d Tensor后的Paddle代码，在写法上简洁清晰很多，提升了用户体验与API易用性。
 
 
 ### 2.2 代码可读性降低
