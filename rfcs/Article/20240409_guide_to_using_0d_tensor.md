@@ -56,26 +56,35 @@ out = torch.stack([x, x])
 print(out.shape)  # 输出 torch.Size([2])  0D升为1D，符合预期
 ```
 
-如果 Paddle 不支持 0-d Tensor 而是直接用 1-d Tensor 来表示, 就需要额外判断 x 是否为 1D，是就需要补 squeeze 来矫正结果以对齐 pytorch，不是就可和 Pytorch 相同。直接使用 1-d Tensor 来表示 0-d Tensor, 就会导致这种情况下的 API 行为不一致。
+如果 Paddle 不支持 0-d Tensor 而是直接用 1-d Tensor 来表示, 就需要额外判断 x 是否为 1D，是就需要补 squeeze 来矫正结果以对齐 pytorch，不是就可和 Pytorch 相同。支持 0-D 的 paddle 可以有更更加简洁的代码实现。
+
+假如paddle不支持0D，则写法为：
 
 ```python
 import paddle
 
 x = paddle.to_tensor(3.14)
 
-# Paddle 不支持 0-D 的情况
 # Paddle 写法需4行：需要额外判断x是否为1D，是就需要补squeeze来矫正结果以对齐 pytorch
 if len(x.shape) == 1:
     # 因为用shape=[1]的1维替代0维，导致x[0]还是1维，stack结果为2维，出现异常升维，需要补squeeze来校正维度
     out = paddle.stack([x[0], x[0]]).squeeze()
 else:
     out = paddle.stack([x[0], x[0]])
+```
 
+假如paddle支持0D，则写法为：
 
-# Paddle 支持 0-D 的情况
+```
+import paddle
+
+x = paddle.to_tensor(3.14)
+
 out = paddle.stack([x, x])
 print(out.shape)
 ```
+
+
 
 
 ### 2.2 代码可读性降低
@@ -192,14 +201,15 @@ print(y.shape) # []
 ```python
 import paddle
 
-x = paddle.to_tensor([1, 2, 3])
+x = paddle.rand([2, 2, 2])
 y = x[paddle.to_tensor(0)] 
 print(y)
-# Tensor(shape=[], dtype=int64, place=Place(cpu), stop_gradient=True,
-#        1)
+# Tensor(shape=[2, 2], dtype=float32, place=Place(cpu), stop_gradient=True,
+#        [[0.97571695, 0.84757918],
+#         [0.35047710, 0.37460467]])
 ```
 
-- 索引输出0D时：当索引的输出应当支持 0-d Tensor 时，例如3-D Tensor取[0，0，0]，降3维应输出 0D，以下是一个例子:
+- 索引输出0D时：当索引的输出应当支持 0-d Tensor 时，例如3-D Tensor取 [0，0，0]，降3维应输出 0D，以下是一个例子:
 
 ```python
 x = paddle.rand([2, 2, 2])
