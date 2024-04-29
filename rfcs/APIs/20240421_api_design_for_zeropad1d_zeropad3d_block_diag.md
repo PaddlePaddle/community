@@ -1,12 +1,12 @@
 # paddle_zeropad1d_zeropad3d_block_diag 设计文档
 
-| API 名称     | paddle.nn.zeropad1d/zeropad3d/paddle.block_diag            |
-| ------------ | ---------------------------------------------------------- |
-| 提交作者     | Chen-Lun-Hao                                               |
-| 提交时间     | 2024-04-21                                                 |
-| 版本号       | V2.0                                                       |
-| 依赖飞桨版本 | develop                                                    |
-| 文件名       | 20240421_api_design_for_zeropad1d_zeropad3d_block_diag.md  |
+| API 名称     | paddle.nn.zeropad1d/zeropad3d/paddle.block_diag           |
+| ------------ | --------------------------------------------------------- |
+| 提交作者     | Chen-Lun-Hao                                              |
+| 提交时间     | 2024-04-21                                                |
+| 版本号       | V2.0                                                      |
+| 依赖飞桨版本 | develop                                                   |
+| 文件名       | 20240421_api_design_for_zeropad1d_zeropad3d_block_diag.md |
 
 # 一、概述
 
@@ -191,7 +191,7 @@ def block_diag(*tensors: List[TensorLikeType]) -> TensorLikeType:
 
 # 五、设计思路与实现方案
 
-paddle 目前的 `pad` 算子已经支持 `x`, `pad`, `mode`, `value`, `data_format` 等参数，因此只需指定 value 为 0 以及 mode 为 constant 即可使用 `pad` 算子实现 `zeropad1d/zeropad3d` 。而针对需要实现 `block_diag`的 API，只需在 `zeros` 算子和 `concat`算子即可实现。
+paddle 目前的 `pad` 算子已经支持 `x`, `pad`, `mode`, `value`, `data_format` 等参数，因此只需指定 value 为 0 以及 mode 为 constant 即可使用 `pad` 算子实现 `zeropad1d/zeropad3d` 。而针对需要实现 `block_diag`的 API，使用 `zeros` 算子和 `concat`算子即可实现。
 
 ## 命名与参数设计
 
