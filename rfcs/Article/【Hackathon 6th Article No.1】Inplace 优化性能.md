@@ -111,7 +111,7 @@ Inplace 操作可以优化内存使用并提高执行效率，通过减少数据
 
 为避免影响计算的准确性，执行 Inplace 操作时需要特别注意以下情况：
 
-1. **对设置了 `requires_grad=True` 的叶子张量（leaf tensor）应避免使用原地（inplace）操作。** 因为即便梯度正确无误，原地修改了的张量值将影响后续的数据更新。例如，在使用 `a.add_(b)` 时，即使 `a` 的梯度计算是正确的，已经被原地修改的 `a` 的值在使用其梯度进行更新后，其更新后的最终数值也不再正确。
+1. **对设置了 `requires_grad=True` 的叶子张量（leaf tensor）应避免使用原地（inplace）操作。** 因为原地修改叶子张量的数据会覆盖前向传递中的值，从而阻碍在反向传播时正确地重建计算图。
 2. **PaddlePaddle 在执行反向传播时，针对某些特定的函数，能够保存必要的中间状态，或已经实现了策略以正确处理 Inplace 操作。** 不过，对于不常见或复杂的操作，最好在实际使用前通过实验来验证其行为。
 
 
@@ -132,10 +132,9 @@ Inplace 操作可以优化内存使用并提高执行效率，通过减少数据
 
 下面的示例展示了当尝试进行一个可能影响计算的 Inplace 操作时，PaddlePaddle 如何处理这种情况：
 
-### 1. 对 `requires_grad=True` 的叶子张量不能使用 Inplace 操作
+### 1. 对设置了 `requires_grad=True` 的叶子张量应避免使用原地（inplace）操作
 
-叶子张量是直接创建的张量，不是通过任何 Paddle 操作创建的结果。如果这样的张量设置了 `requires_grad=True`，意味着需要计算其梯度，进行 Inplace 操作可能会直接修改其数据，从而影响梯度计算。
-
+当这类张量设置为 `requires_grad=True`，表示它们的梯度需要被计算以用于反向传播。对这些张量执行原地操作，如 `a.sin_()`，可能会直接修改其数据。这反映了一个关键问题：原地修改叶子张量的数据会覆盖前向传递中的值，从而阻碍在反向传播时正确地重建计算图。这样的修改不仅可能导致梯度计算错误，还可能影响整个模型训练过程的稳定性和准确性。
 
 ```python
 import paddle
@@ -166,7 +165,7 @@ print("Gradient of x after backward:", x.grad.numpy())
 
 错误信息明确指出了“叶子变量不应该停止梯度计算并且不能使用原地策略”，这表明当张量被用于梯度计算时，进行原地操作可能会导致前向传递的值被覆盖，从而无法在反向传播时正确地重建计算图。
 即，原地操作 sin_() 在计算图中的叶子节点上不能直接使用，因为它会影响梯度计算。
-在PaddlePaddle中，对于原地修改（in-place）操作，如果是叶子节点（leaf tensor）并且需要计算梯度，通常是不允许直接进行原地操作的，因为这会影响梯度的正确计算。
+因此在PaddlePaddle中，对于原地修改（in-place）操作，如果是叶子节点（leaf tensor）并且需要计算梯度，通常是不允许直接进行原地操作的，因为这会影响梯度的正确计算。
 
 ```python
 ValueError: (InvalidArgument) Leaf Var (generated_tensor_0) that doesn't stop gradient can't use inplace strategy.
