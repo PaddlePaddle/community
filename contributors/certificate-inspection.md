@@ -48,4 +48,12 @@
 | 田川   | [gouzil](https://github.com/gouzil)             | 张正海 | [ccsuzzh](https://github.com/ccsuzzh)         |
 
 
+## 2023年下半年开源之星
+| 姓名   | GitHub ID                                       | 姓名   | GitHub ID                                     |
+| ------ | ---------------------------------------------- | ------ | --------------------------------------------- |
+| 田川   | [gouzil](https://github.com/gouzil)             | 刘宇博 | [RedContritio](https://github.com/RedContritio) |
+| 张一乔 | [Liyulingyue](https://github.com/Liyulingyue)   | 汪昕   | [greatv](https://github.com/greatv)            |
+| 詹荣瑞 | [zrr1999](https://github.com/zrr1999)           | 陆琦   | [MarioLulab](https://github.com/MarioLulab) |
+| 柳顺   | [megemini](https://github.com/megemini)         | 陈旭军 | [co63oc](https://github.com/co63oc) |
+| 卢畅   | [AndSonder](https://github.com/AndSonder)       | 马贺达 | [WintersMontagne10335](https://github.com/WintersMontagne10335)|
 
