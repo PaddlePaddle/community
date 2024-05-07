@@ -17,7 +17,7 @@
 若 $Z = X + iY$ ，且 $X \sim N(\mu, \sigma^2)$ , $Y \sim N(\mu, \sigma^2)$ ，$X$ 与 $Y$ 相互独立，则 $Z \sim CN(\mu+i\mu, 2\sigma^2)$
 记 $\mu+i\mu = \mu_z \in \mathbb{C}$ ， $2\sigma^2 = \sigma_z \in \mathbb{R}$ ，则其概率密度函数为：
 
-$$ p_Z(z) = \frac{1}{\pi\sigma_z^2}\exp\left\{-\frac{(z - \mu_z)^2}{\sigma_z^2}\right\} $$
+$$ p_Z(z) = \frac{1}{\pi\sigma_z^2}\exp[-\frac{(z - \mu_z)^2}{\sigma_z^2}] $$
 
 ## 2、功能目标
 针对涉及正态分布采样方法的 API - paddle.normal，paddle.nn.initializer.Normal 等，即调用底层 _C_ops.gaussian 的 API，需要统一对采样方法增加复数支持；
@@ -520,16 +520,15 @@ def kl_divergence(self, other):
 KL-divergence:
 
 $$ \begin{aligned}
-\mathcal{D}_{KL}(p || q) & = \int_z p(z)\log \frac{p(z)}{q(z)} dz \\
-& = \mathbb{E}_p[\log \frac{p(z)}{q(z)}] \\
-& = \mathbb{E}_p\{\log\left[\frac{\sigma_q^2}{\sigma_p^2} \exp\left(-\frac{|z-\mu_p|^2}{\sigma_p^2}+\frac{|z-\mu_q|^2}{\sigma_q^2}\right)\right]\} \\
-& = -\log \frac{\sigma_p^2}{\sigma_q^2} - \frac{1}{\sigma_p^2}\mathbb{E}_p(z-\mu_p)^2 + \frac{1}{\sigma_q^2}\mathbb{E}_p(z-\mu_q)^2\\
-& = -2\log \frac{\sigma_p}{\sigma_q} - 1 + \frac{1}{\sigma_q^2}\mathbb{E}_p(z^*z -\mu_q^*z-z^*\mu_q+\mu_q^*\mu_q) \\
-& = -2\log \frac{\sigma_p}{\sigma_q} - 1 + \frac{1}{\sigma_q^2}(\sigma_p^2+\mu_p*\mu_p -\mu_q^*\mu_p-\mu_p^*\mu_q+\mu_q^*\mu_q) \\
+\mathcal{D}\_{KL}(p || q) & = \int_z p(z)\log \frac{p(z)}{q(z)} dz \\
+& = \mathbb{E}\_p\[\log \frac{p(z)}{q(z)}\] \\
+& = \mathbb{E}\_p\[\log\[\frac{\sigma_q^2}{\sigma_p^2} \exp(-\frac{|z-\mu_p|^2}{\sigma_p^2}+\frac{|z-\mu_q|^2}{\sigma_q^2})\]\] \\
+& = -\log \frac{\sigma_p^2}{\sigma_q^2} - \frac{1}{\sigma_p^2}\mathbb{E}\_p(z-\mu_p)^2 + \frac{1}{\sigma_q^2}\mathbb{E}\_p(z-\mu_q)^2\\
+& = -2\log \frac{\sigma_p}{\sigma_q} - 1 + \frac{1}{\sigma_q^2}\mathbb{E}\_p(z^cz -\mu_q^cz-z^c\mu_q+\mu_q^c\mu_q) \\
+& = -2\log \frac{\sigma_p}{\sigma_q} - 1 + \frac{1}{\sigma_q^2}(\sigma_p^2+\mu_p^c\mu_p -\mu_q^c\mu_p-\mu_p^c\mu_q+\mu_q^c\mu_q) \\
 & = -2\log \frac{\sigma_p}{\sigma_q} - 1 + \frac{1}{\sigma_q^2}(\sigma_p^2+|\mu_p-\mu_q|^2) \\
 & = \frac{\sigma_p^2}{\sigma_q^2} - 1 + \frac{|\mu_p-\mu_q|^2}{\sigma_q^2}-2\log \frac{\sigma_p}{\sigma_q}
-\end{aligned}
-$$
+\end{aligned} $$
 
 # 六、测试和验收的考量
 
