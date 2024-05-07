@@ -16,6 +16,7 @@
 复正态分布随机变量的数学表示：
 若 $Z = X + iY$ ，且 $X \sim N(\mu, \sigma^2)$ , $Y \sim N(\mu, \sigma^2)$ ，$X$ 与 $Y$ 相互独立，则 $Z \sim CN(\mu+i\mu, 2\sigma^2)$
 记 $\mu+i\mu = \mu_z \in \mathbb{C}$ ， $2\sigma^2 = \sigma_z \in \mathbb{R}$ ，则其概率密度函数为：
+
 $$ p_Z(z) = \frac{1}{\pi\sigma_z^2}\exp\left\{-\frac{(z - \mu_z)^2}{\sigma_z^2}\right\} $$
 
 ## 2、功能目标
@@ -413,6 +414,7 @@ def entropy(self):
             )
 ```
 entropy:
+
 $$ \begin{aligned}
 H(Z) & = - \int_z p(z)\log p(z) dz \\
 & = - \mathbb{E}[\log p(z)] \\
@@ -516,6 +518,7 @@ def kl_divergence(self, other):
     )
 ```
 KL-divergence:
+
 $$ \begin{aligned}
 \mathcal{D}_{KL}(p || q) & = \int_z p(z)\log \frac{p(z)}{q(z)} dz \\
 & = \mathbb{E}_p[\log \frac{p(z)}{q(z)}] \\
