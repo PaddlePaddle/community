@@ -437,35 +437,42 @@ df<=1 时, 为 nan
 
 熵的计算方法： 
 $H = - \int_{x \in \Omega} f(x) \log{f(x)} dx$
+
 参考：[Shannon Entropy and Mutual Information for Multivariate SkewElliptical Distributions](https://marcgenton.github.io/2013.ACG.SJS.pdf) p46 s2.4 The multivariate Student’s t distribution
 记 $\nu = df$, $\mu = loc$, $\sigma=scale$
+
 $$
 H = \log(\frac{\Gamma(\nu/2)\Gamma(1/2) \sigma \sqrt{\nu}}{\Gamma[(1+\nu)/2]}) + \frac{(1+\nu)}{2} \cdot \{\psi[(1+\nu)/2] - \psi(\nu/2)\}
 $$
+
 where $\psi(\cdot)$ is the digamma function
 
 - `kl_divergence` 相对熵计算
 
-相对熵的计算方法： 
-$D_{KL}(\nu_1, \mu_1, \sigma1 ,\nu_2, \mu_2, \sigma_2) = \int_{x \in \Omega} f_1(x) \log{\frac{f_1(x)}{f_2(x)}}dx = \mathbb{E}_{f1(x)}[\log f_1(x) - \log f_2(x)]$
+KL散度的计算方法： 
+
+$$D_{KL}(\nu_1, \mu_1, \sigma1 ,\nu_2, \mu_2, \sigma_2) = \int_{x \in \Omega} f_1(x) \log{\frac{f_1(x)}{f_2(x)}}dx = \mathbb{E}_{f1(x)}[\log f_1(x) - \log f_2(x)]$$
+
 $$
 \begin{align*}
-D_{KL} & =  \mathbb{E}_{f1(x)} \{ \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
-& - \frac{\nu_1+1}{2}\log[1+(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1] +  \frac{\nu_2+1}{2}\log[1+(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\} \\
+D_{KL} & =  \mathbb{E}\_{f1(x)} \[ \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
+& - \frac{\nu_1+1}{2}\log[1+(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1] +  \frac{\nu_2+1}{2}\log[1+(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\] \\
 & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
-& - \frac{\nu_1+1}{2} \mathbb{E}_{f1(x)}\{\log[1 +(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1]\} \\
-& + \frac{\nu_2+1}{2} \mathbb{E}_{f1(x)}\{\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\}
+& - \frac{\nu_1+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1]\] \\
+& + \frac{\nu_2+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]
 \end{align*}
 $$
+
 from the derivation of entropy, we have
-$$ \mathbb{E}_{f(x)}\{\log[1 +(\frac{x-\mu}{\sigma})^2 / \nu] \} = \psi(\frac{1+\nu}{2}) - \psi(\frac{\nu}{2})$$
+
+$$ \mathbb{E}_{f(x)}\[\log[1 +(\frac{x-\mu}{\sigma})^2 / \nu] \] = \psi(\frac{1+\nu}{2}) - \psi(\frac{\nu}{2})$$
+
 therefore
-$$
-\begin{align*}
+
+$$ \begin{aligned}
 D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
 & - \frac{\nu_1+1}{2} [\psi(\frac{1+\nu_1}{2}) - \psi(\frac{\nu_1}{2})] + \frac{\nu_2+1}{2} [\psi(\frac{1+\nu_2}{2}) - \psi(\frac{\nu_2}{2})]
-\end{align*}
-$$
+\end{aligned} $$
 
 - `sample` 随机采样
 
