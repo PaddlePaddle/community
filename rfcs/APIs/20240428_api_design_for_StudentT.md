@@ -522,7 +522,7 @@ paddle.distribution.studentT.StudentT(df, loc=0.0, scale=1.0)
 ```
 参数 `df`, `loc`, `scale` 分别为 t 分布的三个参数, 表示自由度, 平移变换量, 和缩放变换量。
 
-数学表示例如，随机变量 $X$ 服从 t 分布，即 $X \sim t(n, loc, scale)$。
+数学表示例如，随机变量 $X$ 服从 t 分布，即 $X \sim t(df, loc, scale)$。
 
 ## 底层OP设计
 用现有API组合实现
@@ -539,42 +539,42 @@ class StudentT(Distribution):
     
 ```
 
-`StudentT` 类的初始化参数有 `df`，`loc` 和 `scale` ，
-需满足 `df>0`, `scale>0`
+`StudentT` 类的初始化参数有 `df`，`loc` 和 `scale` ，需满足 `df>0`, `scale>0`
+
 类包含的方法及实现方案如下：
 
 - `mean` 计算均值
 
-均值：
-
-df>1 时, 为 $loc$
-df<=1 时, 为 nan
+    均值的计算方法：
+    
+    df>1 时, 为 $loc$ ;   
+    df<=1 时, 为 nan
 
 - `variance` 计算方差
 
-方差的计算方法： 
-
-df>2 时, 为 $scale^2 \frac{df}{df-2}$
-2>=df>1 时，为 inf
-df<=1 时, 为 nan
+    方差的计算方法： 
+    
+    df>2 时, 为 $scale^2 \frac{df}{df-2}$ ;  
+    2>=df>1 时，为 inf ;  
+    df<=1 时, 为 nan
 
 - `entropy` 熵计算
 
-熵的计算方法： 
-$H = - \int_{x \in \Omega} f(x) \log{f(x)} dx$
+    熵的计算方法： 
+    $H = - \int_{x \in \Omega} f(x) \log{f(x)} dx$
 
-参考：[Shannon Entropy and Mutual Information for Multivariate SkewElliptical Distributions](https://marcgenton.github.io/2013.ACG.SJS.pdf) p46 s2.4 The multivariate Student’s t distribution
-记 $\nu = df$, $\mu = loc$, $\sigma=scale$
+    参考：[Shannon Entropy and Mutual Information for Multivariate SkewElliptical Distributions](https://marcgenton.github.io/2013.ACG.SJS.pdf) p46 s2.4 The multivariate Student’s t distribution
+    记 $\nu = df$, $\mu = loc$, $\sigma=scale$
 
 $$
 H = \log(\frac{\Gamma(\nu/2)\Gamma(1/2) \sigma \sqrt{\nu}}{\Gamma[(1+\nu)/2]}) + \frac{(1+\nu)}{2} \cdot \{\psi[(1+\nu)/2] - \psi(\nu/2)\}
 $$
 
-where $\psi(\cdot)$ is the digamma function
+        where $\psi(\cdot)$ is the digamma function
 
 - `kl_divergence` 相对熵计算
 
-KL散度的计算方法： 
+    KL散度的计算方法： 
 
 $$D_{KL}(\nu_1, \mu_1, \sigma1 ,\nu_2, \mu_2, \sigma_2) = \int_{x \in \Omega} f_1(x) \log{\frac{f_1(x)}{f_2(x)}}dx = \mathbb{E}_{f1(x)}[\log f_1(x) - \log f_2(x)]$$
 
@@ -588,11 +588,11 @@ D_{KL} & =  \mathbb{E}\_{f1(x)} \[ \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(
 \end{align*}
 $$
 
-from the derivation of entropy, we have
+        from the derivation of entropy, we have
 
 $$ \mathbb{E}_{f(x)}\[\log[1 +(\frac{x-\mu}{\sigma})^2 / \nu] \] = \psi(\frac{1+\nu}{2}) - \psi(\frac{\nu}{2})$$
 
-therefore
+        therefore
 
 $$ \begin{aligned}
 D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
@@ -601,28 +601,28 @@ D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \fr
 
 - `sample` 随机采样
 
-采样方法：
-记 $\nu = df$, $\mu = loc$, $\sigma=scale$
-若 $X \sim t(\nu, \mu=0, \sigma=1)$, 则
-$X = \frac{Z}{\sqrt{T/\nu}}$, 其中 $Z \sim N(0, 1)$, $T \sim \chi^2(\nu)$, Z 与 T 相互独立。
+    采样方法：
+    记 $\nu = df$, $\mu = loc$, $\sigma=scale$
+    若 $X \sim t(\nu, \mu=0, \sigma=1)$, 则
+    $X = \frac{Z}{\sqrt{T/\nu}}$, 其中 $Z \sim N(0, 1)$, $T \sim \chi^2(\nu)$, Z 与 T 相互独立。
 
-由于目前 paddle 无卡方分布，需要将其替换为 gamma 分布的特例，即 $T \sim \chi^2(\nu) = Gamma(\frac{\nu}{2}, \frac{1}{2})$
-
-对一般的 $X^{\prime} \sim t(\nu, \mu, \sigma)$
-只需对 X 做线性变换，即 $X^{\prime} = \mu + \sigma X$
+    由于目前 paddle 无卡方分布，需要将其替换为 gamma 分布的特例，即 $T \sim \chi^2(\nu) = Gamma(\frac{\nu}{2}, \frac{1}{2})$
+    
+    对一般的 $X^{\prime} \sim t(\nu, \mu, \sigma)$
+    只需对 X 做线性变换，即 $X^{\prime} = \mu + \sigma X$
 
 - `prob` 概率密度
 
-概率密度函数： 
-记 $\nu = df$, $\mu = loc$, $\sigma=scale$
-$X \sim t(\nu, \mu, \sigma)$, 则
-$f(x;\nu, \mu, \sigma) = \frac{\Gamma[(\nu+1)/2]}{\sigma\sqrt{\nu\pi}\Gamma(\nu/2)[1+(\frac{x-\mu}{\sigma})^2/\nu]^{(1+\nu)/2}}$
+    概率密度函数的计算方法： 
+    记 $\nu = df$, $\mu = loc$, $\sigma=scale$
+    $X \sim t(\nu, \mu, \sigma)$, 则
+    $f(x;\nu, \mu, \sigma) = \frac{\Gamma[(\nu+1)/2]}{\sigma\sqrt{\nu\pi}\Gamma(\nu/2)[1+(\frac{x-\mu}{\sigma})^2/\nu]^{(1+\nu)/2}}$
 
 - `log_prob` 对数概率密度
 
-对数概率密度函数： 
-记 $\nu = df$, $\mu = loc$, $\sigma=scale$
-$\log[f(\nu, \mu, \sigma)] = \log\Gamma[(\nu+1)/2] - \log \sigma - 0.5 \log \nu - 0.5 \log \pi - \log \Gamma(\nu/2) - 0.5 (\nu+1)\log[1+(\frac{x-\mu}{\sigma})^2/\nu] $
+    对数概率密度函数的计算方法： 
+    记 $\nu = df$, $\mu = loc$, $\sigma=scale$
+    $\log[f(\nu, \mu, \sigma)] = \log\Gamma[(\nu+1)/2] - \log \sigma - 0.5 \log \nu - 0.5 \log \pi - \log \Gamma(\nu/2) - 0.5 (\nu+1)\log[1+(\frac{x-\mu}{\sigma})^2/\nu] $
 
 
 
