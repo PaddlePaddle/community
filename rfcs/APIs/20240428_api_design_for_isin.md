@@ -369,7 +369,7 @@ paddle.isin
 用现有API组合实现
 
 ## API实现方案
-参考 pytorch 在 _decompose 中的设计：当 test_elements 元素个数较少时直接进行暴力搜索，较多时则采取基于排序的算法：若assume_unique=True，则用（利用 flatten，concat，index_put_，searchsorted等API组合实现）。暂时去掉 assume_unique 参数，因为**当前 paddle 的 argsort kernel 使用的是 std::sort 的不稳定排序，与 pytorch 和 numpy 的结果就会存在差异。若后期需要加 assume_unique 参数并用 argsort 实现 isin，则需要先实现 stable 的 argsort。
+参考 pytorch 在 _decompose 中的设计：当 test_elements 元素个数较少时直接进行暴力搜索，较多时则采取基于排序的算法：若 assume_unique=True，则用稳定排序的 argsort 进行实现；若 assume_unique=False，则用 searchsorted 进行实现。
 
 ```python
 def isin(elements, test_elements, invert=False, assume_unique=False, name=None):
