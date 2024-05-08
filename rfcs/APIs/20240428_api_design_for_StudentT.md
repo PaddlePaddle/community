@@ -385,9 +385,134 @@ class StudentT(distribution.AutoCompositeTensorDistribution):
 
 `tfp.distributions.StudentT` 继承自 `tfp.distribution.AutoCompositeTensorDistribution` 
 
+### Scipy
+scipy.stats.t = <scipy.stats._continuous_distns.t_gen object>
+
+```python
+class t_gen(rv_continuous):
+    r"""A Student's t continuous random variable.
+
+    For the noncentral t distribution, see `nct`.
+
+    %(before_notes)s
+
+    See Also
+    --------
+    nct
+
+    Notes
+    -----
+    The probability density function for `t` is:
+
+    .. math::
+
+        f(x, \nu) = \frac{\Gamma((\nu+1)/2)}
+                        {\sqrt{\pi \nu} \Gamma(\nu/2)}
+                    (1+x^2/\nu)^{-(\nu+1)/2}
+
+    where :math:`x` is a real number and the degrees of freedom parameter
+    :math:`\nu` (denoted ``df`` in the implementation) satisfies
+    :math:`\nu > 0`. :math:`\Gamma` is the gamma function
+    (`scipy.special.gamma`).
+
+    %(after_notes)s
+
+    %(example)s
+
+    """
+    def _shape_info(self):
+        return [_ShapeInfo("df", False, (0, np.inf), (False, False))]
+
+    def _rvs(self, df, size=None, random_state=None):
+        return random_state.standard_t(df, size=size)
+
+    def _pdf(self, x, df):
+        return _lazywhere(
+            df == np.inf, (x, df),
+            f=lambda x, df: norm._pdf(x),
+            f2=lambda x, df: (
+                np.exp(self._logpdf(x, df))
+            )
+        )
+
+    def _logpdf(self, x, df):
+
+        def t_logpdf(x, df):
+            return (np.log(sc.poch(0.5 * df, 0.5))
+                    - 0.5 * (np.log(df) + np.log(np.pi))
+                    - (df + 1)/2*np.log1p(x * x/df))
+
+        def norm_logpdf(x, df):
+            return norm._logpdf(x)
+
+        return _lazywhere(df == np.inf, (x, df, ), f=norm_logpdf, f2=t_logpdf)
+
+    def _cdf(self, x, df):
+        return sc.stdtr(df, x)
+
+    def _sf(self, x, df):
+        return sc.stdtr(df, -x)
+
+    def _ppf(self, q, df):
+        return sc.stdtrit(df, q)
+
+    def _isf(self, q, df):
+        return -sc.stdtrit(df, q)
+
+    def _stats(self, df):
+        # infinite df -> normal distribution (0.0, 1.0, 0.0, 0.0)
+        infinite_df = np.isposinf(df)
+
+        mu = np.where(df > 1, 0.0, np.inf)
+
+        condlist = ((df > 1) & (df <= 2),
+                    (df > 2) & np.isfinite(df),
+                    infinite_df)
+        choicelist = (lambda df: np.broadcast_to(np.inf, df.shape),
+                      lambda df: df / (df-2.0),
+                      lambda df: np.broadcast_to(1, df.shape))
+        mu2 = _lazyselect(condlist, choicelist, (df,), np.nan)
+
+        g1 = np.where(df > 3, 0.0, np.nan)
+
+        condlist = ((df > 2) & (df <= 4),
+                    (df > 4) & np.isfinite(df),
+                    infinite_df)
+        choicelist = (lambda df: np.broadcast_to(np.inf, df.shape),
+                      lambda df: 6.0 / (df-4.0),
+                      lambda df: np.broadcast_to(0, df.shape))
+        g2 = _lazyselect(condlist, choicelist, (df,), np.nan)
+
+        return mu, mu2, g1, g2
+
+    def _entropy(self, df):
+        if df == np.inf:
+            return norm._entropy()
+
+        def regular(df):
+            half = df/2
+            half1 = (df + 1)/2
+            return (half1*(sc.digamma(half1) - sc.digamma(half))
+                    + np.log(np.sqrt(df)*sc.beta(half, 0.5)))
+
+        def asymptotic(df):
+            # Formula from Wolfram Alpha:
+            # "asymptotic expansion (d+1)/2 * (digamma((d+1)/2) - digamma(d/2))
+            #  + log(sqrt(d) * beta(d/2, 1/2))"
+            h = (norm._entropy() + 1/df + (df**-2.)/4 - (df**-3.)/6
+                 - (df**-4.)/8 + 3/10*(df**-5.) + (df**-6.)/4)
+            return h
+
+        h = _lazywhere(df >= 100, (df, ), f=asymptotic, f2=regular)
+        return h
+```
 
 # 四、对比分析
-Pytorch 与 Tensorflow_probability 实现方式大体类似, 由于t分布是连续的概率分布，相应的概率属性都可以通过基本的概率计算得到。而在 Tensorflow_probability 中除了实现了mean, variance, log_prob, entropy 等方法外还实现了 cdf, survival function, quantile 等方法。考虑与 paddle 现有概率分布类 API 保持一致，参照 pytorch 的实现方式。
+Pytorch、Tensorflow_probability、Scipy 实现方式大体类似, 由于t分布是连续的概率分布，相应的概率属性都可以通过基本的概率计算得到。而在 Tensorflow_probability 和 Scipy 中除了实现了mean, variance, log_prob, entropy 等方法外还实现了 cdf, survival function, quantile 等方法。
+
+survival function 本质上等于 1 - cdf，且 Tensorflow_probability 和 Scipy 的实现都是通过 1 - cdf, 所以可以省略。tfp 中的 quantile 方法与 Scipy 中的 ppf 方法等价, 相当于 icdf。
+
+t 分布的 cdf 与 icdf 主要是在统计学的假设检验问题中有重要价值, 而在机器学习的概率模型领域下，使用最为广泛的主要还是分布的 pdf 与 logpdf。另一方面由于 t 分布的 cdf 和 icdf 的实现相对复杂, 对 pdf 的积分函数与其积分函数的逆函数的实现需要借助 [incomplete beta function](https://dlmf.nist.gov/8.17) 和 inverse incomplete beta function，这两个在 paddle 中尚未实现，所以考虑暂时先不实现 cdf 与 icdf。
 
 # 五、设计思路与实现方案
 
