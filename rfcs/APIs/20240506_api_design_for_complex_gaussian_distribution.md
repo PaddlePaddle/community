@@ -14,7 +14,7 @@
 复值随机变量在许多科学领域都有应用，如信号处理、无线电工程和大气物理学，因此希望对 paddle 目前已有的正态分布 API 添加复数支持。详见：[NO.31 paddle Normal 分布支持复数](https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_6th/【Hackathon%206th】开源贡献个人挑战赛框架开发任务合集.md#no31-paddle-normal-分布支持复数)
 
 复正态分布随机变量的数学表示：
-若 $Z = X + iY$ ，且 $X \sim N(\mu, \sigma^2)$ , $Y \sim N(\mu, \sigma^2)$ ，$X$ 与 $Y$ 相互独立，则 $Z \sim CN(\mu+i\mu, 2\sigma^2)$
+若 $Z = X + iY$ ，且 $X \sim N(\mu, \sigma^2)$ , $Y \sim N(\mu, \sigma^2)$ ， $X$ 与 $Y$ 相互独立，则 $Z \sim CN(\mu+i\mu, 2\sigma^2)$  
 记 $\mu+i\mu = \mu_z \in \mathbb{C}$ ， $2\sigma^2 = \sigma_z \in \mathbb{R}$ ，则其概率密度函数为：
 
 $$ p_Z(z) = \frac{1}{\pi\sigma_z^2}\exp[-\frac{(z - \mu_z)^2}{\sigma_z^2}] $$
@@ -513,9 +513,14 @@ def kl_divergence(self, other):
     var_ratio = var_ratio * var_ratio
     t1 = (self.loc - other.loc) / other.scale
     t1 = t1 * t1
-    return paddle.add(
-        0.5 * var_ratio, 0.5 * (t1 - 1.0 - paddle.log(var_ratio)), name=name
-    )
+    if self._complex_gaussian:
+        return paddle.add(
+            var_ratio, (t1 - 1.0 - paddle.log(var_ratio)), name=name
+        )
+    else:
+        return paddle.add(
+            0.5 * var_ratio, 0.5 * (t1 - 1.0 - paddle.log(var_ratio)), name=name
+        )
 ```
 KL-divergence:
 
