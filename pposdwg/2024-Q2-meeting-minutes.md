@@ -31,4 +31,4 @@
 
 ### 一些活动与通知
 1. 2024 年 H1 飞桨开源之星评选筹备：见 [评选规则](https://github.com/PaddlePaddle/community/issues/892)，共 10 人，6月11日前提交申请
-2. 机会分享：[2024中国互联网发展创新与投资大赛（开源）](https://bs.bjos.club/gong-n255-1.html#cons) ，如【开源应用和开放赛道】适合 PaddleOCR 的下游项目 RapidOCR 申请报名。
+2. 机会分享：[2024中国互联网发展创新与投资大赛（开源）](https://bs.bjos.club/gong-n255-1.html#cons) ，如【开源应用和开放赛道】适合 PaddleOCR 的下游项目 RapidOCR 申请
