@@ -26,7 +26,7 @@
         - 决策一：撤销撤销工作组秘书，经讨论通过。
         - 决策二：成员汤诗雨更换为张军，经讨论通过。
 ## Meeting Minutes
-- [2024-Q1 meeting miniutes](https://github.com/PaddlePaddle/community/blob/master/pposdwg/2024-Q1-meeting-minutes.md)
+- [2024-Q1 meeting minutes](https://github.com/PaddlePaddle/community/blob/master/pposdwg/2024-Q1-meeting-minutes.md)
 - [2024-Q2 meeting minutes](https://github.com/PaddlePaddle/community/blob/master/pposdwg/2024-Q2-meeting-minutes.md)
 ## 致谢
 感谢各位成员对飞桨社区做出的贡献。
