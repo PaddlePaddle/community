@@ -18,7 +18,7 @@
    - [@GreatV](https://github.com/GreatV)（汪昕、 PMC Chair）
    - [@tink2123](https://github.com/tink2123)（殷晓婷、 PMC Chair）
    - [@Topdu](https://github.com/Topdu)（杜永坤）
-   - [@SWHL](https://github.com/SWHL)（王佳华）
+   - [@SWHL](https://github.com/SWHL)（Joshua Wang）
    - [@Liyulingyue](https://github.com/Liyulingyue)（张一乔）
    - [@Sunting78](https://github.com/Sunting78)（孙婷）
 
