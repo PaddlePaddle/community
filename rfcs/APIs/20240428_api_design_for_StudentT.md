@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2024-04-28 | 
-|版本号 | V1.0 | 
+|版本号 | V1.1 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20240428_api_design_for_StudentT.md<br> | 
 
@@ -24,7 +24,6 @@ t分布是一种基础的概率分布, 它在概率论及统计学中用于根�
 - prob 概率密度
 - log_prob 对数概率密度
 - entropy 熵计算
-- kl_divergence 相对熵计算
 
 ## 3、意义
 丰富 Paddle 能够提供的分布类型，进一步完善 Paddle 框架以用于概率编程。
@@ -635,7 +634,6 @@ $$
 
 3. 使用 `StudentT` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。(参考的是目前 `geometric`、`gumbel`、`laplace`、`lognormal`、`multinomial`、`normal` 的测试方法)
 
-4. `kl_divergence` 通过 `numpy` 重写kl散度的计算逻辑来进行验证。
 
 # 七、可行性分析和排期规划
 - 排期规划
