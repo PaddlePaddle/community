@@ -591,13 +591,11 @@ class StudentT(Distribution):
     $H = - \int_{x \in \Omega} f(x) \log{f(x)} dx$
 
     参考：[Shannon Entropy and Mutual Information for Multivariate SkewElliptical Distributions](https://marcgenton.github.io/2013.ACG.SJS.pdf) p46 s2.4 The multivariate Student’s t distribution
-    记 $\nu = df$, $\mu = loc$, $\sigma=scale$
+    记 $\nu = df$, $\mu = loc$, $\sigma=scale$, $\psi(\cdot)$ 是 digamma 函数
 
 $$
-H = \log(\frac{\Gamma(\nu/2)\Gamma(1/2) \sigma \sqrt{\nu}}{\Gamma[(1+\nu)/2]}) + \frac{(1+\nu)}{2} \cdot \{\psi[(1+\nu)/2] - \psi(\nu/2)\}
+H = \log(\frac{\Gamma(\nu/2)\Gamma(1/2) \sigma \sqrt{\nu}}{\Gamma[(1+\nu)/2]}) + \frac{(1+\nu)}{2} \cdot [\psi[(1+\nu)/2] - \psi(\nu/2)]
 $$
-
-        where $\psi(\cdot)$ is the digamma function
 
 - `sample` 随机采样
 
