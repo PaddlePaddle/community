@@ -515,7 +515,11 @@ t 分布的 cdf 与 icdf 主要是在统计学的假设检验问题中有重要�
 
 此外, kl 散度的解析函数较难推导出, 以下过程参考[A Novel Kullback-Leilber Divergence Minimization-Based Adaptive Student's t-Filter](https://www.researchgate.net/publication/335580775_A_Novel_Kullback-Leilber_Divergence_Minimization-Based_Adaptive_Student's_t-Filter)
 
+记 $\nu_1, \mu_1, \sigma_1$, $\nu_2, \mu_2, \sigma_2$ 分别为2个t分布的自由度参数, 平移参数和缩放参数:
+
 $$D_{KL}(\nu_1, \mu_1, \sigma1 ,\nu_2, \mu_2, \sigma_2) = \int_{x \in \Omega} f_1(x) \log{\frac{f_1(x)}{f_2(x)}}dx = \mathbb{E}_{f1(x)}[\log f_1(x) - \log f_2(x)]$$
+
+在以下所有内容中（包括[第五部分](#五设计思路与实现方案)） $\Gamma(\cdot)$ 表示 gamma 函数, $\psi(\cdot)$ 表示 digamma 函数
 
 $$
 \begin{align*}
@@ -527,11 +531,11 @@ D_{KL} & =  \mathbb{E}\_{f1(x)} \[ \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(
 \end{align*}
 $$
 
-        from the derivation of entropy, we have
+根据t分布的 entropy 的推导过程，有
 
 $$ \mathbb{E}_{f(x)}\[\log[1 +(\frac{x-\mu}{\sigma})^2 / \nu] \] = \psi(\frac{1+\nu}{2}) - \psi(\frac{\nu}{2})$$
 
-        therefore
+因此
 
 $$ \begin{aligned}
 D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
@@ -539,7 +543,7 @@ D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \fr
 & + \frac{\nu_2+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]
 \end{aligned} $$
 
-只能推导到这一步, 因此建议暂不实现 kl 散度方法。
+但目前只能推导到这一步, 由于 $\mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]$ 这一项无法解析，只能利用Jansen不等式（将 log 放到期望外面）推导出这一项的上界，因此建议暂不实现 kl 散度方法。
 
 # 五、设计思路与实现方案
 
@@ -591,7 +595,7 @@ class StudentT(Distribution):
     $H = - \int_{x \in \Omega} f(x) \log{f(x)} dx$
 
     参考：[Shannon Entropy and Mutual Information for Multivariate SkewElliptical Distributions](https://marcgenton.github.io/2013.ACG.SJS.pdf) p46 s2.4 The multivariate Student’s t distribution
-    记 $\nu = df$, $\mu = loc$, $\sigma=scale$, $\psi(\cdot)$ 是 digamma 函数
+    记 $\nu = df$, $\mu = loc$, $\sigma=scale$
 
 $$
 H = \log(\frac{\Gamma(\nu/2)\Gamma(1/2) \sigma \sqrt{\nu}}{\Gamma[(1+\nu)/2]}) + \frac{(1+\nu)}{2} \cdot [\psi[(1+\nu)/2] - \psi(\nu/2)]
