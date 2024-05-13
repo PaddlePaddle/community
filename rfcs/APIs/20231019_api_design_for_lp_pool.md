@@ -196,7 +196,7 @@ def lp_pool1d(
 
     ``` python
     paddle.nn.functional.lp_pool1d(
-        input:Tensor,
+        x:Tensor,
         norm_type:Union[int, float],
         kernel_size:int,
         stride:Optional[BroadcastingList1[int]]=None,
@@ -205,7 +205,7 @@ def lp_pool1d(
 
     |参数名|类型|描述|
     |---|---|---|
-    |input|Tensor|Tensor of input|
+    |x|Tensor|Tensor of input|
     |norm_type|Union[int, float]|exponent|
     |kernel_size|int|the size of the window|
     |stride|Optional[BroadcastingList1[int]]|the stride of the window|
@@ -220,20 +220,22 @@ def lp_pool1d(
 
     ``` python
     paddle.nn.functional.lp_pool2d(
-        input:Tensor,
+        x:Tensor,
         norm_type:Union[int, float],
         kernel_size:BroadcastingList2[int],
         stride:Optional[BroadcastingList2[int]]=None,
-        ceil_mode:bool=False)
+        ceil_mode:bool=False,
+        data_format:str="NCHW")
     ```
 
     |参数名|类型|描述|
     |---|---|---|
-    |input|Tensor|Tensor of input|
+    |x|Tensor|Tensor of input|
     |norm_type|Union[int, float]|exponent|
     |kernel_size|BroadcastingList2[int]|the size of the window|
     |stride|Optional[BroadcastingList2[int]]|the stride of the window|
     |ceil_mode|bool|when True, will use ceil instead of floor to compute the output shape|
+    |data_format|str|The data format of the input and output data.|
     |output|Tensor|Tensor of output|
 
 - `paddle.nn.LPPool2D`
@@ -242,13 +244,22 @@ def lp_pool1d(
 
 ## 底层 OP 设计
 
-本设计文档不涉及。
+由于 lp pool 操作与其他 pool 操作类似，得益于 Paddle 优秀的代码设计，可以直接复用现有的 `Pool2dFunctor` 与 `Pool2dGradFunctor`，只需单独实现 lp pool 在每个区域计算的逻辑即可。 对于 `norm_type=inf` 的情况，可直接调用 `MaxPool`，而无需使用判断增添额外的开销。
+
+直接使用 `Pool2DInferMeta`, 因此底层 op 设计为
+
+```
+- op : lp_pool2d
+  args : (Tensor x, IntArray kernel_size, int[] strides = {1,1}, int[] paddings = {0,0}, bool ceil_mode = false, bool exclusive = true, str data_format = "NCHW", str pooling_type = "", bool global_pooling = false, bool adaptive = false, str padding_algorithm = "EXPLICIT", float norm_type = 0.0f)
+```
+
+其中 `exclusive`, `global_pooling`, `adaptive` 为无用参数。
 
 ## API实现方案
 
 - `paddle.nn.functional.lp_pool1d`
 
-利用 `Paddle` 已有的 `paddle.nn.functional.avg_pool1d`组合实现。
+将输入转换为 2D ，调用 `_C_ops.lp_pool2d` 实现。
 
 - `paddle.nn.LPPool1D`
 
@@ -256,11 +267,11 @@ def lp_pool1d(
 
 - `paddle.nn.functional.lp_pool2d`
 
-利用 `Paddle` 已有的 `paddle.nn.functional.avg_pool2d`组合实现。
+调用 `_C_ops.lp_pool2d` 实现。
 
 - `paddle.nn.LPPool2D`
 
-调用 `paddle.nn.functional.lp_poo21d` 实现。
+调用 `paddle.nn.functional.lp_pool2d` 实现。
 
 # 六、测试和验收的考量
 
