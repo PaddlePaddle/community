@@ -13,36 +13,36 @@
 0-1分布（伯努利分布）:
 
 设随机变量X只可能取0与1两个值，它的分布律是 ：
-$\mathrm{P}\{X=k\}=p^k(1-p)^{1-k},k=0,1$
+$\mathrm{P}\\{X=k\\}=p^k(1-p)^{1-k}, \quad k=0,1$
 则称X服从以p为参数的0-1分布或者两点分布。
-它的期望为：$EX=p$
-它的方差为：$DX=p(1-p)$
+它的期望为： $EX=p$
+它的方差为： $DX=p(1-p)$
 
 二项分布: 
 
 了解到了伯努利分布后，我们来考虑n重伯努利实验，设随机变量X是事件发生的次数，那么其分布律是：
-$\mathrm{P}\{X=k\}=(_k^n)p^k(1-p)^{n-k},k=0,1,\ldots,n$
-则称随机变量X服从参数n，p的二项分布，并记作：$X\sim b(n,p)$
-它的期望为：$EX=np$
-它的方差为：$DX=np(1-p)$
+$\mathrm{P}\\{X=k\\} = \binom{n}{k} p^k (1-p)^{n-k}, \quad k=0,1,\ldots,n$
+则称随机变量X服从参数n，p的二项分布，并记作： $X\sim b(n,p)$
+它的期望为： $EX=np$
+它的方差为： $DX=np(1-p)$
 
 泊松分布:
 
 设随机变量X的可能取值为0，1，2，...，且概率分布为：
-$\operatorname{P}\{X=k\}=\frac{e^{-\lambda}\lambda^{k}}{k!}$
-,则称随机变量X服从泊松分布，并记作：$X\sim\pi(\lambda)$
-它的期望为：$EX=\lambda$
-它的方差为：$DX=\lambda$
+$\text{P}\\{X=k\\} = \frac{e^{-\lambda} \lambda^{k}}{k!}$
+,则称随机变量X服从泊松分布，并记作： $X\sim\pi(\lambda)$
+它的期望为： $EX=\lambda$
+它的方差为： $DX=\lambda$
 
 几何分布:
 
 几何分布指的是以下两种离散型概率分布中的一种：
   在伯努利试验中，得到一次成功所需要的试验次数X。X的值域是{1，2，3...}
-  在得到第一次成功之前所经历的失败次数：$Y=X-1$。Y的值域是{0，1，2，...}
+  在得到第一次成功之前所经历的失败次数： $Y=X-1$。Y的值域是{0，1，2，...}
 如果每次试验的成功概率是p，那么k次试验中，第k次才得到成功的概率是：
-$\begin{matrix}\mathrm{P}(X=k)=(1-p)^{k-1}p\end{matrix}$
-它的期望为：$EX=\frac1p$
-它的方差为：$DX=\frac{1-p}{p^2}$
+$\mathrm{P}(X=k) = (1-p)^{k-1} p$
+它的期望为： $EX=\frac1p$
+它的方差为： $DX=\frac{1-p}{p^2}$
 
 
 ### 1.3 连续型随机变量概率分布
@@ -52,26 +52,29 @@ $\begin{matrix}\mathrm{P}(X=k)=(1-p)^{k-1}p\end{matrix}$
 均匀分布:
 
 一个均匀分布在区间[a,b]上的连续型随机变量X，其对应的概率密度函数为：
-$f(x)=\left\{\begin{array}{ll}\frac{1}{b-a}&a\leq x\leq b\\0&\text{else}\end{array}\right.$
-它的期望为：$EX=\frac{a+b}2$
-它的方差为：$DX=\frac{(b-a)^2}{12}$
+$f(x) = | \frac{1}{b-a} \quad \text{if } a \leq x \leq b |
+       | 0 \quad \text{otherwise} |$
+它的期望为： $EX=\frac{a+b}2$
+它的方差为： $DX=\frac{(b-a)^2}{12}$
 
 指数分布:
 若随机变量X有以下的概率密度函数：
-$f(x)=\left\{\begin{array}{ll}\lambda e^{-\lambda x}&x>0\\0&x\leq0\end{array}\right.$
-则称X服从指数分布。其中$\lambda$为参数，其分布函数为：
-$F(x)=\int_{-\infty}^xf(t)\mathrm{d}t=\left\{\begin{array}{ll}1-e^{-\lambda x}&x>0\\0&x\leq0\end{array}\right.$
-它的期望为：$EX=\frac1\lambda$
-它的方差为：$DX=\frac{1}{\lambda^{2}}$
+$f(x) = | \lambda e^{-\lambda x} \quad \text{if } x > 0 |
+       | 0 \quad \text{otherwise} |$
+则称X服从指数分布。其中 $\lambda$为参数，其分布函数为：
+$F(x) = | \int_{-\infty}^x f(t) \, dt = 1 - e^{-\lambda x} \quad \text{if } x > 0 |
+       | 0 \quad \text{otherwise} |$
+它的期望为： $EX=\frac1\lambda$
+它的方差为： $DX=\frac{1}{\lambda^{2}}$
 
 正态分布:
 若随机变量X对应的概率密度函数为：
 $f(x)=\frac{1}{\sqrt{2\pi}\sigma}e^{\frac{-(x-\mu)^2}{2\sigma^2}}$
-则称X服从正态分布，又名高斯分布，并记作$X\sim N(\mu,\sigma^{2})$
-它的期望为：$EX=\mu$
-它的方差为：$DX=\sigma^2$
-当$\mu=0$，$\sigma^2=1$，$f(x)=\frac{1}{\sqrt{2\pi}}e^{\frac{-x^{2}}{2}}$，即$X\sim N(0,1)$，称其服从标准正态分布
-通常习惯将标准正态分布函数记作$\Phi(x)$，概率密度函数记作$\phi(x)$
+则称X服从正态分布，又名高斯分布，并记作 $X\sim N(\mu,\sigma^{2})$
+它的期望为： $EX=\mu$
+它的方差为： $DX=\sigma^2$
+当 $\mu=0$，$\sigma^2=1$， $f(x)=\frac{1}{\sqrt{2\pi}}e^{\frac{-x^{2}}{2}}$，即 $X\sim N(0,1)$，称其服从标准正态分布
+通常习惯将标准正态分布函数记作 $\Phi(x)$，概率密度函数记作 $\phi(x)$
 
 
 ## 2. Paddle 概率分布 API
