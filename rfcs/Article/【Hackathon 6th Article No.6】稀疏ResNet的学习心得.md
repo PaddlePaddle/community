@@ -11,13 +11,15 @@
 ## 1. COO（Coordinate Format）
 在 COO 格式中，只记录非零元素的位置和值。这种格式由三个主要组件组成：`indices`、`values` 和 `shape`。`indices` 是一个二维数组，其中的每一列代表一个非零元素的坐标；`values` 存储对应的非零元素值；`shape` 则描述了张量的维度。
 
-![image](https://github.com/lightrain-a/community/assets/164860023/6ea1fbe9-9b9b-4b01-b60d-a474103212db)
+![image](https://github.com/lightrain-a/community/assets/164860023/ceaf67fc-be65-4ab5-84f9-a7c27cda7f52)
+
 
 
 ## 2. CSR（Compressed Sparse Row Format）
 CSR 格式是一种更为紧凑的稀疏表示，专为快速的行访问和矩阵乘法运算优化。在 CSR 中，通过三个数组 `crows`、`cols` 和 `values` 来表示稀疏矩阵。`crows` 存储每一行第一个非零元素的索引，`cols` 存储非零元素的列索引，而 `values` 则直接存储这些非零元素的值。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/c5b958755ace496d95409f2ec00eb3ae.png)
+![image](https://github.com/lightrain-a/community/assets/164860023/1621e8b8-f776-49ba-88e5-be3dd7c8804a)
+
 
 
 
@@ -37,7 +39,8 @@ PaddlePaddle 支持多种类型的稀疏张量，主要包括：
 
 PaddlePaddle 提供了完整的支持来创建和操作 COO 和 CSR 格式的稀疏张量。以下是使用 PaddlePaddle 创建和操作这些张量的具体方法。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/6a79578e9fbb4f98b5cc4e83cac580ff.png)
+![image](https://github.com/lightrain-a/community/assets/164860023/d1981488-25c2-45b7-927a-2147f12415d9)
+
 
 
 
@@ -130,7 +133,8 @@ PaddlePaddle 提供了一套简单易用的接口，使得稀疏张量的使用�
 
 PaddlePaddle 支持通过几个简单的 API，如 `Tensor.to_dense()`, `Tensor.to_sparse_coo()`, 和 `Tensor.to_sparse_csr()` 来实现稀疏与稠密之间的转换，这些操作保证了数据处理的灵活性和效率。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/533b7f3ce74845b5ad1c57dd44280d0a.png)
+![image](https://github.com/lightrain-a/community/assets/164860023/39d01114-11f3-49d6-affa-0ad716b5c5b5)
+
 
 代码示例：稠密到稀疏的转换
 
@@ -266,7 +270,8 @@ model
 ```
 输出：
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/9b6669da0c6f4a28bd3b7f768c62edf8.png)
+![image](https://github.com/lightrain-a/community/assets/164860023/b2b9d3e8-b460-4555-b3cd-82a7bd61ef65)
+
 
 
 ```python
