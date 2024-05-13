@@ -98,22 +98,27 @@ print(torch.var(a))
 
 ## 底层OP设计
 
-修改 GaussianKernel、GaussianInplaceKernel：
-增加参数 `complex_gaussian` 默认值 false
+增加 GaussianKernel、GaussianInplaceKernel 以及对应反向算子的复数类型特化：
 
 以 GaussianKernel 为例：
 ```cpp
-template <typename T, typename Context>
+#include "paddle/phi/common/complex.h"
+
+// If T is complex
+template <
+    typename T,
+    typename Context,
+    std::enable_if_t<std::is_same<T, phi::dtype::complex<float>>::value ||
+                         std::is_same<T, phi::dtype::complex<double>>::value,
+                     bool> = true>
 void GaussianKernel(const Context& dev_ctx,
                     const IntArray& shape,
-                    float mean,
+                    std::complex<float> mean,
                     float std,
                     int seed,
-                    bool complex_gaussian,
                     DataType dtype,
                     DenseTensor* out) {
   auto tensor = out;
-
 
   tensor->Resize(common::make_ddim(shape.GetData()));
   int64_t size = tensor->numel();
@@ -125,28 +130,17 @@ void GaussianKernel(const Context& dev_ctx,
     engine = dev_ctx.GetGenerator()->GetCPUEngine();
   }
 
-  if (!complex_gaussian) {
-    std::normal_distribution<T> dist(mean, std);
-    T* data = dev_ctx.template Alloc<T>(tensor);
+  float mean_real = mean.real();
+  std = std::sqrt(std::pow(std, 2)/2);
+  std::normal_distribution<T> dist(mean_real, std);
+  
+  T* data = dev_ctx.template Alloc<T>(tensor);
+  for (int64_t i = 0; i < size; ++i) {
+    phi::dtype::Real<T> x = dist(*engine);
+    phi::dtype::Real<T> y = dist(*engine);
+    data[i] = T(x, y);
+  }
 
-    for (int64_t i = 0; i < size; ++i) {
-      data[i] = dist(*engine);
-    }
-  }
-  else {
-    std = std::sqrt(std::pow(std, 2)/2);
-    DenseTensor* real = new DenseTensor();
-    DenseTensor* imag = new DenseTensor();
-    real->Resize(common::make_ddim(shape.GetData()));
-    imag->Resize(common::make_ddim(shape.GetData()));
-    T* data_real = dev_ctx.template Alloc<T>(real);
-    T* data_imag = dev_ctx.template Alloc<T>(imag);
-    for (int64_t i = 0; i < size; ++i) {
-      data_real[i] = dist(*engine);
-      data_imag[i] = dist(*engine);
-    }
-    phi::ComplexKernel(dev_ctx, data_real, data_imag, out);
-  }
 }
 ```
 
