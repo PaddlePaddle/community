@@ -31,22 +31,37 @@ PaddlePaddle 支持多种类型的稀疏张量，主要包括：
 1. **COO格式（Coordinate List）**:
    - 这是一种常用的稀疏表示格式，其中非零元素通过其坐标列表进行存储。
    - 使用 `paddle.sparse.sparse_coo_tensor(indices, values, shape)` 可以创建 COO 格式的稀疏张量，其中 `indices` 是一个二维整数张量，指示非零元素的坐标；`values` 是一个张量，包含与 `indices` 对应的值；`shape` 是一个定义张量形状的整数列表或张量。
+  
+2. **CSR格式（Compressed Sparse Row）**:
+   - 这是另一种常用的稀疏表示格式，主要用于优化行访问的性能，其中非零元素通过行的压缩方式进行存储。
+   - 使用 `paddle.sparse.sparse_csr_tensor(crow_indices, col_indices, values, shape)` 可以创建 CSR 格式的稀疏张量，其中 `crow_indices` 是一个一维整数张量，指示每一行的起始非零元素在 `values` 中的位置；`col_indices` 是一个一维整数张量，指示每个非零元素的列索引；`values` 是一个张量，包含所有非零元素的值；`shape` 是一个定义张量形状的整数列表或张量。
 
-2. **转换功能**:
-   - 稀疏张量可以转换为密集张量，反之亦然。使用 `to_dense()` 方法可以将稀疏张量转换为标准的密集张量；使用 `to_sparse_coo()` 方法可以将密集张量转换为 COO 格式的稀疏张量。
+3. **转换功能**:
+   - 稀疏张量可以转换为密集张量，反之亦然。使用 `to_dense()` 方法可以将稀疏张量转换为标准的密集张量；使用 `to_sparse_coo()`、`to_sparse_csr()` 方法可以将密集张量转换为 COO 格式、CSR格式 的稀疏张量。
 
+在PaddlePaddle中，COO格式和CSR格式都是用来存储和处理稀疏张量的方法，但它们在结构和应用场景上有所不同。了解这两种格式的区别以及它们各自的适用情况可以帮助你更有效地使用稀疏数据。
 
+**COO格式和CSR格式的选择建议**：
+
+- 如果你的应用主要涉及稀疏矩阵的构建和逐项添加数据，COO格式会更简单且直接。
+- 如果你的应用需要高效的行操作或频繁进行矩阵乘法，特别是在稀疏矩阵较大的情况下，CSR格式是更好的选择。
+
+选择哪种格式应基于你的具体应用需求，如操作类型、数据规模和性能要求。在PaddlePaddle中，你可以根据需要轻松地在两种格式之间转换，以适应不同的计算需求。
 
 PaddlePaddle 提供了完整的支持来创建和操作 COO 和 CSR 格式的稀疏张量。以下是使用 PaddlePaddle 创建和操作这些张量的具体方法。
 
-
-
-
-
-
 ## 1. 创建 COO 格式的 SparseTensor
 
-PaddlePaddle 使用 `sparse_coo_tensor` 函数来创建 COO 格式的稀疏张量。这个函数需要 `indices`、`values` 以及可选的 `shape` 参数来指定张量的形状。
+**结构特点**:
+- COO格式通过一个坐标列表存储非零元素的位置和相应的值。
+- 它使用三个数组：一个数组存储行索引，一个存储列索引，第三个存储元素值。
+
+**适用场景**:
+- **数据添加频繁**：当稀疏矩阵需要频繁添加新的非零元素时，COO格式是较好的选择，因为它允许直接添加数据而不需重新构造整个数据结构。
+- **简单结构**：适合于那些结构简单的矩阵，特别是在非零元素分布较为随机时。
+
+
+PaddlePaddle 使用 `sparse_coo_tensor` 函数来创建 COO 格式的稀疏张量。这个函数需要 `indices`、`values` 以及可选的 `dense_shape` 参数来指定张量的形状。
 
 
 示例代码：
@@ -61,9 +76,31 @@ coo = paddle.sparse.sparse_coo_tensor(indices, values, dense_shape)
 print(coo)
 ```
 
+输出：
+```python
+Tensor(shape=[3, 3], dtype=paddle.float32, place=Place(cpu), stop_gradient=True, 
+       indices=[[0, 1, 2],
+                [1, 2, 0]], 
+       values=[1., 2., 3.])
+```
+
+
+在这个例子中，indices定义了非零元素的位置，其中每个子数组的两个数字分别代表行和列的坐标。这种方式直接揭示了每个值在张量中的具体位置。values提供了相应的值，与indices中的坐标一一对应。dense_shape是一个可选参数，指定了张量的整体形状，即它的行数和列数。
+
+COO格式的这种表示方式适用于数据稀疏但结构简单的情况，非常适合在需要频繁添加新元素或者修改已有元素时使用。由于它简单地列出了所有非零元素的坐标和值，因此在构建和更新稀疏张量时具有高度的灵活性和效率。
+
 ## 2. 创建 CSR 格式的 SparseTensor
 
-为了创建 CSR 格式的稀疏张量，PaddlePaddle 提供了 `sparse_csr_tensor` 函数。此函数接受 `crows`、`cols`、`values` 和 `shape` 作为参数，以定义稀疏张量的结构。
+**结构特点**:
+- CSR格式通过行来压缩存储，使用三个数组：行指针数组、列索引数组、以及非零元素值数组。
+- 行指针数组的大小比实际行数多一个，用于表示每行的起始位置和结束位置。
+
+**适用场景**:
+- **行操作优化**：当需要高效地进行行相关的操作（如行切片、行求和）时，CSR格式提供更优的性能。
+- **矩阵乘法**：对于稀疏矩阵与稀疏或密集矩阵的乘法运算，CSR格式通常会提供更好的性能。
+- **大规模数据处理**：在处理大规模稀疏数据时，CSR格式因其压缩特性而节省内存。
+
+为了创建 CSR 格式的稀疏张量，PaddlePaddle 提供了 `sparse_csr_tensor` 函数。此函数接受 `crows`、`cols`、`values` 和 `dense_shape` 作为参数，以定义稀疏张量的结构。
 
 示例代码：
 
@@ -78,6 +115,19 @@ csr = paddle.sparse.sparse_csr_tensor(crows, cols, values, dense_shape)
 print(csr)
 ```
 
+输出：
+```python
+Tensor(shape=[3, 4], dtype=paddle.int64, place=Place(cpu), stop_gradient=True, 
+       crows=[0, 2, 3, 5], 
+       cols=[1, 3, 2, 0, 1], 
+       values=[1, 2, 3, 4, 5])
+```
+
+在这个例子中，`crows`定义了每一行非零元素开始的位置在`values`数组中的索引，这有助于快速定位行的起始点和终点。`cols`则指示了非零元素在各自行中的列位置，`values`提供了相应的值。`dense_shape`指定了张量的整体形状，即行数和列数。
+
+这种CSR格式的表示方式适用于数据稀疏且行访问频繁的场景。它通过压缩行索引来减少内存使用，优化了对稀疏矩阵行的操作，使得行级操作更加高效。在处理行密集型操作（如行切片或行求和）时特别有用，也适合于稀疏矩阵的乘法等计算密集任务。
+
+
 ## 3. 创建稀疏张量的相关参数详解
 在 PaddlePaddle 的稀疏张量创建API中，参数的设计允许用户灵活地定义和操作稀疏数据结构。对于两种类型的稀疏张量创建函数，参数主要涉及初始化数据的类型和结构，其中：
 
@@ -85,34 +135,34 @@ print(csr)
 
 对于 `sparse_coo_tensor` 和 `sparse_csr_tensor` 函数，存在一些共通的参数，这些参数允许用户指定如何构建和处理稀疏张量：
 
-1. **indices, crows, cols (list|tuple|ndarray|Tensor)**：
-   - 对于 COO 格式，`indices` 参数是一个二维数组，每列代表一个非零元素的坐标。
-   - 对于 CSR 格式，`crows` 和 `cols` 分别表示行索引的开始和非零元素的列索引。
-   - 这些参数可以是 Python 的 list 或 tuple，也可以是 NumPy ndarray 或 Paddle Tensor。
-
-2. **values (list|tuple|ndarray|Tensor)**：
+1. **values (list|tuple|ndarray|Tensor)**：
    - 表示非零元素的实际数值。
    - 类似于索引参数，这可以是 list、tuple、NumPy ndarray 或 Paddle Tensor。
 
-3. **shape (list|tuple, 可选)**：
+2. **shape (list|tuple, 可选)**：
    - 定义稀疏张量的形状，如果未提供，则会根据 indices 或 crows 和 cols 的最大值自动推断。
    - 必须是一个整数列表或元组，指定张量在每个维度的大小。
 
-4. **dtype (str|np.dtype, 可选)**：
+3. **dtype (str|np.dtype, 可选)**：
    - 指定张量元素的数据类型，如 'float32', 'int64' 等。
    - 如果未指定，则从 `values` 的数据类型自动推断。
 
-5. **place (CPUPlace|CUDAPinnedPlace|CUDAPlace|str, 可选)**：
+4. **place (CPUPlace|CUDAPinnedPlace|CUDAPlace|str, 可选)**：
    - 决定张量的存储设备，例如 CPU 或 GPU。
    - 如果未指定，则使用当前环境的默认设备。
 
-6. **stop_gradient (bool, 可选)**：
+5. **stop_gradient (bool, 可选)**：
    - 指示是否对该张量进行梯度计算。
    - 在大多数深度学习应用中，非模型权重的张量通常设置为 `True` 以提高计算效率。
 
 ### 特定于格式的参数细节
 
 除了上述共通参数外，COO 和 CSR 格式因其数据结构的不同而在参数应用上有所区别。
+
+**indices, crows, cols (list|tuple|ndarray|Tensor)**：
+   - 对于 COO 格式，`indices` 参数是一个二维数组，每列代表一个非零元素的坐标。
+   - 对于 CSR 格式，`crows` 和 `cols` 分别表示行索引的开始和非零元素的列索引。
+   - 这些参数可以是 Python 的 list 或 tuple，也可以是 NumPy ndarray 或 Paddle Tensor。
 
 **COO 格式**
 - `indices` 用于直接指定每个非零元素的多维坐标。
