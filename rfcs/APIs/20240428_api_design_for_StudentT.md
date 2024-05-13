@@ -543,7 +543,7 @@ D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \fr
 & + \frac{\nu_2+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]
 \end{aligned} $$
 
-但目前只能推导到这一步, 由于 $\mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]$ 这一项无法解析，只能利用Jansen不等式（将 log 放到期望外面）推导出这一项的上界，因此建议暂不实现 kl 散度方法。
+但目前只能推导到这一步, 由于 $\mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]$ 这一项无法解析，只能利用Jensen不等式（将 log 放到期望外面）推导出这一项的上界，因此建议暂不实现 kl 散度方法。
 
 # 五、设计思路与实现方案
 
