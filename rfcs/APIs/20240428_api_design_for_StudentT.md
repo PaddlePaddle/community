@@ -4,7 +4,7 @@
 |---|---|
 |提交作者<input type="checkbox" class="rowselector hidden"> | NKNaN | 
 |提交时间<input type="checkbox" class="rowselector hidden"> | 2024-04-28 | 
-|版本号 | V1.0 | 
+|版本号 | V1.1 | 
 |依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
 |文件名 | 20240428_api_design_for_StudentT.md<br> | 
 
@@ -24,7 +24,6 @@ t分布是一种基础的概率分布, 它在概率论及统计学中用于根�
 - prob 概率密度
 - log_prob 对数概率密度
 - entropy 熵计算
-- kl_divergence 相对熵计算
 
 ## 3、意义
 丰富 Paddle 能够提供的分布类型，进一步完善 Paddle 框架以用于概率编程。
@@ -514,6 +513,38 @@ survival function 本质上等于 1 - cdf，且 Tensorflow_probability 和 Scipy
 
 t 分布的 cdf 与 icdf 主要是在统计学的假设检验问题中有重要价值, 而在机器学习的概率模型领域下，使用最为广泛的主要还是分布的 pdf 与 logpdf。另一方面由于 t 分布的 cdf 和 icdf 的实现相对复杂, 对 pdf 的积分函数与其积分函数的逆函数的实现需要借助 [incomplete beta function](https://dlmf.nist.gov/8.17) 和 inverse incomplete beta function，这两个在 paddle 中尚未实现，所以考虑暂时先不实现 cdf 与 icdf。
 
+此外, kl 散度的解析函数较难推导出, 以下过程参考[A Novel Kullback-Leilber Divergence Minimization-Based Adaptive Student's t-Filter](https://www.researchgate.net/publication/335580775_A_Novel_Kullback-Leilber_Divergence_Minimization-Based_Adaptive_Student's_t-Filter)
+
+记 $\nu_1, \mu_1, \sigma_1$, $\nu_2, \mu_2, \sigma_2$ 分别为2个t分布的自由度参数, 平移参数和缩放参数:
+
+$$D_{KL}(\nu_1, \mu_1, \sigma1 ,\nu_2, \mu_2, \sigma_2) = \int_{x \in \Omega} f_1(x) \log{\frac{f_1(x)}{f_2(x)}}dx = \mathbb{E}_{f1(x)}[\log f_1(x) - \log f_2(x)]$$
+
+在以下所有内容中（包括[第五部分](#五设计思路与实现方案)） $\Gamma(\cdot)$ 表示 gamma 函数, $\psi(\cdot)$ 表示 digamma 函数
+
+$$
+\begin{align*}
+D_{KL} & =  \mathbb{E}\_{f1(x)} \[ \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
+& - \frac{\nu_1+1}{2}\log[1+(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1] +  \frac{\nu_2+1}{2}\log[1+(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\] \\
+& = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
+& - \frac{\nu_1+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1]\] \\
+& + \frac{\nu_2+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]
+\end{align*}
+$$
+
+根据t分布的 entropy 的推导过程，有
+
+$$ \mathbb{E}_{f(x)}\[\log[1 +(\frac{x-\mu}{\sigma})^2 / \nu] \] = \psi(\frac{1+\nu}{2}) - \psi(\frac{\nu}{2})$$
+
+因此
+
+$$ \begin{aligned}
+D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
+& - \frac{\nu_1+1}{2} [\psi(\frac{1+\nu_1}{2}) - \psi(\frac{\nu_1}{2})] \\
+& + \frac{\nu_2+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]
+\end{aligned} $$
+
+但目前只能推导到这一步, 由于 $\mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]$ 这一项无法解析，只能利用Jensen不等式（将 log 放到期望外面）推导出这一项的上界，因此建议暂不实现 kl 散度方法。
+
 # 五、设计思路与实现方案
 
 ## 命名与参数设计
@@ -567,37 +598,8 @@ class StudentT(Distribution):
     记 $\nu = df$, $\mu = loc$, $\sigma=scale$
 
 $$
-H = \log(\frac{\Gamma(\nu/2)\Gamma(1/2) \sigma \sqrt{\nu}}{\Gamma[(1+\nu)/2]}) + \frac{(1+\nu)}{2} \cdot \{\psi[(1+\nu)/2] - \psi(\nu/2)\}
+H = \log(\frac{\Gamma(\nu/2)\Gamma(1/2) \sigma \sqrt{\nu}}{\Gamma[(1+\nu)/2]}) + \frac{(1+\nu)}{2} \cdot [\psi[(1+\nu)/2] - \psi(\nu/2)]
 $$
-
-        where $\psi(\cdot)$ is the digamma function
-
-- `kl_divergence` 相对熵计算
-
-    KL散度的计算方法： 
-
-$$D_{KL}(\nu_1, \mu_1, \sigma1 ,\nu_2, \mu_2, \sigma_2) = \int_{x \in \Omega} f_1(x) \log{\frac{f_1(x)}{f_2(x)}}dx = \mathbb{E}_{f1(x)}[\log f_1(x) - \log f_2(x)]$$
-
-$$
-\begin{align*}
-D_{KL} & =  \mathbb{E}\_{f1(x)} \[ \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
-& - \frac{\nu_1+1}{2}\log[1+(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1] +  \frac{\nu_2+1}{2}\log[1+(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\] \\
-& = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
-& - \frac{\nu_1+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_1}{\sigma_1})^2 / \nu_1]\] \\
-& + \frac{\nu_2+1}{2} \mathbb{E}\_{f1(x)}\[\log[1 +(\frac{x-\mu_2}{\sigma_2})^2 / \nu_2]\]
-\end{align*}
-$$
-
-        from the derivation of entropy, we have
-
-$$ \mathbb{E}_{f(x)}\[\log[1 +(\frac{x-\mu}{\sigma})^2 / \nu] \] = \psi(\frac{1+\nu}{2}) - \psi(\frac{\nu}{2})$$
-
-        therefore
-
-$$ \begin{aligned}
-D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \frac{1}{2}\log\frac{\nu_2}{\nu_1} + \log\frac{\sigma_2}{\sigma_1} - \log\Gamma(\frac{\nu_1}{2}) + \log\Gamma(\frac{\nu_2}{2}) \\
-& - \frac{\nu_1+1}{2} [\psi(\frac{1+\nu_1}{2}) - \psi(\frac{\nu_1}{2})] + \frac{\nu_2+1}{2} [\psi(\frac{1+\nu_2}{2}) - \psi(\frac{\nu_2}{2})]
-\end{aligned} $$
 
 - `sample` 随机采样
 
@@ -634,7 +636,6 @@ D_{KL} & = \log \Gamma(\frac{\nu_1+1}{2}) - \log \Gamma(\frac{\nu_2+1}{2}) + \fr
 
 3. 使用 `StudentT` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。(参考的是目前 `geometric`、`gumbel`、`laplace`、`lognormal`、`multinomial`、`normal` 的测试方法)
 
-4. `kl_divergence` 通过 `numpy` 重写kl散度的计算逻辑来进行验证。
 
 # 七、可行性分析和排期规划
 - 排期规划
@@ -658,3 +659,5 @@ $$f(x;\nu, \mu, \sigma) = \frac{\Gamma[(\nu+1)/2]}{\sigma\sqrt{\nu\pi}\Gamma(\nu
 2. [Pytorch 的 StudentT 文档](https://pytorch.org/docs/stable/distributions.html#studentt)
 
 3. [Scipy 的 StudentT 文档](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html)
+
+4. [A Novel Kullback-Leilber Divergence Minimization-Based Adaptive Student's t-Filter](https://www.researchgate.net/publication/335580775_A_Novel_Kullback-Leilber_Divergence_Minimization-Based_Adaptive_Student's_t-Filter)
