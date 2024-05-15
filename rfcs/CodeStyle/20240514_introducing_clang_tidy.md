@@ -1,27 +1,95 @@
 # clang-tidy代码风格检查工具的引入
 
-| 任务名称     | clang-tidy代码风格检查工具的引入   |
-| ------------ | ---------------------------------- |
-| 提交作者     | @ApricityXX                        |
-| 提交时间     | 2024-05-14                         |
-| 版本号       | v0.2                               |
-| 依赖飞桨版本 | develop                            |
-| 文件名       | 20240514_introducing_clang_tidy.md |
+|任务名称|clang-tidy代码风格检查工具的引入|
+|------|------|
+|提交作者|@ApricityXX|
+|提交时间|2024-05-14|
+|版本号|v0.2|
+|依赖飞桨版本|develop|
+|文件名| 20240514_introducing_clang_tidy.md |
 
 ## 一、概述
 
-### 1、背景
+### 1.1 背景
 
 当前 `Paddle` 已引入 `precommit`、`pylint`、`remove-ctrlf`、`cpplint`、`clang-format`、`yapf`、`cmakelint`、`cmake-format` 和 `flake8` 等多种代码风格检查工具。在v0.1中，Paddle引入了 `clang-tidy` 静态分析工具。
 
 但是目前`Paddle`开启的拦截数量仍然较少，本次技术文档主要对标`pytorch`进行规则的引入，在此基础上，希望可以针对各个错误进行存量的修复，并且能够在CI中开启相应规则的拦截，以实现增量拦截
 
-### 2、意义
+### 1.2 意义
 
 - 进一步规范 C++ 代码风格；
 - 进一步提升 C++ 代码稳健性，提升工程质量和 C++ 代码的可维护性，减少潜在的 bug；
 - 自动修复部分典型的编程错误，降低开发者解决 Linter Error 的成本。
 - 开启CI拦截，后续自动化进行增量的拦截，避免后续无止境的存量修复
+
+### 1.3 前置工作
+
+PaddlePaddle于2023年已经进行过一轮clang-tidy的技术修复方案，具体见：
+
+1. [20230501_introducing_clang_tidy.md](https://github.com/PaddlePaddle/community/blob/master/rfcs/CodeStyle/20230501_introducing_clang_tidy.md)
+2. [赛题四：在飞桨框架中引入 clang-tidy Tracking Issue](https://github.com/PaddlePaddle/Paddle/issues/54073)
+
+工作修复了clang-tidy40多项存量，并且在pre-commit中加入了clang-tidy的检查，这些项目的优化使得PaddlePaddle的代码风格有了显著改善。
+
+具体工作见下表
+
+> | 编号            | 错误类型                                                     | 错误数量                                | 认领人                                                       | PR链接                                                       |
+> | --------------- | ------------------------------------------------------------ | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+> | 1               | cppcoreguidelines-init-variables                             | 11002                                   |                                                              |                                                              |
+> | 2               | modernize-redundant-void-arg                                 | 1294                                    |                                                              |                                                              |
+> | 3               | bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions | 327                                     | [@enkilee](https://github.com/enkilee)                       | [#61759](https://github.com/PaddlePaddle/Paddle/pull/61759) ✅ [#62109](https://github.com/PaddlePaddle/Paddle/pull/62109) ✅ |
+> | 4               | cppcoreguidelines-pro-type-member-init                       | 216                                     |                                                              |                                                              |
+> | 5✅ (2024/3/1)   | cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays    | 151                                     | [@enkilee](https://github.com/enkilee)                       | [#61751](https://github.com/PaddlePaddle/Paddle/pull/61751)  |
+> | 6               | modernize-unary-static-assert                                | 132                                     |                                                              |                                                              |
+> | 7✅ (2024/3/1)   | bugprone-branch-clone                                        | 132                                     | [@enkilee](https://github.com/enkilee)                       | [#61735](https://github.com/PaddlePaddle/Paddle/pull/61735)  |
+> | 8               | performance-unnecessary-copy-initialization                  | 127                                     |                                                              |                                                              |
+> | 9               | cppcoreguidelines-avoid-goto,hicpp-avoid-goto                | 109                                     |                                                              |                                                              |
+> | 10              | cppcoreguidelines-pro-type-const-cast                        | 90                                      |                                                              |                                                              |
+> | 11              | modernize-pass-by-value                                      | 65                                      |                                                              |                                                              |
+> | 12✅ (2024/3/7)  | modernize-loop-convert                                       | 46                                      | [@enkilee](https://github.com/enkilee)                       | [#61725](https://github.com/PaddlePaddle/Paddle/pull/61725)  |
+> | 13✅ (2024/2/21) | modernize-deprecated-headers                                 | 44                                      | [@enkilee](https://github.com/enkilee)                       | [#61721](https://github.com/PaddlePaddle/Paddle/pull/61721)  |
+> | 14✅ (2024/2/20) | misc-unused-alias-decls                                      | 44                                      | [@enkilee](https://github.com/enkilee)                       | [#61716](https://github.com/PaddlePaddle/Paddle/pull/61716)  |
+> | 15✅ (2024/2/20) | performance-inefficient-vector-operation                     | 30                                      | [@enkilee](https://github.com/enkilee)                       | [#61715](https://github.com/PaddlePaddle/Paddle/pull/61715)  |
+> | 16              | clang-analyzer-optin.cplusplus.VirtualCall                   | 26                                      |                                                              |                                                              |
+> | 17✅ (2024/3/1)  | cppcoreguidelines-explicit-virtual-functions,modernize-use-override | 20                                      | [@enkilee](https://github.com/enkilee)                       | [#61714](https://github.com/PaddlePaddle/Paddle/pull/61714)  |
+> | 18              | clang-analyzer-core.NullDereference                          | 18                                      |                                                              |                                                              |
+> | 19✅ (2024/2/26) | readability-container-size-empty                             | 16                                      | [@enkilee](https://github.com/enkilee)                       | [#61713](https://github.com/PaddlePaddle/Paddle/pull/61713)  |
+> | 20✅ (2023/12/5) | modernize-use-nullptr                                        | 15                                      | [@ccsuzzh](https://github.com/ccsuzzh)                       | [#59626](https://github.com/PaddlePaddle/Paddle/pull/59626)  |
+> | 21✅ (2024/2/21) | performance-for-range-copy                                   | 14                                      | [@enkilee](https://github.com/enkilee)                       | [#61712](https://github.com/PaddlePaddle/Paddle/pull/61712)  |
+> | 22              | cppcoreguidelines-no-malloc                                  | 13                                      |                                                              |                                                              |
+> | 23              | modernize-use-emplace                                        | 11                                      |                                                              |                                                              |
+> | 24✅ (2024/3/1)  | hicpp-exception-baseclass                                    | 11                                      | [@enkilee](https://github.com/enkilee)                       | [#61691](https://github.com/PaddlePaddle/Paddle/pull/61691)  |
+> | 25✅ (2024/2/26) | modernize-use-transparent-functors                           | 9                                       | [@enkilee](https://github.com/enkilee)                       | [#61689](https://github.com/PaddlePaddle/Paddle/pull/61689)  |
+> | 26✅ (2024/2/20) | misc-unused-using-decls                                      | 9                                       | [@enkilee](https://github.com/enkilee)                       | [#61616](https://github.com/PaddlePaddle/Paddle/pull/61616)  |
+> | 27✅ (2024/2/21) | performance-move-const-arg                                   | 7                                       | [@enkilee](https://github.com/enkilee)                       | [#61615](https://github.com/PaddlePaddle/Paddle/pull/61615)  |
+> | 28✅ (2024/2/21) | modernize-use-equals-default                                 | 7                                       | [@enkilee](https://github.com/enkilee)                       | [#61614](https://github.com/PaddlePaddle/Paddle/pull/61614)  |
+> | 29✅ (2024/2/20) | bugprone-exception-escape                                    | 7                                       | [@enkilee](https://github.com/enkilee)                       | [#61609](https://github.com/PaddlePaddle/Paddle/pull/61609)  |
+> | 30              | performance-inefficient-string-concatenation                 | 5                                       |                                                              |                                                              |
+> | 31✅ (2024/2/29) | clang-analyzer-cplusplus.NewDeleteLeaks                      | 5                                       | [@enkilee](https://github.com/enkilee)                       | [#62129](https://github.com/PaddlePaddle/Paddle/pull/62129)  |
+> | 32✅ (2024/2/29) | bugprone-unused-raii                                         | 5                                       | [@enkilee](https://github.com/enkilee)                       | [#62129](https://github.com/PaddlePaddle/Paddle/pull/62129)  |
+> | 33✅ (2024/2/20) | bugprone-inaccurate-erase                                    | 5                                       | [@enkilee](https://github.com/enkilee)                       | [#61589](https://github.com/PaddlePaddle/Paddle/pull/61589)  |
+> | 34✅ (2024/2/29) | bugprone-copy-constructor-init                               | 5                                       | [@enkilee](https://github.com/enkilee)                       | [#62129](https://github.com/PaddlePaddle/Paddle/pull/62129)  |
+> | 35✅ (2024/2/20) | modernize-use-bool-literals                                  | 3                                       | [@enkilee](https://github.com/enkilee)                       | [#61580](https://github.com/PaddlePaddle/Paddle/pull/61580)  |
+> | 36✅ (2024/2/20) | clang-analyzer-core.DivideZero                               | 3                                       | [@enkilee](https://github.com/enkilee)                       | [#61580](https://github.com/PaddlePaddle/Paddle/pull/61580)  |
+> | 37✅ (2024/2/20) | bugprone-integer-division                                    | 3                                       | [@enkilee](https://github.com/enkilee)                       | [#61580](https://github.com/PaddlePaddle/Paddle/pull/61580)  |
+> | 38✅ (2024/2/26) | performance-trivially-destructible                           | 2                                       | [@enkilee](https://github.com/enkilee)                       | [#61556](https://github.com/PaddlePaddle/Paddle/pull/61556)  |
+> | 39✅ (2024/2/26) | modernize-make-unique                                        | 2                                       | [@enkilee](https://github.com/enkilee)                       | [#61556](https://github.com/PaddlePaddle/Paddle/pull/61556)  |
+> | 40✅ (2024/2/26) | modernize-avoid-bind                                         | 2                                       | [@enkilee](https://github.com/enkilee)                       | [#61556](https://github.com/PaddlePaddle/Paddle/pull/61556)  |
+> | 41✅ (2024/2/29) | cppcoreguidelines-slicing                                    | 2                                       | [@enkilee](https://github.com/enkilee)                       | [#62129](https://github.com/PaddlePaddle/Paddle/pull/62129)  |
+> | 42✅ (2024/2/20) | performance-noexcept-move-constructor                        | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61555](https://github.com/PaddlePaddle/Paddle/pull/61555)  |
+> | 43✅ (2024/2/20) | clang-diagnostic-unused-but-set-variable                     | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61555](https://github.com/PaddlePaddle/Paddle/pull/61555)  |
+> | 44✅ (2024/2/20) | clang-analyzer-security.FloatLoopCounter                     | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61555](https://github.com/PaddlePaddle/Paddle/pull/61555)  |
+> | 45✅ (2024/2/29) | clang-analyzer-cplusplus.NewDelete                           | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#62129](https://github.com/PaddlePaddle/Paddle/pull/62129)  |
+> | 46✅ (2024/2/21) | clang-analyzer-core.NonNullParamChecker                      | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61494](https://github.com/PaddlePaddle/Paddle/pull/61494)  |
+> | 47✅ (2024/2/21) | bugprone-unhandled-self-assignment                           | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61494](https://github.com/PaddlePaddle/Paddle/pull/61494)  |
+> | 48✅ (2024/2/20) | bugprone-string-integer-assignment                           | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61492](https://github.com/PaddlePaddle/Paddle/pull/61492)  |
+> | 49✅ (2024/2/20) | bugprone-misplaced-widening-cast                             | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61492](https://github.com/PaddlePaddle/Paddle/pull/61492)  |
+> | 50✅ (2024/2/20) | bugprone-infinite-loop                                       | 1                                       | [@enkilee](https://github.com/enkilee)                       | [#61492](https://github.com/PaddlePaddle/Paddle/pull/61492)  |
+> | 67✅ (2023/7/11) | 在 `.pre-commit-config.yaml` 在添加 `clang-tidy` 检查项      | [@GreatV](https://github.com/GreatV)    | [#55279](https://github.com/PaddlePaddle/Paddle/pull/55279) [#55894](https://github.com/PaddlePaddle/Paddle/pull/55894) |                                                              |
+> | 68✅(2023/7/11)  | 使用单独的脚本运行 `clang-tidy`，开发者便于手动执行检查      | 运行`tools/codestyle/clang-tidy.py`即可 | [#55279](https://github.com/PaddlePaddle/Paddle/pull/55279)  |                                                              |
+
+但是美中不足的是工作并没有开启CI的拦截，导致pr的不断增多的同时，存量也在不断增加，这是一个急需改善并解决的问题，否则PaddlePaddle只会陷入无止境的存量修复之中，因此这也是本次工作的重点内容。
 
 ## 二、飞桨现状
 
@@ -39,14 +107,13 @@ Paddle目前引入了`clang-format`、`cpplint`等工具用于C++端的代码风
 
 ## 三、`clang-tidy` 相关调研
 
-### `pytorch`调研
+### 3.1`pytorch`调研
 
 - 版本： **15.0.6**
 
 - 针对`pytorch`的规则，修改`.clang-tidy`如下：
 
   ---
-
   ```yaml
   ---
   Checks: '
@@ -115,7 +182,7 @@ Paddle目前引入了`clang-format`、`cpplint`等工具用于C++端的代码风
 
   
 
-### `clang-tidy`进行存量扫描
+### 3.2`clang-tidy`进行存量扫描
 
 注意：以下规则检测基于2024.5.13的`paddlepaddle`的`develop`分支以及`pytorch`的检查规则
 
@@ -766,6 +833,114 @@ readability-simplify-subscript-expr: 0
 
 针对后续非0错误项的存量修复解决之后，可以进行CI的引入
 
+### 4.3 后续改进的可行方案
+
+上述修改主要是针对`Pytorch`的规则，而当`pytorch`规则在`PaddlePaddle`上完善之后，我们希望可以增加更对的规则，来使得`PaddlePaddle`具有更好的`code style`
+
+为了使得上述问题可行并且有质量保证，我调研了`tensorflow`的检查项，可以对额外检查项进行引进，`tensorflow`检查项如下：
+
+```yaml
+	bugprone-argument-comment
+    bugprone-assert-side-effect
+    bugprone-branch-clone
+    bugprone-copy-constructor-init
+    bugprone-dangling-handle
+    bugprone-dynamic-static-initializers
+    bugprone-macro-parentheses
+    bugprone-macro-repeated-side-effects
+    bugprone-misplaced-widening-cast
+    bugprone-move-forwarding-reference
+    bugprone-multiple-statement-macro
+    bugprone-suspicious-semicolon
+    bugprone-swapped-arguments
+    bugprone-terminating-continue
+    bugprone-unused-raii
+    bugprone-unused-return-value
+    llvm-else-after-return
+    llvm-header-guard
+    llvm-include-order
+    llvm-namespace-comment
+    llvm-prefer-isa-or-dyn-cast-in-conditionals
+    llvm-prefer-register-over-unsigned
+    llvm-qualified-auto
+    llvm-twine-local
+    misc-confusable-identifiers
+    misc-const-correctness
+    misc-definitions-in-headers
+    misc-misleading-bidirectional
+    misc-misleading-identifier
+    misc-misplaced-const
+    misc-new-delete-overloads
+    misc-non-copyable-objects
+    misc-redundant-expression
+    misc-static-assert
+    misc-throw-by-value-catch-by-reference
+    misc-unconventional-assign-operator
+    misc-uniqueptr-reset-release
+    misc-unused-alias-decls
+    misc-unused-parameters
+    misc-unused-using-decls
+    modernize-loop-convert
+    modernize-make-unique
+    modernize-raw-string-literal
+    modernize-use-bool-literals
+    modernize-use-default-member-init
+    modernize-use-emplace
+    modernize-use-equals-default
+    modernize-use-nullptr
+    modernize-use-override
+    modernize-use-using
+    performance-for-range-copy
+    performance-implicit-conversion-in-loop
+    performance-inefficient-algorithm
+    performance-inefficient-vector-operation
+    performance-move-const-arg
+    performance-no-automatic-move
+    performance-trivially-destructible
+    performance-unnecessary-copy-initialization
+    performance-unnecessary-value-param
+    readability-avoid-const-params-in-decls
+    readability-const-return-type
+    readability-container-size-empty
+    readability-identifier-naming
+    readability-inconsistent-declaration-parameter-name
+    readability-misleading-indentation
+    readability-redundant-control-flow
+    readability-simplify-boolean-expr
+    readability-simplify-subscript-expr
+    readability-use-anyofallof
+```
+
+找到比pytorch多出的检查规则：
+
+```
+	misc-confusable-identifiers
+    readability-avoid-const-params-in-decls
+    readability-simplify-boolean-expr
+    llvm-header-guard
+    llvm-qualified-auto
+    bugprone-swapped-arguments
+    llvm-include-order
+    llvm-prefer-register-over-unsigned
+    readability-const-return-type
+    llvm-namespace-comment
+    readability-inconsistent-declaration-parameter-name
+    misc-const-correctness
+    readability-misleading-indentation
+    readability-use-anyofallof
+    readability-redundant-control-flow
+    llvm-twine-local
+    llvm-else-after-return
+    readability-identifier-naming
+    misc-unused-parameters
+    modernize-use-default-member-init
+    llvm-prefer-isa-or-dyn-cast-in-conditionals
+    bugprone-macro-parentheses
+    modernize-use-using
+```
+
+这样就可以继续完善PaddlePaddle的检查项和CI拦截，当然，这里只是拿tensorflow举个例子，还可以寻找一些其他的知名项目进行类似的操作。
+
 ## 五、测试和验收的考量
 
 - 确保不会引起性能倒退
@@ -787,3 +962,4 @@ readability-simplify-subscript-expr: 0
 1. [clang-tidy](https://clang.llvm.org/extra/clang-tidy/)
 2. [clang-tidy代码风格检查工具的引入](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/code_style/code_style_clang_tidy.md)
 3. [20230501_introducing_clang_tidy.md](https://github.com/PaddlePaddle/community/blob/master/rfcs/CodeStyle/20230501_introducing_clang_tidy.md)
+4. [赛题四：在飞桨框架中引入 clang-tidy Tracking Issue](https://github.com/PaddlePaddle/Paddle/issues/54073)
