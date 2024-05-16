@@ -14,7 +14,7 @@
 
 当前 `Paddle` 已引入 `precommit`、`pylint`、`remove-ctrlf`、`cpplint`、`clang-format`、`yapf`、`cmakelint`、`cmake-format` 和 `flake8` 等多种代码风格检查工具。在v0.1中，Paddle引入了 `clang-tidy` 静态分析工具。
 
-但是目前`Paddle`开启的拦截数量仍然较少，本次技术文档主要对标`pytorch`进行规则的引入，在此基础上，希望可以针对各个错误进行存量的修复，并且能够在CI中开启相应规则的拦截，以实现增量拦截
+但是目前`Paddle`开启的拦截数量仍然较少，本次技术文档主要对标`pytorch`进行规则的引入（pytorch支持246种规则的检查）。在此基础上，希望可以针对各个错误进行存量的修复，并且能够在CI中开启相应规则的拦截，以实现增量拦截。
 
 ### 1.2 意义
 
