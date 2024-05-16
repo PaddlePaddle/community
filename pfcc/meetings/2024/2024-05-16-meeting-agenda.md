@@ -9,5 +9,6 @@
 
 ## 会议议程
 
-1. 在日本 IT 行业工作及生活经历分享 @[unseenme](https://github.com/unseenme) （40 mins）
-2. 开源社区新动态：开源之星评选活动、快乐开源专享团持续招收简历  @[Harryoung](https://github.com/Harryoung) （20 mins）
+1. 机会分享：在社区寻求将 superglue, lofr 两个模型从 pytorch 转到 paddle 的开发者（有偿）。 (10mins)
+2. 在日本 IT 行业工作及生活经历分享 @[unseenme](https://github.com/unseenme) （40 mins）
+3. 开源社区新动态：开源之星评选活动、快乐开源专享团持续招收简历  @[Harryoung](https://github.com/Harryoung) （20 mins）
