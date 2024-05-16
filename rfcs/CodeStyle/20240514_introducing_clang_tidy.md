@@ -629,6 +629,25 @@ readability-string-compare,
 
 - 对于某些情况下，需要跳过 `clang-tidy` 检查的，可以使用 `NOLINT`, `NOLINTNEXTLINE`, `NOLINTBEGIN ... NOLINTEND` 来抑制检查诊断。
 
+针对已经全部修复完的检查项，可以把`.clang-tidy`文件中中的对应项前面的`"-"`删除，以`modernize-use-emplace`举例：
+
+假设所有的`modernize-use-emplace`错误项均修复完成，就可以在`.clang-tidy`文件中将其前面的"-"去掉，随着`modernize-use-emplace-final`的pr一起提交。
+
+例如：
+
+```
+...
+-modernize-replace-auto-ptr,
+-modernize-replace-random-shuffle,
+-modernize-shrink-to-fit,
+-modernize-unary-static-assert,
+modernize-use-bool-literals,
+modernize-use-emplace,
+...
+```
+
+
+
 
 
 ### 4.2 引入CI
