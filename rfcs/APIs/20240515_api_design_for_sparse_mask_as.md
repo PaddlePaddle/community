@@ -13,9 +13,10 @@
 
 ## 1、相关背景
 
-[NO.17 为 Paddle 新增 sparse.mask_as API](https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_6th/%E3%80%90Hackathon%206th%E3%80%91%E5%BC%80%E6%BA%90%E8%B4%A1%E7%8C%AE%E4%B8%AA%E4%BA%BA%E6%8C%91%E6%88%98%E8%B5%9B%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91%E4%BB%BB%E5%8A%A1%E5%90%88%E9%9B%86.md#no17-%E4%B8%BA-paddle-%E6%96%B0%E5%A2%9E-sparsemask_as-api)
+目前 Paddle 支持 `coo` 和 `csr` 两种稀疏矩阵格式，需要新增 `mask` 掩码逻辑，利用稀疏矩阵 `mask` 的 `indices` 过滤输入 Tensor `x`，进而生成对应格式的稀疏矩阵。需要新增 2 个 kernel 的前向与反向逻辑，其中 `csr` 的 kernel 需支持 2D/3D Tensor，`coo` 的 kernel 需支持任意维度的 Tensor。
 
-利用稀疏矩阵 `mask` 的 `indices` 过滤输入 Tensor `x`，进而生成对应的稀疏矩阵。
+> 参考赛题：[NO.17 为 Paddle 新增 sparse.mask_as API](https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_6th/%E3%80%90Hackathon%206th%E3%80%91%E5%BC%80%E6%BA%90%E8%B4%A1%E7%8C%AE%E4%B8%AA%E4%BA%BA%E6%8C%91%E6%88%98%E8%B5%9B%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91%E4%BB%BB%E5%8A%A1%E5%90%88%E9%9B%86.md#no17-%E4%B8%BA-paddle-%E6%96%B0%E5%A2%9E-sparsemask_as-api)
+
 
 ## 2、功能目标
 
@@ -75,6 +76,161 @@ SparseTensor sparse_mask(const Tensor& t, const SparseTensor& mask) {
   return t.mul(mask_template).to(t.scalar_type());
 }
 ```
+
+对于 `csr` 格式的矩阵，`aten/src/ATen/native/sparse/SparseCsrTensorMath.cpp` 中
+
+``` c++
+Tensor sparse_mask_sparse_compressed(
+    const Tensor& self,
+    const Tensor& mask) {
+  TORCH_CHECK(at::sparse_csr::is_sparse_compressed(mask),
+              "sparse_mask_sparse_compressed expects mask to have sparse compressed layout, got ", mask.layout());
+  TORCH_CHECK(
+      mask.sizes().equals(self.sizes()),
+      "sparse_mask(): operands have incompatible sizes; self has size ",
+      self.sizes(),
+      " but mask has size ",
+      mask.sizes());
+
+  if (self.is_same(mask)) {
+    return self;
+  }
+
+  if (!mask.numel() || !mask._nnz()) {
+    return mask.clone().to(self.device(), self.scalar_type());
+  }
+
+  if (self.layout() == kStrided) {
+    auto [compressed_indices, plain_indices] = at::sparse_csr::getCompressedPlainIndices(mask);
+    auto mask_values = mask.values();
+    auto dense_mask = at::_sparse_compressed_tensor_unsafe(
+        compressed_indices,
+        plain_indices,
+        at::ones({1}, self.options().dtype(kBool)).expand_as(mask_values),
+        self.sizes(),
+        self.options().dtype(kBool).layout(mask.layout())).to_dense();
+    return AT_DISPATCH_PLAIN_SPARSE_COMPRESSED_LAYOUTS(
+        mask.layout(), "sparse_mask_sparse_compressed",
+        [&] {
+          return at::native::dense_to_sparse_with_mask(self, dense_mask, mask.layout(), {}, mask.dense_dim());
+        },
+        [&] {
+          auto blocksize = at::sparse_csr::getBlockSize(mask);
+          return at::native::dense_to_sparse_with_mask(self, dense_mask, mask.layout(), blocksize, mask.dense_dim());
+        });
+  } else if (self.layout() == mask.layout()) {
+    // TODO: keeping this for BC but the method used here may lead to
+    // incorrect indices.
+    return self.mul(at::ones_like(mask)).to(self.scalar_type());
+  } else {
+    // TODO: keeping this for BC but the method used here cannot
+    // support batch dimensions because sparse COO tensors are batch
+    // dimension ignorant.
+    return AT_DISPATCH_PLAIN_SPARSE_COMPRESSED_LAYOUTS(
+        mask.layout(), "sparse_mask_sparse_compressed",
+        [&] {
+          return self.sparse_mask(mask.to_sparse()).to_sparse(mask.layout());
+        },
+        [&] {
+          auto blocksize = at::sparse_csr::getBlockSize(mask);
+          return self.sparse_mask(mask.to_sparse()).to_sparse(mask.layout(), blocksize);
+        });
+  }
+}
+```
+
+进而利用 `at::native::dense_to_sparse_with_mask` 处理 `compressed` 格式的稀疏矩阵，包括 `csr` 格式。
+
+具体进行 `dense to sparse` 的逻辑为 `aten/src/ATen/native/TensorConversions.cpp`
+
+``` c++
+template<Layout target_layout>
+static Tensor dense_to_sparse_compressed(const Tensor& self, const Tensor& self_mask, IntArrayRef blocksize, c10::optional<int64_t> dense_dim_opt) {
+  static_assert(target_layout == Layout::SparseCsr || target_layout == Layout::SparseCsc
+                || target_layout == Layout::SparseBsr || target_layout == Layout::SparseBsc,
+                "invalid layout template parameter for dense_to_sparse_compressed");
+  constexpr auto compressed_rows_layout = target_layout == Layout::SparseCsr || target_layout == Layout::SparseBsr;
+  constexpr auto blocked_layout = target_layout == Layout::SparseBsr || target_layout == Layout::SparseBsc;
+
+  int64_t dense_dim = dense_dim_opt.value_or(0);
+
+  // Reshape values so that the block dims are explicitly added, and
+  // calculate a mask tensor that has only batch and sparse dims, and
+  // value true whenever sparse matrix has a non-zero element over
+  // corresponding block and dense dims, and false otherwise.
+  auto n_batch_dim = self.dim() - 2 - dense_dim;
+  auto is_batched = n_batch_dim > 0;
+  auto values = blocked_layout ? _batch_tile_tensor(self, blocksize, dense_dim) :  self;
+  auto not_zero_mask = blocked_layout ? _batch_tile_tensor(self_mask, blocksize, dense_dim) : self_mask;
+  if (blocked_layout || dense_dim > 0) {
+    std::vector<int64_t> reduce_dim((blocked_layout ? 2 : 0) + dense_dim);
+    std::iota(reduce_dim.begin(), reduce_dim.end(), n_batch_dim + 2);
+    not_zero_mask = not_zero_mask.sum(reduce_dim) != 0;
+  }
+
+  if (is_batched) {
+    // Prepare for the conversion, in particular join the batch dims
+    // and the compressed dim into the single dim.
+    dense_to_sparse_compressed_prepare_check_mask_values_batched(
+        target_layout, values, not_zero_mask, n_batch_dim);
+  }
+
+  // Calculate sparse matrix row and col indices and then, depending
+  // on the target layout, corresponding compressed and sparse
+  // indices.  Use the mask tensor calculate above to generate sparse
+  // matrix values tensor.
+  Tensor row_indices;
+  Tensor col_indices;
+  Tensor compressed_indices;
+  if (compressed_rows_layout) {
+    std::tie(col_indices, row_indices) = _not_zero_mask_to_col_row_indices(
+        not_zero_mask, at::kLong, not_zero_mask.device());
+    compressed_indices = at::_convert_indices_from_coo_to_csr(
+        row_indices, not_zero_mask.size(0), false /*out_int32*/);
+    {
+      auto mask_indices = _mask_to_indices(not_zero_mask.flatten());
+      values = values.flatten(0, 1).index_select(0, mask_indices);
+    }
+  } else {
+    std::tie(row_indices, col_indices) = _not_zero_mask_to_col_row_indices(
+       not_zero_mask.transpose(1, 0), at::kLong, not_zero_mask.device());
+    compressed_indices = at::_convert_indices_from_coo_to_csr(
+        col_indices, not_zero_mask.size(-1), false /*out_int32*/);
+    {
+      auto mask_indices = _mask_to_indices(not_zero_mask.transpose(0, 1).flatten());
+      values = values.transpose(0, 1).flatten(0, 1).index_select(0, mask_indices);
+    }
+  }
+  Tensor& plain_indices = compressed_rows_layout ? col_indices : row_indices;
+
+  if (is_batched) {
+   // Restore the batch dims and compressed dim.
+    reshape_2d_sparse_compressed_members_to_nd_batched(
+        self.sizes(), n_batch_dim, compressed_indices, plain_indices, values);
+  }
+
+  // Create compressed sparse matrix with the target layout.
+  return at::_sparse_compressed_tensor_unsafe(
+        compressed_indices,
+        plain_indices,
+        values,
+        self.sizes(),
+        self.options().layout(target_layout));
+}
+
+```
+
+其中关键的两句 
+
+``` c++
+    {
+      auto mask_indices = _mask_to_indices(not_zero_mask.flatten());
+      values = values.flatten(0, 1).index_select(0, mask_indices);
+    }
+
+```
+
+即，将 `mask` 转为 Tensor 可以 `index_select` 的格式，然后提取出具体值。
 
 # 四、对比分析
 
@@ -172,15 +328,59 @@ void MaskAsCsrKernel(const Context& dev_ctx,
                      const DenseTensor& x,
                      const SparseCsrTensor& mask,
                      SparseCsrTensor* out) {
-  // transform csr format to coo format, and then use coo kernel
-  const SparseCooTensor mask_coo = CsrToCoo<T, Context>(dev_ctx, mask);
-  SparseCooTensor out_coo;
-  MaskAsCooKernel<T, Context>(dev_ctx, x, mask_coo, &out_coo);
-  CooToCsrKernel<T, Context>(dev_ctx, out_coo, out);
+// 分为 2D 和 3D 两种处理方式
+// 2D
+  int64_t numel = 0;
+  for (int64_t i = 0; i < mask_crows.numel() - 1; ++i) {
+    for (int64_t j = mask_crows.data<IntT>()[i];
+         j < mask_crows.data<IntT>()[i + 1];
+         ++j) {
+      IntT col_idx = mask_cols.data<IntT>()[numel];
+
+      out_values.data<T>()[numel] =
+          x.data<T>()[(i / x.dims()[0]) * x.dims()[1] +
+                      (i % x.dims()[0]) * x.dims()[1] + col_idx];
+
+      ++numel;
+    }
+  }
+
+// 3D
+
+  int64_t numel = 0;
+  for (int64_t i = 0; i < mask_crows.numel() - 1; ++i) {
+    for (int64_t j = mask_crows.data<IntT>()[i];
+         j < mask_crows.data<IntT>()[i + 1];
+         ++j) {
+      IntT col_idx = mask_cols.data<IntT>()[numel];
+
+      out_values.data<T>()[numel] =
+          x.data<T>()[(i / x.dims()[0]) * (x.dims()[1] * x.dims()[2]) +
+                      (i % x.dims()[0]) * x.dims()[2] + col_idx];
+
+      ++numel;
+    }
+  }
 }
 ```
 
-其中，`csr` 类型通过 `CsrToCoo` 转换为 `coo` 后利用 `MaskAsCooKernel` 进行计算。
+这里没有使用类似 PyTorch 的 `index_select` 的转换方式，因为，虽然可以通过 Paddle 的 `masked_select` 实现类似能力，但是，仍需将 `mask` 转换为 `DenseTensor` ，而目前 Paddle 的 `CsrToDenseKernel` 仍然是先将 `csr` 转为 `coo` 然后处理，不具备性能优势。
+
+``` c++
+template <typename T, typename Context>
+void CsrToDenseKernel(const Context& dev_ctx,
+                      const SparseCsrTensor& x,
+                      DenseTensor* out) {
+  DenseTensor indices;
+  DenseTensor values;
+  SparseCooTensor coo(indices, values, x.dims());
+  MetaTensor meta_out(&coo);
+  phi::UnchangedInferMeta(x, &meta_out);
+  CsrToCooKernel<T, Context>(dev_ctx, x, &coo);
+  CooToDenseKernel<T, Context>(dev_ctx, coo, out);
+}
+
+```
 
 `paddle/phi/kernels/sparse/gpu/mask_kernel.cu` 逻辑相同
 
@@ -198,13 +398,12 @@ void MaskAsCsrKernel(const Context& dev_ctx,
                      const DenseTensor& x,
                      const SparseCsrTensor& mask,
                      SparseCsrTensor* out) {
-  // transform csr format to coo format, and then use coo kernel
-  const SparseCooTensor mask_coo = CsrToCoo<T, Context>(dev_ctx, mask);
-  SparseCooTensor out_coo;
-  MaskAsCooKernel<T, Context>(dev_ctx, x, mask_coo, &out_coo);
-  CooToCsrKernel<T, Context>(dev_ctx, out_coo, out);
+// 分为 2D 和 3D 两种处理方式
+...
 }
 ```
+
+gpu kernel 的实现与 cpu 有所不同，因为 `csr` 格式没有办法直接使用 cuda 的 grid ，需要先把 `csr` 格式的 `crows` 转换为常规 `rows` 的方式，然后复用 gpu kernel 中的 `MaskKernel` 进行实现。
 
 - 实现反向算子
 
