@@ -634,7 +634,56 @@ $$
 
 2. `entropy`、`prob`、`log_prob` 分别用 `scipy.stats.t.entropy`、`scipy.stats.t.pdf`、`scipy.stats.t.logpdf` 进行验证。
 
-3. 使用 `StudentT` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和标准差是否正确。(参考的是目前 `geometric`、`gumbel`、`laplace`、`lognormal`、`multinomial`、`normal` 的测试方法)
+3. 使用 `StudentT` 类的 `sample` 方法生成5000个样本，测试这些这样的均值和方差是否正确。(参考的是目前 `geometric`、`gumbel`、`laplace`、`lognormal`、`multinomial`、`normal` 的测试方法)    
+具体的经验均值和经验方差与理论均值和理论方差的差异控制量 rtol 设为 0.10, 这个值是通过tensorflow的StudentT分布类实验得到：
+
+```python
+import tensorflow_probability as tfp
+import numpy as np
+
+def xrand(shape=(10, 10, 10), dtype='float64', min=1.0, max=10.0):
+    return (np.random.rand(*shape).astype(dtype)) * (max - min) + min
+df = xrand((2, 1), dtype='float32', min=4, max=30)
+loc = xrand((2, 3), dtype='float32', min=1, max=10)
+scale = xrand((2, 3), dtype='float32', min=0.1, max=3)
+t = tfp.distributions.StudentT(df, loc, scale)
+
+for i in range(5000):
+    sample_shape = (10000,)
+    samples = t.sample(sample_shape).numpy()
+    sample_mean = samples.mean(axis=0)
+    sample_variance = samples.var(axis=0)
+    np.testing.assert_allclose(
+        sample_mean, t.mean().numpy(), atol=0, rtol=0.05
+    )
+    np.testing.assert_allclose(
+        sample_variance, t.variance().numpy(), atol=0, rtol=0.05
+    )
+
+# AssertionError: 
+# Not equal to tolerance rtol=0.05, atol=0
+
+# Mismatched elements: 1 / 6 (16.7%)
+# Max absolute difference: 0.40583897
+# Max relative difference: 0.05726147
+#  x: array([[4.606094, 8.034422, 0.114834],
+#        [1.1879  , 7.493309, 2.921553]], dtype=float32)
+#  y: array([[4.556666, 8.08968 , 0.114245],
+#        [1.202345, 7.087471, 2.856817]], dtype=float32)
+
+for i in range(5000):
+    sample_shape = (10000,)
+    samples = t.sample(sample_shape).numpy()
+    sample_mean = samples.mean(axis=0)
+    sample_variance = samples.var(axis=0)
+    np.testing.assert_allclose(
+        sample_mean, t.mean().numpy(), atol=0, rtol=0.1
+    )
+    np.testing.assert_allclose(
+        sample_variance, t.variance().numpy(), atol=0, rtol=0.1
+    )
+# 可以跑通
+```
 
 
 # 七、可行性分析和排期规划
