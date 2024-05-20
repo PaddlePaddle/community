@@ -15,7 +15,7 @@
 
 复正态分布随机变量的数学表示：
 若 $Z = X + iY$ ，且 $X \sim N(\mu, \sigma^2)$ , $Y \sim N(\mu, \sigma^2)$ ， $X$ 与 $Y$ 相互独立，则 $Z \sim CN(\mu+i\mu, 2\sigma^2)$  
-记 $\mu+i\mu = \mu_z \in \mathbb{C}$ ， $2\sigma^2 = \sigma_z \in \mathbb{R}$ ，则其概率密度函数为：
+记 $\mu+i\mu = \mu_z \in \mathbb{C}$ ， $2\sigma^2 = \sigma_z^2 \in \mathbb{R}$ ，则其概率密度函数为：
 
 $$ p_Z(z) = \frac{1}{\pi\sigma_z^2}\exp[-\frac{(z - \mu_z)^2}{\sigma_z^2}] $$
 
@@ -531,9 +531,9 @@ $$ \begin{aligned}
 
 # 六、测试和验收的考量
 
-1. 针对 paddle.gaussian、paddle.nn.initializer.NormalInitializer 和 paddle.distribution.Normal 的采样方法，生成5000个样本，测试这些这样的均值和标准差是否正确。
+1. 针对 paddle.gaussian、paddle.nn.initializer.NormalInitializer 和 paddle.distribution.Normal 的采样方法，生成5000个样本，测试这些这样的均值和方差是否正确：例如设置采样的复高斯分布均值为 0.0+0.0j，方差为 1.0，则需要测试得到样本的实部均值是否接近 0.0，虚部均值是否接近 0.0，实部方差是否接近 0.5，虚部方差是否接近 0.5，以及实部虚部总体方差是否接近 1.0。 
 
-2. paddle.distribution.Normal 的 `kl_divergence`、`entropy`、`prob`、`log_prob` 方法分别用 numpy 重写进行验证。
+2. 由于numpy或scipy没有实现复高斯分布，paddle.distribution.Normal 的 `kl_divergence`、`entropy`、`prob`、`log_prob` 方法在修改支持复高斯分布后，需要分别用 numpy 重写对应公式进行验证。
 
 
 # 七、可行性分析和排期规划
