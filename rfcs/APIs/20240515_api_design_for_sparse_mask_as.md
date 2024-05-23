@@ -4,7 +4,7 @@
 | ------------ | ----------------------------------------- |
 | 提交作者     | megemini                                  |
 | 提交时间     | 2024-05-15                                |
-| 版本号       | V1.0                                      |
+| 版本号       | V1.1                                      |
 | 依赖飞桨版本 | develop版本                               |
 | 文件名       | 20240515_api_design_for_sparse_mask_as.md |
 
@@ -20,7 +20,7 @@
 
 ## 2、功能目标
 
-实现 `paddle.sparse.mask_as` 作为独立的函数调。
+实现 `paddle.sparse.mask_as` 作为独立的函数调用。
 
 ## 3、意义
 
@@ -28,15 +28,13 @@
 
 # 二、飞桨现状
 
-目前没有 `paddle.sparse.mask_as` 接口，但是，sparse 算子中的 `mask_kernel.cc mask_kernel.cu` 实现了相同的功能，需要对其进行封装，并支持 `coo csr` 两种稀疏矩阵，并实现反向算子。
+目前没有 `paddle.sparse.mask_as` 接口，但是，sparse 算子中的 `mask_kernel.cc mask_kernel.cu` 实现了相同的功能，需要对其进行封装，支持 `coo csr` 两种稀疏矩阵，并实现反向算子。
 
 # 三、业内方案调研
 
-PyTorch 中的 [torch.Tensor.sparse_mask](https://pytorch.org/docs/stable/generated/torch.Tensor.sparse_mask.html#torch-tensor-sparse-mask)
+PyTorch 中的 [torch.Tensor.sparse_mask](https://pytorch.org/docs/stable/generated/torch.Tensor.sparse_mask.html#torch-tensor-sparse-mask) 实现了相同的能力。
 
-实现了相同的能力。
-
-PyTorch 中 `aten/src/ATen/native/sparse/SparseTensor.cpp`
+参考 PyTorch 中的 `aten/src/ATen/native/sparse/SparseTensor.cpp`
 
 ``` c++
 SparseTensor sparse_mask(const Tensor& t, const SparseTensor& mask) {
@@ -77,7 +75,7 @@ SparseTensor sparse_mask(const Tensor& t, const SparseTensor& mask) {
 }
 ```
 
-对于 `csr` 格式的矩阵，`aten/src/ATen/native/sparse/SparseCsrTensorMath.cpp` 中
+对于 `csr` 格式的矩阵，参考 `aten/src/ATen/native/sparse/SparseCsrTensorMath.cpp` 中的
 
 ``` c++
 Tensor sparse_mask_sparse_compressed(
@@ -139,9 +137,9 @@ Tensor sparse_mask_sparse_compressed(
 }
 ```
 
-进而利用 `at::native::dense_to_sparse_with_mask` 处理 `compressed` 格式的稀疏矩阵，包括 `csr` 格式。
+其利用 `at::native::dense_to_sparse_with_mask` 处理 `compressed` 格式的稀疏矩阵，包括 `csr` 格式。
 
-具体进行 `dense to sparse` 的逻辑为 `aten/src/ATen/native/TensorConversions.cpp`
+具体进行 `dense to sparse` 的逻辑为 `aten/src/ATen/native/TensorConversions.cpp` 中的
 
 ``` c++
 template<Layout target_layout>
@@ -220,7 +218,7 @@ static Tensor dense_to_sparse_compressed(const Tensor& self, const Tensor& self_
 
 ```
 
-其中关键的两句 
+其中关键的两句
 
 ``` c++
     {
@@ -245,8 +243,7 @@ void MaskCooKernel(const Context& dev_ctx,
 
 此算子实现了与 PyTorch 中 `sparse_mask` 相同的能力，但是，Paddle 算子中只有 `coo` 类型的支持，还需要补充 `csr` 类型稀疏矩阵的支持。
 
-另外，Paddle 的 `MaskCooKernel` 并没有暴露至上层 Python 接口，还需要注册此算子，以及涉及对应的反向算子。
-
+另外，Paddle 的 `MaskCooKernel` 并没有暴露至上层 Python 接口，还需要注册此算子，以及对应的反向算子。
 
 # 五、设计思路与实现方案
 
@@ -364,7 +361,7 @@ void MaskAsCsrKernel(const Context& dev_ctx,
 }
 ```
 
-这里没有使用类似 PyTorch 的 `index_select` 的转换方式，因为，虽然可以通过 Paddle 的 `masked_select` 实现类似能力，但是，仍需将 `mask` 转换为 `DenseTensor` ，而目前 Paddle 的 `CsrToDenseKernel` 仍然是先将 `csr` 转为 `coo` 然后处理，不具备性能优势。
+这里没有使用类似 PyTorch 的 `index_select` 的转换方式，因为，虽然可以通过 Paddle 的 `masked_select` 实现类似能力，但是，仍需将 `mask` 转换为 `DenseTensor` ，而目前 Paddle 的 `CsrToDenseKernel` 仍然是先将 `csr` 转为 `coo` 然后处理，不具备性能优势。可参考如下代码：
 
 ``` c++
 template <typename T, typename Context>
@@ -382,7 +379,7 @@ void CsrToDenseKernel(const Context& dev_ctx,
 
 ```
 
-`paddle/phi/kernels/sparse/gpu/mask_kernel.cu` 逻辑相同
+`paddle/phi/kernels/sparse/gpu/mask_kernel.cu` 中 GPU 算子：
 
 ``` c++
 template <typename T, typename Context>
