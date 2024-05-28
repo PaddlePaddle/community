@@ -281,7 +281,7 @@ class ZeroPad3D(Layer):
 
 ```python
 
-def block_diag(*inputs, name=None):
+def block_diag(inputs, name=None):
     def to_col_block(arys, i, a):
         return [
             a if idx == i else paddle.zeros([ary.shape[0], a.shape[1]], dtype=a.dtype)
