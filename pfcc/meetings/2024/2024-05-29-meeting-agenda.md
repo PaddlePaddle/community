@@ -13,5 +13,5 @@
    - [2024年开源之夏](https://summer-ospp.ac.cn/org/orgdetail/ba9ed81f-5898-465f-be22-070901bb17a0?lang=zh)：报名截止6月3日，申请书截止6月4日
    - 2024年GLCC夏令营：5月30日公布题目，报名和申请书截止6月23日
    - 第七期黑客松护航计划介绍：近期公布题目  
-4. 新人介绍：[Chen-Lun-Hao](https://github.com/Chen-Lun-Hao)、[walkalone20](https://github.com/walkalone20)、[ApricityXX](https://github.com/ApricityXX)、[bapijun](https://github.com/bapijun)（5 min）
-5. PaddleOCR算法模型挑战赛OCR赛道一等奖技术方案分享 @[Topdu](https://github.com/Topdu) （45 mins）
+2. 新人介绍：[Chen-Lun-Hao](https://github.com/Chen-Lun-Hao)、[walkalone20](https://github.com/walkalone20)、[ApricityXX](https://github.com/ApricityXX)、[bapijun](https://github.com/bapijun)（5 min）
+3. PaddleOCR算法模型挑战赛OCR赛道一等奖技术方案分享 @[Topdu](https://github.com/Topdu) （45 mins）
