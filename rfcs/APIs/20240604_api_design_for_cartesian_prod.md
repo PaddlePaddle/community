@@ -14,9 +14,9 @@
 
 计算给定的一组 Tensor 的笛卡尔积。python 的 itertools 中有 product 方法，用于计算集合的笛卡尔积，其数学表示可以为：
 
-若集合 $ A = \{a\}$ ， 集合 $B = \{b\}$ ，则 $A$ 和 $B$ 的笛卡尔积为 $A \times B = \{(a, b)|a \in A \wedge b \in B\}$ ;
+若集合 $A = \{a\}$ ， 集合 $B = \{b\}$ ，则 $A$ 和 $B$ 的笛卡尔积为 $A \times B = \{(a, b)|a \in A \wedge b \in B\}$ ;
 
-若集合 $ X_i = \{x_i\}$ ，则 $n$ 个集合的笛卡尔积为 $\prod_{i=1}^n X_i = X_1 \times ... \times X_n = \{(x_1, ... ,x_n)|x_1 \in X_1 \wedge ... \wedge x_n \in X_n\}$
+若集合 $X_i = \{x_i\}$ ，则 $n$ 个集合的笛卡尔积为 $\prod \limits_{i=1}^n X_i = X_1 \times ... \times X_n = \{(x_1, ... ,x_n)|x_1 \in X_1 \wedge ... \wedge x_n \in X_n\}$
 
 一组 1 维 Tensor 的笛卡尔积则相当于将 Tensor 视为集合，然后求集合的笛卡尔积。
 
