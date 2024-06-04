@@ -128,14 +128,7 @@ def alpha_dropout(x, p=0.5, training=True, name=None):
         b = -a * alpha_p * p
 
         dtype = x.dtype
-        if not feature_dropout:
-            input_shape = x.shape
-        else:
-            if x.ndim < 2:
-                raise ValueError(
-                    'Feature alpha dropout needs at least 2D input.'
-                )
-            input_shape = list(x.shape[:2]) + [1] * len(x.shape[2:])
+        input_shape = x.shape
 
         # get mask
         random_tensor = paddle.uniform(
