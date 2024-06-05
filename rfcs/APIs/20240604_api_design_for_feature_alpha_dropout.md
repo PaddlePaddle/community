@@ -72,7 +72,36 @@ Ctype<inplace> _dropout_impl(T& input, double p, bool train) {
 }
 ```
 
-可以看到，由于 `feature alpha dropout` 为 `alpha dropout` 的一种特殊情况，因此， PyTorch 将两者统一实现在以上的同一个函数中，两者的唯一区别为，`feature alpha dropout` 的 `noise` 是通过 `make_feature_noise` 生成的，而不是 `alpha dropout` 中的一个与输入相同形状的空张量：
+``` c++
+#define ALIAS_SPECIALIZATION(ALIAS_NAME, IS_FEATURE, IS_ALPHA)                      \
+template <bool inplace, typename... Args>                                           \
+Ctype<inplace> ALIAS_NAME(Args&&... args) {                                         \
+  return _dropout_impl<IS_FEATURE, IS_ALPHA, inplace>(std::forward<Args>(args)...); \
+}
+
+ALIAS_SPECIALIZATION(_dropout,               false, false)
+ALIAS_SPECIALIZATION(_feature_dropout,       true,  false)
+ALIAS_SPECIALIZATION(_alpha_dropout,         false, true )
+ALIAS_SPECIALIZATION(_feature_alpha_dropout, true,  true )
+```
+
+可以看到，通过 `_dropout_impl` 实现了四种 dropout 类型：
+
+- _dropout
+- _feature_dropout
+- _alpha_dropout
+- _feature_alpha_dropout
+
+本方案需要实现的 `feature_alpha_dropout` 属于第四种，即，`IS_FEATURE = true, IS_ALPHA = true`。
+
+则 `feature_alpha_dropout` 的实现路径为：
+
+- 通过 `make_feature_noise` 生成 `noise`
+- `noise` 进行 `noise.bernoulli_(1 - p)`
+- 第一个 `alpha_dropout` 分支，`constexpr double alpha = 1.7580993408473766 ...`
+- 第二个 `alpha_dropout` 分支，`multiply<inplace>(input, noise).add_(b)`
+
+比较 `feature alpha dropout` 与 `alpha dropout`，`feature alpha dropout` 的 `noise` 是通过 `make_feature_noise` 生成的，而不是 `alpha dropout` 中的一个与输入相同形状的空张量：
 
 ``` c++
 Tensor make_feature_noise(const Tensor& input) {
@@ -324,6 +353,8 @@ def feature_alpha_dropout(x, p=0.5, training=True, name=None):
 
 # 六、测试和验收的考量
 
+目前 Paddle 对于 `alpha_dropout` 的单测，与其他 dropout 的单测，放置于：`test/legacy_test/test_dropout_op.py`，此处保持一致。
+
 - **编程范式场景**
   - 常规覆盖动态图 (和静态图) 的测试场景。
 
@@ -332,7 +363,7 @@ def feature_alpha_dropout(x, p=0.5, training=True, name=None):
 
 - **输入参数**
   - 常规覆盖默认参数，常用参数，错误参数。
-  - 常规数据类型 float16, float32 or float64
+  - 常规数据类型 bfloat16, float16, float32 or float64
 
 # 七、可行性分析和排期规划
 
