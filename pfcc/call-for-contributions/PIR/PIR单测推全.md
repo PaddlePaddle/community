@@ -148,7 +148,23 @@ Py3下有些单测不能复现问题，需要从deprecated目录移出，
 
 ## 6. 参考资料
 
-### 6.1 历史修复PR
+### 6.1 PIR相关的设计文档
+
+- [IR升级整体规划以及第一阶段(类型系统)设计文档](files/IR升级整体规划以及第一阶段(类型系统)设计文档.pdf)
+- [IR升级第二阶段(模型结构)设计评审](files/IR升级第二阶段(模型结构)设计评审.pdf)
+- [新IR下自动微分模块设计](files/新IR下自动微分模块设计.pdf)
+- [IR控制流设计评审方案](files/IR控制流设计评审方案.pdf)
+- [PIR适配OneDNN的方案](files/PIR适配OneDNN的方案.pdf)
+- [PIR 适配 AMP 的方案](files/PIR%20适配%20AMP%20的方案.pdf)
+- [新IR下自动微分模块设计](files/新%20IR%20下基于%20DRR%20的%20Pass%20简化技术方案.pdf)
+- [静态图半自动并行架构基于 PIR 重构升级](files/静态图半自动并行架构基于%20PIR%20重构升级.pdf)
+
+### 6.2 旧版静态图相关的参考资料
+
+- [Paddle Fluid框架执行逻辑 v1.2 - 陈威行](files/Paddle%20Fluid框架执行逻辑%20v1.2%20-%20陈威行.pptx)
+- [Paddle学习笔记——王欢](files/Paddle学习笔记——王欢.pptx)
+- [PaddlePaddle学习笔记——王欢](files/PaddlePaddle学习笔记——王欢.docx)
+### 6.3 历史修复PR
 
 - https://github.com/PaddlePaddle/Paddle/pull/64055
 - https://github.com/PaddlePaddle/Paddle/pull/64064
