@@ -1309,7 +1309,7 @@ def train_model():
                             batch_sampler=sampler,
                             num_workers=1)
     dist_dataloader = shard_dataloader(dataloader=train_loader, meshes=world_process_mesh, shard_dims="dp")
-    dist_opt = shard_optimizer(optimizer, ShardingStage1(world_process_mesh))
+    dist_opt = shard_optimizer(optimizer, ShardingStage1(world_process_mesh)) # can also use ShardingStage2(world_process_mesh) and ShardingStage3(world_process_mesh)
 
     for eop in range(epoch):
         model.train()
@@ -1744,7 +1744,7 @@ def train_model():
                             batch_sampler=sampler,
                             num_workers=1)
     dist_dataloader = shard_dataloader(dataloader=train_loader, meshes=world_process_mesh, shard_dims="dp")
-    dist_opt = shard_optimizer(optimizer, ShardingStage1(world_process_mesh))
+    dist_opt = shard_optimizer(optimizer, ShardingStage1(world_process_mesh)) # can also use ShardingStage2(world_process_mesh) and ShardingStage3(world_process_mesh)
     # 动转静
     dist_model = to_static(model, dist_dataloader, loss_func, optimizer)
     # print(dist_model._engine.serial_main_program)
