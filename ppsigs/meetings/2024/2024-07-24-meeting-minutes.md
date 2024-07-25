@@ -3,7 +3,7 @@
 ## 会议概况
 - 会议时间：2024-07-24 19:00-21:00
 - 会议地点：线上会议
-- 参会人：本次会议共有6名成员参会，由 PaddleOCR 贡献者组成。本次会议由刘卓鑫（[[mattheliu](https://github.com/mattheliu)](https://github.com/GreatV)）主持。
+- 参会人：本次会议共有6名成员参会，由 PaddleOCR 贡献者组成。本次会议由刘卓鑫（[[mattheliu](https://github.com/mattheliu)]）主持。
 
 ## 会议分享与讨论
 
@@ -15,7 +15,6 @@
   * 本地推理比官网效果差，正在排查。
   * mkldnn加速问题，已经告知intel工程师团队。
   * 社区成员讨论了一些疑难issue，形成意见并回复到相关issue中。
-
   * 关于ppocrlabel提供可执行文件，有时间的话可以出exe版本。
   * 关于回归测试议题，先补充单测。
 
