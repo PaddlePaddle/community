@@ -938,7 +938,7 @@ if __name__ == '__main__':
 import numpy as np
 import paddle
 # 导入动态图半自动接口
-from paddle.distributed import ProcessMesh, shard_tensor, shard_op, Shard
+from paddle.distributed import ProcessMesh, shard_tensor, shard_op, Shard, shard_dataloader
 # 导入数据加载和数据保存接口
 from paddle.io import Dataset, BatchSampler, DataLoader
 
@@ -983,7 +983,6 @@ class SimpleNet(paddle.nn.Layer):
         self.relu = paddle.nn.ReLU()
 
     def forward(self, x):
-        x = shard_tensor(x, world_process_mesh, [Shard(0)])
         x = self.linear1(x)
         x = self.linear2(x)
         x = self.linear3(x)
@@ -1007,19 +1006,17 @@ def train_model():
     train_loader = DataLoader(dataset,
                             batch_sampler=sampler,
                             num_workers=1)
+    dist_dataloader = shard_dataloader(dataloader=train_loader, meshes=world_process_mesh, shard_dims="dp")
 
     for eop in range(epoch):
         model.train()
 
-        for batch_id, data in enumerate(train_loader()):
+        for batch_id, data in enumerate(dist_dataloader()):
             img, label = data
             label.stop_gradient = True
 
             out = model(img)
-            loss = loss_func(input=out, label=label)
-            avg_loss = paddle.mean(x=loss)
-            # acc_top1 = paddle.metric.accuracy(input=out, label=label, k=1)
-            # acc_top5 = paddle.metric.accuracy(input=out, label=label, k=5)
+            avg_loss = loss_func(input=out, label=label)
 
             avg_loss.backward()
             optimizer.step()
@@ -1238,7 +1235,101 @@ if __name__ == '__main__':
 
 ##### 2.2.4.2.4 动半-group sharded并行示例代码
 ```python
-# 后续完善
+# -*- coding: UTF-8 -*-
+import numpy as np
+import paddle
+# 导入动态图半自动接口
+from paddle.distributed import ProcessMesh, shard_tensor, shard_op, Shard, shard_dataloader, shard_optimizer, ShardingStage1, ShardingStage3
+# 导入数据加载和数据保存接口
+from paddle.io import Dataset, BatchSampler, DataLoader
+
+base_lr = 0.1   # 学习率
+momentum_rate = 0.9 # 冲量
+l2_decay = 1e-4 # 权重衰减
+
+epoch = 5  #训练迭代次数
+batch_num = 100 #每次迭代的 batch 数
+batch_size = 32 #训练批次大小
+class_dim = 10
+
+# 设置数据读取器
+class RandomDataset(Dataset):
+    def __init__(self, num_samples):
+        self.num_samples = num_samples
+
+    def __getitem__(self, idx):
+        image = np.random.random([256]).astype('float32')
+        label = np.random.randint(0, class_dim - 1, (1, )).astype('int64')
+        return image, label
+
+    def __len__(self):
+        return self.num_samples
+
+# 设置优化器
+def optimizer_setting(parameter_list=None):
+    optimizer = paddle.optimizer.Momentum(
+        learning_rate=base_lr,
+        momentum=momentum_rate,
+        weight_decay=paddle.regularizer.L2Decay(l2_decay),
+        parameters=parameter_list)
+    return optimizer
+
+# 模型网络
+class SimpleNet(paddle.nn.Layer):
+    def __init__(self, input_size, inner_size, output_size):
+        super().__init__()
+        self.linear1 = paddle.nn.Linear(input_size, inner_size)
+        self.linear2 = paddle.nn.Linear(inner_size, input_size)
+        self.linear3 = paddle.nn.Linear(input_size, output_size)
+        self.relu = paddle.nn.ReLU()
+
+    def forward(self, x):
+        x = self.linear1(x)
+        x = self.linear2(x)
+        x = self.linear3(x)
+        x = self.relu(x)
+        return x
+
+# 设置mesh
+world_process_mesh = ProcessMesh([0, 1], dim_names=["dp"])
+
+# 设置训练函数
+def train_model():
+    model = SimpleNet(input_size=256, inner_size=102400, output_size=class_dim)
+    loss_func = paddle.nn.CrossEntropyLoss()
+    # optimizer = optimizer_setting(parameter_list=model.parameters())
+    optimizer = paddle.optimizer.AdamW(learning_rate=0.001, parameters=model.parameters())
+
+    # 设置dataset和dataloader，用于并行训练
+    dataset = RandomDataset(batch_num * batch_size)
+    # 设置批采样器，用于数据并行训练
+    sampler = BatchSampler(dataset,
+                        batch_size=batch_size,shuffle=False, drop_last=True)
+    train_loader = DataLoader(dataset,
+                            batch_sampler=sampler,
+                            num_workers=1)
+    dist_dataloader = shard_dataloader(dataloader=train_loader, meshes=world_process_mesh, shard_dims="dp")
+    dist_opt = shard_optimizer(optimizer, ShardingStage1(world_process_mesh)) # can also use ShardingStage2(world_process_mesh) and ShardingStage3(world_process_mesh)
+
+    for eop in range(epoch):
+        model.train()
+
+        for batch_id, data in enumerate(dist_dataloader()):
+            img, label = data
+            label.stop_gradient = True
+
+            out = model(img)
+            avg_loss = loss_func(input=out, label=label)
+
+            avg_loss.backward()
+            dist_opt.step()
+            model.clear_gradients()
+
+            if batch_id % 5 == 0:
+                print("[Epoch %d, batch %d] loss: %.5f" % (eop, batch_id, np.array(avg_loss)))
+# 启动训练
+if __name__ == '__main__':
+    train_model()
 ```
 
 因为飞桨支持动转静，所以我们有两种方法实现静半的各种并行策略，一种是在动半的代码基础上加上动转静接口，即以动半编程而以静半方式运行；一种是使用原生静半接口编程并运行，这里给出第1种方法的代码，后1种方法的代码在下1节介绍。
@@ -1252,7 +1343,7 @@ if __name__ == '__main__':
 import numpy as np
 import paddle
 # 导入动态图半自动接口
-from paddle.distributed import ProcessMesh, shard_tensor, shard_op, Shard, to_static
+from paddle.distributed import ProcessMesh, shard_tensor, shard_op, Shard, shard_dataloader, to_static
 # 导入数据加载和数据保存接口
 from paddle.io import Dataset, BatchSampler, DataLoader
 # from paddle.base import core
@@ -1302,7 +1393,6 @@ class SimpleNet(paddle.nn.Layer):
         self.relu = paddle.nn.ReLU()
 
     def forward(self, x):
-        x = shard_tensor(x, world_process_mesh, [Shard(0)])
         x = self.linear1(x)
         x = self.linear2(x)
         x = self.linear3(x)
@@ -1326,8 +1416,9 @@ def train_model():
     train_loader = DataLoader(dataset,
                             batch_sampler=sampler,
                             num_workers=1)
+    dist_dataloader = shard_dataloader(dataloader=train_loader, meshes=world_process_mesh, shard_dims="dp")
     # 动转静
-    dist_model = to_static(model, train_loader, loss_func, optimizer)
+    dist_model = to_static(model, dist_dataloader, loss_func, optimizer)
     # print(dist_model._engine.serial_main_program)
     # print(dist_model._engine.serial_startup_program)
     # print(dist_model._engine.main_program)
@@ -1338,7 +1429,7 @@ def train_model():
     for eop in range(epoch):
         dist_model.train()
 
-        for batch_id, data in enumerate(train_loader()):
+        for batch_id, data in enumerate(dist_dataloader()):
             img, label = data
             label.stop_gradient = True
 
@@ -1574,16 +1665,118 @@ if __name__ == '__main__':
 
 ##### 2.2.4.2.8 动半转静半-group sharded并行示例代码
 ```python
-# 后续完善
+# -*- coding: UTF-8 -*-
+import numpy as np
+import paddle
+# 导入动态图半自动接口
+from paddle.distributed import ProcessMesh, shard_tensor, shard_op, Shard, shard_dataloader, shard_optimizer, ShardingStage1, ShardingStage3, to_static
+# 导入数据加载和数据保存接口
+from paddle.io import Dataset, BatchSampler, DataLoader
+# from paddle.base import core
+# from paddle.base.framework import IrGraph
+# def dump_prog(program, file_name):
+#     offline_graph = IrGraph(core.Graph(program.desc), for_test=True)
+#     offline_graph.draw('.', file_name, [])
+
+base_lr = 0.1   # 学习率
+momentum_rate = 0.9 # 冲量
+l2_decay = 1e-4 # 权重衰减
+
+epoch = 5  #训练迭代次数
+batch_num = 100 #每次迭代的 batch 数
+batch_size = 32 #训练批次大小
+class_dim = 10
+
+# 设置数据读取器
+class RandomDataset(Dataset):
+    def __init__(self, num_samples):
+        self.num_samples = num_samples
+
+    def __getitem__(self, idx):
+        image = np.random.random([256]).astype('float32')
+        label = np.random.randint(0, class_dim - 1, (1, )).astype('int64')
+        return image, label
+
+    def __len__(self):
+        return self.num_samples
+
+# 设置优化器
+def optimizer_setting(parameter_list=None):
+    optimizer = paddle.optimizer.Momentum(
+        learning_rate=base_lr,
+        momentum=momentum_rate,
+        weight_decay=paddle.regularizer.L2Decay(l2_decay),
+        parameters=parameter_list)
+    return optimizer
+
+# 模型网络
+class SimpleNet(paddle.nn.Layer):
+    def __init__(self, input_size, inner_size, output_size):
+        super().__init__()
+        self.linear1 = paddle.nn.Linear(input_size, inner_size)
+        self.linear2 = paddle.nn.Linear(inner_size, input_size)
+        self.linear3 = paddle.nn.Linear(input_size, output_size)
+        self.relu = paddle.nn.ReLU()
+
+    def forward(self, x):
+        x = self.linear1(x)
+        x = self.linear2(x)
+        x = self.linear3(x)
+        x = self.relu(x)
+        return x
+
+# 设置mesh
+world_process_mesh = ProcessMesh([0, 1], dim_names=["dp"])
+
+# 设置训练函数
+def train_model():
+    model = SimpleNet(input_size=256, inner_size=102400, output_size=class_dim)
+    loss_func = paddle.nn.CrossEntropyLoss()
+    # optimizer = optimizer_setting(parameter_list=model.parameters())
+    optimizer = paddle.optimizer.AdamW(learning_rate=0.001, parameters=model.parameters())
+
+    # 设置dataset和dataloader，用于并行训练
+    dataset = RandomDataset(batch_num * batch_size)
+    # 设置批采样器，用于数据并行训练
+    sampler = BatchSampler(dataset,
+                        batch_size=batch_size,shuffle=False, drop_last=True)
+    train_loader = DataLoader(dataset,
+                            batch_sampler=sampler,
+                            num_workers=1)
+    dist_dataloader = shard_dataloader(dataloader=train_loader, meshes=world_process_mesh, shard_dims="dp")
+    dist_opt = shard_optimizer(optimizer, ShardingStage1(world_process_mesh)) # can also use ShardingStage2(world_process_mesh) and ShardingStage3(world_process_mesh)
+    # 动转静
+    dist_model = to_static(model, dist_dataloader, loss_func, optimizer)
+    # print(dist_model._engine.serial_main_program)
+    # print(dist_model._engine.serial_startup_program)
+    # print(dist_model._engine.main_program)
+    # print(dist_model._engine.startup_program)
+    # dump_prog(dist_model._engine.serial_main_program, file_name = "d2s_gs_stage1_serial_main_program_" + str(paddle.distributed.get_rank()))
+    # dump_prog(dist_model._engine.main_program, file_name = "d2s_gs_stage1_main_program_" + str(paddle.distributed.get_rank()))
+
+    for eop in range(epoch):
+        dist_model.train()
+
+        for batch_id, data in enumerate(dist_dataloader()):
+            img, label = data
+            label.stop_gradient = True
+
+            avg_loss = dist_model(img, label)
+
+            if batch_id % 5 == 0:
+                print("[Epoch %d, batch %d] loss: %.5f" % (eop, batch_id, avg_loss))
+# 启动训练
+if __name__ == '__main__':
+    train_model()
 ```
 
 | 动态图半自动各并行策略 | 是否修改__init__ | 是否修改forward | 初始化分布式环境&设置分布式策略 | 封装模型和优化器 | 分布式数据加载和采样 | 迭代训练过程 |
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
 | 单卡运行 | 否 | 否 | 不需要 | 不需要 | 不需要 | 常规 |
-| 数据并行 | 否 | **是** | 不需要 | 不需要 | 不需要 | 常规 |
+| 数据并行 | 否 | 否 | 不需要 | 不需要 | **需要切分dataloader** | 常规 |
 | 模型并行 | 否 | **是** | 不需要 | 不需要 | 不需要 | 常规 |
 | 流水线并行 | 否 | **是** | 不需要 | 不需要 | 不需要 | 常规 |
-| group_sharded(fsdp) | 待补 | 待补 | 待补 | 待补 | 待补 |待补 |
+| group_sharded(fsdp) | 否 | 否 | 不需要 | **需要切分优化器** | **需要切分dataloader** | 常规 |
 
 #### 2.2.4.3 静态图半自动(静半)实现的各种并行策略
 使用原生静半接口开发的分布式编程代码相比于单卡编程代码需要添加：
