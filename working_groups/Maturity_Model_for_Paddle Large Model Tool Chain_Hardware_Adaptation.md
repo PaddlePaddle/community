@@ -1,4 +1,4 @@
-**飞桨大模型工具链适配认证标准
+## 飞桨大模型工具链适配认证标准
 
 
 <table border="2" >
@@ -68,7 +68,8 @@
 •每TFLOPS处理的QPS（首token 时延不超过1s），达到百度提供benchmark作为基线（各级要求见上）。</td>
 	</tr>
 </table>
-** Notes
+
+## Notes
 -  [1]每一级是在较低一级的基础上增加模型要求，预训练认证需要满足同级的调优认证要求。
 -  [2]LLM类别推荐适配开源模型列表：
 
@@ -77,7 +78,7 @@
 | GPT-3 | https://github.com/PaddlePaddle/PaddleNLP/blob/develop/llm/config/gpt-3 | 
 | LLaMA | https://github.com/PaddlePaddle/PaddleNLP/blob/develop/llm/config/llama |
 | Qwen | https://github.com/PaddlePaddle/PaddleNLP/tree/develop/llm/config/qwen |
--  文生图类别推荐适配开源模型：SD https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/README.md
+-  [3]文生图类别推荐适配开源模型：SD https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/README.md
 
 
 
