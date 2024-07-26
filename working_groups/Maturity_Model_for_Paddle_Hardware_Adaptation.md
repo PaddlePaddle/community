@@ -1,4 +1,4 @@
-##飞桨芯片适配认证标准
+## 飞桨芯片适配认证标准
 
 
 <table border="2" >
@@ -100,6 +100,7 @@
 		<td>[7]</td>
 	</tr>	
 </table>
+
 ## Notes
 - [1] 模型领域包括：视觉（分类、检测、分割）/OCR/NLP/时间序列 
 - [2] 飞桨开源模型库包括大量经典模型和飞桨特色模型，每个模型有其所属领域，地址：https://github.com/PaddlePaddle/PaddleX/blob/release/3.0-beta/docs/tutorials/models/support_model_list.md
