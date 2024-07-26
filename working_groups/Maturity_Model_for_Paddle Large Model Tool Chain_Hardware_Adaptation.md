@@ -71,6 +71,7 @@
 ## Notes
 -  [1]每一级是在较低一级的基础上增加模型要求，预训练认证需要满足同级的调优认证要求。
 -  [2]LLM 类别推荐适配开源模型列表：
+
 | 模型 | 代码地址 | 
 |:------|:-------:|
 | GPT-3 | https://github.com/PaddlePaddle/PaddleNLP/blob/develop/llm/config/gpt-3 | 
