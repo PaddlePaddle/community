@@ -1,6 +1,5 @@
 ## 飞桨芯片适配认证标准
 
-
 <table border="2" >
 	<tr >
 		<td rowspan="2">硬件类型</td>
@@ -106,9 +105,9 @@
 - [2] 飞桨开源模型库包括大量经典模型和飞桨特色模型，每个模型有其所属领域，地址：https://github.com/PaddlePaddle/PaddleX/blob/release/3.0-beta/docs/tutorials/models/support_model_list.md
 - [3]基于全量数据集，端到端训推精度对齐
 - [4] 基础训推功能验证
-- [5] 以Paddle Inference适配
-- [6] 以Paddle Lite/ONNX/TVM适配
+- [5] 以 Paddle Inference 适配
+- [6] 以 Paddle Lite/ONNX/TVM 适配
 - [7] 针对该类芯片，暂无此级别适配标准
 - [8] 飞桨硬件适配全量算子列表：https://github.com/onecatcn/my-demo-code/blob/develop/PaddlePaddle/ops/gpu_ops_2023-03-20.csv
-- [9] 训练精度要求：FP32训练精度下误差小于正负0.3%，AMP混合精度训练下误差小于正负3%，满足其中一个要求即可。
-- [10] 推理精度要求：和GPU/CPU精度一致(移动边缘类芯片的量化模型预计有特殊损失，硬件厂商提供精度损失说明，由飞桨研发同学判断其合理性)
+- [9] 训练精度要求：FP32 训练精度下误差小于正负 0.3%，AMP 混合精度训练下误差小于正负 3%，满足其中一个要求即可。
+- [10] 推理精度要求：和 GPU/CPU 精度一致(移动边缘类芯片的量化模型预计有特殊损失，硬件厂商提供精度损失说明，由飞桨研发同学判断其合理性)

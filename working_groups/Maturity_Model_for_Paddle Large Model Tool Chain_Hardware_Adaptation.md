@@ -1,6 +1,5 @@
 ## 飞桨大模型工具链适配认证标准
 
-
 <table border="2" >
 	<tr >
 		<td width="10%" rowspan="2">分级</td>
@@ -65,22 +64,16 @@
 * 模型在指定数据集评测，准确率与GPU结果持平(± 1%以内)，人工评估结果与GPU结果持平；
 
 推理性能：
-•每TFLOPS处理的QPS（首token 时延不超过1s），达到百度提供benchmark作为基线（各级要求见上）。</td>
+•每 TFLOPS 处理的 QPS（首 token 时延不超过 1s），达到百度提供 benchmark 作为基线（各级要求见上）。</td>
 	</tr>
 </table>
 
 ## Notes
 -  [1]每一级是在较低一级的基础上增加模型要求，预训练认证需要满足同级的调优认证要求。
--  [2]LLM类别推荐适配开源模型列表：
-
+-  [2]LLM 类别推荐适配开源模型列表：
 | 模型 | 代码地址 | 
 |:------|:-------:|
 | GPT-3 | https://github.com/PaddlePaddle/PaddleNLP/blob/develop/llm/config/gpt-3 | 
 | LLaMA | https://github.com/PaddlePaddle/PaddleNLP/blob/develop/llm/config/llama |
 | Qwen | https://github.com/PaddlePaddle/PaddleNLP/tree/develop/llm/config/qwen |
 -  [3]文生图类别推荐适配开源模型：SD https://github.com/PaddlePaddle/PaddleMIX/blob/develop/ppdiffusers/README.md
-
-
-
-
-
