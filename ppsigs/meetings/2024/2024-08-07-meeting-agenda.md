@@ -26,8 +26,8 @@
 * PaddleOCR 近期进展同步
     * 近期issue和Discussions回顾
     * PaddleOCR文档维护情况
-* 黑客松第7期招募题目，讨论OCR方向可以出的题目
 * PaddleOCR离线推理 vs [AI Studio](https://aistudio.baidu.com/community/app/91660/webUI) 效果不一致？（相关[Discussions](https://github.com/PaddlePaddle/PaddleOCR/discussions?discussions_q=is%3Aopen+label%3Ademo)）
 * Topdu openocr分享
+* 黑客松第7期招募题目，讨论OCR方向可以出的题目
 * 自由发言，可以提需求给大家讨论、提问等
 * 确定下次的部分议题及召开时间
