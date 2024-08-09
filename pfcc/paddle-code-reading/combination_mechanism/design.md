@@ -92,12 +92,7 @@ Meta PyTorch2.0、Google Jax 通过基础算子组合实现复杂算子，并通
 
 1. ResNet50拆解BatchNorm导致显存占用增加70%。
 2. Sigmoid拆解导致网络出现Nan的结果，其解决方案则是通过手写反向计算过程（数值稳定写法）进行化简。
-
-$$
-sigmoid： y = \frac{1}{1+e^{-x}} \\
-sigmoid(自动推导)：y^{\prime} = \frac{e^{-x}}{(1+e^{-x})^2} \\
-sigmoid(数值稳定写法)：y^{\prime} = y(1-y)
-$$
+   ![img](./images/sigmoid.png)
 3. log_softmax拆解后，自动推导的反向图会Hold前向中间变量，从而导致显存占用增加。
 
    ![img](./images/log_softmax1.png)
