@@ -18,7 +18,7 @@ AI Studio是基于百度深度学习开源平台飞桨的人工智能学习与�
 为支持开发者完成框架开发任务，AI Studio推出「框架开发任务」，为开发者提供飞桨镜像环境、在线 IDE 与专属 GPU 算力。你可以在这里便捷地从 GitHub 拉取代码、基于飞桨框架开发并参与开源共建，飞桨团队愿与你一起执桨破浪，让深度学习技术的创新与应用更简单。
 <img width="500" alt="image" src="https://user-images.githubusercontent.com/39876205/201044617-2dbcb752-42c1-40f7-b634-2e4c776b55f9.png">
 
-一个使用case：[利用 AI Studio 完成 Paddle 编译](https://aistudio.baidu.com/aistudio/projectdetail/4572885)
+一个使用case：[利用 AI Studio 完成 Paddle 编译](https://aistudio.baidu.com/projectdetail/8255767)
 
 申请方式：
 发邮件到 ext_paddle_oss@baidu.com，附上 GitHub username 和 AI Studio uid 并说明用途。
