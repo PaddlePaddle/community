@@ -20,6 +20,11 @@
 
 [greatv](https://github.com/greatv)建议改为github网址链接，由[Topdu](https://github.com/)负责完成
 
+### 黑客松OCR题目推荐
+
+greatv推荐[Mixtex](https://github.com/RQLuo/MixTeX-Latex-OCR), Topdu推荐[OmniParser](https://github.com/AlibabaResearch/AdvancedLiterateMachinery/tree/main/OCR/OmniParser)
+[jzhang533](https://github.com/jzhang533)建议完成黑客松确立题目的要求后发布
+
 推荐🔥🔥
 
 ### 自由发言，可以提需求给大家讨论、提问等
