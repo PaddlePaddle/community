@@ -18,7 +18,7 @@
 
 ### PaddleOCR文档站点的链接跳转失败
 
-[greatv](https://github.com/greatv)改为github网址链接，由[Topdu](https://github.com/)负责完成
+[greatv](https://github.com/greatv)建议改为github网址链接，由[Topdu](https://github.com/)负责完成
 
 推荐🔥🔥
 
