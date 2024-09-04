@@ -144,26 +144,52 @@ self._add_accumulator(self._moment2_acc_max_str, p, dtype=acc_dtype)
 调用 c++ 接口时传入相关变量与标记：
 
 ``` python
-            _ = _C_ops.adam_(
-                param_and_grad[0],
-                param_and_grad[1],
-                lr,
-                moment1,
-                moment2,
-                moment2_max,        # 输入参数，最大值
-                beta1_pow_acc,
-                beta2_pow_acc,
-                master_weight,
-                found_inf,
-                _beta1,
-                _beta2,
-                self._epsilon,
-                self._lazy_mode,
-                1000,
-                find_master,
-                False,
-                self._amsgrad,      # 标记位
-            )
+class Adam(Optimizer):
+    def __init__(
+        self,
+        learning_rate: float | LRScheduler = 0.001,
+        beta1: float | Tensor = 0.9,
+        beta2: float | Tensor = 0.999,
+        epsilon: float | Tensor = 1e-8,
+        parameters: (
+            Sequence[Tensor] | Sequence[_AdamParameterConfig] | None
+        ) = None,
+        weight_decay: float | WeightDecayRegularizer | None = None,
+        grad_clip: GradientClipBase | None = None,
+        lazy_mode: bool = False,
+        multi_precision: bool = False,
+        use_multi_tensor: bool = False,
+        amsgrad: bool = False,      # 标记位
+        name: str | None = None,
+    ) -> None:
+      ...
+      self._amsgrad = amsgrad      # 标记位
+
+  ...
+
+  def _append_optimize_op(self, block, param_and_grad):
+    ...
+
+    _ = _C_ops.adam_(       # 调用底层算子
+        param_and_grad[0],
+        param_and_grad[1],
+        lr,
+        moment1,
+        moment2,
+        moment2_max,        # 输入参数，最大值
+        beta1_pow_acc,
+        beta2_pow_acc,
+        master_weight,
+        found_inf,
+        _beta1,
+        _beta2,
+        self._epsilon,
+        self._lazy_mode,
+        1000,
+        find_master,
+        False,
+        self._amsgrad,      # 标记位
+    )
 ```
 
 ### `ops.yaml` 算子
@@ -348,6 +374,51 @@ void Adam(T beta1,
         param_ptr[i] + lr * (mom1_out_ptr[i] / (sqrt(mom2) + eps));
   }
 }
+```
+
+### 分布式切分推导规则
+
+`Adam` 的分布式切分推导规则 `spmd_rule : AdamInferSpmdDynamic` ，涉及 `paddle/phi/infermeta/spmd_rules/optimizer.h, optimizer.cc` 的修改。
+
+同步修改上述接口：
+
+``` c++
+SpmdInfo AdamInferSpmdDynamic(const DistMetaTensor& param,
+                              const DistMetaTensor& grad,
+                              const DistMetaTensor& learning_rate,
+                              const DistMetaTensor& moment1,
+                              const DistMetaTensor& moment2,
+                              const DistMetaTensor& moment2_max,       // 增加的参数
+                              const DistMetaTensor& beta1_pow,
+                              const DistMetaTensor& beta2_pow,
+                              const DistMetaTensor& master_param,
+                              const DistMetaTensor& skip_update,
+                              const Scalar& beta1,
+                              const Scalar& beta2,
+                              const Scalar& epsilon,
+                              bool lazy_mode,
+                              int64_t min_row_size_to_use_multithread,
+                              bool multi_precision,
+                              bool use_global_beta_pow,
+                              bool amsgrad)        // 增加的参数
+
+```
+
+由于 `moment2_max` 在 `Adam` 的执行流程中，与 `moment2` 基本一致，可以认为是伴生变量，因此，需要在 `moment2` 相应执行的地方，增加 `moment2_max` 的执行值令，如：
+
+``` c++
+  ...
+
+  TensorDistAttr moment2_dist_attr =
+      CopyTensorDistAttrForOutput(moment2.dist_attr());
+  TensorDistAttr moment2_max_dist_attr =
+      CopyTensorDistAttrForOutput(moment2_max.dist_attr());   // 增加的执行值令
+
+  ...
+
+  auto momentum2_src_dims_mapping = moment2.dist_attr().dims_mapping();
+  auto momentum2_max_src_dims_mapping = moment2_max.dist_attr().dims_mapping();   // 增加的执行值令
+
 ```
 
 ## API实现方案
