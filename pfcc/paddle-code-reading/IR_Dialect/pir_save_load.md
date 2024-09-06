@@ -11,7 +11,7 @@
 
 ## 二. API 功能变化
 <figure align="center">
-<img src="./img/version-update.png" style="zoom:50%"/>
+<img src="img/version-update.png" style="zoom:50%"/>
 </figure>
 
 1. 用户使用的 Python 端接口与旧 IR 下保持一致，内部依据当前运行状态进行分支处理。
@@ -42,7 +42,7 @@
 ## 三. 版本管理支持度，版本兼容方案
 版本兼容原则为向后兼容，即新版本支持部分旧版本的推理部署，但旧版本无需支持新版本的推理部署。3.0 版本将不再支持 1.0 版本的推理部署，对于 2.0 版本则通过 program_translator 进行转换和支持。
 <figure align="center">
-<img src="./img/version-update.png" style="zoom:50%"/>
+<img src="img/version-update.png" style="zoom:50%"/>
 </figure>
 
 以下方案讨论 3.0 以上版本向后兼容情况：
@@ -51,14 +51,14 @@
 - 3.1 框架加载 3.0 模型：3.0 以后的 3.x 版本，将通过版本兼容系统支持对于旧版本的兼容加载和推理部署。
 
 <figure align="center">
-<img src="./img/version-compat.png" style="zoom:50%"/>
+<img src="img/version-compat.png" style="zoom:50%"/>
 </figure>
 
 ## 四.设计思路和实现方案：
 ### 1.model 文件设计方案
 **主体设计思路与路线**
 <figure align="center">
-<img src="./img/architecture.png" style="zoom:50%"/>
+<img src="img/architecture.png" style="zoom:50%"/>
 </figure>
 
 save_load 体系需要完成 PIR 的类型系统，模型结构 到 序列化文件的互转功能，其中需要实现类型系统和模型结构到序列化结构的对应规则（及序列化协议），再实现 IR 结构到序列化结构互转的对应功能。
@@ -537,7 +537,7 @@ JSon 字符串具体如何与基本数据类型进行转换。选择 `nlohmann` 
 
 `ModuleWriter` / `ModuleReader` 类，承担了读写 `IR` 结构的管理功能，依托于第三方库完成基本单位的读写。
 <figure align="center">
-<img src="./img/module.png" style="zoom:50%"/>
+<img src="img/module.png" style="zoom:50%"/>
 </figure>
 
 - **ModuleWriter**
@@ -681,11 +681,11 @@ JSon 字符串具体如何与基本数据类型进行转换。选择 `nlohmann` 
 
 - paddle.save & paddle.load：Python 端直接调用协议库函数进行参数保存加载
     <figure align="center">
-    <img src="./img/param_py.png" style="zoom:50%"/>
+    <img src="img/param_py.png" style="zoom:50%"/>
     </figure>
 
 - paddle.save_vars & paddle.load_vars：适配推理侧，调用 C++端功能实现 C++端的参数读写
 
     <figure align="center">
-    <img src="./img/param_cpp.png" style="zoom:50%"/>
+    <img src="img/param_cpp.png" style="zoom:50%"/>
     </figure>
