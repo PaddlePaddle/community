@@ -11,7 +11,7 @@
 
 ## 二. API 功能变化
 <figure align="center">
-<img src="img/version-update.png" style="zoom:50%"/>
+<img src="img/api.png" style="zoom:50%"/>
 </figure>
 
 1. 用户使用的 Python 端接口与旧 IR 下保持一致，内部依据当前运行状态进行分支处理。
