@@ -93,7 +93,7 @@ class BaseNet3(paddle.nn.Layer):
 
 其动态图可视化后如下图所示:
 
-![img](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=0d15a3585f2543858f9d487a0a2f443f&docGuid=e1c8c54730c545)
+![img](img/image-1.png)
 
 **参考链接：**
 
@@ -248,7 +248,7 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 - 中英文文档：文档应包含在 [Formula Recognition Docs](https://github.com/PaddlePaddle/PaddleOCR/tree/main/docs/algorithm/formula_recognition) 目录中，提交至 PaddleOCR 仓库
 - 性能指标：复现的性能指标需要与原始仓库效果相当，并在提交的文档中给出 [UniMERNet](https://github.com/opendatalab/UniMERNet) 论文中给出的 SPE-BLEU、SPE-EditDis、CPE-BLEU、CPE-EditDis、SCE-BLEU、SCE-EditDis、HWE-BLEU 和 HWE-EditDis 指标值。模型存储大小<300M，CPU 推理平均耗时 1s 左右。
 
-![img](https://rte.weiyun.baidu.com/wiki/attach/image/api/imageDownloadAddress?attachId=7298714cdaca421e8f634e44a72cf1a2&docGuid=e1c8c54730c545)
+![img](img/image-2.png)
 
 **技术要求**
 
