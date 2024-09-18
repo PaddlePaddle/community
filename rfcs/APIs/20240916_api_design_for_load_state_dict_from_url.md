@@ -61,7 +61,7 @@
 - [pytorch/torch/hub.py at main · pytorch/pytorch (github.com)](https://github.com/pytorch/pytorch/blob/main/torch/hub.py)
 
 ```Python
-def load_state_dict_from_url(url, model_dir=None, map_location=None, progress=True, check_hash=False, file_name=None):
+def load_state_dict_from_url(url, model_dir=None, map_location=None, progress=True, check_hash=False, file_name=None, weights_only=False):
     if os.getenv('TORCH_MODEL_ZOO'):
         warnings.warn('TORCH_MODEL_ZOO is deprecated, please use env TORCH_HOME instead')
 
@@ -127,7 +127,7 @@ model = hub.load("https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classif
 
 ## MXNet
 
-**MXNet **提供了类似的功能，通常通过其 `gluoncv` 模块来实现，gluoncv 提供了丰富的预训练模型和加载功能。例如：
+**MXNet**提供了类似的功能，通常通过其 `gluoncv` 模块来实现，gluoncv 提供了丰富的预训练模型和加载功能。例如：
 
 ```
 from gluoncv import model_zoo
@@ -146,7 +146,7 @@ net = model_zoo.get_model('mobilenet1.0', pretrained=True)
 ### 添加 Python API:
 
 ```
-Paddle.hub.load_state_dict_from_url(url, model_dir=None, map_location=None, progress=True, check_hash=False, file_name=None)
+Paddle.hub.load_state_dict_from_url(url, model_dir=None, map_location=None, progress=True, check_hash=False, file_name=None, weights_only=False)
 ```
 
 ### 参数表
@@ -159,7 +159,7 @@ Paddle.hub.load_state_dict_from_url(url, model_dir=None, map_location=None, prog
 | progress     | bool, optional   | 是否显示进度条到标准错误输出。默认值：`True`。               |
 | check_hash   | bool, optional   | 如果为 `True`，URL 的文件名部分应遵循命名约定 `filename-<sha256>.ext`，其中 `<sha256>` 是文件内容的 SHA256 哈希的前八位或更多位。哈希用于确保唯一的名称和验证文件内容。默认值：`False`。 |
 | file_name    | string, optional | 下载文件的名称。如果未设置，将使用 URL 中的文件名。          |
-
+| weights_only | bool, optional   | 如果为 True，则只会加载权重，而不会加载复杂的序列化对象。建议用于不受信任的来源。 |
 
 ## 底层 OP 设计
 
@@ -170,7 +170,7 @@ Paddle.hub.load_state_dict_from_url(url, model_dir=None, map_location=None, prog
 - **load_state_dict_from_url**的函数实现：
 
 ```python
-def load_state_dict_from_url(url, model_dir=None, map_location=None, progress=True, check_hash=False, file_name=None):
+def load_state_dict_from_url(url, model_dir=None, map_location=None, progress=True, check_hash=False, file_name=None, weights_only=False):
     if model_dir is None:
         hub_dir = get_dir()
         model_dir = os.path.join(hub_dir, 'checkpoints')
@@ -280,7 +280,7 @@ def download_url_to_file(url: str, dst: str, hash_prefix: Optional[str] = None, 
 
 ```
 
-- 函数**_is_legacy_zip_format**判断是否为ZIP文件的函数：
+- 函数 **_is_legacy_zip_format** 判断是否为ZIP文件的函数：
 
 ```python
 def _is_legacy_zip_format(filename):
@@ -290,7 +290,7 @@ def _is_legacy_zip_format(filename):
     return False
 ```
 
-- 函数**_legacy_zip_load**ZIP文件解压，并用load函数加载文件：
+- 函数 **_legacy_zip_load** ZIP文件解压，并用load函数加载文件：
 
 ```python
 def _legacy_zip_load(filename, model_dir, map_location):
@@ -307,7 +307,7 @@ def _legacy_zip_load(filename, model_dir, map_location):
     return paddle.hub.load(extracted_file, map_location=map_location)
 ```
 
-- 函数**get_dir()**获取 `Paddle Hub`缓存目录的路径
+- 函数 **get_dir()** 获取 `Paddle Hub`缓存目录的路径
 
 ```
 def get_dir():
@@ -331,28 +331,22 @@ def _get_paddle_home():
 # 六、测试和验收的考量
 
 测试考虑的case如下：
-
-- **编程范式场景**
-  常规覆盖动态图和静态图的测试场景
+    1.用Paddle.hub.load_state_dict_from_url()加载url，下载模型权重；同时手动下载对应url的多个模型权重文件，用paddle.hub.load()加载文件，进行结果对齐；
+    2.用Paddle.hub.load_state_dict_from_url()加载url，下载压缩的模型权重，即ZIP格式文件；同时手动下载对应url的多个模型权重ZIP文件，并手动解压，用paddle.hub.load()加载文件，进行结果对齐；
+    2.用Paddle.hub.load_state_dict_from_url()加载已经下载的模型权重文件；同时用paddle.hub.load()加载对应的模型权重文件，进行结果对齐；
 
 - **硬件场景**
-  常规需覆盖 CPU、GPU 两种测试场景
+  覆盖 CPU、GPU 两种测试场景
 
 - **输出正确性**
   输出数值结果的一致性和数据类型是否正确
 
-- **计算精度**
-  需要保证计算的精度正确性
-
-- **边界场景**
-  需要保证计算在边界场景下的正确性
-
-- **数据类型**
-  CPU 端需要测试 float、 double； GPU 端需要测试 fp16、 bf16、 float、 double
 
 # 七、可行性分析及规划排期
 
-9. 20前做出第一版提交审核。
+- 第一周，实现相关代码
+- 第二周，测试用例和文档
+- 第三周，Review
 
 # 八、影响面
 
