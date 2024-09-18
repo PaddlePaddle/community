@@ -331,9 +331,12 @@ def _get_paddle_home():
 # 六、测试和验收的考量
 
 测试考虑的case如下：
+
     1.用Paddle.hub.load_state_dict_from_url()加载url，下载模型权重；同时手动下载对应url的多个模型权重文件，用paddle.hub.load()加载文件，进行结果对齐；
+    
     2.用Paddle.hub.load_state_dict_from_url()加载url，下载压缩的模型权重，即ZIP格式文件；同时手动下载对应url的多个模型权重ZIP文件，并手动解压，用paddle.hub.load()加载文件，进行结果对齐；
-    2.用Paddle.hub.load_state_dict_from_url()加载已经下载的模型权重文件；同时用paddle.hub.load()加载对应的模型权重文件，进行结果对齐；
+    
+    3.用Paddle.hub.load_state_dict_from_url()加载已经下载的模型权重文件；同时用paddle.hub.load()加载对应的模型权重文件，进行结果对齐；
 
 - **硬件场景**
   覆盖 CPU、GPU 两种测试场景
