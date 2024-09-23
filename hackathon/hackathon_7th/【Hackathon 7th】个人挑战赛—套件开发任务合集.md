@@ -163,10 +163,10 @@ Paddle2ONNX 已经添加了 Linux 的发包支持，但是 Windows 平台仍然�
 **详细任务说明：**
 
 - 开发 Android 应用（原生应用、Web 应用或混合应用均可），在一个应用中支持如下所有任务：
-  - 图像分类。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/image_classification。参考项目中，`android/shell`对应命令行调用示例，`android/app`对应示例Android应用，后同。
-  - 目标检测。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/object_detection。
-  - OCR。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/ocr。
-  - 图像分割。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/semantic_segmentation。
+  - 图像分类。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/image_classification 。参考项目中，`android/shell`对应命令行调用示例，`android/app`对应示例Android应用，后同。
+  - 目标检测。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/object_detection 。
+  - OCR。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/ocr 。
+  - 图像分割。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/semantic_segmentation 。
 - Android 应用需支持用户通过图形界面灵活地选择模型、输入数据和推理参数。
 - 对于每个任务，需保证应用至少能够针对各参考项目的命令行调用示例支持的所有示例模型取得预期的效果。
 
