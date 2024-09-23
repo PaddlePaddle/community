@@ -407,13 +407,13 @@ class ParameterList(Layer):
 ## 命名与参数设计
 
 ```python
-class ParameterDict(parameters): ...
+class ParameterDict(parameters=None): ...
 
 ```
 
 其中:
 
-- parameters (dict)，输入的字典数据
+- parameters (OrderedDict)，输入的字典数据
 
 ## 底层OP设计
 
