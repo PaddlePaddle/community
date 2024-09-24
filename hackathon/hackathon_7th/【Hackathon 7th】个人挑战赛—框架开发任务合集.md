@@ -404,6 +404,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
+
 **技术要求：**
 
 - 熟练掌握 Python
@@ -422,6 +427,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 映射文档**：描述 Paddle API 与 Pytorch API 之间的映射关系，请在 [API 映射文档目录](https://github.com/PaddlePaddle/docs/tree/develop/docs/guides/model_convert/convert_from_pytorch/api_difference) 中为每个 API 新增对应的 映射关系文件，文件名为 PyTorch API 名，请务必遵守 [《API 映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) ，代码提交到 [Docs Repo](https://github.com/PaddlePaddle/docs)下
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
+
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
 
 **技术要求：**
 
@@ -443,6 +453,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
+
 **技术要求：**
 
 - 熟练掌握 Python
@@ -461,6 +476,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 映射文档**：描述 Paddle API 与 Pytorch API 之间的映射关系，请在 [API 映射文档目录](https://github.com/PaddlePaddle/docs/tree/develop/docs/guides/model_convert/convert_from_pytorch/api_difference) 中为每个 API 新增对应的 映射关系文件，文件名为 PyTorch API 名，请务必遵守 [《API 映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) ，代码提交到 [Docs Repo](https://github.com/PaddlePaddle/docs)下
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
+
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
 
 **技术要求：**
 
@@ -481,6 +501,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
+
 **技术要求：**
 
 - 熟练掌握 Python
@@ -499,6 +524,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 映射文档**：描述 Paddle API 与 Pytorch API 之间的映射关系，请在 [API 映射文档目录](https://github.com/PaddlePaddle/docs/tree/develop/docs/guides/model_convert/convert_from_pytorch/api_difference) 中为每个 API 新增对应的 映射关系文件，文件名为 PyTorch API 名，请务必遵守 [《API 映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) ，代码提交到 [Docs Repo](https://github.com/PaddlePaddle/docs)下
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
+
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
 
 **技术要求：**
 
@@ -519,6 +549,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
+
 **技术要求：**
 
 - 熟练掌握 Python
@@ -538,6 +573,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
+
 **技术要求：**
 
 - 熟练掌握 Python
@@ -556,6 +596,11 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - **API 映射文档**：描述 Paddle API 与 Pytorch API 之间的映射关系，请在 [API 映射文档目录](https://github.com/PaddlePaddle/docs/tree/develop/docs/guides/model_convert/convert_from_pytorch/api_difference) 中为每个 API 新增对应的 映射关系文件，文件名为 PyTorch API 名，请务必遵守 [《API 映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) ，代码提交到 [Docs Repo](https://github.com/PaddlePaddle/docs)下
 - **API 转换规则**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#如何贡献代码)，代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
 - **API 转换单测**：具体开发步骤，请参考 [《PaConvert：如何贡献代码》](https://github.com/PaddlePaddle/PaConvert/blob/master/docs/CONTRIBUTING.md#步骤5编写单元测试)中步骤 5，注意单测规范与要求。代码提交到 [PaConvert Repo](https://github.com/PaddlePaddle/PaConvert) 下
+
+**注意事项：**
+- 务必按照 [映射文档模板](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md) 编写，一比一对照编写，提交review前先自查问题
+- 本次放出来的API，内部已初步分析过，基本上都有相关功能，功能缺失不太可能。尽可能去找组合替代实现，判定为功能缺失要慎重，除非paddle完全无相类似功能
+- 先写好映射文档，再根据文档来实现Matcher，注意不要出现文档与Matcher的diff。如果后面实现Matcher时，发现文档有误，需返工及时更正文档
 
 **技术要求：**
 
