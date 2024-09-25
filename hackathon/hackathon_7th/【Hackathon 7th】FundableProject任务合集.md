@@ -122,3 +122,35 @@ FLUX.1 是由 Black Forest Labs 推出的 AI 图像生成模型，拥有 12B 参
 - https://github.com/black-forest-labs/flux
 
 - https://github.com/huggingface/diffusers/tree/main/src/diffusers/pipelines/flux
+
+### 前沿文档多模态大模型飞桨复现
+
+**任务背景：**
+
+GOT-OCR2.0 是由 StepFun 和中国科学院大学推出的专用于通用 OCR 任务的多模态大模型，参数量 0.6B，采用 vision encoder+input embedding layer+decoder 的 pipeline。PaddleMIX 是基于飞桨的多模态大模型开发套件，聚合图像、文本、视频等多种模态，覆盖视觉语言预训练，文生图，文生视频等丰富的多模态任务。依托于 PaddlePaddle 框架和 PaddleNLP 自然语言处理开发库，目前我们已经完成了套件的训练、推理、应用等基础能力建设，但跨模态文图领域发展迅速，需要从模型、训练、推理等方面不断地跟进与丰富。
+
+**详细描述：**
+
+参考 GOT-OCR2.0 原库完成模型复现、推理 pipeline 复现、模型转换等，具体包括：
+
+- GOT-OCR2.0 基础模型复现，包含其依赖的相关基础组件
+- GOT-OCR2.0 推理 pipeline 构建
+- 提供相关的 paddle 模型权重
+- 支持并对齐 GOT-OCR2.0 的 post-training 训练
+
+**验收说明：**
+
+- 相关 PR 合入 PaddleMIX/paddlemix
+- 产出精度对齐数据
+- 提供单侧代码，在本地及 CI 测试通过
+
+**技术要求：**
+
+- 熟练掌握 Python 语言
+- 熟练使用 PyTorch/Paddle 框架 API
+- 熟悉多模态大模型原理
+
+**参考资料：**
+
+https://github.com/Ucas-HaoranWei/GOT-OCR2.0/
+https://huggingface.co/stepfun-ai/GOT-OCR2_0
