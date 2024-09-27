@@ -123,7 +123,7 @@ FLUX.1 是由 Black Forest Labs 推出的 AI 图像生成模型，拥有 12B 参
 
 - https://github.com/huggingface/diffusers/tree/main/src/diffusers/pipelines/flux
 
-### 前沿文档多模态大模型飞桨复现
+### 五、前沿文档多模态大模型飞桨复现
 
 **任务背景：**
 
