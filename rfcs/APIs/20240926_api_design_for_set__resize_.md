@@ -434,6 +434,7 @@ paddle.Tensor.set_
 1. paddle.Tensor.set_
 
     ```python
+    @inplace_apis_in_dygraph_only
     def set_(x, source=None, shape=None, stride=None, offset=0):
         if source is None:
             source = paddle.empty([0], dtype=x.dtype)
@@ -453,6 +454,7 @@ paddle.Tensor.set_
 2. paddle.Tensor.resize_
 
     ```python
+    @inplace_apis_in_dygraph_only
     def resize_(x, shape, fill_zero=False):
         new_size = math.prod(shape)
         old_size = x.numel()
