@@ -665,12 +665,12 @@ Pytorch 在整体上功能更为丰富，如支持的 reduce 方法除了 sum、
 ## 命名与参数设计
 paddle.nn.functional.embedding_bag
 ```Python
-def embedding_bag(x, weight, offsets=None, per_sample_weights=None, mode='mean', max_norm=None, norm_type=2, scale_grad_by_freq=False, sparse=False, padding_idx=None, include_last_offset=False, weight_attr=None, name=None):
+def embedding_bag(x, weight, offsets=None, per_sample_weights=None, mode='mean', max_norm=None, norm_type=2, scale_grad_by_freq=False, sparse=False, padding_idx=None, include_last_offset=False, name=None):
     """
     Args:
         x(Tensor): A 1D or 2D tensor with type int32/int64, which contains the id information. If ``x`` is 1D tensor, it will be treated as the concatenation of multiple bags, and will be segmented by ``offsets`` into each bag. If ``x`` is 2D tensor, the shape should be [bag_number, sequence_length]. The value of the input id should satisfy :math: `0 <= id < params.shape[0]`.
 
-        weight(Tensor): A tensor with shape of [num_embedding, embedding_dim] in which num_embedding indicates the size of the dictionary of embeddings and embedding_dim indicates the size of each embedding vector.
+        weight(Tensor): A tensor with shape of [num_embedding, embedding_dim] in which num_embedding indicates the size of the dictionary of embeddings and embedding_dim indicates the size of each embedding vector. Supported dtypes are int8, float16, bfloat16, complex64, complex128, float32, float64.
 
         offsets(Tensor, optional): Specify the starting index (in ``x``) of the sequence in each bag. Default: None.
 
@@ -689,8 +689,6 @@ def embedding_bag(x, weight, offsets=None, per_sample_weights=None, mode='mean',
         padding_idx(int, optional): padding_idx needs to be in the interval [-weight.shape[0], weight.shape[0]). If :math:`padding\_idx < 0`, the :math:`padding\_idx` will automatically be converted to :math:`weight.shape[0] + padding\_idx` . It will treat the vector at ``padding_idx`` to be an all-zero padding vector. And the padding vector will not be updated while training. Default: None.
 
         include_last_offset(bool, optional): If True, the size of ``offsets`` will be [B+1], where B is the number of bags, and the last element will specify the ending position of the last bag. Default: False.
-
-        weight_attr(ParamAttr|None, optional): To specify the weight parameter property. Default: None, which means the default weight parameter property is used. See usage for details in :ref:`api_paddle_ParamAttr` . In addition, user-defined or pre-trained word vectors can be loaded with the :attr:`param_attr` parameter. The local word vector needs to be transformed into numpy format, and the shape of local word vector should be consistent with :attr:`num_embeddings` . Then :ref:`api_paddle_nn_initializer_Assign` is used to load custom or pre-trained word vectors. See code example for details.
 
         name(str|None, optional): Usually name is no need to set and None by default.
 
@@ -804,11 +802,12 @@ class EmbeddingBag(nn.Layers):
 
 测试case：
 - 测试不同输入 shape；
-- 测试不同输入 dtype 类型：包括 'int32'，'int64'；
+- 测试不同输入 dtype 类型：输入 x 可以是 'int32'，'int64'，输入 weight 可以是 'int8'， 'float16'， 'bfloat16'， 'complex64'， 'complex128'， 'float32', 'float64'；
 - 测试不同设备；
 - 测试动态图静态图；
 - 测试不同的参数组合；
 
+单侧文件位于：test/legacy_test/test_embeddingbag.py
 
 # 七、可行性分析和排期规划
 
