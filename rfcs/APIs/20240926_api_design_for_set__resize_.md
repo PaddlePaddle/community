@@ -475,7 +475,7 @@ paddle.Tensor.set_
   - 不同参数组合；
   - 验证不同dtype类型：`bfloat16`，`float16`，`float32`，`float64`，`bool`，`int8`，`int16`，`int32`，`int64`，`uint8`，`complex64`，`complex128`；
   - 验证不同计算设备：覆盖 CPU 和 GPU 等实现；
-单测位于test/legacy_test/test_set_inplace_api.py
+单测位于 test/legacy_test/test_inplace.py 内部，与其他 inplace api 的单测统一格式
 
 paddle.Tensor.resize_
 - 正确性验证：可以与 NumPy 的结果对齐；
@@ -483,7 +483,7 @@ paddle.Tensor.resize_
   - old_size > new_size ；
   - 验证不同dtype类型：`bfloat16`，`float16`，`float32`，`float64`，`bool`，`int8`，`int16`，`int32`，`int64`，`uint8`，`complex64`，`complex128`；
   - 验证不同计算设备：覆盖 CPU 和 GPU 等实现；
-单测位于test/legacy_test/test_resize_inplace_api.py
+单测位于 test/legacy_test/test_inplace.py 内部，与其他 inplace api 的单测统一格式
 
 # 七、可行性分析和排期规划
 
