@@ -30,9 +30,9 @@
 	</tr>
 	</tr>
 		<td>II级</td>
-		<td >Qwen2-14B <br>SD(SFT only)</td>
+		<td >Qwen2.5-14B <br>SD(SFT only)</td>
 		<td>tokens/TFLOPS （取前1000步均值）达到A100/800的40%</td>
-		<td>Qwen2-14B<br>SD</td>
+		<td>Qwen2.5-14B<br>SD</td>
 		<td> int8 （weight only）</td>
 		<td>首token 时延不超过1s的QPS/TFPLOPs达到A800的40%</td>
 	</tr>	
