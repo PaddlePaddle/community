@@ -69,7 +69,7 @@
 
 > 可以是对设计方案中的名词、概念等内容的详细解释。
 
-由于unonet已在PaddleScience实现，参照赛事要求，所有文件组织结构必须与原有代码保持一致（新增文件除外），原有的注释、换行、空格、开源协议等内容不能随意变动（新增内容除外），否则会严重影响代码合入和比赛结束后成果代码的维护，原有代码结构可能需要进行变动，但有些文件因为代码功能重复问题不能完全与代码一致。
+参照赛事要求，所有文件组织结构必须与原有代码保持一致（新增文件除外），原有的注释、换行、空格、开源协议等内容不能随意变动（新增内容除外），否则会严重影响代码合入和比赛结束后成果代码的维护，因此不改动已有的相关代码，将代码实现在`ppsci.contrib.neuralop`中。
 
 原有代码的设计如下:
 
@@ -93,13 +93,6 @@ neuraloperator
 │   ├── layers
 │   ├── losses
 │   ├── models
-│   │   ├── __init__.py
-│   │   ├── __pycache__
-│   │   ├── base_model.py
-│   │   ├── fno.py
-│   │   ├── fnogno.py
-│   │   ├── tests
-│   │   └── uno.py
 │   ├── mpu
 │   ├── tests
 │   ├── training
@@ -107,7 +100,7 @@ neuraloperator
 ...
 ```
 
-上述代码中，如果完全保留原有代码结构可能会跟PaddleScience代码有功能性重复，除了`neuralop.models`需要，其他模块可以并入已有模块中，设计后PaddleScience的`nerualop`代码结构如下:
+设计后PaddleScience的`nerualop`代码结构如下:
 
 ```
 PaddleScience
@@ -115,21 +108,12 @@ PaddleScience
 │   ├── neuralop
 ...
 ├── ppsci
-│   ├── arch
+│   ├── contrib
 │   │   ├── neuralop
-│   │   │   ├── __init__.py
-│   │   │   ├── models
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── base_model.py
-│   │   │   │   ├── fno.py
-│   │   │   │   ├── fnogno.py
-│   │   │   │   └── uno.py
-│   │   │   └── utils.py
+│   │   │   ├── ...
 ...
 
 ```
-
-参考PaddleScience现有代码，`paddle/PaddleScience/jointContribution/PINO`相关代码和参考代码可能存在不统一，暂不做处理，根据参考代码进行实现。已实现的相关文件比如[unonet.py](https://github.com/PaddlePaddle/PaddleScience/blob/develop/ppsci/arch/unonet.py)，进行迁移到`ppsci.arch.neuralop.models`下，另`layers`目录作为基础模块放在`ppsci.arch`下，包括[fno_block.py](paddle/PaddleScience/ppsci/arch/fno_block.py)仍然不做改动，可能根据参考代码做一些参数上的统一。此外，另外几个模块实现在`ppsci`对应模块中或者调用已有实现。
 
 ## 5. 测试和验收的考量
 
