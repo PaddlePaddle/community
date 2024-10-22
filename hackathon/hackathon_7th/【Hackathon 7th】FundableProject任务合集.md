@@ -175,5 +175,6 @@ PaddleSpeech 是基于飞桨 PaddlePaddle 的语音方向的开源套件，囊�
 
 - 熟悉 Python，工程能力强
 - 对语音识别或合成有一定了解，有训练或者研发经验（加分项）
+- 对 PaddleSpeech 套件比较熟悉（加分项）
 
 **参考资料：** https://github.com/PaddlePaddle/PaddleSpeech
