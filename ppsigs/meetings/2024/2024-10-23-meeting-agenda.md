@@ -5,7 +5,7 @@
     * 腾讯会议：607-2630-0369
     * 会议密码：1111
     * [点击链接入会](https://meeting.tencent.com/dm/egxl0HKTx7Ow)，或添加至会议列表
-* 本次拟参会member list：
+* 本次拟参会 member list：
     * [dyning](https://github.com/dyning)
     * [jzhang533](https://github.com/jzhang533)
     * [Topdu](https://github.com/)
@@ -24,10 +24,12 @@
 
 ## 会议议程
 
+* [PaddleOCR 在部署场景的问题](https://github.com/lumina-ai-inc/chunkr/issues/224)讨论
 * PaddleOCR 近期进展同步
-    * 近期issue和Discussions回顾
+    * 近期 issue 和 Discussions 回顾
     * 近期 PullRequest 回顾
 * 自由发言，可以提需求给大家讨论、提问等
+* 未来的值班安排
 * 确定下次的部分议题及召开时间
     * 时间：2024-11-06
     * 轮值主持人：
