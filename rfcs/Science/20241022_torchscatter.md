@@ -5,7 +5,7 @@
 | 提交作者      | NkNaN             |
 | 提交时间      | 2024/10/22   |
 | RFC 版本号    | v1.0               |
-| 依赖飞桨版本  | develop 版本        |
+| 依赖飞桨版本  | develop 版本 (https://github.com/PaddlePaddle/Paddle/pull/68780 之后的版本)       |
 | 文件名        | 20241022_torchscatter.md  |
 
 ## 1. 概述
@@ -343,10 +343,10 @@ def gather_coo(
 
 ## 4. 设计思路与实现方案
 
-1. scatter 类: 用 paddle.put_along_axis 以及 paddle.std、paddle.logsumexp、paddle.nn.functional.softmax 组合实现；
-2. segment_csr 类：可以将 indptr 转换为 segment_coo 的 index 后用 segment_coo 实现；
-3. segment_coo 类：用 paddle.geometric.segment_sum/paddle.geometric.segment_min/paddle.geometric.segment_max/paddle.geometric.segment_mean 实现；
-4. gather 类：gather_coo 用 paddle.take_along_axis 实现，gather_csr 用 paddle.diff 和 paddle.repeat_interleave 以及 gather_coo 组合实现；
+1. scatter 类: 用 `paddle.scatter/paddle.put_along_axis` 以及 `paddle.std/paddle.logsumexp/paddle.nn.functional.softmax` 组合实现；
+2. segment_csr 类：可以用 `paddle.diff` 和 `paddle.repeat_interleave` 以及 `paddle.geometric.segment_*` 组合实现；
+3. segment_coo 类：用 `paddle.geometric.segment_*` 实现；
+4. gather 类：gather_coo 用 `paddle.gathehr/paddle.take_along_axis` 组合实现，gather_csr 用 `paddle.diff` 和 `paddle.repeat_interleave` 以及 `paddle.gathehr/paddle.take_along_axis` 组合实现；
 
 ### 4.1 补充说明[可选]
 
