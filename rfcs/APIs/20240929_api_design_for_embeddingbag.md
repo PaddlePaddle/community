@@ -670,7 +670,7 @@ def embedding_bag(x, weight, offsets=None, per_sample_weights=None, mode='mean',
     Args:
         x(Tensor): A 1D or 2D tensor with type int32/int64, which contains the id information. If ``x`` is 1D tensor, it will be treated as the concatenation of multiple bags, and will be segmented by ``offsets`` into each bag. If ``x`` is 2D tensor, the shape should be [bag_number, sequence_length]. The value of the input id should satisfy :math: `0 <= id < params.shape[0]`.
 
-        weight(Tensor): A tensor with shape of [num_embedding, embedding_dim] in which num_embedding indicates the size of the dictionary of embeddings and embedding_dim indicates the size of each embedding vector. Supported dtypes are int8, float16, bfloat16, complex64, complex128, float32, float64.
+        weight(Tensor): A tensor with shape of [num_embedding, embedding_dim] in which num_embedding indicates the size of the dictionary of embeddings and embedding_dim indicates the size of each embedding vector. Supported dtypes are int8, bfloat16, float16, float32, float64, complex64, complex128.
 
         offsets(Tensor, optional): Specify the starting index (in ``x``) of the sequence in each bag. Default: None.
 
