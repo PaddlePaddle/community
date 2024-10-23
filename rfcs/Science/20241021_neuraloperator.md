@@ -7,7 +7,7 @@
 | 提交作者      |       xiaoyewww    |
 | 提交时间      |       2024-10-21   |
 | RFC 版本号    | v1.0               |
-| 依赖飞桨版本  | release 2.6.0 版本    |
+| 依赖飞桨版本  | release 3.0.0(beta)/develop 版本    |
 | 文件名       | 20241021_neuraloperator.md |
 
 ## 1. 概述
