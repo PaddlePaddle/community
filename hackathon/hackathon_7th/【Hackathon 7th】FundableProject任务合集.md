@@ -1,4 +1,4 @@
-此文档展示 **PaddlePaddle Hackathon 第六期活动——Fundable Projects** 任务详细介绍。Fundable Projects 赛道定位硬核任务，要求高水平的开发者独立进行任务拆解和完成。
+此文档展示 **PaddlePaddle Hackathon 第七期活动——Fundable Projects** 任务详细介绍。Fundable Projects 赛道定位硬核任务，要求高水平的开发者独立进行任务拆解和完成。
 
 ## 产出要求
 
@@ -155,7 +155,7 @@ GOT-OCR2.0 是由 StepFun 和中国科学院大学推出的专用于通用 OCR �
 https://github.com/Ucas-HaoranWei/GOT-OCR2.0/
 https://huggingface.co/stepfun-ai/GOT-OCR2_0
 
-### 六、PaddleSpeech 套件能力建设
+### 七、PaddleSpeech 套件能力建设
 
 **任务背景**：
 
@@ -163,7 +163,7 @@ PaddleSpeech 是基于飞桨 PaddlePaddle 的语音方向的开源套件，囊�
 
 **详细描述：**
 
-1. 基于 Paddle 3.0.0-beta 版本对 PaddleSpeech 进行适配升级，梳理已有堵点并解决。保证 [demo](https://github.com/PaddlePaddle/PaddleSpeech/tree/doc/demos) 和 [example](https://github.com/PaddlePaddle/PaddleSpeech/tree/develop/examples) 目录下已适配的模型在 新 Paddle 版本 & 新其他深度学习框架版本下的正常运转。目前适配版本为paddle2.5.1。
+1. 基于 Paddle 3.0.0-beta 版本对 PaddleSpeech 进行适配升级，梳理已有堵点并解决。保证 [demo](https://github.com/PaddlePaddle/PaddleSpeech/tree/doc/demos) 和 [example](https://github.com/PaddlePaddle/PaddleSpeech/tree/develop/examples) 目录下已适配的模型在 新 Paddle 版本 & 新其他深度学习框架版本下的正常运转。目前适配版本为 Paddle 2.5.1。
 2. 基于 Paddle 3.0.0-beta 版本对 PaddleSpeech 中支持转静的模型重新按照 PIR + predictor 的方式导出，并成功推理。
 
 **验收说明：**
