@@ -30,7 +30,7 @@ PaddleOcr已对经典的ocr识别算法进行了支持，并持续优化通用�
 
 # 三、业内方案调研
 
-1. 已开源数据生成代码至代码仓库  
+1. 已开源数据生成代码和模型训练和推理代码至代码仓库  
    
    [RQLuo/MixTeX-Latex-OCR: MixTeX multimodal LaTeX, ZhEn, and, Table OCR. It performs efficient CPU-based inference in a local offline on Windows. (github.com)](https://github.com/RQLuo/MixTeX-Latex-OCR/tree/main)
 
@@ -56,9 +56,9 @@ PaddleOcr已对经典的ocr识别算法进行了支持，并持续优化通用�
 
 总体思路
 
-1. 在PaddleOcr的PaddleOCR/ppocr/modeling模块增加MixTex模型，在PaddleOCR/ppocr/postprocess模块增加对应的后处理。
+1. 在PaddleOCR/ppocr/data/中增加mixtex_dataset.py,在PaddleOCR/ppocr/data/imaug中增加数据生成方式
 
-2. 在PaddleOCR/ppocr/data/中增加mixtex_dataset.py,在PaddleOCR/ppocr/data/imaug中增加数据生成方式
+2. 在PaddleOcr的PaddleOCR/ppocr/modeling模块增加MixTex模型，在PaddleOCR/ppocr/postprocess模块增加对应的后处理。
 
 # 六、测试和验收的考量
 
