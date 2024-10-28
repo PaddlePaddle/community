@@ -279,3 +279,26 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 - 了解 Whisper 模型
 - 熟练掌握 Python 语言
 - 熟悉 PaddleSpeech 框架及其数据处理流程
+
+---
+
+### NO.55 在 PaddleSpeech 中实现 DAC 的训练
+
+**详细描述：**
+
+- 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 的分布式训练、推理和评估流程。
+- 相关论文：https://arxiv.org/abs/2306.06546
+- 参考：https://github.com/descriptinc/descript-audio-codec
+- 需要实现 DAC 模型中使用到的 audiotools 库：https://github.com/descriptinc/audiotools
+
+**验收标准**：
+
+- 复现的性能指标需要与论文预期一致
+- 需上传完整的训练代码和训练脚本以及模型
+
+**技术要求：**
+
+- 了解 DAC 模型
+- 熟练掌握 Python 语言
+- 熟悉 PaddleSpeech 框架及其数据处理流程
+
