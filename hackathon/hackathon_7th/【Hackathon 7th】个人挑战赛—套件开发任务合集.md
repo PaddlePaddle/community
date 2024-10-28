@@ -321,8 +321,8 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 
 ---
 
-### NO.57 在 PaddleSpeech 中复现 Descript Audio Codec 模型 (依赖任务 NO.55、NO.56)
-
+### NO.57 在 PaddleSpeech 中复现 DAC 模型 (依赖任务 NO.55、NO.56)
+AC
 **详细描述：**
 
 - 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 的分布式训练、推理和评估流程。
