@@ -328,7 +328,7 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 **详细描述：**
 
 - 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 中使用到的第三方库 audiotools 的接口。
-- 参考：https://github.com/descriptinc/audiotools
+- 参考：https://github.com/descriptinc/audiotools , https://github.com/descriptinc/descript-audio-codec
 - 相关实现放在 [audio](https://github.com/PaddlePaddle/PaddleSpeech/tree/develop/audio) 中
 
 **验收标准**：
