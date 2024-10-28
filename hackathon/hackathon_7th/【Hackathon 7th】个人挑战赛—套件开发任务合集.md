@@ -279,3 +279,63 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 - 了解 Whisper 模型
 - 熟练掌握 Python 语言
 - 熟悉 PaddleSpeech 框架及其数据处理流程
+
+---
+
+### NO.55 在 PaddleSpeech 中实现 DAC 的训练中使用的第三方库 audiotools
+
+**详细描述：**
+
+- 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 中使用到的第三方库 audiotools 的接口。
+- 参考：https://github.com/descriptinc/audiotools , https://github.com/descriptinc/descript-audio-codec
+- 相关实现放在 [audio](https://github.com/PaddlePaddle/PaddleSpeech/tree/develop/audio) 中
+
+**验收标准**：
+
+- 复现的精度需要与原 repo 保持一致
+
+**技术要求：**
+
+- 熟练掌握 Python 语言
+- 熟悉 PaddleSpeech 框架及其数据处理流程
+
+---
+
+### NO.56 在 PaddleSpeech 中复现 DAC 的训练需要用到的 loss (依赖任务 NO.55)
+
+**详细描述：**
+
+- 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 中使用到的 MultiScaleSTFTLoss，GANLoss，SISDRLoss。
+- 相关论文：https://arxiv.org/abs/2306.06546
+- 参考：https://github.com/descriptinc/descript-audio-codec/blob/main/dac/nn/loss.py
+- 相关实现放在：paddlespeech/t2s/modules/losses.py
+
+**验收标准**：
+
+- 复现的精度需要与原 repo 保持一致
+
+**技术要求：**
+
+- 熟练掌握 Python 语言
+
+
+---
+
+### NO.57 在 PaddleSpeech 中复现 DAC 模型 (依赖任务 NO.55、NO.56)
+
+**详细描述：**
+
+- 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 的分布式训练、推理和评估流程。
+- 相关论文：https://arxiv.org/abs/2306.06546
+- 参考：https://github.com/descriptinc/descript-audio-codec
+
+**验收标准**：
+
+- 复现的性能指标需要与论文预期一致
+- 需上传完整的训练代码和训练脚本以及模型
+
+**技术要求：**
+
+- 了解 DAC 模型
+- 熟练掌握 Python 语言
+- 熟悉 PaddleSpeech 框架及其数据处理流程

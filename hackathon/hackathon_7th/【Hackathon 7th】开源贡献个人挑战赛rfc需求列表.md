@@ -66,3 +66,6 @@
 |  52  | ⭐️⭐️⭐️ | 论文复现：OmniParser                              |        是        |
 |  53  |  ⭐️⭐️   | 在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型        |        是        |
 |  54  | ⭐️⭐️⭐️ | 在 PaddleSpeech 中实现 Whisper 的 Finetune        |        否        |
+|  55  | ⭐️⭐️    | 在 PaddleSpeech 中实现 DAC 的训练中使用的第三方库 audiotools |        是        |
+|  56  | ⭐️      | 在 PaddleSpeech 中复现 DAC 的训练需要用到的 loss (依赖 55)   |        是        |
+|  57  | ⭐️⭐️    | 在 PaddleSpeech 中复现 DAC 模型（依赖 55、56）      |        是        |
