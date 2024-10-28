@@ -1,12 +1,12 @@
-# MixText——设计文档
+# MixTex——设计文档
 
-| 任务名  | PaddleOcr--MixText |
-| ---- | ------------------ |
-| 提交作者 | ErnestinaQiu       |
-| 提交时间 | 2024-10-26         |
-| 版本号  | v1.0               |
-| 依赖   | develop版本          |
-| 文件名  | MixTex.md          |
+| 任务名  | PaddleOcr--MixTex |
+| ---- | ----------------- |
+| 提交作者 | ErnestinaQiu      |
+| 提交时间 | 2024-10-28        |
+| 版本号  | v1.0              |
+| 依赖   | main版本            |
+| 文件名  | MixTex.md         |
 
 # 一、概述
 
@@ -26,7 +26,7 @@
 
 # 二、飞桨现状
 
-PaddleOCR目前暂无对swin transformer encoder和RoBERTa的支持，可以通过PaddlePaddle.nn以现有api的组合方式实现。
+[PaddleMIX](https://github.com/PaddlePaddle/PaddleMIX/tree/develop)中实现了swin_transformer的模型结构，[PaddleNLP](https://github.com/PaddlePaddle/PaddleNLP/tree/develop)中实现了RoBERTa的模型结构。可以参考以上开源项目，使用API组合的方式在PaddleOCR中加入模型。
 
 # 三、业内方案调研
 
@@ -35,12 +35,14 @@ PaddleOCR目前暂无对swin transformer encoder和RoBERTa的支持，可以通�
    [RQLuo/MixTeX-Latex-OCR: MixTeX multimodal LaTeX, ZhEn, and, Table OCR. It performs efficient CPU-based inference in a local offline on Windows. (github.com)](https://github.com/RQLuo/MixTeX-Latex-OCR/tree/main)
 
 2. Swin Transformer
-
-[microsoft/swin-tiny-patch4-window7-224 · Hugging Face](https://huggingface.co/microsoft/swin-tiny-patch4-window7-224)
+   
+   基于飞浆框架的实现 [PaddleMIX/paddlemix/models/groundingdino/backbone/swin_transformer.py at develop · PaddlePaddle/PaddleMIX (github.com)](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/paddlemix/models/groundingdino/backbone/swin_transformer.py)
+   
+   作者论文中引用的模型 [microsoft/swin-tiny-patch4-window7-224 · Hugging Face](https://huggingface.co/microsoft/swin-tiny-patch4-window7-224)
 
 4. RoBERTa
-
-    [fairseq/examples/roberta/README.md at main · facebookresearch/fairseq (github.com)
+   
+   基于飞浆框架的实现  [PaddleNLP/slm/model_zoo/roberta at develop · PaddlePaddle/PaddleNLP (github.com)](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/slm/model_zoo/roberta)  
 
 # 四、对比分析
 
