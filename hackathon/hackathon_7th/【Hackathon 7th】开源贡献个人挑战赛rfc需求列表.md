@@ -66,3 +66,4 @@
 |  52  | ⭐️⭐️⭐️ | 论文复现：OmniParser                              |        是        |
 |  53  |  ⭐️⭐️   | 在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型        |        是        |
 |  54  | ⭐️⭐️⭐️ | 在 PaddleSpeech 中实现 Whisper 的 Finetune        |        否        |
+|  54  | ⭐️⭐️⭐️ | 在 PaddleSpeech 中复现 Descript Audio Codec 模型     |        是        |
