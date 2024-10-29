@@ -69,4 +69,4 @@
 |  55  | ⭐️⭐️    | 在 PaddleSpeech 中实现 DAC 的训练中使用的第三方库 audiotools |        是        |
 |  56  | ⭐️      | 在 PaddleSpeech 中复现 DAC 的训练需要用到的 loss (依赖 55)   |        是        |
 |  57  | ⭐️⭐️    | 在 PaddleSpeech 中复现 DAC 模型（依赖 55、56）      |        是        |
-|  57  | ⭐️⭐️    | VisualDL PIR可视化产品形态改进      |        否        |
+|  57  | ⭐️⭐️    | VisualDL PIR 可视化产品形态改进      |        否        |
