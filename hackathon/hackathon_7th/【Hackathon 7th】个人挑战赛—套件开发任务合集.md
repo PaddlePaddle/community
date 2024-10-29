@@ -340,6 +340,10 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 - 熟练掌握 Python 语言
 - 熟悉 PaddleSpeech 框架及其数据处理流程
 
+
+
+---
+
 ### NO.58 VisualDL PIR可视化产品形态改进
 
 **详细描述：**
