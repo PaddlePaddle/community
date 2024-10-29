@@ -349,6 +349,7 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 **详细描述：**
 
 目前VisualDL已支持PIR可视化，但使用门槛较高使用方法如下：[VisualDL Graph--网络结构组件](https://github.com/PaddlePaddle/VisualDL/blob/develop/docs/components/README_CN.md#Graph--%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84%E7%BB%84%E4%BB%B6)
+
 用户需要先使用Python将动态图模型对象，提供给LogWriter，由LogWriter调用动转静+analyse，生成中间协议文件。在通过visualdl加载中间协议文件才能在浏览器展示。新的产品形态期望去掉Python的环节。直接支持：`visualdl --modelfile resnet.json --port 8080`。即：直接通过命令行，向visualdl提供模型文件，由visualdl  Load为Program，再做analyse。将anslyse产出的结果直接展示在网页端。
 
 **验收标准**：
