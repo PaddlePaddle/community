@@ -178,3 +178,27 @@ PaddleSpeech 是基于飞桨 PaddlePaddle 的语音方向的开源套件，囊�
 - 对 PaddleSpeech 套件比较熟悉（加分项）
 
 **参考资料：** https://github.com/PaddlePaddle/PaddleSpeech
+
+### 八、Netron原生支持Paddle PIR可视化
+
+**任务背景**：
+
+Netron 是一个开源的神经网络模型可视化工具，它支持多种深度学习框架的模型格式。通过 Netron，用户可以直观地查看神经网络模型的结构、层次关系、参数信息和数据流，帮助开发者调试和优化模型。早在 2018 年 Netron 已支持 Paddle 模型文件的解析和展示。但 2024 年，Paddle 对静态图 IR 进行了全面的升级换代（PIR），Save 的模型文件格式也从 protobuf 格式变为了 Json 格式。因此，Paddle 需要重新适配 Netron。主要工作包括：
+
+**详细描述：**
+
+1. 编写 JavaScript，解析 Json 格式的模型文件。关于 Json 格式的细节将会有 Paddle 相关导致答疑。
+2. 适配 Netron，将解析的模型与 Netron 前端逻辑适配。
+
+**验收说明：**
+打开 Netron 网站，提交多种 case 的模型文件，能够正确展示模型结构。
+
+**技术要求：**
+
+- 熟练掌握 JavaScript
+- 了解 Json
+- 了解深度学习基本知识
+
+**参考资料：** 
+https://github.com/lutzroeder/netron
+https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/pir_save_load.md
