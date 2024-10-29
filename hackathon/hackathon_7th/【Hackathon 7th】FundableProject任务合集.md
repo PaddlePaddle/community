@@ -179,7 +179,7 @@ PaddleSpeech 是基于飞桨 PaddlePaddle 的语音方向的开源套件，囊�
 
 **参考资料：** https://github.com/PaddlePaddle/PaddleSpeech
 
-### 八、Netron原生支持Paddle PIR可视化
+### 八、Netron 原生支持 Paddle PIR 可视化
 
 **任务背景**：
 
