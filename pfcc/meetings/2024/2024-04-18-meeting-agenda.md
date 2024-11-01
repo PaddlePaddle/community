@@ -1,4 +1,4 @@
-# Paddle Framework Contributor Club 第三十八次会议
+# Paddle Framework Contributor Club 第三十八次会议议程
 
 - 本次会议时间：2024/04/18 19:30-20:30 (GMT+08:00) 中国标准时间 - 北京
 - 本次会议接入方式：【腾讯会议】
