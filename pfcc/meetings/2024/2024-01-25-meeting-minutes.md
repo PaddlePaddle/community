@@ -11,7 +11,7 @@
 
 以下为本次会议的主要内容：
 
-## 会议议程
+## 会议纪要
 
 ### 1、新成员的自我介绍
 
@@ -114,7 +114,7 @@
 2. Pytorch Conference 系列翻译活动产生的原因
 
 ### TODO
-    
+
 1. [@sanbuphy](https://github.com/sanbuphy)发布 Pytorch Conference 系列翻译活动
 2. [飞桨社区开源发展工作组](https://github.com/PaddlePaddle/community/tree/master/pposdwg) 2024 Q1 例会议题征集，可以在Github community issue 区提相关的issue。
 3. 小红书关注飞桨xiaoxiao

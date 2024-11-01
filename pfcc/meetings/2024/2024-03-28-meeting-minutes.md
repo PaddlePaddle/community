@@ -7,7 +7,7 @@
 - 参会人：本次会议共有 40 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席[MarioLulab](https://github.com/MarioLulab)主持。
 - 会议主题：《校招及面试经验分享》
 
-## 会议议程
+## 会议纪要
 
 1. 新人介绍：[yulangz](https://github.com/yulangz)、[Eddie-Wang1120](https://github.com/Eddie-Wang1120)、[cmcamdy](https://github.com/cmcamdy)、[Austin-00](https://github.com/Austin-00)、[Dmovic](https://github.com/Dmovic)、[yinfan98](https://github.com/yinfan98)、[shuaihehe](https://github.com/shuaihehe)（5 min）
 
