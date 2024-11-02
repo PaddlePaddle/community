@@ -7,7 +7,7 @@
 - 参会人：本次会议共有 40 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席[MarioLulab](https://github.com/MarioLulab)主持。
 - 会议主题：《Ivy & PaConvert 代码转换工具分享及研讨》
 
-## 会议议程
+## 会议纪要
 
 1. 如何通过 [Ivy](https://github.com/unifyai/ivy) 将 PyTorch 和 TensorFlow 模型进行转换，并直接在 Paddle 项目中使用。（35 min） [@djl11](https://github.com/djl11)
 

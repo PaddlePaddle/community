@@ -7,7 +7,7 @@
 - 参会人：本次会议共有 37 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席郑必城（[Zheng-Bicheng](https://github.com/Zheng-Bicheng)）主持。
 - 会议主题：《Paddle2ONNX 社区化转型方案》
 
-## 会议议程
+## 会议纪要
 
 1. 新人介绍：[smallpoxscattered](https://github.com/smallpoxscattered)、[hu-qi](https://github.com/hu-qi)、[1want2sleep](https://github.com/1want2sleep)、[WoWYoYLoL](https://github.com/WoWYoYLoL)（5 min）
 2. [Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX) 社区化转型方案（30 min）[@Zheng-Bicheng](https://github.com/Zheng-Bicheng)

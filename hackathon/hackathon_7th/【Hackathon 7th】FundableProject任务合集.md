@@ -1,4 +1,4 @@
-此文档展示 **PaddlePaddle Hackathon 第六期活动——Fundable Projects** 任务详细介绍。Fundable Projects 赛道定位硬核任务，要求高水平的开发者独立进行任务拆解和完成。
+此文档展示 **PaddlePaddle Hackathon 第七期活动——Fundable Projects** 任务详细介绍。Fundable Projects 赛道定位硬核任务，要求高水平的开发者独立进行任务拆解和完成。
 
 ## 产出要求
 
@@ -154,3 +154,51 @@ GOT-OCR2.0 是由 StepFun 和中国科学院大学推出的专用于通用 OCR �
 
 https://github.com/Ucas-HaoranWei/GOT-OCR2.0/
 https://huggingface.co/stepfun-ai/GOT-OCR2_0
+
+### 七、PaddleSpeech 套件能力建设
+
+**任务背景**：
+
+PaddleSpeech 是基于飞桨 PaddlePaddle 的语音方向的开源套件，囊括语音识别、语音合成、语音唤醒、声纹识别等多种语音常用功能的支持。由于近期 Paddle 新版本的升级存在不兼容部分（如 `paddle.fluid` API 全面退场，PIR + predictor 升级， 0-d tensor，view 行为修改等），需要重新对 PaddleSpeech 中的模型进行适配开发与回归测试，保证套件正常运转，模型功能与精度不受损失。外部开发者需要做的事情包括：
+
+**详细描述：**
+
+1. 基于 Paddle 3.0.0-beta 版本对 PaddleSpeech 进行适配升级，梳理已有堵点并解决。保证 [demo](https://github.com/PaddlePaddle/PaddleSpeech/tree/doc/demos) 和 [example](https://github.com/PaddlePaddle/PaddleSpeech/tree/develop/examples) 目录下已适配的模型在 新 Paddle 版本 & 新其他深度学习框架版本下的正常运转。目前适配版本为 Paddle 2.5.1。
+2. 基于 Paddle 3.0.0-beta 版本对 PaddleSpeech 中支持转静的模型重新按照 PIR + predictor 的方式导出，并成功推理。
+
+**验收说明：**
+
+1. PaddleSpeech 基于 Paddle 3.0.0-beta 版本，完成 80+ 原有模型的适配。
+2. PaddleSpeech 基于 Paddle 3.0.0-beta 版本，完成 20+ 原有静态图模型的重新导出和上传。
+
+**技术要求：**
+
+- 熟悉 Python，工程能力强
+- 对语音识别或合成有一定了解，有训练或者研发经验（加分项）
+- 对 PaddleSpeech 套件比较熟悉（加分项）
+
+**参考资料：** https://github.com/PaddlePaddle/PaddleSpeech
+
+### 八、Netron 原生支持 Paddle PIR 可视化
+
+**任务背景**：
+
+Netron 是一个开源的神经网络模型可视化工具，它支持多种深度学习框架的模型格式。通过 Netron，用户可以直观地查看神经网络模型的结构、层次关系、参数信息和数据流，帮助开发者调试和优化模型。早在 2018 年 Netron 已支持 Paddle 模型文件的解析和展示。但 2024 年，Paddle 对静态图 IR 进行了全面的升级换代（PIR），Save 的模型文件格式也从 protobuf 格式变为了 Json 格式。因此，Paddle 需要重新适配 Netron。主要工作包括：
+
+**详细描述：**
+
+1. 编写 JavaScript，解析 Json 格式的模型文件。关于 Json 格式的细节将会有 Paddle 相关导师答疑。
+2. 适配 Netron，将解析的模型与 Netron 前端逻辑适配。
+
+**验收说明：**
+打开 Netron 网站，提交多种 case 的模型文件，能够正确展示模型结构。
+
+**技术要求：**
+
+- 熟练掌握 JavaScript
+- 了解 Json
+- 了解深度学习基本知识
+
+**参考资料：** 
+https://github.com/lutzroeder/netron
+https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/pir_save_load.md
