@@ -22,19 +22,53 @@ TokenizerFast和Tokenizer都是Hugging Face的Transformers库中的类，用于�
 
 
 ## 2、功能目标
-完善 TokenizerFast 功能支持，编写单测并验证大规模数据集。
+完善 TokenizerFast 功能支持，编写单测并验证大规模数据集。并对齐精度，给出自动化实现脚本。
 
 
 ## 3、意义
 
 全量支持TokenizerFast，能带来性能上提升。
 
-# 二、任务内容
+# 二、飞桨现状
 
-- 实现 bert、bloom、chatglm、ernie、gemma、gpt、qwen、qwen2 对应的 toekizer_fast.py 文件
+[PaddleNLP](https://github.com/PaddlePaddle/PaddleNLP),只有像llama等少量模型支持了TokenizerFast，但是在tokenizer_utils_fast里已支持base的TokenizerFast。需要做的是从llama推全TokenizerFast操作，支持所在bert、bloom、chatglm、ernie、gemma、gpt、qwen、qwen2上的tokenizer fast。
+
+# 三、业内方案调研
+
+目前huggingface已基本支持tokenizer_fast,并且开源模型在编写自己的代码时，也会加上tokenizer_fast。
+
+# 四、对比分析
+
+对标其他实现，让paddle支持更快速的tokenizer。
+
+# 五、设计思路与实现方案
+
+- 实现 bert、bloom、chatglm、ernie、gemma、gpt、qwen、qwen2 对应的 tokenizer_fast.py 文件
   
 - 撰写理论上精度对齐报告和实验证明，在上述模型下TokenizerFast能和Tokenizer结果对齐
 
 - 预计对上述8个模型每个模型选取2种大规模数据集，在16个单测上对齐性能
 
 - 产出自动化单测脚本，方便对齐后续模型
+
+# 六、测试验收的考量
+
+1. 实验报告
+2. tokenizer fast 代码
+
+# 七、可行性分析和排期规划
+
+- 实现 bert、bloom、chatglm、ernie、gemma、gpt、qwen、qwen2 对应的 tokenizer_fast.py 文件
+  
+- 撰写理论上精度对齐报告和实验证明，在上述模型下TokenizerFast能和Tokenizer结果对齐
+
+- 预计对上述8个模型每个模型选取2种大规模数据集，在16个单测上对齐性能
+
+- 产出自动化单测脚本，方便对齐后续模型
+
+# 八、影响面
+
+- PaddleNLP 的 transformers 下这八个模型文件夹增加新文件
+
+# 名词解释
+# 附件及参考资料
