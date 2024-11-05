@@ -7,7 +7,7 @@
 - 参会人：本次会议共有 10 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席尤江彬（[Harryoung](https://github.com/Harryoung)）主持。
 - 会议主题：《PaddleOCR算法模型挑战赛一等奖技术分享》
 
-## 会议议程
+## 会议纪要
 
 1. 最新开源实习活动介绍 [luotao1](https://github.com/luotao1) （10 mins）
    - [2024年开源之夏](https://summer-ospp.ac.cn/org/orgdetail/ba9ed81f-5898-465f-be22-070901bb17a0?lang=zh)：报名截止6月3日，申请书截止6月4日

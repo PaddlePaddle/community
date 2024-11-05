@@ -339,3 +339,24 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 - 了解 DAC 模型
 - 熟练掌握 Python 语言
 - 熟悉 PaddleSpeech 框架及其数据处理流程
+
+
+
+---
+
+### NO.58 VisualDL PIR 可视化产品形态改进
+
+**详细描述：**
+
+目前 VisualDL 已支持 PIR 可视化，但使用门槛较高使用方法如下：[VisualDL Graph--网络结构组件](https://github.com/PaddlePaddle/VisualDL/blob/develop/docs/components/README_CN.md#Graph--%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84%E7%BB%84%E4%BB%B6)
+- 当前产品形态：用户需要先使用 Python 将动态图模型对象，提供给 LogWriter；由 LogWriter 调用动转静 + analysis，生成中间协议文件；再通过 VisualDL 加载中间协议文件才能在浏览器展示。
+- 新的产品形态：期望去掉 Python 的环节，直接支持 `visualdl --modelfile resnet.json --port 8080`。即直接通过命令行，向 VisualDL 提供模型文件，由 VisualDL Load 为 Program，再做 analysis，将 analysis 产出的结果直接展示在网页端。
+
+**验收标准**：
+
+- 通过`visualdl --modelfile resnet.json --port 8080`即可完成模型展示
+
+**技术要求：**
+
+- 熟练掌握 Python
+- 了解 VisualDL 的基本流程流程
