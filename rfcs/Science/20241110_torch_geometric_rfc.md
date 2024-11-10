@@ -627,6 +627,27 @@ Torch-Geometric 的架构设计清晰，按照功能分为以下主要模块：
 | torch_geometric | set_experimental_mode     | 否       |
 | torch_geometric | torch_geometric           | 否       |
 | torch_geometric | version                   | 否       |
+| torch_geometric | _compile                 | 否 |
+| torch_geometric | _onnx                    | 否 |
+| torch_geometric | backend                  | 否 |
+| torch_geometric | config_mixin             | 否 |
+| torch_geometric | config_store             | 否 |
+| torch_geometric | debug                    | 否 |
+| torch_geometric | deprecation              | 否 |
+| torch_geometric | device                   | 否 |
+| torch_geometric | edge_index               | 否 |
+| torch_geometric | experimental             | 否 |
+| torch_geometric | home                     | 否 |
+| torch_geometric | index                    | 否 |
+| torch_geometric | inspector                | 否 |
+| torch_geometric | isinstance               | 否 |
+| torch_geometric | lazy_loader              | 否 |
+| torch_geometric | logging                  | 否 |
+| torch_geometric | resolver                 | 否 |
+| torch_geometric | seed                     | 否 |
+| torch_geometric | template                 | 否 |
+| torch_geometric | typing                   | 否 |
+| torch_geometric | warnings                 | 否 |
 
 
 ## 4. 公共 API 单元测试
