@@ -39,7 +39,7 @@ PaddleSpeech 是基于飞桨 PaddlePaddle 的语音方向的开源套件，囊�
 经测试，Demos 目录下脚本大部分能够兼容 Paddle 3.0.0-beta 版本，总结如下：
 - 样例 Metaverse 和 story_talker 的功能与其他套件捆绑，导致依赖复杂，不进行修复。
 - 样例 speech_ssl 存在逻辑错误，不是框架升级带来的，已提交PR修复。
-- 样例 whisper 在部分分支存在算子不适配的错误，不影响基础功能调用，该问题优先级较低，可以在后续修复。
+- 样例 whisper 在部分分支存在算子不适配的错误，不影响基础功能调用，在后续修复。
 - 其他脚本的推理与运行基本正常。
 
 结合 Demos 的测试结果，初步认为 Paddle 3.0.0-beta 版本下，PaddleSpeech 推理功能可以正常使用。
