@@ -203,7 +203,7 @@ Netron 是一个开源的神经网络模型可视化工具，它支持多种深�
 https://github.com/lutzroeder/netron
 https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-code-reading/IR_Dialect/pir_save_load.md
 
-### 九、Paddle LoD退场清理——第一期
+### 九、Paddle LoD 退场清理
 
 **任务背景**：
 
