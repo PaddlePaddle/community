@@ -91,27 +91,26 @@ Torch-Geometric 的架构设计清晰，按照功能分为以下主要模块：
 
 | **模块**   | **公开 API**                  | **需要反向** | **转换代码API** | **转码状态** | **单测码文件** | **单测码状态** | **最终状态** |
 |------------|-------------------------------|--------------|-----------------|--------------|----------------|----------------|--------------|
-| data       | FeatureStore                  | 否           |                 |              |                |                |              |
-| data       | TensorAttr                    | 否           |                 |              |                |                |              |
-| data       | GraphStore                    | 否           |                 |              |                |                |              |
-| data       | EdgeAttr                      | 否           |                 |              |                |                |              |
-| data       | Data                          | 否           |                 |              |                |                |              |
-| data       | HeteroData                    | 否           |                 |              |                |                |              |
-| data       | Batch                         | 否           |                 |              |                |                |              |
-| data       | TemporalData                  | 否           |                 |              |                |                |              |
-| data       | Database                      | 否           |                 |              |                |                |              |
-| data       | SQLiteDatabase                | 否           |                 |              |                |                |              |
-| data       | RocksDatabase                 | 否           |                 |              |                |                |              |
-| data       | Dataset                       | 否           |                 |              |                |                |              |
-| data       | InMemoryDataset               | 否           |                 |              |                |                |              |
-| data       | OnDiskDataset                 | 否           |                 |              |                |                |              |
-| data       | makedirs                      | 否           |                 |              |                |                |              |
-| data       | download_url                  | 否           |                 |              |                |                |              |
-| data       | download_google_url           | 否           |                 |              |                |                |              |
-| data       | extract_tar                   | 否           |                 |              |                |                |              |
-| data       | extract_zip                   | 否           |                 |              |                |                |              |
-| data       | extract_bz2                   | 否           |                 |              |                |                |              |
-| data       | extract_gz                    | 否           |                 |              |                |                |              |
+| data       | batch                  | 否           |      :heavy_check_mark:           |              |                |                |              |
+| data       | collate                    | 否           |    :heavy_check_mark:             |              |                |                |              |
+| data       | data                    | 否           |       :heavy_check_mark:          |              |                |                |              |
+| data       | database                      | 否           |   :heavy_check_mark:              |              |                |                |              |
+| data       | datapipes                          | 否           |    :heavy_check_mark:             |              |                |                |              |
+| data       | dataset                    | 否           |     :heavy_check_mark:            |              |                |                |              |
+| data       | download                         | 否           |      :heavy_check_mark:           |              |                |                |              |
+| data       | extract                  | 否           |       :heavy_check_mark:          |              |                |                |              |
+| data       | feature_store                      | 否           |   :heavy_check_mark:              |              |                |                |              |
+| data       | graph_store                | 否           |   :heavy_check_mark:              |              |                |                |              |
+| data       | hetero                 | 否           |     :heavy_check_mark:            |              |                |                |              |
+| data       | hypergraph_data                       | 否           |    :heavy_check_mark:             |              |                |                |              |
+| data       | in_memory_dataset               | 否           |   :heavy_check_mark:              |              |                |                |              |
+| data       | on_disk_dataset                 | 否           |  :heavy_check_mark:               |              |                |                |              |
+| data       | remote_backend_utils                      | 否           |   :heavy_check_mark:              |              |                |                |              |
+| data       | separate                  | 否           |   :heavy_check_mark:              |              |                |                |              |
+| data       | summary           | 否           | :heavy_check_mark:                |              |                |                |              |
+| data       | temporal                   | 否           |   :heavy_check_mark:              |              |                |                |              |
+| data       | view                   | 否           |    :heavy_check_mark:             |              |                |                |              |
+
 
 
 ### `sampler` 模块
