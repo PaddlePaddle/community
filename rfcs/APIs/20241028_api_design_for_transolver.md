@@ -856,29 +856,259 @@ class Model(paddle.nn.Layer):
 先复现基于Pytorch版本的Transolver代码，与原论文对齐精度，使用Paconvert转换Pytorch代码为Paddle代码，对其中不支持的部分代码函数进行人工修改，再复现基于Paddle版本的Transolver代码，与原论文和基于Pytorch版本的代码对齐精度，计算相对误差，对于公式(复现指标-源论文指标)/源论文指标<10%,该公式使用的是相对误差，但在某些情况下，绝对误差可能更有意义。例如，当源论文指标非常接近零时，即使是微小的绝对误差也会导致相对误差非常大。当出现微小的绝对误差以及源论文指标数据在以小于5的数字开头的时候，与Paddle团队沟通误差事宜。
 
 ### 主体设计选型考量
-基于Pytorch版本复现部分数据：
-| Model      | Shape-Net-Car |         |        |        |
-| ---------- | ------------- | ------- | ------ | ------ |
-|            | volume     | surf          | Cd      | ρd     |
-| Transolver | 0.0211        | 0.0769  | 0.0123 | 0.9909 |
-| 相对误差   | 0.01932       | 0.03221 | 0.1942 | -0.003 |
+基于Pytorch版本复现数据：
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="4">Shape-Net-Car</th>
+  </tr>
+  <tr>
+    <th>volume</th>
+    <th>surf</th>
+    <th>Cd</th>
+    <th>ρd</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td style="color: red;">0.0211</td>
+    <td style="color: red;">0.0769</td>
+    <td style="color: red;">0.0123</td>
+    <td style="color: red;">0.9909</td>
+  </tr>
+  <tr>
+    <td>相对误差</td>
+    <td style="color: red;">0.019323671</td>
+    <td style="color: red;">0.032214765</td>
+    <td style="color: red;">0.194174757</td>
+    <td style="color: red;">-0.002617011</td>
+  </tr>
+</table>
 
-| Model      | POINT CLOUND | STRUCTURED MESH | REGULAR GRID |               |       |              |
-| ---------- | ------------ | --------------- | ------------ | ------------- | ----- | ------------ |
-|            | ELASTICITY   | PLASTICITY      | AIRFOIL      | PIPE          | NAVIER-STOKES | DARCY |
-| Transolver | 0.0072       | 0.0013          | 0.0049       | 0.0047        |       | 0.0049       |
-| 相对误差   | 0.125        | 0.083333333     | -0.075471698 | 0.424242424   |       | -0.140350877 |
+
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="1">POINT CLOUD</th>
+    <th colspan="3">STRUCTURED MESH</th>
+    <th colspan="2">REGULAR GRID</th>
+  </tr>
+  <tr>
+    <th>ELASTICITY</th>
+    <th>PLASTICITY</th>
+    <th>AIRFOIL</th>
+    <th>PIPE</th>
+    <th>NAVIER-STOKES</th>
+    <th>DARCY</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td style="color: red;">0.0072</td>
+    <td style="color: red;">0.0013</td>
+    <td style="color: red;">0.0049</td>
+    <td style="color: red;">0.0047</td>
+    <td style="color: red;">0.085</td>
+    <td style="color: red;">0.0049</td>
+  </tr>
+  <tr>
+    <td>相对误差</td>
+    <td style="color: red;">0.125</td>
+    <td style="color: red;">0.083333333</td>
+    <td style="color: red;">-0.075471698</td>
+    <td style="color: red;">0.424242424</td>
+    <td style="color: red;">-0.055555556</td>
+    <td style="color: red;">-0.140350877</td>
+  </tr>
+</table>
+
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="4">AIRFRANS</th>
+  </tr>
+  <tr>
+    <th>volume</th>
+    <th>surf</th>
+    <th>CL</th>
+    <th>ρL</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td style="color: red;">0.0057</td>
+    <td style="color: red;">0.0106</td>
+    <td style="color: red;">0.115</td>
+    <td style="color: red;">0.9975</td>
+  </tr>
+  <tr>
+    <td>相对误差</td>
+    <td style="color: red;">0.540540541</td>
+    <td style="color: red;">-0.253521127</td>
+    <td style="color: red;">0.116504854</td>
+    <td style="color: red;">-0.000300661</td>
+  </tr>
+</table>
+
 
 源论文指标：
-| Model      | Shape-Net-Car |        |        |        |
-| ---------- | ------------- | ------ | ------ | ------ |
-|            | volume     | surf          | Cd      | ρd     |
-| Transolver | 0.0207        | 0.0745 | 0.0103 | 0.9935 |
+<table border="1" style="border-collapse: collapse; text-align: center;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="4">Shape-Net-Car</th>
+  </tr>
+  <tr>
+    <th>volume</th>
+    <th>surf</th>
+    <th>Cd</th>
+    <th>ρd</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td>0.0207</td>
+    <td>0.0745</td>
+    <td>0.0103</td>
+    <td>0.9935</td>
+  </tr>
+</table>
 
-| Model      | POINT CLOUND | STRUCTURED MESH | REGULAR GRID |               |       |        |
-| ---------- | ------------ | --------------- | ------------ | ------------- | ----- | ------ |
-|            | ELASTICITY   | PLASTICITY      | AIRFOIL      | PIPE          | NAVIER-STOKES | DARCY |
-| Transolver | 0.0064       | 0.0012          | 0.0053       | 0.0033        | 0.09  | 0.0057 |
+
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="1">POINT CLOUD</th>
+    <th colspan="3">STRUCTURED MESH</th>
+    <th colspan="2">REGULAR GRID</th>
+  </tr>
+  <tr>
+    <th>ELASTICITY</th>
+    <th>PLASTICITY</th>
+    <th>AIRFOIL</th>
+    <th>PIPE</th>
+    <th>NAVIER-STOKES</th>
+    <th>DARCY</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td style="color: red;">0.0064</td>
+    <td style="color: red;">0.0012</td>
+    <td style="color: red;">0.0053</td>
+    <td style="color: red;">0.0033</td>
+    <td style="color: red;">0.09</td>
+    <td style="color: red;">0.0057</td>
+  </tr>
+</table>
+
+
+<table border="1" style="border-collapse: collapse; text-align: center;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="4">AIRFRANS</th>
+  </tr>
+  <tr>
+    <th>volume</th>
+    <th>surf</th>
+    <th>CL</th>
+    <th>ρL</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td>0.0037</td>
+    <td>0.0142</td>
+    <td>0.103</td>
+    <td>0.9978</td>
+  </tr>
+</table>
+
+
+基于Paddle版本复现数据：
+<table border="1" style="border-collapse: collapse; text-align: center;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="4">Shape-Net-Car</th>
+  </tr>
+  <tr>
+    <th>volume</th>
+    <th>surf</th>
+    <th>Cd</th>
+    <th>ρd</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td style="color: red;">0.0211</td>
+    <td style="color: red;">0.08</td>
+    <td style="color: red;">0.0124</td>
+    <td style="color: red;">0.9896</td>
+  </tr>
+  <tr>
+    <td>相对误差</td>
+    <td>0.01932</td>
+    <td>0.07383</td>
+    <td>0.2049</td>
+    <td>-0.004</td>
+  </tr>
+</table>
+
+
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="1">POINT CLOUD</th>
+    <th colspan="3">STRUCTURED MESH</th>
+    <th colspan="2">REGULAR GRID</th>
+  </tr>
+  <tr>
+    <th>ELASTICITY</th>
+    <th>PLASTICITY</th>
+    <th>AIRFOIL</th>
+    <th>PIPE</th>
+    <th>NAVIER-STOKES</th>
+    <th>DARCY</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td style="color: red;">0.00573</td>
+    <td style="color: red;">0.0033</td>
+    <td style="color: red;">0.00597</td>
+    <td style="color: red;">0.0049</td>
+    <td style="color: red;">0.0882</td>
+    <td style="color: red;">0.0056</td>
+  </tr>
+  <tr>
+    <td>相对误差</td>
+    <td style="color: red;">-0.1046875</td>
+    <td style="color: red;">1.75</td>
+    <td style="color: red;">0.126415094</td>
+    <td style="color: red;">0.484848485</td>
+    <td style="color: red;">-0.02</td>
+    <td style="color: red;">-0.01754386</td>
+  </tr>
+</table>
+
+<table border="1" style="border-collapse: collapse; text-align: center; width: 100%;">
+  <tr>
+    <th rowspan="2">Model</th>
+    <th colspan="4">AIRFRANS</th>
+  </tr>
+  <tr>
+    <th>volume</th>
+    <th>surf</th>
+    <th>CL</th>
+    <th>ρL</th>
+  </tr>
+  <tr>
+    <td>Transolver</td>
+    <td style="color: red;">0.0055</td>
+    <td style="color: red;">0.0105</td>
+    <td style="color: red;">0.114</td>
+    <td style="color: red;">0.9976</td>
+  </tr>
+  <tr>
+    <td>相对误差</td>
+    <td style="color: red;">0.486486486</td>
+    <td style="color: red;">-0.26056338</td>
+    <td style="color: red;">0.106796117</td>
+    <td style="color: red;">-0.000200441</td>
+  </tr>
+</table>
+
 
 # 六、测试和验收的考量
 正确性验证：验证Transolver Pytorch复现精度与Transolver Paddle复现精度，代码能正常跑通训练、评估。
