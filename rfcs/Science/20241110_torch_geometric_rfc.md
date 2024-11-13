@@ -51,40 +51,40 @@ Torch-Geometric 的架构设计清晰，按照功能分为以下主要模块：
 
 | **模块**   | **公开 API**                  | **需要反向** | **转换代码API** | **转码状态** | **单测码文件** | **单测码状态** | **最终状态** |
 |------------|-------------------------------|--------------|-----------------|------------------|------------------------|----------------------|--------------|
-| utils      | scatter                       | 否           |                 |                  |                        |                      |              |
-| utils      | group_argsort                 | 否           |                 |                  |                        |                      |              |
-| utils      | segment                       | 否           |                 |                  |                        |                      |              |
-| utils      | index_sort                    | 否           |                 |                  |                        |                      |              |
-| utils      | cumsum                        | 否           |                 |                  |                        |                      |              |
-| utils      | degree                        | 否           |                 |                  |                        |                      |              |
-| utils      | softmax                       | 否           |                 |                  |                        |                      |              |
-| utils      | lexsort                       | 否           |                 |                  |                        |                      |              |
-| utils      | sort_edge_index               | 否           |                 |                  |                        |                      |              |
-| utils      | coalesce                      | 否           |                 |                  |                        |                      |              |
-| utils      | is_undirected                 | 否           |                 |                  |                        |                      |              |
-| utils      | to_undirected                 | 否           |                 |                  |                        |                      |              |
-| utils      | contains_self_loops           | 否           |                 |                  |                        |                      |              |
-| utils      | remove_self_loops             | 否           |                 |                  |                        |                      |              |
-| utils      | segregate_self_loops          | 否           |                 |                  |                        |                      |              |
-| utils      | add_self_loops                | 否           |                 |                  |                        |                      |              |
-| utils      | add_remaining_self_loops      | 否           |                 |                  |                        |                      |              |
-| utils      | get_self_loop_attr            | 否           |                 |                  |                        |                      |              |
-| utils      | contains_isolated_nodes       | 否           |                 |                  |                        |                      |              |
-| utils      | remove_isolated_nodes         | 否           |                 |                  |                        |                      |              |
-| utils      | get_num_hops                  | 否           |                 |                  |                        |                      |              |
-| utils      | subgraph                      | 否           |                 |                  |                        |                      |              |
-| utils      | bipartite_subgraph            | 否           |                 |                  |                        |                      |              |
-| utils      | k_hop_subgraph                | 否           |                 |                  |                        |                      |              |
-| utils      | dropout_node                  | 否           |                 |                  |                        |                      |              |
-| utils      | dropout_edge                  | 否           |                 |                  |                        |                      |              |
-| utils      | dropout_path                  | 否           |                 |                  |                        |                      |              |
-| utils      | dropout_adj                   | 否           |                 |                  |                        |                      |              |
-| utils      | homophily                     | 否           |                 |                  |                        |                      |              |
-| utils      | assortativity                 | 否           |                 |                  |                        |                      |              |
-| utils      | get_laplacian                 | 否           |                 |                  |                        |                      |              |
-| utils      | get_mesh_laplacian            | 否           |                 |                  |                        |                      |              |
-| utils      | mask_select                   | 否           |                 |                  |                        |                      |              |
-| utils      | index_to_mask                 | 否           |                 |                  |                        |                      |              |
+| utils      | scatter                       | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | group_argsort                 | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | segment                       | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | index_sort                    | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | cumsum                        | 否           |                 |  :heavy_check_mark:                |                        |                      |              |
+| utils      | degree                        | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | softmax                       | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | lexsort                       | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | sort_edge_index               | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | coalesce                      | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | is_undirected                 | 否           |                 |  :heavy_check_mark:                |                        |                      |              |
+| utils      | to_undirected                 | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | contains_self_loops           | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | remove_self_loops             | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | segregate_self_loops          | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | add_self_loops                | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | add_remaining_self_loops      | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | get_self_loop_attr            | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | contains_isolated_nodes       | 否           |                 |  :heavy_check_mark:                |                        |                      |              |
+| utils      | remove_isolated_nodes         | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | get_num_hops                  | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | subgraph                      | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | bipartite_subgraph            | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | k_hop_subgraph                | 否           |                 |  :heavy_check_mark:                |                        |                      |              |
+| utils      | dropout_node                  | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | dropout_edge                  | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | dropout_path                  | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | dropout_adj                   | 否           |                 | :heavy_check_mark:                |                        |                      |              |
+| utils      | homophily                     | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | assortativity                 | 否           |                 |  :heavy_check_mark:                |                        |                      |              |
+| utils      | get_laplacian                 | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | get_mesh_laplacian            | 否           |                 |  :heavy_check_mark:                |                        |                      |              |
+| utils      | mask_select                   | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
+| utils      | index_to_mask                 | 否           |                 | :heavy_check_mark:                 |                        |                      |              |
 
 
 ### `data` 模块
@@ -117,39 +117,39 @@ Torch-Geometric 的架构设计清晰，按照功能分为以下主要模块：
 
 | **模块**   | **公开 API**               | **需要反向** | **转换代码API** | **转码状态** | **单测码文件** | **单测码状态** | **最终状态** |
 |------------|----------------------------|--------------|-----------------|--------------|----------------|----------------|--------------|
-| sampler    | BaseSampler                | 否           |                 |              |                |                |              |
-| sampler    | NodeSamplerInput           | 否           |                 |              |                |                |              |
-| sampler    | EdgeSamplerInput           | 否           |                 |              |                |                |              |
-| sampler    | SamplerOutput              | 否           |                 |              |                |                |              |
-| sampler    | HeteroSamplerOutput        | 否           |                 |              |                |                |              |
-| sampler    | NumNeighbors               | 否           |                 |              |                |                |              |
-| sampler    | NegativeSampling           | 否           |                 |              |                |                |              |
-| sampler    | NeighborSampler            | 否           |                 |              |                |                |              |
-| sampler    | HGTSampler                 | 否           |                 |              |                |                |              |
+| sampler    | BaseSampler                | 否           |                 |:heavy_check_mark:              |                |                |              |
+| sampler    | NodeSamplerInput           | 否           |                 |:heavy_check_mark:              |                |                |              |
+| sampler    | EdgeSamplerInput           | 否           |                 | :heavy_check_mark:             |                |                |              |
+| sampler    | SamplerOutput              | 否           |                 | :heavy_check_mark:             |                |                |              |
+| sampler    | HeteroSamplerOutput        | 否           |                 | :heavy_check_mark:             |                |                |              |
+| sampler    | NumNeighbors               | 否           |                 | :heavy_check_mark:             |                |                |              |
+| sampler    | NegativeSampling           | 否           |                 | :heavy_check_mark:             |                |                |              |
+| sampler    | NeighborSampler            | 否           |                 | :heavy_check_mark:             |                |                |              |
+| sampler    | HGTSampler                 | 否           |                 |:heavy_check_mark:              |                |                |              |
 
 
 ### `loader` 模块
 
 | **模块**   | **公开 API**                  | **需要反向** | **转换代码API** | **转码状态** | **单测码文件** | **单测码状态** | **最终状态** |
 |------------|-------------------------------|--------------|-----------------|--------------|----------------|----------------|--------------|
-| loader     | DataLoader                    | 否           |                 |              |                |                |              |
-| loader     | NodeLoader                    | 否           |                 |              |                |                |              |
-| loader     | LinkLoader                    | 否           |                 |              |                |                |              |
-| loader     | NeighborLoader                | 否           |                 |              |                |                |              |
-| loader     | LinkNeighborLoader            | 否           |                 |              |                |                |              |
-| loader     | HGTLoader                     | 否           |                 |              |                |                |              |
-| loader     | ClusterData                   | 否           |                 |              |                |                |              |
-| loader     | ClusterLoader                 | 否           |                 |              |                |                |              |
-| loader     | GraphSAINTSampler             | 否           |                 |              |                |                |              |
-| loader     | GraphSAINTNodeSampler         | 否           |                 |              |                |                |              |
-| loader     | GraphSAINTEdgeSampler         | 否           |                 |              |                |                |              |
-| loader     | GraphSAINTRandomWalkSampler   | 否           |                 |              |                |                |              |
-| loader     | ShaDowKHopSampler             | 否           |                 |              |                |                |              |
-| loader     | RandomNodeLoader              | 否           |                 |              |                |                |              |
-| loader     | ZipLoader                     | 否           |                 |              |                |                |              |
-| loader     | DataListLoader                | 否           |                 |              |                |                |              |
-| loader     | DenseDataLoader               | 否           |                 |              |                |                |              |
-| loader     | TemporalDataLoader            | 否           |                 |              |                |                |              |
+| loader     | DataLoader                    | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | NodeLoader                    | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | LinkLoader                    | 否           |                 |:heavy_check_mark:              |                |                |              |
+| loader     | NeighborLoader                | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | LinkNeighborLoader            | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | HGTLoader                     | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | ClusterData                   | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | ClusterLoader                 | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | GraphSAINTSampler             | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | GraphSAINTNodeSampler         | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | GraphSAINTEdgeSampler         | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | GraphSAINTRandomWalkSampler   | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | ShaDowKHopSampler             | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | RandomNodeLoader              | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | ZipLoader                     | 否           |                 | :heavy_check_mark:             |                |                |              |
+| loader     | DataListLoader                | 否           |                 | :heavy_check_mark:            |                |                |              |
+| loader     | DenseDataLoader               | 否           |                 |  :heavy_check_mark:            |                |                |              |
+| loader     | TemporalDataLoader            | 否           |                 | :heavy_check_mark:             |                |                |              |
 
 
 ### `transforms` 模块
@@ -334,34 +334,34 @@ Torch-Geometric 的架构设计清晰，按照功能分为以下主要模块：
 
 | **模块**    | **公开 API**              | **需要反向** | **转换代码API** | **转码状态** | **单测码文件** | **单测码状态** | **最终状态** |
 |-------------|---------------------------|--------------|-----------------|--------------|----------------|----------------|--------------|
-| explain     | ExplainerConfig           | 否           |                 |              |                |                |              |
-| explain     | ModelConfig               | 否           |                 |              |                |                |              |
-| explain     | ThresholdConfig           | 否           |                 |              |                |                |              |
-| explain     | Explanation               | 否           |                 |              |                |                |              |
-| explain     | HeteroExplanation         | 否           |                 |              |                |                |              |
-| explain     | Explainer                 | 否           |                 |              |                |                |              |
+| explain     | ExplainerConfig           | 否           |                 | :heavy_check_mark:             |                |                |              |
+| explain     | ModelConfig               | 否           |                 |  :heavy_check_mark:            |                |                |              |
+| explain     | ThresholdConfig           | 否           |                 | :heavy_check_mark:             |                |                |              |
+| explain     | Explanation               | 否           |                 |  :heavy_check_mark:            |                |                |              |
+| explain     | HeteroExplanation         | 否           |                 |  :heavy_check_mark:            |                |                |              |
+| explain     | Explainer                 | 否           |                 | :heavy_check_mark:             |                |                |              |
 
 
 ### `profile` 模块
 
 | **模块**    | **公开 API**                  | **需要反向** | **转换代码API** | **转码状态** | **单测码文件** | **单测码状态** | **最终状态** |
 |-------------|-------------------------------|--------------|-----------------|--------------|----------------|----------------|--------------|
-| profile     | profileit                     | 否           |                 |              |                |                |              |
-| profile     | timeit                        | 否           |                 |              |                |                |              |
-| profile     | get_stats_summary             | 否           |                 |              |                |                |              |
-| profile     | trace_handler                 | 否           |                 |              |                |                |              |
-| profile     | print_time_total              | 否           |                 |              |                |                |              |
-| profile     | rename_profile_file           | 否           |                 |              |                |                |              |
-| profile     | torch_profile                 | 否           |                 |              |                |                |              |
-| profile     | xpu_profile                   | 否           |                 |              |                |                |              |
-| profile     | count_parameters              | 否           |                 |              |                |                |              |
-| profile     | get_model_size                | 否           |                 |              |                |                |              |
-| profile     | get_data_size                 | 否           |                 |              |                |                |              |
-| profile     | get_cpu_memory_from_gc        | 否           |                 |              |                |                |              |
-| profile     | get_gpu_memory_from_gc        | 否           |                 |              |                |                |              |
-| profile     | get_gpu_memory_from_nvidia_smi | 否          |                 |              |                |                |              |
-| profile     | get_gpu_memory_from_ipex      | 否           |                 |              |                |                |              |
-| profile     | benchmark                     | 否           |                 |              |                |                |              |
+| profile     | profileit                     | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | timeit                        | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | get_stats_summary             | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | trace_handler                 | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | print_time_total              | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | rename_profile_file           | 否           |                 |  :heavy_check_mark:            |                |                |              |
+| profile     | torch_profile                 | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | xpu_profile                   | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | count_parameters              | 否           |                 | :heavy_check_mark:            |                |                |              |
+| profile     | get_model_size                | 否           |                 | :heavy_check_mark:            |                |                |              |
+| profile     | get_data_size                 | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | get_cpu_memory_from_gc        | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | get_gpu_memory_from_gc        | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | get_gpu_memory_from_nvidia_smi | 否          |                 |:heavy_check_mark:             |                |                |              |
+| profile     | get_gpu_memory_from_ipex      | 否           |                 | :heavy_check_mark:             |                |                |              |
+| profile     | benchmark                     | 否           |                 | :heavy_check_mark:             |                |                |              |
 
 
 ### `nn.aggr` 模块
