@@ -63,12 +63,46 @@
 
 所以本项目按照[`neuraloperator`](https://github.com/neuraloperator/neuraloperator/tree/0.3.0)的源码来撰写支持飞桨后端的文件，并且严格保持文件结构、名称、注释、空格等都相同。
 
+### 4.1[`neuraloperator`](https://github.com/neuraloperator/neuraloperator/tree/0.3.0)核心API和对应单测文件列表
+
+
+| API列表                                  | 单测                              | API列表                                  | 单测                              | API列表                                  | 单测                              |
+| ---------------------------------------- | ------------------------------------- | ---------------------------------------- | ------------------------------------- | ---------------------------------------- | ------------------------------------- |
+| FNOBlocks                                | test_fno_block.py                    | BaseSpectralConv                         | 无                                   | einsum_complexhalf_two_input             | 无                                   |
+| legacy_spectral_convolution_SpectralConv | test_legacy_spectral_convolution.py  | einsum_complexhalf                       | 无                                   | PositionalEmbedding                      | 无                                   |
+| legacy_spectral_convolution_SpectralConv1d | test_legacy_spectral_convolution.py  | SubModule                                | 无                                   | FCLegendre                               | 无                                   |
+| legacy_spectral_convolution_SpectralConv2d | test_legacy_spectral_convolution.py  | IntegralTransform                        | 无                                   | _contract_dense                          | 无                                   |
+| legacy_spectral_convolution_SpectralConv3d | test_legacy_spectral_convolution.py  | _contract_dense_separable                | 无                                   | _contract_cp                             | 无                                   |
+| DomainPadding                            | test_padding.py                      | _contract_tucker                         | 无                                   | _contract_tt                             | 无                                   |
+| resample                                 | test_resample.py                     | get_contract_fun                         | 无                                   | SubConv                                  | 无                                   |
+| spectral_convolution_SpectralConv        | test_spectral_convolution.py         | MLP                                      | 无                                   | MLPLinear                                | 无                                   |
+| spectral_convolution_SpectralConv1d      | test_spectral_convolution.py         | AdaIN                                    | 无                                   | iterative_resample                       | 无                                   |
+| spectral_convolution_SpectralConv2d      | test_spectral_convolution.py         | segment_csr                              | 无                                   | simple_neighbor_search                   | 无                                   |
+| spectral_convolution_SpectralConv3d      | test_spectral_convolution.py         | skip_connection                          | 无                                   | SoftGating                               | 无                                   |
+| SHT                                      | test_spherical_convolution.py        | central_diff_1d                          | 无                                   | central_diff_2d                          | 无                                   |
+| SphericalConv                            | test_spherical_convolution.py        | central_diff_3d                          | 无                                   | LpLoss                                   | 无                                   |
+| FNO                                      | test_fno.py                          | H1Loss                                   | 无                                   | IregularLpqLoss                          | 无                                   |
+| FNO1d                                    | test_fno.py                          | WeightedL2DragLoss                       | 无                                   | BurgersEqnLoss                           | 无                                   |
+| FNO2d                                    | test_fno.py                          | ICLoss                                   | 无                                   | FieldwiseAggregatorLoss                 | 无                                   |
+| FNO3d                                    | test_fno.py                          | WeightedSumLoss                          | 无                                   | load_burgers_1d                          | 无                                   |
+| TFNO                                     | test_fno.py                          | load_burgers_1dtime                      | 无                                   | load_darcy_flow_small                    | 无                                   |
+| TFNO1d                                   | test_fno.py                          | load_darcy_pt                            | 无                                   | MGPatchingDataProcessor                  | 无                                   |
+| TFNO2d                                   | test_fno.py                          | H5pyDataset                              | 无                                   | load_navier_stokes_pt                    | 无                                   |
+| TFNO3d                                   | test_fno.py                          | _load_navier_stokes_test_HR              | 无                                   | OutputEncoder                            | 无                                   |
+| UNO                                      | test_uno.py                          | MultipleFieldOutputEncoder               | 无                                   | DictTransform                            | 无                                   |
+| DefaultDataProcessor                     | test_data_processor.py               | load_pt_traintestsplit                   | 无                                   | load_spherical_swe                       | 无                                   |
+| UnitGaussianNormalizer                   | test_output_encoder.py               | SphericalSWEDataset                      | 无                                   | TensorDataset                            | 无                                   |
+|                                           |                                       | GeneralTensorDataset                     | 无                                   | Transform                                | 无                                   |
+|                                           |                                       | Normalizer                               | 无                                   | Composite                                | 无                                   |
+|                                           |                                       | MGPatchingTransform                      | 无                                   | RandomMGPatch                            | 无                                   |
+|                                           |                                       | MGPTensorDataset                         | 无                                   | regular_grid                             | 无                                   |
+|                                           |                                       | PositionalEmbedding2D                    | 无                                   | ZarrDataset                              | 无                                   |
 
 
 ## 5. 测试和验收的考量
 
 
-所有测试结果均在 NVIDIA RTX 4090 GPU 上进行，操作系统为 Ubuntu 20.04，。测试分为三个独立的环境：环境1 使用 PyTorch 1.10（CUDA 12.3），环境2 使用 Paddle 3.0-beta（CUDA 12.3），环境1和环境2主要用于代码测试；环境3 包括 PyTorch 2.5.0（CUDA 11.8） 和 Paddle 3.0-beta（CUDA 11.8），用于模型初始化权重参数的转换。
+所有测试结果均在 NVIDIA RTX 3090 GPU 上进行，操作系统为 Ubuntu 20.04，。测试分为三个独立的环境：环境1 使用 PyTorch 2.4.0（CUDA 12.1），环境2 使用 Paddle 3.0-beta（CUDA 11.8），环境1和环境2主要用于代码测试；环境3 包括 PyTorch 2.5.0（CUDA 11.8） 和 Paddle 3.0-beta（CUDA 11.8），用于模型初始化权重参数的转换。
 
 ### 5.1 模型前向对齐
 
@@ -107,8 +141,8 @@
 | FNO2d | 2.69e-05 | 0.00 | 3.44e-11 |单精度训练|
 | FNO3d | 4.75e-05 |0.00   | 5.66e-11  |单精度训练|
 | UFNO(layers=1) | 1.03e-09 | 0.00 | 6.91e-21 |双精度训练|
-| UFNO(layers=5) | 4.02e-02 |2.24e-05  | 2.99e-04  |双精度训练，存在的问题见6.1节|
-| SFNO | 5.60e-02 | 7.88e-07  | 1.92e-04 |双精度训练，存在的问题见6.2节|
+| UFNO(layers=5) | 1.33e-08 |8.05e-13  | 1.05e-17  |双精度训练|
+| SFNO | 3.068e-09 | 1.81e-13  | 4.36e-19 |双精度训练|
 | TFNO1d | &nbsp; |&nbsp;   | &nbsp;  |撰写中，具体难点见6.3节|
 | TFNO2d | &nbsp; | &nbsp;  | &nbsp; |撰写中，具体难点见6.3节|
 |TFNO3d | &nbsp; |&nbsp;   | &nbsp;  |撰写中，具体难点见6.3节|
@@ -273,17 +307,17 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
 | FNO2d | 7.20e-03 | 0.00 | 9.18e-06 |0.00 |单精度训练|
 | FNO3d | 7.50e-03 |1.14e-05   | 6.96e-06  |0.00 |单精度训练|
 | UFNO(layers=1) | 1.10e-06 | 1.53e-08  | 4.62e-13 |0.00 |双精度训练|
-| UFNO(layers=5) | 1.49e+01 |2.96e-02   | 2.84e+01  |0.00|双精度训练，具体见6.1节|
-| SFNO | 6.85e-00 | 7.93e-02  | 1.55e+01 |0.00 |双精度训练，具体见6.2节|
+| UFNO(layers=5) | 1.23e-04 |6.77e-09  | 2.71e-09  |0.00|双精度训练|
+| SFNO | 2.17e-06 | 1.65e-08  |1.05e-12 |0.00 |双精度训练|
 | TFNO1d | &nbsp; |&nbsp;   | &nbsp;  ||撰写中，具体见6.3节|
-| TFNO2d | &nbsp; | &nbsp;  | &nbsp; ||撰写中|
-|TFNO3d | &nbsp; |&nbsp;   | &nbsp;  ||撰写中|
+| TFNO2d | &nbsp; | &nbsp;  | &nbsp; ||撰写中，具体见6.3节|
+|TFNO3d | &nbsp; |&nbsp;   | &nbsp;  ||撰写中，具体见6.3节|
 
 
 #### 5.3.3 不同模型训练耗时 
 使用 `timeit` 模块中的 `default_timer` 进行计时，各个模型在训练 10个epochs 时的耗时为 `10_epochs_time`，数据读取耗时为 `data_reader_time`，其中包括所有的数据预处理步骤（例如对 y 进行UnitGaussianNormalizer）,各个模型的耗时（s）如下：
 
-
+(fno2d,ufno,sfno)
 <table>
   <tr>
     <th>模型</th>
@@ -299,45 +333,45 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
   </tr>
   <tr>
     <td>FNO1d</td>
-    <td>1.47e-01</td>
-    <td>4.19e-01</td>
-    <td>4.81e-03</td>
-    <td>1.77e-01</td>
+    <td>7.19e-01</td>
+    <td>3.18e-01</td>
+    <td>2.32e-02</td>
+    <td>8.79e-02</td>
   </tr>
   <tr>
     <td>FNO2d</td>
-    <td>1.74e-01</td>
-    <td>4.56e-01</td>
-    <td>7.17e-03</td>
-    <td>1.84e-01</td>
+    <td>7.81e-01</td>
+    <td>3.13e-01</td>
+    <td>2.68e-02</td>
+    <td>1.14e-01</td>
   </tr>
   <tr>
     <td>FNO3d</td>
-    <td>1.44</td>
-    <td>1.42</td>
-    <td>1.57e-02</td>
-    <td>2.54e-01</td>
+    <td>1.88</td>
+    <td>1.57</td>
+    <td>3.26e-02</td>
+    <td>1.62e-01</td>
   </tr>
   <tr>
     <td>UFNO(layers=1)</td>
-    <td>6.50e-02</td>
-    <td>1.91e-01</td>
-    <td>6.87e-03</td>
-    <td>1.80e-01</td>
+    <td>6.30e-01</td>
+    <td>2.86e-01</td>
+    <td>2.68e-02</td>
+    <td>8.03e-02</td>
   </tr>
   <tr>
     <td>UFNO(layers=5)</td>
-    <td>1.89e-01</td>
-    <td>3.88e-01</td>
-    <td>6.87e-03</td>
-    <td>1.54e-01</td>
+    <td>8.94e-01</td>
+    <td>5.26e-01</td>
+    <td>3.12e-02</td>
+    <td>9.05e-02</td>
   </tr>
   <tr>
     <td>SFNO</td>
-    <td>1.71e-01</td>
-    <td>3.24e-01</td>
-    <td>6.98e-03</td>
-    <td>2.06e-01</td>
+    <td>8.11e-01</td>
+    <td>4.44e-01</td>
+    <td>3.19e-02</td>
+    <td>1.04e-01</td>
   </tr>
   <tr>
     <td>TFNO1d</td>
@@ -365,10 +399,9 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
 
 
 
-## 6. 待解决的问题
+## 6. 已被解决的关键问题
 
-## 6.1 UFNO(layers=5)待解决的问题
-
+## 6.1 UFNO(layers=5)（已解决）
 在训练模型`UFNO(layers=5)`时，Pytorch版本和Paddle版本的训练损失在epoch=2时出现了显著差异，具体表现如下
 
 <table>
@@ -483,9 +516,10 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
 
 
 
-由于模型`UFNO(layers=1)`时的训练结果是对齐的，因此初步判断模型UFNO（layers=5）时出现的问题是由误差累积引起的。目前该问题尚未解决。
 
-## 6.2 SFNO待解决的问题
+解决过程： 从1开始逐渐增大UFNO的layers数量。最终发现当layers>1，且UFNO模型的放缩参数uno_scalings经过0.5倍返回1倍时，UFNO中间网络层所调用函数validate_scaling_factor()返回值出错，经过修改后，UFNO的适配过程正常。
+
+## 6.2 SFNO（已解决）
 
 在训练模型`SFNO`时，Pytorch版本和Paddle版本的训练损失在epoch=3时出现了显著差异，具体表现如下
 
@@ -600,9 +634,10 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
     </tbody>
 </table>
 
+解决过程：排查代码，最终发现由于粗心，SFNO中的谱卷积层类型出错，对应修正后，SFNO的适配过程正常。
 
 
-## 6.3 TFNO待解决的问题
+## 7. 未解决的问题：TFNO中的张量分解过程
 
 `TFNO`中使用了tltorch进行张量分解，tltorch是tensorly的PyTorch版。tensorly源代码([https://github.com/tensorly/tensorly](https://github.com/tensorly/tensorly))中说明了
 ```
@@ -619,7 +654,7 @@ ValueError:Unknown backend name 'paddle', known backends are ['numpy', 'mxnet', 
 ```
 
 
-## 7. 可行性分析和排期规划
+## 8. 可行性分析和排期规划
 
 
 | 里程碑        |  时间点     |
@@ -627,7 +662,7 @@ ValueError:Unknown backend name 'paddle', known backends are ['numpy', 'mxnet', 
 | 提交RFC      |     2024.10.25        |  
 | 完成全部代码撰写并通过相关单测验证  |    2024.10.25-2024.11.15        |
 | 提交PR，修改代码完成合入 |  2024.11.15-2024.11.25       | 
-## 8. 影响面
+## 9. 影响面
 
 
 为 PaddleScience 添加`neuraloperator`库。
