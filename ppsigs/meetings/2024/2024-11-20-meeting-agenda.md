@@ -35,6 +35,20 @@
 
   经常有用户在多年前的 issue 下再次回复，目前是进行 close 和 lock
 
+* PaddleOCR 海外开发者交流会（某次 PFCC）
+
+  以下是从 2024.1.1 ~ 2024.10.17 给 PaddleOCR 仓库合入过 PR 的海外开发者，且给提供了邮寄地址接受了快乐开源礼物，可以尝试邀请 & 讨论下交流会的主题：
+
+  | **GithubID** | **PR** | **Country** ｜
+  | ------  |  ------ | ----------|
+  | [1chimaruGin](https://github.com/1chimaruGin)  |  https://github.com/PaddlePaddle/PaddleOCR/pull/12020 | Japan|
+  | [AlexPasqua](https://github.com/AlexPasqua) |  https://github.com/PaddlePaddle/PaddleOCR/pull/12042 、https://github.com/PaddlePaddle/PaddleOCR/pull/12542 | ITALY|
+  | [johnlockejrr](https://github.com/johnlockejrr)  | https://github.com/PaddlePaddle/PaddleOCR/pull/13797 、 https://github.com/PaddlePaddle/PaddleOCR/pull/13800  |Spain|
+  | [Kayzwer](https://github.com/Kayzwer)  | https://github.com/PaddlePaddle/PaddleOCR/pull/13760  | Malaysia|
+  | [MatKollar](https://github.com/MatKollar)  | https://github.com/PaddlePaddle/PaddleOCR/pull/11520 | Slovakia |
+  | [taeefnajib](https://github.com/taeefnajib)  | https://github.com/PaddlePaddle/PaddleOCR/pull/13373  | Bangladesh |
+  | [zovelsanj](https://github.com/zovelsanj)  | https://github.com/PaddlePaddle/PaddleOCR/pull/12108 | Spain|
+
 * 自由发言，可以提需求给大家讨论、提问等
 
 * 确定下次的部分议题及召开时间
