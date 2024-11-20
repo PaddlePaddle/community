@@ -19,6 +19,7 @@ audiotools 是一个基于 Torch 的面向对象的音频信号处理库，具�
 ## 2、功能目标
 
 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 中使用到的第三方库 audiotools 的接口，并完成相应单测
+用 paddle 完成全部 DAC 中的内容，非单测中不出现 PyTorch
 
 ## 3、意义
 
@@ -169,6 +170,33 @@ tests/test_train.py:
   11: from audiotools import AudioSignal
 ```
 
+除了 AudioSignal 需要单独实现外，audiotools.ml.decorators 目录下的这几个部分也要实现
+
+```
+ml.BaseModel
+ml.Accelerator
+from audiotools.ml.decorators import timer
+from audiotools.ml.decorators import Tracker
+from audiotools.ml.decorators import when
+
+audiotools.ml.BaseModel.INTERN += ["dac.**"]
+audiotools.ml.BaseModel.EXTERN += ["einops"]
+```
+
+audiotools.data 目录下需要改写的内容
+```
+from audiotools.data import transforms
+from audiotools.data.datasets import AudioDataset
+from audiotools.data.datasets import AudioLoader
+from audiotools.data.datasets import ConcatDataset
+```
+
+除单测外，其余小组件
+```
+from audiotools import metrics
+from audiotools.core import util
+from audiotools import preference as pr
+```
 # 六、测试和验收的考量
 
 - 编写的单测与原 repo 保持一致
