@@ -17,6 +17,8 @@
   * [mattheliu](https://github.com/mattheliu)
   * [UserWangZz](https://github.com/UserWangZz)
   * [jingsongliujing](https://github.com/jingsongliujing)
+  * [E-Pudding](https://github.com/E-Pudding)
+  * [JiehangXie](https://github.com/JiehangXie)
 
 ## 会议议程
 
@@ -35,7 +37,7 @@
 
   经常有用户在多年前的 issue 下再次回复，目前是进行 close 和 lock
 
-* PaddleOCR 海外开发者交流会（某次 PFCC）
+* PaddleOCR 海外开发者交流会（某次 PFCC）[E-Pudding](https://github.com/E-Pudding) [luotao1](https://github.com/luotao1)
 
   以下是从 2024.1.1 ~ 2024.10.17 给 PaddleOCR 仓库合入过 PR 的海外开发者，且给提供了邮寄地址接受了快乐开源礼物，可以尝试邀请 & 讨论下交流会的主题：
 
@@ -48,6 +50,16 @@
   | [MatKollar](https://github.com/MatKollar)  | https://github.com/PaddlePaddle/PaddleOCR/pull/11520 | Slovakia |
   | [taeefnajib](https://github.com/taeefnajib)  | https://github.com/PaddlePaddle/PaddleOCR/pull/13373  | Bangladesh |
   | [zovelsanj](https://github.com/zovelsanj)  | https://github.com/PaddlePaddle/PaddleOCR/pull/12108 | Spain|
+
+* Paddle OCR 识别提取字幕的精准度问题探讨 [JiehangXie](https://github.com/JiehangXie)
+
+  - 【背景】：当前使用 Paddle OCR 进行视频画面的字幕提取，用于生成音频-文本对多模态数据，用于训练语音&多模态模型。
+  - 【实现方案】：开发批处理脚本，用 OCR 识别每一帧，根据上下文不同生成一份包含时间戳的字幕 srt 文件。
+  - 【问题】：当前OCR开源模型识别准确率不足，导致出现
+     - 1）同一句台词有不同的识别结果，时间帧被砍成了若干段；
+     - 2）基于1）的问题尝试增加过滤规则，但发生导致较短的句子被删除，字幕文件高频漏字漏句；
+     - 3）模型精度不足经常出现画面误识别，出现特殊符号，比如#号。
+     - 最终方案的结果是高频出现漏字漏句、出现特殊符号等问题，导致对齐数据的字准率不足，音文不齐，无法通过数据质检。
 
 * 自由发言，可以提需求给大家讨论、提问等
 
