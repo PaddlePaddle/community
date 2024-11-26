@@ -39,16 +39,9 @@ PadddleSpeech 暂无关于 audiotools 的相关实现
 
 # 五、设计思路与实现方案
 
-依次实现以下文件用到的API，并完成相应单测, 与原 audiotools 对齐
+依次实现以下文件用到的API，并完成相应单测, 与原 audiotools 对齐, 各个API与原始 audiotools 的目录相同
 
 ```python
-dac/__init__.py:
-  5  
-  6: import audiotools
-  7  
-  8: audiotools.ml.BaseModel.INTERN += ["dac.**"]
-  9: audiotools.ml.BaseModel.EXTERN += ["einops"]
-  10  
 
 dac/compare/encodec.py:
   1  import torch
@@ -178,9 +171,6 @@ ml.Accelerator
 from audiotools.ml.decorators import timer
 from audiotools.ml.decorators import Tracker
 from audiotools.ml.decorators import when
-
-audiotools.ml.BaseModel.INTERN += ["dac.**"]
-audiotools.ml.BaseModel.EXTERN += ["einops"]
 ```
 
 audiotools.data 目录下需要改写的内容
@@ -197,9 +187,52 @@ from audiotools import metrics
 from audiotools.core import util
 from audiotools import preference as pr
 ```
+
+目录结构在如下, 放置于 audio 下
+```
+.
+├── audiotools
+│   ├── __init__.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── audio_signal.py
+│   │   ├── resample.py
+│   │   └── util.py
+│   ├── data
+│   │   ├── __init__.py
+│   │   ├── datasets.py
+│   │   ├── preprocess.py
+│   │   └── transforms.py
+│   ├── metrics
+│   │   ├── __init__.py
+│   │   └── quality.py
+│   ├── ml
+│   │   ├── __init__.py
+│   │   ├── accelerator.py
+│   │   ├── basemodel.py
+│   │   └── decorators.py
+│   └── requirements.txt
+└── tests
+    ├── audio
+    │   ├── *
+    ├── core
+    │   ├── test_audio_signal.py
+    │   └── test_util.py
+    ├── data
+    │   ├── test_datasets.py
+    │   ├── test_preprocess.py
+    │   └── test_transforms.py
+    ├── metrics
+    │   └── test_quality.py
+    ├── ml
+    │   ├── test_decorators.py
+    │   ├── test_experiment.py
+    │   └── test_model.py
+    └── test_preference.py
+```
 # 六、测试和验收的考量
 
-- 编写的单测与原 repo 保持一致
+- 编写的单测与原 repo 保持一致, test 位置放到 audiotools 同级目录
 
 # 七、可行性分析和排期规划
 
