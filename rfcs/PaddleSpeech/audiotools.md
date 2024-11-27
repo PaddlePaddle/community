@@ -188,7 +188,7 @@ from audiotools.core import util
 from audiotools import preference as pr
 ```
 
-目录结构在如下, 放置于 audio 下
+目录结构在如下, 单测 `tests` 放置于 audio 下, 与 `audiotools` 处于同级目录
 ```
 .
 ├── audiotools
@@ -226,13 +226,12 @@ from audiotools import preference as pr
     │   └── test_quality.py
     ├── ml
     │   ├── test_decorators.py
-    │   ├── test_experiment.py
     │   └── test_model.py
     └── test_preference.py
 ```
 # 六、测试和验收的考量
 
-- 编写的单测与原 repo 保持一致, test 位置放到 audiotools 同级目录
+- 编写的单测与原 repo 保持一致, test 位置放到 audiotools 同级目录, 使用 pytest 全部通过即可
 
 # 七、可行性分析和排期规划
 
