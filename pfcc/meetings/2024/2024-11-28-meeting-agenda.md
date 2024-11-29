@@ -4,7 +4,7 @@
 - 本次会议接入方式：【腾讯会议】
   - 会议密码：\*\*\*\*（群内通知）
   - [点击链接入会](https://meeting.tencent.com/dm/Clrub5hDh78M)，或添加至会议列表
-- 本次会议主席：肖宇檬（[GoldenStain](https://github.com/GoldenStain)）
+- 本次会议主席：刘卓鑫（[mattheliu](https://github.com/mattheliu)）
 - 本次会议副主席：空缺
 
 ## 会议议程
