@@ -6,6 +6,7 @@
 - 本次地点：线上会议
 - 参会人：本次会议共有 49 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席莹莹 @[E-Pudding](https://github.com/E-Pudding) 主持。
 - 会议主题：《第四期启航计划/快乐开源专题任务介绍》
+- 录屏链接：https://meeting.tencent.com/crm/KDooGwqe25
 
 ## 会议纪要
 
