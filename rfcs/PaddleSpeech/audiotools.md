@@ -163,7 +163,7 @@ tests/test_train.py:
   11: from audiotools import AudioSignal
 ```
 
-除了 AudioSignal 需要单独实现外，audiotools.ml.decorators 目录下的这几个部分也要实现
+即除了 `AudioSignal` 需要单独实现外，audiotools.ml.decorators 目录下的这几个部分也要实现
 
 ```
 ml.BaseModel
@@ -214,7 +214,7 @@ from audiotools import preference as pr
 │   └── requirements.txt
 └── tests
     ├── audio
-    │   ├── *
+    │   ├── * 放置测试所用到的 wav / mp3 音频文件
     ├── core
     │   ├── test_audio_signal.py
     │   └── test_util.py
@@ -229,6 +229,31 @@ from audiotools import preference as pr
     │   └── test_model.py
     └── test_preference.py
 ```
+
+由于 audiotools 使用到了 julius, 而 julius 依赖于 torch, 所以也需要实现 julius 中的函数, 并写相关单测:
+```
+fft_conv1d
+FFTConv1d
+LowPassFilters
+LowPassFilter
+lowpass_filters
+lowpass_filter
+HighPassFilters
+HighPassFilter
+highpass_filters
+highpass_filter
+SplitBands
+split_bands
+```
+
+相关单测放置在:
+```
+tests/core/test_bands.py
+tests/core/test_fftconv.py
+tests/core/test_highpass.py
+tests/core/test_lowpass.py
+```
+
 # 六、测试和验收的考量
 
 - 编写的单测与原 repo 保持一致, test 位置放到 audiotools 同级目录, 使用 pytest 全部通过即可
