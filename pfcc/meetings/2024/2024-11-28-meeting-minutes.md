@@ -12,18 +12,18 @@
 1. 新人介绍：@[MrXnneHang](https://github.com/MrXnneHang)（5 min）
 2. 启航计划/快乐开源专题任务介绍
    - [Typo 清理计划](https://github.com/PaddlePaddle/Paddle/issues/69377) @[MrXnneHang](https://github.com/MrXnneHang) (5 min)
-   - 任务类型：修复代码中的 typo
+     + 任务类型：修复代码中的 typo
    - [CININ编译器后端Pass改造](https://github.com/PaddlePaddle/Paddle/issues/69639) @[Hongqing-work](https://github.com/Hongqing-work) (20 min)
-   - 任务类型：后端pass改造
-     可参考PR
-     [[CINN][Backend Pass Update] Update IfFusion pass #69611](https://github.com/PaddlePaddle/Paddle/pull/69611)
-     使用BlockPass改造的合并具有相同条件的连续If的转换函数
-     [[CINN]Backend IR and pass refactoring #69454](https://github.com/PaddlePaddle/Paddle/pull/69454)
-     可参考其中的stmt_converter/ir_printer进行对stmt类型敏感的定制化访问
+     + 任务类型：后端pass改造
+     + 可参考PR
+     + [[CINN][Backend Pass Update] Update IfFusion pass #69611](https://github.com/PaddlePaddle/Paddle/pull/69611)
+       使用BlockPass改造的合并具有相同条件的连续If的转换函数
+     + [[CINN]Backend IR and pass refactoring #69454](https://github.com/PaddlePaddle/Paddle/pull/69454)
+       可参考其中的stmt_converter/ir_printer进行对stmt类型敏感的定制化访问
    - [PaddleMIX 快乐开源活动](https://github.com/PaddlePaddle/PaddleMIX/issues/787) @[nemonameless](https://github.com/nemonameless) @[luyao-cv](https://github.com/luyao-cv)
      @[cheng221](https://github.com/cheng221) @[WFLiu0327](https://github.com/WFLiu0327) @[yangrongxinuser](https://github.com/yangrongxinuser) (20 min)
-   - 任务类型：文档完善及撰写、单测、模型训练及复现
-     可参考PR
-     [MiniCPM-V 2.6 完善](https://github.com/PaddlePaddle/PaddleMIX/pull/843)
-     [LLaVA-OneVision 模型推理](https://github.com/PaddlePaddle/PaddleMIX/pull/796)
-     [MiniCPM-V 2.6 推理](https://github.com/PaddlePaddle/PaddleMIX/pull/796)
+     + 任务类型：文档完善及撰写、单测、模型训练及复现
+     + 可参考PR
+     + [MiniCPM-V 2.6 完善](https://github.com/PaddlePaddle/PaddleMIX/pull/843)
+     + [LLaVA-OneVision 模型推理](https://github.com/PaddlePaddle/PaddleMIX/pull/796)
+     + [MiniCPM-V 2.6 推理](https://github.com/PaddlePaddle/PaddleMIX/pull/796)
