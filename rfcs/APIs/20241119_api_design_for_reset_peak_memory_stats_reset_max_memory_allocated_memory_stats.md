@@ -126,6 +126,31 @@ public:
 `DeviceCachingAllocator`类的`resetPeakStats`函数将`DeviceStats`类中的所有相关参数从`peak`改为`current`。
 
 ```C++
+struct DeviceStats {
+  // COUNT: allocations requested by client code
+  StatArray allocation;
+  // COUNT: number of allocated segments from device memory allocation.
+  StatArray segment;
+  // COUNT: number of active memory blocks (allocated or used by stream)
+  StatArray active;
+  // COUNT: number of inactive, split memory blocks (unallocated but can't be
+  // released via device memory deallocation)
+  StatArray inactive_split;
+
+  // SUM: bytes allocated by this memory alocator
+  StatArray allocated_bytes;
+  // SUM: bytes reserved by this memory allocator (both free and used)
+  StatArray reserved_bytes;
+  // SUM: bytes within active memory blocks
+  StatArray active_bytes;
+  // SUM: bytes within inactive, split memory blocks
+  StatArray inactive_split_bytes;
+  // SUM: bytes requested by client code
+  StatArray requested_bytes;
+
+  // others ...
+}
+
 class DeviceCachingAllocator {
  private:
   // lock around all operations
@@ -159,7 +184,7 @@ class DeviceCachingAllocator {
 
 #### Python 接口
 
-PyTorch中的`reset_peak_memory_stats`函数是通过调用`reset_peak_memory_stats`函数实现，即会将所有的内存状态重置。
+PyTorch中的`reset_max_memory_allocated`函数是通过调用`reset_peak_memory_stats`函数实现，即会将所有的内存状态重置。
 
 ```python
 def reset_max_memory_allocated(device: Union[Device, int] = None) -> None:
@@ -473,7 +498,7 @@ PYBIND11_MODULE(_pywrap_tfe, m) {
 
 # 四、对比分析
 
-由于 PyTorch 中的函数结构更符合飞浆的要求，因此可以参考 PyTorch 中的函数实现。
+由于 PyTorch 中的函数结构更符合飞桨的要求，因此可以参考 PyTorch 中的函数实现。
 
 # 五、设计思路与实现方案
 
