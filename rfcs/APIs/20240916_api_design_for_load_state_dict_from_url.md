@@ -349,7 +349,7 @@ def device_guard(device="cpu", dev_id=0):
     finally:
         paddle.set_device(origin_device)
 
-因为在paddlenlp_load中使用过该参数，因此我们采用同样的设计思路在该api下使用map_location参数
+经过多方面调查，最后认为，因为在paddlenlp_load中使用过该参数，因此我采用同样的设计思路在该api下使用map_location参数
 ```
 
 
