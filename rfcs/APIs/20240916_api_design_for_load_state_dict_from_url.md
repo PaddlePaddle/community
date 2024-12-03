@@ -326,7 +326,9 @@ def _get_paddle_home():
     return paddle_home
 ```
 
-- 补充：**map_location=None**的设计思路
+- **map_location=None**的设计思路
+- 结论：经过多方面调查，最后认为，因为在paddlenlp_load中使用过该参数，因此我采用同样的设计思路在该api下使用map_location参数。
+  函数paddlenlp_load的参考链接：https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/utils.py
 
 ```
 def paddlenlp_load(path, map_location="cpu"):
@@ -349,15 +351,14 @@ def device_guard(device="cpu", dev_id=0):
     finally:
         paddle.set_device(origin_device)
 
-经过多方面调查，最后认为，因为在paddlenlp_load中使用过该参数，因此我采用同样的设计思路在该api下使用map_location参数
 ```
 
 
-- 补充：**weights_only=False**的设计思路
-
+- **weights_only=False**的设计思路
+- 结论：该参数主要是用来————如果为 True，则只会加载权重，而不会加载复杂的序列化对象。建议用于不受信任的来源。
+  然而，当前paddle的权重文件.pdparams文件（选择了resnet18.pdparams分析）打印出来结果如下代码块所示，
+  可以发现，并不存在其它非权重信息，并且也不存在类似于model的键，将权重分块和其它信息分隔开，因此该参数当前并不具有现实意义，对齐paddle.load，建议删除或者后续有需要再开发。
 ```
-该参数主要是用来————如果为 True，则只会加载权重，而不会加载复杂的序列化对象。建议用于不受信任的来源。
-然而，当前paddle的权重文件.pdparams文件（选择了resnet18.pdparams分析）打印出来结果如下：
 Weight keys and shapes:
 conv1.weight: [64, 3, 7, 7]
 bn1.weight: [64]
@@ -462,7 +463,6 @@ layer4.1.bn2._variance: [512]
 fc.weight: [512, 1000]
 fc.bias: [1000]
 
-可以发现，并不存在其它非权重信息，并且也不存在类似于model的键，将权重分块和其它信息分隔开，因此该参数当前并不具有现实意义，对齐paddle.load，建议删除或者后续有需要再开发。
 ```
 
 
