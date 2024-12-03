@@ -52,7 +52,7 @@
     - Return type
         - [*Dict*](https://docs.python.org/3/library/typing.html#typing.Dict)[[str](https://docs.python.org/3/library/stdtypes.html#str), [*Any*](https://docs.python.org/3/library/typing.html#typing.Any)]
 
-### 实现逻辑 
+### 实现逻辑
 
 #### `Python` 端
 
@@ -120,7 +120,7 @@ model = hub.load("https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classif
 
   ```
   from tensorflow.keras.applications import MobileNetV2
-  
+
   # 加载预训练的 MobileNetV2 模型
   model = MobileNetV2(weights='imagenet')
   ```
@@ -223,7 +223,7 @@ def download_url_to_file(url: str, dst: str, hash_prefix: Optional[str] = None, 
         progress (bool, optional): whether or not to display a progress bar to stderr
             Default: True
 
-    Reference: 
+    Reference:
         https://github.com/pytorch/pytorch/blob/main/torch/hub.py
     """
     file_size = None
@@ -326,6 +326,144 @@ def _get_paddle_home():
     return paddle_home
 ```
 
+- **map_location=None**的设计思路
+- 结论：经过多方面调查，最后认为，因为在paddlenlp_load中使用过该参数，因此我采用同样的设计思路在该api下使用map_location参数。
+  函数paddlenlp_load的参考链接：https://github.com/PaddlePaddle/PaddleNLP/blob/develop/paddlenlp/transformers/utils.py
+
+```
+def paddlenlp_load(path, map_location="cpu"):
+    assert map_location in ["cpu", "gpu", "xpu", "npu", "numpy", "np"]
+    if map_location in ["numpy", "np"]:
+        return paddle.load(path, return_numpy=True)
+    else:
+        with device_guard(map_location):
+            return paddle.load(path)
+
+@contextlib.contextmanager
+def device_guard(device="cpu", dev_id=0):
+    origin_device = paddle.device.get_device()
+    if device == "cpu":
+        paddle.set_device(device)
+    elif device in ["gpu", "xpu", "npu"]:
+        paddle.set_device("{}:{}".format(device, dev_id))
+    try:
+        yield
+    finally:
+        paddle.set_device(origin_device)
+
+```
+
+
+- **weights_only=False**的设计思路
+- 结论：该参数主要是用来————如果为 True，则只会加载权重，而不会加载复杂的序列化对象。建议用于不受信任的来源。
+  然而，当前paddle的权重文件.pdparams文件（选择了resnet18.pdparams分析）打印出来结果如下代码块所示，
+  可以发现，并不存在其它非权重信息，并且也不存在类似于model的键，将权重分块和其它信息分隔开，因此该参数当前并不具有现实意义，对齐paddle.load，建议删除或者后续有需要再开发。
+```
+Weight keys and shapes:
+conv1.weight: [64, 3, 7, 7]
+bn1.weight: [64]
+bn1.bias: [64]
+bn1._mean: [64]
+bn1._variance: [64]
+layer1.0.conv1.weight: [64, 64, 3, 3]
+layer1.0.bn1.weight: [64]
+layer1.0.bn1.bias: [64]
+layer1.0.bn1._mean: [64]
+layer1.0.bn1._variance: [64]
+layer1.0.conv2.weight: [64, 64, 3, 3]
+layer1.0.bn2.weight: [64]
+layer1.0.bn2.bias: [64]
+layer1.0.bn2._mean: [64]
+layer1.0.bn2._variance: [64]
+layer1.1.conv1.weight: [64, 64, 3, 3]
+layer1.1.bn1.weight: [64]
+layer1.1.bn1.bias: [64]
+layer1.1.bn1._mean: [64]
+layer1.1.bn1._variance: [64]
+layer1.1.conv2.weight: [64, 64, 3, 3]
+layer1.1.bn2.weight: [64]
+layer1.1.bn2.bias: [64]
+layer1.1.bn2._mean: [64]
+layer1.1.bn2._variance: [64]
+layer2.0.conv1.weight: [128, 64, 3, 3]
+layer2.0.bn1.weight: [128]
+layer2.0.bn1.bias: [128]
+layer2.0.bn1._mean: [128]
+layer2.0.bn1._variance: [128]
+layer2.0.conv2.weight: [128, 128, 3, 3]
+layer2.0.bn2.weight: [128]
+layer2.0.bn2.bias: [128]
+layer2.0.bn2._mean: [128]
+layer2.0.bn2._variance: [128]
+layer2.0.downsample.0.weight: [128, 64, 1, 1]
+layer2.0.downsample.1.weight: [128]
+layer2.0.downsample.1.bias: [128]
+layer2.0.downsample.1._mean: [128]
+layer2.0.downsample.1._variance: [128]
+layer2.1.conv1.weight: [128, 128, 3, 3]
+layer2.1.bn1.weight: [128]
+layer2.1.bn1.bias: [128]
+layer2.1.bn1._mean: [128]
+layer2.1.bn1._variance: [128]
+layer2.1.conv2.weight: [128, 128, 3, 3]
+layer2.1.bn2.weight: [128]
+layer2.1.bn2.bias: [128]
+layer2.1.bn2._mean: [128]
+layer2.1.bn2._variance: [128]
+layer3.0.conv1.weight: [256, 128, 3, 3]
+layer3.0.bn1.weight: [256]
+layer3.0.bn1.bias: [256]
+layer3.0.bn1._mean: [256]
+layer3.0.bn1._variance: [256]
+layer3.0.conv2.weight: [256, 256, 3, 3]
+layer3.0.bn2.weight: [256]
+layer3.0.bn2.bias: [256]
+layer3.0.bn2._mean: [256]
+layer3.0.bn2._variance: [256]
+layer3.0.downsample.0.weight: [256, 128, 1, 1]
+layer3.0.downsample.1.weight: [256]
+layer3.0.downsample.1.bias: [256]
+layer3.0.downsample.1._mean: [256]
+layer3.0.downsample.1._variance: [256]
+layer3.1.conv1.weight: [256, 256, 3, 3]
+layer3.1.bn1.weight: [256]
+layer3.1.bn1.bias: [256]
+layer3.1.bn1._mean: [256]
+layer3.1.bn1._variance: [256]
+layer3.1.conv2.weight: [256, 256, 3, 3]
+layer3.1.bn2.weight: [256]
+layer3.1.bn2.bias: [256]
+layer3.1.bn2._mean: [256]
+layer3.1.bn2._variance: [256]
+layer4.0.conv1.weight: [512, 256, 3, 3]
+layer4.0.bn1.weight: [512]
+layer4.0.bn1.bias: [512]
+layer4.0.bn1._mean: [512]
+layer4.0.bn1._variance: [512]
+layer4.0.conv2.weight: [512, 512, 3, 3]
+layer4.0.bn2.weight: [512]
+layer4.0.bn2.bias: [512]
+layer4.0.bn2._mean: [512]
+layer4.0.bn2._variance: [512]
+layer4.0.downsample.0.weight: [512, 256, 1, 1]
+layer4.0.downsample.1.weight: [512]
+layer4.0.downsample.1.bias: [512]
+layer4.0.downsample.1._mean: [512]
+layer4.0.downsample.1._variance: [512]
+layer4.1.conv1.weight: [512, 512, 3, 3]
+layer4.1.bn1.weight: [512]
+layer4.1.bn1.bias: [512]
+layer4.1.bn1._mean: [512]
+layer4.1.bn1._variance: [512]
+layer4.1.conv2.weight: [512, 512, 3, 3]
+layer4.1.bn2.weight: [512]
+layer4.1.bn2.bias: [512]
+layer4.1.bn2._mean: [512]
+layer4.1.bn2._variance: [512]
+fc.weight: [512, 1000]
+fc.bias: [1000]
+
+```
 
 
 # 六、测试和验收的考量
@@ -333,9 +471,9 @@ def _get_paddle_home():
 测试考虑的case如下：
 
     1.用Paddle.hub.load_state_dict_from_url()加载url，下载模型权重；同时手动下载对应url的多个模型权重文件，用paddle.hub.load()加载文件，进行结果对齐；
-    
+
     2.用Paddle.hub.load_state_dict_from_url()加载url，下载压缩的模型权重，即ZIP格式文件；同时手动下载对应url的多个模型权重ZIP文件，并手动解压，用paddle.hub.load()加载文件，进行结果对齐；
-    
+
     3.用Paddle.hub.load_state_dict_from_url()加载已经下载的模型权重文件；同时用paddle.hub.load()加载对应的模型权重文件，进行结果对齐；
 
 - **硬件场景**
