@@ -529,7 +529,7 @@ paddle.device.cuda.memory_stats
 
 ### `cuda.reset_peak_memory_stats`的实现
 
-设计`ResetPeakMemoryStats`函数，将`StatRegistry`类（单例类）的变量`stat_map_`存储的相关的`StatBase`中的peak值改为current值。
+设计`ResetPeakMemoryStats`函数，将`StatRegistry`类（单例类）的变量`stat_map_`存储的相关的`StatBase`中的peak值改为current值。同时还需要各个线程中的peak值改为current值。
 
 ```C++
 void ResetPeakMemoryStats(int dev_id) {
@@ -545,6 +545,15 @@ class Stat : public StatBase {
   void ResetPeakValue() {
     int64_t current_value = GetCurrentValue();
     peak_value_.store(current_value, std::memory_order_relaxed);
+
+    std::unordered_map<uint64_t, std::reference_wrapper<ThreadLocalStatType>> thread_local_stats =
+      ThreadDataRegistry<ThreadLocalStatType>::GetInstance().GetAllThreadDataByRef();
+
+    for (auto pair : thread_local_stats) {
+      pair.second.get().peak = pair.second.get().current;
+    }
+
+    VLOG(8) << "Reset peak_value to current_value = " << current_value;
   }
 };
 ```
