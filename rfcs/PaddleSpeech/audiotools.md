@@ -6,7 +6,7 @@
 | ---- | ----------------- |
 | 提交作者 | DrRyanhuang |
 | 提交时间 | 2024-11-17 |
-| 版本号  | v1.0 |
+| 版本号  | v1.1 |
 | 依赖   ||
 | 文件名  | audiotools.md|
 
@@ -195,7 +195,12 @@ from audiotools import preference as pr
 │   ├── __init__.py
 │   ├── core
 │   │   ├── __init__.py
+│   │   ├── _julius.py
 │   │   ├── audio_signal.py
+│   │   ├── dsp.py
+│   │   ├── effects.py
+│   │   ├── ffmpeg.py
+│   │   ├── loudness.py
 │   │   ├── resample.py
 │   │   └── util.py
 │   ├── data
@@ -211,23 +216,31 @@ from audiotools import preference as pr
 │   │   ├── accelerator.py
 │   │   ├── basemodel.py
 │   │   └── decorators.py
-│   └── requirements.txt
-└── tests
-    ├── audio
-    │   ├── * 放置测试所用到的 wav / mp3 音频文件
-    ├── core
-    │   ├── test_audio_signal.py
-    │   └── test_util.py
-    ├── data
-    │   ├── test_datasets.py
-    │   ├── test_preprocess.py
-    │   └── test_transforms.py
-    ├── metrics
-    │   └── test_quality.py
-    ├── ml
-    │   ├── test_decorators.py
-    │   └── test_model.py
-    └── test_preference.py
+│   ├── requirements.txt
+│   └── post.py
+├── tests
+│   └── audiotools
+│       ├── audio
+│       │   ├── * 放置测试所用到的 wav / mp3 音频文件
+│       ├── core
+│       │   ├── test_audio_signal.py
+│       │   ├── test_bands.py
+│       │   ├── test_fftconv.py
+│       │   ├── test_highpass.py
+│       │   ├── test_loudness.py
+│       │   ├── test_lowpass.py
+│       │   └── test_util.py
+│       ├── data
+│       │   ├── test_datasets.py
+│       │   ├── test_preprocess.py
+│       │   └── test_transforms.py
+│       ├── ml
+│       │   ├── test_decorators.py
+│       │   └── test_model.py
+│       ├── regression
+│       │   └── transforms
+│       │       └── *.wav -- 放置测试 transforms 所用到的 wav / mp3 音频文件
+│       └── test_post.py
 ```
 
 由于 audiotools 使用到了 julius, 而 julius 依赖于 torch, 所以也需要实现 julius 中的函数, 并写相关单测:
@@ -248,10 +261,10 @@ split_bands
 
 相关单测放置在:
 ```
-tests/core/test_bands.py
-tests/core/test_fftconv.py
-tests/core/test_highpass.py
-tests/core/test_lowpass.py
+tests/audiotools/core/test_bands.py
+tests/audiotools/core/test_fftconv.py
+tests/audiotools/core/test_highpass.py
+tests/audiotools/core/test_lowpass.py
 ```
 
 # 六、测试和验收的考量
