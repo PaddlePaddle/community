@@ -25,6 +25,7 @@
   * 近期 Pull Request 回顾
 * 引入机器人自动回复，示例：https://github.com/PaddlePaddle/PaddleOCR/issues/14283
 * 分享好玩儿的 OCR 项目：[manga-ocr](https://github.com/kha-white/manga-ocr), [MangaOCR](https://github.com/gnurt2041/MangaOCR), [ manga-ocr-base](https://huggingface.co/kha-white/manga-ocr-base)
+* [PFCCLab/PPOCRLabel](https://github.com/PFCCLab/PPOCRLabel/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aclosed) 拉新人加入社区，如 BotAndyGao、yes-github
 * 自由发言，可以提需求给大家讨论、提问等
 * 确定下次的部分议题及召开时间
 
