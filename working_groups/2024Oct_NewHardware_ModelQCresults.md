@@ -89,7 +89,7 @@
 | OCRNet_HRNet-W18                          | ✓        | ✓      | X        | ✓      |
 | OCRNet_HRNet-W48                          | ✓        | ✓      | X        | ✓      |
 | PatchTST                                  | X        | ✓      | ✓        | X      |
-| PatchTST_ad                               | X        | ✓      | ﻿         | X      |
+| PatchTST_ad                               | X        | ✓      | ﻿X        | X      |
 | PicoDet_layout_1x                         | ✓        | ✓      | ✓        | X      |
 | PicoDet_LCNet_x2_5_face                   | X        | ✓      | ✓        | X      |
 | PicoDet-L                                 | X        | ✓      | ✓        | ✓      |
