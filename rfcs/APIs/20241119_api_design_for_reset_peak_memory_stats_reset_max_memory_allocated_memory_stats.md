@@ -529,20 +529,19 @@ paddle.device.cuda.memory_stats
 
 ### `cuda.reset_peak_memory_stats`的实现
 
-设计`ResetPeakMemoryStats`函数，将`StatRegistry`类（单例类）的变量`stat_map_`存储的相关的`StatBase`中的peak值改为current值。同时还需要各个线程中的peak值改为current值。
+在`Stat`类中，加入`ResetPeakValue`函数，将类中记录的`peak_value_`改为当前的`current_value`的值。同时将各个线程中存储的`peak`值改为`current`值。  
+在`StatBase`类中加入`ResetPeakValue`虚函数接口。
 
 ```C++
-void ResetPeakMemoryStats(int dev_id) {
-}
-```
+class StatBase {
+ public:
+  virtual void ResetPeakValue() = 0;
+};
 
-可能需要修改`Stat`类，例如在类内直接添加函数或者添加一个友元函数。
-
-```C++
 template <typename ThreadLocalStatType>
 class Stat : public StatBase {
   // 新增函数，用于将 peak_value_ 设置为 current_value_
-  void ResetPeakValue() {
+  void ResetPeakValue() override {
     int64_t current_value = GetCurrentValue();
     peak_value_.store(current_value, std::memory_order_relaxed);
 
@@ -560,21 +559,14 @@ class Stat : public StatBase {
 
 ### `cuda.reset_max_memory_allocated`的实现
 
-设计`ResetMaxMemoryAllocated`函数，将变量`stat_map_`中存储的关于"Allocated"的部分的peak值改为current值。  
-
-```C++
-void ResetMaxMemoryAllocated(int dev_id) {
-}
-```
-
-另一种实现方式：采用PyTorch中的方式，不设计底层`ResetMaxMemoryAllocated`函数，`reset_max_memory_allocated`实际调用`ResetPeakMemoryStats`函数。
+采用PyTorch中的方式，不设计底层`ResetMaxMemoryAllocated`函数，`reset_max_memory_allocated`实际调用`ResetPeakMemoryStats`函数。
 
 ### `cuda.memory_stats`的实现
 
-设计`MemoryStats`函数，将所有内存信息存入unordered_map中。例如：
+设计`device_memory_stats`函数，将所有内存信息存入字典中。内存信息通过已有的函数直接获取，如`API实现方案`中的`device_memory_stats`所示。
 
 ```C++
-unordered_map<string, long unsigned int> stat_info_map = {
+py::dict dict = {
   {"memory.allocated.peak", 0},
   {"memory.allocated.current", 0},
   {"memory.reserved.peak", 0},
@@ -582,42 +574,72 @@ unordered_map<string, long unsigned int> stat_info_map = {
 }
 ```
 
-可能需要增加一个函数获取`stat_map_`
-
-```C++
-class StatRegistry {
-public:
-  const std::unordered_map<std::string, StatBase*>& GetStatMap() const {
-    return stat_map_;
-  }
-}
-```
-
-遍历`stat_map_`，获取每个stat的current和peak值。  
-
-另一种实现方式：在外层的python函数中直接设定有哪些内存信息需要遍历，例如只有"allocated"和"reserved"信息需要遍历，则可以直接调用相关函数获取peak值和current值。
-
 ## API实现方案
 
-通过 PYBIND11 将C++函数注册到Python模块中。例如：
+通过PYBIND11将C++函数注册到Python模块中。
 
 ```C++
 PYBIND11_MODULE(libpaddle, m){
-  m.def("device_reset_peak_memory_stats", memory::ResetPeakMemoryStats);
-  m.def("device_reset_max_memory_allocated", memory::ResetMaxMemoryAllocated);
-  m.def("device_memory_stats", []() {
-    py::dict result;
-    for (const auto& pair : stat_info_map) {
-        result[pair.first.c_str()] = pair.second;
-    }
-    return result;
+  m.def("device_memory_stat_reset_peak_value", memory::DeviceMemoryStatResetPeakValue);
+
+  m.def("device_memory_stats", [](int dev_id) {
+    py::dict dict;
+    dict["memory.allocated.current"] = memory::DeviceMemoryStatCurrentValue("Allocated", dev_id);
+    dict["memory.allocated.peak"] = memory::DeviceMemoryStatPeakValue("Allocated", dev_id);
+    dict["memory.reserved.current"] = memory::DeviceMemoryStatCurrentValue("Reserved", dev_id);
+    dict["memory.reserved.peak"] = memory::DeviceMemoryStatPeakValue("Reserved", dev_id);
+    return dict;
   });
 }
+```
+
+### `cuda.reset_peak_memory_stats`的实现
+
+调用PYBIND11中注册的`device_memory_stat_reset_peak_value`函数，重置`Allocated Memory`和`Reserved Memory`。
+
+```python
+def reset_peak_memory_stats(device: _CudaPlaceLike | None = None) -> None:
+    device_id = extract_cuda_device_id(device, op_name=name)
+    core.device_memory_stat_reset_peak_value("Allocated", device_id)
+    core.device_memory_stat_reset_peak_value("Reserved", device_id)
+```
+
+### `cuda.reset_max_memory_allocated`的实现
+
+直接调用`reset_peak_memory_stats`函数实现。
+
+```python
+def reset_max_memory_allocated(device: _CudaPlaceLike | None = None) -> None:
+    logging.warning(
+        "paddle.device.cuda.reset_max_memory_allocated calls paddle.device.cuda.reset_peak_memory_stats, "
+        "which resets both allocated and reserved peak memory stats."
+    )
+    reset_peak_memory_stats(device)
+```
+
+### `cuda.memory_stats`的实现
+
+调用PYBIND11中注册的`device_memory_stats`函数，获取包含内存分配器统计信息的字典
+
+```python
+def memory_stats(device: _CudaPlaceLike | None = None) -> dict:
+    device_id = extract_cuda_device_id(device, op_name=name)
+    return core.device_memory_stats(device_id)
 ```
 
 # 六、测试和验收的考量
 
 ## 单元测试
+
+### `DeviceMemoryStatResetPeakValue`和`HostMemoryStatResetPeakValue`
+
+#### 功能测试
+  - 更新一定量的内存。
+  - 调用`DeviceMemoryStatResetPeakValue`或者`HostMemoryStatResetPeakValue`函数。
+  - 确保峰值被重置为当前值。
+
+#### 验证重置效果
+  - 重置后，获取当前的峰值内存使用量，应该等于当前的内存使用量。
 
 ### `reset_peak_memory_stats`
 
@@ -643,19 +665,19 @@ PYBIND11_MODULE(libpaddle, m){
 
 #### 数据正确性测试
   - 分配和释放不同大小的内存块，调用 `memory_stats`，验证返回的数据是否准确反映当前的内存使用情况。
-  - 检查返回的字典或数据结构中，各个字段是否正确，例如已用内存、空闲内存等。
+  - 检查返回的字典或数据结构中，各个字段是否正确。
 
 
 # 七、影响面
 
 ## 需要进一步讨论的问题
-1. 是否对`Stat`类进行修改。
-2. 目前`StatRegistry`类中是否只注册了`Allocated`和`Reserved`。
-3. 是否参考Pytorch注册更多的内存信息标签。
+1. 是否对`Stat`类进行修改。（对`Stat`类进行了修改）
+2. 目前`StatRegistry`类中是否只注册了`Allocated`和`Reserved`。（目前只注册了`Allocated`和`Reserved`）
+3. 是否参考Pytorch注册更多的内存信息标签。（目前不需要注册其他内存信息标签）
 
 ## 对二次开发用户的影响
 
-如果修改`Stat`类，类中新增的函数会暴露给二次开发用户。
+`Stat`类中新增的函数`ResetPeakValue`会暴露给二次开发用户。
 
 # 八、排期规划
 
@@ -663,3 +685,11 @@ PYBIND11_MODULE(libpaddle, m){
 2. 2024/12/08前提交第一版代码。
 3. 2024/12/14前提交优化后的代码和API文档。
 
+# 九、参考资料
+
+飞桨内存池统计方案：
+https://patentimages.storage.googleapis.com/86/71/69/a6a95a1bcb9b05/CN114610575B.pdf
+
+# 十、致谢
+
+感谢陈锐彪老师和骆涛老师在飞桨GPU内存管理方面的指导。
