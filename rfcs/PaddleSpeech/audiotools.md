@@ -192,6 +192,7 @@ from audiotools import preference as pr
 ```
 .
 ├── audiotools
+│   ├── README.md --- 用于介绍 audiotools
 │   ├── __init__.py
 │   ├── core
 │   │   ├── __init__.py
@@ -220,8 +221,6 @@ from audiotools import preference as pr
 │   └── post.py
 ├── tests
 │   └── audiotools
-│       ├── audio
-│       │   ├── * 放置测试所用到的 wav / mp3 音频文件
 │       ├── core
 │       │   ├── test_audio_signal.py
 │       │   ├── test_bands.py
@@ -237,9 +236,6 @@ from audiotools import preference as pr
 │       ├── ml
 │       │   ├── test_decorators.py
 │       │   └── test_model.py
-│       ├── regression
-│       │   └── transforms
-│       │       └── *.wav -- 放置测试 transforms 所用到的 wav / mp3 音频文件
 │       └── test_post.py
 ```
 
@@ -266,6 +262,20 @@ tests/audiotools/core/test_fftconv.py
 tests/audiotools/core/test_highpass.py
 tests/audiotools/core/test_lowpass.py
 ```
+
+在测试时会自动下载相应的音频文件，会放置在这两个位置：
+```
+.
+├── audiotools
+├── tests
+│   └── audiotools
+│       ├── audio
+│       │   ├── * 放置测试所用到的 wav / mp3 音频文件
+│       ├── regression
+│       │   └── transforms
+│       │       └── *.wav -- 放置测试 transforms 所用到的 wav / mp3 音频文件
+```
+
 
 # 六、测试和验收的考量
 
