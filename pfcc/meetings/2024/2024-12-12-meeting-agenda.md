@@ -11,7 +11,7 @@
 
 1. 新人介绍：@[sunnychenxiwang](https://github.com/sunnychenxiwang) & @[LittleHerozzzx](https://github.com/LittleHerozzzx) & @[zty-king](https://github.com/zty-king) 三位同学时间冲突，群内文字介绍（5 min）
 2. 启航计划/快乐开源专题任务介绍
-   - [CINN编译器后端Pass注释添加](https://github.com/PaddlePaddle/Paddle/issues/70113) @[Hongqing-work](https://github.com/Hongqing-work) @[gongshaotian](https://github.com/gongshaotian)(20 min)
-   - [Paddle Tensor 规范化](https://github.com/PaddlePaddle/Paddle/issues/69908) @[HydrogenSulfate](https://github.com/HydrogenSulfate) (15 min)
-   - 北京大学——健康度量框架 Measurement of OSS Projects’ Health @[chyyy510](https://github.com/chyyy510) (40 min)
-   
+   - [Paddle Tensor 规范化（第2期）](https://github.com/PaddlePaddle/Paddle/issues/69908) @[HydrogenSulfate](https://github.com/HydrogenSulfate) (10 min)
+   - [CINN编译器后端Pass注释添加](https://github.com/PaddlePaddle/Paddle/issues/70113) @[Hongqing-work](https://github.com/Hongqing-work) @[gongshaotian](https://github.com/gongshaotian) (15 min)
+3. 开源项目健康度量 Measurement of OSS Projects’ Health @[chyyy510](https://github.com/chyyy510) (25 min)
+4. Wave Submit 12月26日开发者活动介绍（5 min）@[E-Pudding](https://github.com/E-Pudding) 
