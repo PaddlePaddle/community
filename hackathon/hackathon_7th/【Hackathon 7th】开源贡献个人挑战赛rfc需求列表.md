@@ -33,7 +33,7 @@
 |  24  |  ⭐⭐  | 为 Paddle 新增 EmbeddingBag API                                                                                |        是        |
 |  25  |   ⭐   | 为 Paddle 新增 is_coalesced/sparse_dim/dense_dim API                                                           |        是        |
 |  26  |  ⭐⭐  | 为 Paddle 新增 lu_solve API                                                                                    |        是        |
-|  27  | ⭐⭐⭐ | 为 Paddle 新增 register_parametrization/remove_parametrizations/cached/ParametrizationList/is_parametrized API |        是        |
+|  27  |  ⭐⭐  | 为 Paddle 新增 baddbmm API                                                                                     |        是        |
 |  28  |   ⭐   | 为 `paddle.clip` 进行功能增强                                                                                  |        否        |
 |  29  |   ⭐   | 为 `paddle.grad` 进行功能增强                                                                                  |        否        |
 |  30  |   ⭐   | 为 `paddle.divide` 进行功能增强                                                                                |        否        |
