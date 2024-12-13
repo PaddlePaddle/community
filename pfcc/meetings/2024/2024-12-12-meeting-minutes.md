@@ -1,4 +1,4 @@
-# Paddle Framework Contributor Club 四十九次会议议程
+# Paddle Framework Contributor Club 四十九次会议纪要
 
 - 本次会议时间：2024/12/12 19:00-20:00 (GMT+08:00) 中国标准时间 - 北京
 - 本次地点：线上会议
