@@ -1,12 +1,12 @@
-# paddle.device.cuda.reset_peak_memory_stats / paddle.device.cuda.reset_max_memory_allocated / paddle.device.cuda.reset_max_memory_reserved / paddle.device.cuda.memory_stats 设计文档
+# paddle.device.cuda.reset_max_memory_allocated / paddle.device.cuda.reset_max_memory_reserved 设计文档
 
-| API名称                                                            | paddle.device.cuda.reset_peak_memory_stats / paddle.device.cuda.reset_max_memory_allocated / paddle.device.cuda.reset_max_memory_reserved / paddle.device.cuda.memory_stats |
+| API名称                                                            | paddle.device.cuda.reset_max_memory_allocated / paddle.device.cuda.reset_max_memory_reserved |
 | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | 提交作者<input type="checkbox" class="rowselector hidden">     | Qin-sx                                                                                                                       |
 | 提交时间<input type="checkbox" class="rowselector hidden">     | 2024-11-19                                                                                                                   |
 | 版本号                                                             | V1.0                                                                                                                         |
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本                                                                                                                  |
-| 文件名                                                             | 20241119_api_design_for_reset_peak_memory_stats_reset_max_memory_allocated_memory_stats.md<br>                           |
+| 文件名                                                             | 20241119_api_design_for_reset_max_memory_allocated_reset_max_memory_reserved.md<br>                           |
 
 # 一、概述
 
@@ -16,18 +16,15 @@ https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_7th/%E
 
 ## 2、功能目标
 
-在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下三个支持  
-1. **重置CUDA内存分配器的峰值统计信息**：新增API `reset_peak_memory_stats`，位于`paddle.device.cuda`路径下，用于重置CUDA内存分配器的峰值统计信息。
+在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下两个支持  
 
-2. **重置最大分配的GPU内存的跟踪起点**：新增API `reset_max_memory_allocated`，位于`paddle.device.cuda`路径下，用于重置特定设备上张量占用的最大GPU内存的跟踪起点。
+1. **重置最大分配的GPU内存的跟踪起点**：新增API `reset_max_memory_allocated`，位于`paddle.device.cuda`路径下，用于重置特定设备上张量占用的最大GPU内存的跟踪起点。
 
-3. **重置最大保留的GPU内存的跟踪起点**：新增API `reset_max_memory_reserved`，位于`paddle.device.cuda`路径下，用于重置特定设备上分配器持有的最大GPU内存的跟踪起点。
-
-4. **获取CUDA内存分配器统计信息**：新增API `memory_stats`，位于`paddle.device.cuda`路径下，用于返回包含给定设备CUDA内存分配器统计信息的字典。
+2. **重置最大保留的GPU内存的跟踪起点**：新增API `reset_max_memory_reserved`，位于`paddle.device.cuda`路径下，用于重置特定设备上分配器持有的最大GPU内存的跟踪起点。
 
 ## 3、意义
 
-新增paddle.device.cuda.reset_peak_memory_stats， paddle.device.cuda.reset_max_memory_allocated，paddle.device.cuda.reset_max_memory_reserved，paddle.device.cuda.memory_stats方法，丰富 paddle API。
+新增paddle.device.cuda.reset_max_memory_allocated和paddle.device.cuda.reset_max_memory_reserved丰富 paddle API。
 
 # 二、飞桨现状
 
@@ -38,7 +35,7 @@ https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_7th/%E
 - `memory_allocated`：用于获取给定设备上当前分配给Tensor的显存大小。[API文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/device/cuda/memory_allocated_cn.html#cn-api-paddle-device-cuda-memory-allocated)
 - `memory_reserved`：用于获取给定设备上当前由Allocator管理的显存大小。[API文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/api/paddle/device/cuda/memory_reserved_cn.html#cn-api-paddle-device-cuda-memory-reserved)
 
-然而，飞桨尚未提供类似于`peak_memory_stats`和`memory_stats`这样的API，这些API能够提供更详细的内存使用统计信息。此外，飞桨也没有提供重置`peak_memory_stats`，`max_memory_allocated`和`max_memory_reserved`的API。为了进一步完善内存管理功能，飞桨应该加入`reset_peak_memory_stats`、`reset_max_memory_allocated`、`reset_max_memory_reserved`和`memory_stats`这四个API。这些新增的API将有助于开发者更精确地监控和控制内存使用情况。
+然而，飞桨尚未提供类似于`reset_max_memory_allocated`和`reset_max_memory_reserved`这样的API，这些API能够重置特定设备上GPU内存的峰值统计信息。为了进一步完善内存管理功能，飞桨应该加入`reset_max_memory_allocated`和`reset_max_memory_reserved`API。这些新增的API将有助于开发者更精确地监控和控制内存使用情况。
 
 # 三、业内方案调研
 
@@ -534,13 +531,6 @@ PYBIND11_MODULE(_pywrap_tfe, m) {
 
 ## 命名与参数设计
 
-API `paddle.device.cuda.reset_peak_memory_stats(device: _CudaPlaceLike | None = None) -> None`
-paddle.device.cuda.reset_peak_memory_stats
-----------------------
-参数
-- device (_CudaPlaceLike) - 输入device名称或者序号。
-- None 无返回值。
-
 API `paddle.device.cuda.reset_max_memory_allocated(device: _CudaPlaceLike | None = None) -> None`
 paddle.device.cuda.reset_max_memory_allocated
 ----------------------
@@ -555,16 +545,9 @@ paddle.device.cuda.reset_max_memory_reserved
 - device (_CudaPlaceLike) - 输入device名称或者序号。
 - None 无返回值。
 
-API `paddle.device.cuda.memory_stats(device: _CudaPlaceLike | None = None) -> Dict[str, Any]`
-paddle.device.cuda.memory_stats
-----------------------
-参数
-- device (_CudaPlaceLike) - 输入device名称或者序号。
-- Dict - 返回存储device内存管理信息的字典。
-
 ## 底层设计
 
-### `cuda.reset_peak_memory_stats`的实现
+### `cuda.reset_max_memory_allocated`的实现
 
 在`Stat`类中，加入`ResetPeakValue`函数，将类中记录的`peak_value_`改为当前的`current_value`的值。同时将各个线程中存储的`peak`值改为`current`值。  
 在`StatBase`类中加入`ResetPeakValue`虚函数接口。
@@ -592,28 +575,17 @@ class Stat : public StatBase {
     VLOG(8) << "Reset peak_value to current_value = " << current_value;
   }
 };
+
+void DeviceMemoryStatResetPeakValue(const std::string& stat_type, int dev_id) {
+  StatRegistry::GetInstance()->ResetPeakValue("Device" + stat_type, dev_id);
+}
 ```
 
-### `cuda.reset_max_memory_allocated`的实现
-
-与`reset_peak_memory_stats`函数的实现相似，但是仅重置`Allocated Memory`。
+调用函数时参数输入为`Allocated`，重置`分配给Tensor的显存峰值`。
 
 ### `cuda.reset_max_memory_reserved`的实现
 
-与`reset_peak_memory_stats`函数的实现相似，但是仅重置`Reserved Memory`。
-
-### `cuda.memory_stats`的实现
-
-设计`device_memory_stats`函数，将所有内存信息存入字典中。内存信息通过已有的函数直接获取，如`API实现方案`中的`device_memory_stats`所示。
-
-```C++
-py::dict dict = {
-  {"memory.allocated.peak", 0},
-  {"memory.allocated.current", 0},
-  {"memory.reserved.peak", 0},
-  {"memory.reserved.current", 0}
-}
-```
+与`reset_peak_memory_stats`函数的实现相似，但是调用函数时参数输入为`Reserved`，重置`由Allocator管理的显存峰值`。
 
 ## API实现方案
 
@@ -622,32 +594,12 @@ py::dict dict = {
 ```C++
 PYBIND11_MODULE(libpaddle, m){
   m.def("device_memory_stat_reset_peak_value", memory::DeviceMemoryStatResetPeakValue);
-
-  m.def("device_memory_stats", [](int dev_id) {
-    py::dict dict;
-    dict["memory.allocated.current"] = memory::DeviceMemoryStatCurrentValue("Allocated", dev_id);
-    dict["memory.allocated.peak"] = memory::DeviceMemoryStatPeakValue("Allocated", dev_id);
-    dict["memory.reserved.current"] = memory::DeviceMemoryStatCurrentValue("Reserved", dev_id);
-    dict["memory.reserved.peak"] = memory::DeviceMemoryStatPeakValue("Reserved", dev_id);
-    return dict;
-  });
 }
-```
-
-### `cuda.reset_peak_memory_stats`的实现
-
-调用PYBIND11中注册的`device_memory_stat_reset_peak_value`函数，重置`Allocated Memory`和`Reserved Memory`。
-
-```python
-def reset_peak_memory_stats(device: _CudaPlaceLike | None = None) -> None:
-    device_id = extract_cuda_device_id(device, op_name=name)
-    core.device_memory_stat_reset_peak_value("Allocated", device_id)
-    core.device_memory_stat_reset_peak_value("Reserved", device_id)
 ```
 
 ### `cuda.reset_max_memory_allocated`的实现
 
-调用PYBIND11中注册的`device_memory_stat_reset_peak_value`函数，仅重置`Allocated Memory`
+调用PYBIND11中注册的`device_memory_stat_reset_peak_value`函数，参数输入为`Allocated`（仅重置`分配给Tensor的显存峰值`）。
 
 ```python
 def reset_max_memory_allocated(device: _CudaPlaceLike | None = None) -> None:
@@ -657,22 +609,12 @@ def reset_max_memory_allocated(device: _CudaPlaceLike | None = None) -> None:
 
 ### `cuda.reset_max_memory_reserved`的实现
 
-调用PYBIND11中注册的`device_memory_stat_reset_peak_value`函数，仅重置`Reserved Memory`
+调用PYBIND11中注册的`device_memory_stat_reset_peak_value`函数，参数输入为`Reserved`（仅重置`由Allocator管理的显存峰值`）。
 
 ```python
 def reset_max_memory_reserved(device: _CudaPlaceLike | None = None) -> None:
     device_id = extract_cuda_device_id(device, op_name=name)
     core.device_memory_stat_reset_peak_value("Reserved", device_id)
-```
-
-### `cuda.memory_stats`的实现
-
-调用PYBIND11中注册的`device_memory_stats`函数，获取包含内存分配器统计信息的字典
-
-```python
-def memory_stats(device: _CudaPlaceLike | None = None) -> dict:
-    device_id = extract_cuda_device_id(device, op_name=name)
-    return core.device_memory_stats(device_id)
 ```
 
 # 六、测试和验收的考量
@@ -689,41 +631,25 @@ def memory_stats(device: _CudaPlaceLike | None = None) -> dict:
 #### 验证重置效果
   - 重置后，获取当前的峰值内存使用量，应该等于当前的内存使用量。
 
-### `reset_peak_memory_stats`
-
-#### 功能测试
-  - 分配一定量的内存（例如，创建大型张量），记录峰值内存使用量。
-  - 调用 `reset_peak_memory_stats` 函数。
-  - 再次分配内存，确保新的峰值内存使用量从重置后重新计算。
-
-#### 验证重置效果
-  - 重置后，获取当前的峰值内存使用量，应该等于当前的内存使用量，而不是之前的峰值。
-
 ### `reset_max_memory_allocated`
 
 #### 功能测试
-  - 分配内存，记录最大内存分配量。
+  - 分配内存，记录`分配给Tensor的显存峰值`。
   - 调用 `reset_max_memory_allocated` 函数。
-  - 再次分配内存，验证最大内存分配量从重置后开始统计。
+  - 再次分配内存，验证`分配给Tensor的显存峰值`从重置后开始统计。
 
 #### 验证重置效果
-  - 重置后，获取当前的最大内存分配量，应该等于当前的内存分配量。
+  - 重置后，获取`分配给Tensor的显存峰值`，应该等于`当前分配给Tensor的显存大小`。
 
 ### `reset_max_memory_reserved`
 
 #### 功能测试
-  - 分配内存，记录最大内存保留量。
+  - 分配内存，记录`由Allocator管理的显存峰值`。
   - 调用 `reset_max_memory_allocated` 函数。
-  - 再次分配内存，验证最大内存保留量从重置后开始统计。
+  - 再次分配内存，验证`由Allocator管理的显存峰值`从重置后开始统计。
 
 #### 验证重置效果
-  - 重置后，获取当前的最大内存保留量，应该等于当前的内存保留量。
-
-### `memory_stats`
-
-#### 数据正确性测试
-  - 分配和释放不同大小的内存块，调用 `memory_stats`，验证返回的数据是否准确反映当前的内存使用情况。
-  - 检查返回的字典或数据结构中，各个字段是否正确。
+  - 重置后，获取`由Allocator管理的显存峰值`，应该等于`当前由Allocator管理的显存大小`。
 
 
 # 七、影响面
