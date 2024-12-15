@@ -16,7 +16,7 @@ https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_7th/%E
 
 ## 2、功能目标
 
-在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下两个支持  
+在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下两个支持
 
 1. **重置最大分配的GPU内存的跟踪起点**：新增API `reset_max_memory_allocated`，位于`paddle.device.cuda`路径下，用于重置特定设备上张量占用的最大GPU内存的跟踪起点。
 
@@ -549,7 +549,7 @@ paddle.device.cuda.reset_max_memory_reserved
 
 ### `cuda.reset_max_memory_allocated`的实现
 
-在`Stat`类中，加入`ResetPeakValue`函数，将类中记录的`peak_value_`改为当前的`current_value`的值。同时将各个线程中存储的`peak`值改为`current`值。  
+在`Stat`类中，加入`ResetPeakValue`函数，将类中记录的`peak_value_`改为当前的`current_value`的值。同时将各个线程中存储的`peak`值改为`current`值。
 在`StatBase`类中加入`ResetPeakValue`虚函数接口。
 
 ```C++
