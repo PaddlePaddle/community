@@ -81,13 +81,13 @@
 - 了解 Paddle 算子开发流程
 - 熟练掌握 Python、C++
 
-### NO.21 为 Paddle 新增 reset_peak_memory_stats/reset_max_memory_allocated/memory_stats API
+### NO.21 为 Paddle 新增 reset_max_memory_reserved/reset_max_memory_allocated API
 
 **详细描述：**
 
-- 在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下三个支持：重置 CUDA 内存分配器跟踪的“峰值”统计信息，在 paddle 框架中新增 reset_peak_memory_stats API，调用路径为 paddle.device.cuda.reset_peak_memory_stats；
+- 在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下两个支持：
+- 重置 CUDA 内存分配器跟踪的“峰值”统计信息，在 paddle 框架中新增 reset_max_memory_reserved API，调用路径为 paddle.device.cuda.reset_max_memory_reserved；
 - 重置跟踪给定设备上张量占用的最大 GPU 内存的起点，在 paddle 框架中新增 reset_max_memory_allocated API，调用路径为 paddle.device.cuda.reset_max_memory_allocated；
-- 返回给定设备的 CUDA 内存分配器统计信息字典，在 paddle 框架中新增 memory_stats API，调用路径为 paddle.device.cuda.memory_stats。
 
 **提交内容：**
 
