@@ -40,19 +40,19 @@ dac 代码地址如下：https://github.com/descriptinc/descript-audio-codec, �
 - 参考 paddlespeech/kws 的实现，利用 paddleaudio 实现好的 audiotools 中的功能，将 dac 中的损失函数重新进行实现，将内部的函数全部换成 paddleaudio 和 paddlespeech 内部的实现，保证以下接口可以访问
 
 ```
-from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，SISDRLoss
+from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，MultiMelSpectrogramLoss
 ```
 
 其中， AudioSignal 须使用 paddleaudio 内部的实现
 
 # 五、测试和验收的考量
 
-- 首先在原 dac 仓库进行一次完完整的训练流程，抓出其中的多次经过 Loss 函数之后的输入和输出作为测试用例，在 tests/units/ 下新增 t2s 文件夹，同时添加文件 test_losses.py 作为单测, 单测必须全部通过
+- 首先在原 dac 仓库进行一次完完整的训练流程，抓出其中的多次经过 Loss 函数之后的输入和输出作为测试用例，在 tests/units/tts 下添加文件 test_losses.py 作为单测, 单测必须全部通过
 
 - 安装 paddlespeech 后，以下代码须能够正常运行
 
 ```
-from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，SISDRLoss
+from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，MultiMelSpectrogramLoss
 ```
 
 # 六、可行性分析和排期规划
@@ -61,10 +61,8 @@ from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，SISDR
 
 # 七、影响面
 
-- 在 paddlespeech/t2s/modules/losses.py 中增加 MultiScaleSTFTLoss，GANLoss，SISDRLoss
+- 在 paddlespeech/t2s/modules/losses.py 中增加 MultiScaleSTFTLoss，GANLoss，MultiMelSpectrogramLoss
 
-- 新增文件夹 tests/units/
-
-- 新增单测文件 tests/units/test_losses.py
+- 新增单测文件 tests/units/tts/test_losses.py
 
 - 修改文件 tests/unit/ci.sh
