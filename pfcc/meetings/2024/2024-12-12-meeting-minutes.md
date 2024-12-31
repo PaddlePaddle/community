@@ -14,8 +14,7 @@
 		+ 任务类型：适配0-size Tensor与Tensor的规范化
    - [CINN编译器后端Pass注释添加](https://github.com/PaddlePaddle/Paddle/issues/70113) @[Hongqing-work](https://github.com/Hongqing-work) @[gongshaotian](https://github.com/gongshaotian) (20 min)
 		+ 任务类型：为后端Pass添加注释，为Pass改造做补充
-		+ 可参考PR
-			+ [[CINN][Backend Pass Update] Update IfFusion pass #69611](https://github.com/PaddlePaddle/Paddle/pull/69611)
+		+ 可参考PR：[[CINN][Backend Pass Update] Update IfFusion pass #69611](https://github.com/PaddlePaddle/Paddle/pull/69611)
 			使用BlockPass合并具有相同条件的连续If的转换函数，并为它们添加严格的注释
 3. 开源项目健康度量 Measurement of OSS Projects’ Health @[chyyy510](https://github.com/chyyy510) (25 min)
 	- 介绍对开源项目的健康程度进行度量的框架
