@@ -1,4 +1,4 @@
-# Paddle Framework Contributor Club 第四十三次会议
+# Paddle Framework Contributor Club 第四十三次会议议程
 
 - 本次会议时间：2024/08/29 19:00-20:00 (GMT+08:00) 中国标准时间 - 北京
 - 本次会议接入方式：【腾讯会议】

@@ -7,9 +7,7 @@
 每个技术方向都会有工程师支持，和该方向中的同学一起确定目标、规划和分工，希望 PFCC 的成员能逐渐成为方向骨干甚至是带头人，带领更多人一起开发。
 
 - 详细项目进展：https://github.com/orgs/PaddlePaddle/projects/7 
-- 已结项 & 即将结项的内容： https://github.com/PaddlePaddle/Paddle/issues/48019#issuecomment-1457650067 
-- 进行中的项目： [飞桨快乐开源活动表单->命题任务](https://github.com/PaddlePaddle/Paddle/issues/48019)
-- 一些在社区发现的可以进行贡献的想法：https://github.com/PaddlePaddle/Paddle/discussions/51794
+- 往期项目参考： https://github.com/PaddlePaddle/Paddle/issues/48019#issuecomment-1457650067 
 
 
 ## 飞桨线上开发环境——AI Studio

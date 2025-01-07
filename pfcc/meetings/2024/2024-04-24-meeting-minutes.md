@@ -7,7 +7,7 @@
 - 参会人：本次会议共有 10+ 名成员参会，由来自全国各地的飞桨框架的贡献者组成。本次会议由轮值主席尤江彬（[Harryoung](https://github.com/Harryoung)）主持。
 - 会议主题：《Sora相关技术分解》
 
-## 会议议程
+## 会议纪要
 
 1. 启航计划课程「Sora相关技术分解」 @[zhangxu44](https://github.com/zhangxu44)
 

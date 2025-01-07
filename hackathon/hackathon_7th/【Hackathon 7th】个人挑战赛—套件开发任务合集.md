@@ -163,10 +163,10 @@ Paddle2ONNX 已经添加了 Linux 的发包支持，但是 Windows 平台仍然�
 **详细任务说明：**
 
 - 开发 Android 应用（原生应用、Web 应用或混合应用均可），在一个应用中支持如下所有任务：
-  - 图像分类。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/image_classification。参考项目中，`android/shell`对应命令行调用示例，`android/app`对应示例Android应用，后同。
-  - 目标检测。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/object_detection。
-  - OCR。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/ocr。
-  - 图像分割。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/semantic_segmentation。
+  - 图像分类。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/image_classification 。参考项目中，`android/shell`对应命令行调用示例，`android/app`对应示例Android应用，后同。
+  - 目标检测。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/object_detection 。
+  - OCR。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/ocr 。
+  - 图像分割。可参考：https://github.com/PaddlePaddle/Paddle-Lite-Demo/tree/feature/paddle-x/semantic_segmentation 。
 - Android 应用需支持用户通过图形界面灵活地选择模型、输入数据和推理参数。
 - 对于每个任务，需保证应用至少能够针对各参考项目的命令行调用示例支持的所有示例模型取得预期的效果。
 
@@ -279,3 +279,84 @@ MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环
 - 了解 Whisper 模型
 - 熟练掌握 Python 语言
 - 熟悉 PaddleSpeech 框架及其数据处理流程
+
+---
+
+### NO.55 在 PaddleSpeech 中实现 DAC 的训练中使用的第三方库 audiotools
+
+**详细描述：**
+
+- 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 中使用到的第三方库 audiotools 的接口。
+- 参考：https://github.com/descriptinc/audiotools , https://github.com/descriptinc/descript-audio-codec
+- 相关实现放在 [audio](https://github.com/PaddlePaddle/PaddleSpeech/tree/develop/audio) 中
+
+**验收标准**：
+
+- 复现的精度需要与原 repo 保持一致
+
+**技术要求：**
+
+- 熟练掌握 Python 语言
+- 熟悉 PaddleSpeech 框架及其数据处理流程
+
+---
+
+### NO.56 在 PaddleSpeech 中复现 DAC 的训练需要用到的 loss (依赖任务 NO.55)
+
+**详细描述：**
+
+- 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 中使用到的 MultiScaleSTFTLoss，GANLoss，SISDRLoss。
+- 相关论文：https://arxiv.org/abs/2306.06546
+- 参考：https://github.com/descriptinc/descript-audio-codec/blob/main/dac/nn/loss.py
+- 相关实现放在：paddlespeech/t2s/modules/losses.py
+
+**验收标准**：
+
+- 复现的精度需要与原 repo 保持一致
+
+**技术要求：**
+
+- 熟练掌握 Python 语言
+
+
+---
+
+### NO.57 在 PaddleSpeech 中复现 DAC 模型 (依赖任务 NO.55、NO.56)
+
+**详细描述：**
+
+- 在 PaddleSpeech 套件中实现并对齐 Descript-Audio-Codec 的分布式训练、推理和评估流程。
+- 相关论文：https://arxiv.org/abs/2306.06546
+- 参考：https://github.com/descriptinc/descript-audio-codec
+
+**验收标准**：
+
+- 复现的性能指标需要与论文预期一致
+- 需上传完整的训练代码和训练脚本以及模型
+
+**技术要求：**
+
+- 了解 DAC 模型
+- 熟练掌握 Python 语言
+- 熟悉 PaddleSpeech 框架及其数据处理流程
+
+
+
+---
+
+### NO.58 VisualDL PIR 可视化产品形态改进
+
+**详细描述：**
+
+目前 VisualDL 已支持 PIR 可视化，但使用门槛较高使用方法如下：[VisualDL Graph--网络结构组件](https://github.com/PaddlePaddle/VisualDL/blob/develop/docs/components/README_CN.md#Graph--%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84%E7%BB%84%E4%BB%B6)
+- 当前产品形态：用户需要先使用 Python 将动态图模型对象，提供给 LogWriter；由 LogWriter 调用动转静 + analysis，生成中间协议文件；再通过 VisualDL 加载中间协议文件才能在浏览器展示。
+- 新的产品形态：期望去掉 Python 的环节，直接支持 `visualdl --modelfile resnet.json --port 8080`。即直接通过命令行，向 VisualDL 提供模型文件，由 VisualDL Load 为 Program，再做 analysis，将 analysis 产出的结果直接展示在网页端。
+
+**验收标准**：
+
+- 通过`visualdl --modelfile resnet.json --port 8080`即可完成模型展示
+
+**技术要求：**
+
+- 熟练掌握 Python
+- 了解 VisualDL 的基本流程流程

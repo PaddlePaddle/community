@@ -8,7 +8,7 @@
 - 会议主题：《 Paddle 分布式原理及使用方法、Paddle 分布式的高层 API 调研、黑客马拉松的稿件赛道》
 
 
-## 会议议程
+## 会议纪要
 
 1. **新人介绍**：[liujun121533](https://github.com/liujun121533)、[JiehangXie](https://github.com/JiehangXie)、[diadestiny](https://github.com/diadestiny)（5 min）
 2. **飞桨资深研发分享** @jeff41404、@lxd-cumt （40 min）

@@ -33,7 +33,7 @@
 |  24  |  ⭐⭐  | 为 Paddle 新增 EmbeddingBag API                                                                                |        是        |
 |  25  |   ⭐   | 为 Paddle 新增 is_coalesced/sparse_dim/dense_dim API                                                           |        是        |
 |  26  |  ⭐⭐  | 为 Paddle 新增 lu_solve API                                                                                    |        是        |
-|  27  | ⭐⭐⭐ | 为 Paddle 新增 register_parametrization/remove_parametrizations/cached/ParametrizationList/is_parametrized API |        是        |
+|  27  |  ⭐⭐  | 为 Paddle 新增 baddbmm API                                                                                     |        是        |
 |  28  |   ⭐   | 为 `paddle.clip` 进行功能增强                                                                                  |        否        |
 |  29  |   ⭐   | 为 `paddle.grad` 进行功能增强                                                                                  |        否        |
 |  30  |   ⭐   | 为 `paddle.divide` 进行功能增强                                                                                |        否        |
@@ -50,7 +50,7 @@
 |  41  |   ⭐   | 为 Paddle 代码转换工具新增 API 转换规则（第 8 组）                                                             |        否        |
 |  42  |   ⭐   | 为 Paddle 代码转换工具新增 API 转换规则（第 9 组）                                                             |        否        |
 
-## 套件开发任务、
+## 套件开发任务
 
 | 序号 |   难度    | 任务标题                                          | 是否需要提交 RFC |
 | :--: | :-------: | ------------------------------------------------- | :--------------: |
@@ -66,3 +66,7 @@
 |  52  | ⭐️⭐️⭐️ | 论文复现：OmniParser                              |        是        |
 |  53  |  ⭐️⭐️   | 在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型        |        是        |
 |  54  | ⭐️⭐️⭐️ | 在 PaddleSpeech 中实现 Whisper 的 Finetune        |        否        |
+|  55  | ⭐️⭐️    | 在 PaddleSpeech 中实现 DAC 的训练中使用的第三方库 audiotools |        是        |
+|  56  | ⭐️      | 在 PaddleSpeech 中复现 DAC 的训练需要用到的 loss (依赖 55)   |        是        |
+|  57  | ⭐️⭐️    | 在 PaddleSpeech 中复现 DAC 模型（依赖 55、56）      |        是        |
+|  58  | ⭐️⭐️    | VisualDL PIR 可视化产品形态改进      |        否        |

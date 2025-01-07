@@ -81,13 +81,13 @@
 - 了解 Paddle 算子开发流程
 - 熟练掌握 Python、C++
 
-### NO.21 为 Paddle 新增 reset_peak_memory_stats/reset_max_memory_allocated/memory_stats API
+### NO.21 为 Paddle 新增 reset_max_memory_reserved/reset_max_memory_allocated API
 
 **详细描述：**
 
-- 在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下三个支持：重置 CUDA 内存分配器跟踪的“峰值”统计信息，在 paddle 框架中新增 reset_peak_memory_stats API，调用路径为 paddle.device.cuda.reset_peak_memory_stats；
+- 在 paddle.device.cuda 包中，增加对 CUDA 张量类型的以下两个支持：
+- 重置 CUDA 内存分配器跟踪的“峰值”统计信息，在 paddle 框架中新增 reset_max_memory_reserved API，调用路径为 paddle.device.cuda.reset_max_memory_reserved；
 - 重置跟踪给定设备上张量占用的最大 GPU 内存的起点，在 paddle 框架中新增 reset_max_memory_allocated API，调用路径为 paddle.device.cuda.reset_max_memory_allocated；
-- 返回给定设备的 CUDA 内存分配器统计信息字典，在 paddle 框架中新增 memory_stats API，调用路径为 paddle.device.cuda.memory_stats。
 
 **提交内容：**
 
@@ -233,26 +233,22 @@ Paddle Tensor 可以存储在连续内存中，以便快速访问，实现高效
 - 熟悉 lapack/cublas 库
 - 熟练掌握 Python
 
-### NO.27 为 Paddle 新增 register_parametrization/remove_parametrizations/cached/ParametrizationList/is_parametrized API
+### NO.27 为 Paddle 新增 baddbmm API
 
 **详细描述：**
 
-为 Paddle 新增自定义参数化模块功能，该模块对于改变和控制模型参数的行为非常有用，特别是在需要对参数施加特定的约束或转换时。此任务的目标是在 Paddle 框架中，新增 5 个 API。调用路径为：paddle.nn.utils.register_parametrization、paddle.nn.utils.remove_parametrizations、paddle.nn.utils.cached、paddle.nn.utils.ParametrizationList、paddle.nn.utils.is_parametrized。
+为 Paddle 新增 baddbmm API，以实现 $\beta * input + \alpha (A @ B)$的功能。
 
-- register_parametrization：注册 nn.Layer 的自定义参数化方法。
-- remove_parametrizations：移除 nn.Layer 的自定义参数化方法。
-- cached：上下文管理器，用于启用通过 register_parametrization() 注册的参数化对象的缓存系统。
-- ParametrizationList：顺序容器，用于保存和管理参数化的 nn.Layer 的原始参数或缓冲区。
-- is_parametrized：用于检查一个 nn.Layer 是否有活跃的参数化，或指定的张量名称是否已经被参数化。
+此任务的目标是在 Paddle 框架中，新增 baddbmm API，调用路径为：paddle.baddbmm 和 Tensor.baddbmm
 
 **提交内容：**
 
 - API 的设计文档，并提 PR 至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/APIs 目录
-- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/paddle/nn/utils](https://github.com/PaddlePaddle/Paddle/tree/develop/python/paddle/nn/utils) 目录下新建文件
-- 并在[python/paddle/nn/utils/\_\_init\_\_.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/nn/utils/__init__.py)中添加相应 API
-- C++ /CUDA 实现代码，在 Paddle repo 的 [paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/phi/kernels) 目录
+- Python 实现代码 & 英文 API 文档，在 Paddle repo 的 [python/paddle/tensor/math.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/math.py) 目录下新建文件
+- 并在[python/paddle/tensor/\_\_init\_\_.py](https://github.com/PaddlePaddle/Paddle/blob/develop/python/paddle/tensor/__init__.py#L274)中，添加 API，以支持 Tensor.baddbmm 的调用方式
+- C++ 实现代码，在 Paddle repo 放置。头文件在 Paddle repo 的[paddle/phi/kernels](https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/phi/kernels)目录，cc 文件在[paddle/phi/kernels/cpu](https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/phi/kernels/cpu)目录 和 cu 文件在[paddle/phi/kernels/gpu](https://github.com/PaddlePaddle/Paddle/tree/develop/paddle/phi/kernels/gpu)目录
 - 单测代码，在 Paddle repo 的[ python/paddle/test/legacy_test](https://github.com/PaddlePaddle/Paddle/tree/develop/test/legacy_test) 目录
-- 中文 API 文档，在 docs repo 的 [docs/api/paddle/nn/utils](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle/nn/utils) 目录
+- 中文 API 文档，在 docs repo 的 [docs/api/paddle](https://github.com/PaddlePaddle/docs/tree/develop/docs/api/paddle) 目录
 - API 映射文档：描述 Paddle API 与 Pytorch API 之间的映射关系，请在 [API 映射文档目录](https://github.com/PaddlePaddle/docs/tree/develop/docs/guides/model_convert/convert_from_pytorch/api_difference) 中为每个 API 新增对应的 映射关系 文件，请务必遵守[《API 映射关系-格式规范》](https://github.com/PaddlePaddle/docs/blob/develop/docs/guides/model_convert/convert_from_pytorch/pytorch_api_mapping_format_cn.md)，提交到 [Docs Repo](https://github.com/PaddlePaddle/docs)
 
 **技术要求：**
