@@ -17,6 +17,7 @@
     * [mattheliu](https://github.com/mattheliu)
     * [UserWangZz](https://github.com/UserWangZz)
     * [jingsongliujing](https://github.com/jingsongliujing)
+    * [Alex Zhang](https://github.com/openvino-book)
 
 ## 会议议程
 
@@ -30,6 +31,7 @@
 1. 探讨PaddleOCR对昇腾系列显卡的支持（[link](https://github.com/PaddlePaddle/PaddleOCR/issues/14452)）
 
 2. 探讨PaddleOCR对ZLUDA显卡的支持（[link](https://github.com/PaddlePaddle/PaddleOCR/discussions/14484)）
+3. 探讨PaddleOCR实现小学生手写字符识别: http://handwriting-ocr.org/
 
 ### 3. 自由发言，可以提需求给大家讨论、提问等
 
