@@ -62,7 +62,7 @@
 - 熟练掌握 Python 语言
 - 熟悉 PaddleSpeech 框架及其数据处理流程
 
-### NO.8
+### NO.8 在 PaddleSpeech 中实现 CosyVoice 模型推理
 
 **详细描述：**
 
