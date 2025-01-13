@@ -99,9 +99,11 @@
 
 - 熟练掌握 Python 语言
 
-## 【开源贡献个人挑战赛-科学计算】任务详情
+---
 
-### 开发流程
+## 【开源贡献个人挑战赛-科学计算方向】任务详情
+
+#### 开发流程
 
 1. **要求基于 PaddleScience 套件进行开发**，开发文档参考：https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/ 。
 2. 复现整体流程和验收标准可以参考：https://paddlescience-docs.readthedocs.io/zh/latest/zh/reproduction/#21，复现完成后需供必要的训练产物，包括训练结束后保存的 `train.log`日志文件、`.pdparams`模型权重参数文件（可用网盘的方式提交）、**撰写的 `.md` 案例文档。**
@@ -110,11 +112,9 @@
 5. **如在复现过程中出现需添加的功能无法兼容现有 PaddleScience API 体系（[PaddleScience API 文档](https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/)），则可与论文复现指导人说明情况，并视情况允许直接基于 Paddle API 进行复现。**
 6. 若参考代码为 pytorch，则复现过程可以尝试使用 [PaConvert](https://github.com/PaddlePaddle/PaConvert) 辅助完成代码转换工作，然后可以尝试使用 [PaDiff](https://github.com/PaddlePaddle/PaDiff) 工具辅助完成前反向精度对齐，从而提高复现效率。
 
-### 验收标准
+#### 验收标准
 
 参考模型复现指南验收标准部分 https://paddlescience-docs.readthedocs.io/zh/latest/zh/reproduction/#3
-
-## 【开源贡献个人挑战赛-科学计算方向】任务详情
 
 ### NO.10 Transolver 论文复现
 
@@ -137,8 +137,6 @@ https://scholar.google.com/scholar?hl=zh-CN&as_sdt=0%2C5&q=Transolver%3A+A+Fast+
 
 https://github.com/thuml/Transolver
 
----
-
 ### NO.11 DrivAerNet ++ 论文复现
 
 **论文链接：**
@@ -153,4 +151,4 @@ https://github.com/Mohamedelrefaie/DrivAerNet#:~:text=preprint%3A%20DrivAerNet%2
 
 https://github.com/Mohamedelrefaie/DrivAerNet
 
----  
+---

@@ -8,6 +8,7 @@
 - 代码运行无误，通过社区 maintainers 的评审并合入代码仓库。
 
 ## 任务详情
+
 ### 一、PaddleSpeech 套件能力建设 - 模型精度对齐
 
 **任务背景**：
@@ -30,7 +31,7 @@ PaddleSpeech 基于 Paddle 3.0.0-beta 版本，完成 10+ 原有模型的适配�
 
 **参考资料：** https://github.com/PaddlePaddle/PaddleSpeech
 
-### 二、PaddleSpeech 套件能力建设 - PIR导出
+### 二、PaddleSpeech 套件能力建设 - PIR 导出
 
 **任务背景**：
 
