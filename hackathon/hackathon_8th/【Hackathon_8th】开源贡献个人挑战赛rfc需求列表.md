@@ -11,7 +11,10 @@
 
 | 序号 |   难度    | 任务标题                                   | 是否需要提交 RFC |
 | :--: | :-------: | ------------------------------------------ | :--------------: |
-|  5   |  ⭐⭐️⭐  | 在 PaddleSpeech 中复现 DAC 模型            |        是        |
+|  5   |  ⭐⭐️⭐  | 在 PaddleSpeech 中复现 DAC 模型 (依赖 9)               |        是        |
 |  6   | ⭐️⭐️⭐️ | 在 PaddleSpeech 中实现 Whisper 的 Finetune |        是        |
-|  7   |  ⭐️⭐️   | PaddleSpeech 新 Python 版本适配            |        否        |
+|  7   |  ⭐️⭐️   | PaddleSpeech 新 Python 版本适配            |        是        |
 |  8   |  ⭐⭐⭐️  | 在 PaddleSpeech 中实现 CosyVoice 模型推理  |        是        |
+|  9  | ⭐️      | 在 PaddleSpeech 中复现 DAC 的训练需要用到的 loss|        是        |
+|  10   |  ⭐️⭐️   | Transolver 论文复现                       |        是        |
+|  11   |  ⭐️⭐️   | DrivAerNet ++ 论文复现                    |        是        |
