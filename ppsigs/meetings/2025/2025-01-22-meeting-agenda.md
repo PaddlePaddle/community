@@ -28,7 +28,7 @@
 
 ### 2. 其他议题
 
-1. 探讨PaddleOCR对OpenVINO的支持
+1. 通过探讨PaddleOCR对OpenVINO的支持，探讨一个简单的方式，可以让各个硬件厂商来贡献PaddleOCR推理代码
 
 ### 3. 自由发言，可以提需求给大家讨论、提问等
 
