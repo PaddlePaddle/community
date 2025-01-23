@@ -9,7 +9,7 @@
 
 ## 会议议程
 
-1. 新人介绍：[sunnyLcs](https://github.com/sunnyLcs) [lvdongyi](https://github.com/lvdongyi) [Qin-sx](https://github.com/Qin-sx) [javey-q](https://github.com/javey-q) [smile2game](https://github.com/smile2game) [decade-afk](https://github.com/decade-afk) [ZhijunLStudio](https://github.com/ZhijunLStudio) [swagger-coder](https://github.com/swagger-coder) [Albresky](https://github.com/Albresky)（5 min）
+1. 新人介绍：[sunnyLcs](https://github.com/sunnyLcs) [lvdongyi](https://github.com/lvdongyi) [Qin-sx](https://github.com/Qin-sx) [javey-q](https://github.com/javey-q) [smile2game](https://github.com/smile2game) [decade-afk](https://github.com/decade-afk) [ZhijunLStudio](https://github.com/ZhijunLStudio) [swagger-coder](https://github.com/swagger-coder) [Albresky](https://github.com/Albresky) [hanyang2508](https://github.com/hanyang2508) [WAYKEN-TSE](https://github.com/WAYKEN-TSE)（5 min）
 2. 暖场：研发拜年视频（5 min）
 3. 2024 开源社区「活动」回顾（15 min） @孙师傅
 4. 抽奖（5 min） @小莹莹
