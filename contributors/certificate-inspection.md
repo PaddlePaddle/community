@@ -74,3 +74,20 @@
 | 汪昕   | [greatv](https://github.com/greatv)       | 郑必城 | [Zheng-Bicheng](https://github.com/Zheng-Bicheng) |
 | 陈旭军 | [co63oc](https://github.com/co63oc)       | 柳顺   | [megemini](https://github.com/megemini)           |
 | 卢畅   | [AndSonder](https://github.com/AndSonder) | 詹荣瑞 | [zrr1999](https://github.com/zrr1999)             |
+
+## 2024 年下半年开源之星
+
+| 姓名   | GitHub ID                                         | 姓名   | GitHub ID                                     |
+| ------ | ------------------------------------------------- | ------ | --------------------------------------------- |
+| 郑天宇 | [zty-king](https://github.com/zty-king)                       | 卢林军 | [zeroRains](https://github.com/zeroRains)     |
+| 李睿文 | [NKNaN](https://github.com/NKNaN) | 曾培健 | [LilaKen](https://github.com/LilaKen)           |
+| 章睿彬 | [BeingGod](https://github.com/BeingGod)                 | 吴则平 | [xiaoyewww](https://github.com/xiaoyewww) |
+| 尹帆 | [yinfan98](https://github.com/yinfan98)   | 李志军 | [ZhijunLStudio](https://github.com/ZhijunLStudio)           |
+| 韩用功| [Hanyonggong](https://github.com/Hanyonggong)         | 陈伦豪 | [ADream-ki](https://github.com/ADream-ki)             |
+
+## 2024 年下半年开源仙人
+
+| 姓名   | GitHub ID                                 | 姓名   | GitHub ID                                         |
+| ------ | ----------------------------------------- | ------ | ------------------------------------------------- |
+| 张一乔 | [Liyulingyue](https://github.com/Liyulingyue)      | 田川 | [gouzil](https://github.com/gouzil) |
+| 柳顺 | [megemini](https://github.com/megemini)       |    |            |
