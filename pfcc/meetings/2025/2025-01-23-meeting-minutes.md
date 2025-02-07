@@ -8,7 +8,7 @@
 - 本次会议副主席：空缺
 
 ## 会议议程
-
+![PFCC Party](../images/pfccparty.jpg "PFCC Party")
 1. 新人介绍：[sunnyLcs](https://github.com/sunnyLcs) [lvdongyi](https://github.com/lvdongyi) [Qin-sx](https://github.com/Qin-sx) [javey-q](https://github.com/javey-q) [smile2game](https://github.com/smile2game) [decade-afk](https://github.com/decade-afk) [ZhijunLStudio](https://github.com/ZhijunLStudio) [swagger-coder](https://github.com/swagger-coder) [Albresky](https://github.com/Albresky) [WAYKEN-TSE](https://github.com/WAYKEN-TSE)  [hanyang2508](https://github.com/hanyang2508) （5 min）
 2. 暖场：研发拜年视频（5 min）
 - 可访问 [ppt链接](https://www.canva.cn/design/DAGc0yaMnaA/B27mKvZ-jmo7FcXxebvXbQ/edit?utm_content=DAGc0yaMnaA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton) 查看
