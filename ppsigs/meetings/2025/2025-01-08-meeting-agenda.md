@@ -18,6 +18,7 @@
     * [UserWangZz](https://github.com/UserWangZz)
     * [jingsongliujing](https://github.com/jingsongliujing)
     * [Alex Zhang](https://github.com/openvino-book)
+    * [Melrose Data](https://github.com/MelroseData)
 
 ## 会议议程
 
