@@ -78,7 +78,7 @@
 
 **技术要求：**
 
-- 了解 Whisper 模型
+- 了解 CosyVoice 模型
 - 熟练掌握 Python 语言
 - 熟悉 PaddleSpeech 框架及其数据处理流程
 
