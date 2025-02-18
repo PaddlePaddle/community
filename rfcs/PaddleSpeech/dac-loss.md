@@ -2,9 +2,9 @@
 
 | 任务名   | PaddleSpeech--dac-loss |
 | -------- | ------------------------ |
-| 提交作者 | suzakuwcx                |
-| 提交时间 | 2024-11-30               |
-| 版本号   | v1.0                     |
+| 提交作者 | suzakuwcx cchaifeng       |
+| 提交时间 | 2025-02-14               |
+| 版本号   | v2.0                     |
 | 依赖     | main 版本                |
 | 文件名   | dac-loss.md    |
 
@@ -52,7 +52,7 @@ from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，Multi
 - 安装 paddlespeech 后，以下代码须能够正常运行
 
 ```
-from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，MultiMelSpectrogramLoss
+from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，SISDRLoss
 ```
 
 # 六、可行性分析和排期规划
@@ -61,7 +61,7 @@ from paddlespeech.t2s.modules.losses import MultiScaleSTFTLoss，GANLoss，Multi
 
 # 七、影响面
 
-- 在 paddlespeech/t2s/modules/losses.py 中增加 MultiScaleSTFTLoss，GANLoss，MultiMelSpectrogramLoss
+- 在 paddlespeech/t2s/modules/losses.py 中增加 MultiScaleSTFTLoss，GANLoss，SISDRLoss
 
 - 新增单测文件 tests/units/tts/test_losses.py
 
