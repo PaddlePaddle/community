@@ -2,9 +2,9 @@
 
 | 任务名   | PaddleSpeech--dac-loss |
 | -------- | ------------------------ |
-| 提交作者 | cchaifeng                |
+| 提交作者 | suzakuwcx cchaifeng       |
 | 提交时间 | 2025-02-14               |
-| 版本号   | v1.0                     |
+| 版本号   | v2.0                     |
 | 依赖     | main 版本                |
 | 文件名   | dac-loss.md    |
 
