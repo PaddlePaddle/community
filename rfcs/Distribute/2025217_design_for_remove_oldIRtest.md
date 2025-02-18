@@ -35,12 +35,14 @@
         | `test_amp_o2_pass_deprecated` | Operator "c_allreduce_max" has not been registered. | 直接删除 |
 
 前六个单测中，对`auto_parallel_pass_test_base_deprecated.py`的`AutoParallelPassTestBase`进行引用，并且只有这六个测试引用，因此删除。
+类似，单测`test_amp_o2_pass_deprecated` 引用`amp_o2_pass.py`，因此删除。
 
 `test/deprecated/collective/fleet`下报错单测:
 
    -    | 单测名称 | 报错原因 | 处理方法 |
         |----------|----------|----------|
         | `test_auto_parallel_parallelizer_deprecated` | ImportError: /home/aistudio/Paddle/build/python/paddle/base/libpaddle.so: undefined symbol: PyCMethod_New | 直接删除 |
+        | `test_communicator_sync_deprecated` | Operator "send_barrier" has not been registered | 直接删除 |
 
 `test/deprecated/legacy_test`下报错单测:
 
