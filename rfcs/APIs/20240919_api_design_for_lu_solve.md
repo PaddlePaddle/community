@@ -2,9 +2,9 @@
 
 | API 名称             | `paddle.linalg.lu_solve`        |
 | -------------------- | ------------------------------- |
-| 提交作者             | [GreatV](https://github.com/greatv) |
+| 提交作者             | [GreatV](https://github.com/greatv) decade-afk |
 | 提交日期             | 2024-09-19                      |
-| 版本号               | V1.0                            |
+| 版本号               | V2.0                            |
 | 依赖飞桨版本         | 基于 `develop` 分支开发          |
 | 文件名               | `20240919_api_design_for_lu_solve.md` |
 
