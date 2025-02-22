@@ -37,44 +37,43 @@ Paddle 自动并行、通信库相关代码中，同时存在新老IR代码，�
 | all_reduce       | 是        | test/collective/process_group_nccl_pir.py |
 | broadcast        | 是        | test/collective/process_group_nccl_pir.py |
 ### 1.2 Auto_Parallel (python/paddle/distributed/auto_parallel)
-
-| 模块/方法                      | 文件:行号              | 新 IR 分支 | 新 IR 单测                                      | 备注                     |
-|-------------------------------|-----------------------|------------|------------------------------------------------|--------------------------|
-| reshard                       | api.py:858            | 是         | test/auto_parallel/pir/test_reshard.py         |                          |
-| shard_tensor                  | api.py:360            | 是         | test/auto_parallel/test_shard_tensor_api.py    |                          |
-| unshard_dtensor               | api.py:3218           | 是         | test/auto_parallel/semi_auto_parallel_unshard_dtensor_api.py |              |
-| to_static                     | api.py:3119           | 是         | -                                              | 兼容老 IR 分支            |
-| _build_distributed_state_dict | api.py:2756           | 是         | -                                              | 调用 get_dist_attr        |
-| DistModel::state_dict         | api.py:2674           | 是         | -                                              |                          |
-| DistModel::set_state_dict     | api.py:2896           | 是         | -                                              |                          |
-| get_dist_attr                 | static/utils.py:876   | 是         | -                                              |                          |
+| 模块/方法                      | 文件:行号              | 新 IR 单测                                      | 备注                     |
+|-------------------------------|-----------------------|------------------------------------------------|--------------------------|
+| reshard                       | api.py:858            | test/auto_parallel/pir/test_reshard.py         |                          |
+| shard_tensor                  | api.py:360            | test/auto_parallel/test_shard_tensor_api.py    |                          |
+| unshard_dtensor               | api.py:3218           | test/auto_parallel/semi_auto_parallel_unshard_dtensor_api.py |              |
+| to_static                     | api.py:3119           | -                                              | 兼容老 IR 分支            |
+| _build_distributed_state_dict | api.py:2756           | -                                              | 调用 get_dist_attr        |
+| DistModel::state_dict         | api.py:2674           | -                                              |                          |
+| DistModel::set_state_dict     | api.py:2896           | -                                              |                          |
+| get_dist_attr                 | static/utils.py:876   | -                                              |                          |
 
 #### 1.2.1 Engine (static/engine.py)
-| 模块/方法                   | 行号   | 新 IR 分支 | 新 IR 单测 | 备注 |
-|----------------------------|--------|------------|------------|------|
-| \_\_init\_\_               | 305    | 是         | -          |      |
-| _prepare_fetch             | 572    | 是         | -          |      |
-| _prepare_program           | 1017   | 是         | -          |      |
-| _build                     | 1153   | 是         | -          |      |
-| _init_comm                 | 1323   | 是         | -          |      |
-| _initialize                | 1369   | 是         | -          |      |
-| run                        | 2095   | 是         | -          |      |
-| get_dist_main_program      | 2599   | 是         | -          |      |
+| 模块/方法                   | 行号   | 备注 |
+|:--------------------------|-------:|:----|
+| \_\_init\_\_               | 305    |      |
+| _prepare_fetch             | 572    |      |
+| _prepare_program           | 1017   |      |
+| _build                     | 1153   |      |
+| _init_comm                 | 1323   |      |
+| _initialize                | 1369   |      |
+| run                        | 2095   |      |
+| get_dist_main_program...   | 2599   |      |
 
 ### 1.3 Pass (python/paddle/distributed/passes)
 
 #### 1.3.1 pass_utils.py
 
 | 函数/方法                        | 行号  | 新 IR 分支/说明               | 备注                                      |
-|---------------------------------|-------|-------------------------------|-------------------------------------------|
-| set_skip_gc_vars                | 277   | 是                            |                                           |
-| _set_skip_gc_vars_in_old_ir     | 283   | _set_skip_gc_vars_in_pir      |                                           |
-| shadow_var_between_sub_programs | 370   | 仅被老 IR 调用                 |                                           |
-| _overlap_send_recv              | 645   | _pir_overlap_send_recv        |                                           |
-| _get_backward_op_type           | 1450  | _pir_get_backward_op_type      |                                           |
-| _program_for_vpp                | 1207  | _pir_program_for_vpp           |                                           |
-| split_matmul_grad_to_matmul     | 1782  | _pir_split_matmul_grad_to_matmul |                                         |
-| _program_for_fthenb_and_1f1b    | 679   | 仅被老 IR 调用                 | 在 pipeline_eager_1f1b 中被调用，保留 |
+|---------------------------------|-------:|------------------------------|-------------------------------------------|
+| set_skip_gc_vars                | 277    | 是                           |                                           |
+| _set_skip_gc_vars_in_old_ir     | 283    | _set_skip_gc_vars_in_pir     |                                           |
+| shadow_var_between_sub_programs | 370    | 仅被老 IR 调用                |                                           |
+| _overlap_send_recv              | 645    | _pir_overlap_send_recv       |                                           |
+| _get_backward_op_type           | 1450   | _pir_get_backward_op_type     |                                           |
+| _program_for_vpp                | 1207   | _pir_program_for_vpp          |                                           |
+| split_matmul_grad_to_matmul     | 1782   | _pir_split_matmul_grad_to_matmul |                                        |
+| _program_for_fthenb_and_1f1b    | 679    | 仅被老 IR 调用                | 在 pipeline_eager_1f1b 中被调用，保留 |
 
 #### 1.3.2 Scheduler (pipeline_scheduler_pass)
 
@@ -142,7 +141,7 @@ Paddle 自动并行、通信库相关代码中，同时存在新老IR代码，�
 
 # 四、影响面
 
-仅删除已适配新IR逻辑的老IR代码，不会对产生影响。
+仅删除已适配新IR逻辑的老IR代码，不会产生影响。
 
 # 五、排期规划
 
