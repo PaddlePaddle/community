@@ -105,6 +105,9 @@ Paddle 自动并行、通信库相关代码中，同时存在新老IR代码，�
 | _apply_single_impl | 847 | _apply_pir_single_impl  |  `auto_parallel_replace_with_parallel_cross_entropy.py`仅实现这个接口，未适配PIR，保留 |
 | _partial_programs  | 49  | _partial_pir_programs   |  `pipeline_eager_1f1b.py`中仅实现了这个接口，未适配PIR，保留   |
 
+将不清除`pipeline_pass_base.py`中的老IR逻辑，原因是：
+- 目前仍有个别的pipeline未适配PIR，为了兼容老IR，因此选择保留。
+
 ##### (4) pipeline_vpp.py
 
 | 方法路径                          | 行号 | 新 IR 分支/说明                | 备注                  |
