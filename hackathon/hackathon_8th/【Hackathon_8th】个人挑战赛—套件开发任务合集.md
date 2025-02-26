@@ -206,8 +206,9 @@
 
 **详细描述：**
 
-- 在 PaddleNLP 套件中实现不同模型的测试工作
-- 参考开源代码
+- 在 PaddleNLP 套件中实现不同模型的流水线监控，包括 [Yuan2](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/yuan)、[llm_embed](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/llm_embed)、[DeepSeekV2/V3](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/deepseek_v2)，参考开源代码 Llama 和 Qwen2 相关实现，[链接](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/qwen2)。
+- 实现Yuan2和DeepSeekV2模型在[llm](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/llm)上的验证，包括[Pretrain](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_pretrain.py)、[Fintune](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_finetune.py)、[Lora](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_lora.py)、[Predictor](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_predictor.py)等阶段验证。
+- 在验证过程中，如需协助上传相关文件，可联系研发同学。
 
 **验收标准：**
 
