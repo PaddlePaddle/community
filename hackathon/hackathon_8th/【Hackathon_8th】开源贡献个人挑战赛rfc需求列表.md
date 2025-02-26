@@ -22,7 +22,7 @@
 |  13  |   ⭐⭐    | Domino 论文复现                                                                                |        是        |
 |  14  |   ⭐⭐    | CoNFiLD 论文复现                                                                               |        是        |
 |  15  |   ⭐⭐    | Diffeomorphism Neural Operator 论文复现                                                        |        是        |
-|  16  |    ⭐     | Data-Efficient Operator Learning via Unsupervised Pretraining and In-Context Learning 论文复现 |        是        |
+|  16  |   ⭐⭐    | Data-Efficient Operator Learning via Unsupervised Pretraining and In-Context Learning 论文复现 |        是        |
 |  17  |    ⭐     | FuXi 论文复现                                                                                  |        是        |
 |  18  |    ⭐     | FengWu 论文复现                                                                                |        是        |
 |  19  |    ⭐     | Pangu-Weather 论文复现                                                                         |        是        |
