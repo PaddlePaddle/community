@@ -46,3 +46,6 @@
 |  37  |  ⭐⭐⭐   | YOLOv11 模型复现                                                                               |        是        |
 |  38  |  ⭐⭐⭐   | RT-DETRv3 模型复现                                                                             |        是        |
 |  39  |  ⭐⭐⭐   | DEIM 模型复现                                                                                  |        是        |
+|  40  | ⭐️⭐️⭐️ | 在 PaddleOCR 中复现 MixTeX 模型                                                                |        是        |
+|  41  | ⭐️⭐️⭐️ | 论文复现：OmniParser                                                                           |        是        |
+|  42  |  ⭐️⭐️   | 在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型                                                     |        是        |

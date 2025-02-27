@@ -207,7 +207,7 @@
 **详细描述：**
 
 - 在 PaddleNLP 套件中实现不同模型的流水线监控，包括 [Yuan2](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/yuan)、[llm_embed](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/llm_embed)、[DeepSeekV2/V3](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/deepseek_v2)，参考开源代码 Llama 和 Qwen2 相关实现，[链接](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/transformers/qwen2)。
-- 实现Yuan2和DeepSeekV2模型在[llm](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/llm)上的验证，包括[Pretrain](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_pretrain.py)、[Fintune](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_finetune.py)、[Lora](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_lora.py)、[Predictor](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_predictor.py)等阶段验证。
+- 实现 Yuan2 和 DeepSeekV2 模型在[llm](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/tests/llm)上的验证，包括[Pretrain](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_pretrain.py)、[Fintune](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_finetune.py)、[Lora](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_lora.py)、[Predictor](https://github.com/PaddlePaddle/PaddleNLP/blob/develop/tests/llm/test_predictor.py)等阶段验证。
 - 在验证过程中，如需协助上传相关文件，可联系研发同学。
 
 **验收标准：**
@@ -346,6 +346,80 @@
 
 - 熟练掌握 Python 语言
 - 熟悉检测模型原理
+
+### NO.40 在 PaddleOCR 中复现 MixTeX 模型
+
+**详细描述：**
+
+MixTeX 是一款创新的多模态 LaTeX 识别模型，能够在本地离线环境中进行高效的 CPU 推理。本任务的目标是在 PaddleOCR 中复现 MixTex。
+
+1. **论文地址**：https://arxiv.org/abs/2406.17148
+2. **源代码地址**：https://github.com/RQLuo/MixTeX-Latex-OCR
+3. **数据集地址**：https://huggingface.co/datasets/MixTex/Pseudo-Latex-ZhEn-1
+
+**提交内容：**
+
+1. **设计文档**：提至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/PaddleOCR 目录
+2. **Python 实现代码**：复现代码需要提交并合入 PaddleOCR 仓库，复现格式可参考 [https://github.com/PaddlePaddle/PaddleOCR/pull/13401/](https://github.com/PaddlePaddle/PaddleOCR/pull/13401/。)
+3. **中英文文档**：中英文文档应包含在 https://github.com/PaddlePaddle/PaddleOCR/tree/main/docs/algorithm/formula_recognition 目录中，提交至 PaddleOCR 仓库。
+4. **性能指标**：复现的性能指标需要与原始仓库效果相当，并在提交的文档中给出 Edit distance(Edit Dis.)、BLEU score、Precision、Recall 具体值。
+
+**技术要求：**
+
+- 了解 MixText 模型
+- 熟练掌握 Python 语言
+- 熟悉 PaddleOCR 框架及其数据处理流程
+
+### NO.41 论文复现：OmniParser
+
+**详细描述：**
+
+- 论文：[OmniParser: A Unified Framework for Text Spotting, Key Information Extraction and Table Recognition](https://openaccess.thecvf.com/content/CVPR2024/papers/Wan_OmniParser_A_Unified_Framework_for_Text_Spotting_Key_Information_Extraction_CVPR_2024_paper.pdf)
+- 参考 repo：https://github.com/AlibabaResearch/AdvancedLiterateMachinery/tree/main/OCR/OmniParser
+
+**验收标准**：
+
+- 基于论文中开源的数据集训练，达到论文中 Table 2 中的各项指标。
+
+**提交内容**：
+
+- 设计文档：提至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/PaddleOCR 目录
+- 代码、模型、训练日志
+- 提交代码和中英文文档 PR 到 PaddleOCR，参考 https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/algorithm_overview.md
+
+**技术要求**：
+
+- 熟悉 OCR 领域相关算法，最好有 PaddleOCR 使用经验。
+- 有基本的模型训练和 debug 能力。
+
+### NO.42 在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型
+
+**详细描述**
+
+[TrOCR-Formula-Rec](https://github.com/SWHL/TrOCR-Formula-Rec) 是一个基于 TrOCR 算法、整合[UniMER-1M](https://huggingface.co/datasets/wanderkid/UniMER_Dataset) & [fusion-image-to-latex-datasets](https://huggingface.co/datasets/hoang-quoc-trung/fusion-image-to-latex-datasets) 等公式识别数据集的公式识别项目，该模型可以在本地离线环境中进行高效的 CPU 推理。本任务的目标是在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型。
+
+相关资料：
+
+- 基于 transformers 库版本项目地址：[TrOCR-Formula-Rec](https://github.com/SWHL/TrOCR-Formula-Rec)
+- 数据集地址：[UniMER-1M](https://huggingface.co/datasets/wanderkid/UniMER_Dataset)、[fusion-image-to-latex-datasets](https://huggingface.co/datasets/hoang-quoc-trung/fusion-image-to-latex-datasets)
+- UniMERNet 论文地址：[PDF](https://arxiv.org/abs/2404.15254)
+
+**提交内容**
+
+- 设计文档：提至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 rfcs/PaddleOCR 目录
+- Python 实现内容：复现代码需要提交并合入 PaddleOCR 仓库，复现格式可参考：[PR #13401 LaTeX OCR Paddle](https://github.com/PaddlePaddle/PaddleOCR/pull/13401/)
+- 中英文文档：文档应包含在 [Formula Recognition Docs](https://github.com/PaddlePaddle/PaddleOCR/tree/main/docs/algorithm/formula_recognition) 目录中，提交至 PaddleOCR 仓库
+- 性能指标：复现的性能指标需要与原始仓库效果相当，并在提交的文档中给出 [UniMERNet](https://github.com/opendatalab/UniMERNet) 论文中给出的 SPE-BLEU、SPE-EditDis、CPE-BLEU、CPE-EditDis、SCE-BLEU、SCE-EditDis、HWE-BLEU 和 HWE-EditDis 指标值。模型存储大小<300M，CPU 推理平均耗时 1s 左右。
+
+![img](../hackathon_7th/img/image-2.png)
+
+**技术要求**
+
+- 了解 TrOCR 模型
+- 熟练掌握 Python、paddlepaddle 框架、PyTorch 框架
+- 熟悉 transformers 相关结构
+
+---
 
 ## 【开源贡献个人挑战赛-科学计算方向】任务详情
 
