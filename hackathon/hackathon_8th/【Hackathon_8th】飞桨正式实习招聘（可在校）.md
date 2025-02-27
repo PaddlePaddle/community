@@ -15,7 +15,7 @@
 3. 将 Paddle 主仓库可共用的单测文件导入 CustomDevice 仓库中，达到修改主仓单测即可同步修改 CustomDevice 仓库对应测试文件。
 4. 协助测试同学完成 Paddle3.0 模式下多硬件方向 PaddleX 仓库模型的正确性验证工作，修复相关问题。
 
-#### 营员要求：
+#### 营员要求（1 人）：
 
 - 计算机及计算机相关专业本科或本科以上学历，熟悉 C++，Python。
 - 熟悉一个或多个深度学习框架，包括但不限于 PaddlePaddle，TensorFlow, PyTorch, MXNet, Caffe 等。
