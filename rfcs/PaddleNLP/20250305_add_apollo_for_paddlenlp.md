@@ -57,13 +57,13 @@ Apollo 已在 Hugging Face Transformers、LLaMA-Factory 等主流开源项目中
 
 # 七、可行性分析和排期规划
 
-- paddlenlp/utils/optimizer.py中实现Apollo的主要逻辑。一周
+- paddlenlp/utils/optimizer.py中实现Apollo的主要逻辑。两周
   
 - 修改paddlenlp/trainer/trainer.py以支持Apollo优化器。一天
 
-- 修改对应的文档与添加对应的测试。三天
+- 修改对应的文档与添加对应的测试。一周
 
-- 测试Apollo优化器在 Llama3-8B 上的实验结果，达到优化器状态显存占用相比 AdamW 降低 50% 以上。两周
+- 测试Apollo优化器在 Llama3-8B 上的实验结果，达到优化器状态显存占用相比 AdamW 降低 50% 以上。三周
 
 # 八、影响面
 
