@@ -14,6 +14,6 @@
    - DeepSeek 技术创新 @[jzhang533](https://github.com/jzhang533) （15 min）
      > 文字材料：https://pfcc.blog/posts/deepseek-tech-visualized
    - DeepSeek V3 量化简析 @[yinfan98](https://github.com/yinfan98) （15 min）
+     > 文字材料：[简单聊聊 Deepseek V3 的 FP8 训练](./Deepseek_V3_FP8.md)
    - DeepSeek 社区共建 @[yinfan98](https://github.com/yinfan98) （5 min）
-     >
    - AIStudio DeepSeek 专题 @[E-Pudding](https://github.com/E-Pudding) （5 min）
