@@ -680,3 +680,21 @@ https://proceedings.mlr.press/v235/lin24b.html
 **参考代码链接：**
 
 https://github.com/EmperorJia/EquiCSP
+
+### NO.28 在 PaddleX 中集成 PaddleSpeech 中的 conformer 模型
+**详细描述：**
+* 在 PaddleX 套件中实现并对齐 PaddleSpeech 中 conformer 模型的训练和推理。
+* 参考：
+  * 训练： https://github.com/PaddlePaddle/PaddleX/commit/12c154c09687d7b4f8e076f8fe48d66e17b5236f
+  * 推理：https://github.com/PaddlePaddle/PaddleX/pull/2983
+* 该项目要求 4 月底收尾，无法保证完成时间的开发者不建议领取
+  
+**验收标准：**
+* 复现的性能指标需要与 PaddleSpeech 仓库效果相当
+* 训练后的模型支持 command line 方式推理
+* 需完善对应的产线和模型脚本
+* 代码相关文档和注释完备
+  
+**技术要求：**
+* 熟悉 PaddleX 和 PaddleSpeech 套件
+* 熟练掌握 Python 语言
