@@ -28,7 +28,7 @@
 
 - 职责：处理 issue 区和 Discussion 区的新增问题，召集，主持例会并记录。
 - 期间：每隔两周轮换。
-- 排班：@greatv, @SWHL, @jingsongliujing, @cuicheng01， @jzhang533, @mattheliu， 
+- 排班：@greatv, @SWHL, @jingsongliujing, @cuicheng01， @jzhang533, @mattheliu， @Topdu 
 
 序号|GITHUB ID|值班开始|值班结束
 :------:|:------:|:------:|:------:
@@ -38,3 +38,4 @@
 4|@cuicheng01 |2025-04-17|2025-04-30
 5|@jzhang533 |2025-05-01|2025-05-14
 6|@mattheliu |2025-05-15|2025-05-28
+7|@Topdu |2025-05-29|2025-06-11
