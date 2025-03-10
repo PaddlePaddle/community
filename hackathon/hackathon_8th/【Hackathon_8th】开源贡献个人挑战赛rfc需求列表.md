@@ -49,3 +49,4 @@
 |  40  | ⭐️⭐️⭐️ | 在 PaddleOCR 中复现 MixTeX 模型                                                                |        是        |
 |  41  | ⭐️⭐️⭐️ | 论文复现：OmniParser                                                                           |        是        |
 |  42  |  ⭐️⭐️   | 在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型                                                     |        是        |
+|  43  |  ⭐️⭐️   | 在 PaddleX 中集成 PaddleSpeech 中的 conformer 模型                                              |        否       |
