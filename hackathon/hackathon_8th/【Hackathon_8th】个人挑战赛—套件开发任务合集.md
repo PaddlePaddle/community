@@ -495,7 +495,7 @@ https://github.com/NVIDIA/modulus/tree/main/examples/cfd/external_aerodynamics/d
 
 **代码复现：**
 
-复现 [Domino](https://github.com/NVIDIA/modulus/tree/main/examples/cfd/external_aerodynamics/domino) 模型推理，精度与论文中对齐，并合入 PaddleScience
+复现 [Domino](https://github.com/NVIDIA/modulus/tree/main/examples/cfd/external_aerodynamics/domino) 模型训练推理，精度与论文中对齐，并合入 PaddleScience
 
 ### NO.14 CoNFiLD 论文复现
 
@@ -505,7 +505,7 @@ https://github.com/jx-wang-s-group/CoNFiLD
 
 **代码复现：**
 
-复现 [CoNFiLD](https://github.com/jx-wang-s-group/CoNFiLD) 模型推理，精度与论文中对齐，并合入 PaddleScience
+复现 [CoNFiLD](https://github.com/jx-wang-s-group/CoNFiLD) 模型训练推理，精度与论文中对齐，并合入 PaddleScience
 
 ### NO.15 Diffeomorphism Neural Operator 论文复现
 
@@ -515,7 +515,7 @@ https://github.com/Zhaozhiwhy/Diffeomorphism-Neural-Operator
 
 **代码复现：**
 
-复现 [Diffeomorphism-Neural-Operator](https://github.com/Zhaozhiwhy/Diffeomorphism-Neural-Operator) 模型推理，精度与论文中对齐，并合入 PaddleScience
+复现 [Diffeomorphism-Neural-Operator](https://github.com/Zhaozhiwhy/Diffeomorphism-Neural-Operator) 训练推理，精度与论文中对齐，并合入 PaddleScience
 
 ### NO.16 Data-Efficient Operator Learning via Unsupervised Pretraining and In-Context Learning 论文复现
 
@@ -525,7 +525,7 @@ https://github.com/delta-lab-ai/data_efficient_nopt
 
 **代码复现：**
 
-复现 [data_efficient_nopt](https://github.com/delta-lab-ai/data_efficient_nopt) 模型推理，精度与论文中对齐，并合入 PaddleScience
+复现 [data_efficient_nopt](https://github.com/delta-lab-ai/data_efficient_nopt) 训练推理，精度与论文中对齐，并合入 PaddleScience
 
 ### NO.17 FuXi 论文复现
 
