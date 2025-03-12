@@ -17,7 +17,7 @@
 	 - 面向推理的强化学习
 	 - 拒绝采样与监督微调
 	 - 面向所有场景的强化学习
-3. 多模态推理模型综述及实践 @[ZhijunLStudio](https://github.com/ZhijunLStudio) （20 min）
+3   [多模态推理模型综述及实践](https://pfcclab.github.io/posts/lzj-sharing) @[ZhijunLStudio](https://github.com/ZhijunLStudio) （20 min）
 - 多模态模型训练工程经验分享
     - 奖励函数设计
 	- 去掉KL散度防止损失为零
