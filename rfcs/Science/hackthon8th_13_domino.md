@@ -20,7 +20,7 @@
 
 > 在本任务中，作者根据[DoMINO: A Decomposable Multi-scale Iterative Neural Operator for Modeling Large Scale Engineering Simulations](https://arxiv.org/abs/2501.13350)中的代码[Domino code](https://github.com/NVIDIA/modulus/tree/main/examples/cfd/external_aerodynamics/domino)
 >
-> 复现domino推理。
+> 复现domino训练推理。
 
 ### 1.3 意义
 
@@ -46,7 +46,7 @@
 ## 5. 测试和验收的考量
 
 1. 通过 PaddleScience 的代码风格检查
-2. Domino推理精度与论文中对齐
+2. Domino训练推理精度与论文中对齐
 
 ## 6. 可行性分析和排期规划
 
