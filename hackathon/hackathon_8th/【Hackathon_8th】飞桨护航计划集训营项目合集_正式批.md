@@ -55,6 +55,20 @@
 - 熟悉深度学习框架中的动态图和静态图
 - 熟悉自动并行相关基础概念
 
+### 项目五：框架作为array-api-compat后端
+
+#### 项目介绍：
+
+适配 paddle 的 API，满足 array-api-compat 的测试要求，并且将 paddle 作为后端合入 array-api-compat
+
+主要工作内容：
+
+- 适配 paddle 的 API，满足 array-api-compat 的测试要求，并且将 paddle 作为后端合入 array-api-compat
+
+#### 营员要求（1 人）：
+
+- 熟悉 Python
+- 掌握基本的深度学习框架使用能力
 
 ### 项目六：高效表格识别新范式探索
 
