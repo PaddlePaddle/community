@@ -29,7 +29,7 @@
 
 - PaddleOCR 社区运营进展
 - PaddlePaddle 3.0 内存不释放问题是否得以解决？Discussions [#14814](https://github.com/PaddlePaddle/PaddleOCR/discussions/14814)
-
+- PaddleOCR 未来规划探讨
 
 ### 3. 自由发言，可以提需求给大家讨论、提问等
 
