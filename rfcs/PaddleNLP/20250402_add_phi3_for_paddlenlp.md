@@ -1,4 +1,4 @@
-
+好的，这是可以直接复制粘贴的RFC文档：
 
 # 在 PaddleNLP 中实现 Phi-3 模型
 
@@ -124,4 +124,3 @@ PaddleNLP新增Phi-3模型支持，包括单卡模型和模型并行能力。
 - Phi-3模型论文
 - Microsoft Phi-3官方实现
 - [LLaMA _get_name_mappings方法实现](https://github.com/PaddlePaddle/PaddleNLP/blob/bfd053db0897943f5d4d116dde755dbf21d18b23/paddlenlp/transformers/llama/modeling.py#L1334-L1366)
-- [LL
