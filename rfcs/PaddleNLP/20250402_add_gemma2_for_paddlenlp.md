@@ -1,4 +1,3 @@
-[# 在 PaddleNLP 中复现 Gemma2 模型
 
 |任务名称 | 在 PaddleNLP 中复现 Gemma2 模型 | 
 |---|---|
