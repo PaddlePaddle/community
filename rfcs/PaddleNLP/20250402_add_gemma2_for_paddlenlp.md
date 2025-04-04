@@ -1,4 +1,4 @@
-# 在 PaddleNLP 中复现 Gemma2 模型
+[# 在 PaddleNLP 中复现 Gemma2 模型
 
 |任务名称 | 在 PaddleNLP 中复现 Gemma2 模型 | 
 |---|---|
@@ -105,3 +105,4 @@ PaddleNLP新增Gemma2模型支持。
 
 - [Hugging Face Gemma2实现](https://github.com/huggingface/transformers/tree/main/src/transformers/models/gemma2)
 - [PaddleNLP模型对齐指南](https://paddlenlp.readthedocs.io/zh/latest/community/contribute_models/align_pytorch_and_paddle.html)
+](https://github.com/robinbg/community/blob/robinbg-add-gemma2/rfcs/PaddleNLP/20250402_add_gemma2_for_paddlenlp.md)
