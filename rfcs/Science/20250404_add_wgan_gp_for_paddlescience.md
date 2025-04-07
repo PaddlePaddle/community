@@ -182,22 +182,26 @@ for iteration in range(ITERATIONS):
 
 ### 5.1 模型结构
 ```
-paddlescience/
-└── generative/
-    ├── gan/
-    │   ├── __init__.py
-    │   ├── base_gan.py        # GAN 基类
-    │   ├── wgan.py            # WGAN 实现
-    │   └── wgan_gp.py         # WGAN-GP 实现
-    ├── utils/
-    │   ├── __init__.py
-    │   ├── losses.py          # 损失函数
-    │   ├── metrics.py         # 评估指标
-    │   └── visualization.py   # 可视化工具
-    └── examples/
-        ├── wgan_gp_toy.py     # 玩具数据集示例
-        ├── wgan_gp_mnist.py   # MNIST 示例
-        └── wgan_gp_cifar.py   # CIFAR-10 示例
+PaddleScience/
+├── ppsci/
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── losses.py          # 损失函数
+│   │   ├── metrics.py         # 评估指标
+│   │   └── visualization.py   # 可视化工具
+│   └── ...
+└── examples/
+    └── wgan_gp/
+        ├── __init__.py
+        ├── models/
+        │   ├── __init__.py
+        │   ├── base_gan.py    # GAN 基类
+        │   ├── wgan.py        # WGAN 实现
+        │   └── wgan_gp.py     # WGAN-GP 实现
+        └── cases/
+            ├── wgan_gp_toy.py     # 玩具数据集示例
+            ├── wgan_gp_mnist.py   # MNIST 示例
+            └── wgan_gp_cifar.py   # CIFAR-10 示例
 ```
 
 ### 5.2 接口设计
@@ -205,7 +209,7 @@ paddlescience/
 
 ```python
 # 示例用法
-from paddlescience.generative.gan import WGAN_GP
+from models.wgan_gp import WGAN_GP
 
 # 创建模型
 model = WGAN_GP(
@@ -304,11 +308,3 @@ samples = model.generate(num_samples=100)
 2. [原作者 TensorFlow 实现](https://github.com/igul222/improved_wgan_training)
 3. [PaddleScience 文档](https://github.com/PaddlePaddle/PaddleScience)
 4. [Wasserstein GAN 原始论文](https://arxiv.org/abs/1701.07875)
-
-ATTACHMENT:"https://app.devin.ai/attachments/72986bf9-45d1-4e31-a5fe-0b8e781a7d2c/arxiv_abs_1704_00028_102621.png"
-
-ATTACHMENT:"https://app.devin.ai/attachments/b5274cbb-50c9-47a6-b380-9733b60f304b/github_igul222_102631.png"
-
-ATTACHMENT:"https://app.devin.ai/attachments/c6fdf596-3b63-49bb-a5ab-37decb101517/github_igul222_102640.png"
-
-ATTACHMENT:"https://app.devin.ai/attachments/f41229cf-a945-4ba1-b329-4657705bbd6a/github_igul222_102705.png"
