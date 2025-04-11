@@ -183,16 +183,14 @@ for iteration in range(ITERATIONS):
 ### 5.1 模型结构
 ```
 PaddleScience/
-├── ppsci/
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── losses.py          # 损失函数
-│   │   ├── metrics.py         # 评估指标
-│   │   └── visualization.py   # 可视化工具
-│   └── ...
 └── examples/
     └── wgan_gp/
         ├── __init__.py
+        ├── utils/
+        │   ├── __init__.py
+        │   ├── losses.py    # 损失函数
+        │   ├── metrics.py        # 评估指标
+        │   └── visualization.py     # 可视化工具
         ├── models/
         │   ├── __init__.py
         │   ├── base_gan.py    # GAN 基类
