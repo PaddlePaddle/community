@@ -1,6 +1,6 @@
 # PaddlePaddle SIGs
 
-PaddlePaddle projects have special interest groups operating in their repective ways. 
+PaddlePaddle projects have special interest groups operating in their respective ways. 
 
 ## PPOCR-SIG
 
@@ -23,7 +23,7 @@ _SIG maintainer: [sunzhongkai588](https://github.com/sunzhongkai588)_
   * [【第四期体验评测任务】](https://github.com/PaddlePaddle/docs/issues/4920) ｜ [【第三期体验评测任务】](https://github.com/PaddlePaddle/docs/issues/4846)
   * [【第二期体验评测任务】](https://github.com/PaddlePaddle/Paddle/issues/40109) ｜ [【第一期体验评测任务】](https://github.com/PaddlePaddle/Paddle/issues/38865)
 
-The **PaddlePaddle Experience and Evaluation** is an open source co-contribution activity initiated by the PPSIG Usability, focusing on improving the use experience of the Paddle Paddle Framework. Since the launch of the event in February 2022, the *experience and evaluation team* has focused on the Paddle Paddle Framework documentation (including API documents, guides, etc.), covering vairous fileds such as training, deployment, hardware, distribution, etc., to improve the use experience of Paddle Paddle Framework. Furthermore, we aim to jointly explore a new model of open source collaboration through community cooperation to contribute Paddle Paddle together.
+The **PaddlePaddle Experience and Evaluation** is an open source co-contribution activity initiated by the PPSIG Usability, focusing on improving the use experience of the Paddle Paddle Framework. Since the launch of the event in February 2022, the *experience and evaluation team* has focused on the Paddle Paddle Framework documentation (including API documents, guides, etc.), covering various fields such as training, deployment, hardware, distribution, etc., to improve the use experience of Paddle Paddle Framework. Furthermore, we aim to jointly explore a new model of open source collaboration through community cooperation to contribute Paddle Paddle together.
 
 Links to previous activity:
   * [【The 6th activity】](https://github.com/PaddlePaddle/docs/issues/5259) ｜ [【The 5th activity】](https://github.com/PaddlePaddle/docs/issues/5142)

@@ -6,7 +6,7 @@ Welcome to the PaddlePaddle community! This is the starting point for joining an
 - We have bi-week online Paddle contributor meetup, see details here: [PFCC](./pfcc).
 - Explore heartwarming community stories on our blog:  [blog](https://pfcc.blog/).
 
-##  Governance
+## Governance
 PaddlePaddle adopts a hierarchical technical governance structure, please view roles and applying process here: [community membership](contributors/community-membership.md).
 
 We have implemented several mechanisms to enhance community engagement and decision-making.
