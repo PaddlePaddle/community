@@ -6,7 +6,7 @@ Welcome to the PaddlePaddle community! This is the starting point for joining an
 - We have bi-week online Paddle contributor meetup, see details here: [PFCC](./pfcc).
 - Explore heartwarming community stories on our blog:  [blog](https://pfcc.blog/).
 
-##  Governance
+## Governance
 PaddlePaddle adopts a hierarchical technical governance structure, please view roles and applying process here: [community membership](contributors/community-membership.md).
 
 We have implemented several mechanisms to enhance community engagement and decision-making.
@@ -16,7 +16,7 @@ We have implemented several mechanisms to enhance community engagement and decis
 - [Paddle2ONNX PMC](https://github.com/PaddlePaddle/Paddle2ONNX/issues/1185)
 
 ## Contribution
-- RFCs are listed [here](./rfcs), you can also poropose new ideas by creating new RFC.
+- RFCs are listed [here](./rfcs), you can also propose new ideas by creating new RFC.
 - Many of our contribution events offer varying levels of mentorship from experienced community members. If you're interested in participating in our dedicated mentorship program, please review the details outlined in this document and consider applying: [mentorship program](contributors/paddle_contributor_remote_intern_program.pdf).
 - Contributor Recognition
   - Paddle codebase authors are encouraged to include his/her github account and full name into [AUTHORS.md](https://github.com/PaddlePaddle/Paddle/blob/develop/AUTHORS.md)
