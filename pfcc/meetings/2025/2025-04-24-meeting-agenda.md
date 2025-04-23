@@ -1,4 +1,4 @@
-# Paddle Framework Contributor Club 五十五次会议议程
+# Paddle Framework Contributor Club 五十四次会议议程
 
 - 本次会议时间：2025/4/24 19:00-20:00 (GMT+08:00) 中国标准时间 - 北京
 - 本次会议接入方式：【腾讯会议】
