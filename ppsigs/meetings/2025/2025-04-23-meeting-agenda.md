@@ -30,6 +30,9 @@
 - PaddleOCR 社区运营进展
 - 当use_gpu=True, 结果是 None [#15033](https://github.com/PaddlePaddle/PaddleOCR/issues/15033)
 - Windows 下与 torch 的兼容性问题？Discussions [#14979](https://github.com/PaddlePaddle/PaddleOCR/issues/14979)
+- 在 HF 上托管 PaddleOCR 的模型。
+  - 现有 DEMO ： <https://huggingface.co/spaces/PaddlePaddle/PaddleOCR>, 遇到了 "RuntimeError: could not execute a primitive" 的问题
+  - 将现有托管在百度 bos 上的 PaddleOCR 的模型，托管到 HF models 上，应该能让老外下载更快，更方便，相应的 PaddleOCR 的代码要做改动。
 - PaddleOCR 未来规划探讨
 
 ### 3. 自由发言，可以提需求给大家讨论、提问等
