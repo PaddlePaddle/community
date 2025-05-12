@@ -14,4 +14,4 @@
    1. [算子切分推导规则开发](https://github.com/PaddlePaddle/Paddle/issues/72415) @[Yeenyeong](https://github.com/Yeenyeong) （15 mins）
    2. [Paddle API 0-size 机制建设](https://github.com/PaddlePaddle/Paddle/issues/72637) @[DanielSun11](https://github.com/DanielSun11) （15mins）
    3. [Paddle2Torch API 转换功能开发](https://github.com/PaddlePaddle/Paddle/issues/72643) @[cangtianhuang](https://github.com/cangtianhuang) （15 mins）
-   4. [Paddle CPU/GPU Kernel 精度问题修复](https://github.com/PaddlePaddle/Paddle/issues/72667) @[lshpku](https://github.com/lshpku) （15 mins）
+   4. [Paddle CPU/GPU Kernel 精度问题推全](https://github.com/PaddlePaddle/Paddle/issues/72667) @[lshpku](https://github.com/lshpku) （15 mins）
