@@ -16,7 +16,7 @@
 
 ## 2、功能目标
 
-本任务的目标是在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型。复现性能指标与原始仓库效果相当，并在提交的文档中给出的 SPE-BLEU、SPE-EditDis、CPE-BLEU、CPE-EditDis、SCE-BLEU、SCE-EditDis、HWE-BLEU 和 HWE-EditDis 指标值。模型存储大小<300M，CPU 推理平均耗时 1s 左右。
+本任务的目标是在 PaddleOCR 中复现 TrOCR-Formula-Rec 模型。复现性能指标与原始仓库效果相当，并在提交的文档中给出的 SPE-BLEU、SPE-EditDis、CPE-BLEU、CPE-EditDis、SCE-BLEU、SCE-EditDis、HWE-BLEU 和 HWE-EditDis 指标值。模型存储大小<300M，推理耗时与原始仓库相当，简单公式在1s左右。
 
 ## 3、意义
 
@@ -24,11 +24,13 @@
 
 # 二、飞桨现状
 
-[PaddleMIX](https://github.com/PaddlePaddle/PaddleMIX/tree/develop) ppdiffusers 中没有 trocr 模型结构，可以参考transformers库加入 trocr 的模型结构。在PaddleOCR中调用 ppdiffusers 中的模型进行推理验证。
+[PaddleMIX](https://github.com/PaddlePaddle/PaddleMIX/tree/develop) ppdiffusers 中没有 trocr, DeiT 和 VisionEncoderDecoder 模型结构，可以参考transformers库加入 trocr, DeiT 和 VisionEncoderDecoder 的模型结构。在PaddleOCR中调用 ppdiffusers 中的模型进行推理验证。
 
 # 三、业内方案调研
 
 1. pytorch框架环境下，trocr 在 transformers 中实现 [transformers/src/transformers/models/trocr](https://github.com/huggingface/transformers/tree/main/src/transformers/models/trocr)
+2. pytorch框架环境下，DeiT 在 transformers 中实现 [transformers/src/transformers/models/deit](https://github.com/huggingface/transformers/tree/main/src/transformers/models/deit)
+3. pytorch框架环境下，VisionEncoderDecoder 在 transformers 中实现 [transformers/src/transformers/models/vision_encoder_decoder](https://github.com/huggingface/transformers/tree/main/src/transformers/models/vision_encoder_decoder)
 
 # 四、对比分析
 
