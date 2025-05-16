@@ -135,34 +135,12 @@ WGAN-GP 的训练流程与标准 GAN 有所不同，主要区别在于：
 
 ```python
 # 训练循环示例
-for iteration in range(ITERATIONS):
-    # 训练判别器
-    for _ in range(CRITIC_ITERS):
-        real_data = next(data_iterator)
-        noise = paddle.randn([BATCH_SIZE, NOISE_DIM])
-        
-        # 计算判别器损失
-        fake_data = generator(noise)
-        real_output = discriminator(real_data)
-        fake_output = discriminator(fake_data)
-        gp = gradient_penalty(discriminator, real_data, fake_data)
-        d_loss = discriminator_loss(real_output, fake_output, gp)
-        
-        # 更新判别器参数
-        d_optimizer.clear_grad()
-        d_loss.backward()
-        d_optimizer.step()
-    
-    # 训练生成器
-    noise = paddle.randn([BATCH_SIZE, NOISE_DIM])
-    fake_data = generator(noise)
-    fake_output = discriminator(fake_data)
-    g_loss = generator_loss(fake_output)
-    
-    # 更新生成器参数
-    g_optimizer.clear_grad()
-    g_loss.backward()
-    g_optimizer.step()
+for i in range(cfg.TRAIN.epochs):
+     logger.message(f"\nEpoch: {i + 1}\n")
+     solver_discriminator.train()
+     optimizer_generator.clear_grad()
+     solver_generator.train()
+     optimizer_discriminator.clear_grad()
 ```
 
 ## 4. 评估指标
@@ -171,10 +149,7 @@ for iteration in range(ITERATIONS):
 ### 4.1 Inception Score (IS)
 用于评估生成图像的质量和多样性。
 
-### 4.2 Fréchet Inception Distance (FID)
-测量生成图像分布与真实图像分布之间的距离。
-
-### 4.3 生成样本可视化
+### 4.2 生成样本可视化
 定期保存生成的样本，用于直观评估模型性能。
 
 ## 5. 与 PaddleScience 集成
@@ -185,21 +160,15 @@ for iteration in range(ITERATIONS):
 PaddleScience/
 └── examples/
     └── wgan_gp/
-        ├── __init__.py
-        ├── utils/
-        │   ├── __init__.py
-        │   ├── losses.py    # 损失函数
-        │   ├── metrics.py        # 评估指标
-        │   └── visualization.py     # 可视化工具
-        ├── models/
-        │   ├── __init__.py
-        │   ├── base_gan.py    # GAN 基类
-        │   ├── wgan.py        # WGAN 实现
-        │   └── wgan_gp.py     # WGAN-GP 实现
-        └── cases/
-            ├── wgan_gp_toy.py     # 玩具数据集示例
-            ├── wgan_gp_mnist.py   # MNIST 示例
-            └── wgan_gp_cifar.py   # CIFAR-10 示例
+        ├── conf
+        │  ├── wgangp_cifar10.yaml # CIFAR-10 配置文件
+        │  ├── wgangp_mnist.yaml # MNIST 配置文件
+        │  └── wgangp_toy.yaml # 玩具数据集配置文件
+        ├── function.py # 损失函数、评估指标、可视化工具
+        ├── model.py # 模型定义
+        ├── wgangp_cifr10.py # CIFAR-10 示例 
+        ├── wgangp_mnist.py # MNIST 示例
+        └── wgangp_toy.py # 玩具数据集示例
 ```
 
 ### 5.2 接口设计
@@ -207,27 +176,20 @@ PaddleScience/
 
 ```python
 # 示例用法
-from models.wgan_gp import WGAN_GP
+from model import WganGpCifar10Discriminator,WganGpCifar10Generator
 
 # 创建模型
-model = WGAN_GP(
-    generator=generator_network,
-    discriminator=discriminator_network,
-    lambda_gp=10.0,
-    critic_iters=5
-)
+ generator_model = WganGpCifar10Generator(**cfg["MODEL"]["gen_net"])
+ discriminator_model = WganGpCifar10Discriminator(**cfg["MODEL"]["dis_net"])
 
 # 训练模型
-model.train(
-    train_data=dataset,
-    batch_size=64,
-    iterations=100000,
-    g_learning_rate=1e-4,
-    d_learning_rate=1e-4
-)
+for i in range(cfg.TRAIN.epochs):
+     logger.message(f"\nEpoch: {i + 1}\n")
+     solver_discriminator.train()
+     optimizer_generator.clear_grad()
+     solver_generator.train()
+     optimizer_discriminator.clear_grad()
 
-# 生成样本
-samples = model.generate(num_samples=100)
 ```
 
 # 六、测试验收的考量
