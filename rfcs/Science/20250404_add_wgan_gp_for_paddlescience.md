@@ -1,11 +1,11 @@
 # 在 PaddleScience 中复现 WGAN-GP 模型
 
-| 任务名称 | 在 PaddleScience 中复现 WGAN-GP 模型 |
-| --- | --- |
-| 提交作者 | robinbg |
-| 提交时间 | 2025-04-04 |
-| 版本号 | V1.0 |
-| 依赖飞桨版本 | develop |
+| 任务名称 | 在 PaddleScience 中复现 WGAN-GP 模型            |
+| --- |-------------------------------------------|
+| 提交作者 | robinbg、XvLingWYY                         |
+| 提交时间 | 2025-04-04                                |
+| 版本号 | V1.0                                      |
+| 依赖飞桨版本 | develop                                   |
 | 文件名 | 20250404_add_wgan_gp_for_paddlescience.md |
 
 # 一、概述
@@ -135,12 +135,12 @@ WGAN-GP 的训练流程与标准 GAN 有所不同，主要区别在于：
 
 ```python
 # 训练循环示例
-for i in range(cfg.TRAIN.epochs):
+ for i in range(cfg.TRAIN.epochs):
      logger.message(f"\nEpoch: {i + 1}\n")
+     optimizer_discriminator.clear_grad()
      solver_discriminator.train()
      optimizer_generator.clear_grad()
      solver_generator.train()
-     optimizer_discriminator.clear_grad()
 ```
 
 ## 4. 评估指标
@@ -150,7 +150,7 @@ for i in range(cfg.TRAIN.epochs):
 用于评估生成图像的质量和多样性。
 
 ### 4.2 生成样本可视化
-定期保存生成的样本，用于直观评估模型性能。
+保存生成的样本，用于直观评估模型性能。
 
 ## 5. 与 PaddleScience 集成
 我们将设计一个模块化的实现，便于与 PaddleScience 集成：
@@ -159,16 +159,18 @@ for i in range(cfg.TRAIN.epochs):
 ```
 PaddleScience/
 └── examples/
-    └── wgan_gp/
+    └── wgangp/
         ├── conf
         │  ├── wgangp_cifar10.yaml # CIFAR-10 配置文件
         │  ├── wgangp_mnist.yaml # MNIST 配置文件
         │  └── wgangp_toy.yaml # 玩具数据集配置文件
         ├── function.py # 损失函数、评估指标、可视化工具
-        ├── model.py # 模型定义
         ├── wgangp_cifr10.py # CIFAR-10 示例 
+        ├── wgangp_cifar10_model.py # CIFAR-10实验模型
         ├── wgangp_mnist.py # MNIST 示例
+        ├── wgangp_mnist_model.py # MNIST实验模型
         └── wgangp_toy.py # 玩具数据集示例
+        └── wgangp_toy_model.py # 玩具数据集实验模型
 ```
 
 ### 5.2 接口设计
@@ -176,7 +178,7 @@ PaddleScience/
 
 ```python
 # 示例用法
-from model import WganGpCifar10Discriminator,WganGpCifar10Generator
+from wgangp_cifar10_model import WganGpCifar10Discriminator,WganGpCifar10Generator
 
 # 创建模型
  generator_model = WganGpCifar10Generator(**cfg["MODEL"]["gen_net"])
