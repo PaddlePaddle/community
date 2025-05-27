@@ -83,10 +83,10 @@ pytest
 | test_eye.py|Y|
 | test_matmul.py|N|
 | test_metis.py|N|
-| test_mul.py|N|
+| test_mul.py|Y|
 | test_neighbor_sample.py|N|
 | test_overload.py|Y|
-| test_permute.py|N|
+| test_permute.py|Y|
 | test_saint.py|N|
 | test_sample.py|N|
 | test_spmm.py|N|
