@@ -43,7 +43,7 @@ torch-sparse 依赖 torch-scatter，其中 torch-scatter 已经完成了相应�
 
 ### 3.2 跑通 torch-sparse
 
-image: addlepaddle/paddle:3.0.0-gpu-cuda12.6-cudnn9.5-trt10.5
+image: paddlepaddle/paddle:3.0.0-gpu-cuda12.6-cudnn9.5-trt10.5
 
 1. 安装
 
@@ -123,4 +123,4 @@ shared_memory 和 is_shared 接口依赖主框架，不影响功能实现，暂�
 
 ## 7. 影响面
 
-1. 在 PFCC 下添加 paddle_sparse 仓库
+1. 在 PFCC 下添加 paddle_sparse 仓库, 并作为第三方库集成到 PaddleScience 内(https://paddlescience-docs.readthedocs.io/zh-cn/latest/zh/install_setup/#143)
