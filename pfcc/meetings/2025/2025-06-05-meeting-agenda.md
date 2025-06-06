@@ -12,4 +12,4 @@
 1. 新人介绍：[yuwu46](https://github.com/yuwu46)、[HangFu7](https://github.com/HangFu7)、[superdonkey007](https://github.com/superdonkey007)、[lxw112190](https://github.com/lxw112190) （3 mins）
 2. MCP 协议基础和技术架构 @[JiehangXie](https://github.com/JiehangXie) （20 mins）
 3. PaddleOCR×MCP：AI 文档处理能力的标准化突破
-   核心技术概述 @[Yiiii007](https://github.com/Yiiii0) （20 mins）
+   核心技术概述 @[Yiiii0](https://github.com/Yiiii0) （20 mins）
