@@ -9,6 +9,6 @@
 
 ## 会议纪要
 
-1. 新人介绍：@[Glencsa](https://github.com/Glencsa)（3 mins）
+1. 新人介绍：@[Glencsa](https://github.com/Glencsa)、@[Cutelemon6](https://github.com/Cutelemon6)（3 mins）
 2. Agent应用观察 @[Bunny](https://github.com/JiehangXie) （40 mins）
 3. Paddle社区近期活动介绍 @[E-Pudding](https://github.com/E-Pudding)（3 mins）
