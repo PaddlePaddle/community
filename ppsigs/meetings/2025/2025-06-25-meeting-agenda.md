@@ -23,6 +23,12 @@
 ### 1. Issue 与 PR 回顾
 
 ### 2. 其他议题
+Paddle C API 讨论
+- 问题：C API没有做好C++异常隔离，也无法将错误信息报告给上层的C# 程序——必须从控制台看日志，目前C API虽然维护变少了，但希望官方不要完全停止维护，这对其它编程语言接入很重要
+- PR review：
+  - 1、有些关键新API，如NewIREnabled不支持C API，patch会增加这个C API：https://github.com/PaddlePaddle/Paddle/pull/73629
+  - 2、修复new ir（JSON模型）无法从内存中加载的问题：https://github.com/PaddlePaddle/Paddle/pull/73630
+  - 3、修复macos-13（x64）使用了ONNXRUNTIME时编译报错的问题：https://github.com/PaddlePaddle/Paddle/pull/73631 
 
 ### 3. 自由发言，可以提需求给大家讨论、提问等
 
