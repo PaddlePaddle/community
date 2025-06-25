@@ -1,9 +1,9 @@
-## 第二十一次 PaddleOCR 开源共建研讨会
+## 第二十二次 PaddleOCR 开源共建研讨会
 
-* 会议时间：2025-06-04 19:30
+* 会议时间：2025-06-25 19:30
 * 本次会议接入方式：
-    * 腾讯会议：383-5276-3788
-    * [点击链接入会](https://meeting.tencent.com/dm/xVCAma7fohAo)，或添加至会议列表
+    * 腾讯会议：758-578-854
+    * [点击链接入会](https://meeting.tencent.com/dm/KPTfyrAYOKCc)，或添加至会议列表
 * 本次拟参会 member list：
     * [cuicheng01](https://github.com/cuicheng01)
     * [jzhang533](https://github.com/jzhang533)
@@ -20,30 +20,12 @@
 
 ## 会议议程
 
-### 0. 新人介绍
 
-- @E-Pudding @lxw112190 @TingquanGao
+### 1. Issue与PR回顾
 
-### 1.PaddleOCR 3.0 发版后的问题的专项讨论
-
-| 问题                                                         | 是否已经解决                                            |
-| ------------------------------------------------------------ | ------------------------------------------------------- |
-| 转换ONNX模型时遇到Unsupported IR model IR version: 11, max supported IR version: 10错误 | 是，在3.0.1体现                                         |
-| 在CPU环境中仍然会尝试获取GPU信息，并导致报错。               | 是，在3.0.1体现                                         |
-| PP-OCRv5_server_det模型GPU推理，当输入张量尺寸较大时报错     | 框架未解决，但套件已修改默认行为绕过此问题，在3.0.1体现 |
-| 构造PaddleOCR对象时，如果指定了lang或者ocr_version, 即便设置text_detection_model_name='PP-OCRv5_server_det', text_recognition_model_name='PP-OCRv5_server_rec'，实际使用的模型也会是PP-OCRv5_mobile_det, PP-OCRv5_mobile_rec. | 是，在3.0.1体现                                         |
-| PP-OCRv5、PP-StructureV3等执行GPU推理后，对象析构时报错;     | 是，在3.0.1体现                                         |
-| PPStructureV3对象缺少concatenate_markdown_pages方法，导致文档中的示例跑不通 | 是，在3.0.1体现                                         |
-| 部分图像上的预测结果较PP-OCRv4更差                           | 是，默认推理配置不合理，大部分已经解决，在3.0.1体现     |
-| 因numpy、pandas等依赖的限制，Python 3.12安装PaddleOCR 3.0失败 | 否，解决中                                              |
 
 ### 2. 其他议题
 
-- PaddleOCR 社区运营进展 @E-Pudding
-- PaddleOCR on HuggingFace
-    - https://huggingface.co/spaces/PaddlePaddle/PP-OCRv5_Online_Demo
-    - https://huggingface.co/spaces?category=ocr
-    - Planned to release a joint blog with HuggingFace team.
 
 
 ### 3. 自由发言，可以提需求给大家讨论、提问等
