@@ -18,7 +18,7 @@
 
 #### 项目介绍：
 
-为了实现高效的将 PyTorch 代码自动化的转写成 Paddle 代码，从而提升模型迁移的效率，我们建设了[**PaConvert 代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): \*_PaddlePaddle Code Convert_- Toolkits。目前已支持约 1400 个 Pytorch API 的自动转换与 90+%的代码转换率，但在 新增 API 转写策略、转换机制优化、辅助函数优化、CI 维护与优化 等方面，仍然有很多可持续完善的地方。
+为了实现高效的将 PyTorch 代码自动化的转写成 Paddle 代码，从而提升模型迁移的效率，我们建设了[**PaConvert 代码自动转换工具**](https://github.com/PaddlePaddle/PaConvert): **_PaddlePaddle Code Convert_**- Toolkits。目前已支持约 1400 个 Pytorch API 的自动转换与 90+%的代码转换率，但在 新增 API 转写策略、转换机制优化、辅助函数优化、CI 维护与优化 等方面，仍然有很多可持续完善的地方。
 
 本课题的工作任务包括转换工具建设的以下内容：
 
