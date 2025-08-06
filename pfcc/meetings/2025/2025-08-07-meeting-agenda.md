@@ -9,6 +9,6 @@
 
 ## 会议议程
 
-1. GraphNet项目引入及介绍 @[JewelRoam](https://github.com/JewelRoam)（30 mins）
-3. GraphNet共创计划介绍及演示 @[JewelRoam](https://github.com/JewelRoam) @[RbRe145](https://github.com/RbRe145) （20 mins）
+1. GraphNet 项目引入及介绍 @[JewelRoam](https://github.com/JewelRoam)（30 mins）
+3. [GraphNet 共创计划](https://github.com/PaddlePaddle/Paddle/issues/74368) 介绍及演示 @[JewelRoam](https://github.com/JewelRoam) @[RbRe145](https://github.com/RbRe145) （20 mins）
 4. 互动及提问 （10 mins）
