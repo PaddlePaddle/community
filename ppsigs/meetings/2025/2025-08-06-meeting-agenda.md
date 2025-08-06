@@ -2,8 +2,8 @@
 
 * 会议时间：2025-08-06 19:30
 * 本次会议接入方式：
-    * 腾讯会议：470-234-441
-    * [点击链接入会](https://meeting.tencent.com/dm/XYlBHZ3nnQjX)，或添加至会议列表
+    * 腾讯会议：631-4439-5062
+    * [点击链接入会](https://meeting.tencent.com/dm/ZFE1oGdfaigO)，或添加至会议列表
 * 本次拟参会 member list：
     * [cuicheng01](https://github.com/cuicheng01)
     * [jzhang533](https://github.com/jzhang533)
