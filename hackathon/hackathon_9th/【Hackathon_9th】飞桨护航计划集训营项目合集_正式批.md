@@ -1,4 +1,5 @@
-此文档展示 **PaddlePaddle Hackathon 第九期活动——飞桨护航计划集训营（正式批）** 项目的详细介绍
+此文档展示 **PaddlePaddle Hackathon 第九期活动——飞桨护航计划集训营（正式批）**
+项目的详细介绍
 
 ## 赛题详情
 
@@ -6,8 +7,9 @@
 
 #### 项目介绍：
 
-为了实现高效的将PyTorch代码自动化的转写成Paddle代码，从而提升模型迁移的效率，我们建设了[PaConvert代码自动转换工具](https://github.com/PaddlePaddle/PaConvert): PaddlePaddle Code Convert Toolkits。目前已支持约1800个Pytorch API的自动转换与95+%的代码转换率，但在 新增转换策略、转换机制优化、转换策略与Paddle主框架对齐、转换策略与映射文档一致性检查 等方面，仍然有很多可持续完善的地方。同时在Paddle框架API、[PaDiff精度对齐工具](https://github.com/PaddlePaddle/PaDiff)方面也有可继续完善的地方。
-本课题的工作任务包括转换工具建设的以下内容：
+为了实现高效的将PyTorch代码自动化的转写成Paddle代码，从而提升模型迁移的效率，我们建设了[PaConvert代码自动转换工具](https://github.com/PaddlePaddle/PaConvert):
+PaddlePaddle Code Convert Toolkits。目前已支持约1800个Pytorch
+API的自动转换与95+%的代码转换率，但在 新增转换策略、转换机制优化、转换策略与Paddle主框架对齐、转换策略与映射文档一致性检查 等方面，仍然有很多可持续完善的地方。同时在Paddle框架API、[PaDiff精度对齐工具](https://github.com/PaddlePaddle/PaDiff)方面也有可继续完善的地方。本课题的工作任务包括转换工具建设的以下内容：
 
 1. 新增API转写策略，例如大模型相关的API转写策略
 2. 优化转换机制，例如自定义算子转写机制方面的问题
