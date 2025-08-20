@@ -83,7 +83,7 @@
 - 完成Paddle后端和Pytorch/JAX后端模型精度对齐，按照PaddleCFD智能流体开发套件的单文件夹策略组织模型代码并合入PaddleCFD代码仓库。
 - 提供详细的模型精度对齐文档、数据集、模型训练说明文档。
 
-### NO.107 基于PaddleScience复现neuralgcm模型推理，使用小样本数据能够实现训练
+### NO.107 基于PaddleScience复现Aurora模型推理，使用小样本数据能够实现微调及训练
 
 **论文链接：**
 
