@@ -57,7 +57,8 @@ pytorch_spline_conv实现了一种基于B-splines的新型卷积算子，用于�
 - 熟悉 Python，C++，工程能力强
 - 对PyTorch、Paddle比较熟悉
 
-**参考资料：** 
+**参考资料：**
+
 1. pytorch_spline_conv: [https://github.com/rusty1s/pytorch_spline_conv](https://github.com/rusty1s/pytorch_spline_conv)
 
 ### 三、工具组件适配dgl适配

@@ -16,7 +16,6 @@
 5. 转换工具CI日常维护
 6. 视情况也可开展一些Paddle框架API增强或[PaDiff精度对齐工具](https://github.com/PaddlePaddle/PaDiff)增强的工作
 
-
 #### 营员要求（1 人）：
 
 - 熟悉 Python

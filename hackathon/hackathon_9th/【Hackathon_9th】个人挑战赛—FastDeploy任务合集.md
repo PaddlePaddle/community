@@ -1,4 +1,4 @@
-此文档展示 **PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛套件开发方向任务*- 详细介绍
+此文档展示 \*_PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛套件开发方向任务_- 详细介绍
 
 ## 【开源贡献个人挑战赛-FastDeploy】任务详情
 
@@ -62,66 +62,97 @@
 68. 自定义算子 ngram_match 单测补充
 69. 自定义算子 draft_model_preprocess 单测补充
 70. 功能模块 CUDAPlatform、CPUPlatform 单测补充
+
 - 详细描述：本任务中需要补充功能模块 CUDAPlatform、CPUPlatform 的单测
 - 测试内容：类中各个接口正常可用，功能包括正确判断所在硬件类型，硬件是否可用，正确返回 attention_backend
 - 单测名称：tests/platforms/test_platforms.py
+
 71. 功能模块 WeightOnlyLinearMethod 单测补充
+
 - 详细描述：本任务中需要补充功能模块 WeightOnlyLinearMethod 的单测
 - 测试内容：创建的 Parameter，apply 计算结果是否符合预期
 - 单测名称：tests/quantization/test_weight_only.py
+
 72. 功能模块 Worker/ModelRunner 单测补充
+
 - 详细描述：本任务中需要补充功能模块 Worker/ModelRunner 的单测
 - 测试内容：构造一个可以随意指定BatchSize（无动态插入）、Prompt 的 token 数、Decode 的 token 数的只跑假数据的 Worker/ModelRunner
 - 单测名称：tests/worker/model_runner.py
+
 73. 功能模块 graph_optimization 单测补充
+
 - 详细描述：本任务中需要补充功能模块 graph_optimization 的单测
 - 测试内容：添加一个单测，测试Numpy实现(BaseLine)、动态图、静态图、CINN、动态图+CudaGraph、静态图+CudaGraph、CINN+CudaGraph 七种情况下精度正常且能对齐
 - 单测名称：test/graph_optimization/graph_opt_backend.py
+
 74. 功能模块 fastdeploy/cache_manager/RDMACommManager 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/cache_manager/RDMACommManager 的单测
 - 测试内容：测试任意两个实例能否进行 kvcache 传输, 并验证传输内容是否完全一致，包括机内与机间
 - 单测名称：test/cache_manager/rdma_connect.py
+
 75. 功能模块 fastdeploy/cache_manager/IPCCommManager 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/cache_manager/IPCCommManager 的单测
 - 测试内容：测试任意两个实例单机内能否进行 kvcache 传输，且结果一致
 - 单测名称：test/cache_manager/ipc_connect.py
+
 76. 功能模块 fastdeploy/model_executor/guided_decoding/XGrammarChecker 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/model_executor/guided_decoding/XGrammarChecker 的单测
 - 测试内容：测试能否正确识别 guided_json、guided_grammar、guided_json_object、guided_choice、structural_tag、regex 语法是否合法
 - 单测名称：test/model_executor/guided_decoding/test_xgrammar.py
+
 77. 功能模块 fastdeploy/metrics/metrics/get_filtered_metrics 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/metrics/metrics/get_filtered_metrics 的单测
 - 测试内容：测试过滤制指定指标，保留其他指标功能，extra_register_func 的指标是否生效
 - 单测名称：test/metrics/test_metrics.py
+
 78. 功能模块 fastdeploy/entrypoints 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/entrypoints 的单测
 - 测试内容：chat/generation 接口测试，涵盖不同输入格式
 - 单测名称：tests/entrypoints/test_generation.py、tests/entrypoints/test_chat.py
+
 79. 功能模块 fastdeploy/entrypoints/openai 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/entrypoints/openai 的单测
 - 测试内容：chat/completion 接口测试，流式非流式，异常报错抛出
 - 单测名称：tests/entrypoints/openai
+
 80. 功能模块 fastdeploy/splitwise 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/splitwise 的单测
 - 测试内容：增加 e2e 单机pd 分离单测，可以正常推理
 - 单测名称：tests/splitwise
+
 81. 功能模块 fastdeploy/output 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/output 的单测
 - 测试内容：增加 e2e 单机pd 分离单测，可以正常推理
 - 单测名称：tests/output
+
 82. 功能模块 fastdeploy/cache_manager 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/cache_manager 的单测
 - 测试内容：增加 e2e prompt cache 单测，验证命中率，cache 驱逐，cache swap 是否正常
 - 单测名称：fastdeploy/cache_manager/test_prefix_cache.py
-83. 功能模块  fastdeploy/model_executor/models 单测补充
-- 详细描述：本任务中需要补充功能模块  fastdeploy/model_executor/models 的单测
+
+83. 功能模块 fastdeploy/model_executor/models 单测补充
+
+- 详细描述：本任务中需要补充功能模块 fastdeploy/model_executor/models 的单测
 - 测试内容：每个模型创造一个少量层、fake parameters 的小模型(涵盖 dense layer 和 moe layer)，完成正常推理不报错
 - 单测名称：tests/models
+
 84. 功能模块 fastdeploy/reasoning/ 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/reasoning/ 的单测
 - 测试内容：测试基类的注册、获取函数功能是否正常
 - 单测名称：test/reasoning/test_reasoning_parser.py
+
 85. 功能模块 fastdeploy/inputs/ 单测补充
+
 - 详细描述：本任务中需要补充功能模块 fastdeploy/inputs/ 的单测
 - 测试内容：input 为数据处理模块，测试这个目录下四个 processor 类的process_request_dict、process_response、process_response_dict 类能否返回正确值
 - 单测名称：test/inputs
@@ -207,7 +238,7 @@
 
 **详细描述：**
 
-- 为FastDeploy 集成SageAttn v2/2++  高性能量化 Attention能力。
+- 为FastDeploy 集成SageAttn v2/2++ 高性能量化 Attention能力。
 
 **提交内容**：
 
@@ -220,10 +251,10 @@
 
 **技术要求：**
 
-- 熟悉Attention算子，熟悉常见的LLM模型结构和计算流程. 
+- 熟悉Attention算子，熟悉常见的LLM模型结构和计算流程.
 - 熟悉python, 有GEMM/Attention算子等开发经验优先
 
-### NO.90 为FastDeploy集成  SpargeAttn
+### NO.90 为FastDeploy集成 SpargeAttn
 
 **详细描述：**
 
@@ -240,14 +271,14 @@
 
 **技术要求：**
 
-- 熟悉Attention算子，熟悉常见的LLM模型结构和计算流程. 
+- 熟悉Attention算子，熟悉常见的LLM模型结构和计算流程.
 - 熟悉python, 有GEMM/Attention算子等开发经验优先
 
-### NO.91 FastDeploy中的MoE GroupGEMM支持INT8*INT8实现
+### NO.91 FastDeploy中的MoE GroupGEMM支持INT8\*INT8实现
 
 **详细描述：**
 
-- 为FastDeploy 开发高性能 MoE算子(INT8*INT8)
+- 为FastDeploy 开发高性能 MoE算子(INT8\*INT8)
 
 **提交内容**：
 
@@ -266,11 +297,11 @@
 
 **详细描述：**
 
-- 为FastDeploy 提供部署高性能的Kimi K2 模型的能力. 
+- 为FastDeploy 提供部署高性能的Kimi K2 模型的能力.
 
 **提交内容**：
 
-1. Kimi K2 模型代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档. 
+1. Kimi K2 模型代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档.
 2. 如需开发自定义算子, 提交至 FastDeploy/custom_ops/gpu_ops/ 目录下.
 3. 为 Kimi K2 适配FastDeploy现有的各种低bit量化推理的能力.
 
@@ -279,15 +310,15 @@
 - 熟悉常见的LLM模型结构和计算流程. 了解 Kimi K2 模型结构.
 - 熟悉python, 熟悉cuda
 
-### NO.93 为 FastDeploy 新增 MiniMax-M1模型 
+### NO.93 为 FastDeploy 新增 MiniMax-M1模型
 
 **详细描述：**
 
-- 为FastDeploy 提供部署高性能的MiniMax-M1模型的能力. 
+- 为FastDeploy 提供部署高性能的MiniMax-M1模型的能力.
 
 **提交内容**：
 
-1. MiniMax-M1 模型组网代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档. 
+1. MiniMax-M1 模型组网代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档.
 2. 如需开发自定义算子, 提交至 FastDeploy/custom_ops/gpu_ops/ 目录下.
 3. 为MiniMax-M1适配FastDeploy现有的各种低bit量化推理的能力.
 
@@ -296,15 +327,15 @@
 - 熟悉常见的LLM模型结构和计算流程. 了解 MiniMax-M1 模型结构.
 - 熟悉python, 熟悉cuda
 
-### NO.94 为 FastDeploy 新增 SD、Flux扩散模型 
+### NO.94 为 FastDeploy 新增 SD、Flux扩散模型
 
 **详细描述：**
 
-- 为FastDeploy 提供部署高性能的Stable-diffusion、Flux模型的能力. 
+- 为FastDeploy 提供部署高性能的Stable-diffusion、Flux模型的能力.
 
 **提交内容**：
 
-1. SD3、Flux扩散模型组网代码, 提交至 FastDeploy/fastdeploy/model_executor/diffusion_models/ 目录下. 同时提交模型使用说明文档. 
+1. SD3、Flux扩散模型组网代码, 提交至 FastDeploy/fastdeploy/model_executor/diffusion_models/ 目录下. 同时提交模型使用说明文档.
 2. 如需开发自定义算子, 提交至 FastDeploy/custom_ops/gpu_ops/ 目录下.
 3. 为扩散模型适配FastDeploy现有的各种并行、低bit量化推理的能力.
 

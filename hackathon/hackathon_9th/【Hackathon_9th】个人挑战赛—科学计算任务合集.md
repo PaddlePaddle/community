@@ -5,6 +5,7 @@
 复现任务说明：
 
 开发流程：
+
 1. 要求基于 PaddleScience 套件进行开发，开发文档参考：[https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/](https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/)。
 2. 复现整体流程和验收标准可以参考：[https://paddlescience-docs.readthedocs.io/zh/latest/zh/reproduction/#21](https://paddlescience-docs.readthedocs.io/zh/latest/zh/reproduction/#21)，复现完成后需供必要的训练产物，包括训练结束后保存的 train.log日志文件、.pdparams模型权重参数文件（可用网盘的方式提交）、撰写的.md案例文档。
 3. 理解复现流程后，可以参考 PaddleScience 开发文档：[https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/](https://paddlescience-docs.readthedocs.io/zh/latest/zh/development/)，了解各个模块如何进行开发、修改，以及参考API文档，了解各个现有API的功能和作用：[https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/](https://paddlescience-docs.readthedocs.io/zh/latest/zh/api/arch/)。
@@ -24,61 +25,63 @@
 
 **验收标准**：
 
-* 实现其中全部API。
-* 完成单元测试
-* 实现精度对齐。
-* 安装文档。
+- 实现其中全部API。
+- 完成单元测试
+- 实现精度对齐。
+- 安装文档。
 
 **技术要求：**
 
-* 熟练掌握 Python 语言
-* 熟悉 Paddle 框架
+- 熟练掌握 Python 语言
+- 熟悉 Paddle 框架
 
 ### NO.104 基于Paddle实现第三方库torchmetrics
 
 **详细描述：**
 
 - 基于Paddle实现机器学习常用指标库torchmetrics
+
 * 参考代码链接：[https://github.com/Lightning-AI/torchmetrics](https://github.com/Lightning-AI/torchmetrics)
 
 **验收标准**：
 
-* 实现其中全部API。
-* 完成单元测试
-* 实现精度对齐。
-* 安装文档。
+- 实现其中全部API。
+- 完成单元测试
+- 实现精度对齐。
+- 安装文档。
 
 **技术要求：**
 
-* 熟练掌握 Python 语言
-* 熟悉 Paddle 框架
+- 熟练掌握 Python 语言
+- 熟悉 Paddle 框架
 
 ### NO.105 基于Paddle实现CoNFiLD流场生成模型
 
 **详细描述：**
 
 - 实现基于Paddle框架的CoNFiLD模型
+
 * 论文链接：[https://www.nature.com/articles/s41467-024-54712-1](https://www.nature.com/articles/s41467-024-54712-1)
 * 参考代码链接：[https://github.com/jx-wang-s-group/CoNFiLD](https://github.com/jx-wang-s-group/CoNFiL)
 
 **验收标准**：
 
-* 完成Paddle后端和Pytorch后端模型精度对齐，按照PaddleCFD智能流体开发套件的单文件夹策略组织模型代码并合入PaddleCFD代码仓库。
-* 提供详细的模型精度对齐文档、数据集、模型训练说明文档。
+- 完成Paddle后端和Pytorch后端模型精度对齐，按照PaddleCFD智能流体开发套件的单文件夹策略组织模型代码并合入PaddleCFD代码仓库。
+- 提供详细的模型精度对齐文档、数据集、模型训练说明文档。
 
 ### NO.106 基于Paddle实现符号深度学习模型，用于流体力学方程发现
 
 **详细描述：**
 
 - 基于Paddle实现符号深度学习模型，用于流体力学方程发现
+
 * 论文链接：[https://proceedings.neurips.cc/paper/2020/file/c9f2f917078bd2db12f23c3b413d9cba-Paper.pdf](https://proceedings.neurips.cc/paper/2020/file/c9f2f917078bd2db12f23c3b413d9cba-Paper.pdf)
 * 参考代码链接：[https://github.com/MilesCranmer/symbolic_deep_learning](https://github.com/MilesCranmer/symbolic_deep_learning)
 
-
 **验收标准**：
 
-* 完成Paddle后端和Pytorch/JAX后端模型精度对齐，按照PaddleCFD智能流体开发套件的单文件夹策略组织模型代码并合入PaddleCFD代码仓库。
-* 提供详细的模型精度对齐文档、数据集、模型训练说明文档。
+- 完成Paddle后端和Pytorch/JAX后端模型精度对齐，按照PaddleCFD智能流体开发套件的单文件夹策略组织模型代码并合入PaddleCFD代码仓库。
+- 提供详细的模型精度对齐文档、数据集、模型训练说明文档。
 
 ### NO.107 基于PaddleScience复现neuralgcm模型推理，使用小样本数据能够实现训练
 

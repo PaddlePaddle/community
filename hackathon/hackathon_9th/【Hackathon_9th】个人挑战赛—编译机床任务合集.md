@@ -1,24 +1,23 @@
-此文档展示 **PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛套件开发方向任务*- 详细介绍
+此文档展示 \*_PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛套件开发方向任务_- 详细介绍
 
 ## 【开源贡献个人挑战赛-编译机床】任务详情
 
 本期任务贡献于 AI Infra 编译机床 计划的子项目 GraphNet（[https://github.com/PaddlePaddle/GraphNet](https://github.com/PaddlePaddle/GraphNet)），目标计算图数据集收集与通用评价指标建设。
+
 1. 该项目要求 **8月27日中期检查，9月3日收尾**，无法保证完成时间的开发者不建议领取
 2. 开发说明：
 
 GraphNet设计了test_compiler接口来评测编译器在GraphNet数据集上的指标，实现代码在graph_net/torch/test_compiler.py。用法如下：
+
 ```
 python -m graph_net.torch.test_compiler \
   --model-path $GRAPH_NET_EXTRACT_WORKSPACE/model_name/ \
-  --compiler /path/to/custom/compiler 
+  --compiler /path/to/custom/compiler
 ```
-参数功能包括：
-    - --model-path，字符串类型，指定模型文件的路径，可以支持单个模型或多个模型批量测试。
-    - --compiler，字符串类型，指定要评测的编译器后端，默认值为"default"，即torch.compile并且设置backend="inductor"。
 
-给定一份计算图，当前已支持统计一些原始的指标，包括：
-    1. 不同精度下的正确率；
-    2. 编译前后的运行时间对比。
+参数功能包括：- --model-path，字符串类型，指定模型文件的路径，可以支持单个模型或多个模型批量测试。- --compiler，字符串类型，指定要评测的编译器后端，默认值为"default"，即torch.compile并且设置backend="inductor"。
+
+给定一份计算图，当前已支持统计一些原始的指标，包括：1. 不同精度下的正确率；2. 编译前后的运行时间对比。
 
 ### NO.97 适配 tvm 编译器
 
@@ -26,13 +25,12 @@ python -m graph_net.torch.test_compiler \
 
 - 功能需求：graph_net.torch.test_compiler支持后端使用 tvm 编译器，即支持配置 --compiler "tvm"，读取GraphNet/samples目录下的子图，可成功执行并获得正确的评测结果。
 - 可选方案（可选择列举的一种或多种方案实现，或者自行调研更优的方案，若能对多种方案进行对比为最佳）
-
-    1. 使用torch.compile(m, backend="tvm")，可参考 [https://docs.pytorch.org/docs/stable/torch.compiler.html](https://docs.pytorch.org/docs/stable/torch.compiler.html)。
-    2. 在 PyTorch 中用 torch.jit.trace 或 torch.jit.script 把模型转换为 TorchScript，用 tvm.frontend.from_pytorch（或 relay 接口）加载。
+  1. 使用torch.compile(m, backend="tvm")，可参考 [https://docs.pytorch.org/docs/stable/torch.compiler.html](https://docs.pytorch.org/docs/stable/torch.compiler.html)。
+  2. 在 PyTorch 中用 torch.jit.trace 或 torch.jit.script 把模型转换为 TorchScript，用 tvm.frontend.from_pytorch（或 relay 接口）加载。
 
 - 测试要求：
-    - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
-    - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
+  - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
+  - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
 
 **提交内容**：
 
@@ -54,13 +52,12 @@ python -m graph_net.torch.test_compiler \
 
 - 功能需求：graph_net.torch.test_compiler支持后端使用 xla 编译器，即支持配置 --compiler "xla"，读取GraphNet/samples目录下的子图，可成功执行并获得正确的评测结果。
 - 可选方案（可选择列举的一种或多种方案实现，或者自行调研更优的方案，若能对多种方案进行对比为最佳）
-
-    1. 使用torch_xla包，参考 [https://github.com/pytorch/xla](https://github.com/pytorch/xla)，然后使用device='xla'
-    2. 使用torch_xla包，然后使用torch.compile(..., backend='openxla')
+  1. 使用torch_xla包，参考 [https://github.com/pytorch/xla](https://github.com/pytorch/xla)，然后使用device='xla'
+  2. 使用torch_xla包，然后使用torch.compile(..., backend='openxla')
 
 - 测试要求：
-    - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
-    - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
+  - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
+  - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
 
 **提交内容**：
 
@@ -82,14 +79,13 @@ python -m graph_net.torch.test_compiler \
 
 - 功能需求：graph_net.torch.test_compiler支持后端使用 xla 编译器，即支持配置 --compiler "tensorrt"，读取GraphNet/samples目录下的子图，可成功执行并获得正确的评测结果。
 - 可选方案（可选择列举的一种或多种方案实现，或者自行调研更优的方案，若能对多种方案进行对比为最佳）
-
-    1. 使用torch.compile(m, backend="tensorrt")，可参考 [https://docs.pytorch.org/docs/stable/torch.compiler.html](https://docs.pytorch.org/docs/stable/torch.compiler.html)
-    2. 使用AOT编译，即torch_tensorrt.compile(m, ir, inputs, ...)，可参考 [https://docs.pytorch.org/TensorRT/py_api/torch_tensorrt.html?highlight=torch+compile#torch_tensorrt.compile](https://docs.pytorch.org/TensorRT/py_api/torch_tensorrt.html?highlight=torch+compile#torch_tensorrt.compile)
-    3. 使用TorchScript，将模型转换为TorchScript后调用torch._C._jit_to_backend("tensorrt", ...)
+  1. 使用torch.compile(m, backend="tensorrt")，可参考 [https://docs.pytorch.org/docs/stable/torch.compiler.html](https://docs.pytorch.org/docs/stable/torch.compiler.html)
+  2. 使用AOT编译，即torch_tensorrt.compile(m, ir, inputs, ...)，可参考 [https://docs.pytorch.org/TensorRT/py_api/torch_tensorrt.html?highlight=torch+compile#torch_tensorrt.compile](https://docs.pytorch.org/TensorRT/py_api/torch_tensorrt.html?highlight=torch+compile#torch_tensorrt.compile)
+  3. 使用TorchScript，将模型转换为TorchScript后调用torch.\_C.\_jit_to_backend("tensorrt", ...)
 
 - 测试要求：
-    - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
-    - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
+  - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
+  - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
 
 **提交内容**：
 
@@ -111,13 +107,12 @@ python -m graph_net.torch.test_compiler \
 
 - 功能需求：graph_net.torch.test_compiler支持后端使用 xla 编译器，即支持配置 --compiler "blade-disc"，读取GraphNet/samples目录下的子图，可成功执行并获得正确的评测结果。
 - 可选方案（可选择列举的一种或多种方案实现，或者自行调研更优的方案，若能对多种方案进行对比为最佳）
-
-    1. TorchScript 模式，即先用 torch.jit.trace 或 torch.jit.script 把 PyTorch 模型转成 TorchScript，再用 BladeDISC 的 torch_blade.optimize 进行编译优化，可参考 [https://github.com/alibaba/BladeDISC/blob/main/docs/developers/bladedisc_torch_overview.md](https://github.com/alibaba/BladeDISC/blob/main/docs/developers/bladedisc_torch_overview.md)。
-    2. FX Graph 模式，即基于 PyTorch FX 捕获计算图，直接交给 BladeDISC 编译，支持动态图和部分复杂控制流
+  1. TorchScript 模式，即先用 torch.jit.trace 或 torch.jit.script 把 PyTorch 模型转成 TorchScript，再用 BladeDISC 的 torch_blade.optimize 进行编译优化，可参考 [https://github.com/alibaba/BladeDISC/blob/main/docs/developers/bladedisc_torch_overview.md](https://github.com/alibaba/BladeDISC/blob/main/docs/developers/bladedisc_torch_overview.md)。
+  2. FX Graph 模式，即基于 PyTorch FX 捕获计算图，直接交给 BladeDISC 编译，支持动态图和部分复杂控制流
 
 - 测试要求：
-    - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
-    - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
+  - GraphNet/samples 目录下，每种类型至少需要验证一个模型，需通过 Profiler 或者日志确认子图是否真的用到了 tvm 编译器后端。若遇到整个类型无法支持的问题，需通过 issue 或其他方式找官方确认。
+  - 选取 GraphNet/samples 目录下一个子类型进行批量测试。
 
 **提交内容**：
 
@@ -159,13 +154,12 @@ python -m graph_net.torch.test_compiler \
 
 **详细描述：**
 
-- 问题描述：该任务对应 [https://github.com/PaddlePaddle/GraphNet/issues/130](https://github.com/PaddlePaddle/GraphNet/issues/130) 中提到的问题：捕捉GraphMoudle时，遇到torch._C._functorch.PyCapsule._vmap_increment_nesting这类函数，dynamo的捕捉过程会被打断，这时候只会有前面捕捉的第一个子图。
+- 问题描述：该任务对应 [https://github.com/PaddlePaddle/GraphNet/issues/130](https://github.com/PaddlePaddle/GraphNet/issues/130) 中提到的问题：捕捉GraphMoudle时，遇到torch.\_C.\_functorch.PyCapsule.\_vmap_increment_nesting这类函数，dynamo的捕捉过程会被打断，这时候只会有前面捕捉的第一个子图。
 - **该任务与前面几项不同**，与test_compiler无关，具体修改内容需要探索。
 - 可能的解决方案，目前大概有三个思路：
-
-    1. 让 dynamo感知_vmap_increase_nesting / _vmap_decrease_nesting；
-    2. 在 validate 的时候不再使用 torch.compile 来抽取计算图，而是直接用 symbolic_trace；
-    3. 编写 fx.Graph 的 revert pass，把_vmap_increase_nesting / _vmap_decrease_nesting 复原到高阶函数 vmap 调用。
+  1. 让 dynamo感知\_vmap_increase_nesting / \_vmap_decrease_nesting；
+  2. 在 validate 的时候不再使用 torch.compile 来抽取计算图，而是直接用 symbolic_trace；
+  3. 编写 fx.Graph 的 revert pass，把\_vmap_increase_nesting / \_vmap_decrease_nesting 复原到高阶函数 vmap 调用。
 
 **提交内容**：
 
