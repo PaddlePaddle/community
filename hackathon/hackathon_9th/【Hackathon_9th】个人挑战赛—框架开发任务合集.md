@@ -21,7 +21,7 @@
     - [复数梯度推导计算](https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading/complex_autograd)
     - [paddlepaddle 支持复数任务](https://github.com/PaddlePaddle/Paddle/issues/61975)
 
-### NO.1 - NO.19 API正确性
+### NO.1-NO.19API正确性
 
 **详细描述：**
 
