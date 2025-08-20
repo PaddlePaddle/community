@@ -2,7 +2,7 @@
 
 ## 【开源贡献个人挑战赛-FastDeploy套件开发】任务详情
 
-### NO.20 - NO.85 为 FastDeploy 各个模块及自定义算子补充单测
+**NO.20 - NO.85 为 FastDeploy 各个模块及自定义算子补充单测**
 
 **详细描述：**
 
@@ -27,148 +27,148 @@
 
 **题目内容**：
 
-##### NO.20 自定义算子 masked_per_token_quant 单测补充
-##### NO.21 自定义算子 moe_fused_hadamard_quant_fp8 单测补充
-##### NO.22 自定义算子 share_external_data 单测补充
-##### NO.23 自定义算子 fused_hadamard_quant_fp8 单测补充
-##### NO.24 自定义算子 rebuild_padding 单测补充
-##### NO.25 自定义算子 fused_get_rotary_embedding 单测补充
-##### NO.26 自定义算子 set_value_by_flags_and_idx 单测补充
-##### NO.27 自定义算子 get_padding_offset 单测补充
-##### NO.28 自定义算子 cutlass_fp8_fp8_fp8_dual_gemm_fused 单测补充
-##### NO.29 自定义算子 cutlass_fp8_fp8_half_block_gemm_fused 单测补充
-##### NO.30 自定义算子 tritonmoe_preprocess 单测补充
-##### NO.31 自定义算子 gptq_marlin_repack 单测补充
-##### NO.32 自定义算子 group_swiglu_with_masked 单测补充
-##### NO.33 自定义算子 moe_wna16_marlin_gemm 单测补充
-##### NO.34 自定义算子 get_position_ids_and_mask_encoder_batch 单测补充
-##### NO.35 自定义算子 moe_redundant_topk_select 单测补充
-##### NO.36 自定义算子 extract_text_token_output 单测补充
-##### NO.37 自定义算子 top_k_re##### NOrm_probs 单测补充
-##### NO.38 自定义算子 winx_unzip 单测补充
-##### NO.39 自定义算子 moe_expert_ffn_wint2 单测补充
-##### NO.40 自定义算子 top_p_candidates 单测补充
-##### NO.41 自定义算子 speculate_update_v2 单测补充
-##### NO.42 自定义算子 speculate_get_output_padding_offset 单测补充
-##### NO.43 自定义算子 speculate_get_seq_lens_output 单测补充
-##### NO.44 自定义算子 speculate_get_token_penalty_multi_scores 单测补充
-##### NO.45 自定义算子 speculate_get_padding_offset 单测补充
-##### NO.46 自定义算子 fused_rotary_position_encoding 单测补充
-##### NO.47 自定义算子 append_attention 单测补充
-##### NO.48 自定义算子 ep_moe_expert_dispatch_fp8 单测补充
-##### NO.49 自定义算子 pre_cache_len_concat 单测补充
-##### NO.50 自定义算子 ep_moe_expert_dispatch 单测补充
-##### NO.51 自定义算子 gqa_rope_write_cache 单测补充
-##### NO.52 自定义算子 dynamic_per_token_scaled_fp8_quant 单测补充
-##### NO.53 自定义算子 multi_head_latent_attention 单测补充
-##### NO.54 自定义算子 per_token_quant 单测补充
-##### NO.55 自定义算子 update_inputs_v1 单测补充
-##### NO.56 自定义算子 get_data_ptr_ipc 单测补充
-##### NO.57 自定义算子 per_token_quant_padding 单测补充
-##### NO.58 自定义算子 speculate_rebuild_append_padding 单测补充
-##### NO.59 自定义算子 speculate_set_value_by_flags_and_idx 单测补充
-##### NO.60 自定义算子 eagle_get_self_hidden_states 单测补充
-##### NO.61 自定义算子 speculate_update_v3 单测补充
-##### NO.62 自定义算子 eagle_get_hidden_states 单测补充
-##### NO.63 自定义算子 draft_model_postprocess 单测补充
-##### NO.64 自定义算子 draft_model_set_value_by_flags 单测补充
-##### NO.65 自定义算子 draft_model_update 单测补充
-##### NO.66 自定义算子 speculate_set_stop_value_multi_seqs 单测补充
-##### NO.67 自定义算子 speculate_verify 单测补充
-##### NO.68 自定义算子 ngram_match 单测补充
-##### NO.69 自定义算子 draft_model_preprocess 单测补充
+### NO.20 自定义算子 masked_per_token_quant 单测补充
+### NO.21 自定义算子 moe_fused_hadamard_quant_fp8 单测补充
+### NO.22 自定义算子 share_external_data 单测补充
+### NO.23 自定义算子 fused_hadamard_quant_fp8 单测补充
+### NO.24 自定义算子 rebuild_padding 单测补充
+### NO.25 自定义算子 fused_get_rotary_embedding 单测补充
+### NO.26 自定义算子 set_value_by_flags_and_idx 单测补充
+### NO.27 自定义算子 get_padding_offset 单测补充
+### NO.28 自定义算子 cutlass_fp8_fp8_fp8_dual_gemm_fused 单测补充
+### NO.29 自定义算子 cutlass_fp8_fp8_half_block_gemm_fused 单测补充
+### NO.30 自定义算子 tritonmoe_preprocess 单测补充
+### NO.31 自定义算子 gptq_marlin_repack 单测补充
+### NO.32 自定义算子 group_swiglu_with_masked 单测补充
+### NO.33 自定义算子 moe_wna16_marlin_gemm 单测补充
+### NO.34 自定义算子 get_position_ids_and_mask_encoder_batch 单测补充
+### NO.35 自定义算子 moe_redundant_topk_select 单测补充
+### NO.36 自定义算子 extract_text_token_output 单测补充
+### NO.37 自定义算子 top_k_renorm_probs 单测补充
+### NO.38 自定义算子 winx_unzip 单测补充
+### NO.39 自定义算子 moe_expert_ffn_wint2 单测补充
+### NO.40 自定义算子 top_p_candidates 单测补充
+### NO.41 自定义算子 speculate_update_v2 单测补充
+### NO.42 自定义算子 speculate_get_output_padding_offset 单测补充
+### NO.43 自定义算子 speculate_get_seq_lens_output 单测补充
+### NO.44 自定义算子 speculate_get_token_penalty_multi_scores 单测补充
+### NO.45 自定义算子 speculate_get_padding_offset 单测补充
+### NO.46 自定义算子 fused_rotary_position_encoding 单测补充
+### NO.47 自定义算子 append_attention 单测补充
+### NO.48 自定义算子 ep_moe_expert_dispatch_fp8 单测补充
+### NO.49 自定义算子 pre_cache_len_concat 单测补充
+### NO.50 自定义算子 ep_moe_expert_dispatch 单测补充
+### NO.51 自定义算子 gqa_rope_write_cache 单测补充
+### NO.52 自定义算子 dynamic_per_token_scaled_fp8_quant 单测补充
+### NO.53 自定义算子 multi_head_latent_attention 单测补充
+### NO.54 自定义算子 per_token_quant 单测补充
+### NO.55 自定义算子 update_inputs_v1 单测补充
+### NO.56 自定义算子 get_data_ptr_ipc 单测补充
+### NO.57 自定义算子 per_token_quant_padding 单测补充
+### NO.58 自定义算子 speculate_rebuild_append_padding 单测补充
+### NO.59 自定义算子 speculate_set_value_by_flags_and_idx 单测补充
+### NO.60 自定义算子 eagle_get_self_hidden_states 单测补充
+### NO.61 自定义算子 speculate_update_v3 单测补充
+### NO.62 自定义算子 eagle_get_hidden_states 单测补充
+### NO.63 自定义算子 draft_model_postprocess 单测补充
+### NO.64 自定义算子 draft_model_set_value_by_flags 单测补充
+### NO.65 自定义算子 draft_model_update 单测补充
+### NO.66 自定义算子 speculate_set_stop_value_multi_seqs 单测补充
+### NO.67 自定义算子 speculate_verify 单测补充
+### NO.68 自定义算子 ngram_match 单测补充
+### NO.69 自定义算子 draft_model_preprocess 单测补充
 
-##### NO.70 功能模块 CUDAPlatform、CPUPlatform 单测补充
+### NO.70 功能模块 CUDAPlatform、CPUPlatform 单测补充
 
 - 详细描述：本任务中需要补充功能模块 CUDAPlatform、CPUPlatform 的单测
 - 测试内容：类中各个接口正常可用，功能包括正确判断所在硬件类型，硬件是否可用，正确返回 attention_backend
 - 单测名称：tests/platforms/test_platforms.py
 
-##### NO.71 功能模块 WeightOnlyLinearMethod 单测补充
+### NO.71 功能模块 WeightOnlyLinearMethod 单测补充
 
 - 详细描述：本任务中需要补充功能模块 WeightOnlyLinearMethod 的单测
 - 测试内容：创建的 Parameter，apply 计算结果是否符合预期
 - 单测名称：tests/quantization/test_weight_only.py
 
-##### NO.72 功能模块 Worker/ModelRunner 单测补充
+### NO.72 功能模块 Worker/ModelRunner 单测补充
 
 - 详细描述：本任务中需要补充功能模块 Worker/ModelRunner 的单测
 - 测试内容：构造一个可以随意指定BatchSize（无动态插入）、Prompt 的 token 数、Decode 的 token 数的只跑假数据的 Worker/ModelRunner
 - 单测名称：tests/worker/model_runner.py
 
-##### NO.73 功能模块 graph_optimization 单测补充
+### NO.73 功能模块 graph_optimization 单测补充
 
 - 详细描述：本任务中需要补充功能模块 graph_optimization 的单测
 - 测试内容：添加一个单测，测试Numpy实现(BaseLine)、动态图、静态图、CINN、动态图+CudaGraph、静态图+CudaGraph、CINN+CudaGraph 七种情况下精度正常且能对齐
 - 单测名称：test/graph_optimization/graph_opt_backend.py
 
-##### NO.74 功能模块 fastdeploy/cache_manager/RDMACommManager 单测补充
+### NO.74 功能模块 fastdeploy/cache_manager/RDMACommManager 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/cache_manager/RDMACommManager 的单测
 - 测试内容：测试任意两个实例能否进行 kvcache 传输, 并验证传输内容是否完全一致，包括机内与机间
 - 单测名称：test/cache_manager/rdma_connect.py
 
-##### NO.75 功能模块 fastdeploy/cache_manager/IPCCommManager 单测补充
+### NO.75 功能模块 fastdeploy/cache_manager/IPCCommManager 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/cache_manager/IPCCommManager 的单测
 - 测试内容：测试任意两个实例单机内能否进行 kvcache 传输，且结果一致
 - 单测名称：test/cache_manager/ipc_connect.py
 
-##### NO.76 功能模块 fastdeploy/model_executor/guided_decoding/XGrammarChecker 单测补充
+### NO.76 功能模块 fastdeploy/model_executor/guided_decoding/XGrammarChecker 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/model_executor/guided_decoding/XGrammarChecker 的单测
 - 测试内容：测试能否正确识别 guided_json、guided_grammar、guided_json_object、guided_choice、structural_tag、regex 语法是否合法
 - 单测名称：test/model_executor/guided_decoding/test_xgrammar.py
 
-##### NO.77 功能模块 fastdeploy/metrics/metrics/get_filtered_metrics 单测补充
+### NO.77 功能模块 fastdeploy/metrics/metrics/get_filtered_metrics 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/metrics/metrics/get_filtered_metrics 的单测
 - 测试内容：测试过滤制指定指标，保留其他指标功能，extra_register_func 的指标是否生效
 - 单测名称：test/metrics/test_metrics.py
 
-##### NO.78 功能模块 fastdeploy/entrypoints 单测补充
+### NO.78 功能模块 fastdeploy/entrypoints 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/entrypoints 的单测
 - 测试内容：chat/generation 接口测试，涵盖不同输入格式
 - 单测名称：tests/entrypoints/test_generation.py、tests/entrypoints/test_chat.py
 
-##### NO.79 功能模块 fastdeploy/entrypoints/openai 单测补充
+### NO.79 功能模块 fastdeploy/entrypoints/openai 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/entrypoints/openai 的单测
 - 测试内容：chat/completion 接口测试，流式非流式，异常报错抛出
 - 单测名称：tests/entrypoints/openai
 
-##### NO.80 功能模块 fastdeploy/splitwise 单测补充
+### NO.80 功能模块 fastdeploy/splitwise 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/splitwise 的单测
 - 测试内容：增加 e2e 单机pd 分离单测，可以正常推理
 - 单测名称：tests/splitwise
 
-##### NO.81 功能模块 fastdeploy/output 单测补充
+### NO.81 功能模块 fastdeploy/output 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/output 的单测
 - 测试内容：增加 e2e 单机pd 分离单测，可以正常推理
 - 单测名称：tests/output
 
-##### NO.82 功能模块 fastdeploy/cache_manager 单测补充
+### NO.82 功能模块 fastdeploy/cache_manager 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/cache_manager 的单测
 - 测试内容：增加 e2e prompt cache 单测，验证命中率，cache 驱逐，cache swap 是否正常
 - 单测名称：fastdeploy/cache_manager/test_prefix_cache.py
 
-##### NO.83 功能模块 fastdeploy/model_executor/models 单测补充
+### NO.83 功能模块 fastdeploy/model_executor/models 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/model_executor/models 的单测
 - 测试内容：每个模型创造一个少量层、fake parameters 的小模型(涵盖 dense layer 和 moe layer)，完成正常推理不报错
 - 单测名称：tests/models
 
-##### NO.84 功能模块 fastdeploy/reasoning/ 单测补充
+### NO.84 功能模块 fastdeploy/reasoning/ 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/reasoning/ 的单测
 - 测试内容：测试基类的注册、获取函数功能是否正常
 - 单测名称：test/reasoning/test_reasoning_parser.py
 
-##### NO.85 功能模块 fastdeploy/inputs/ 单测补充
+### NO.85 功能模块 fastdeploy/inputs/ 单测补充
 
 - 详细描述：本任务中需要补充功能模块 fastdeploy/inputs/ 的单测
 - 测试内容：input 为数据处理模块，测试这个目录下四个 processor 类的process_request_dict、process_response、process_response_dict 类能否返回正确值
