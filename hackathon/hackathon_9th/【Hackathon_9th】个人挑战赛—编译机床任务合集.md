@@ -1,4 +1,4 @@
-此文档展示 \*_PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛编译机床方向任务_- 详细介绍
+此文档展示 **PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛编译机床方向任务** 详细介绍
 
 ## 【开源贡献个人挑战赛-编译机床】任务详情
 
@@ -15,7 +15,9 @@ python -m graph_net.torch.test_compiler \
   --compiler /path/to/custom/compiler
 ```
 
-参数功能包括：- --model-path，字符串类型，指定模型文件的路径，可以支持单个模型或多个模型批量测试。- --compiler，字符串类型，指定要评测的编译器后端，默认值为"default"，即torch.compile并且设置backend="inductor"。
+参数功能包括：
+- --model-path，字符串类型，指定模型文件的路径，可以支持单个模型或多个模型批量测试。
+- --compiler，字符串类型，指定要评测的编译器后端，默认值为"default"，即torch.compile并且设置backend="inductor"。
 
 给定一份计算图，当前已支持统计一些原始的指标，包括：1. 不同精度下的正确率；2. 编译前后的运行时间对比。
 
