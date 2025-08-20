@@ -1,4 +1,4 @@
-此文档展示 \*_PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛套件开发方向任务_- 详细介绍
+此文档展示 \*_PaddlePaddle Hackathon 第九期活动——开源贡献个人挑战赛FastDeploy方向任务_- 详细介绍
 
 ## 【开源贡献个人挑战赛-FastDeploy】任务详情
 
