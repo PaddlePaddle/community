@@ -23,7 +23,7 @@ python -m graph_net.torch.test_compiler \
 
 > 交流微信群
 > 
-> <img src="https://github.com/user-attachments/assets/f0b57cda-63a2-44b0-ab14-87e04fd59ead" width="20%" height="50%">
+> <img src="https://github.com/user-attachments/assets/f0b57cda-63a2-44b0-ab14-87e04fd59ead" width="30%" height="60%">
 
 
 ### NO.97 适配 tvm 编译器
