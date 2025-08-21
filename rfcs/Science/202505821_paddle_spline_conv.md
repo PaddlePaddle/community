@@ -1,4 +1,4 @@
-# paddle-sparse 设计文档
+# paddle-spline-conv 设计文档
 
 > RFC 文档相关记录信息
 
