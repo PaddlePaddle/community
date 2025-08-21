@@ -21,6 +21,11 @@ python -m graph_net.torch.test_compiler \
 
 给定一份计算图，当前已支持统计一些原始的指标，包括：1. 不同精度下的正确率；2. 编译前后的运行时间对比。
 
+> 交流微信群
+> 
+> <img src="https://github.com/user-attachments/assets/f0b57cda-63a2-44b0-ab14-87e04fd59ead" width="30%" height="60%">
+
+
 ### NO.97 适配 tvm 编译器
 
 **详细描述：**
