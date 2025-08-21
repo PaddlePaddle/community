@@ -12,3 +12,5 @@
 1. 新人介绍：@[lixiaoming233](https://github.com/lixiaoming233)，@[qikai](https://github.com/qikai)（5 mins）
 2. GraphNet 二期开源任务 ([【Hackathon 9th】开源贡献个人挑战赛](https://github.com/PaddlePaddle/Paddle/issues/74773) 中的第三部分) @[JewelRoam](https://github.com/JewelRoam)（20 mins）
 3. 互动及提问 （10 mins）
+4. 第九期黑客松介绍 @[mattheliu](https://github.com/mattheliu)（5 mins）
+5. 文心杭州站活动 @[E-Pudding](https://github.com/E-Pudding)（10 mins）
