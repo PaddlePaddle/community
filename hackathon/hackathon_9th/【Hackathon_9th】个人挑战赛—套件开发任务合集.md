@@ -15,7 +15,7 @@
 
 **参考文档**：
 
-- 单测开发规范：[Fastdeploy单测规范](https://github.com/PaddlePaddle/FastDeploy/blob/develop/docs/zh/fastdeploy_unit_test_guide.md)
+- 单测开发规范：[Fastdeploy单测规范](https://github.com/PaddlePaddle/FastDeploy/blob/develop/docs/zh/usage/fastdeploy_unit_test_guide.md)
 - 单测写法示例可参考FastDeploy/test目录下已有的单测
 
 **技术要求：**
