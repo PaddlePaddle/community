@@ -27,7 +27,7 @@
 - 推荐Milestones，明确下个版本会解决的问题。因为观察到很多issue不了了之了。像issue #[16373](https://github.com/PaddlePaddle/PaddleOCR/issues/16373) #[16315](https://github.com/PaddlePaddle/PaddleOCR/issues/16315)
 - 广告是不是需要妥善安排一下。[link](https://github.com/PaddlePaddle/PaddleOCR/issues/16322)
 - PaddleX和PaddleOCR问题混在一起了。issue[#16314](https://github.com/PaddlePaddle/PaddleOCR/issues/16314) #[16275](https://github.com/PaddlePaddle/PaddleOCR/issues/16275)
-- 可用的最新训练模型的文档，以及数据集准备建议等。#[16261](https://github.com/PaddlePaddle/PaddleOCR/issues/16261) #[16253](https://github.com/PaddlePaddle/PaddleOCR/issues/16253)
+- 可用的最新训练模型的文档，以及数据集准备建议、PaddleX产线中数据集建设进展（[link](https://aistudio.baidu.com/pipeline/mine/productionLineDataSet)）。#[16261](https://github.com/PaddlePaddle/PaddleOCR/issues/16261) #[16253](https://github.com/PaddlePaddle/PaddleOCR/issues/16253)
 
 ### 2. 其他议题
 
