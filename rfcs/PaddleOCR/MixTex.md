@@ -36,17 +36,17 @@
 
 2. Swin Transformer
    
-   基于飞浆框架的实现 [PaddleMIX/paddlemix/models/groundingdino/backbone/swin_transformer.py at develop · PaddlePaddle/PaddleMIX (github.com)](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/paddlemix/models/groundingdino/backbone/swin_transformer.py)
+   基于飞桨框架的实现 [PaddleMIX/paddlemix/models/groundingdino/backbone/swin_transformer.py at develop · PaddlePaddle/PaddleMIX (github.com)](https://github.com/PaddlePaddle/PaddleMIX/blob/develop/paddlemix/models/groundingdino/backbone/swin_transformer.py)
    
    作者论文中引用的模型 [microsoft/swin-tiny-patch4-window7-224 · Hugging Face](https://huggingface.co/microsoft/swin-tiny-patch4-window7-224)
 
 4. RoBERTa
    
-   基于飞浆框架的实现  [PaddleNLP/slm/model_zoo/roberta at develop · PaddlePaddle/PaddleNLP (github.com)](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/slm/model_zoo/roberta)  
+   基于飞桨框架的实现  [PaddleNLP/slm/model_zoo/roberta at develop · PaddlePaddle/PaddleNLP (github.com)](https://github.com/PaddlePaddle/PaddleNLP/tree/develop/slm/model_zoo/roberta)  
 
 # 四、对比分析
 
-使用作者开源的模型和代码进行实现为目前最佳的论文复现实践方式，但基于控制影响面考量，将作者开源的模型转换成基于飞浆的模型，并为PaddleOCR增加研究中提出的数据生成和增强方式为目前的最佳实践方式
+使用作者开源的模型和代码进行实现为目前最佳的论文复现实践方式，但基于控制影响面考量，将作者开源的模型转换成基于飞桨的模型，并为PaddleOCR增加研究中提出的数据生成和增强方式为目前的最佳实践方式
 
 # 五、设计思路与实现方案
 

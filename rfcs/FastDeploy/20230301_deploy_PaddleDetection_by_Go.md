@@ -11,7 +11,7 @@
 
 ## 1、相关背景
 
-随着飞浆项目使用者越来越多，需要开发Golang部署示例来满足Golang开发者的模型部署需求。
+随着飞桨项目使用者越来越多，需要开发Golang部署示例来满足Golang开发者的模型部署需求。
 
 ## 2、功能目标
 * 在`FastDeploy`中使用`Golang`完成`PaddleDetection`中`PP-YOLOE`, `PaddleYOLOv8`, `PaddleYOLOv5`等模型的部署。
