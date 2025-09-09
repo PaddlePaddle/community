@@ -23,11 +23,13 @@
 ### 1. 常见问题总结
 
 - AI Studio中的PP-Structurev3 运行结果与用户自己运行结果对不齐。issue #[16400](https://github.com/PaddlePaddle/PaddleOCR/issues/16400)
-- Issue和Discussion使用，大家似乎还是分不清。
-- 推荐Milestones，明确下个版本会解决的问题。因为观察到很多issue不了了之了。像issue #[16373](https://github.com/PaddlePaddle/PaddleOCR/issues/16373) #[16315](https://github.com/PaddlePaddle/PaddleOCR/issues/16315)
+- Issue和Discussion使用，大家似乎还是分不清。issue #[16403](https://github.com/PaddlePaddle/PaddleOCR/issues/16403) #[16363](https://github.com/PaddlePaddle/PaddleOCR/issues/16363) #[16354](https://github.com/PaddlePaddle/PaddleOCR/issues/16354) 建议：先判断issue是否为bug，如果不能十分确定就是bug一律移到Discussions。
+- 推荐Milestones，明确下个版本会解决的问题。因为观察到很多issue不了了之了。像issue #[16373](https://github.com/PaddlePaddle/PaddleOCR/issues/16373) #[16315](https://github.com/PaddlePaddle/PaddleOCR/issues/16315) #[14955](https://github.com/PaddlePaddle/PaddleOCR/issues/14955) #[15848](https://github.com/PaddlePaddle/PaddleOCR/issues/15848) #[15730)](https://github.com/PaddlePaddle/PaddleOCR/issues/15730) #[15553](https://github.com/PaddlePaddle/PaddleOCR/issues/15553)
 - 广告是不是需要妥善安排一下。[link](https://github.com/PaddlePaddle/PaddleOCR/issues/16322)
-- PaddleX和PaddleOCR问题混在一起了。issue[#16314](https://github.com/PaddlePaddle/PaddleOCR/issues/16314) #[16275](https://github.com/PaddlePaddle/PaddleOCR/issues/16275)
-- 可用的最新训练模型的文档，以及数据集准备建议、PaddleX产线中数据集建设进展（[link](https://aistudio.baidu.com/pipeline/mine/productionLineDataSet)）。#[16261](https://github.com/PaddlePaddle/PaddleOCR/issues/16261) #[16253](https://github.com/PaddlePaddle/PaddleOCR/issues/16253)
+- PaddleX和PaddleOCR问题混在一起了。issue[#16314](https://github.com/PaddlePaddle/PaddleOCR/issues/16314) #[16275](https://github.com/PaddlePaddle/PaddleOCR/issues/16275) #[16137](https://github.com/PaddlePaddle/PaddleOCR/issues/16137)
+- 可用的最新训练模型的文档，以及数据集准备建议、PaddleX产线中数据集建设进展（[link](https://aistudio.baidu.com/pipeline/mine/productionLineDataSet)）。#[16261](https://github.com/PaddlePaddle/PaddleOCR/issues/16261) #[16253](https://github.com/PaddlePaddle/PaddleOCR/issues/16253) #[15005](https://github.com/PaddlePaddle/PaddleOCR/issues/15005)
+- 中文路径乱码问题：[link](https://github.com/PaddlePaddle/PaddleOCR/issues?q=state%3Aopen%20label%3A%22%E4%B8%AD%E6%96%87%E8%B7%AF%E5%BE%84%E4%B9%B1%E7%A0%81%22)
+- NPU支持咋样了呀？[Issue](https://github.com/PaddlePaddle/PaddleOCR/issues?q=state%3Aopen%20label%3A%22NPU%22) | [Discussions](https://github.com/PaddlePaddle/PaddleOCR/discussions?discussions_q=label%3ANPU)
 
 ### 2. 其他议题
 
