@@ -1,6 +1,6 @@
 # FastDeploy编译加速设计文档
 
-| 领域                                                       | 飞桨文档体验方案                                     | 
+| 任务名称                                                  |   FastDeploy编译加速                          | 
 |----------------------------------------------------------|----------------------------------------------|
 | 提交作者<input type="checkbox" class="rowselector hidden">   | ccsuzzh                                     | 
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2025-09-09                                   | 
