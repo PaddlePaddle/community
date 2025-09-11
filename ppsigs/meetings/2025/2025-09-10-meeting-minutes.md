@@ -4,7 +4,7 @@
 
 - 会议时间：2025-09-10 19:30-20:30
 - 会议地点：线上会议
-- 参会人：本次会议共有 7 名成员参会，由 PaddleOCR 贡献者组成。本次会议由 [GreatV](https://github.com/SWHL) 主持。
+- 参会人：本次会议共有 7 名成员参会，由 PaddleOCR 贡献者组成。本次会议由 [SWHL](https://github.com/SWHL) 主持。
 
 ## 会议分享与讨论
 
