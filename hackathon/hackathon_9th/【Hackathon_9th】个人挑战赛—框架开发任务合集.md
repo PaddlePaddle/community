@@ -41,3 +41,29 @@ Paddle目前正在对全量API的边界正确性做系统性排查，我们开�
 ### NO.17 完成 paddle.nn.functional.conv2d 精度问题修复
 ### NO.18 完成 paddle.nn.functional.conv2d_transpose 精度问题修复
 ### NO.19 完成 paddle.put_along_axis 精度问题修复
+
+**NO.109 自定义算子**
+
+### NO.109 基于 Setuptools 80+ 版本自定义算子机制适配
+
+**详细描述：**
+
+使用 C++ 实现自定义算子是深度学习框架中一种非常常见的需求，这可以使得框架自身足够整洁的情况下，灵活接入第三方生态开发的算子。
+PaddlePaddle 目前提供了[两种自定义算子接入机制](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/custom_op/index_cn.html)，分别为[自定义 C++ 算子](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/custom_op/new_cpp_op_cn.html)、和[自定义 C++ 扩展](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/custom_op/cpp_extension_cn.html)，自定义 C++ 扩展即将 C++ 函数通过 pybind11 暴露到 Python 端，而自定义 C++ 算子则是需要将 C++ 函数接入到算子库中。
+PaddlePaddle 目前对于自定义 C++ 算子的实现是基于 setuptools 做了一些 patch，在 `bdist_egg` 阶段通过 patch `write_stub` 实现的，然而在 setuptools 80+，被 patch 的逻辑在 `install` command 不会被走到（于 [pypa/setuptools#2908](https://github.com/pypa/setuptools/pull/2908) 移除），因此我们希望基于 setuptools 80+ 对自定义 C++ 算子进行适配，确保自定义 C++ 算子在 setuptools 80+ 是可用的。
+
+**验收说明：**
+
+- 基于 setuptools 80+ 实现自定义 C++ 算子机制适配（需要能够通过 `python setup.py install` 或者 `pip install . --no-build-isolation` 安装并成功调用）
+- 确保框架现存自定义算子单测在 setuptools 80 验证通过
+- 确保低版本 setuptools 编译好的自定义算子在 setuptools 80 仍然能够正常加载
+
+**技术要求：**
+
+- 熟悉深度学习框架自定义算子机制
+- 了解 setuptools 内部实现机制
+
+**参考资料：**
+
+- [PaddlePaddle 自定义算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/custom_op/index_cn.html)
+- [setuptools 源码](https://github.com/pypa/setuptools)
