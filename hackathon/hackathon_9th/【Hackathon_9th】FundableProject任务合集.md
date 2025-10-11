@@ -95,3 +95,33 @@ DGL 是一个易于使用、高性能和可扩展的 Python 包，用于图形�
 
 1. dgl 仓库: https://github.com/dmlc/dgl/tree/master
 2. 当前已有 paddle backend 适配实现: https://github.com/lijialin03/dgl/tree/bkd_paddle
+
+### 四、动转静 SOT Python 3.14 支持
+
+**任务背景**：
+
+动转静 SOT 模块是基于 Python 字节码的 JIT 编译模块，旨在在运行时将 PaddlePaddle 动态图组网代码转换为静态图组网代码，具体设计参见：[PaddleSOT 项目介绍](https://github.com/PaddlePaddle/community/tree/master/pfcc/paddle-code-reading/symbolic_opcode_translator)
+由于 SOT 模块需要针对每条字节码进行模拟执行，并在 CodeGen 时生成合法的 Python 字节码，因此对于 Python 版本非常敏感。我们现在对 Python 3.9-3.13 已经有了较为全面的支持，但新发布的 Python 3.14 目前还是不支持的，因此需要专项对 Python 3.14 进行支持。
+
+**详细描述：**
+
+1. 参考 [Python 3.11 支持规划](https://github.com/PaddlePaddle/PaddleSOT/issues/357)、[SOT Python3.12 支持任务汇总](https://github.com/PaddlePaddle/Paddle/issues/61173)、[SOT Python 3.13 支持任务汇总](https://github.com/PaddlePaddle/Paddle/issues/69245)，调研 Python 3.14 主要改动，确定 Python 3.14 支持路线
+2. PR-CI-SOT 流水线上线 Python 3.14 监控，确保已有单测不会回归
+3. 适配 Eval Frame 模块，适配模拟执行、CodeGen 等流程
+
+**验收说明：**
+
+1. CI 流水线能够监控 Python 3.14 SOT 单测
+2. SOT 在 Python 3.14 下功能完备，全部 SOT 单测能够在 Python 3.14 下验证通过
+
+**技术要求：**
+
+- 精通 Python，对 Python 虚拟机执行机制有深入了解
+- 熟悉 C/C++
+- 掌握基本的编译原理知识
+
+**参考资料：**
+
+1. [Python 3.11 支持规划](https://github.com/PaddlePaddle/PaddleSOT/issues/357)
+2. [SOT Python3.12 支持任务汇总](https://github.com/PaddlePaddle/Paddle/issues/61173)
+3. [SOT Python 3.13 支持任务汇总](https://github.com/PaddlePaddle/Paddle/issues/69245)
