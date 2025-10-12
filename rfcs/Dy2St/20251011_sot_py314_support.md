@@ -29,16 +29,21 @@
 
 ## 3、意义
 
-动转静 SOT 模块是 PaddlePaddle 框架中非常重要的模块，能够帮助用户将动态图代码转换为静态图代码，从而提升模型的执行效率和性能。支持 Python 3.14 能够让更多用户在最新的 Python 版本下使用 PaddlePaddle 框架，提升用户体验和满意度。
+动转静 SOT 模块是 PaddlePaddle 框架中非常重要的模块，能够帮助用户将动态图代码转换为静态图代码，从而提升模型的执行效率和性能。支持 Python 3.14 能够让更多用户在最新的 Python 版本下使用 PaddlePaddle 框架，提升用户体验，能够使得用户在使用动态图组网代码的情况下通过添加一行装饰器低成本编译优化
 
 # 二、飞桨现状
 
-目前 PaddlePaddle 框架已经支持 Python 3.9-3.13 版本，但对于 Python 3.14 还不支持。由于 Python 3.14 引入了一些新的特性和变化，因此需要对 SOT 模块进行相应的修改和适配，才能够在 Python 3.14 下正常工作。
+当前 PaddlePaddle 对 Python 3.14 的支持总体处于建设阶段：主框架层面尚未在官方 CI 建立完整的 3.14 编译与单测链路、也未开展规模化的 3.14 单元/集成/模型用例验证，开发/调试镜像与预置环境仍需补齐；SOT 模块尚未适配 3.14 的字节码与 `eval_frame`，在 3.14 环境下将自动回退至 AST 路径，功能正确但相较基于虚拟机（VM）的字节码路径在捕获/优化能力与覆盖范围上受限。本 RFC 旨在补齐上述缺口，给出完整的 3.14 适配方案与验收标准（含 opcode/CodeGen 更新、`eval_frame` 安装策略、CI 增维与镜像产出）。
 
 
 # 三、业内方案调研
 
 目前主流的深度学习框架 PyTorch 都已经支持 Python 3.14 版本，并且在 dynamo 模块方面也有类似的实现和设计。我们可以参考这些框架的实现方式和设计思路，来进行 PaddlePaddle 框架中 SOT 模块的修改和适配。
+
+torch 适配 python 3.14 的相关 pr :
+  - 正式开始适配 python 3.14 [pytorch/pytorch#158184](https://github.com/pytorch/pytorch/pull/158184)
+  - eval_frame 适配 [pytorch/pytorch#161555](https://github.com/pytorch/pytorch/pull/161555)
+  - torch python 3.14 适配规划 [pytorch/pytorch#156856](https://github.com/pytorch/pytorch/pull/156856)
 
 # 四、对比分析
 ## 1、Python 3.14 主要变化（字节码和 eval_frame 方面的）
@@ -46,26 +51,20 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 （1）`eval_frame` 与解释器相关变化（与 SOT 直接相关）
 
-- 新型解释器实现（tail-call interpreter，配置开关 `--with-tail-call-interp`）：属于 CPython 内部实现细节，不改变 Python 语义，但可能影响基于 `eval_frame` 的性能特征与热点分布，建议在 3.14 基线与启用该解释器时分别做一轮基准评估。[参考：Python 3.14 新变化-一种新型的解释器]
 - 自由线程模式完善（PEP 703，3.14 官方支持）：3.14 在 free-threaded 构建下启用更多优化（包含专用解释器的自适应特化）。对基于 `eval_frame`/`JIT` 的桥接代码有两点注意：
-	- 引用计数策略变化：解释器在可能的情况下借用引用以减少 refcount 修改，这会导致通过 `Py_REFCNT(op)==1` 判断“唯一引用”的逻辑不再可靠；若 SOT 在 C/C++ 扩展层使用此类优化，需要改用 3.14 提供的替代检测方法（如 `PyUnstable_Object_IsUniqueReferencedTemporary()` 等）。
-	- 并发与隔离：free-threaded 下必须保证 SOT 的缓存、守卫（guards）与 `JIT` 工件是线程安全且按解释器实例隔离（每 Interpreter 独立安装 `eval_frame` hook，不共享可变全局状态）。
-- 标准库子解释器（PEP 734）：`concurrent.interpreters` 向 Python 层暴露了创建子解释器的能力。`eval_frame` 钩子是“按解释器生效”的，SOT 需要在新建子解释器时再次安装/初始化自身（包括环境、缓存与黑名单/白名单策略）。跨解释器的共享缓存需显式隔离（建议以 `PyInterpreterState`/`PyThreadState` 或 Interpreter id 作为 key 作用域）。
-- 安全外部调试器接口（PEP 768）与 `sys.monitoring`：3.14 增强了监控/调试基础设施，并新增 `NOT_TAKEN` 伪指令用于分支事件记录。若 SOT 利用 `sys.monitoring` 做热点探测或分支覆盖，需要适配这些事件，同时避免与 `eval_frame` 重入冲突（必要时设置优先级或禁用重叠功能）。
-- 实验性 `JIT`（PEP 744）与 `sys._jit`：官方 macOS/Windows 包可选择开启 `JIT`。开启后 `eval_frame` 仍会工作，但热点可能被官方 `JIT` 提前接管，影响 SOT 的捕获时机与收益。建议：
-	- 启动时探测 `sys._jit` 可用性与是否启用；
-	- 给出告警或自动降级策略（例如仅在 JIT 关闭时启用 SOT，或在二者同时开启时限制 SOT 的转换范围）。
+	- 引用计数策略变化：解释器在可能的情况下借用引用以减少 refcount 修改，这会导致通过 `Py_REFCNT(op)==1` 判断“唯一引用”的逻辑不再可靠；（影响的是 `cpython_internals` 部分）
+	- 并发与隔离：free-threaded 下必须保证 faster guard 与 `JIT` 工件是线程安全且按解释器实例隔离（每 Interpreter 独立安装 `eval_frame` hook，不共享可变全局状态）。
+
 
 参考资料：
-- https://docs.python.org/zh-cn/3.14/whatsnew/3.14.html
-- 其中与解释器相关的章节：一种新型的解释器、自由线程模式的改进、实验性 JIT、sys.monitoring/调试接口
+- https://docs.python.org/zh-cn/3.14/whatsnew/3.14.html 其中与解释器相关的章节：一种新型的解释器、自由线程模式的改进、实验性 JIT
 
 （2）CPython 字节码的变化（与 python 虚拟机/字节码生成强相关）
 
 重点与 SOT 相关的变更摘录（更完整表格参考 Paddle 议题）：
 - `BINARY_SUBSCR` 被替换为 `BINARY_OP` 搭配 `oparg: NB_SUBSCR`（必须更新虚拟机（VM）与 CodeGen 的索引路径）。
 - 移除 `BUILD_CONST_KEY_MAP`（使用 `BUILD_MAP` 实现常量键字典的构造）。
-- `with`/`async with` 编码路径变化：移除 `BEFORE_WITH` 和 `BEFORE_ASYNC_WITH`，新引入 `LOAD_SPECIAL` 以支撑 `with`/`async with` 进入协议（需要调整上下文管理器进入/退出的栈效果保持一致）。
+- `with`/`async with` 编码路径变化：移除 `BEFORE_WITH` 和 `BEFORE_ASYNC_WITH`，新引入 `LOAD_SPECIAL` 以支撑 `with`/`async with` 进入协议（需要调整上下文管理器进入/退出的栈效果保持一致）。目前 SOT [尝试过适配](https://github.com/PaddlePaddle/Paddle/pull/72736) with 相关字节码，但因为一些其他原因[被回滚了](https://github.com/PaddlePaddle/Paddle/pull/73816)。本次任务不包含 with 相关支持。
 - 新增 `LOAD_COMMON_CONSTANT`（替代 `LOAD_ASSERTION_ERROR`），并扩展对常见异常常量的载入（例如 `NotImplementedError`）。
 - 新增/增强的指令（节选）：
 	- `LOAD_SMALL_INT`、`LOAD_CONST_IMMORTAL`（常量加载优化）。
@@ -78,7 +77,6 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 	- 3.13 起 `CALL` 与 `CALL_KW` 分离；3.14 进一步引入 `CALL_KW` 的特化伪指令（`CALL_KW_PY`/`CALL_KW_BOUND_METHOD`/`CALL_KW_NON_PY`），以利于解释器特化与内联缓存。
 	- `KW_NAMES` 在 3.14 路径中不再使用；SOT 生成含关键字参数的调用需遵循 `CALL_KW` 新路径。
 - 比较与跳转：
-	- `COMPARE_OP` 的 `oparg` 编码延续 3.13 规则（高位存放 `cmp_op` 索引，增加强制布尔转换位）。
 	- `POP_JUMP_IF_TRUE`/`POP_JUMP_IF_FALSE` 自 3.13 起要求栈顶为“精确 `bool`”；3.14 新增的 `JUMP_IF_TRUE`/`JUMP_IF_FALSE` 伪指令不改变栈。
 
 参考资料：
@@ -87,16 +85,12 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 （3）SOT 的适配要点与建议
 
-- 版本路由与 opcode 表：为 3.14 新增独立的 opcode 映射与特性开关；在运行时根据 `sys.version_info` 选择 3.9–3.13 与 3.14 的不同路径。
-- 虚拟机层（VM/Tracer）：
+- 模拟执行层：
 	- 覆盖新/变更指令：`BINARY_OP:NB_SUBSCR`、`LOAD_SPECIAL`、`LOAD_COMMON_CONSTANT`、`LOAD_SMALL_INT`、`LOAD_FAST_BORROW*`、`POP_ITER`、`JUMP_IF_TRUE/FALSE`、`BUILD_TEMPLATE/BUILD_INTERPOLATION` 等；
 	- 调整 `with`/`async with` 的状态机与异常路径（`END_FOR`/`END_SEND`/`CLEANUP_THROW` 等已在 3.12+ 引入，需与 3.14 组合验证）。
-	- 严格布尔语义：对 `POP_JUMP_*`、`COMPARE_OP` 强制布尔位等在虚拟机执行阶段显式规范化，避免隐式 truthy/falsy 导致的分支偏差。
 - 生成层（CodeGen/Assembler）：
-	- 插入合法 3.14 字节码：用 `BINARY_OP:NB_SUBSCR` 替换 `BINARY_SUBSCR`；用 `BUILD_MAP` 替换 `BUILD_CONST_KEY_MAP`；用 `LOAD_SPECIAL` 编码 `with`/`async with`；避免发出 `KW_NAMES`；`MAKE_FUNCTION` 附加属性使用 `SET_FUNCTION_ATTRIBUTE` 路径（延续 3.13 行为）。
-	- `COMPARE_OP` 的 `oparg` 编码/解码适配 3.14；必要时提供 3.13/3.14 双分支。
+	- 插入合法 3.14 字节码：用 `BINARY_OP:NB_SUBSCR` 替换 `BINARY_SUBSCR`；用 `BUILD_MAP` 替换 `BUILD_CONST_KEY_MAP`；用 `LOAD_SPECIAL` 编码 `with`/`async with`；避免发出 `KW_NAMES`；
 - `eval_frame` 安装策略：
-	- 每子解释器安装 hook；在 `concurrent.interpreters` 创建新解释器时自动初始化 SOT。
 	- free-threaded 下的锁粒度与缓存隔离（按 Interpreter/Thread 维度划分）；避免使用 `Py_REFCNT==1` 的假设，改用 3.14 提供的唯一引用检测 API。
 	- 与 `sys.monitoring`/`JIT` 共存：支持配置项选择优先级；在官方 `JIT` 开启时打印提示或降级范围。
 - 测试与验收：
@@ -109,11 +103,10 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 ## 1、主体设计思路与折衷
 ### 整体全貌
 本方案延续过往 `3.12`/`3.13` 版本适配的分层策略，将 SOT 分为三层：
-1) `eval_frame` 注入层（C/C++，`paddle/fluid/pybind/eval_frame.c` 及相关绑定）：基于 PEP 523 的 `frame_eval` 钩子在解释器维度安装与清理，负责将 Python 运行时的 `PyFrameObject` 交给 SOT。
-2) 虚拟机层（VM/Tracer，Python，`python/paddle/jit/sot/opcode_translator/executor/`）：以 VM 的方式解释执行新老指令集，维护执行栈/块栈/符号栈等状态，收集图与守卫（guards）。
-3) 生成层（CodeGen/Assembler，Python，`python/paddle/jit/sot/opcode_translator/executor/pycode_generator.py` 等）：面向 `3.14` 的合法字节码插入，产出可回放的 `code object` 与可执行函数。
-
-4) 兼容优先：以“最小改动覆盖新语义”为原则，不回退既有 3.9–3.13 路径；采用“版本路由 + 能力位（feature flag）”方式分流。
+1) `eval_frame`（C/C++，`paddle/fluid/pybind/eval_frame.c` 及相关绑定）：基于 PEP 523 的 `frame_eval` 钩子在解释器维度安装与清理，负责将 Python 运行时的 `PyFrameObject` 交给 SOT。
+2) 模拟执行（Python，`python/paddle/jit/sot/opcode_translator/executor/`）：以 VM 的方式解释执行新老指令集，维护执行栈/块栈/符号栈等状态，收集图与守卫（guards）。
+3) CodeGen（Python，`python/paddle/jit/sot/opcode_translator/executor/pycode_generator.py` 等）：面向 `3.14` 的合法字节码插入，产出可回放的 `code object` 与可执行函数。
+4) 兼容优先：以“最小改动覆盖新语义”为原则，不改动既有 3.9–3.13 路径；
 
 
 ### 主体设计具体描述
@@ -150,7 +143,7 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 1) 生成层（CodeGen/Assembler）
 - 指令插入：统一使用 `BINARY_OP:NB_SUBSCR`、`BUILD_MAP`、`LOAD_SPECIAL`、`CALL`/`CALL_KW` 等 `3.14` 合法指令；按需插入 `LOAD_COMMON_CONSTANT`、`LOAD_SMALL_INT`，并保证回放一致性。
 - 操作数编码：实现 `COMPARE_OP` 的 `oparg` 高位/强制布尔位编码；与 `3.13` 保持差异化路径。
-- 函数构造：延续 `SET_FUNCTION_ATTRIBUTE` 方案；清理 `KW_NAMES` 旧路径。
+- 函数构造：延续 `SET_FUNCTION_ATTRIBUTE` 方案；
 
 ## 3、主要影响的模块接口变化
 
@@ -165,7 +158,7 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 ## 对用户的影响
 
-无
+- 用户在 Python 3.14 环境下使用 PaddlePaddle 框架时，可以直接使用 SOT 功能，无需进行额外的配置或修改代码。
 
 ## 对二次开发用户的影响
 
@@ -173,9 +166,7 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 ## 对框架架构的影响
 
-- 官方 JIT 的共存策略，以避免两者在热点探测与转换范围上的冲突，确保用户在启用官方 JIT 时仍能获得稳定的 SOT 行为。
-- free-threaded 模式下的线程安全与缓存隔离，避免多线程环境中状态污染或竞态。
-- multiple interpreter 的支持与隔离，确保子解释器间不共享可变状态。
+无
 
 ## 对性能的影响
 
@@ -187,9 +178,10 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 # 八、排期规划
 
-1. Eval Frame 适配 - 2025-10-11 ~ 2025-10-30
-2. 字节码适配 - 2025-10-31 ~ 2025-11-30
-3. 模型和各组件库适配 - 待定
+1. PR-CI-SOT 流水线上线 Python 3.14 监控，确保已有单测不会回归 - 3天
+2. Eval Frame 适配 - 10天
+3. 字节码适配 - 30天
+4. 模型和各组件库适配 - 待定
 
 # 名词解释
 
