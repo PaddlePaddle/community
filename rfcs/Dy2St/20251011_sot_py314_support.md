@@ -68,7 +68,7 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 参考资料：
 - Python 3.14 字节码变化：https://docs.python.org/zh-cn/3.14/whatsnew/3.14.html#cpython-bytecode-changes
-- Paddle 字节码差异表（含 3.14）：https://github.com/PaddlePaddle/Paddle/issues/69134#issue-2631286178
+- Paddle 字节码差异表（含 3.14）：https://github.com/PaddlePaddle/Paddle/issues/69134
 
 （3）SOT 的适配要点与建议
 
