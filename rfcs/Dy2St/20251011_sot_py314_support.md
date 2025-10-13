@@ -16,31 +16,25 @@
 
 ## 2、功能目标
 
-1. 参考 [Python 3.11 支持规划](https://github.com/PaddlePaddle/PaddleSOT/issues/357)、[SOT Python3.12 支持任务汇总](https://github.com/PaddlePaddle/Paddle/issues/61173)、[SOT Python 3.13 支持任务汇总](https://github.com/PaddlePaddle/Paddle/issues/69245)，调研 Python 3.14 主要改动，确定 Python 3.14 支持路线
-2. PR-CI-SOT 流水线上线 Python 3.14 监控，确保已有单测不会回归
-3. 适配 Eval Frame 模块，适配模拟执行、CodeGen 等流程
+1. PR-CI-SOT 流水线上线 Python 3.14 监控，确保已有单测不会回归
+2. 适配 Eval Frame 模块，适配模拟执行、CodeGen 等流程
 
 
 ## 3、意义
 
-动转静 SOT 模块是 PaddlePaddle 框架中非常重要的模块，能够帮助用户将动态图代码转换为静态图代码，从而提升模型的执行效率和性能。支持 Python 3.14 能够让更多用户在最新的 Python 版本下使用 PaddlePaddle 框架，提升用户体验，能够使得用户在使用动态图组网代码的情况下通过添加一行装饰器低成本编译优化
+动转静 SOT 模块是 PaddlePaddle 框架中非常重要的模块，能够使得用户在使用动态图组网代码的情况下通过添加一行装饰器低成本编译优化，从而提升模型的执行效率和性能。支持 Python 3.14 能够让更多用户在最新的 Python 版本下使用 PaddlePaddle 框架，提升用户体验。
 
 # 二、飞桨现状
 
-当前 PaddlePaddle 对 Python 3.14 的支持总体处于建设阶段：主框架层面尚未在官方 CI 建立完整的 3.14 编译与单测链路、也未开展规模化的 3.14 单元/集成/模型用例验证，开发/调试镜像与预置环境仍需补齐；SOT 模块尚未适配 3.14 的字节码与 `eval_frame`，在 3.14 环境下将自动回退至 AST 路径，功能正确但相较基于模拟执行模块的字节码路径在捕获/优化能力与覆盖范围上受限。本 RFC 旨在补齐上述缺口，给出完整的 3.14 适配方案与验收标准。
+当前 PaddlePaddle 对 Python 3.14 的支持总体处于建设阶段：主框架层面尚未在官方 CI 建立完整的 3.14 编译与单测链路、也未开展规模化的 3.14 单元/集成/模型用例验证，开发/调试镜像与预置环境仍需补齐。
+
+SOT 模块尚未适配 3.14 的字节码与 `eval_frame`，在 3.14 环境下将自动回退至 AST 路径，功能正确但相较基于模拟执行模块的字节码路径在捕获/优化能力与覆盖范围上受限。本 RFC 旨在补齐上述缺口，给出完整的 3.14 适配方案与验收标准。
 
 
 # 三、业内方案调研
 
 目前主流的深度学习框架 PyTorch 已经支持 Python 3.14 版本，并且在 dynamo 模块方面也有类似的实现和设计。我们可以参考这些框架的实现方式和设计思路，来进行 PaddlePaddle 框架中 SOT 模块的修改和适配。
 
-PyTorch 适配 python 3.14 的相关 PR 如下：
-  - 正式开始适配 python 3.14 [pytorch/pytorch#158184](https://github.com/pytorch/pytorch/pull/158184)
-  - eval_frame 适配 [pytorch/pytorch#161555](https://github.com/pytorch/pytorch/pull/161555)
-  - torch python 3.14 适配规划 [pytorch/pytorch#156856](https://github.com/pytorch/pytorch/pull/156856)
-
-# 四、对比分析
-## 1、Python 3.14 主要变化（字节码和 eval_frame 方面的）
 Python 3.14 引入了一些新的特性和变化，主要包括以下几个方面：
 
 （1）`eval_frame` 与解释器相关变化（与 SOT 直接相关）
@@ -52,7 +46,7 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 - https://docs.python.org/zh-cn/3.14/whatsnew/3.14.html 其中与解释器相关的章节：一种新型的解释器、自由线程模式的改进、实验性 JIT
 - `_PyStackRef` 相关改动说明：https://github.com/python/cpython/issues/127705
 
-（2）CPython 字节码的变化（与 python 虚拟机/字节码生成强相关）
+（2）CPython 字节码的变化（与 Python 虚拟机/字节码生成强相关）
 
 重点与 SOT 相关的变更摘录（更完整表格参考 Paddle 议题）：
 - `BINARY_SUBSCR` 被替换为 `BINARY_OP` 搭配 `oparg: NB_SUBSCR`。
@@ -83,12 +77,15 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 	- 调整 `with`/`async with` 的状态机与异常路径（`END_FOR`/`END_SEND`/`CLEANUP_THROW` 等已在 3.12+ 引入，需与 3.14 组合验证）。
 - CodeGen 模块：
 	- 插入合法 3.14 字节码：用 `BINARY_OP:NB_SUBSCR` 替换 `BINARY_SUBSCR`；用 `BUILD_MAP` 替换 `BUILD_CONST_KEY_MAP`；用 `LOAD_SPECIAL` 编码 `with`/`async with`；避免发出 `KW_NAMES`；
-- `eval_frame` 安装策略：
-	- free-threaded 下的锁粒度与缓存隔离（按 Interpreter/Thread 维度划分）；避免使用 `Py_REFCNT==1` 的假设，改用 3.14 提供的唯一引用检测 API。
-	- 与 `sys.monitoring`/`JIT` 共存：支持配置项选择优先级；在官方 `JIT` 开启时打印提示或降级范围。
 
 
-# 五、设计思路与实现方案
+PyTorch 适配 Python 3.14 的相关 PR 如下：
+- 正式开始适配 Python 3.14 [pytorch/pytorch#158184](https://github.com/pytorch/pytorch/pull/158184)
+- eval_frame 适配 [pytorch/pytorch#161555](https://github.com/pytorch/pytorch/pull/161555)
+- PyTorch Python 3.14 适配规划 [pytorch/pytorch#156856](https://github.com/pytorch/pytorch/pull/156856)
+
+
+# 四、设计思路与实现方案
 
 ## 1、主体设计思路与折衷
 ### 整体全貌
@@ -134,12 +131,12 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 无对外接口变化，均为内部实现改动。
 
-# 六、测试和验收的考量
+# 五、测试和验收的考量
 
 1. CI 流水线能够监控 Python 3.14 SOT 单测
 2. SOT 在 Python 3.14 下功能完备，全部 SOT 单测能够在 Python 3.14 下验证通过
 
-# 七、影响面
+# 六、影响面
 
 ## 对用户的影响
 
@@ -161,15 +158,13 @@ Python 3.14 引入了一些新的特性和变化，主要包括以下几个方�
 
 无
 
-# 八、排期规划
+# 七、排期规划
 
 1. PR-CI-SOT 流水线上线 Python 3.14 监控，确保已有单测不会回归 - 7天
 2. Eval Frame 适配 - 10天
 3. 模拟执行模块与 CodeGen 模块适配 - 14 天
 4. SOT 单测验证推全 - 14 天
 5. 模型和各组件库适配 - 待定
-
-# 名词解释
 
 # 附件及参考资料
 
