@@ -4,7 +4,7 @@
 |----------------------------------------------------------|-------------------------------------------|
 | 提交作者<input type="checkbox" class="rowselector hidden">   | fangfangssj                             | 
 | 提交时间<input type="checkbox" class="rowselector hidden">   | 2025-09-16                              | 
-| 版本号                                                      | V1.0                                      | 
+| 版本号                                                      | V1.1                                      | 
 | 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | paddlepaddle-gpu==3.2.0                     | 
 | 文件名                                                      | 20250916_FastDeploy_add_sageattention.md<br> | 
 
@@ -95,21 +95,25 @@ triton算子实现sm86架构
 
 
 # 六、测试和验收的考量
-- tests/layers/下增加SageAttention的测试=
+- tests/layers/下增加SageAttention的测试
 - tests/operators/下增加新增cuda算子测试
 - tests/operators/下增加新增triton算子测试
-- SageAttention在EB，Qwen上测试性能
+- SageAttention在EB，Qwen上测试8-128K数据下 E2E 精度&性能
 
 # 七、影响面
 为FastDeploy集成 SageAttn v2++，不影响其他部分
 
 # 八、排期规划
-* 2025-9-26 ~ 2025-10-15：完成集成代码开发
-* 2025-10-5 ~ 2025-10-15：完成代码测试
-* 2025-10-7 ~ 2025-10-15： 完成部署示例及文档
+* 2025-10-15 ~ 2025-11-10：完成集成代码开发
+* 2025-10-15 ~ 2025-11-10：完成代码测试
+* 2025-10-15 ~ 2025-11-15： 完成部署示例及文档
 
 # 九、参考资料
 
 [SageAttention](https://github.com/thu-ml/SageAttention)
 
 [FD接入MobaAttn的PR](https://github.com/PaddlePaddle/FastDeploy/pull/3209)
+
+[PaddleNLP接入SageAttention的PR](https://github.com/PaddlePaddle/PaddleNLP/pull/9848)
+
+[PaddleNLP接入SageAttention的PR](https://github.com/PaddlePaddle/PaddleNLP/pull/10032)
