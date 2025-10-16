@@ -25,9 +25,7 @@
 - 目前业内MoE GroupGEMM没有支持INT8*INT8的实现
 
 # 四、设计思路与实现方案
-## 总体设计
-
-
+参考 FastDeploy 其余算子实现，添加好INT8*INT8的MoE GroupGEMM实现。
 
 # 五、测试和验收的考量
 - 增加算子测试
