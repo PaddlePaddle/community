@@ -1,10 +1,10 @@
-# Pi5Translator
+# Pi5 Fun Text Interpreter
 
-This project demonstrates how to build a photo-translation device on Raspberry Pi 5 using ERNIE 0.3B. Use this repository as a minimal demo to quickly prototype a hardware project based on ERNIE 0.3B.
+This project demonstrates how to build a fun text interpreter on Raspberry Pi 5 using ERNIE-4.5-0.3B. Use this repository as a minimal demo to quickly prototype a hardware project based on ERNIE-4.5-0.3B.
 
 This project mainly covers:
-- Running ERNIE 0.3B on Raspberry Pi 5 via llama.cpp
-- Performing photo-based OCR and translation on Raspberry Pi 5
+- Running ERNIE-4.5-0.3B on Raspberry Pi 5 via llama.cpp
+- Performing photo-based OCR and fun text interpretation on Raspberry Pi 5
 
 > Because Raspberry Pi 5's system-level Python package management may not allow installing global dependencies directly, you should use a virtual environment to manage project dependencies. Create and activate a virtual environment first:
 ```bash
@@ -12,8 +12,8 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-## Install and deploy ERNIE 0.3B
-> Nearly all end-side devices can run Ernie 0.3B using llama.cpp. 
+## Install and deploy ERNIE-4.5-0.3B
+> Nearly all end-side devices can run ERNIE-4.5-0.3B using llama.cpp. 
 
 ### Install dependencies
 Installing llama-cpp-python via pip may take a long time. If your hardware is low-end, consider using brew or building from source.
@@ -22,7 +22,7 @@ pip install llama-cpp-python uvicorn anyio starlette fastapi sse_starlette starl
 ```
 
 ### Prepare gguf model file
-llama.cpp requires models in gguf format. You can download ERNIE 0.3B gguf files from Hugging Face or ModelScope.
+llama.cpp requires models in gguf format. You can download ERNIE-4.5-0.3B gguf files from Hugging Face or ModelScope.
 
 ```bash
 # Download from Hugging Face
@@ -70,9 +70,9 @@ assistant_reply = response.choices[0].message.content
 print(assistant_reply)
 ```
 
-## Build the translation device
+## Build the Fun Text Interpreter
 ### Install OCR tools
-This project uses RapidOCR as the OCR tool. Activate the virtual environment in a new terminal and install dependencies:
+This project uses RapidOCR as the OCR tool. RapidOCR is an open-source OCR tool based on [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR), which is Baidu's PaddlePaddle open-source OCR library supporting multi-language text recognition with high accuracy and efficiency. Activate the virtual environment in a new terminal and install dependencies:
 ```bash
 source venv/bin/activate
 pip install rapidocr onnxruntime
@@ -198,8 +198,8 @@ else:
 cap.release()
 ```
 
-### Build the translator UI
-Install PyQt5 and build a simple UI to continuously show the camera stream and trigger capture + OCR + translation on click.
+### Build the Fun Text Interpreter UI
+Install PyQt5 and build a simple UI to continuously show the camera stream and trigger capture + OCR + fun text interpretation on click.
 
 Note: On Raspberry Pi 5, you may need to install PyQt5 outside the virtual environment:
 ```bash
@@ -224,7 +224,7 @@ from PIL import Image
 class CameraApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Raspberry Pi Camera + OCR + Translation")
+        self.setWindowTitle("Raspberry Pi Camera + OCR + Fun Text Interpreter")
         self.resize(800, 600)
         
         # Initialize camera (RGB)
@@ -249,7 +249,7 @@ class CameraApp(QWidget):
         self.timer.start(30)
     
     def mousePressEvent(self, event):
-        """On mouse click -> capture and translate"""
+        """On mouse click -> capture and interpret text funnily"""
         if event.button() == Qt.LeftButton:
             self.capture_and_translate()
     
@@ -284,22 +284,22 @@ class CameraApp(QWidget):
             
             ocr_text = ocr_response.json()["result"][0]  # take first line
             
-            # 2. Call llama.cpp translation via OpenAI-compatible API
+            # 2. Call llama.cpp interpretation via OpenAI-compatible API
             translate_url = "http://localhost:8000/v1/chat/completions"
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer sk-dummy"
             }
             data = {
-                "model": "gpt-3.5-turbo",
+                "model": "ernie-4.5-0.3b",  # Use ERNIE-4.5-0.3B model
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are a translation assistant. Convert Chinese input to English."
+                        "content": "You are a fun assistant. Explain the content of the following text in a fun way."
                     },
                     {
                         "role": "user",
-                        "content": f"Please translate the following: {ocr_text}"
+                        "content": f"Please explain the following text in a fun way: {ocr_text}"
                     }
                 ]
             }
@@ -311,14 +311,14 @@ class CameraApp(QWidget):
             )
             
             if translate_response.status_code != 200:
-                raise Exception(f"Translation service error: {translate_response.text}")
+                raise Exception(f"Interpretation service error: {translate_response.text}")
             
-            # 3. Parse translation
+            # 3. Parse interpretation
             translation = translate_response.json()["choices"][0]["message"]["content"]
             
-            # 4. Show original and translated text
-            result_text = f"【Original】{ocr_text}\n\n【Translation】{translation}"
-            QMessageBox.information(self, "Translation Result", result_text)
+            # 4. Show original and interpreted text
+            result_text = f"【Original】{ocr_text}\n\n【Fun Interpretation】{translation}"
+            QMessageBox.information(self, "Fun Text Interpretation Result", result_text)
         
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Processing failed: {str(e)}")
@@ -336,4 +336,33 @@ if __name__ == "__main__":
 ```
 
 
-Run `show.py` to start the app. Ensure the OCR service and the llama.cpp server are running beforehand. After running, a camera preview will appear — point it at text and click to trigger capture, OCR, and
+Run `show.py` to start the app. Ensure the OCR service and the llama.cpp server are running beforehand. After running, a camera preview will appear — point it at text and click to trigger capture, OCR, and fun text interpretation.
+
+## Future Outlook
+
+This project demonstrates the feasibility of building a fun text interpreter on Raspberry Pi 5 using the ERNIE-4.5-0.3B model. As a minimal demo, it inspires end-side AI applications. In the future, we can expand and improve in the following areas:
+
+### Model Optimization
+- **Parameter Upgrade**: Try using larger ERNIE models (e.g., ERNIE-3.5-8B or higher) to improve text interpretation accuracy and fun factor.
+- **Model Fine-tuning**: Fine-tune for specific domains (e.g., education, entertainment) to make interpretations more tailored.
+- **Quantization Optimization**: Further optimize model quantization (e.g., using GGUF Q2_K or lower precision) for lower-power devices.
+
+### Feature Expansion
+- **Multi-language Support**: Integrate multi-language OCR and translation for global users.
+- **Voice Interaction**: Add voice recognition input and speech synthesis output for full voice interaction.
+- **Enhanced Interaction**: Support continuous capture, batch processing, or user feedback to improve interpretation quality.
+- **Cloud Collaboration**: Collaborate with cloud large models when network is available to enhance interpretation.
+
+### Hardware Adaptation
+- **More Devices**: Adapt to other edge devices with compute acceleration to leverage hardware acceleration (e.g., GPU, TPU) for faster inference and lower latency.
+
+### Application Scenarios
+- **Educational Tools**: For children's learning, helping understand complex text.
+- **Entertainment Apps**: Provide fun interpretations in games or social settings.
+- **Assistive Tools**: Help visually impaired people understand text or language learners practice reading.
+
+We encourage the open-source community to contribute. If you have ideas or suggestions, feel free to submit Issues or Pull Requests!
+
+---
+
+*This document is based on the PaddlePaddle community open-source project, aiming to promote the popularization and application of AI technology.*

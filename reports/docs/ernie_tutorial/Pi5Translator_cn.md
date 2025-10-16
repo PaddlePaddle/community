@@ -1,10 +1,10 @@
-# Pi5Transolator
+# Pi5Translator
 
-本项目介绍在树莓派5上基于 Ernie0.3B 构建拍照翻译机，你可以以这个项目作为最小DEMO，快速构造一个基于Ernie0.3B的硬件项目。
+本项目介绍在树莓派5上基于 ERNIE-4.5-0.3B 构建文字趣味解释器，你可以以这个项目作为最小DEMO，快速构造一个基于ERNIE-4.5-0.3B的硬件项目。
 
 本项目主要包含：
-- 如何在树莓派5上基于llama.cpp运行Ernie0.3B
-- 如何使用树莓派5进行拍照翻译
+- 如何在树莓派5上基于llama.cpp运行ERNIE-4.5-0.3B
+- 如何使用树莓派5进行拍照文字趣味解释
 
 > 由于树莓派5对于Python环境的管理机制不允许用户直接安装系统级别的依赖，因此需要使用虚拟环境来管理项目依赖。即您首先需要创建虚拟环境。
 ```bash
@@ -71,7 +71,7 @@ print(assistant_reply)
 
 ## 构建翻译机
 ### 安装OCR工具
-本项目采用 RapidOCR 作为OCR工具，请在新的终端中激活虚拟环境并安装依赖
+本项目采用 RapidOCR 作为OCR工具。RapidOCR 是基于 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 的开源 OCR 工具，PaddleOCR 是百度飞桨开源的 OCR 工具库，支持多种语言的文字识别，具有高精度和高效性能。请在新的终端中激活虚拟环境并安装依赖
 ```bash
 source venv/bin/activate
 pip install rapidocr onnxruntime
@@ -201,7 +201,7 @@ else:
 cap.release()
 ```
 
-### 构造翻译机
+### 构造文字趣味解释器
 最后，只需要安装PyQt5，再构建页面，循环读取摄像头，当用户点击界面时，即可触发拍照和OCR识别流程。
 
 首先，安装依赖，由于树莓派5的环境限制，需要在虚拟环境外安装PyQt5
@@ -228,7 +228,7 @@ from PIL import Image
 class CameraApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("树莓派摄像头 + OCR + 翻译")
+        self.setWindowTitle("树莓派摄像头 + OCR + 文字趣味解释器")
         self.resize(800, 600)
         
         # 初始化摄像头（RGB格式）
@@ -254,7 +254,7 @@ class CameraApp(QWidget):
         self.timer.start(30)
     
     def mousePressEvent(self, event):
-        """鼠标点击事件 - 触发翻译"""
+        """鼠标点击事件 - 触发文字趣味解释"""
         if event.button() == Qt.LeftButton:  # 只响应左键点击
             self.capture_and_translate()
     
@@ -271,7 +271,7 @@ class CameraApp(QWidget):
             self.label.setPixmap(pixmap)
     
     def capture_and_translate(self):
-        """捕获画面 → OCR识别 → 翻译（中英互译）"""
+        """捕获画面 → OCR识别 → 文字趣味解释"""
         try:
             # 1. 捕获画面并调用OCR服务
             frame = self.picam2.capture_array()
@@ -291,22 +291,22 @@ class CameraApp(QWidget):
             
             ocr_text = ocr_response.json()["result"][0]  # 取第一行识别结果
             
-            # 2. 调用 llama.cpp 的翻译接口（OpenAI API兼容）
+            # 2. 调用 llama.cpp 的解释接口（OpenAI API兼容）
             translate_url = "http://localhost:8000/v1/chat/completions"  # llama.cpp的API端点
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer sk-dummy"  # 模拟OpenAI的API key
             }
             data = {
-                "model": "gpt-3.5-turbo",  # llama.cpp支持的模型名
+                "model": "ernie-4.5-0.3b",  # 使用 ERNIE-4.5-0.3B 模型
                 "messages": [
                     {
                         "role": "system",
-                        "content": "你是一个翻译助手，将输入中文转变为英文"
+                        "content": "你是一个有趣的助手，请用有趣的方式解释以下文字的内容。"
                     },
                     {
                         "role": "user",
-                        "content": f"请翻译以下内容：{ocr_text}"
+                        "content": f"请有趣地解释以下文字：{ocr_text}"
                     }
                 ]
             }
@@ -318,14 +318,14 @@ class CameraApp(QWidget):
             )
             
             if translate_response.status_code != 200:
-                raise Exception(f"翻译服务错误: {translate_response.text}")
+                raise Exception(f"解释服务错误: {translate_response.text}")
             
-            # 3. 解析翻译结果
+            # 3. 解析解释结果
             translation = translate_response.json()["choices"][0]["message"]["content"]
             
-            # 4. 弹窗显示原文和译文
-            result_text = f"【原文】{ocr_text}\n\n【译文】{translation}"
-            QMessageBox.information(self, "翻译结果", result_text)
+            # 4. 弹窗显示原文和解释
+            result_text = f"【原文】{ocr_text}\n\n【解释】{translation}"
+            QMessageBox.information(self, "文字趣味解释结果", result_text)
         
         except Exception as e:
             QMessageBox.critical(self, "错误", f"处理失败: {str(e)}")
@@ -346,4 +346,27 @@ if __name__ == "__main__":
 运行文件 `show.py`，即可启动应用程序。确保在运行之前，已经启动了 OCR 服务和 llama.cpp 服务。
 
 
-运行后，将会看到摄像头画面，对准文字，点击屏幕即可触发翻译功能。
+运行后，将会看到摄像头画面，对准文字，点击屏幕即可触发文字趣味解释功能。
+
+## 未来展望
+
+本项目展示了在树莓派5上使用 ERNIE-4.5-0.3B 模型构建文字趣味解释器的可行性。作为一个最小DEMO，它为端侧AI应用提供了灵感。未来，我们可以从以下几个方面进行扩展和改进：
+
+### 模型优化
+- **参数升级**：尝试使用更大参数的 ERNIE 模型（如 ERNIE-3.5-8B 或更高），以提升文字解释的准确性和趣味性。
+- **模型微调**：针对特定领域（如教育、娱乐）进行微调，使解释更加贴合用户需求。
+- **量化优化**：进一步优化模型量化（如使用 GGUF Q2_K 或更低精度），以在更低功耗设备上运行。
+
+### 功能扩展
+- **多语言支持**：集成多语言 OCR 和翻译功能，支持全球用户。
+- **语音交互**：添加语音识别输入和语音合成输出，实现全语音交互体验。
+- **交互增强**：支持连续拍照、批量处理，或添加用户反馈机制来改进解释质量。
+- **云端协同**：在网络可用时，与云端大模型协同，提升解释效果。
+
+### 硬件适配
+- **更多设备**：适配其他带有计算加速的边缘设备，以利用硬件加速（如 GPU、TPU）提升推理速度，降低延迟。
+
+### 应用场景
+- **教育工具**：用于儿童学习，帮助理解复杂文字。
+- **娱乐应用**：在游戏或社交中提供趣味解释。
+- **辅助工具**：帮助视障人士理解文字，或语言学习者练习阅读。
