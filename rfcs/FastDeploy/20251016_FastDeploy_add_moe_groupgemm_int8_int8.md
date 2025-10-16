@@ -19,20 +19,20 @@
 支持INT8*INT8的MoE GroupGEMM实现能够充分利用硬件的整数计算单元，相较于高精度计算，大幅减少计算延迟，提高模型推理速度。
 
 # 二、FastDeploy现状
-- 目前FastDeploy中MoE GroupGEMM没有支持INT8*INT8的实现
+- 目前`FastDeploy`中`MoE GroupGEMM`没有支持`INT8*INT8`的实现
 
 # 三、业内方案调研
-- 目前业内MoE GroupGEMM没有支持INT8*INT8的实现
+- 目前业内`MoE GroupGEMM`没有支持`INT8*INT8`的实现
 
 # 四、设计思路与实现方案
-参考 FastDeploy 其余算子实现，添加好INT8*INT8的MoE GroupGEMM实现。
+参考`FastDeploy`其余算子实现，添加好`INT8*INT8`的`MoE GroupGEMM`实现。
 
 # 五、测试和验收的考量
 - 增加算子测试
 - 在EB，Qwen开源模型上测试数据精度&性能
 
 # 六、影响面
-为FastDeploy集成 SageAttn v2++，不影响其他部分
+为`FastDeploy`集成`MoE GroupGEMM`，不影响其他部分
 
 # 七、排期规划
 * 2025-10-16 ~ 2025-11-16：完成集成代码开发
