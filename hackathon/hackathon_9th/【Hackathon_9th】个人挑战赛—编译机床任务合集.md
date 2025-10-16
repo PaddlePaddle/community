@@ -190,10 +190,10 @@ python -m graph_net.torch.test_compiler \
 
 我们设想中的 AI4C 子图分解功能包含以下模块：
 
-1. 计算图区间分解器，负责分解操作执行，需要包含分解区间配置
-2. 计算图分解方案验证器，对拆分后的子图做有效性验证
+1. 计算图区间分解器，负责分解操作执行，需要包含分解区间配置（本次任务不涉及）
+2. 计算图分解方案验证器，对拆分后的子图做有效性验证（在本次任务中，使用一个极简分解器或分解模型测试用例来评估验证器的效果）
 
-基于以上设计，我们计划先完成【计算图区间分解方案验证器】。我们计划复用现有的test_compiler及后续的评估方法，只新增一个RangeDecomposerValidatorBackend，作为验证器核心。
+基于以上设计，我们计划先完成【计算图区间分解方案验证器】，复用现有的test_compiler及后续的评估方法，只新增一个RangeDecomposerValidatorBackend，作为验证器核心。
 
 **任务描述**:
 
@@ -212,11 +212,16 @@ python -m graph_net.torch.test_compiler \
 
 1. graph_net.torch.test_compiler，记录下原始log
 2. graph_net.log2json，将log转化为JSON
-3. graph_net.S_analysis，生成S和ES图象，并输出其各项参数
+3. graph_net.plot_ESt，生成ESt图象，并输出其各项参数
 
-随后，根据ES图象t>0时的阶梯表现，我们可以分析出该样本的正确性。在当前GraphNet repo中，默认t=1的跳跃代表输出精度错误，t=3的跳跃代表编译运行等其它类别错误。
+随后，根据ESt图象在t>0时的阶梯表现，我们可以分析出该样本的正确性。在当前GraphNet repo中，默认t=1的抬升代表输出精度错误，t=3的抬升代表编译运行等其它类别错误。
 
-为了方便测试，我们在GraphNet/todo_works/range_decomposer_validator/test/下提供了简单的测试用例；开发者需要构造出更多测试用例，包含分解错误以及有placeholder的情形，以说明验证器达成了功能。
+为了方便测试，我们在GraphNet/todo_works/range_decomposer_validator/test/下提供了简单的测试用例：
+
+* simple_CNN为分解前的原模型样本；
+* simple_CNN_decomposed下面的subgraph_0到subgraph_2为分解后的模型样本，其model.py中的forward和weight_meta.py来自对simple_CNN模型的区间拆分。
+
+开发者需要构造出更多测试用例，包含分解错误以及有placeholder的情形，以说明验证器达成了功能。
 
 由于是单个样本测试，无需考虑性能提升，故预期使用所需的RangeDecomposerValidatorBackend后，对于正确拆分样本，ES图象应当是y=1的【一条直线】；对于错误或不完整的拆分样本，应当打印【错误报告】，或ES图象在t>0区域存在【阶梯状抬升】。
 
