@@ -12,6 +12,8 @@ python -m venv venv
 source venv/bin/activate
 ```
 
+![alt text](hardware.jpg)
+
 ## 安装和部署Ernie0.3B
 > 几乎所有的端侧设备都可以通过llama.cpp运行Ernie0.3B。
 ### 安装依赖

@@ -12,6 +12,8 @@ python -m venv venv
 source venv/bin/activate
 ```
 
+![alt text](hardware.jpg)
+
 ## Install and deploy ERNIE-4.5-0.3B
 > Nearly all end-side devices can run ERNIE-4.5-0.3B using llama.cpp. 
 
