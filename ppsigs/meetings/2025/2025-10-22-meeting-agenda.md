@@ -2,8 +2,8 @@
 
 * 会议时间：2025-10-22 19:30
 * 本次会议接入方式：
-    * 腾讯会议：
-    * [点击链接入会](https://meeting.tencent.com/dm/ZFE1oGdfaigO)，或添加至会议列表
+    * 腾讯会议：663-189-966
+    * [点击链接入会](https://meeting.tencent.com/dm/UuyFzlvxQLbA)，或添加至会议列表
 * 本次拟参会 member list：
     * [cuicheng01](https://github.com/cuicheng01)
     * [jzhang533](https://github.com/jzhang533)
