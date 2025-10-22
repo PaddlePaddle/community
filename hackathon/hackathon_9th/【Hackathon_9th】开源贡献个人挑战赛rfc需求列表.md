@@ -33,9 +33,10 @@
 |  101   |  ⭐  | 多图抽取问题修复         |        是        |
 |  102   |  ⭐  | vmap抽取问题修复        |        是        |
 |  110   |  ⭐  | AI4C计算图分解验证器        |        是        |
-|  110   |  0.5⭐  | （GraphNet样本修复）batch_norm算子添加weight_meta约束        |        是        |
-|  110   |  0.5⭐  | （GraphNet样本修复）27个因 torch 版本带来的样本问题        |        是        |
-|  110   |  ⭐  | （GraphNet样本修复）非法Torch样本修复        |        是        |
+|  111   |  0.5⭐  | （GraphNet样本修复）batch_norm算子添加weight_meta约束        |        是        |
+|  112   |  0.5⭐  | （GraphNet样本修复）27个因 torch 版本带来的样本问题        |        是        |
+|  113   |  0.5⭐  | （GraphNet样本修复）非法Torch样本修复        |        是        |
+|  114   |  ⭐  | Torch样本Unstable API转换成Stable API        |        是        |
 
 ## 科学计算任务
 
