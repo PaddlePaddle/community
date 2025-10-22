@@ -451,10 +451,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/fft_irfft/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/fft_irfft`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_irfft/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_irfft`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.115 torch._C._linalg.linalg_vector_norm API转换
 
@@ -476,10 +475,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/linalg_vector_norm/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/linalg_vector_norm`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_vector_norm/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_vector_norm`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.116 torch._C._nn.pad API转换
 
@@ -501,10 +499,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/pad/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/pad`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.pad/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.pad`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.117 torch._C._log_api_usage_once API转换
 
@@ -526,10 +523,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/log_api_usage_once/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/log_api_usage_once`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._log_api_usage_once/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._log_api_usage_once`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.118 torch._C._fft.fft_rfft API转换
 
@@ -551,10 +547,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/fft_rfft/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/fft_rfft`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_rfft/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_rfft`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.119 torch._C._nn.linear API转换
 
@@ -576,10 +571,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/linear/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/linear`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.linear/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.linear`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.120 torch._C._nn.scaled_dot_product_attention API转换
 
@@ -601,10 +595,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/scaled_dot_product_attention/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/scaled_dot_product_attention`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.scaled_dot_product_attention/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.scaled_dot_product_attention`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.121 torch._C._nn.avg_pool2d API转换
 
@@ -626,10 +619,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/avg_pool2d/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/avg_pool2d`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.avg_pool2d/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.avg_pool2d`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.122 torch._C._nn.gelu API转换
 
@@ -651,10 +643,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/gelu/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/gelu`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.gelu/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.gelu`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.123 torch._C._nn.softplus API转换
 
@@ -676,10 +667,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/softplus/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/softplus`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.softplus/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.softplus`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.124 torch._C._set_grad_enabled API转换
 
@@ -701,10 +691,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/set_grad_enabled/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/set_grad_enabled`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._set_grad_enabled/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._set_grad_enabled`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.125 torch._C._fft.fft_fftn API转换
 
@@ -726,10 +715,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/fft_fftn/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/fft_fftn`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_fftn/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_fftn`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.126 torch._C._linalg.linalg_norm API转换
 
@@ -751,10 +739,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/linalg_norm/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/linalg_norm`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_norm/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_norm`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.127 torch._C._nn.one_hot API转换
 
@@ -776,10 +763,9 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/one_hot/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/one_hot`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.one_hot/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.one_hot`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
 
 ### NO.128 torch._C._special.special_logit API转换
 
@@ -801,7 +787,6 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 **预期效果**
 
 绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/special_logit/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/special_logit`。
+1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._special.special_logit/test.sh`，进行检查。
+2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._special.special_logit`。
 3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
-
