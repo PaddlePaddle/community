@@ -1,12 +1,12 @@
 # FastDeploy中的MoE GroupGEMM支持INT8*INT8实现
 
-| 方案名称                         |  FastDeploy中的MoE GroupGEMM支持INT8*INT8实现  | 
+| 方案名称                         |  FastDeploy中的MoE GroupGEMM支持INT8*INT8实现  |
 |----------------------------------------------------------|-------------------------------------------|
-| 提交作者<input type="checkbox" class="rowselector hidden">   | WanRui37                             | 
-| 提交时间<input type="checkbox" class="rowselector hidden">   | 2025-10-16                              | 
-| 版本号                                                      | V1.1                                      | 
-| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | paddlepaddle-gpu==3.2.0                     | 
-| 文件名                                                      | 20251016_FastDeploy_add_moe_groupgemm_int8_int8.md<br> | 
+| 提交作者<input type="checkbox" class="rowselector hidden">   | WanRui37                             |
+| 提交时间<input type="checkbox" class="rowselector hidden">   | 2025-10-16                              |
+| 版本号                                                      | V1.1                                      |
+| 依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | paddlepaddle-gpu==3.2.0                     |
+| 文件名                                                      | 20251016_FastDeploy_add_moe_groupgemm_int8_int8.md<br> |
 
 # 一、概述
 ## 1、相关背景
@@ -38,12 +38,12 @@
 
 1. 需要修改的代码路径
     ```text
-    custom_ops/                           
+    custom_ops/
     └── gpu_ops/                            # GPU相关自定义算子
         ├── int8_gemm_with_cutlass/         # INT8*INT8 GEMM with Cutlass 算子实现
         │   ├── w8a8_group_gemm.cu          # Cutlass Kernel实现
         │   └── w8a8_group_gemm.h           # Cutlass Kernel头文件
-        └── ...                             
+        └── ...
     test/
     └── operators/
         ├── test_w8a8_group_gemm.py          # 测试INT8*INT8 GEMM with Cutlass 算子
