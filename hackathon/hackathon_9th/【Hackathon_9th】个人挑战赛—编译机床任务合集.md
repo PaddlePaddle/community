@@ -229,3 +229,242 @@ python -m graph_net.torch.test_compiler \
 
 - 熟练掌握 Python
 - 对 PyTorch 和 GraphNet 的运作机制有一定的了解
+
+### NO.111 （GraphNet样本修复）batch_norm算子添加weight_meta约束
+**任务背景**
+GraphNet支持对深度学习模型的推理样本进行统一评测。batch_norm算子在CV模型中被普遍应用，推理模式下计算公式为：
+
+$batch\_norm = weight * (x - running\_mean) / sqrt(running\_var + eps) + bias$
+
+计算中存在除法和`sqrt`计算，为了得到正常的计算结果，需满足约束`running_var + eps > 0`，否则会产生异常的结果（如`inf`或`nan`）。在GraphNet评测任务中，算子的权重和输入都统一当做样本模型的输入来对待，由评测任务按照样本中保存的 meta 信息进行随机初始化。当前 Torch 样本浮点输入 meta 信息中保存了`mean` 和 `std`。依据 `mean`和`std`随机初始化的数据，难以保证一定满足该约束。Torch 样本在批量评测时，发现 150 个样本因 batch_norm 算子weight_meta 不满足上述要求，导致计算结果出现 `nan`，[https://github.com/PaddlePaddle/GraphNet/pull/301](https://github.com/PaddlePaddle/GraphNet/pull/301) 中采用一种临时方式规避了该问题。最终修复方法，需要为所有样本中 batch_norm 算子的 `running_var`参数添加`min_val = 0`约束。
+
+
+
+**任务描述**
+通过修改样本，为所有样本中 batch_norm 算子的 `running_var`参数添加`min_val = 0`约束。具体步骤如下：
+
+1. 移除 [https://github.com/PaddlePaddle/GraphNet/pull/301](https://github.com/PaddlePaddle/GraphNet/pull/301) 添加的临时修复代码 [https://github.com/PaddlePaddle/GraphNet/blob/fd025b0c0c0e480577fa527e3d72aa1781484846/graph_net/torch/utils.py#L279](https://github.com/PaddlePaddle/GraphNet/blob/fd025b0c0c0e480577fa527e3d72aa1781484846/graph_net/torch/utils.py#L279) - L281，执行如下命令复现`nan`问题。
+
+```
+$ python -m graph_net.torch.test_compiler --model-path samples/mmseg/MAE --compiler "nope" --warmup 0 --trials 1
+graph-net-test-compiler-log [Processing] /work/GraphNet/samples/torchvision/mnasnet1_3
+graph-net-test-compiler-log [Config] model: mnasnet1_3
+graph-net-test-compiler-log [Config] device: cuda
+graph-net-test-compiler-log [Config] hardware: NVIDIA H20-3e
+graph-net-test-compiler-log [Config] compiler: nope
+graph-net-test-compiler-log [Config] warmup: 0
+graph-net-test-compiler-log [Config] trials: 1
+graph-net-test-compiler-log [Config] compile_framework_version: unknown
+graph-net-test-compiler-log [Profiling] Using device: cuda NVIDIA H20-3e, warm up 0, trials 1
+Trial 1: e2e=217.01026 ms, gpu=216.88783 ms
+graph-net-test-compiler-log [Performance][eager]: {"e2e": {"mean": 217.0, "std": 0.0, "min": 217.0, "max": 217.0}, "gpu": {"mean": 217.0, "std": 0.0, "min": 217.0, "max": 217.0}}
+graph-net-test-compiler-log [Datatype][eager]: float32
+graph-net-test-compiler-log [Profiling] Using device: cuda NVIDIA H20-3e, warm up 0, trials 1
+Trial 1: e2e=1.78576 ms, gpu=1.72432 ms
+graph-net-test-compiler-log [Performance][compiled]: {"e2e": {"mean": 1.79, "std": 0.0, "min": 1.79, "max": 1.79}, "gpu": {"mean": 1.72, "std": 0.0, "min": 1.72, "max": 1.72}}
+graph-net-test-compiler-log [Datatype][compiled]: float32
+graph-net-test-compiler-log [DataType] eager:['float32'] compiled:['float32'] match:True
+graph-net-test-compiler-log [Correctness][equal]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-10_rtol_1.00E-06]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-10_rtol_2.56E-04]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-10_rtol_1.69E-12]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-14_rtol_1.00E-14]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-09_rtol_3.98E-06]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-09_rtol_5.85E-04]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-09_rtol_2.54E-11]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_2.51E-13_rtol_2.51E-13]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-08_rtol_1.58E-05]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-08_rtol_1.34E-03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-08_rtol_3.82E-10]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_6.31E-12_rtol_6.31E-12]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-07_rtol_6.31E-05]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-07_rtol_3.06E-03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-07_rtol_5.75E-09]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.58E-10_rtol_1.58E-10]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-06_rtol_2.51E-04]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-06_rtol_7.00E-03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-06_rtol_8.65E-08]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_3.98E-09_rtol_3.98E-09]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-05_rtol_1.00E-03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-05_rtol_1.60E-02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-05_rtol_1.30E-06]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-07_rtol_1.00E-07]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-04_rtol_3.98E-03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-04_rtol_3.66E-02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-04_rtol_1.96E-05]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_2.51E-06_rtol_2.51E-06]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-03_rtol_1.58E-02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-03_rtol_8.36E-02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-03_rtol_2.94E-04]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_6.31E-05_rtol_6.31E-05]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-02_rtol_6.31E-02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-02_rtol_1.91E-01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-02_rtol_4.42E-03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.58E-03_rtol_1.58E-03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-01_rtol_2.51E-01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-01_rtol_4.37E-01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E-01_rtol_6.65E-02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_3.98E-02_rtol_3.98E-02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+00_rtol_1.00E+00]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+00_rtol_1.00E+00]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+00_rtol_1.00E+00]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+00_rtol_1.00E+00]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+01_rtol_3.98E+00]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+01_rtol_2.29E+00]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+01_rtol_1.50E+01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_2.51E+01_rtol_2.51E+01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+02_rtol_1.58E+01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+02_rtol_5.23E+00]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+02_rtol_2.26E+02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_6.31E+02_rtol_6.31E+02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+03_rtol_6.31E+01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+03_rtol_1.20E+01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+03_rtol_3.40E+03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.58E+04_rtol_1.58E+04]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+04_rtol_2.51E+02]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+04_rtol_2.73E+01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+04_rtol_5.11E+04]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_3.98E+05_rtol_3.98E+05]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+05_rtol_1.00E+03]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+05_rtol_6.25E+01]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+05_rtol_7.69E+05]: 0
+graph-net-test-compiler-log [Correctness][all_close_atol_1.00E+07_rtol_1.00E+07]: 0
+graph-net-test-compiler-log [Correctness][max_diff]: nan
+graph-net-test-compiler-log [Correctness][mean_diff]: nan
+graph-net-test-compiler-log [Result] status: success
+graph-net-test-compiler-log [Speedup][e2e]: 121.2291
+graph-net-test-compiler-log [Speedup][gpu]: 126.1628
+```
+
+
+2. 编写脚本，批量修改`GraphNet/samples`目录下面的样本的weight_meta.py，为batch_norm算子的`running_var`添加`min_val = 0`meta信息。
+3. 修改`GraphNet/graph_net/torch/utils.py`，`replay_tensor`中使用`min_val`约束随机Tensor值的下界。
+4. 提交PR。
+
+
+
+**预期效果**
+1. 验证`test_compiler`评测结果，`max_diff`和`mean_diff`中不再出现`nan`，设置 nope 编译器后端测试所有容忍度下`allclose`检查结果均通过。
+
+
+### NO.112 （GraphNet样本修复）27个因 torch 版本带来的样本问题
+**任务背景**
+通过指定graph_net.torch.test_compiler的--compiler参数为nope，一共有27个模型样本由于经过PyTorch 2.2.x或之前的版本抽取，其model.py中例如`l_self_modules_... = L_self_modules_... `此类的 predispatch 调用，在旧版 PyTorch 上被自动替换为`torch._functorch.predispatch(...)`；而PyTorch 2.3 以后把 torch._functorch 内部的实现做了重构，不包含 predispatch 属性，于是抛出错误 `AttributeError: module 'torch._functorch' has no attribute 'predispatch'`。涉及的样本如下：
+
+```
+samples/transformers-auto-model/42dot_LLM-SFT-1.3B
+samples/transformers-auto-model/dansk-gpt-wiki
+samples/transformers-auto-model/distilgpt2
+samples/transformers-auto-model/EleutherAI_pythia-70m
+samples/transformers-auto-model/GePpeTto
+samples/transformers-auto-model/gpt2
+samples/transformers-auto-model/gpt-sw3-356m
+samples/transformers-auto-model/japanese-gpt-1b
+samples/transformers-auto-model/joancipria_gpt2-base-bne-FineTunedEmoEvent
+samples/transformers-auto-model/kogpt
+samples/transformers-auto-model/LFM2-350M
+samples/transformers-auto-model/LLaMmlein_120M
+samples/transformers-auto-model/LYTinn_gpt2-finetuning-sentiment-model-3000-samples
+samples/transformers-auto-model/nie3e_sentiment-polish-gpt2-large
+samples/transformers-auto-model/orca_mini_3b
+samples/transformers-auto-model/PolyCoder-160M
+samples/transformers-auto-model/polyglot-ko-1.3b
+samples/transformers-auto-model/Qwen1.5-0.5B
+samples/transformers-auto-model/Qwen2.5-0.5B
+samples/transformers-auto-model/Qwen3-Embedding-0.6B
+samples/transformers-auto-model/sarvam-0.5
+samples/transformers-auto-model/super-fast-llm
+samples/transformers-auto-model/TinyLlama-1.1B-step-50K-105b
+samples/transformers-auto-model/tiny_starcoder_py
+samples/transformers-auto-model/Tucano-2b4
+samples/transformers-auto-model/w11wo_javanese-gpt2-small-imdb-classifier
+samples/transformers-auto-model/w11wo_sundanese-gpt2-base-emotion-classifier
+```
+
+**任务描述**
+1. 对于上述模型，使用torch2.8重新抽取计算图并更新样本。
+2. 自行测试，确保新样本运行符合预期效果。
+3. 提交PR。
+
+
+
+**预期效果**
+1. 验证`test_compiler`评测结果，上述模型设置 nope 编译器后端测试不出现错误。
+
+
+
+### NO.113 （GraphNet样本修复）非法Torch样本修复
+**任务背景**
+一些样本在使用`test_compiler`评测时，计算结果中会产生`inf`或`nan`，最终导致`max_diff`为`nan`，精度检测不通过。样本列表如下：
+
+```
+samples/transformers-auto-model/IDEA-Research_grounding-dino-base
+samples/transformers-auto-model/canary-1b-v2
+samples/transformers-auto-model/fushh7_llmdet_swin_tiny_hf
+samples/nemo/stt_en_squeezeformer_ctc_small_ls
+samples/nemo/stt_en_conformer_ctc_large
+samples/nemo/stt_en_squeezeformer_ctc_small_medium_ls
+samples/nemo/parakeet-ctc-1.1b
+samples/nemo/stt_en_squeezeformer_ctc_medium_large_ls
+samples/nemo/parakeet-tdt-1.1b
+samples/nemo/stt_en_fastconformer_hybrid_large_pc
+samples/nemo/parakeet-ctc-0.6b
+samples/nemo/stt_en_conformer_ctc_medium
+samples/nemo/parakeet-tdt-0.6b-v3
+samples/nemo/stt_en_squeezeformer_ctc_xsmall_ls
+samples/nemo/stt_en_squeezeformer_ctc_medium_ls
+samples/nemo/stt_en_squeezeformer_ctc_large_ls
+samples/nemo/stt_en_conformer_ctc_small
+```
+
+
+**任务描述**
+修复上述17个样本，使得`nope`和`inductor`评测结果均不再出现`nan`。具体步骤如下：
+
+1. 执行`python -m graph_net.torch.test_compiler --model-path samples/xxx/xxx --compiler "inductor" --warmup 0 --trials 1`复现`nan`问题。
+2. 通过修改样本、数据初始化或评测执行流程解决问题。
+3. 提交PR。
+
+
+
+**预期效果**
+1. 给定17个样本`test_compiler`在使用`nope`和`inductor`后端时评测结果中均不出现`nan`。
+
+
+### NO.114 Torch样本Unstable API转换成Stable API
+**任务背景**
+GraphNet中很多计算图由于用到了torch中的unstable_api，因此无法直接通过PaConvertor转换为Paddle计算图。本项目需要为`unstable_to_stable_backend`新增`<unstable>_to_<stable>`转换函数，将之转换为pytorch stable api。
+
+```
+fft_irfft    
+linalg_vector_norm  
+pad
+_log_api_usage_once 
+fft_rfft     
+linear              
+scaled_dot_product_attention
+avg_pool2d               
+gelu         
+softplus
+_set_grad_enabled    
+fft_fftn                
+linalg_norm  
+one_hot             
+special_logit
+```
+pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)
+
+**任务描述**
+为`graph_net/torch/backend/unstable_to_stable_backend.py`新增`<unstable>_to_<stable>`函数，并绘制出y=1的水平直线
+
+1. 设置好`DISALLOWED_UNSTABLE_API`，名称参考“任务背景”中的pytorch unstable api任务列表。
+2. 设置好`GRAPH_NET_WORKSPACE`，为GraphNet项目路径。
+3. 在`unstable_to_stable_backend.py`中找到有#TODO标记的`unstable_to_stable`函数，将其函数名改为`<unstable>_to_<stable>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+4. 完善转换api的逻辑，返回一个修改好的gm对象。
+5. 运行`plot_unstable_to_stable.sh`，进行检查。查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/<unstable_api>`。中间运行过程的`log.log`也可以在上述路径找到。
+
+**预期效果**
+1. 绘制出y=1的ES(t)曲线
+
+为了便于开发者debug，可以参考运行过程中的log.log，观察print等信息，以及代码运行报错信息。
+
