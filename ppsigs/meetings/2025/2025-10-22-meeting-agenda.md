@@ -33,9 +33,12 @@ PaddleOCR-VL模型量化部署和硬件适配
 
 ### 2. 其他议题
 
-PaddleOCR-VL
+#### PaddleOCR-VL
+- 转换为其他格式： https://huggingface.co/PaddlePaddle/PaddleOCR-VL/discussions/2
+- SFT 模型：https://github.com/jzhang533/paddleocr-vl-sft
+- 开发应用：https://huggingface.co/spaces/jzhang533/doc2page
 
-PaddleOCR突破60k stars
+#### PaddleOCR突破60k stars
 
 ### 3. 自由发言，可以提需求给大家讨论、提问等
 
