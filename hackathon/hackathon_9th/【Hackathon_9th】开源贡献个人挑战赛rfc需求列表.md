@@ -33,8 +33,8 @@
 |  101   |  ⭐  | 多图抽取问题修复         |        是        |
 |  102   |  ⭐  | vmap抽取问题修复        |        是        |
 |  110   |  ⭐  | AI4C计算图分解验证器        |        是        |
-|  111   |  0.5⭐  | （GraphNet样本修复）batch_norm算子添加weight_meta约束        |        是        |
-|  112   |  0.5⭐  | （GraphNet样本修复）27个因 torch 版本带来的样本问题        |        是        |
+|  111   |  0.25⭐  | （GraphNet样本修复）batch_norm算子添加weight_meta约束        |        是        |
+|  112   |  0.15⭐  | （GraphNet样本修复）27个因 torch 版本带来的样本问题        |        是        |
 |  113   |  0.5⭐  | （GraphNet样本修复）非法Torch样本修复        |        是        |
 | 114 | 0.025⭐ | torch._C._fft.fft_irfft API转换 | 是 |
 | 115 | 0.025⭐ | torch._C._linalg.linalg_vector_norm API转换 | 是 |
