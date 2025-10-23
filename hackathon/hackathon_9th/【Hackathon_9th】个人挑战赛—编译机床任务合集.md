@@ -231,52 +231,8 @@ python -m graph_net.torch.test_compiler \
 - 对 PyTorch 和 GraphNet 的运作机制有一定的了解
 
 
-### NO.111 （GraphNet样本修复）27个因 torch 版本带来的样本问题
 
-**任务背景**
-通过指定graph\_net.torch.test\_compiler的--compiler参数为nope，一共有27个模型样本由于经过PyTorch 2.2.x或之前的版本抽取，其model.py中例如` l_self_modules_... = L_self_modules_...  `此类的 predispatch 调用，在旧版 PyTorch 上被自动替换为`torch._functorch.predispatch(...)`；而PyTorch 2.3 以后把 torch.\_functorch 内部的实现做了重构，不包含 predispatch 属性，于是抛出错误 `AttributeError: module 'torch._functorch' has no attribute 'predispatch'`。涉及的样本如下：
-
-```
-samples/transformers-auto-model/42dot_LLM-SFT-1.3B
-samples/transformers-auto-model/dansk-gpt-wiki
-samples/transformers-auto-model/distilgpt2
-samples/transformers-auto-model/EleutherAI_pythia-70m
-samples/transformers-auto-model/GePpeTto
-samples/transformers-auto-model/gpt2
-samples/transformers-auto-model/gpt-sw3-356m
-samples/transformers-auto-model/japanese-gpt-1b
-samples/transformers-auto-model/joancipria_gpt2-base-bne-FineTunedEmoEvent
-samples/transformers-auto-model/kogpt
-samples/transformers-auto-model/LFM2-350M
-samples/transformers-auto-model/LLaMmlein_120M
-samples/transformers-auto-model/LYTinn_gpt2-finetuning-sentiment-model-3000-samples
-samples/transformers-auto-model/nie3e_sentiment-polish-gpt2-large
-samples/transformers-auto-model/orca_mini_3b
-samples/transformers-auto-model/PolyCoder-160M
-samples/transformers-auto-model/polyglot-ko-1.3b
-samples/transformers-auto-model/Qwen1.5-0.5B
-samples/transformers-auto-model/Qwen2.5-0.5B
-samples/transformers-auto-model/Qwen3-Embedding-0.6B
-samples/transformers-auto-model/sarvam-0.5
-samples/transformers-auto-model/super-fast-llm
-samples/transformers-auto-model/TinyLlama-1.1B-step-50K-105b
-samples/transformers-auto-model/tiny_starcoder_py
-samples/transformers-auto-model/Tucano-2b4
-samples/transformers-auto-model/w11wo_javanese-gpt2-small-imdb-classifier
-samples/transformers-auto-model/w11wo_sundanese-gpt2-base-emotion-classifier
-```
-
-**任务描述**
-
-1.  对于上述模型，使用torch2.8重新抽取计算图并更新样本。
-2.  自行测试，确保新样本运行符合预期效果。
-3.  提交PR。
-
-**预期效果**
-
-1.  验证`test_compiler`评测结果，上述模型设置 nope 编译器后端测试不出现错误。
-
-### NO.112 （GraphNet样本修复）batch\_norm算子添加weight\_meta约束
+### NO.111 （GraphNet样本修复）batch\_norm算子添加weight\_meta约束
 
 **任务背景**
 GraphNet支持对深度学习模型的推理样本进行统一评测。batch\_norm算子在CV模型中被普遍应用，推理模式下计算公式为：
@@ -391,7 +347,7 @@ graph-net-test-compiler-log [Speedup][gpu]: 126.1628
 
 1.  验证`test_compiler`评测结果，`max_diff`和`mean_diff`中不再出现`nan`，设置 nope 编译器后端测试所有容忍度下`allclose`检查结果均通过。
 
-### NO.113 （GraphNet样本修复）非法Torch样本修复
+### NO.112 （GraphNet样本修复）非法Torch样本修复
 
 **任务背景**
 一些样本在使用`test_compiler`评测时，计算结果中会产生`inf`或`nan`，最终导致`max_diff`为`nan`，精度检测不通过。样本列表如下：
@@ -427,7 +383,7 @@ samples/nemo/stt_en_conformer_ctc_small
 
 1.  给定17个样本`test_compiler`在使用`nope`和`inductor`后端时评测结果中均不出现`nan`。
 
-### NO.114 torch.\_C.\_fft.fft\_irfft API转换
+### NO.113 torch.\_C.\_fft.fft\_irfft API转换
 
 **任务背景**
 
@@ -453,7 +409,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_irfft`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.115 torch.\_C.\_linalg.linalg\_vector\_norm API转换
+### NO.114 torch.\_C.\_linalg.linalg\_vector\_norm API转换
 
 **任务背景**
 
@@ -479,7 +435,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_vector_norm`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.116 torch.\_C.\_fft.fft\_rfft API转换
+### NO.115 torch.\_C.\_fft.fft\_rfft API转换
 
 **任务背景**
 
@@ -505,7 +461,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_rfft`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.117 torch.\_C.\_nn.softplus API转换
+### NO.116 torch.\_C.\_nn.softplus API转换
 
 **任务背景**
 
@@ -531,7 +487,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.softplus`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.118 torch.\_C.\_fft.fft\_fftn API转换
+### NO.117 torch.\_C.\_fft.fft\_fftn API转换
 
 **任务背景**
 
@@ -557,7 +513,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_fftn`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.119 torch.\_C.\_linalg.linalg\_norm API转换
+### NO.118 torch.\_C.\_linalg.linalg\_norm API转换
 
 **任务背景**
 
@@ -583,7 +539,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_norm`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.120 torch.\_C.\_nn.one\_hot API转换
+### NO.119 torch.\_C.\_nn.one\_hot API转换
 
 **任务背景**
 
@@ -609,7 +565,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.one_hot`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.121 torch.\_C.\_special.special\_logit API转换
+### NO.120 torch.\_C.\_special.special\_logit API转换
 
 **任务背景**
 
@@ -635,7 +591,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._special.special_logit`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.122 torch.\_C.\_set\_grad\_enabled API转换
+### NO.121 torch.\_C.\_set\_grad\_enabled API转换
 
 **任务背景**
 
@@ -661,7 +617,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._set_grad_enabled`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.123 torch.\_C.\_log\_api\_usage\_once API转换
+### NO.122 torch.\_C.\_log\_api\_usage\_once API转换
 
 **任务背景**
 
@@ -687,7 +643,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._log_api_usage_once`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.124 torch.\_C.\_nn.pad API转换
+### NO.123 torch.\_C.\_nn.pad API转换
 
 **任务背景**
 
@@ -713,7 +669,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.pad`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.125 torch.\_C.\_nn.avg\_pool2d API转换
+### NO.124 torch.\_C.\_nn.avg\_pool2d API转换
 
 **任务背景**
 
@@ -739,7 +695,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.avg_pool2d`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.126 torch.\_C.\_nn.gelu API转换
+### NO.125 torch.\_C.\_nn.gelu API转换
 
 **任务背景**
 
@@ -765,7 +721,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.gelu`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.127 torch.\_C.\_nn.scaled\_dot\_product\_attention API转换
+### NO.126 torch.\_C.\_nn.scaled\_dot\_product\_attention API转换
 
 **任务背景**
 
@@ -791,7 +747,7 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2.  查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.scaled_dot_product_attention`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
 
-### NO.128 torch.\_C.\_nn.linear API转换
+### NO.127 torch.\_C.\_nn.linear API转换
 
 **任务背景**
 
