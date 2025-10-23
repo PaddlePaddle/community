@@ -230,7 +230,56 @@ python -m graph_net.torch.test_compiler \
 - 熟练掌握 Python
 - 对 PyTorch 和 GraphNet 的运作机制有一定的了解
 
-### NO.111 （GraphNet样本修复）batch_norm算子添加weight_meta约束
+
+
+### NO.111 （GraphNet样本修复）27个因 torch 版本带来的样本问题
+**任务背景**
+通过指定graph_net.torch.test_compiler的--compiler参数为nope，一共有27个模型样本由于经过PyTorch 2.2.x或之前的版本抽取，其model.py中例如`l_self_modules_... = L_self_modules_... `此类的 predispatch 调用，在旧版 PyTorch 上被自动替换为`torch._functorch.predispatch(...)`；而PyTorch 2.3 以后把 torch._functorch 内部的实现做了重构，不包含 predispatch 属性，于是抛出错误 `AttributeError: module 'torch._functorch' has no attribute 'predispatch'`。涉及的样本如下：
+
+```
+samples/transformers-auto-model/42dot_LLM-SFT-1.3B
+samples/transformers-auto-model/dansk-gpt-wiki
+samples/transformers-auto-model/distilgpt2
+samples/transformers-auto-model/EleutherAI_pythia-70m
+samples/transformers-auto-model/GePpeTto
+samples/transformers-auto-model/gpt2
+samples/transformers-auto-model/gpt-sw3-356m
+samples/transformers-auto-model/japanese-gpt-1b
+samples/transformers-auto-model/joancipria_gpt2-base-bne-FineTunedEmoEvent
+samples/transformers-auto-model/kogpt
+samples/transformers-auto-model/LFM2-350M
+samples/transformers-auto-model/LLaMmlein_120M
+samples/transformers-auto-model/LYTinn_gpt2-finetuning-sentiment-model-3000-samples
+samples/transformers-auto-model/nie3e_sentiment-polish-gpt2-large
+samples/transformers-auto-model/orca_mini_3b
+samples/transformers-auto-model/PolyCoder-160M
+samples/transformers-auto-model/polyglot-ko-1.3b
+samples/transformers-auto-model/Qwen1.5-0.5B
+samples/transformers-auto-model/Qwen2.5-0.5B
+samples/transformers-auto-model/Qwen3-Embedding-0.6B
+samples/transformers-auto-model/sarvam-0.5
+samples/transformers-auto-model/super-fast-llm
+samples/transformers-auto-model/TinyLlama-1.1B-step-50K-105b
+samples/transformers-auto-model/tiny_starcoder_py
+samples/transformers-auto-model/Tucano-2b4
+samples/transformers-auto-model/w11wo_javanese-gpt2-small-imdb-classifier
+samples/transformers-auto-model/w11wo_sundanese-gpt2-base-emotion-classifier
+```
+
+**任务描述**
+1. 对于上述模型，使用torch2.8重新抽取计算图并更新样本。
+2. 自行测试，确保新样本运行符合预期效果。
+3. 提交PR。
+
+
+
+**预期效果**
+1. 验证`test_compiler`评测结果，上述模型设置 nope 编译器后端测试不出现错误。
+
+
+
+
+### NO.112 （GraphNet样本修复）batch_norm算子添加weight_meta约束
 **任务背景**
 GraphNet支持对深度学习模型的推理样本进行统一评测。batch_norm算子在CV模型中被普遍应用，推理模式下计算公式为：
 
@@ -345,51 +394,6 @@ graph-net-test-compiler-log [Speedup][gpu]: 126.1628
 
 **预期效果**
 1. 验证`test_compiler`评测结果，`max_diff`和`mean_diff`中不再出现`nan`，设置 nope 编译器后端测试所有容忍度下`allclose`检查结果均通过。
-
-
-### NO.112 （GraphNet样本修复）27个因 torch 版本带来的样本问题
-**任务背景**
-通过指定graph_net.torch.test_compiler的--compiler参数为nope，一共有27个模型样本由于经过PyTorch 2.2.x或之前的版本抽取，其model.py中例如`l_self_modules_... = L_self_modules_... `此类的 predispatch 调用，在旧版 PyTorch 上被自动替换为`torch._functorch.predispatch(...)`；而PyTorch 2.3 以后把 torch._functorch 内部的实现做了重构，不包含 predispatch 属性，于是抛出错误 `AttributeError: module 'torch._functorch' has no attribute 'predispatch'`。涉及的样本如下：
-
-```
-samples/transformers-auto-model/42dot_LLM-SFT-1.3B
-samples/transformers-auto-model/dansk-gpt-wiki
-samples/transformers-auto-model/distilgpt2
-samples/transformers-auto-model/EleutherAI_pythia-70m
-samples/transformers-auto-model/GePpeTto
-samples/transformers-auto-model/gpt2
-samples/transformers-auto-model/gpt-sw3-356m
-samples/transformers-auto-model/japanese-gpt-1b
-samples/transformers-auto-model/joancipria_gpt2-base-bne-FineTunedEmoEvent
-samples/transformers-auto-model/kogpt
-samples/transformers-auto-model/LFM2-350M
-samples/transformers-auto-model/LLaMmlein_120M
-samples/transformers-auto-model/LYTinn_gpt2-finetuning-sentiment-model-3000-samples
-samples/transformers-auto-model/nie3e_sentiment-polish-gpt2-large
-samples/transformers-auto-model/orca_mini_3b
-samples/transformers-auto-model/PolyCoder-160M
-samples/transformers-auto-model/polyglot-ko-1.3b
-samples/transformers-auto-model/Qwen1.5-0.5B
-samples/transformers-auto-model/Qwen2.5-0.5B
-samples/transformers-auto-model/Qwen3-Embedding-0.6B
-samples/transformers-auto-model/sarvam-0.5
-samples/transformers-auto-model/super-fast-llm
-samples/transformers-auto-model/TinyLlama-1.1B-step-50K-105b
-samples/transformers-auto-model/tiny_starcoder_py
-samples/transformers-auto-model/Tucano-2b4
-samples/transformers-auto-model/w11wo_javanese-gpt2-small-imdb-classifier
-samples/transformers-auto-model/w11wo_sundanese-gpt2-base-emotion-classifier
-```
-
-**任务描述**
-1. 对于上述模型，使用torch2.8重新抽取计算图并更新样本。
-2. 自行测试，确保新样本运行符合预期效果。
-3. 提交PR。
-
-
-
-**预期效果**
-1. 验证`test_compiler`评测结果，上述模型设置 nope 编译器后端测试不出现错误。
 
 
 
