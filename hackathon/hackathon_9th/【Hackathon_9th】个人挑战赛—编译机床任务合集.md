@@ -230,20 +230,23 @@ python -m graph_net.torch.test_compiler \
 - 熟练掌握 Python
 - 对 PyTorch 和 GraphNet 的运作机制有一定的了解
 
-### NO.111 （GraphNet样本修复）batch_norm算子添加weight_meta约束
+
+
+### NO.111 （GraphNet样本修复）batch\_norm算子添加weight\_meta约束
+
 **任务背景**
-GraphNet支持对深度学习模型的推理样本进行统一评测。batch_norm算子在CV模型中被普遍应用，推理模式下计算公式为：
+GraphNet支持对深度学习模型的推理样本进行统一评测。batch\_norm算子在CV模型中被普遍应用，推理模式下计算公式为：
 
 $batch\_norm = weight * (x - running\_mean) / sqrt(running\_var + eps) + bias$
 
-计算中存在除法和`sqrt`计算，为了得到正常的计算结果，需满足约束`running_var + eps > 0`，否则会产生异常的结果（如`inf`或`nan`）。在GraphNet评测任务中，算子的权重和输入都统一当做样本模型的输入来对待，由评测任务按照样本中保存的 meta 信息进行随机初始化。当前 Torch 样本浮点输入 meta 信息中保存了`mean` 和 `std`。依据 `mean`和`std`随机初始化的数据，难以保证一定满足该约束。Torch 样本在批量评测时，发现 150 个样本因 batch_norm 算子weight_meta 不满足上述要求，导致计算结果出现 `nan`，[https://github.com/PaddlePaddle/GraphNet/pull/301](https://github.com/PaddlePaddle/GraphNet/pull/301) 中采用一种临时方式规避了该问题。最终修复方法，需要为所有样本中 batch_norm 算子的 `running_var`参数添加`min_val = 0`约束。
-
-
+计算中存在除法和`sqrt`计算，为了得到正常的计算结果，需满足约束`running_var + eps > 0`，否则会产生异常的结果（如`inf`或`nan`）。在GraphNet评测任务中，算子的权重和输入都统一当做样本模型的输入来对待，由评测任务按照样本中保存的 meta 信息进行随机初始化。当前 Torch 样本浮点输入 meta 信息中保存了`mean` 和 `std`。依据 `mean`和`std`随机初始化的数据，难以保证一定满足该约束。Torch 样本在批量评测时，发现 150 个样本因 batch\_norm 算子weight\_meta 不满足上述要求，导致计算结果出现 `nan`，[https://github.com/PaddlePaddle/GraphNet/pull/301 ](https://github.com/PaddlePaddle/GraphNet/pull/301) 中采用一种临时方式规避了该问题。最终修复方法，需要为所有样本中 batch\_norm 算子的 `running_var`参数添加`min_val = 0`约束。
 
 **任务描述**
-通过修改样本，为所有样本中 batch_norm 算子的 `running_var`参数添加`min_val = 0`约束。具体步骤如下：
+通过修改样本，为所有样本中 batch\_norm 算子的 `running_var`参数添加`min_val = 0`约束。具体步骤如下：
 
-1. 移除 [https://github.com/PaddlePaddle/GraphNet/pull/301](https://github.com/PaddlePaddle/GraphNet/pull/301) 添加的临时修复代码 [https://github.com/PaddlePaddle/GraphNet/blob/fd025b0c0c0e480577fa527e3d72aa1781484846/graph_net/torch/utils.py#L279](https://github.com/PaddlePaddle/GraphNet/blob/fd025b0c0c0e480577fa527e3d72aa1781484846/graph_net/torch/utils.py#L279) - L281，执行如下命令复现`nan`问题。
+1.  移除 [https://github.com/PaddlePaddle/GraphNet/pull/301 ](https://github.com/PaddlePaddle/GraphNet/pull/301) 添加的临时修复代码 [https://github.com/PaddlePaddle/GraphNet/blob/fd025b0c0c0e480577fa527e3d72aa1781484846/graph\_net/torch/utils.py\#L279 ](https://github.com/PaddlePaddle/GraphNet/blob/fd025b0c0c0e480577fa527e3d72aa1781484846/graph_net/torch/utils.py#L279) - L281，执行如下命令复现`nan`问题。
+
+<!-- end list -->
 
 ```
 $ python -m graph_net.torch.test_compiler --model-path samples/mmseg/MAE --compiler "nope" --warmup 0 --trials 1
@@ -336,64 +339,16 @@ graph-net-test-compiler-log [Speedup][e2e]: 121.2291
 graph-net-test-compiler-log [Speedup][gpu]: 126.1628
 ```
 
-
-2. 编写脚本，批量修改`GraphNet/samples`目录下面的样本的weight_meta.py，为batch_norm算子的`running_var`添加`min_val = 0`meta信息。
-3. 修改`GraphNet/graph_net/torch/utils.py`，`replay_tensor`中使用`min_val`约束随机Tensor值的下界。
-4. 提交PR。
-
-
+2.  编写脚本，批量修改`GraphNet/samples`目录下面的样本的weight\_meta.py，为batch\_norm算子的`running_var`添加`min_val = 0`meta信息。
+3.  修改`GraphNet/graph_net/torch/utils.py`，`replay_tensor`中使用`min_val`约束随机Tensor值的下界。
+4.  提交PR。
 
 **预期效果**
-1. 验证`test_compiler`评测结果，`max_diff`和`mean_diff`中不再出现`nan`，设置 nope 编译器后端测试所有容忍度下`allclose`检查结果均通过。
 
+1.  验证`test_compiler`评测结果，`max_diff`和`mean_diff`中不再出现`nan`，设置 nope 编译器后端测试所有容忍度下`allclose`检查结果均通过。
 
-### NO.112 （GraphNet样本修复）27个因 torch 版本带来的样本问题
-**任务背景**
-通过指定graph_net.torch.test_compiler的--compiler参数为nope，一共有27个模型样本由于经过PyTorch 2.2.x或之前的版本抽取，其model.py中例如`l_self_modules_... = L_self_modules_... `此类的 predispatch 调用，在旧版 PyTorch 上被自动替换为`torch._functorch.predispatch(...)`；而PyTorch 2.3 以后把 torch._functorch 内部的实现做了重构，不包含 predispatch 属性，于是抛出错误 `AttributeError: module 'torch._functorch' has no attribute 'predispatch'`。涉及的样本如下：
+### NO.112 （GraphNet样本修复）非法Torch样本修复
 
-```
-samples/transformers-auto-model/42dot_LLM-SFT-1.3B
-samples/transformers-auto-model/dansk-gpt-wiki
-samples/transformers-auto-model/distilgpt2
-samples/transformers-auto-model/EleutherAI_pythia-70m
-samples/transformers-auto-model/GePpeTto
-samples/transformers-auto-model/gpt2
-samples/transformers-auto-model/gpt-sw3-356m
-samples/transformers-auto-model/japanese-gpt-1b
-samples/transformers-auto-model/joancipria_gpt2-base-bne-FineTunedEmoEvent
-samples/transformers-auto-model/kogpt
-samples/transformers-auto-model/LFM2-350M
-samples/transformers-auto-model/LLaMmlein_120M
-samples/transformers-auto-model/LYTinn_gpt2-finetuning-sentiment-model-3000-samples
-samples/transformers-auto-model/nie3e_sentiment-polish-gpt2-large
-samples/transformers-auto-model/orca_mini_3b
-samples/transformers-auto-model/PolyCoder-160M
-samples/transformers-auto-model/polyglot-ko-1.3b
-samples/transformers-auto-model/Qwen1.5-0.5B
-samples/transformers-auto-model/Qwen2.5-0.5B
-samples/transformers-auto-model/Qwen3-Embedding-0.6B
-samples/transformers-auto-model/sarvam-0.5
-samples/transformers-auto-model/super-fast-llm
-samples/transformers-auto-model/TinyLlama-1.1B-step-50K-105b
-samples/transformers-auto-model/tiny_starcoder_py
-samples/transformers-auto-model/Tucano-2b4
-samples/transformers-auto-model/w11wo_javanese-gpt2-small-imdb-classifier
-samples/transformers-auto-model/w11wo_sundanese-gpt2-base-emotion-classifier
-```
-
-**任务描述**
-1. 对于上述模型，使用torch2.8重新抽取计算图并更新样本。
-2. 自行测试，确保新样本运行符合预期效果。
-3. 提交PR。
-
-
-
-**预期效果**
-1. 验证`test_compiler`评测结果，上述模型设置 nope 编译器后端测试不出现错误。
-
-
-
-### NO.113 （GraphNet样本修复）非法Torch样本修复
 **任务背景**
 一些样本在使用`test_compiler`评测时，计算结果中会产生`inf`或`nan`，最终导致`max_diff`为`nan`，精度检测不通过。样本列表如下：
 
@@ -417,21 +372,18 @@ samples/nemo/stt_en_squeezeformer_ctc_large_ls
 samples/nemo/stt_en_conformer_ctc_small
 ```
 
-
 **任务描述**
 修复上述17个样本，使得`nope`和`inductor`评测结果均不再出现`nan`。具体步骤如下：
 
-1. 执行`python -m graph_net.torch.test_compiler --model-path samples/xxx/xxx --compiler "inductor" --warmup 0 --trials 1`复现`nan`问题。
-2. 通过修改样本、数据初始化或评测执行流程解决问题。
-3. 提交PR。
-
-
+1.  执行`python -m graph_net.torch.test_compiler --model-path samples/xxx/xxx --compiler "inductor" --warmup 0 --trials 1`复现`nan`问题。
+2.  通过修改样本、数据初始化或评测执行流程解决问题。
+3.  提交PR。
 
 **预期效果**
-1. 给定17个样本`test_compiler`在使用`nope`和`inductor`后端时评测结果中均不出现`nan`。
 
+1.  给定17个样本`test_compiler`在使用`nope`和`inductor`后端时评测结果中均不出现`nan`。
 
-### NO.114 torch._C._fft.fft_irfft API转换
+### NO.113 torch.\_C.\_fft.fft\_irfft API转换
 
 **任务背景**
 
@@ -443,19 +395,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`fft_irfft_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`fft_irfft_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_irfft/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_irfft`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.115 torch._C._linalg.linalg_vector_norm API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_irfft/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_irfft`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.114 torch.\_C.\_linalg.linalg\_vector\_norm API转换
 
 **任务背景**
 
@@ -467,19 +421,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`linalg_vector_norm_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`linalg_vector_norm_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_vector_norm/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_vector_norm`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.116 torch._C._nn.pad API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_vector_norm/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_vector_norm`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.115 torch.\_C.\_fft.fft\_rfft API转换
 
 **任务背景**
 
@@ -491,19 +447,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`pad_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`fft_rfft_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.pad/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.pad`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.117 torch._C._log_api_usage_once API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_rfft/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_rfft`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.116 torch.\_C.\_nn.softplus API转换
 
 **任务背景**
 
@@ -515,19 +473,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`log_api_usage_once_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`softplus_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._log_api_usage_once/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._log_api_usage_once`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.118 torch._C._fft.fft_rfft API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.softplus/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.softplus`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.117 torch.\_C.\_fft.fft\_fftn API转换
 
 **任务背景**
 
@@ -539,19 +499,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`fft_rfft_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`fft_fftn_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_rfft/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_rfft`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.119 torch._C._nn.linear API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_fftn/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_fftn`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.118 torch.\_C.\_linalg.linalg\_norm API转换
 
 **任务背景**
 
@@ -563,19 +525,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`linear_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`linalg_norm_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.linear/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.linear`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.120 torch._C._nn.scaled_dot_product_attention API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_norm/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_norm`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.119 torch.\_C.\_nn.one\_hot API转换
 
 **任务背景**
 
@@ -587,19 +551,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`scaled_dot_product_attention_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`one_hot_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.scaled_dot_product_attention/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.scaled_dot_product_attention`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.121 torch._C._nn.avg_pool2d API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.one_hot/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.one_hot`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.120 torch.\_C.\_special.special\_logit API转换
 
 **任务背景**
 
@@ -611,19 +577,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`avg_pool2d_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`special_logit_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.avg_pool2d/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.avg_pool2d`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.122 torch._C._nn.gelu API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._special.special_logit/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._special.special_logit`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.121 torch.\_C.\_set\_grad\_enabled API转换
 
 **任务背景**
 
@@ -635,19 +603,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`gelu_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`set_grad_enabled_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.gelu/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.gelu`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.123 torch._C._nn.softplus API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._set_grad_enabled/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._set_grad_enabled`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.122 torch.\_C.\_log\_api\_usage\_once API转换
 
 **任务背景**
 
@@ -659,19 +629,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`softplus_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`log_api_usage_once_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.softplus/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.softplus`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.124 torch._C._set_grad_enabled API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._log_api_usage_once/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._log_api_usage_once`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.123 torch.\_C.\_nn.pad API转换
 
 **任务背景**
 
@@ -683,19 +655,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`set_grad_enabled_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`pad_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._set_grad_enabled/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._set_grad_enabled`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.125 torch._C._fft.fft_fftn API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.pad/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.pad`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.124 torch.\_C.\_nn.avg\_pool2d API转换
 
 **任务背景**
 
@@ -707,19 +681,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`fft_fftn_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`avg_pool2d_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_fftn/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._fft.fft_fftn`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.126 torch._C._linalg.linalg_norm API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.avg_pool2d/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.avg_pool2d`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.125 torch.\_C.\_nn.gelu API转换
 
 **任务背景**
 
@@ -731,19 +707,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`linalg_norm_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`gelu_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_norm/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._linalg.linalg_norm`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.127 torch._C._nn.one_hot API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.gelu/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.gelu`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.126 torch.\_C.\_nn.scaled\_dot\_product\_attention API转换
 
 **任务背景**
 
@@ -755,19 +733,21 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`one_hot_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`scaled_dot_product_attention_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.one_hot/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.one_hot`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
 
-### NO.128 torch._C._special.special_logit API转换
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.scaled_dot_product_attention/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.scaled_dot_product_attention`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+### NO.127 torch.\_C.\_nn.linear API转换
 
 **任务背景**
 
@@ -779,14 +759,16 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 为`graph_net/torch/backend/unstable_to_stable_backend.py`新增对应的`unstable_to_stable`函数。
 
-并绘制出y=1的水平直线，作为可供验收的预期效果。具体细则如下：
-1. 在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
-2. 在`unstable_to_stable_backend.py`中找到有"# TODO"标记的`unstable_to_stable`函数，将其函数名改为`special_logit_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
-3. 完善转换api的逻辑，返回一个修改好的gm对象。
+并绘制符合预期的ESt曲线，作为验收结果。具体细则如下：
+
+1.  在pytorch stable api列表：[https://docs.pytorch.org/docs/stable/index.html ](https://docs.pytorch.org/docs/stable/index.html)中找到可供转换的 `<stable_api>`。
+2.  在`unstable_to_stable_backend.py`中找到有"\# TODO"标记的`unstable_to_stable`函数，将其函数名改为`linear_to_<stable_api>`，并同步修改`UnstableToStableBackend`的`__call__`函数。
+3.  完善转换api的逻辑，返回一个修改好的gm对象。
 
 **预期效果**
 
-绘制出y=1的ES(t)曲线。具体细则如下：
-1. 在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._special.special_logit/test.sh`，进行检查。
-2. 查看Es曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._special.special_logit`。
-3. 为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与Es曲线相同。
+当前ESt曲线大致在0.1处水平，在t=3跳变；最终绘制出的曲线应当只在t=1时有跳变，且ES(-6) >= 0.63（等同于修复80%的错误问题）。具体细则如下：
+
+1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.linear/test.sh`，进行检查。
+2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.linear`。
+3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。

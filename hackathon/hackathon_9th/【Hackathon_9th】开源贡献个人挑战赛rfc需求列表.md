@@ -33,24 +33,23 @@
 |  101   |  ⭐  | 多图抽取问题修复         |        是        |
 |  102   |  ⭐  | vmap抽取问题修复        |        是        |
 |  110   |  ⭐  | AI4C计算图分解验证器        |        是        |
-|  111   |  0.25⭐  | （GraphNet样本修复）batch_norm算子添加weight_meta约束        |        是        |
-|  112   |  0.15⭐  | （GraphNet样本修复）27个因 torch 版本带来的样本问题        |        是        |
-|  113   |  0.5⭐  | （GraphNet样本修复）非法Torch样本修复        |        是        |
-| 114 | 0.025⭐ | torch._C._fft.fft_irfft API转换 | 是 |
-| 115 | 0.025⭐ | torch._C._linalg.linalg_vector_norm API转换 | 是 |
-| 116 | 0.1⭐ | torch._C._nn.pad API转换 | 是 |
-| 117 | 0.075⭐ | torch._C._log_api_usage_once API转换 | 是 |
-| 118 | 0.025⭐ | torch._C._fft.fft_rfft API转换 | 是 |
-| 119 | 0.25⭐ | torch._C._nn.linear API转换 | 是 |
-| 120 | 0.2⭐ | torch._C._nn.scaled_dot_product_attention API转换 | 是 |
-| 121 | 0.1⭐ | torch._C._nn.avg_pool2d API转换 | 是 |
-| 122 | 0.15⭐ | torch._C._nn.gelu API转换 | 是 |
-| 123 | 0.025⭐ | torch._C._nn.softplus API转换 | 是 |
-| 124 | 0.05⭐ | torch._C._set_grad_enabled API转换 | 是 |
-| 125 | 0.025⭐ | torch._C._fft.fft_fftn API转换 | 是 |
-| 126 | 0.025⭐ | torch._C._linalg.linalg_norm API转换 | 是 |
-| 127 | 0.025⭐ | torch._C._nn.one_hot API转换 | 是 |
-| 128 | 0.025⭐ | torch._C._special.special_logit API转换 | 是 |
+| 111 | 0.25⭐ | （GraphNet样本修复）batch_norm算子添加weight_meta约束 | 是
+| 112 | 0.5⭐ | （GraphNet样本修复）非法Torch样本修复 | 是
+| 113 | 0.025⭐ | torch._C._fft.fft_irfft API转换 | 是
+| 114 | 0.025⭐ | torch._C._linalg.linalg_vector_norm API转换 | 是
+| 115 | 0.025⭐ | torch._C._fft.fft_rfft API转换 | 是
+| 116 | 0.025⭐ | torch._C._nn.softplus API转换 | 是
+| 117 | 0.025⭐ | torch._C._fft.fft_fftn API转换 | 是
+| 118 | 0.025⭐ | torch._C._linalg.linalg_norm API转换 | 是
+| 119 | 0.025⭐ | torch._C._nn.one_hot API转换 | 是
+| 120 | 0.025⭐ | torch._C._special.special_logit API转换 | 是
+| 121 | 0.05⭐ | torch._C._set_grad_enabled API转换 | 是
+| 122 | 0.075⭐ | torch._C._log_api_usage_once API转换 | 是
+| 123 | 0.1⭐ | torch._C._nn.pad API转换 | 是
+| 124 | 0.1⭐ | torch._C._nn.avg_pool2d API转换 | 是
+| 125 | 0.15⭐ | torch._C._nn.gelu API转换 | 是
+| 126 | 0.2⭐ | torch._C._nn.scaled_dot_product_attention API转换 | 是
+| 127 | 0.25⭐ | torch._C._nn.linear API转换 | 是
 
 ## 科学计算任务
 
