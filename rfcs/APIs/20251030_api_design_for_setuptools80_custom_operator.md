@@ -1,12 +1,12 @@
 # paddle.utils.cpp_extension 基于 Setuptools 80+ 版本自定义算子机制适配设计文档
 
-| API名称 | paddle.utils.cpp_extension 基于 Setuptools 80+ 版本自定义算子机制适配设计文档 | 
+| API名称 | paddle.utils.cpp_extension 基于 Setuptools 80+ 版本自定义算子机制适配设计文档 |
 |---|---|
-|提交作者<input type="checkbox" class="rowselector hidden"> | megemini | 
-|提交时间<input type="checkbox" class="rowselector hidden"> | 2025-10-30 | 
-|版本号 | V1.0 | 
-|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 | 
-|文件名 | 20251030_api_design_for_setuptools80_custom_operator.md<br> | 
+|提交作者<input type="checkbox" class="rowselector hidden"> | megemini |
+|提交时间<input type="checkbox" class="rowselector hidden"> | 2025-10-30 |
+|版本号 | V1.0 |
+|依赖飞桨版本<input type="checkbox" class="rowselector hidden"> | develop版本 |
+|文件名 | 20251030_api_design_for_setuptools80_custom_operator.md<br> |
 
 
 # 一、概述
@@ -51,23 +51,16 @@ PaddlePaddle 目前的自定义算子机制主要通过 `paddle.utils.cpp_extens
 
 ## API实现方案
 
-### 1. 设置 metadata_version
+Setuptools 80- 中，`paddle.utils.cpp_extension.setup` 函数的内部实现是通过 `write_stub` 机制生成 Python API 文件，该机制在 Setuptools 80+ 中不再自动触发。
 
-参考 https://packaging.python.org/en/latest/specifications/core-metadata/#core-metadata ，
+因此：
 
-> Metadata consumers may want to use the more relaxed formatting rules even for metadata files that are nominally less than version 2.1.
+- 保留旧版本 Setuptools 下的兼容性，在 Setuptools 80- 中，通过 `write_stub` 机制生成 Python API 文件
+- 在 Setuptools 80+ 中，通过 `BuildExtension` 类生成 Python API 文件
+- 在 Setuptools 80+ 中，通过 `InstallCommand` 类处理安装目录规范化
+- 通过判断 `setuptools.__version__` 来判断是否是 Setuptools 80+ 版本，从而选择不同的实现方案
 
-在 `setup` 函数中添加 `metadata_version` 参数，使用 2.1 版本的元数据格式，鼓励使用现代的元数据格式：
-
-```python
-def setup(**attr: Any) -> None:
-    ...
-
-    if 'metadata_version' not in attr:
-        attr['metadata_version'] = '2.1'
-```
-
-### 2. 扩展 BuildExtension 类
+### 1. 扩展 BuildExtension 类
 
 添加 `_generate_python_api_file` 方法，在编译完成后生成 Python API 文件：
 
@@ -105,7 +98,7 @@ def setup(**attr: Any) -> None:
         self._clean_intermediate_files()
 ```
 
-### 3. 新增 InstallCommand 类
+### 2. 新增 InstallCommand 类
 
 添加自定义的 `install` 命令类，处理以下任务：
 
@@ -245,20 +238,15 @@ class InstallCommand(install):
                         os.remove(p)
 ```
 
-### 4. 更新测试用例
+### 3. 更新测试用例
 
-修改测试用例中的断言，从期望 1 个包文件改为期望 2 个（egg-info + 包目录）：
+修改测试用例中的断言，通过 Setuptools 的版本判断生成的文件和目录的数量：
 
 ```python
-# 修改前
-assert len(custom_egg_path) == 1, (
-    f"Matched egg number is {len(custom_egg_path)}."
-)
-
-# 修改后
-assert len(custom_egg_path) == 2, (
-    f"Matched egg number is {len(custom_egg_path)}."
-)
+        egg_counts = 1 if int(setuptools.__version__.split('.')[0]) < 80 else 2
+        assert len(custom_egg_path) == egg_counts, (
+            f"Matched egg number is {len(custom_egg_path)}."
+        )
 ```
 
 # 六、测试和验收的考量
@@ -313,4 +301,3 @@ assert len(custom_egg_path) == 2, (
 1. [Setuptools 80.0 Release Notes](https://setuptools.pypa.io/en/latest/history.html#v80-0-0)
 2. [PEP 566 - Metadata for Python Software Packages 2.1](https://peps.python.org/pep-0566/)
 3. [Hackathon 9th No.109 任务说明](https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_9th/%E3%80%90Hackathon_9th%E3%80%91%E4%B8%AA%E4%BA%BA%E6%8C%91%E6%88%98%E8%B5%9B%E2%80%94%E6%A1%86%E6%9E%B6%E5%BC%80%E5%8F%91%E4%BB%BB%E5%8A%A1%E5%90%88%E9%9B%86.md#no109-基于-setuptools-80-版本自定义算子机制适配)
-
