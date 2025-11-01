@@ -51,14 +51,44 @@ PaddlePaddle 目前的自定义算子机制主要通过 `paddle.utils.cpp_extens
 
 ## API实现方案
 
-Setuptools 80- 中，`paddle.utils.cpp_extension.setup` 函数的内部实现是通过 `write_stub` 机制生成 Python API 文件，该机制在 Setuptools 80+ 中不再自动触发。
-
-因此：
-
-- 保留旧版本 Setuptools 下的兼容性，在 Setuptools 80- 中，通过 `write_stub` 机制生成 Python API 文件
-- 在 Setuptools 80+ 中，通过 `BuildExtension` 类生成 Python API 文件
-- 在 Setuptools 80+ 中，通过 `InstallCommand` 类处理安装目录规范化
 - 通过判断 `setuptools.__version__` 来判断是否是 Setuptools 80+ 版本，从而选择不同的实现方案
+- 通过 `from wheel.bdist_wheel import bdist_wheel` 来判断是否是 wheel 安装方式
+- 保留旧版本 Setuptools 下的兼容性，通过 `_is_legacy_setuptools` 判断是否使用修改后的逻辑
+- 在 Setuptools 80+ 中，通过 `BuildExtension` 类直接调用 `custom_write_stub` 生成 Python API 文件
+- 在 Setuptools 80+ 中，对于使用 `python setup.py install` 方式安装的场景 (旧的 egg 方式，生成 egg-info)，通过 `InstallCommand` 类处理安装目录规范化
+- 在 Setuptools 80+ 中，对于使用 `python install .` 方式安装的场景 (现代的 wheel 方式，生成 dist-info)，通过 `BdistWheelCommand` 类处理安装目录规范化
+
+### 0. 判断是否使用 hook
+
+只有在 setuptools 80+ 中，才使用 hook 机制，否则使用旧版本的逻辑。
+同时，如果能够使用 wheel 安装方式时，添加 `BdistWheelCommand` 命令。
+
+``` python
+
+    # Add bdist_wheel hook to reorganize wheel contents (setuptools >= 80)
+    # This is the primary mechanism for modern pip install
+    if not _is_legacy_setuptools():
+        if HAS_WHEEL:
+            # Override the default bdist_wheel command to reorganize wheel contents
+            # for proper inclusion of C++ extensions in the wheel archive
+            assert 'bdist_wheel' not in cmdclass
+            cmdclass['bdist_wheel'] = BdistWheelCommand
+
+            # Setting metadata_version >= 2.1 ensures compatibility with modern metadata
+            # features and encourages setuptools to create .dist-info directories instead
+            # of .egg-info, which allows pip to properly detect and list installed packages
+            # via `pip list`. Version 2.1 is sufficient for this purpose and maintains
+            # compatibility.
+            if 'metadata_version' not in attr:
+                attr['metadata_version'] = '2.1'
+
+        # Add install hook for legacy 'python setup.py install' (setuptools >= 80)
+        # Note: This is rarely used with modern pip, which uses bdist_wheel instead
+        assert 'install' not in cmdclass
+        cmdclass['install'] = InstallCommand
+
+
+```
 
 ### 1. 扩展 BuildExtension 类
 
@@ -85,7 +115,9 @@ Setuptools 80- 中，`paddle.utils.cpp_extension.setup` 函数的内部实现是
             # Write stub; it will reference the _pd_ renamed resource at import time
             custom_write_stub(so_name, pyfile)
         except Exception as e:
-            raise RuntimeError(f"Failed to generate python api file: {e}") from e
+            raise RuntimeError(
+                f"Failed to generate python api file: {e}"
+            ) from e
 
     def run(self):
         super().run()
@@ -102,9 +134,10 @@ Setuptools 80- 中，`paddle.utils.cpp_extension.setup` 函数的内部实现是
 
 添加自定义的 `install` 命令类，处理以下任务：
 
-1. **选择合适的安装目录**：确保安装到 sys.path 中的目录
-2. **重命名共享库**：将 `{pkg}.so` 重命名为 `{pkg}_pd_.so`，避免与 Python stub 冲突
-3. **规范化包布局**：将文件组织为单一的包目录结构
+1. 将 `{pkg}.so` 重命名为 `{pkg}_pd_.so`，避免与 Python stub 冲突
+2. 将文件组织为单一的包目录结构。
+3. 如果使用的是 wheel 安装方式，则不干涉 target 目录。
+4. 如果使用的是 egg 安装方式，则进行 `_rename_shared_library` 和 `_single_entry_layout` 。
 
 ```python
 class InstallCommand(install):
@@ -114,10 +147,31 @@ class InstallCommand(install):
       2) ensure a single top-level entry for the package in site/dist-packages so
          legacy tests that expect a sole artifact (egg/package) keep working
       3) rename the compiled library to *_pd_.so to avoid shadowing the python stub
+
+    Note: This is primarily for legacy 'python setup.py install' usage.
+    For modern 'pip install', the BdistWheelCommand handles file layout.
     """
 
     def finalize_options(self) -> None:
         super().finalize_options()
+
+        install_dir = (
+            getattr(self, 'install_lib', None)
+            or getattr(self, 'install_purelib', None)
+            or getattr(self, 'install_platlib', None)
+        )
+        if not install_dir or not os.path.isdir(install_dir):
+            return
+        pkg = self.distribution.get_name()
+        # Check if dist-info exists
+        has_dist_info = any(
+            name.endswith('.dist-info') and name.startswith(pkg)
+            for name in os.listdir(install_dir)
+        )
+        # If dist-info exists, we are installing a wheel, so we are done
+        if has_dist_info:
+            return
+
         # Build candidate site dirs: global + user + entries already on sys.path
         candidates = []
         candidates.extend(site.getsitepackages())
@@ -125,9 +179,9 @@ class InstallCommand(install):
         if usp:
             candidates.append(usp)
         for sp in sys.path:
-            if isinstance(sp, str) and sp.endswith((
-                'site-packages', 'dist-packages'
-            )):
+            if isinstance(sp, str) and sp.endswith(
+                ('site-packages', 'dist-packages')
+            ):
                 candidates.append(sp)
         # De-dup while preserving order
         seen = set()
@@ -155,10 +209,27 @@ class InstallCommand(install):
 
     def run(self, *args: Any, **kwargs: Any) -> None:
         super().run(*args, **kwargs)
-        # First rename the shared library if present at top-level
-        self._rename_shared_library()
-        # Then canonicalize layout to a single top-level entry for this package
-        self._single_entry_layout()
+
+        install_dir = (
+            getattr(self, 'install_lib', None)
+            or getattr(self, 'install_purelib', None)
+            or getattr(self, 'install_platlib', None)
+        )
+        if not install_dir or not os.path.isdir(install_dir):
+            return
+        pkg = self.distribution.get_name()
+        # Check if dist-info exists
+        has_egg_info = any(
+            name.endswith('.egg-info') and name.startswith(pkg)
+            for name in os.listdir(install_dir)
+        )
+        # If egg-info exists, we are installing a source distribution, we need to
+        # reorganize the files
+        if has_egg_info:
+            # First rename the shared library if present at top-level
+            self._rename_shared_library()
+            # Then canonicalize layout to a single top-level entry for this package
+            self._single_entry_layout()
 
     def _rename_shared_library(self) -> None:
         install_dir = (
@@ -170,7 +241,9 @@ class InstallCommand(install):
             return
         pkg = self.distribution.get_name()
         suffix = (
-            '.pyd' if IS_WINDOWS else ('.dylib' if OS_NAME.startswith('darwin') else '.so')
+            '.pyd'
+            if IS_WINDOWS
+            else ('.dylib' if OS_NAME.startswith('darwin') else '.so')
         )
         old = os.path.join(install_dir, f"{pkg}{suffix}")
         new = os.path.join(install_dir, f"{pkg}_pd_{suffix}")
@@ -195,17 +268,14 @@ class InstallCommand(install):
         if not install_dir or not os.path.isdir(install_dir):
             return
         pkg = self.distribution.get_name()
-        # Check if dist-info exists
-        has_dist_info = any(
-            name.endswith('.dist-info') and name.startswith(pkg)
-            for name in os.listdir(install_dir)
-        )
         # Prepare paths
         pkg_dir = os.path.join(install_dir, pkg)
         py_src = os.path.join(install_dir, f"{pkg}.py")
         # Find compiled lib (renamed or not)
         suf_so = (
-            '.pyd' if IS_WINDOWS else ('.dylib' if OS_NAME.startswith('darwin') else '.so')
+            '.pyd'
+            if IS_WINDOWS
+            else ('.dylib' if OS_NAME.startswith('darwin') else '.so')
         )
         so_candidates = [
             os.path.join(install_dir, f"{pkg}_pd_{suf_so}"),
@@ -227,18 +297,112 @@ class InstallCommand(install):
             if os.path.exists(so_dst):
                 os.remove(so_dst)
             os.replace(so_src, so_dst)
-        # Remove egg-info entries for this package only if dist-info exists
-        if has_dist_info:
-            for name in os.listdir(install_dir):
-                if name.startswith(f"{pkg}-") and name.endswith(".egg-info"):
-                    p = os.path.join(install_dir, name)
-                    if os.path.isdir(p):
-                        shutil.rmtree(p, ignore_errors=False)
-                    else:
-                        os.remove(p)
 ```
 
-### 3. 更新测试用例
+### 3. 新增 BdistWheelCommand 类
+
+添加自定义的 `bdist_wheel` 命令类。
+
+作用与 `install` 类似，用于组织安装的文件。
+
+``` python
+
+class BdistWheelCommand(bdist_wheel):
+    """
+    Extend bdist_wheel Command to reorganize the wheel contents after building.
+    This ensures the correct file layout is in the wheel before installation,
+    avoiding the need to move files during installation.
+    """
+
+    def run(self) -> None:
+        super().run()
+        # After wheel is built, reorganize its contents
+        self._reorganize_wheel_contents()
+
+    def _reorganize_wheel_contents(self) -> None:
+        """
+        Reorganize the wheel contents to ensure proper file layout:
+          - Rename {pkg}.so to {pkg}_pd_.so
+          - Move {pkg}.py to {pkg}/__init__.py
+          - Move {pkg}_pd_.so to {pkg}/{pkg}_pd_.so
+        """
+        if not self.dist_dir or not os.path.isdir(self.dist_dir):
+            return
+
+        pkg = self.distribution.get_name()
+
+        # Find the wheel file
+        wheel_files = [
+            f
+            for f in os.listdir(self.dist_dir)
+            if f.startswith(pkg) and f.endswith('.whl')
+        ]
+
+        if not wheel_files:
+            return
+
+        wheel_path = os.path.join(self.dist_dir, wheel_files[0])
+
+        # Create a temporary directory to extract and reorganize
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Extract wheel
+            with zipfile.ZipFile(wheel_path, 'r') as zf:
+                zf.extractall(tmpdir)
+
+            # Reorganize files in the extracted wheel
+            self._reorganize_extracted_wheel(tmpdir, pkg)
+
+            # Repack the wheel
+            os.remove(wheel_path)
+            with zipfile.ZipFile(wheel_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+                for root, dirs, files in os.walk(tmpdir):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, tmpdir)
+                        zf.write(file_path, arcname)
+
+    def _reorganize_extracted_wheel(self, wheel_dir: str, pkg: str) -> None:
+        """Reorganize files in the extracted wheel directory."""
+        suffix = (
+            '.pyd'
+            if IS_WINDOWS
+            else ('.dylib' if OS_NAME.startswith('darwin') else '.so')
+        )
+
+        # Find files in wheel root
+        py_src = os.path.join(wheel_dir, f"{pkg}.py")
+        so_old = os.path.join(wheel_dir, f"{pkg}{suffix}")
+        so_new_name = f"{pkg}_pd_{suffix}"
+        so_renamed = os.path.join(wheel_dir, so_new_name)
+
+        # Rename .so file first if it exists
+        if os.path.exists(so_old):
+            if os.path.exists(so_renamed):
+                os.remove(so_renamed)
+            os.rename(so_old, so_renamed)
+
+        # Create package directory
+        pkg_dir = os.path.join(wheel_dir, pkg)
+        if not os.path.isdir(pkg_dir):
+            os.makedirs(pkg_dir, exist_ok=True)
+
+        # Move .py to package/__init__.py
+        if os.path.exists(py_src):
+            py_dst = os.path.join(pkg_dir, "__init__.py")
+            if os.path.exists(py_dst):
+                os.remove(py_dst)
+            shutil.move(py_src, py_dst)
+
+        # Move .so to package directory
+        if os.path.exists(so_renamed):
+            so_dst = os.path.join(pkg_dir, so_new_name)
+            if os.path.exists(so_dst):
+                os.remove(so_dst)
+            shutil.move(so_renamed, so_dst)
+
+```
+
+### 4. 更新测试用例
 
 修改测试用例中的断言，通过 Setuptools 的版本判断生成的文件和目录的数量：
 
