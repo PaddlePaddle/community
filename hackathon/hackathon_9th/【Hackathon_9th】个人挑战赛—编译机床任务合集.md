@@ -776,3 +776,105 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 1.  在GraphNet目录下，运行`todo_works/unstable_api_to_stable_api/torch._C._nn.linear/test.sh`，进行检查。
 2.  查看ESt曲线结果，结果位于`todo_works/unstable_api_to_stable_api/torch._C._nn.linear`。
 3.  为了便于开发者debug，可以参考运行过程中的`log.log`，观察print等信息，以及代码运行报错信息，路径与ESt曲线相同。
+
+
+### NO.128 PyTorch to Paddle 计算图转换
+**详细描述：**
+
+1. 计算图转换：
+    1. 对于 GraphNet/samples 中所有PyTorch样本，应用 PaConvert 代码转换工具（[https://github.com/PaddlePaddle/PaConvert](https://github.com/PaddlePaddle/PaConvert)），实现 GraphNet 中 torch 样本到 paddle 的迁移；
+    2. 转换后样本位置GraphNet/torch_to_paddle_samples；
+    3. 记录log和转换失败案例，简单分析错误原因。
+
+2. 计算图测试：
+    1. 将 GraphNet/torch_to_paddle_samples 目录下转换后样本进行批量测试；
+    2. 记录log和测试失败案例。
+
+3. 在 graph_net/config 中分别新增两组模型列表，格式参照 [torch_samples_list.txt](https://github.com/JewelRoam/GraphNet/blob/dcu/graph_net/config/torch_samples_list.txt)：
+    1. torch_to_paddle_samples_list_full.txt: 在全量样本中，仅剔除转换过程中失败样本；
+    2. torch_to_paddle_samples_list.txt: 在全量样本中，同时剔除转换过程中和测试过程中的失败样本。
+
+
+**提交内容**：
+
+1. 撰写设计文档，提交 PR 添加至 GraphNet/docs。
+2. 在新增样本的 PR 描述中记录模型样本转换、运行测试的结果，及必要的log片段。
+
+
+
+### NO.129 ai4c区间分解器设计与实现
+**任务背景**
+
+ AI4C 子图分解功能包含以下模块：
+
+1. 计算图区间分解器，负责分解操作执行，需要包含分解区间配置
+2. 【已完成】计算图分解方案验证器，以RangeDecomposerValidatorBackend为核心，对拆分后的子图做有效性验证
+
+当前任务聚焦【计算图区间分解器】，采用一种可能的分解方案实现，与验证器交叉验证。
+
+**任务描述**
+
+该任务的目标是实现一个range_decomposer基类，和一种分解方案的完整实现。拥有如下特性：
+
+1. 作为backend导入graph_net.torch.test_compiler，相应的配置已写入test_compiler代码；
+2. 接收一个【原模型】的torch.nn.Module，输出【分解后模型】的多个subgraph；
+3. 在分解过程中，默认【分解后模型】路径为【原模型】路径加上_decomposed，下有多个subgraph单独目录，例如/test/simple_CNN/的分解后模型包括/test/simple_CNN_decomposed/subgraph_0/.../test/simple_CNN_decomposed/subgraph_n/，每个subgraph的文件组成等同一份标准的GraphNet样本；
+4. 在组合过程中，组合模型的forward是每个分解模型依次连接、嵌套而成，前一个模型的输出作为下一个模型的输入；
+
+**预期效果**
+
+分解正确性验证：以通过range_decomposer_validator的compose操作后ESt图象的表现为标准：
+
+1. t=1的抬升代表输出精度错误，t=3的抬升代表编译运行等其它类别错误。
+2. 由于是单个样本测试，无需考虑性能提升，故预期对于正确拆分样本，ES图象应当是y=1的【一条直线】；
+3. 对于错误或不完整的拆分样本，应当打印【错误报告】，或ES图象在t>0区域存在【阶梯状抬升】。
+
+
+
+### NO.130 GraphNet Analysis功能及ESt绘图优化
+**Analysis读取log功能优化**
+
+原GraphNet的benchmark功能有三个步骤：
+
+1. 使用test compiler（以及刚做好test device的最终步骤）批量测试并记录下合并记录的一份log
+2. 使用graph_net.log2json读取这份log，在另一个目录下生成每个模型
+
+之前这么做的原因是json方便graph_net.analysis_util读取，可读性高；而test_compiler中如果遇到底层的C++ runtime报错等无法被catch住，可能无法直接记录下json。但实际操作过程中debug看log已经足够，log2json的中间过程显得粗糙，同时增加了使用者的学习成本。
+
+于是，本任务需求为去除log2json中间步骤，修改graph_net.analysis_util（在plot_ESt和plot_St过程中调用），使其直接读取log来解析。
+
+解析过程仍可以参考log2json的方式，需要注意的是paddle样本带有subgraph序号而torch样本没有，这个特性log2json的处理在第138-141行，比较粗糙，可以优化兼容解析方式。
+
+**ESt绘图中参数计算优化**
+
+原graph_net.plot_St和graph_net.plot_ESt脚本调用graph_net.analysis_util，实现对技术报告[https://arxiv.org/abs/2510.24035](https://arxiv.org/abs/2510.24035)中3.2 Evaluation Metrics的图象绘制，公式推导、tolerance配置、各项参数参见附录。
+
+graph_net.analysis_util以技术报告中ESt公式为基础，通过两种计算方式交叉验证：
+
+* 微观计算rectified_speedup之后做几何平均
+* 通过宏观统计参数计算
+
+由于计算过程比较复杂，需要验证计算的有效性。本任务单独撰写脚本计算每个宏观参数，打印出结果，从而验证graph_net.plot_ESt得出的结果。
+
+**提交内容**：
+
+1. 对于上面两个功能，可以遵循软件工程的更好设计，重构graph_net.analysis_util的处理逻辑，例如把宏观统计量的计算单独拆开，提高可维护度。
+2. 提交PR，在graph_net/相应位置修改代码，修改[readme中的相关描述](https://github.com/PaddlePaddle/GraphNet?tab=readme-ov-file#%EF%B8%8F-compiler-evaluation)。
+
+
+
+### NO.131 GraphNet自动样本抽取Agent（Huggingface）
+**详细描述：**
+
+实现一个自动从hf上下载模型，使用GraphNet组件端到端抽取样本的Agent，自动完成运行拉取、撰写代码、抽图、验证、提交的流程；
+
+操作过程中应充分使用GraphNet的开放接口，并在架构设计上保留可拓展性（例如方便后续增加面向其它源抽取的Agent组件）
+
+要求结构尽可能稳定、易于理解，功能稳定、方便部署，但Agent的技术选型没有限制。
+
+**提交内容**：
+
+1. 提交代码到graph_net/agent
+2. 撰写设计文档，提交 PR 添加至 GraphNet/docs。
+
+
