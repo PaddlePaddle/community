@@ -50,6 +50,10 @@
 | 125 | 0.15⭐ | torch._C._nn.gelu API转换 | 否
 | 126 | 0.2⭐ | torch._C._nn.scaled_dot_product_attention API转换 | 否
 | 127 | 0.25⭐ | torch._C._nn.linear API转换 | 否
+| 128 | ⭐ | PyTorch to Paddle 计算图转换 | 否
+| 129 | ⭐ | ai4c区间分解器设计与实现 | 否
+| 130 | ⭐ | GraphNet Analysis功能及ESt绘图优化 | 否
+| 131 | ⭐ | GraphNet自动样本抽取Agent | 否
 
 ## 科学计算任务
 
