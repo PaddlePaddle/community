@@ -802,66 +802,63 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 
 
 
-### NO.129 ai4c区间分解器设计与实现
+### NO.129 ai4c计算图粗分解器设计与实现
 **任务背景**
 
  AI4C 子图分解功能包含以下模块：
 
 1. 计算图区间分解器，负责分解操作执行，需要包含分解区间配置
-2. 【已完成】计算图分解方案验证器，以RangeDecomposerValidatorBackend为核心，对拆分后的子图做有效性验证
+2. 计算图分解方案验证器，以RangeDecomposerValidatorBackend为核心，对拆分后的子图做有效性验证
 
-当前任务聚焦【计算图区间分解器】，采用一种可能的分解方案实现，与验证器交叉验证。
+当前任务聚焦【计算图区间分解器】，采用一种可能的粗分解方案实现，与验证器交叉验证。
 
 **任务描述**
 
-该任务的目标是实现一个range_decomposer基类，和一种分解方案的完整实现。拥有如下特性：
+该任务的目标是实现一个 range_decomposer 基类，和粗分解方案的一种实现。拥有如下特性：
 
-1. 作为backend导入graph_net.torch.test_compiler，相应的配置已写入test_compiler代码；
-2. 接收一个【原模型】的torch.nn.Module，输出【分解后模型】的多个subgraph；
-3. 在分解过程中，默认【分解后模型】路径为【原模型】路径加上_decomposed，下有多个subgraph单独目录，例如/test/simple_CNN/的分解后模型包括/test/simple_CNN_decomposed/subgraph_0/.../test/simple_CNN_decomposed/subgraph_n/，每个subgraph的文件组成等同一份标准的GraphNet样本；
+1. 作为 backend 导入 graph_net.torch.test_compiler，相应的配置已写入 test_compiler 代码；
+2. 接收一个【原模型】的 torch.nn.Module，输出【分解后模型】的多个subgraph；
+3. 在分解过程中，默认【分解后模型】路径为【原模型】路径加上_decomposed，下有多个subgraph单独目录，例如 /test/simple_CNN/ 的分解后模型包括 /test/simple_CNN_decomposed/subgraph_0/.../test/simple_CNN_decomposed/subgraph_n/，每个subgraph的文件组成等同一份标准的GraphNet样本；
 4. 在组合过程中，组合模型的forward是每个分解模型依次连接、嵌套而成，前一个模型的输出作为下一个模型的输入；
+5. 粗分解方案可参照 [https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/rp_expr_parser_test.py](https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/rp_expr_parser_test.py)，实现经典子图（即高频子模式）提取。
 
 **预期效果**
 
-分解正确性验证：以通过range_decomposer_validator的compose操作后ESt图象的表现为标准：
+分解正确性验证：以通过 range_decomposer_validator的compose 操作后ESt图象的表现为标准：
 
-1. t=1的抬升代表输出精度错误，t=3的抬升代表编译运行等其它类别错误。
+1. t=1 的抬升代表输出精度错误，t=3的抬升代表编译运行等其它类别错误。
 2. 由于是单个样本测试，无需考虑性能提升，故预期对于正确拆分样本，ES图象应当是y=1的【一条直线】；
-3. 对于错误或不完整的拆分样本，应当打印【错误报告】，或ES图象在t>0区域存在【阶梯状抬升】。
-
-
+3. 对于错误或不完整的拆分样本，应当打印【错误报告】，或ES图象在 t>0 区域存在【阶梯状抬升】。
 
 ### NO.130 GraphNet Analysis功能及ESt绘图优化
-**Analysis读取log功能优化**
+**Analysis 读取 log 功能优化**
 
-原GraphNet的benchmark功能有三个步骤：
+原 GraphNet 的 benchmark 功能有三个步骤：
 
-1. 使用test compiler（以及刚做好test device的最终步骤）批量测试并记录下合并记录的一份log
-2. 使用graph_net.log2json读取这份log，在另一个目录下生成每个模型
+1. 使用 test compiler（以及刚做好 test device 的最终步骤）批量测试并记录下合并记录的一份log
+2. 使用 graph_net.log2json 读取这份 log，在另一个目录下生成每个模型
 
-之前这么做的原因是json方便graph_net.analysis_util读取，可读性高；而test_compiler中如果遇到底层的C++ runtime报错等无法被catch住，可能无法直接记录下json。但实际操作过程中debug看log已经足够，log2json的中间过程显得粗糙，同时增加了使用者的学习成本。
+之前这么做的原因是 json 方便 graph_net.analysis_uti l读取，可读性高；而 test_compiler 中如果遇到底层的 C++ runtime 报错等无法被 catch 住，可能无法直接记录下 json。但实际操作过程中debug 看 log 已经足够，log2json 的中间过程显得粗糙，同时增加了使用者的学习成本。
 
-于是，本任务需求为去除log2json中间步骤，修改graph_net.analysis_util（在plot_ESt和plot_St过程中调用），使其直接读取log来解析。
+于是，本任务需求为去除 log2json 中间步骤，修改 graph_net.analysis_util（在 plot_ESt 和 plot_St 过程中调用），使其直接读取 log 来解析。
 
-解析过程仍可以参考log2json的方式，需要注意的是paddle样本带有subgraph序号而torch样本没有，这个特性log2json的处理在第138-141行，比较粗糙，可以优化兼容解析方式。
+解析过程仍可以参考 log2json 的方式，需要注意的是 paddle 样本带有 subgraph 序号而 torch 样本没有，这个特性 log2json 的处理在 [https://github.com/PaddlePaddle/GraphNet/blob/e7c6e0383aec1c9f6fef775463e8fe68db050389/graph_net/log2json.py#L138](https://github.com/PaddlePaddle/GraphNet/blob/e7c6e0383aec1c9f6fef775463e8fe68db050389/graph_net/log2json.py#L138)，比较粗糙，可以优化兼容解析方式。
 
-**ESt绘图中参数计算优化**
+**ESt 绘图中参数计算优化**
 
-原graph_net.plot_St和graph_net.plot_ESt脚本调用graph_net.analysis_util，实现对技术报告[https://arxiv.org/abs/2510.24035](https://arxiv.org/abs/2510.24035)中3.2 Evaluation Metrics的图象绘制，公式推导、tolerance配置、各项参数参见附录。
+原 graph_net.plot_St 和 graph_net.plot_ESt 脚本调用 graph_net.analysis_util，实现对技术报告 [https://arxiv.org/abs/2510.24035](https://arxiv.org/abs/2510.24035) 中 3.2 Evaluation Metrics 的图象绘制，公式推导、tolerance 配置、各项参数参见附录。
 
-graph_net.analysis_util以技术报告中ESt公式为基础，通过两种计算方式交叉验证：
+graph_net.analysis_util 以技术报告中 ESt 公式为基础，通过两种计算方式交叉验证：
 
-* 微观计算rectified_speedup之后做几何平均
+* 微观计算 rectified_speedup 之后做几何平均
 * 通过宏观统计参数计算
 
-由于计算过程比较复杂，需要验证计算的有效性。本任务单独撰写脚本计算每个宏观参数，打印出结果，从而验证graph_net.plot_ESt得出的结果。
+由于计算过程比较复杂，需要验证计算的有效性。本任务拆分出独立脚本计算每个宏观参数，打印出结果，从而验证 graph_net.plot_ESt 得出的结果。在graph_net.plot_ESt中，改为必须宏观/微观计算结果相匹配情况下才能采用。
 
 **提交内容**：
 
-1. 对于上面两个功能，可以遵循软件工程的更好设计，重构graph_net.analysis_util的处理逻辑，例如把宏观统计量的计算单独拆开，提高可维护度。
-2. 提交PR，在graph_net/相应位置修改代码，修改[readme中的相关描述](https://github.com/PaddlePaddle/GraphNet?tab=readme-ov-file#%EF%B8%8F-compiler-evaluation)。
-
-
+1. 对于上面两个功能，可以遵循软件工程的更好设计，重构 graph_net.analysis_util 的处理逻辑，例如把宏观统计量的计算单独拆开作为一个脚本、每个参数独立一个函数，提高可维护度。
+2. 提交PR，在 graph_net/相应位置修改代码，修改 [readme中的相关描述](https://github.com/PaddlePaddle/GraphNet?tab=readme-ov-file#%EF%B8%8F-compiler-evaluation)。
 
 ### NO.131 GraphNet自动样本抽取Agent（Huggingface）
 **详细描述：**
