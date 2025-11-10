@@ -250,40 +250,40 @@ PR验收的标准是看文件代码的覆盖率(Cover)是否达到了80%，这�
 ### NO.24 功能模块 fastdeploy/model_executor/models/tp_utils.py 单测补充
 ### NO.25 功能模块 fastdeploy/input/ernie4_5_vl_processor/image_preprocessor/image_preprocessor_adaptive.py 单测补充
 ### NO.26 功能模块 fastdeploy/model_executor/load_weight_utils.py 单测补充
-### NO.26 功能模块 fastdeploy/model_executor/layers/moe/fused_moe_wint2_backend.py 单测补充
-### NO.27 功能模块 fastdeploy/model_executor/ops/triton_ops/triton_utils_v2.py 单测补充
-### NO.28 功能模块 fastdeploy/model_executor/models/ernie4_5_mtp.py 单测补充
-### NO.29 功能模块 fastdeploy/model_executor/layers/moe/fused_moe_marlin_backend.py 单测补充
-### NO.30 功能模块 fastdeploy/input/ernie4_5_processor.py 单测补充
-### NO.31 功能模块 fastdeploy/input/ernie4_5_vl_processor/process_video.py 单测补充
-### NO.32 功能模块 fastdeploy/cache_manager/cache_messager.py 单测补充
-### NO.33 功能模块 fastdeploy/scheduler/splitwise_scheduler.py 单测补充
-### NO.34 功能模块 fastdeploy/engine/common_engine.py 单测补充
-### NO.35 功能模块 fastdeploy/cache_manager/prefix_cache_manager.py 单测补充
-### NO.36 功能模块 fastdeploy/output/token_processor.py 单测补充
-### NO.37 功能模块 fastdeploy/scheduler/global_scheduler.py 单测补充
-### NO.38 功能模块 fastdeploy/engine/sched/resource_manager_v1.py 单测补充
-### NO.39 功能模块 fastdeploy/entrypoints/openai/api_server.py 单测补充
-### NO.40 功能模块 fastdeploy/splitwise/splitwise_connector.py 单测补充
-### NO.41 功能模块 fastdeploy/entrypoints/openai/serving_completion.py 单测补充
-### NO.42 功能模块 fastdeploy/utils.py 单测补充
-### NO.43 功能模块 fastdeploy/engine/engine.py 单测补充
-### NO.44 功能模块 fastdeploy/cache_manager/cache_transfer_manager.py 单测补充
-### NO.45 功能模块 fastdeploy/model_executor/guided_decoding/xgrammar_backend.py 单测补充
-### NO.46 功能模块 fastdeploy/inter_communicator/zmq_server.py 单测补充
-### NO.47 功能模块 fastdeploy/engine/resource_manager.py 单测补充
-### NO.48 功能模块 fastdeploy/entrypoints/openai/serving_chat.py 单测补充
-### NO.49 功能模块 fastdeploy/entrypoints/engine_client.py 单测补充
-### NO.50 功能模块 fastdeploy/scheduler/dp_scheduler.py 单测补充
-### NO.51 功能模块 fastdeploy/model_executor/guided_decoding/ernie_tokenizer.py 单测补充
-### NO.52 功能模块 fastdeploy/scheduler/workers.py 单测补充
-### NO.53 功能模块 fastdeploy/inter_communicator/engine_worker_queue.py 单测补充
-### NO.54 功能模块 fastdeploy/scheduler/local_scheduler.py 单测补充
-### NO.55 功能模块 fastdeploy/multimodal/utils.py 单测补充
+### NO.27 功能模块 fastdeploy/model_executor/layers/moe/fused_moe_wint2_backend.py 单测补充
+### NO.28 功能模块 fastdeploy/model_executor/ops/triton_ops/triton_utils_v2.py 单测补充
+### NO.29 功能模块 fastdeploy/model_executor/models/ernie4_5_mtp.py 单测补充
+### NO.30 功能模块 fastdeploy/model_executor/layers/moe/fused_moe_marlin_backend.py 单测补充
+### NO.31 功能模块 fastdeploy/input/ernie4_5_processor.py 单测补充
+### NO.32 功能模块 fastdeploy/input/ernie4_5_vl_processor/process_video.py 单测补充
+### NO.33 功能模块 fastdeploy/cache_manager/cache_messager.py 单测补充
+### NO.34 功能模块 fastdeploy/scheduler/splitwise_scheduler.py 单测补充
+### NO.35 功能模块 fastdeploy/engine/common_engine.py 单测补充
+### NO.36 功能模块 fastdeploy/cache_manager/prefix_cache_manager.py 单测补充
+### NO.37 功能模块 fastdeploy/output/token_processor.py 单测补充
+### NO.38 功能模块 fastdeploy/scheduler/global_scheduler.py 单测补充
+### NO.39 功能模块 fastdeploy/engine/sched/resource_manager_v1.py 单测补充
+### NO.40 功能模块 fastdeploy/entrypoints/openai/api_server.py 单测补充
+### NO.41 功能模块 fastdeploy/splitwise/splitwise_connector.py 单测补充
+### NO.42 功能模块 fastdeploy/entrypoints/openai/serving_completion.py 单测补充
+### NO.43 功能模块 fastdeploy/utils.py 单测补充
+### NO.44 功能模块 fastdeploy/engine/engine.py 单测补充
+### NO.45 功能模块 fastdeploy/cache_manager/cache_transfer_manager.py 单测补充
+### NO.46 功能模块 fastdeploy/model_executor/guided_decoding/xgrammar_backend.py 单测补充
+### NO.47 功能模块 fastdeploy/inter_communicator/zmq_server.py 单测补充
+### NO.48 功能模块 fastdeploy/engine/resource_manager.py 单测补充
+### NO.49 功能模块 fastdeploy/entrypoints/openai/serving_chat.py 单测补充
+### NO.50 功能模块 fastdeploy/entrypoints/engine_client.py 单测补充
+### NO.51 功能模块 fastdeploy/scheduler/dp_scheduler.py 单测补充
+### NO.52 功能模块 fastdeploy/model_executor/guided_decoding/ernie_tokenizer.py 单测补充
+### NO.53 功能模块 fastdeploy/scheduler/workers.py 单测补充
+### NO.54 功能模块 fastdeploy/inter_communicator/engine_worker_queue.py 单测补充
+### NO.55 功能模块 fastdeploy/scheduler/local_scheduler.py 单测补充
+### NO.56 功能模块 fastdeploy/multimodal/utils.py 单测补充
 
-### **NO.56 - NO.57 编译支持**
+### **NO.57 - NO.58 编译支持**
 
-### NO.56 FastDeploy 支持在 T4/V100 硬件的编译
+### NO.57 FastDeploy 支持在 T4/V100 硬件的编译
 
 **详细描述：**
 
@@ -298,7 +298,7 @@ FastDeploy支持在T4、V100硬件编译
 - 熟悉C++/CUDA开发编译，有多硬件开发经验更佳
 - 熟悉 shell 以及setuptools 等编译工具
 
-### NO.57 FastDeploy 支持在 windows 平台的编译
+### NO.58 FastDeploy 支持在 windows 平台的编译
 
 **详细描述：**
 
@@ -313,9 +313,9 @@ FastDeploy支持在Windows平台编译
 - 熟悉C++/CUDA开发编译，有多硬件开发经验更佳
 - 熟悉 shell 以及setuptools 等编译工具
 
-### **NO.58 - NO.68 功能开发** 
+### **NO.59 - NO.70 功能开发** 
 
-### NO.58 FastDeploy Deterministic Inference 模式开发
+### NO.59 FastDeploy Deterministic Inference 模式开发
 
 **任务目标：**
 
@@ -359,7 +359,7 @@ vllm：https://github.com/orgs/vllm-project/projects/29
 
 A800 GPU（星河社区可提供） 或 Hopper GPU
 
-### NO.59 为 FastDeploy 新增支持 DeepSeek 模型的 Reasoning Parser & Tool Parser
+### NO.60 为 FastDeploy 新增支持 DeepSeek 模型的 Reasoning Parser & Tool Parser
 
 **任务目标：**
 
@@ -404,7 +404,7 @@ A800 GPU（星河社区可提供） 或 Hopper GPU
 
 熟悉 python， 了解FastDeploy 数据处理流程
 
-### NO.60 为 FastDeploy 新增支持 Qwen 模型的 Reasoning Parser & Tool Parser
+### NO.61 为 FastDeploy 新增支持 Qwen 模型的 Reasoning Parser & Tool Parser
 
 **任务目标：**
 
@@ -445,7 +445,7 @@ A800 GPU（星河社区可提供） 或 Hopper GPU
 
 熟悉 python， 了解FastDeploy 数据处理流程
 
-### NO.61 DeepseekV3 编译优化+CudaGraph 子图机制支持
+### NO.62 DeepseekV3 编译优化+CudaGraph 子图机制支持
 
 **详细描述：**
 
@@ -474,7 +474,7 @@ https://github.com/PaddlePaddle/FastDeploy/pull/3478，开启CUDAGraph，跑通�
 
 需要 Hopper GPU
 
-### NO.62 CINN 编译 Kernel 缓存机制
+### NO.63 CINN 编译 Kernel 缓存机制
 
 **详细描述：**
 
@@ -506,7 +506,7 @@ CINN在编译生成Kernel的过程中，存在编译耗时的开销。特别是�
 
 A100
 
-### NO.63 新版模型加载Loader 适配 Marlin MoE Backend
+### NO.64 新版模型加载Loader 适配 Marlin MoE Backend
 
 **详细描述：**
 
@@ -539,7 +539,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉python
 * 熟悉VLLM/SGLANG加载流程。
 
-### NO.64 新版模型加载Loader适配 Wint2 MoE Backend
+### NO.65 新版模型加载Loader适配 Wint2 MoE Backend
 
 **详细描述：**
 
@@ -572,7 +572,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉python
 * 熟悉VLLM/SGLANG加载流程。
 
-### NO.65 为 FastDeploy 推全 Pooling 的 classify 任务
+### NO.66 为 FastDeploy 推全 Pooling 的 classify 任务
 
 **详细描述：**
 
@@ -587,7 +587,7 @@ export FD_MOE_BACKEND=marlin
 
 可参考 runner 为 pooling、convert 为 classify 的相关pr：[pr#3827](https://github.com/PaddlePaddle/FastDeploy/pull/3827)，[pr#4344](https://github.com/PaddlePaddle/FastDeploy/pull/4344)，[pr#4345](https://github.com/PaddlePaddle/FastDeploy/pull/4345),[pr#4590](https://github.com/PaddlePaddle/FastDeploy/pull/4590)
 
-### NO.66 为 FastDeploy 推全 Pooling 的 score 任务
+### NO.67 为 FastDeploy 推全 Pooling 的 score 任务
 
 **详细描述：**
 
@@ -602,7 +602,7 @@ export FD_MOE_BACKEND=marlin
 
 可参考 runner 为 pooling、convert 为 classify 的相关pr：[pr#3827](https://github.com/PaddlePaddle/FastDeploy/pull/3827)，[pr#4344](https://github.com/PaddlePaddle/FastDeploy/pull/4344)，[pr#4345](https://github.com/PaddlePaddle/FastDeploy/pull/4345),[pr#4590](https://github.com/PaddlePaddle/FastDeploy/pull/4590)
 
-### NO.66 为 FastDeploy 支持 Pooling 离线推理
+### NO.68 为 FastDeploy 支持 Pooling 离线推理
 
 **详细描述：**
 
@@ -613,7 +613,7 @@ export FD_MOE_BACKEND=marlin
 
 添加embed接口
 
-### NO.67 为 FastDeploy 支持投机解码功能
+### NO.69 为 FastDeploy 支持投机解码功能
 
 **详细描述：**
 
@@ -638,7 +638,7 @@ export FD_MOE_BACKEND=marlin
 
 * 在较长的匹配下，Kernel 性能优于或基本不劣于目前的 CPU kernel
 
-### NO.68 为 FastDeploy 支持投机解码功能
+### NO.70 DeepSeek-v3.1-Terminus 模型支持 MTP
 
 **详细描述：**
 
@@ -664,9 +664,9 @@ export FD_MOE_BACKEND=marlin
     * [https://github.com/PaddlePaddle/FastDeploy/blob/develop/fastdeploy/model_executor/layers/sample/sampler.py](https://github.com/PaddlePaddle/FastDeploy/blob/develop/fastdeploy/model_executor/layers/sample/sampler.py)
 
 
-### **NO.69 - NO.79 模型新增** 
+### **NO.71 - NO.80 模型新增** 
    
-### NO.69 为 FastDeploy 新增 Qwen3-Next-80B-A3B-Thinking 模型
+### NO.71 为 FastDeploy 新增 Qwen3-Next-80B-A3B-Thinking 模型
 
 **详细描述：**
 
@@ -683,7 +683,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的LLM模型结构和计算流程. 了解 Qwen3-Next-80B-A3B-Thinking模型结构.
 * 熟悉python, 熟悉cuda
 
-### NO.70 为 FastDeploy 新增 Qwen3-Omni-30B-A3B-Thinking 模型
+### NO.72 为 FastDeploy 新增 Qwen3-Omni-30B-A3B-Thinking 模型
 
 **详细描述：**
 
@@ -700,7 +700,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的LLM模型结构和计算流程. 了解 Qwen3-Next-80B-A3B-Thinking 模型以及Qwen3-Omni-30B-A3B-Captioner 模型结构.
 * 熟悉 python, 熟悉 cuda
 
-### NO.71 为 FastDeploy 新增 Qwen3-Omni-30B-A3B-Thinking 模型
+### NO.73 为 FastDeploy 新增 Qwen3-VL-30B-A3B-Thinking 模型
 
 **详细描述：**
 
@@ -717,24 +717,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的 LLM 模型结构和计算流程. 了解 Qwen3-VL 类模型结构.
 * 熟悉 python, 熟悉 cuda
 
-### NO.72 为 为 FastDeploy 新增 Qwen3-VL-30B-A3B-Thinking 模型
-
-**详细描述：**
-
-为 FastDeploy 提供部署高性能的 Qwen3-VL 系列模型的能力。包括：[Qwen/Qwen3-VL-30B-A3B-Thinking](https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Thinking)（🌟🌟）、[Qwen/Qwen3-VL-30B-A3B-Thinking-FP8](https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Thinking-FP8)（0.3🌟）、[Qwen/Qwen3-VL-4B-Thinking](https://huggingface.co/Qwen/Qwen3-VL-4B-Thinking)（0.3🌟）、[Qwen/Qwen3-VL-4B-Thinking-FP8](https://huggingface.co/Qwen/Qwen3-VL-4B-Thinking-FP8)（0.4🌟）
-
-**提交内容**
-
-* Qwen3-VL 相关模型的组网代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档. 
-* 如需开发自定义算子, 提交至 FastDeploy/custom_ops/gpu_ops/ 目录下.
-* 为 Qwen3-VL 系列模型适配FastDeploy现有的各种低bit量化推理的能力.
-
-**技术要求：**
-
-* 熟悉常见的 LLM 模型结构和计算流程. 了解 Qwen3-VL 类模型结构.
-* 熟悉 python, 熟悉 cuda
-
-### NO.73 为 FastDeploy 新增 MiniCPM4.1-8B 模型
+### NO.74 为 FastDeploy 新增 MiniCPM4.1-8B 模型
 
 **详细描述：**
 
@@ -751,7 +734,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的 LLM 模型结构和计算流程. 了解 MiniCPM4.1-8B 类模型结构.
 * 熟悉 python, 熟悉 cuda
 
-### NO.74 为 FastDeploy 新增 Llama-4-Scout-17B-16E-Instruct 模型
+### NO.75 为 FastDeploy 新增 Llama-4-Scout-17B-16E-Instruct 模型
 
 **详细描述：**
 
@@ -768,7 +751,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的 LLM 模型结构和计算流程. 了解 Llama-4类模型结构.
 * 熟悉 python, 熟悉 cuda
 
-### NO.75 为 FastDeploy 新增 LongCat-Flash-Chat 模型
+### NO.76 为 FastDeploy 新增 LongCat-Flash-Chat 模型
 
 **详细描述：**
 
@@ -785,7 +768,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的LLM模型结构和计算流程. 了解 LongCat 类模型结构.
 * 熟悉 python, 熟悉 cuda
 
-### NO.76 为 FastDeploy 新增 Kimi-VL-A3B-Thinking-2506 模型
+### NO.77 为 FastDeploy 新增 Kimi-VL-A3B-Thinking-2506 模型
 
 **详细描述：**
 
@@ -802,7 +785,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的 LLM 模型结构和计算流程. 了解Kimi-VL类模型结构.
 * 熟悉 python, 熟悉 cuda
 
-### NO.77 为 FastDeploy 新增 DeepSeek-OCR 模型
+### NO.78 为 FastDeploy 新增 DeepSeek-OCR 模型
 
 **详细描述：**
 
@@ -819,7 +802,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉常见的 LLM 模型结构和计算流程. 了解 DeepSeek-OCR 类模型结构.
 * 熟悉 python, 熟悉 cuda
 
-### NO.78 适配 HF Safetenosrs  Qwen3-4B-AWQ 量化模型并支持 AWQ量化kernel
+### NO.79 适配 HF Safetenosrs  Qwen3-4B-AWQ 量化模型并支持 AWQ量化kernel
 
 **详细描述：**
 
@@ -851,7 +834,7 @@ export FD_MOE_BACKEND=marlin
 * 熟悉python, 熟悉cuda
 * 熟悉VLLM/SGLANG加载量化流程。
 
-### NO.79 适配 HF Safetenosrs  Qwen3-1.7B-GPTQ-Int8/Qwen3-30B-A3B-GPTQ-Int4 量化模型 并支持 GPTQ量化kernel
+### NO.80 适配 HF Safetenosrs  Qwen3-1.7B-GPTQ-Int8/Qwen3-30B-A3B-GPTQ-Int4 量化模型 并支持 GPTQ量化kernel
 
 **详细描述：**
 
@@ -893,9 +876,9 @@ export FD_MOE_BACKEND=marlin
 
 ### PaddleScience套件开发
 
-### **NO.80 - NO.81 算子学习和第三方库新增**
+### **NO.81 - NO.82 算子学习和第三方库新增**
 
-### NO.80 基于PaddleScience复现GAOT模型，精度对齐论文
+### NO.81 基于PaddleScience复现GAOT模型，精度对齐论文
 
 **论文链接：**
 
@@ -909,7 +892,7 @@ export FD_MOE_BACKEND=marlin
 
 [https://github.com/camlab-ethz/GAOT](https://github.com/camlab-ethz/GAOT)
 
-### NO.81 基于Paddle实现Pytorch Geometric库的conv模块
+### NO.82 基于Paddle实现Pytorch Geometric库的conv模块
 
 **详细描述：**
 
@@ -930,7 +913,7 @@ export FD_MOE_BACKEND=marlin
 
 ### PaddleOCR套件开发
 
-### NO.82 总结PaddleOCR/PaddleX issue区、用户群的核心高频问题，定位并解决
+### NO.83 总结PaddleOCR/PaddleX issue区、用户群的核心高频问题，定位并解决
 
 **任务描述：**
 
@@ -948,7 +931,7 @@ export FD_MOE_BACKEND=marlin
 
 ### PaddleSpeech套件开发
 
-### NO.83 支持 PaddleSpeech 中Whisper large/turbo 模型的推理加速
+### NO.84 支持 PaddleSpeech 中Whisper large/turbo 模型的推理加速
 
 **任务描述：**
 
