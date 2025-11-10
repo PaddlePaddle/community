@@ -664,7 +664,7 @@ export FD_MOE_BACKEND=marlin
     * [https://github.com/PaddlePaddle/FastDeploy/blob/develop/fastdeploy/model_executor/layers/sample/sampler.py](https://github.com/PaddlePaddle/FastDeploy/blob/develop/fastdeploy/model_executor/layers/sample/sampler.py)
 
 
-### **NO.71 - NO.81 模型新增** 
+### **NO.71 - NO.80 模型新增** 
    
 ### NO.71 为 FastDeploy 新增 Qwen3-Next-80B-A3B-Thinking 模型
 
