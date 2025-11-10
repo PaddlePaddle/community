@@ -820,7 +820,8 @@ GraphNet中很多计算图由于用到了torch中的unstable\_api，因此无法
 2. 接收一个【原模型】的 torch.nn.Module，输出【分解后模型】的多个subgraph；
 3. 在分解过程中，默认【分解后模型】路径为【原模型】路径加上_decomposed，下有多个subgraph单独目录，例如 /test/simple_CNN/ 的分解后模型包括 /test/simple_CNN_decomposed/subgraph_0/.../test/simple_CNN_decomposed/subgraph_n/，每个subgraph的文件组成等同一份标准的GraphNet样本；
 4. 在组合过程中，组合模型的forward是每个分解模型依次连接、嵌套而成，前一个模型的输出作为下一个模型的输入；
-5. 粗分解方案可参照 [https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/rp_expr_parser_test.py](https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/rp_expr_parser_test.py)，实现经典子图（即高频子模式）提取。
+5. 粗分解方案可参照 [https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/rp_expr_parser_test.py](https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/rp_expr_parser_test.py)，实现经典子图（即高频子模式）提取；
+6. 参照 [朴素子图切分脚本](https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/naive_graph_decomposer_test.sh) 和 [朴素子图链式切分脚本](https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/chain_naive_graph_decomposer_test.sh)，在此基础上开发图分解功能。
 
 **预期效果**
 
