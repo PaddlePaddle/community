@@ -528,7 +528,41 @@ drwxr-xr-x 11 1000 1000 4.0K Oct 22 06:08 ..
 
 ```
 
-在 `BuildExtension` 类中添加了 `_generate_python_api_file` 和 `custom_write_stub` 方法之后，实际上 `extension_utils.py` 中的 `bootstrap_context` 已经不需要了，因为每次 `BuildExtension` 都会执行构建，但是建议先保留 `bootstrap_context` 以防其他兼容性问题 (比如外部用户使用等)：
+修改前，setuptools 79 的目录结构：
+
+```
+
+`-- mix_relu_extension-0.0.0-py3.10-linux-x86_64.egg
+    |-- EGG-INFO
+    |   |-- PKG-INFO
+    |   |-- SOURCES.txt
+    |   |-- dependency_links.txt
+    |   |-- native_libs.txt
+    |   |-- not-zip-safe
+    |   `-- top_level.txt
+    |-- mix_relu_extension.py
+    |-- mix_relu_extension_pd_.so
+    `-- version.txt
+
+```
+
+修改后，无论 setuptools 79 还是 80 都生成如下结构的代码:
+
+```
+
+|-- mix_relu_extension
+|   |-- __init__.py
+|   `-- mix_relu_extension_pd_.so
+`-- mix_relu_extension-0.0.0-py3.10.egg-info
+    |-- PKG-INFO
+    |-- SOURCES.txt
+    |-- dependency_links.txt
+    |-- not-zip-safe
+    `-- top_level.txt
+
+```
+
+另外，在 `BuildExtension` 类中添加了 `_generate_python_api_file` 和 `custom_write_stub` 方法之后，实际上 `extension_utils.py` 中的 `bootstrap_context` 已经不需要了，因为每次 `BuildExtension` 都会执行构建，这里移除掉 `bootstrap_context` 即相关代码：
 
 ``` python
 
@@ -589,7 +623,7 @@ def bootstrap_context():
 ## 可行性分析
 
 1. **技术可行性**：方案基于 setuptools 的标准扩展机制，技术上完全可行
-2. **兼容性风险**：通过条件判断确保兼容 80.0- 的 Setuptools
+2. **兼容性风险**：不影响已经生成的算子的加载；不需要修改构建系统（setup.py）以及算子注册逻辑。
 3. **测试覆盖**：现有测试用例能够覆盖主要功能点
 
 ## 排期规划
