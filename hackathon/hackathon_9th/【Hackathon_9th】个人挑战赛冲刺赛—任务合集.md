@@ -224,7 +224,7 @@ graph_net.analysis_util 以技术报告中 ESt 公式为基础，通过两种计
 
 比如打开覆盖率表格可以看到如上内容，通过Miss列可以看到总的未覆盖代码行号，比如上边的audio.py里有25行有效代码没有单测覆盖；通过Missing列可看到具体未覆盖代码的行号，比如这里表示行号17-127行未被覆盖（这里Missing列会把注释等无效代码算进去，所以数字会比Miss列要大）。
 
-PR验收的标准是看文件代码的覆盖率(Cover)是否达到了80%，这个覆盖率在Coverage CI的日志里有显示，在达到80%的基础上，贡献单测越多，获得的⭐️越高
+PR验收的标准是看文件代码的覆盖率(Cover)是否达到了80%，这个覆盖率在Coverage CI的日志里（Run FastDeploy Unit Tests and Coverage / run_tests_with_coverage 中的 Run FastDeploy Unit Tests and Coverage）有显示，在达到80%的基础上，贡献单测越多，获得的⭐️越高
 
 提交内容：
 * Python 单测代码
