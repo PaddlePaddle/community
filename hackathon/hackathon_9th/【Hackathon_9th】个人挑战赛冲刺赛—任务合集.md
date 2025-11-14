@@ -215,7 +215,7 @@ graph_net.analysis_util 以技术报告中 ESt 公式为基础，通过两种计
 **详细描述：**
 
 当前FastDeploy下一些文件缺少单测监控，需要添加单测代码，来提高文件中代码的单测覆盖率。
-本任务中，通过添加单测后提高的代码覆盖行数来确定PR的贡献度，每提高100行（四舍五入，比如150等同200行，140行等同100行）代码覆盖，贡献度累计0.1⭐️。[提交PR参考](https://github.com/PaddlePaddle/FastDeploy/pull/5007)
+本任务中，通过添加单测后提高的代码覆盖行数来确定PR的贡献度，每提高100行（四舍五入，比如150等同200行，140行等同100行）代码覆盖，贡献度累计0.1⭐️。
 
 开发者可通过链接来查看最新的代码覆盖情况：https://paddle-github-action.bj.bcebos.com/BRANCH/FastDeploy/develop/{完整的commit-id}/SM/CoverageData/full_coverage_report.csv，
 在这个链接里，通过指定commit-id来查看对应commit-id下代码的覆盖情况（当前仅支持查看某一天最后一个commit的覆盖率）：
@@ -224,11 +224,11 @@ graph_net.analysis_util 以技术报告中 ESt 公式为基础，通过两种计
 
 比如打开覆盖率表格可以看到如上内容，通过Miss列可以看到总的未覆盖代码行号，比如上边的audio.py里有25行有效代码没有单测覆盖；通过Missing列可看到具体未覆盖代码的行号，比如这里表示行号17-127行未被覆盖（这里Missing列会把注释等无效代码算进去，所以数字会比Miss列要大）。
 
-PR验收的标准是看文件代码的覆盖率(Cover)是否达到了80%，这个覆盖率在Coverage CI的日志里（Run FastDeploy Unit Tests and Coverage / run_tests_with_coverage 中的 Run FastDeploy Unit Tests and Coverage）有显示，在达到80%的基础上，贡献单测越多，获得的⭐️越高
+PR验收的标准是看文件代码的覆盖率(Cover)是否达到了80%，这个覆盖率在Coverage CI的日志里（Run FastDeploy Unit Tests and Coverage / run_tests_with_coverage 中的 Run FastDeploy Unit Tests and Coverage）有显示，在达到80%的基础上，贡献单测越多，获得的⭐️越高。
 
 提交内容：
 * Python 单测代码
-* PR中评论：当前develop分支的单测覆盖率情况，增加该PR后的单测覆盖率情况，本PR代码覆盖行数
+* PR中评论：当前develop分支的单测覆盖率情况，增加该PR后的单测覆盖率情况，本PR代码覆盖行数。可参考 https://github.com/PaddlePaddle/FastDeploy/pull/5007 
 
 技术要求：
 * 熟悉python及unittest、pytest单测工具，会基于ai工具的单测开发
