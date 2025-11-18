@@ -227,7 +227,7 @@ graph_net.analysis_util 以技术报告中 ESt 公式为基础，通过两种计
 PR验收的标准是看文件代码的覆盖率(Cover)是否达到了80%，这个覆盖率在Coverage CI的日志里（Run FastDeploy Unit Tests and Coverage / run_tests_with_coverage 中的 Run FastDeploy Unit Tests and Coverage）有显示，在达到80%的基础上，贡献单测越多，获得的⭐️越高。
 
 提交内容：
-* Python 单测代码
+* Python 单测代码, **可以适当使用AI，但不能过度依赖完全生成**
 * PR中评论：当前develop分支的单测覆盖率情况，增加该PR后的单测覆盖率情况，本PR代码覆盖行数。可参考 https://github.com/PaddlePaddle/FastDeploy/pull/5007 
 
 技术要求：
