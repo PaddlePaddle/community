@@ -68,9 +68,9 @@ PaddlePaddle 目前对于自定义 C++ 算子的实现是基于 setuptools 做�
 - [PaddlePaddle 自定义算子文档](https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/custom_op/index_cn.html)
 - [setuptools 源码](https://github.com/pypa/setuptools)
 
-**NO.129 SOT 语法支持**
+**NO.128 SOT 语法支持**
 
-### NO.129 Paddle SOT支持 import 语句
+### NO.128 Paddle SOT支持 import 语句
 
 **详细描述：**
 
