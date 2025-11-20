@@ -70,18 +70,18 @@ PaddlePaddle 目前对于自定义 C++ 算子的实现是基于 setuptools 做�
 
 **NO.128 SOT 语法支持**
 
-### NO.128 Paddle SOT支持 import 语句
+### NO.128 Paddle SOT 支持 import 语句
 
 **详细描述：**
 
-当前Paddle SOT在遇到函数内部的import语句时会直接fallback回动态图执行，无法充分利用静态图的性能优势。本任务需要修复此问题，使SOT能够正确处理import语句，保持静态图执行模式。
+当前 Paddle SOT 在遇到函数内部的 import 语句时会直接 fallback 回动态图执行，无法充分利用静态图的性能优势。本任务需要修复此问题，使 SOT 能够正确处理 import 语句，保持静态图执行模式。
 
 **验收说明：**
 
-- 支持各类import语句在SOT转静过程中正确执行，包括：基础import、from...import、import as、函数内import、from .xxx import 等场景
-- 编写全面的单元测试，覆盖Python 3.9-Python 3.14版本的所有import使用场景
-- 确保修复后import语句不再触发fallback机制/子图打断机制，保持静态图执行
-- 验证/修复下游模型（包括FastDeploy、PaddleX）正确性，不引入新的错误或性能下降
+- 支持各类 import 语句在 SOT 转静过程中正确执行，包括：基础 import、from...import、import as、函数内 import、from .xxx import 等场景
+- 编写全面的单元测试，覆盖 Python 3.9-Python 3.14 版本的所有 import 使用场景
+- 确保修复后 import 语句不再触发 fallback 机制/子图打断机制，保持静态图执行
+- 验证/修复下游模型（包括 FastDeploy、PaddleX）正确性，不引入新的错误或性能下降
 
 **技术要求：**
 
