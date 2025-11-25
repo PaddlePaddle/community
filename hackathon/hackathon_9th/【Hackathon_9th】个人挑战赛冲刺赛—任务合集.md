@@ -105,7 +105,7 @@ torch.utils.data.*整体兼容，paddle目前对应路径为paddle.io.*，需要
 
 ## 【开源贡献个人挑战赛-编译机床】任务详情
 
-### **NO.7 - NO.10 编译机床**
+### **NO.7 - NO.10, NO.55 - NO.59 编译机床**
 
 ### NO.7 PyTorch to Paddle 计算图转换
 
