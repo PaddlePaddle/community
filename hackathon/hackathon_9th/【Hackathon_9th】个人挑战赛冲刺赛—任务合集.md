@@ -105,7 +105,7 @@ torch.utils.data.*整体兼容，paddle目前对应路径为paddle.io.*，需要
 
 ## 【开源贡献个人挑战赛-编译机床】任务详情
 
-### **NO.7 - NO.10 编译机床**
+### **NO.7 - NO.10, NO.55 - NO.59 编译机床**
 
 ### NO.7 PyTorch to Paddle 计算图转换
 
@@ -205,6 +205,144 @@ graph_net.analysis_util 以技术报告中 ESt 公式为基础，通过两种计
 
 1. 提交代码到graph_net/agent
 2. 撰写设计文档，提交 PR 添加至 GraphNet/docs。
+
+### NO.85 torch 子图变量重命名
+
+**任务描述**
+
+在子图分解器执行流程的末尾，需要在GraphExtractor中对输入和中间变量名称统一编码。
+
+所有子图均从0开始编码，统一采用如下命名规范：
+
+* in_xx：输入张量
+* w_xx：参数张量
+* tmp_xx：中间变量
+
+使用 [https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/naive_graph_decomposer_test.sh](https://github.com/PaddlePaddle/GraphNet/blob/develop/graph_net/test/naive_graph_decomposer_test.sh) 拆分出子图进行测试，需要确保最终输出的子图样本中：
+
+* 完成model.py中变量名的修改，例如：
+
+```
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(
+        self,
+        in_0: torch.Tensor,
+        in_1: torch.Tensor,
+        w_0: torch.nn.parameter.Parameter,
+        w_1: torch.nn.parameter.Parameter,
+        ………
+```
+* 完成meta.py中变量名的修改，同时原变量名original_name可以保留，例如：
+
+```
+class xxx:
+    name = "w_0"
+    original_name = "L_self_modules_backbone_modules_top_modules_top_modules_0_modules_conv_parameters_weight_"
+    shape = [64, 3, 7, 7]
+    dtype = "torch.float32"
+    device = "cuda:0"
+    mean = -0.047
+    std = 1.534
+    data = None
+```
+
+
+**验收方式**
+
+* 将代码提交到PR；
+* 提供至少1个CV样本、1个NLP样本生成的子图，在PR对话框中展示重命名结果。
+
+
+
+### NO.86 Agent 输入格式整理
+
+**任务描述**
+
+实现GraphNet不同规模样本子图最终输入Agent的整理环节。
+
+设计实现一个AgentUnittestGenerator类，可通过run_model.py使用decorator_config配置来执行。生成的单测格式有如下要求：
+
+* 由子图样本中meta.py和model.py生成一个可以完全独立执行的python单测脚本；
+* 使用unittest接口。
+
+
+
+**验收方式**
+
+* 将代码提交到PR；
+* 生成的python单测脚本能够独立运行，在PR对话中附加一个样例；
+* 至少在1个CV样本、1个NLP样本验证通过。
+
+
+
+### NO.87 多dtype输入生成
+
+**任务描述**
+
+深度学习模型广泛使用float16、bfloat16甚至float8来加速训练、推理过程。据统计，当前GraphNet中一共有2379个torch子图样本，其中97.9%（2330个）使用float精度计算、2.06%（49个）使用float16/bfloat16计算。
+
+将一个计算图改成使用低精度执行，通常需要三处修改：
+
+* 将float输入数据转换成指定的低精度类型；
+* 将权重数据转换成指定的低精度类型，注意有些算子的权重（比如batch_norm的running_mean、running_var、scale、bias）需要保持为float类型，否则可能引入执行错误、精度下降等问题。另外，有些算子不支持低精度计算，也需尽量避免将其权重提前转换成低精度类型；
+* 使用[torch.autocast](https://docs.pytorch.org/docs/stable/amp.html)上下文管理器，避免一些算子因不支持低精度类型而运行报错。
+
+
+
+设计实现MultiDtypeGenerator，生成低精度样本，通过dtype_list指定需要生成的样本精度，通过过滤器过滤掉不能执行的整图/子图。该插件所生成的样本需能够支持在test_compiler评测、Agent代码生成过程中使用。
+
+
+
+**验收成果**
+
+* 将代码提交到PR；
+* 至少在1个CV样本、1个NLP样本上验证通过。
+
+
+
+### NO.88 torch test device 实现
+
+**任务描述**
+
+实现torch上的test device工具，两个脚本：
+
+* graph_net/torch/test_reference_device.py，用来测试cuda gpu上的baseline性能，记录下log和ouputs元数据；
+* graph_net/torch/test_target_device.py，用来测试目标硬件设备上的性能效果，并与上一步的log和ouputs对比，得出speedup和correctness。
+
+以上脚本可参照graph_net/paddle内的实现，尽可能复用test compiler的函数代码。
+
+
+
+**验收成果**
+
+* 提交PR，新增脚本到graph_net.torch相应位置；
+* PR中附带测试案例及中间/结果过程的日志。
+
+
+### NO.89 ESt图像拓展
+
+**任务描述**
+
+在不影响当前GraphNet ESt评测设定的基础上，修改graph_net,analysis_util中的fake_perf_degrad函数实现更详细的版本，规定：
+
+* t = 1 释放accuracy错误：容忍到t=0时outputs尚未在allclose上呈现为correct的样本；
+* t = 2 释放nan/inf/type match错误；
+* t = 3 释放（compiled之后的）execution failure/error；
+* t = 4 释放compiled failure/error；
+* 对于eager（或reference）错误的样本，在前置步骤中剔除，无需加入到ESt考虑的样本中。
+
+以上错误类型来自于t=0时的样本错误码，并固定为t=0时的情况；
+
+即在t>0时，所有类别错误比例和个数都参照t=0时的最终值计算，并非在该tolerance下的实测数值。
+
+
+
+**验收成果**
+
+* 提交PR，在plot_ESt中提供可选开关参数，支持拓展功能；
+* 在PR对话中提供示例展示。
 
 ## 【开源贡献个人挑战赛冲刺赛-套件开发】任务详情
 
