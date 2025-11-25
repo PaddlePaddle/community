@@ -8,6 +8,11 @@
 |  8   |  🌟  | ai4c计算图粗分解器设计与实现          |        是        |
 |  9   |  🌟  | GraphNet Analysis功能及ESt绘图优化     |        是        |
 |  10   |  🌟  | GraphNet自动样本抽取Agent   |        是        |
+|  85   |  0.25🌟  | torch 子图变量重命名   |        是        |
+|  86   |  0.25🌟  | Agent 输入格式整理   |        是        |
+|  87   |  0.5🌟  | 多dtype输入生成   |        是        |
+|  88   |  0.25🌟  | torch test device 实现   |        是        |
+|  89   |  0.25🌟  | ESt图像拓展   |        是        |
 
 ## FastDeploy任务
 
