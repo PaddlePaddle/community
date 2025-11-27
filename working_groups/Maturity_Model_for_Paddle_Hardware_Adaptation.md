@@ -43,9 +43,9 @@
 	</tr>
 		<td>大模型</td>
 		<td>无要求</td>
-		<td>推理 I 级</td>
-		<td>精调 I 级</td>
-		<td>预训练 III 级</td>
+		<td>飞桨大模型工具链推理 I 级 [11] or 文心21B-thinking模型-推理I级（或同等规模模型）[12]</td>
+		<td>飞桨大模型工具链精调 I 级 [11] or 文心21B模型-后训练I级（或同等规模模型）</td>
+		<td>飞桨大模型工具链预训练 III 级[11] or 文心300B-后训练III级 （或同等规模模型）[12]</td>
 	</tr>	
 	</tr>
 		<td>CI搭建</td>
@@ -111,3 +111,5 @@
 - [8] 飞桨硬件适配全量算子列表：https://github.com/onecatcn/my-demo-code/blob/develop/PaddlePaddle/ops/gpu_ops_2023-03-20.csv
 - [9] 训练精度要求：FP32 训练精度下误差小于正负 0.3%，AMP 混合精度训练下误差小于正负 3%，满足其中一个要求即可。
 - [10] 推理精度要求：和 GPU/CPU 精度一致(移动边缘类芯片的量化模型预计有特殊损失，硬件厂商提供精度损失说明，由飞桨研发同学判断其合理性)
+- [11] 飞桨大模型工具链适配分级标准：https://github.com/PaddlePaddle/community/blob/master/working_groups/Maturity_Model_for_PaddleLargeModelToolChain_Hardware_Adaptation.md
+- [12] 文心大模型4.5适配分级标准：https://github.com/PaddlePaddle/community/blob/master/working_groups/Maturity_Model_for_ERNIE45_Hardware_Adaptation.md
