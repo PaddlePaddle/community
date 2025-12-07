@@ -3,11 +3,11 @@
 欢迎加入本项目！
 我们正在推进 **PaddleOCR** 与 **ERNIE** 在产业级 AI 应用中的深度落地，并与开源生态头部项目联合打造高质量案例，包括：
 
-* **Milvus**
-* **Dify**
-* **RAGFlow**
-* **Pathway**
-* **HayStack**
+* **PaddleOCR + ERNIE × Milvus**
+* **PaddleOCR + ERNIE × Dify**
+* **PaddleOCR + ERNIE × RAGFlow**
+* **PaddleOCR + ERNIE × Pathway**
+* **PaddleOCR + ERNIE × HayStack**
 * …
 
 我们正在寻找愿意一起 **构建真正有行业价值的 AI 系统** 的同学与开发者。
