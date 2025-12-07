@@ -1,5 +1,11 @@
 > ### NOTE：不在RFC需求列表里的任务可直接开发，不需要提交RFC
 
+## 框架任务
+
+| 序号 |   难度    | 任务标题                                     | 是否需要提交 RFC |
+| :--: | :-------: | -------------------------------------------- | :--------------: |
+|  109   |  ⭐️⭐️   | 基于 Setuptools 80+ 版本自定义算子机制适配          |        是        |
+
 ## FastDeploy任务
 
 | 序号 |   难度    | 任务标题                                     | 是否需要提交 RFC |
@@ -20,12 +26,30 @@
 
 | 序号 |   难度    | 任务标题                                | 是否需要提交 RFC |
 | :--: | :-------: | ---------------------------------------------------------------------------------------------- | :--------------: |
-|  97   |  ⭐  | 适配 tvm 编译器          |        是        |
-|  98   |  ⭐  | 适配 xla 编译器          |        是        |
-|  99   |  ⭐  | 适配 TensorRT 编译器     |        是        |
-|  100   |  ⭐  | 适配 BladeDISC 编译器   |        是        |
-|  101   |  ⭐  | 多图抽取问题修复         |        是        |
-|  102   |  ⭐  | vmap抽取问题修复        |        是        |
+|  97   |  ⭐  | 适配 tvm 编译器          |        否        |
+|  98   |  ⭐  | 适配 xla 编译器          |        否        |
+|  99   |  ⭐  | 适配 TensorRT 编译器     |        否        |
+|  100   |  ⭐  | 适配 BladeDISC 编译器   |        否        |
+|  101   |  ⭐  | 多图抽取问题修复         |        否        |
+|  102   |  ⭐  | vmap抽取问题修复        |        否        |
+|  110   |  ⭐  | AI4C计算图分解验证器        |        否        |
+| 111 | 0.25⭐ | （GraphNet样本修复）batch_norm算子添加weight_meta约束 | 否
+| 112 | 0.5⭐ | （GraphNet样本修复）非法Torch样本修复 | 否
+| 113 | 0.025⭐ | torch._C._fft.fft_irfft API转换 | 否
+| 114 | 0.025⭐ | torch._C._fft.fft_rfft API转换 | 否
+| 115 | 0.025⭐ | torch._C._fft.fft_fftn API转换 | 否
+| 116 | 0.025⭐ | torch._C._linalg.linalg_vector_norm API转换 | 否
+| 117 | 0.025⭐ | torch._C._linalg.linalg_norm API转换 | 否
+| 118 | 0.025⭐ | torch._C._nn.softplus API转换 | 否
+| 119 | 0.025⭐ | torch._C._nn.one_hot API转换 | 否
+| 120 | 0.025⭐ | torch._C._special.special_logit API转换 | 否
+| 121 | 0.05⭐ | torch._C._set_grad_enabled API转换 | 否
+| 122 | 0.075⭐ | torch._C._log_api_usage_once API转换 | 否
+| 123 | 0.1⭐ | torch._C._nn.pad API转换 | 否
+| 124 | 0.1⭐ | torch._C._nn.avg_pool2d API转换 | 否
+| 125 | 0.15⭐ | torch._C._nn.gelu API转换 | 否
+| 126 | 0.2⭐ | torch._C._nn.scaled_dot_product_attention API转换 | 否
+| 127 | 0.25⭐ | torch._C._nn.linear API转换 | 否
 
 ## 科学计算任务
 
