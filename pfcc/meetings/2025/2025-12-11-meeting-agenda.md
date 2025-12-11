@@ -9,7 +9,7 @@
 
 ## 会议议程
 
-1. 新人介绍：@[xunyoyo](https://github.com/xunyoyo)，@[LiaoYFBH](https://github.com/LiaoYFBH)，@[wanglezz](https://github.com/wanglezz)，@[SZTULDH](https://github.com/SZTULDH)，@[xxiu1](https://github.com/xxiu1)，@[fsylmxx](https://github.com/fsylmxx)，@[dakelong](https://github.com/dakelong)（5 mins）
+1. 新人介绍：@[xunyoyo](https://github.com/xunyoyo)，@[LiaoYFBH](https://github.com/LiaoYFBH)，@[wanglezz](https://github.com/wanglezz)，@[SZTULDH](https://github.com/SZTULDH)，@[xxiu1](https://github.com/xxiu1)，@[fsylmxx](https://github.com/fsylmxx)，@[dakelong](https://github.com/dakelong)，@[ADchampion3](https://github.com/ADchampion3)（5 mins）
 2. 《让“冰冷枯燥”的技术呈现得更加有“温暖有趣”》 @[openvino-book](https://github.com/openvino-book)@[deric-yang](https://github.com/deric-yang)（15 mins）
 3. 《PaddleOCR + ERNIE 案例——智能合同风险审查全流程落地实录》 @[tjujingzong](https://github.com/tjujingzong)（15 mins）
 4. 《PaddleOCR + ERNIE 案例——多文档智能分析与问答系统的搭建流程分享》 @[LiaoYFBH](https://github.com/LiaoYFBH)（15 mins）
