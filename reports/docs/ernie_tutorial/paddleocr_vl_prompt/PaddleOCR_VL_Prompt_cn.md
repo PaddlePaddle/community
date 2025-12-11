@@ -30,6 +30,13 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 
 **微调之前**
 
+![raw](images/raw.png)
+
+<details>
+
+<summary> 点击查看原始输出 </summary>
+
+
 ```json
 
 {
@@ -52,7 +59,15 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 
 ```
 
+</details>
+
 **微调之后**
+
+![after](images/sft.png)
+
+<details>
+
+<summary> 点击查看微调之后的输出 </summary>
 
 ```json
 {
@@ -98,6 +113,8 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 
 ```
 
+</details>
+
 微调之后可以输出 `JSON` 格式的数据，并且可以根据不同的 `prompt`（这里的 `block_label`）输出对应的信息。
 
 > 由于此次微调的数据量很少，因此微调结果并不好，此处仅做参考。
@@ -110,6 +127,326 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 这两部分与原文略有不同。
 
 ## 数据准备
+
+使用 ERNIE 对 PaddleOCR-VL 进行微调，需要准备 `JSON` 格式的数据与对应的图片数据：
+
+```json
+{
+    "image_info": [
+        {"matched_text_index": 0, "image_url": "./assets/table_example.jps"},
+    ],
+    "text_info": [
+        {"text": "OCR:", "tag": "mask"},
+        {"text": "দডর মথ বধ বকসট একনজর দখই চনত পরল তর অনমন\nঠক পনতই লকয রখছ\nর নচ থকই চচয বলল কশর, “এইই; পযছ! পযছ!'\nওপর", "tag": "no_mask"},
+    ]
+}
+```
+
+其中，
+
+- `image_url` 是图片的路径
+- `tag` 是 `mask` 的 `text_info` 对应 `prompt` 部分，也就是 PaddleOCR-VL 的 `TASK` 类型
+- `tag` 是 `no_mask` 的 `text_info` 对应 `completion` 部分，也就是模型的输出
+
+原始模型中只有
+
+```json
+{
+    "ocr": "OCR:",
+    "table": "Table Recognition:",
+    "formula": "Formula Recognition:",
+    "chart": "Chart Recognition:",
+}
+```
+
+这四类 `prompt`，而我们希望，模型能够根据我们的指令抽取对应的信息，因此需要自定义 `prompt`：
+
+```json
+{
+    "image_info": [
+        {
+            "matched_text_index": 0,
+            "image_url": "/home/aistudio/paddleocr_vl/data/zzsptfp/zzsptfp/b175.jpg"
+        }
+    ],
+    "text_info": [
+        {
+            "text": "OCR:{\"发票名称\": \"\"}",
+            "tag": "mask"
+        },
+        {
+            "text": "{\"发票名称\": \"广东增值税专用发票\"}",
+            "tag": "no_mask"
+        }
+    ]
+}
+```
+
+这里 `tag` 为 `mask` 的 `text` 不是 `OCR:` 而是 `OCR:{\"发票名称\": \"\"}`，也就是说，我们希望模型抽取，且仅输出 `发票名称` 字段。
+
+保留原始的 `OCR:` 部分，是为了保证模型能够识别 `OCR:` 部分，而仅对 `{\"发票名称\": \"\"}` 部分进行微调。
+
+`tag` 为 `no_mask` 的 `text` 部分直接输出 `JSON` 格式的数据，并且与 `prompt` 对应。
+
+最后，我们这里设计 `prompt` 为：
+
+``` text
+# 特定值为字符串，如 `{"发票编码":"123456"}`
+"OCR:{\"xxx\":\"\"}"
+
+# 特定值为字典，如 `{"购买方":{"名称":"A公司"}}`
+"OCR:{\"xxx\":{}}"
+
+# 特定值为列表，如 `{"货物或应税劳务、服务名称":[{"名称":"A产品"},{"名称":"B产品"}]}`
+"OCR:{\"xxx\":[]}"
+```
+
+具体如何构建数据集，可以参考后续的附录部分。
+
+## 模型微调
+
+微调的过程与 此 类似，首先安装 ERNIE：
+
+```bash
+cd paddleocr_vl
+git clone https://gitee.com/PaddlePaddle/ERNIE -b release/v1.4
+cd ERNIE
+python -m pip install -r requirements/gpu/requirements.txt
+python -m pip install -e .
+python -m pip install tensorboard
+python -m pip install opencv-python-headless
+python -m pip install numpy==1.26.4
+```
+
+然后，修改配置文件并复制覆盖原有配置文件：
+
+```bash
+cp paddleocr_vl/sft_config/run_ocr_vl_sft_16k.yaml \
+  paddleocr_vl/ERNIE/examples/configs/PaddleOCR-VL/sft/run_ocr_vl_sft_16k.yaml
+```
+
+下载 PaddleOCR-VL 模型，这里使用 modelscope 的 SDK：
+
+```bash
+pip install modelscope
+```
+
+```python
+from modelscope import snapshot_download
+model_dir = snapshot_download('PaddlePaddle/PaddleOCR-VL', local_dir='paddleocr_vl/paddleocr_vl_model')
+```
+
+最后，就是执行微调命令即可，在 AI Studio 的 A100 环境中进行微调，大约需要不到 1.5 小时。
+
+> V100 环境无法执行微调，但是可以进行模型推理
+
+```bash
+cd paddleocr_vl/ERNIE; CUDA_VISIBLE_DEVICES=0 \
+ erniekit train examples/configs/PaddleOCR-VL/sft/run_ocr_vl_sft_16k.yaml
+```
+
+以下是训练的日志：
+
+![logs](images/logs.png)
+
+可以看到，`loss` 在稳定的下降，说明微调应该有效果。
+
+
+## 模型推理
+
+微调完成后，可以使用微调后的模型进行推理。模型可以：
+
+1. 输出 `JSON` 格式的完整信息
+2. 根据不同的输入字段，输出对应的 `JSON` 格式的信息
+
+这为信息抽取任务提供了灵活的接口。
+
+按照 [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) 进行推理，首先需要安装必要的环境
+
+```bash
+python -m pip install -U "paddleocr[doc-parser]"
+python -m pip install https://paddle-whl.bj.bcebos.com/nightly/cu126/safetensors/safetensors-0.6.2.dev0-cp38-abi3-linux_x86_64.whl
+python -m pip install --force-reinstall opencv-python-headless
+python -m pip install numpy==1.26.4
+```
+
+此时，还不能直接进行模型的推理，因为，PaddleOCR 依赖的 PaddleX 中，目前对于 PaddleOCR-VL 仅支持 `['ocr', 'formula', 'table', 'chart']` 这四类 `prompt_label`，而我们的 `prompt` 显然无法通过代码的验证：
+
+参考 `paddlex/inference/pipelines/paddleocr_vl/pipeline.py` 文件
+
+``` python
+assert prompt_label.lower() in [
+    "ocr",
+    "formula",
+    "table",
+    "chart",
+], f"Layout detection is disabled (use_layout_detection=False). 'prompt_label' must be one of ['ocr', 'formula', 'table', 'chart'], but got '{prompt_label}'."
+
+```
+
+这里写了一个 patch 脚本，可以绕过以上限制：
+
+```bash
+python paddleocr_vl/patch/patch_assert_to_warning.py
+```
+
+然后，将以下文件拷贝到 PaddleOCR-VL-SFT 目录下，就可以愉快的进行推理验证了。
+
+```bash
+cp paddleocr_vl/paddleocr_vl_model/chat_template.jinja paddleocr_vl/PaddleOCR-VL-SFT
+cp paddleocr_vl/paddleocr_vl_model/inference.yml paddleocr_vl/PaddleOCR-VL-SFT
+```
+
+这里使用一张新的发票数据来进行模型的验证。
+
+```bash
+python -m paddleocr doc_parser -i paddleocr_vl/data/test.jpg \
+    --vl_rec_model_name "PaddleOCR-VL-0.9B" \
+    --vl_rec_model_dir "paddleocr_vl/PaddleOCR-VL-SFT" \
+    --save_path="paddleocr_vl/PaddleOCR-VL-SFT_response" \
+    --use_layout_detection=False \
+    --prompt_label="OCR:{}"
+```
+
+输出完整的信息：
+
+```json
+{
+    "res": {
+        "input_path": "/home/aistudio/paddleocr_vl/data/test.jpg",
+        "page_index": None,
+        "model_settings": {
+            "use_doc_preprocessor": False,
+            "use_layout_detection": False,
+            "use_chart_recognition": False,
+            "format_block_content": False
+        },
+        "parsing_res_list": [{
+            "block_label": "OCR:{}",
+            "block_content": "{
+              "发票信息": {
+                  "发票名称": "电子发票",
+                  "发票号码": "25332000000426443187",
+                  "开票日期": "2025年09月26日"
+              },
+              "销售方信息": {
+                  "名称": "杭州万力酒店管理有限公司",
+                  "统一社会信用代码": "91330105MA2H2DUJ92",
+                  "纳税人识别号": "91330106MA2B1C4UXN"
+              },
+              "项目名称": "规格型号",
+              "单位": "个",
+              "数量": "3 461.056105610561",
+              "单价": "1383.17",
+              "金额": "税率/征收率",
+              "税额": "13.83"
+          }, "合计": {
+              "金额": "1383.17",
+              "税额": "13.83"
+          }, "价税合计（大写）": "壹仟叁佰玖拾柒圆整", "价税合计（小写）": "1397.00"
+          }, "销售方地址": "浙江省杭州市西湖区转塘街道霞鸣街199号万美商务中心3号楼", "电话": "0571-85220222", "销方开户银行": "农行上泗支行", "入住人": "柳顺", "入住日期": "9月23日 入住-9月26日 退房", "入住天数": "3天", "金额": "1397元"
+          }",
+            "block_bbox": [0, 0, 1260, 838]
+        }]
+    }
+}
+```
+
+注意两点：
+
+- `use_layout_detection=False`，不通过 layout 模型，而是直接将图片送入 `PaddleOCR-VL-0.9B`
+- `prompt_label="OCR:{}"`，这里使用我们微调的 `prompt` ，希望模型输出完整的 json 格式的信息
+
+> 注意，这里模型最终输出的数据实际上不完整，比如，缺少 `购买方` 信息，应该是微调数据较少导致的。
+
+再来看看微调之前的模型，只能输出 table 样式的数据:
+
+```bash
+python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
+    --vl_rec_model_name "PaddleOCR-VL-0.9B" \
+    --vl_rec_model_dir "/home/aistudio/paddleocr_vl/paddleocr_vl_model" \
+    --save_path="/home/aistudio/paddleocr_vl/paddleocr_vl_model_response" \
+    --use_layout_detection=False \
+    --prompt_label="OCR:"
+```
+
+输出：
+
+```json
+{
+    "res": {
+        "input_path": "/home/aistudio/paddleocr_vl/data/test.jpg",
+        "page_index": None,
+        "model_settings": {
+            "use_doc_preprocessor": False,
+            "use_layout_detection": False,
+            "use_chart_recognition": False,
+            "format_block_content": False
+        },
+        "parsing_res_list": [{
+            "block_label": "OCR:",
+            "block_content": "购买方信息 | 名称 | 中青旅联科 | 杭州 | 公关顾问有限公司 | 销售方信息 | 名称 | 杭州万力酒店管理有限公司 | 统一社会信用代码/纳税人识别号 | 纳税人识别号 | 统一社会信用代码/纳税人识别号 | 税额 | 税额/征收率 | 税额/征收率\n**项目名称** | 规格型号 |   |   |   |   |   |   |   |   |   |   |   |  \n**住宿服务** | 住宿费 |   |   |   |   |   |   |   |   |   |   |   |  \n**合计** |   |   |   |   |   |   |   |   |   |   |   |   |  \n**价税合计（大写）** |   | 壹仟叁佰玖拾柒圆整 |   |   |   |   |   |   |   |   |   |   |  \n备注 | 销售方地址：浙江省杭州市西湖区转塘街道霞鸣街199号万美商务中心3号楼；电话：0571-85220222；销方开户银行：农行上泗支行；入住人：柳顺；入住日期：9月23日入住-9月26日退房；入住天数：3天；金额：1397元 |   |   |   |   |   |   |   |   |   |   |   |   |  \n开票人：祝营营",
+            "block_bbox": [0, 0, 1260, 838]
+        }]
+    }
+}
+```
+
+然后，测试一下只抽取部分信息：
+
+```bash
+python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
+    --vl_rec_model_name "PaddleOCR-VL-0.9B" \
+    --vl_rec_model_dir "/home/aistudio/paddleocr_vl/PaddleOCR-VL-SFT" \
+    --save_path="/home/aistudio/paddleocr_vl/PaddleOCR-VL-SFT_response" \
+    --use_layout_detection=False \
+    --prompt_label="OCR:{\"购买方名称\": {}, \"销售方名称\": {}}"
+```
+
+输出：
+
+```json
+{
+    "res": {
+        "input_path": "/home/aistudio/paddleocr_vl/data/test.jpg",
+        "page_index": None,
+        "model_settings": {
+            "use_doc_preprocessor": False,
+            "use_layout_detection": False,
+            "use_chart_recognition": False,
+            "format_block_content": False
+        },
+        "parsing_res_list": [{
+            "block_label": "OCR:{"购买方名称": {}, "销售方名称": {}}",
+            "block_content": "{
+                "购买方名称": {
+                    "名称": "中青旅联科（杭州）公关顾问有限公司",
+                    "统一社会信用代码": "91330105MA2H2DUJ92"
+                },
+                "销售方名称": {
+                    "名称": "杭州万力酒店管理有限公司",
+                    "统一社会信用代码": "91330106MA2B1C4UXN"
+                }
+            }",
+            "block_bbox": [0, 0, 1260, 838]
+        }]
+    }
+}
+```
+
+可以看到，模型基本上可以跟随我们的指令抽取对应的信息。
+
+## 总结
+
+本文介绍了如何通过微调 PaddleOCR-VL 的提示词（prompt）来实现信息抽取任务。主要方法包括：
+
+1. **数据准备**：使用 VLM 模型生成结构化的训练数据，相比于传统标注方式更加高效。
+2. **提示词设计**：通过精心设计的提示词模板，让模型能够灵活地输出不同字段的 `JSON` 格式信息。
+3. **模型微调**：利用 PaddleOCR-VL 的微调能力，使其学会根据不同的提示词生成对应的输出。
+
+这种方法相比于传统的信息抽取方法（如 NER + 关系抽取），具有更好的集成度和灵活性。
+
+## 附录
 
 ### 1. 数据集
 
@@ -364,59 +701,7 @@ python paddleocr_vl/tools/split_jsonl.py paddleocr_vl/output.jsonl \
 - `mask` 的 `text` 不仅仅是 `OCR:` ，还包括之后需要抽取的字段信息
 - `no_mask` 的 `text` 是完整的 `JSON` 格式信息，而不是一段纯文本
 
-> 注意，有的文章在进行 PaddleOCR-VL 微调的时候，会提到 `Completion-Only Training` ，也就是只关心 `completion` 的信息（`no_mask` 部分）而不改变 `prompt` （`mask` 部分），但本文这里需要 `Full-Sequence Training`，而且重点是对 `prompt` 进行微调，需要 `completion` 根据 `prompt` 改变生成行为。
->
-> 另外，由于 PaddleOCR-VL-0.9B 模型参数量的限制，这里在修改 `prompt` 的时候也不会添加一些说明类的文字。
-
-## 模型微调
-
-微调的过程与 此 类似，首先安装 ERNIE：
-
-```bash
-cd paddleocr_vl
-git clone https://gitee.com/PaddlePaddle/ERNIE -b release/v1.4
-cd ERNIE
-python -m pip install -r requirements/gpu/requirements.txt
-python -m pip install -e .
-python -m pip install tensorboard
-python -m pip install opencv-python-headless
-python -m pip install numpy==1.26.4
-```
-
-然后，修改配置文件并复制覆盖原有配置文件：
-
-```bash
-cp paddleocr_vl/sft_config/run_ocr_vl_sft_16k.yaml \
-  paddleocr_vl/ERNIE/examples/configs/PaddleOCR-VL/sft/run_ocr_vl_sft_16k.yaml
-```
-
-下载 PaddleOCR-VL 模型，这里使用 modelscope 的 SDK：
-
-```bash
-pip install modelscope
-```
-
-```python
-from modelscope import snapshot_download
-model_dir = snapshot_download('PaddlePaddle/PaddleOCR-VL', local_dir='paddleocr_vl/paddleocr_vl_model')
-```
-
-最后，就是执行微调命令即可，在 AI Studio 的 A100 环境中进行微调，大约需要不到 1.5 小时。
-
-> V100 环境无法执行微调，但是可以进行模型推理
-
-```bash
-cd paddleocr_vl/ERNIE; CUDA_VISIBLE_DEVICES=0 \
- erniekit train examples/configs/PaddleOCR-VL/sft/run_ocr_vl_sft_16k.yaml
-```
-
-以下是训练的日志：
-
-![logs](images/logs.png)
-
-可以看到，`loss` 在稳定的下降，说明微调应该有效果。
-
-### 配置文件示例
+### 3. 配置文件示例
 
 ```yaml
 ### data
@@ -517,119 +802,3 @@ unified_checkpoint: True
 convert_from_hf: True
 save_to_hf: True
 ```
-
-## 模型推理
-
-微调完成后，可以使用微调后的模型进行推理。模型可以：
-
-1. 输出 `JSON` 格式的完整信息
-2. 根据不同的输入字段，输出对应的 `JSON` 格式的信息
-
-这为信息抽取任务提供了灵活的接口。
-
-按照 [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) 进行推理，首先需要安装必要的环境
-
-```bash
-python -m pip install -U "paddleocr[doc-parser]"
-python -m pip install https://paddle-whl.bj.bcebos.com/nightly/cu126/safetensors/safetensors-0.6.2.dev0-cp38-abi3-linux_x86_64.whl
-python -m pip install --force-reinstall opencv-python-headless
-python -m pip install numpy==1.26.4
-```
-
-此时，还不能直接进行模型的推理，因为，PaddleOCR 依赖的 PaddleX 中，目前对于 PaddleOCR-VL 仅支持 `['ocr', 'formula', 'table', 'chart']` 这四类 `prompt_label`，而我们的 `prompt` 显然无法通过代码的验证：
-
-参考 `paddlex/inference/pipelines/paddleocr_vl/pipeline.py` 文件
-
-``` python
-assert prompt_label.lower() in [
-    "ocr",
-    "formula",
-    "table",
-    "chart",
-], f"Layout detection is disabled (use_layout_detection=False). 'prompt_label' must be one of ['ocr', 'formula', 'table', 'chart'], but got '{prompt_label}'."
-
-```
-
-这里写了一个 patch 脚本，可以绕过以上限制：
-
-```bash
-python paddleocr_vl/patch/patch_assert_to_warning.py
-```
-
-然后，将以下文件拷贝到 PaddleOCR-VL-SFT 目录下，就可以愉快的进行推理验证了。
-
-```bash
-cp paddleocr_vl/paddleocr_vl_model/chat_template.jinja paddleocr_vl/PaddleOCR-VL-SFT
-cp paddleocr_vl/paddleocr_vl_model/inference.yml paddleocr_vl/PaddleOCR-VL-SFT
-```
-
-这里使用一张新的发票数据来进行模型的验证。
-
-```bash
-python -m paddleocr doc_parser -i paddleocr_vl/data/test.jpg \
-    --vl_rec_model_name "PaddleOCR-VL-0.9B" \
-    --vl_rec_model_dir "paddleocr_vl/PaddleOCR-VL-SFT" \
-    --save_path="paddleocr_vl/PaddleOCR-VL-SFT_response" \
-    --use_layout_detection=False \
-    --prompt_label="OCR:{}"
-```
-
-输出完整的信息：
-
-```text
-{'res': {'input_path': '/home/aistudio/paddleocr_vl/data/test.jpg', 'page_index': None, 'model_settings': {'use_doc_preprocessor': False, 'use_layout_detection': False, 'use_chart_recognition': False, 'format_block_content': False}, 'parsing_res_list': [{'block_label': 'OCR:{}', 'block_content': '{"发票信息": {"发票名称": "电子发票", "发票号码": "25332000000426443187", "开票日期": "2025年09月26日"}, "销售方信息": {"名称": "杭州万力酒店管理有限公司", "统一社会信用代码": "91330105MA2H2DUJ92", "纳税人识别号": "91330106MA2B1C4UXN"}, "项目名称": "规格型号", "单位": "个", "数量": "3 461.056105610561", "单价": "1383.17", "金额": "税率/征收率", "税额": "13.83"}, "合计": {"金额": "1383.17", "税额": "13.83"}, "价税合计（大写）": "壹仟叁佰玖拾柒圆整", "价税合计（小写）": "1397.00"}, "销售方地址": "浙江省杭州市西湖区转塘街道霞鸣街199号万美商务中心3号楼", "电话": "0571-85220222", "销方开户银行": "农行上泗支行", "入住人": "柳顺", "入住日期": "9月23日 入住-9月26日 退房", "入住天数": "3天", "金额": "1397元"},', 'block_bbox': [0, 0, 1260, 838]}]}}
-```
-
-注意两点：
-
-- `use_layout_detection=False`，不通过 layout 模型，而是直接将图片送入 `PaddleOCR-VL-0.9B`
-- `prompt_label="OCR:{}"`，这里使用我们微调的 `prompt` ，希望模型输出完整的 json 格式的信息
-
-> 注意，这里模型最终输出的数据实际上不完整，比如，缺少 `购买方` 信息，应该是微调数据较少导致的。
-
-再来看看微调之前的模型，只能输出 table 样式的数据:
-
-```bash
-python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
-    --vl_rec_model_name "PaddleOCR-VL-0.9B" \
-    --vl_rec_model_dir "/home/aistudio/paddleocr_vl/paddleocr_vl_model" \
-    --save_path="/home/aistudio/paddleocr_vl/paddleocr_vl_model_response" \
-    --use_layout_detection=False \
-    --prompt_label="OCR:"
-```
-
-输出：
-
-```text
-{'res': {'input_path': '/home/aistudio/paddleocr_vl/data/test.jpg', 'page_index': None, 'model_settings': {'use_doc_preprocessor': False, 'use_layout_detection': False, 'use_chart_recognition': False, 'format_block_content': False}, 'parsing_res_list': [{'block_label': 'OCR:', 'block_content': '购买方信息 | 名称 | 中青旅联科 | 杭州 | 公关顾问有限公司 | 销售方信息 | 名称 | 杭州万力酒店管理有限公司 | 统一社会信用代码/纳税人识别号 | 纳税人识别号 | 统一社会信用代码/纳税人识别号 | 税额 | 税额/征收率 | 税额/征收率\n**项目名称** | 规格型号 |   |   |   |   |   |   |   |   |   |   |   |  \n**住宿服务** | 住宿费 |   |   |   |   |   |   |   |   |   |   |   |  \n**合计** |   |   |   |   |   |   |   |   |   |   |   |   |  \n**价税合计（大写）** |   | 壹仟叁佰玖拾柒圆整 |   |   |   |   |   |   |   |   |   |   |  \n备注 | 销售方地址：浙江省杭州市西湖区转塘街道霞鸣街199号万美商务中心3号楼；电话：0571-85220222；销方开户银行：农行上泗支行；入住人：柳顺；入住日期：9月23日入住-9月26日退房；入住天数：3天；金额：1397元 |   |   |   |   |   |   |   |   |   |   |   |   |  \n开票人：祝营营', 'block_bbox': [0, 0, 1260, 838]}]}}
-
-```
-
-然后，测试一下只抽取部分信息：
-
-```bash
-python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
-    --vl_rec_model_name "PaddleOCR-VL-0.9B" \
-    --vl_rec_model_dir "/home/aistudio/paddleocr_vl/PaddleOCR-VL-SFT" \
-    --save_path="/home/aistudio/paddleocr_vl/PaddleOCR-VL-SFT_response" \
-    --use_layout_detection=False \
-    --prompt_label="OCR:{\"购买方名称\": {}, \"销售方名称\": {}}"
-```
-
-输出：
-
-```text
-{'res': {'input_path': '/home/aistudio/paddleocr_vl/data/test.jpg', 'page_index': None, 'model_settings': {'use_doc_preprocessor': False, 'use_layout_detection': False, 'use_chart_recognition': False, 'format_block_content': False}, 'parsing_res_list': [{'block_label': 'OCR:{"购买方名称": {}, "销售方名称": {}}', 'block_content': '{"购买方名称": {"名称": "中青旅联科（杭州）公关顾问有限公司", "统一社会信用代码": "91330105MA2H2DUJ92"}, "销售方名称": {"名称": "杭州万力酒店管理有限公司", "统一社会信用代码": "91330106MA2B1C4UXN"}}', 'block_bbox': [0, 0, 1260, 838]}]}}
-```
-
-可以看到，模型基本上可以跟随我们的指令抽取对应的信息。
-
-## 总结
-
-本文介绍了如何通过微调 PaddleOCR-VL 的提示词（prompt）来实现信息抽取任务。主要方法包括：
-
-1. **数据准备**：使用 VLM 模型生成结构化的训练数据，相比于传统标注方式更加高效。
-2. **提示词设计**：通过精心设计的提示词模板，让模型能够灵活地输出不同字段的 `JSON` 格式信息。
-3. **模型微调**：利用 PaddleOCR-VL 的微调能力，使其学会根据不同的提示词生成对应的输出。
-
-这种方法相比于传统的信息抽取方法（如 NER + 关系抽取），具有更好的集成度和灵活性。
