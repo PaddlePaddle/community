@@ -49,7 +49,7 @@ Here's an example of recognizing and extracting information from an invoice:
             "format_block_content": False
         },
         "parsing_res_list": [{
-            "block_label": "OCR:",
+            "block_label": "ocr",
             "block_content": "购买方信息 | 名称 | 中青旅联科 | 杭州 | 公关顾问有限公司 | 销售方信息 | 名称 | 杭州万力酒店管理有限公司 | 统一社会信用代码/纳税人识别号 | 纳税人识别号 | 统一社会信用代码/纳税人识别号 | 税额 | 税额/征收率 | 税额/征收率\n**项目名称** | 规格型号 |   |   |   |   |   |   |   |   |   |   |   |  \n**住宿服务** | 住宿费 |   |   |   |   |   |   |   |   |   |   |   |  \n**合计** |   |   |   |   |   |   |   |   |   |   |   |   |  \n**价税合计（大写）** |   | 壹仟叁佰玖拾柒圆整 |   |   |   |   |   |   |   |   |   |   |  \n备注 | 销售方地址：浙江省杭州市西湖区转塘街道霞鸣街199号万美商务中心3号楼；电话：0571-85220222；销方开户银行：农行上泗支行；入住人：柳顺；入住日期：9月23日入住-9月26日退房；入住天数：3天；金额：1397元 |   |   |   |   |   |   |   |   |   |   |   |   |  \n开票人：祝营营",
             "block_bbox": [0, 0, 1260, 838]
         }]
@@ -363,7 +363,7 @@ python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
     --vl_rec_model_dir "/home/aistudio/paddleocr_vl/paddleocr_vl_model" \
     --save_path="/home/aistudio/paddleocr_vl/paddleocr_vl_model_response" \
     --use_layout_detection=False \
-    --prompt_label="OCR:"
+    --prompt_label="ocr"
 ```
 
 Output:
@@ -380,7 +380,7 @@ Output:
             "format_block_content": False
         },
         "parsing_res_list": [{
-            "block_label": "OCR:",
+            "block_label": "ocr",
             "block_content": "购买方信息 | 名称 | 中青旅联科 | 杭州 | 公关顾问有限公司 | 销售方信息 | 名称 | 杭州万力酒店管理有限公司 | 统一社会信用代码/纳税人识别号 | 纳税人识别号 | 统一社会信用代码/纳税人识别号 | 税额 | 税额/征收率 | 税额/征收率\n**项目名称** | 规格型号 |   |   |   |   |   |   |   |   |   |   |   |  \n**住宿服务** | 住宿费 |   |   |   |   |   |   |   |   |   |   |   |  \n**合计** |   |   |   |   |   |   |   |   |   |   |   |   |  \n**价税合计（大写）** |   | 壹仟叁佰玖拾柒圆整 |   |   |   |   |   |   |   |   |   |   |  \n备注 | 销售方地址：浙江省杭州市西湖区转塘街道霞鸣街199号万美商务中心3号楼；电话：0571-85220222；销方开户银行：农行上泗支行；入住人：柳顺；入住日期：9月23日入住-9月26日退房；入住天数：3天；金额：1397元 |   |   |   |   |   |   |   |   |   |   |   |   |  \n开票人：祝营营",
             "block_bbox": [0, 0, 1260, 838]
         }]
