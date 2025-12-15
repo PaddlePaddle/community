@@ -508,7 +508,7 @@ print(result)
 
 ## Using PaddleOCR-VL-REC for Information Extraction
 
-You can use PaddleOCR-VL-REC for information extraction:
+You can use [PaddleOCR-VL-REC](https://github.com/megemini/PaddleOCR-VL-REC) for information extraction:
 
 ```python
 from paddleocr_vl_rec import PaddleOCRVLRec

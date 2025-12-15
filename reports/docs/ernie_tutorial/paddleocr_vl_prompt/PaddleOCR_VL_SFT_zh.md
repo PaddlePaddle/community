@@ -510,7 +510,7 @@ print(result)
 
 ## 使用 PaddleOCR-VL-REC 进行信息抽取
 
-可以使用 PaddleOCR-VL-REC 进行信息抽取：
+可以使用 [PaddleOCR-VL-REC](https://github.com/megemini/PaddleOCR-VL-REC) 进行信息抽取：
 
 ```python
 from paddleocr_vl_rec import PaddleOCRVLRec
