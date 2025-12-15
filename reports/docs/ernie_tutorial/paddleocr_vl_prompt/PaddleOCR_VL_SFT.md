@@ -1,10 +1,10 @@
-# 微调 PaddleOCR-VL 新姿势 -- Prompt 与 信息抽取
+# Fine-tuning PaddleOCR-VL with New Approaches -- Prompt and Information Extraction
 
-> AI Studio 项目地址：[微调 PaddleOCR-VL 新姿势 -- Prompt 与 信息抽取](https://aistudio.baidu.com/projectdetail/9857242) ，可在 AI Studio 的 A100 环境中直接运行（V100 环境只能进行模型推理，无法进行微调）
+> AI Studio Project Address: [Fine-tuning PaddleOCR-VL with New Approaches -- Prompt and Information Extraction](https://aistudio.baidu.com/projectdetail/9857242), which can be run directly in AI Studio's A100 environment (V100 environment can only perform model inference, not fine-tuning)
 
-## 引言
+## Introduction
 
-当使用 PaddleOCR-VL 时，会使用到如下的代码:
+When using PaddleOCR-VL, you would use code like the following:
 
 ```python
 CHOSEN_TASK = "ocr"  # Options: 'ocr' | 'table' | 'chart' | 'formula'
@@ -16,26 +16,25 @@ PROMPTS = {
 }
 ```
 
-因此，PaddleOCR-VL 可以识别文本、公式、表格和图表元素。
+Therefore, PaddleOCR-VL can recognize text, formulas, tables, and chart elements.
 
-PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision-Language Model, VLM），是通过 `提示词` 完成不同任务的。
+PaddleOCR-VL, as a Vision-Language Model (VLM) specifically designed for document understanding, accomplishes different tasks through `prompts`.
 
-目前对于 PaddleOCR-VL 的微调 [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) 也是围绕这四类任务展开的。
+Currently, the fine-tuning of PaddleOCR-VL [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) also revolves around these four types of tasks.
 
-本文从微调 PaddleOCR-VL 的 `提示词` 入手，介绍如何通过微调 PaddleOCR-VL 用于 `信息抽取`。
+This article starts with fine-tuning the `prompts` of PaddleOCR-VL and introduces how to use fine-tuned PaddleOCR-VL for `information extraction`.
 
-### 微调结果对比
+### Fine-tuning Results Comparison
 
-这里以识别与抽取一张发票内的信息为例：
+Here's an example of recognizing and extracting information from an invoice:
 
-**微调之前**
+**Before Fine-tuning**
 
 ![raw](images/raw.png)
 
 <details>
 
-<summary> 点击查看原始输出 </summary>
-
+<summary>Click to view the raw data</summary>
 
 ```json
 
@@ -61,13 +60,13 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 
 </details>
 
-**微调之后**
+**After Fine-tuning**
 
 ![after](images/sft.png)
 
 <details>
 
-<summary> 点击查看微调之后的输出 </summary>
+<summary>Click to view the fine-tuning data</summary>
 
 ```json
 {
@@ -90,7 +89,7 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 
 ```
 
-或者指定字段抽取特定信息：
+Or specify fields to extract specific information:
 
 ``` json
 {
@@ -115,20 +114,18 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 
 </details>
 
-微调之后可以输出 `JSON` 格式的数据，并且可以根据不同的 `prompt`（这里的 `block_label`）输出对应的信息。
+After fine-tuning, it can output data in `JSON` format and can output corresponding information based on different `prompts` (here `block_label`).
 
-> 由于此次微调的数据量很少，因此微调结果并不好，此处仅做参考。
+> Due to the small amount of data used in this fine-tuning, the fine-tuning results are not very good. This is for reference only.
 
-关于 PaddleOCR-VL 的微调，[PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) 中已经有很详细的介绍，由于本文微调针对的是 `prompt`，因此在：
+Regarding the fine-tuning of PaddleOCR-VL, [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) already has a very detailed introduction. Since this article's fine-tuning targets `prompts`, the following two parts are slightly different from the original text:
 
-- 数据准备
-- 模型推理
+- Data preparation
+- Model inference
 
-这两部分与原文略有不同。
+## Data Preparation
 
-## 数据准备
-
-使用 ERNIE 对 PaddleOCR-VL 进行微调，需要准备 `JSON` 格式的数据与对应的图片数据：
+When fine-tuning PaddleOCR-VL with ERNIE, you need to prepare data in `JSON` format along with corresponding image data:
 
 ```json
 {
@@ -137,18 +134,18 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
     ],
     "text_info": [
         {"text": "OCR:", "tag": "mask"},
-        {"text": "দডর মথ বধ বকসট একনজর দখই চনত পরল তর অনমন\nঠক পনতই লকয রখছ\nর নচ থকই চচয বলল কশর, “এইই; পযছ! পযছ!'\nওপর", "tag": "no_mask"},
+        {"text": "Some text content here", "tag": "no_mask"},
     ]
 }
 ```
 
-其中，
+Where:
 
-- `image_url` 是图片的路径
-- `tag` 是 `mask` 的 `text_info` 对应 `prompt` 部分，也就是 PaddleOCR-VL 的 `TASK` 类型
-- `tag` 是 `no_mask` 的 `text_info` 对应 `completion` 部分，也就是模型的输出
+- `image_url` is the image path
+- `text_info` with `tag` as `mask` corresponds to the `prompt` part, which is the `TASK` type of PaddleOCR-VL
+- `text_info` with `tag` as `no_mask` corresponds to the `completion` part, which is the model's output
 
-原始模型中只有
+The original model only has these four types of `prompt`:
 
 ```json
 {
@@ -159,7 +156,7 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
 }
 ```
 
-这四类 `prompt`，而我们希望，模型能够根据我们的指令抽取对应的信息，因此需要自定义 `prompt`：
+However, we want the model to extract information according to our custom instructions, so we need to define custom `prompt`:
 
 ```json
 {
@@ -171,41 +168,41 @@ PaddleOCR-VL 作为一款专为文档理解设计的视觉-语言模型（Vision
     ],
     "text_info": [
         {
-            "text": "OCR:{\"发票名称\": \"\"}",
+            "text": "OCR:{\"invoice_number\": \"\"}",
             "tag": "mask"
         },
         {
-            "text": "{\"发票名称\": \"广东增值税专用发票\"}",
+            "text": "{\"invoice_number\": \"25332000000426443187\"}",
             "tag": "no_mask"
         }
     ]
 }
 ```
 
-这里 `tag` 为 `mask` 的 `text` 不是 `OCR:` 而是 `OCR:{\"发票名称\": \"\"}`，也就是说，我们希望模型抽取，且仅输出 `发票名称` 字段。
+Here, the `text` in `mask` is not just `OCR:` but `OCR:{\"invoice_number\": \"\"}`, meaning we want the model to extract and output only the `invoice_number` field.
 
-保留原始的 `OCR:` 部分，是为了保证模型能够识别 `OCR:` 部分，而仅对 `{\"发票名称\": \"\"}` 部分进行微调。
+We retain the original `OCR:` part to ensure the model can recognize it, while fine-tuning only the `{\"invoice_number\": \"\"}` part.
 
-`tag` 为 `no_mask` 的 `text` 部分直接输出 `JSON` 格式的数据，并且与 `prompt` 对应。
+The `text` part in `no_mask` directly outputs data in `JSON` format, corresponding to the `prompt`.
 
-最后，我们这里设计 `prompt` 为：
+Finally, we design the `prompt` as follows:
 
 ``` text
-# 特定值为字符串，如 `{"发票编码":"123456"}`
+# When specific value is a string, e.g., `{"invoice_code":"123456"}`
 "OCR:{\"xxx\":\"\"}"
 
-# 特定值为字典，如 `{"购买方":{"名称":"A公司"}}`
+# When specific value is a dictionary, e.g., `{"buyer":{"name":"Company A"}}`
 "OCR:{\"xxx\":{}}"
 
-# 特定值为列表，如 `{"货物或应税劳务、服务名称":[{"名称":"A产品"},{"名称":"B产品"}]}`
+# When specific value is a list, e.g., `{"items":[{"name":"Product A"},{"name":"Product B"}]}`
 "OCR:{\"xxx\":[]}"
 ```
 
-具体如何构建数据集，可以参考后续的附录部分。
+For details on how to construct the dataset, refer to the appendix section below.
 
-## 模型微调
+## Model Fine-tuning
 
-微调的过程与 此 类似，首先安装 ERNIE：
+The fine-tuning process is similar to this. First, install ERNIE:
 
 ```bash
 cd paddleocr_vl
@@ -218,14 +215,14 @@ python -m pip install opencv-python-headless
 python -m pip install numpy==1.26.4
 ```
 
-然后，修改配置文件并复制覆盖原有配置文件：
+Then, modify the configuration file and copy it to overwrite the original configuration file:
 
 ```bash
 cp paddleocr_vl/sft_config/run_ocr_vl_sft_16k.yaml \
   paddleocr_vl/ERNIE/examples/configs/PaddleOCR-VL/sft/run_ocr_vl_sft_16k.yaml
 ```
 
-下载 PaddleOCR-VL 模型，这里使用 modelscope 的 SDK：
+Download the PaddleOCR-VL model, here using modelscope's SDK:
 
 ```bash
 pip install modelscope
@@ -236,32 +233,31 @@ from modelscope import snapshot_download
 model_dir = snapshot_download('PaddlePaddle/PaddleOCR-VL', local_dir='paddleocr_vl/paddleocr_vl_model')
 ```
 
-最后，就是执行微调命令即可，在 AI Studio 的 A100 环境中进行微调，大约需要不到 1.5 小时。
+Finally, execute the fine-tuning command. Fine-tuning in AI Studio's A100 environment takes less than 1.5 hours.
 
-> V100 环境无法执行微调，但是可以进行模型推理
+> V100 environment cannot perform fine-tuning but can perform model inference
 
 ```bash
 cd paddleocr_vl/ERNIE; CUDA_VISIBLE_DEVICES=0 \
  erniekit train examples/configs/PaddleOCR-VL/sft/run_ocr_vl_sft_16k.yaml
 ```
 
-以下是训练的日志：
+Here are the training logs:
 
 ![logs](images/logs.png)
 
-可以看到，`loss` 在稳定的下降，说明微调应该有效果。
+As you can see, `loss` is steadily decreasing, indicating that the fine-tuning should be effective.
 
+## Model Inference
 
-## 模型推理
+After fine-tuning is completed, you can use the fine-tuned model for inference. The model can:
 
-微调完成后，可以使用微调后的模型进行推理。模型可以：
+1. Output complete information in `JSON` format
+2. Output corresponding `JSON` format information based on different input fields
 
-1. 输出 `JSON` 格式的完整信息
-2. 根据不同的输入字段，输出对应的 `JSON` 格式的信息
+This provides a flexible interface for information extraction tasks.
 
-这为信息抽取任务提供了灵活的接口。
-
-按照 [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) 进行推理，首先需要安装必要的环境
+Follow [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) for inference. First, you need to install the necessary environment
 
 ```bash
 python -m pip install -U "paddleocr[doc-parser]"
@@ -270,9 +266,9 @@ python -m pip install --force-reinstall opencv-python-headless
 python -m pip install numpy==1.26.4
 ```
 
-此时，还不能直接进行模型的推理，因为，PaddleOCR 依赖的 PaddleX 中，目前对于 PaddleOCR-VL 仅支持 `['ocr', 'formula', 'table', 'chart']` 这四类 `prompt_label`，而我们的 `prompt` 显然无法通过代码的验证：
+At this point, you still cannot directly perform model inference because, in PaddleX, which PaddleOCR depends on, PaddleOCR-VL currently only supports these four types of `prompt_label`: `['ocr', 'formula', 'table', 'chart']`, and our `prompt` obviously cannot pass the code validation:
 
-参考 `paddlex/inference/pipelines/paddleocr_vl/pipeline.py` 文件
+Refer to the `paddlex/inference/pipelines/paddleocr_vl/pipeline.py` file
 
 ``` python
 assert prompt_label.lower() in [
@@ -284,20 +280,20 @@ assert prompt_label.lower() in [
 
 ```
 
-这里写了一个 patch 脚本，可以绕过以上限制：
+Here is a patch script that can bypass the above restriction:
 
 ```bash
 python paddleocr_vl/patch/patch_assert_to_warning.py
 ```
 
-然后，将以下文件拷贝到 PaddleOCR-VL-SFT 目录下，就可以愉快的进行推理验证了。
+Then, copy the following files to the PaddleOCR-VL-SFT directory, and you can happily perform inference verification.
 
 ```bash
 cp paddleocr_vl/paddleocr_vl_model/chat_template.jinja paddleocr_vl/PaddleOCR-VL-SFT
 cp paddleocr_vl/paddleocr_vl_model/inference.yml paddleocr_vl/PaddleOCR-VL-SFT
 ```
 
-这里使用一张新的发票数据来进行模型的验证。
+Here, a new invoice data is used to verify the model.
 
 ```bash
 python -m paddleocr doc_parser -i paddleocr_vl/data/test.jpg \
@@ -308,7 +304,7 @@ python -m paddleocr doc_parser -i paddleocr_vl/data/test.jpg \
     --prompt_label="OCR:{}"
 ```
 
-输出完整的信息：
+Output complete information:
 
 ```json
 {
@@ -352,14 +348,14 @@ python -m paddleocr doc_parser -i paddleocr_vl/data/test.jpg \
 }
 ```
 
-注意两点：
+Note two points:
 
-- `use_layout_detection=False`，不通过 layout 模型，而是直接将图片送入 `PaddleOCR-VL-0.9B`
-- `prompt_label="OCR:{}"`，这里使用我们微调的 `prompt` ，希望模型输出完整的 json 格式的信息
+- `use_layout_detection=False`, not through the layout model, but directly sending the image to `PaddleOCR-VL-0.9B`
+- `prompt_label="OCR:{}"`, here we use our fine-tuned `prompt`, hoping the model outputs complete json format information
 
-> 注意，这里模型最终输出的数据实际上不完整，比如，缺少 `购买方` 信息，应该是微调数据较少导致的。
+> Note, the data finally output by the model is actually incomplete, for example, missing `购买方` (Buyer) information, which should be caused by the small amount of fine-tuning data.
 
-再来看看微调之前的模型，只能输出 table 样式的数据:
+Now let's look at the model before fine-tuning, which can only output table-style data:
 
 ```bash
 python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
@@ -370,7 +366,7 @@ python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
     --prompt_label="ocr"
 ```
 
-输出：
+Output:
 
 ```json
 {
@@ -390,9 +386,11 @@ python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
         }]
     }
 }
+
+
 ```
 
-然后，测试一下只抽取部分信息：
+Then, let's test extracting only partial information:
 
 ```bash
 python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
@@ -403,7 +401,7 @@ python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
     --prompt_label="OCR:{\"购买方名称\": {}, \"销售方名称\": {}}"
 ```
 
-输出：
+Output:
 
 ```json
 {
@@ -434,49 +432,156 @@ python -m paddleocr doc_parser -i /home/aistudio/paddleocr_vl/data/test.jpg \
 }
 ```
 
-可以看到，模型基本上可以跟随我们的指令抽取对应的信息。
+As you can see, the model can basically follow our instructions to extract corresponding information.
 
-## 总结
+## Using transformers Library for Information Extraction
 
-本文介绍了如何通过微调 PaddleOCR-VL 的提示词（prompt）来实现信息抽取任务。主要方法包括：
+You can use the transformers library for information extraction, referring to [[Model] Add PaddleOCR-VL Model Support by zhang-prog](https://github.com/huggingface/transformers/pull/42178)
 
-1. **数据准备**：使用 VLM 模型生成结构化的训练数据，相比于传统标注方式更加高效。
-2. **提示词设计**：通过精心设计的提示词模板，让模型能够灵活地输出不同字段的 `JSON` 格式信息。
-3. **模型微调**：利用 PaddleOCR-VL 的微调能力，使其学会根据不同的提示词生成对应的输出。
+> Note: Currently, the generated model directory after fine-tuning has not been synchronized for updates. When using the transformers library for information extraction, you need to first download the latest model from [huggingface](https://huggingface.co/PaddlePaddle/PaddleOCR-VL/tree/main), then rename the fine-tuned model file `model-00001-of-00001.safetensors` to `model.safetensors` and place it (overwriting) in the downloaded model directory.
 
-这种方法相比于传统的信息抽取方法（如 NER + 关系抽取），具有更好的集成度和灵活性。
+```python
+from transformers import pipeline
 
-## 附录
+pipe = pipeline(
+    "image-text-to-text", 
+    model="./PaddleOCR_VL_SFT/PaddleOCR-VL", # downloaded model directory
+    dtype="bfloat16")
+messages = [
+    {
+        "role": "user",
+        "content": [
+            {"type": "image", "url": "https://ai-studio-static-online.cdn.bcebos.com/dc31c334d4664ca4955aa47d8e202a53a276fd0aab0840b09abe953fe51207d0"},
+            {"type": "text", "text": "OCR:{}"},
+        ]
+    }
+]
+result = pipe(text=messages)
+print(result)
 
-### 1. 数据集
+```
 
-信息抽取的应用场景有很多，这里以 [增值税普通发票](https://aistudio.baidu.com/datasetdetail/125158) 数据为例。
+If GPU memory is insufficient, you can try the following quantization method:
 
-> 可以参考 [基于VI-LayoutXLM的发票关键信息抽取](https://bbs.huaweicloud.com/blogs/383854) 这篇文章，对于微调 PaddleOCR 模型进行信息抽取做了比较完整的讲解。
+```python
+from transformers import AutoProcessor, AutoModelForImageTextToText, BitsAndBytesConfig
+import torch
 
-但是，数据集对于 `关系抽取（Relation Extraction）` 的标注还是比较简陋的，比如:
+path = "./PaddleOCR_VL_SFT/PaddleOCR-VL", # downloaded model directory
+processor = AutoProcessor.from_pretrained(path, local_files_only=True, use_fast=True)
 
-![增值税普通发票](images/re.jpg)
+# 4-bit quantization configuration to significantly reduce GPU memory usage
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4"
+)
+model = AutoModelForImageTextToText.from_pretrained(
+    path,
+    quantization_config=quantization_config,
+    # device_map="auto",
+    local_files_only=True
+)
+messages = [
+    {
+        "role": "user",
+        "content": [
+            {"type": "image", "url": "https://ai-studio-static-online.cdn.bcebos.com/dc31c334d4664ca4955aa47d8e202a53a276fd0aab0840b09abe953fe51207d0"},
+            {"type": "text", "text": "OCR:{\"Invoice Date\": \"\"}"},
+        ]
+    }
+]
+inputs = processor.apply_chat_template(
+    messages,
+    add_generation_prompt=True,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt",
+).to(model.device)
 
-这里只标注了 `名称`，而没有标注说明是 `购买方名称` 还是 `销售方名称`。
+outputs = model.generate(**inputs, max_new_tokens=100)
+result = processor.decode(outputs[0][inputs["input_ids"].shape[-1]:-1])
+print(result)
 
-前面提到，我们可以把 PaddleOCR-VL 当作 VLM 模型来使用，那么，我们可以让能力更强的 VLM 模型来 `教` PaddleOCR-VL 去识别 `购买方名称` 和 `销售方名称`。
+```
 
-数据可以通过 `ernie-4.5-turbo-vl-preview` 模型来生成，参考脚本 `paddleocr_vl/tools/extract_ner/extract_ner.py`。
+## Using PaddleOCR-VL-REC for Information Extraction
+
+You can use PaddleOCR-VL-REC for information extraction:
+
+```python
+from paddleocr_vl_rec import PaddleOCRVLRec
+
+# Initialize the recognizer
+recognizer = PaddleOCRVLRec(
+    model_dir="path/to/your/model"
+)
+
+# Use dict as query (will be converted to JSON string)
+# Returns JSON format (parse results using json_repair)
+result_json = recognizer.predict(
+    image="/path/to/your/image.jpg",
+    query={"NAME":"", "ITEMS":[]},
+    return_json=True
+)
+# result_json is a dictionary object
+print(type(result_json))  # <class 'dict'>
+print(result_json)
+
+# Use list as query (will be converted to {"item1":"", "item2":""} format)
+result_json = recognizer.predict(
+    image="/path/to/your/image.jpg",
+    query=["item1", "item2"],
+    return_json=True
+)
+print(result_json)
+
+recognizer.close()
+
+```
+
+## Summary
+
+This article introduces how to implement information extraction tasks by fine-tuning the prompts of PaddleOCR-VL. The main methods include:
+
+1. **Data Preparation**: Using VLM models to generate structured training data, which is more efficient compared to traditional annotation methods.
+2. **Prompt Design**: Through carefully designed prompt templates, the model can flexibly output `JSON` format information for different fields.
+3. **Model Fine-tuning**: Utilizing PaddleOCR-VL's fine-tuning capability to make it learn to generate corresponding outputs based on different prompts.
+
+Compared to traditional information extraction methods (such as NER + relation extraction), this method has better integration and flexibility.
+
+## Appendix
+
+### 1. Dataset
+
+There are many application scenarios for information extraction. Here, we use [VAT Ordinary Invoice](https://aistudio.baidu.com/datasetdetail/125158) data as an example.
+
+> You can refer to the article [Invoice Key Information Extraction Based on VI-LayoutXLM](https://bbs.huaweicloud.com/blogs/383854), which provides a relatively complete explanation of fine-tuning PaddleOCR models for information extraction.
+
+However, the dataset's annotation for `Relation Extraction` is quite crude. For example:
+
+![VAT Ordinary Invoice](images/re.jpg)
+
+Here only `名称` (Name) is annotated, without specifying whether it's `购买方名称` (Buyer Name) or `销售方名称` (Seller Name).
+
+As mentioned earlier, we can use PaddleOCR-VL as a VLM model. Therefore, we can let a more capable VLM model `teach` PaddleOCR-VL to recognize `购买方名称` (Buyer Name) and `销售方名称` (Seller Name).
+
+Data can be generated through the `ernie-4.5-turbo-vl-preview` model, referring to the script `paddleocr_vl/tools/extract_ner/extract_ner.py`.
 
 ``` python
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-多模态图像识别脚本
-通过调用OpenAI接口识别图片信息并返回JSON格式数据
-支持本地图片和多模态大模型处理
+Multimodal Image Recognition Script
+Recognizes image information by calling OpenAI API and returns JSON format data
+Supports local images and multimodal large model processing
 """
 ...
 
 class MultimodalImageRecognizer:
-    """多模态图像识别器"""
+    """Multimodal Image Recognizer"""
     ...
 
     def recognize_image(
@@ -487,30 +592,30 @@ class MultimodalImageRecognizer:
         max_tokens: int = 2048
     ) -> Dict[str, Any]:
         """
-        识别图片信息
+        Recognize image information
 
         Args:
-            image_input: 图片路径、URL或base64编码
-            prompt: 用户提示词
-            system_prompt: 系统提示词
-            max_tokens: 最大令牌数
+            image_input: Image path, URL, or base64 encoding
+            prompt: User prompt
+            system_prompt: System prompt
+            max_tokens: Maximum number of tokens
 
         Returns:
-            识别结果的JSON格式数据
+            JSON format data of recognition results
         """
         try:
-            # 创建多模态消息
+            # Create multimodal message
             content = self.create_multimodal_message(prompt, image_input)
 
-            # 构建消息列表
+            # Build message list
             messages = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": content}
             ]
 
-            logger.info(f"开始调用API识别图片，模型: {self.model}")
+            logger.info(f"Starting API call to recognize image, model: {self.model}")
 
-            # 调用API
+            # Call API
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
@@ -526,16 +631,16 @@ class MultimodalImageRecognizer:
         analysis_type: str = "document"
     ) -> Dict[str, Any]:
         """
-        分析图片内容（简化版本）
+        Analyze image content (simplified version)
 
         Args:
-            image_input: 图片路径、URL或base64编码
-            analysis_type: 分析类型，固定为 "document"
+            image_input: Image path, URL, or base64 encoding
+            analysis_type: Analysis type, fixed as "document"
 
         Returns:
-            分析结果的JSON格式数据
+            JSON format data of analysis results
         """
-        # 统一使用文档分析提示词
+        # Use document analysis prompt uniformly
         prompt = "请分析这张文档图片中的所有信息，并返回完整的JSON格式数据。如果有的字段没有值，那么保留此字段，值为空。注意：所有的值都以string的形式返回，不要使用数字类型等。"
         system_prompt = '''
 你是一个专业的文档分析助手，能够准确分析文档内容并返回结构化的JSON数据。
@@ -560,7 +665,7 @@ class MultimodalImageRecognizer:
 ...
 ```
 
-使用 `paddleocr_vl/tools/extract_ner/batch_extract_ner.py` 脚本可以批量生成数据，最终生成的数据参考如下：
+Use the `paddleocr_vl/tools/extract_ner/batch_extract_ner.py` script to batch generate data. The final generated data is as follows:
 
 ``` json
 
@@ -622,39 +727,39 @@ class MultimodalImageRecognizer:
 
 ```
 
-这里生成的数据信息比原有的标注信息丰富很多，虽然有一些瑕疵 (比如 `货物或应税劳务、服务名称` 中应该只有一条记录)，但是不妨碍进行微调实验的进行。
+The data information generated here is much richer than the original annotation information. Although there are some flaws (for example, `货物或应税劳务、服务名称` should only have one record), it does not hinder the fine-tuning experiment.
 
-> 处理后的数据已经上传至 [增值税普通发票与JSON格式信息](https://aistudio.baidu.com/dataset/detail/363136/intro)。
+> The processed data has been uploaded to [VAT Ordinary Invoice and JSON Format Information](https://aistudio.baidu.com/dataset/detail/363136/intro).
 
-### 2. 提示词
+### 2. Prompts
 
-这里的 `信息抽取` 任务，目标是：
+The goal of the `information extraction` task here is:
 
-- 模型可以输出 `JSON` 格式的完整信息
-- 模型可以根据不同的输入字段，输出对应的 `JSON` 格式的信息
+- The model can output complete information in `JSON` format
+- The model can output corresponding `JSON` format information based on different input fields
 
-针对以上目标，这里设计了对应的提示词：
+For the above goals, corresponding prompts are designed here:
 
-**完整信息**
+**Complete Information**
 
 ```
 "OCR:{}"
 ```
 
-**特定信息**
+**Specific Information**
 
 ```
-# 特定值为字符串，如 `{"发票编码":"123456"}`
+# Specific value is a string, such as `{"发票编码":"123456"}`
 "OCR:{\"xxx\":\"\"}"
 
-# 特定值为字典，如 `{"购买方":{"名称":"A公司"}}`
+# Specific value is a dictionary, such as `{"购买方":{"名称":"A公司"}}`
 "OCR:{\"xxx\":{}}"
 
-# 特定值为列表，如 `{"货物或应税劳务、服务名称":[{"名称":"A产品"},{"名称":"B产品"}]}`
+# Specific value is a list, such as `{"货物或应税劳务、服务名称":[{"名称":"A产品"},{"名称":"B产品"}]}`
 "OCR:{\"xxx\":[]}"
 ```
 
-可以使用 `paddleocr_vl/tools/process_ner_dataset.py` 生成完整的训练数据，包括随机生成的提示词：
+You can use `paddleocr_vl/tools/process_ner_dataset.py` to generate complete training data, including randomly generated prompts:
 
 ```bash
 python paddleocr_vl/tools/process_ner_dataset.py paddleocr_vl/data/zzsptfp \
@@ -664,7 +769,7 @@ python paddleocr_vl/tools/process_ner_dataset.py paddleocr_vl/data/zzsptfp \
   -u /home/aistudio/paddleocr_vl/data/zzsptfp
 ```
 
-之后，拆分训练数据集与验证数据集：
+Then, split the training dataset and validation dataset:
 
 ```bash
 python paddleocr_vl/tools/split_jsonl.py paddleocr_vl/output.jsonl \
@@ -673,7 +778,7 @@ python paddleocr_vl/tools/split_jsonl.py paddleocr_vl/output.jsonl \
   --seed 123
 ```
 
-最终生成的数据参考如下：
+The final generated data is as follows:
 
 ```json
 {
@@ -696,12 +801,12 @@ python paddleocr_vl/tools/split_jsonl.py paddleocr_vl/output.jsonl \
 }
 ```
 
-生成的训练数据与 [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) 不同处有：
+The differences between the generated training data and [PaddleOCR-VL-0.9B SFT](https://github.com/PaddlePaddle/ERNIE/blob/release/v1.4/docs/paddleocr_vl_sft_zh.md) are:
 
-- `mask` 的 `text` 不仅仅是 `OCR:` ，还包括之后需要抽取的字段信息
-- `no_mask` 的 `text` 是完整的 `JSON` 格式信息，而不是一段纯文本
+- The `text` of `mask` is not just `OCR:`, but also includes the field information to be extracted later
+- The `text` of `no_mask` is complete `JSON` format information, not a plain text
 
-### 3. 配置文件示例
+### 3. Configuration File Example
 
 ```yaml
 ### data
