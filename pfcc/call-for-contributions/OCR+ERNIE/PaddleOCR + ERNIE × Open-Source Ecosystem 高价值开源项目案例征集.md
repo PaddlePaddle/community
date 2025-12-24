@@ -70,7 +70,7 @@
 * 技术 Blog：[https://liaoyfbh.github.io/blog/src/posts/high-precision-rag-system.html](https://liaoyfbh.github.io/blog/src/posts/high-precision-rag-system.html)
 * 星河应用：[https://aistudio.baidu.com/application/detail/107183](https://aistudio.baidu.com/application/detail/107183)
 * 星河 Notebook：[https://aistudio.baidu.com/projectdetail/9812333](https://aistudio.baidu.com/projectdetail/9812333)
-* Milvus社区发布：待发布..
+* Milvus社区发布：[https://mp.weixin.qq.com/s/sXtgEp_auvoiA-eYVnAM-g](https://mp.weixin.qq.com/s/sXtgEp_auvoiA-eYVnAM-g)
 
 这是一个 **高精度的多文档 RAG 系统**，已被多个开发者 fork、二次开发，是我们希望持续打造的项目类型。
 
