@@ -20,16 +20,19 @@
 **任务说明**：
 
 为了能够低成本接入其他框架生态中丰富的算子库，我们目前引入了一个兼容方案，通过自底向上「C++ API 兼容层」、「算子注册兼容层」、「Python 接口兼容层」、「Python API 代理层」等多层兼容机制，实现对其他框架生态算子的支持。目前生态兼容方案架构已经逐渐成型，并在基于 PyTorch、TVM FFI 生态的算子库中完成了验证，但在实际使用过程中暴露了一些机制不完善的问题，需要进一步完善兼容机制，提升跨生态自定义算子注册的兼容能力和易用性。
+
 本任务专注于「算子注册兼容层」，需要完成以下工作内容：
-- 为 TORCH_LIBRARY 注册机制添加 schema 支持，为类型推导和参数绑定提供支持；
+
+- 为 `TORCH_LIBRARY` 注册机制添加 schema 支持，为类型推导和参数绑定提供支持；
 - 基于 schema 机制，完成复杂传参场景的支持，包括「默认参数」、「keyword 参数」功能；
 - 注册兼容层中实现 backend 选择逻辑，支持多 backend 场景下的算子注册和调用。
 
 **验收说明**：
+
 - 完成关于本任务的 RFC（合入 community 仓库）；
-- 完成 TORCH_LIBRARY 注册机制的 schema 支持，能够正确处理算子参数的类型，以及默认参数、keyword 参数传递功能，单测添加到 test/cpp/compat/torch_library_test.cc（合入 Paddle repo）；
+- 完成 `TORCH_LIBRARY` 注册机制的 schema 支持，能够正确处理算子参数的类型，以及默认参数、keyword 参数传递功能，单测添加到 `test/cpp/compat/torch_library_test.cc`（合入 Paddle repo）；
 - 完成多 backend 支持的注册兼容层实现，并新增相关单测（合入 Paddle repo）；
-- 基于上述功能，减少适配 paddlecodec 过程中进行的改动，并在相关改动恢复后仍能保证适配正确性（合入 PFCCLab/paddlecodec repo）。
+- 基于上述功能，减少适配 [paddlecodec](https://github.com/meta-pytorch/torchcodec/compare/main...PFCCLab:paddlecodec:paddle) 过程中进行的改动，并在相关改动恢复后仍能保证适配正确性（合入 [PFCCLab/paddlecodec](https://github.com/PFCCLab/paddlecodec) repo）。
 
 > 注意，利用 schema 的检查功能是可选的，我们不一定需要实现在 Paddle 兼容层做相关检查，因为我们默认这些库在其原生框架中已经经过了充分的测试和验证，我们需要保证的是在原生框架中能够通过的算子调用，在 Paddle 兼容层中也能正确通过即可。
 
@@ -40,8 +43,8 @@
 
 **参考资料：**
 
-- 跨生态自定义算子接入 - 原理和迁移方式
-- 兼容性生态库 paddlecodec
+- [跨生态自定义算子接入 - 原理和迁移方式](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/custom_op/cross_ecosystem_custom_op/design_and_migration_cn.html)
+- [兼容性生态库 paddlecodec](https://github.com/PFCCLab/paddlecodec)
 
 ## 【开源贡献个人挑战赛春节特别季-套件开发】任务详情
 
