@@ -91,8 +91,8 @@
 **详细描述**：
 
 实现Pytorch Geometric库（2.6.1版本）的conv模块，并将实现结果合入到paddle_geometric仓库
-- 参考代码链接：https://github.com/pyg-team/pytorch_geometric/tree/2.6.1/torch_geometric/nn/conv
-- 相关实现：https://github.com/PFCCLab/paddle_geometric
+- 参考代码链接：[https://github.com/pyg-team/pytorch_geometric/tree/2.6.1/torch_geometric/nn/conv](https://github.com/pyg-team/pytorch_geometric/tree/2.6.1/torch_geometric/nn/conv)
+- 相关实现：[https://github.com/PFCCLab/paddle_geometric](https://github.com/PFCCLab/paddle_geometric)
 
 **验收标准**：
 
@@ -160,7 +160,7 @@ pr/微信等方式给到百度工程师，工程师会给到百度云链接，�
 当前FastDeploy下一些文件缺少单测监控，需要添加单测代码，来提高文件中代码的单测覆盖率。
 本任务中，通过添加单测后提高的代码覆盖行数来确定PR的贡献度，每提高100行（四舍五入，比如150等同200行，140行等同100行）代码覆盖，贡献度累计0.1⭐️。
 
-开发者可通过链接来查看最新的代码覆盖情况：https://paddle-github-action.bj.bcebos.com/BRANCH/FastDeploy/develop/{完整的commit-id}/SM/CoverageData/full_coverage_report.csv，
+开发者可通过链接来查看最新的代码覆盖情况：[https://paddle-github-action.bj.bcebos.com/BRANCH/FastDeploy/develop/{完整的commit-id}/SM/CoverageData/full_coverage_report.csv](https://paddle-github-action.bj.bcebos.com/BRANCH/FastDeploy/develop/{完整的commit-id}/SM/CoverageData/full_coverage_report.csv)，
 在这个链接里，通过指定commit-id来查看对应commit-id下代码的覆盖情况（当前仅支持查看某一天最后一个commit的覆盖率）：
 
 <img width="984" height="40" alt="Image" src="https://github.com/user-attachments/assets/5d6d1dd5-a455-40d7-a430-024cbf29eca3" />
@@ -269,3 +269,45 @@ FastDeploy支持在Windows平台编译
 
 - 熟悉常见的扩散模型结构和计算流程. 了解SD、Flux模型结构.
 - 熟悉python, 熟悉cuda
+
+### NO.49 为 FastDeploy 支持投机解码功能
+
+**详细描述：**
+
+* 背景：
+
+    1. 投机解码有多种方法，目前 FastDeploy 中 ngram_match / hybrid_mtp_ngram 两种方法都用到了字符串匹配方法。
+    2. 但目前两个方法的核心匹配算子实现是 CPU 版本，需要做同步的 Device->CPU 的拷贝操作，对性能影响较大
+
+* 验证模型：[https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-Paddle](https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-Paddle)
+* 其他：该任务涉及到诸多细节，可1对1交流、沟通
+
+**提交内容**
+
+* 将两个 Kernel 优化为 GPU 版本，且性能不低于CPU版本，Kernel 分别是
+
+    1. FastDeploy/custom_ops/gpu_ops/speculate_decoding/ngram_match.cc
+    2. FastDeploy/custom_ops/gpu_ops/speculate_decoding/draft_model/ngram_match_mixed.cu
+
+* 两个Kernel逻辑有较为相似部分，Kernel 形式为提取共用的匹配逻辑，外加业务逻辑
+
+**验收要求：**
+
+* 在较长的匹配下，Kernel 性能优于或基本不劣于目前的 CPU kernel
+
+### NO.50 为 FastDeploy 新增 MiniCPM4.1-8B 模型
+
+**详细描述：**
+
+为 FastDeploy 提供部署高性能的 [openbmb/MiniCPM4.1-8B](https://huggingface.co/openbmb/MiniCPM4.1-8B) 系列模型的能力. 
+
+**提交内容**
+
+* MiniCPM4.1-8B相关模型的组网代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档. 
+* 如需开发自定义算子, 提交至 FastDeploy/custom_ops/gpu_ops/ 目录下.
+* 为 MiniCPM4.1-8B系列模型适配FastDeploy现有的各种低bit量化推理的能力.
+
+**技术要求：**
+
+* 熟悉常见的 LLM 模型结构和计算流程. 了解 MiniCPM4.1-8B 类模型结构.
+* 熟悉 python, 熟悉 cuda
