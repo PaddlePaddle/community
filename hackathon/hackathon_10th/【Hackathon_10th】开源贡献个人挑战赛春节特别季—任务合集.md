@@ -91,8 +91,8 @@
 **详细描述**：
 
 实现Pytorch Geometric库（2.6.1版本）的conv模块，并将实现结果合入到paddle_geometric仓库
-- 参考代码链接：https://github.com/pyg-team/pytorch_geometric/tree/2.6.1/torch_geometric/nn/conv
-- 相关实现：https://github.com/PFCCLab/paddle_geometric
+- 参考代码链接：[https://github.com/pyg-team/pytorch_geometric/tree/2.6.1/torch_geometric/nn/conv](https://github.com/pyg-team/pytorch_geometric/tree/2.6.1/torch_geometric/nn/conv)
+- 相关实现：[https://github.com/PFCCLab/paddle_geometric](https://github.com/PFCCLab/paddle_geometric)
 
 **验收标准**：
 
@@ -160,7 +160,7 @@ pr/微信等方式给到百度工程师，工程师会给到百度云链接，�
 当前FastDeploy下一些文件缺少单测监控，需要添加单测代码，来提高文件中代码的单测覆盖率。
 本任务中，通过添加单测后提高的代码覆盖行数来确定PR的贡献度，每提高100行（四舍五入，比如150等同200行，140行等同100行）代码覆盖，贡献度累计0.1⭐️。
 
-开发者可通过链接来查看最新的代码覆盖情况：https://paddle-github-action.bj.bcebos.com/BRANCH/FastDeploy/develop/{完整的commit-id}/SM/CoverageData/full_coverage_report.csv，
+开发者可通过链接来查看最新的代码覆盖情况：[https://paddle-github-action.bj.bcebos.com/BRANCH/FastDeploy/develop/{完整的commit-id}/SM/CoverageData/full_coverage_report.csv](https://paddle-github-action.bj.bcebos.com/BRANCH/FastDeploy/develop/{完整的commit-id}/SM/CoverageData/full_coverage_report.csv)，
 在这个链接里，通过指定commit-id来查看对应commit-id下代码的覆盖情况（当前仅支持查看某一天最后一个commit的覆盖率）：
 
 <img width="984" height="40" alt="Image" src="https://github.com/user-attachments/assets/5d6d1dd5-a455-40d7-a430-024cbf29eca3" />
