@@ -1,12 +1,12 @@
 # 跨生态自定义算子注册层兼容能力增强
 
-|任务名称 | 跨生态自定义算子注册层兼容能力增强 | 
+|任务名称 | 跨生态自定义算子注册层兼容能力增强 |
 |---|---|
-| 提交作者 | gouzil | 
-| 提交时间 | 2026-02-02 | 
-| 版本号 | V1.0 | 
-| 依赖飞桨版本 | develop | 
-|文件名 | 20260202_design_Cross_for_ecosystem_Op_Reg_Compatibility.md<br> | 
+| 提交作者 | gouzil |
+| 提交时间 | 2026-02-02 |
+| 版本号 | V1.0 |
+| 依赖飞桨版本 | develop |
+|文件名 | 20260202_design_Cross_for_ecosystem_Op_Reg_Compatibility.md<br> |
 
 # 一、概述
 ## 1、相关背景
@@ -96,7 +96,6 @@ flowchart LR
    - 调用对应 backend kernel。
 
 ### 主体设计选型考量
-- **Schema 解析复用 vs 自研**：优先复用兼容层已引入的 `c10` schema 解析能力（若可用），减少维护成本；若不可用，补充轻量 parser 但仅覆盖生态库所需子集。
 - **严格校验 vs 宽松绑定**：默认仅做参数绑定与必要类型转换，不强制全量 schema 校验；可通过环境变量启用严格校验用于调试。
 
 ## 2、关键技术点/子模块设计与实现方案
@@ -320,17 +319,13 @@ flowchart LR
 - 跨生态自定义算子接入 - 原理和迁移方式：https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/custom_op/cross_ecosystem_custom_op/design_and_migration_cn.html
 - 兼容性生态库 paddlecodec：https://github.com/PFCCLab/paddlecodec
 - PyTorch C++ 扩展与自定义算子（TORCH_LIBRARY 相关）：https://pytorch.org/docs/stable/cpp_extension.html
-- Paddle 兼容层 TORCH_LIBRARY/OperatorRegistry 等实现：\
-  https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/phi/api/include/compat/torch/library.h
-- Paddle 兼容层单测（torch_library_test）：\
-  https://github.com/PaddlePaddle/Paddle/blob/develop/test/cpp/compat/torch_library_test.cc
-- PyTorch FunctionSchema 定义：\
-  https://github.com/pytorch/pytorch/blob/main/c10/core/FunctionSchema.h
-- PyTorch schema 类型解析/映射（SchemaTypeParser）：\
-  https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/schema_type_parser.h \
-  https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/schema_type_parser.cpp
-- PyTorch schema 字符串解析（parseSchema/parseSchemaOrName）：\
-  https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/function_schema_parser.h \
-  https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/function_schema_parser.cpp
-- PyTorch schema 类型覆盖测试（op_registration_test.cpp）：\
-  https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/core/op_registration/op_registration_test.cpp
+- Paddle 兼容层 TORCH_LIBRARY/OperatorRegistry 等实现：https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/phi/api/include/compat/torch/library.h
+- Paddle 兼容层单测（torch_library_test）：https://github.com/PaddlePaddle/Paddle/blob/develop/test/cpp/compat/torch_library_test.cc
+- PyTorch FunctionSchema 定义： https://github.com/pytorch/pytorch/blob/main/c10/core/FunctionSchema.h
+- PyTorch schema 类型解析/映射（SchemaTypeParser）：
+  - https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/schema_type_parser.h
+  - https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/schema_type_parser.cpp
+- PyTorch schema 字符串解析（parseSchema/parseSchemaOrName）：
+  - https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/function_schema_parser.h
+  - https://github.com/pytorch/pytorch/blob/main/torch/csrc/jit/frontend/function_schema_parser.cpp
+- PyTorch schema 类型覆盖测试（op_registration_test.cpp）：https://github.com/pytorch/pytorch/blob/main/aten/src/ATen/core/op_registration/op_registration_test.cpp
