@@ -63,9 +63,9 @@ ECDFormerDataset/
 
 #### 设计思路
 ```python
-class ECDFormerDataset(Dataset):
-    _cache = None  # 类级别缓存
-    
+_cache = None  # 缓存
+
+class ECDFormerDataset(Dataset): 
     def __init__(self, path, Use_geometry_enhanced=True, Use_column_info=False):
         # 缓存机制：多次实例化直接返回
         if _cache:
