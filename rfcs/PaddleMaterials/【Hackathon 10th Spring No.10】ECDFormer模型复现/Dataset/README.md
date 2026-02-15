@@ -304,4 +304,4 @@ ir_loader = IRDataLoader(ir_dataset, batch_size=64)
 1. Li, H. et al. Decoupled peak property learning for efficient and interpretable electronic circular dichroism spectrum prediction. *Nature Computational Science*, 2025.
 2. ECDFormerDataset 设计文档：`ECDFormerDataset.md`
 3. IRDataset 设计文档：`IRDataset.md`
-4. PaddlePaddle Issue #77754：DataLoader cannot return non-Tensor data when `return_list=True`
+4. PaddlePaddle Issue #77754：DataLoader cannot return non-Tensor data
