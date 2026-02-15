@@ -242,9 +242,8 @@ ECFormer/                         # 项目总览
 1. Li, H. et al. [Decoupled peak property learning for efficient and interpretable electronic circular dichroism spectrum prediction](https://www.nature.com/articles/s43588-024-00757-7). *Nature Computational Science*, 2025.
 2. ECDFormer 官方代码仓库：[https://github.com/HowardLi1984/ECDFormer](https://github.com/HowardLi1984/ECDFormer)
 3. 【Hackathon 10th】开源贡献个人挑战赛 · 春节特别季：[https://github.com/PaddlePaddle/Paddle/issues/77429](https://github.com/PaddlePaddle/Paddle/issues/77429)
-4. 习近平总书记关于人工智能的重要论述：[http://theory.people.com.cn/n1/2026/0109/c40531-40641880.html](http://theory.people.com.cn/n1/2026/0109/c40531-40641880.html)
-5. 以人工智能为引领赋能高质量发展：[http://theory.people.com.cn/n1/2026/0109/c40531-40641880.html](http://theory.people.com.cn/n1/2026/0109/c40531-40641880.html)
-6. 子模块 RFC 文档：
+4. 以人工智能为引领赋能高质量发展：[http://theory.people.com.cn/n1/2026/0109/c40531-40641880.html](http://theory.people.com.cn/n1/2026/0109/c40531-40641880.html)
+5. 子模块 RFC 文档：
    - [Models/ECFormers.md](./Models/ECFormers.md)
    - [Dataset/README.md](./Dataset/README.md)
    - [Dataset/ECD_dataset.md](./Dataset/ECD_dataset.md)
