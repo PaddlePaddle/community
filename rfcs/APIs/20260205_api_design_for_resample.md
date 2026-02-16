@@ -106,6 +106,7 @@ paddle/audio/functional.py
 - 运行模式：动态图/静态图
 - 边界情况：输入为单通道/多通道/批量数据
 - 错误检查：无效采样率、非浮点输入、无效方法参数等
+- 在paddle仓库中，`Paddle/test/legacy_test/test_audio_functions.py`是对音频相关API进行测试的地方，所以应该在此处增加测试用例。
 
 ---
 
@@ -124,4 +125,5 @@ paddle/audio/functional.py
 - PyTorch Audio `resample` 实现
 - 数字信号处理相关文献（如《Discrete-Time Signal Processing》）
 - Paddle API 设计规范
+
 
