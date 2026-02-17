@@ -28,7 +28,6 @@
 2) **基于 schema 支持默认参数与 keyword 参数**，兼容复杂调用方式；
 3) **支持多 backend 注册与派发**，实现不同设备/后端的实现切换；
 4) **尽量减少生态库适配改动**，以 paddlecodec 为代表的生态库可保留原生注册方式。
-5) **不强制实现完整 schema 校验，但提供可选开关**，用于调试与生态库自检。
 
 
 ## 3、意义
@@ -92,8 +91,7 @@ flowchart LR
 
 3) 调用阶段：
    - 参数绑定器基于 schema 完成 **位置参数 + keyword 参数 + 默认值** 绑定；
-   - 基于输入 `Place` 选择 backend 实现（CPU/CUDA/XPU/...）；
-   - 调用对应 backend kernel。
+   - 按注册的 `DispatchKey` 选择实现并调用对应 backend kernel。
 
 ### 主体设计选型考量
 - **严格校验 vs 宽松绑定**：默认仅做参数绑定与必要类型转换，不强制全量 schema 校验；可通过环境变量启用严格校验用于调试。
@@ -105,12 +103,11 @@ flowchart LR
 
 **实现要点**：
 - **现状对齐**：`OperatorRegistration` 中的 schema 目前以 `std::string` 形式保存，`Library::def` 在遇到 `schema` 字符串时通过 `OperatorRegistry::register_schema` 直接登记原始字符串（未做解析）。
-- **目标改造（对齐 PyTorch）**：注册阶段将 schema string **解析为结构化 `FunctionSchema` 并保存**，后续参数绑定/类型推导均以结构化 schema 为准；原始字符串仅作为输入，不作为持久“数据源”（需要展示时由 `FunctionSchema::toString()` 生成规范化字符串）。
+- **目标改造（对齐 PyTorch）**：注册阶段将 schema string **解析为结构化 `FunctionSchema` 并保存**，后续参数绑定/类型推导均以结构化 schema 为准；原始字符串仅作为输入，不作为持久“数据源”（需要展示时通过 `operator<<` 输出）。
 - 实现 `c10::FunctionSchema`：
-  - 覆盖表格中的核心类型（标量/字符串/Tensor/Optional/Tuple 等）；
-  - 兼容 `List[T]`/`ArrayRef[T]`/固定长度列表 `T[N]` 及其可选/嵌套组合；
+  - 覆盖当前实现的核心类型（标量/字符串/Tensor/Optional/Tuple/固定长度列表 `T[N]`）；
   - 支持 alias/mutation 标注（如 `Tensor(a!)`）并保存在 schema 元数据中；
-  - 支持 `default value`、`*` keyword-only 分隔符；
+  - 支持 `default value`、`*` keyword-only 分隔符、`...`（vararg/varret）；
   - 保留参数名与默认值字符串，用于参数绑定。
 - Registry 以 `namespace::op` 为 key：保存 `FunctionSchema` 与 `implementations`，必要时可缓存派发所需的 `signature`/`metadata`；schema 字符串仅用于解析输入或调试展示。
 
@@ -126,45 +123,42 @@ flowchart LR
 | (Tensor, Tensor, Tensor)? | std::optional<std::tuple<at::Tensor, at::Tensor, at::Tensor>> | std::optional<std::tuple<paddle::Tensor, paddle::Tensor, paddle::Tensor>> |
 | Tensor(a!) / Tensor(a) | at::Tensor（带别名/写标注） | Tensor + alias/mutation 标注（建议保留在 schema 元数据中） |
 | float?/int?/bool?/str?/Tensor? | std::optional<T> | std::optional<T> |
-| T[] / List[T] | c10::List<T> / c10::ArrayRef<T> | c10::List<T> / c10::ArrayRef<T> |
+| T[N] / T[N]? | 固定长度列表（支持可选） | 固定长度列表（支持可选） |
 
 
 补充说明：
-- list 参数在 C++ 侧可用 `c10::List<T>` 或 `c10::ArrayRef<T>`（输入）绑定；legacy API 支持 `std::vector<T>`，但 `std::vector<bool>` 不支持（需改用 `List<bool>`）。
-- `Scalar` 在 `op_registration_test.cpp` 中标注 TODO，若需覆盖则建议映射到 `c10::Scalar`/`paddle::experimental::Scalar`。
+- 重点覆盖 torchcodec 所需的 Optional/Tuple/alias/kw-only/default/variadic 语法；
 - `Tensor(a!)` 中 `(a)` 表示 alias 集合，`!` 表示该 alias 会被写入；属于 schema 的别名/可变性标注，类型仍是 `Tensor`。
 - `(Tensor, Tensor, Tensor)?` 表示可选的 Tuple（`None` 或三元组 Tensor），常见于需要一次性传入多路映射/元信息的场景。
 
-**FunctionSchema 相关数据结构（对齐 PyTorch）**：
-- **c10::FunctionSchema**：算子 schema 的核心结构，包含算子名/重载名、参数列表、返回列表、可变参数标识、alias/分析信息等。
-- **c10::FunctionSchema 常用方法（示例）**：
-  - 基本访问：`operator_name()`、`name()`、`overload_name()`、`arguments()`、`returns()`、`getNamespace()`；
-  - 变参/可变返回：`is_vararg()`、`is_varret()`；
-  - 参数绑定：`checkAndNormalizeInputs(inputs, kwargs)`、`findErrorInKwargs(kwargs)`；
-  - 兼容性判断：`isBackwardCompatibleWith(old)`、`isForwardCompatibleWith(old)`；
-  - alias/mutation：`is_aliasing(arg)`、`is_mutable()`、`is_mutable(arg)`、`may_alias(lhs, rhs)`、`may_contain_alias(lhs, rhs)`；
-  - schema 变体：`cloneWithName(...)`、`cloneWithArguments(...)`、`cloneWithReturns(...)`、`cloneWithRemappedTypes(...)`、`cloneWithRealTypes(...)`；
-  - alias 分析：`aliasAnalysis()`、`setAliasAnalysis(...)`、`isDefaultAliasAnalysisKind()`；
+**FunctionSchema 相关数据结构（当前实现）**：
+- **c10::FunctionSchema**：算子 schema 的核心结构，包含参数列表、返回列表、可变参数标识等。
+- **c10::FunctionSchema 已实现方法**：`arguments()`、`returns()`、`is_vararg()`、`is_varret()`、`checkSchema()`。
 - **c10::Argument**：单个参数/返回的结构化描述，通常包含名称、类型（TypePtr）、默认值（IValue）、是否 keyword-only、alias 信息等。
-- **c10::Type / c10::TypePtr**：类型系统节点指针，常见子类包括 TensorType、OptionalType、ListType、TupleType、DictType、StringType、NumberType 等。
+- **c10::Type / c10::TypePtr**：类型系统节点指针，当前落地重点为 TensorType、OptionalType、TupleType、StringType、NumberType、DeviceObjType 等。
 - **c10::IValue**：默认值与运行时参数的通用载体（schema default value 及调用时实参承载）。
 - **c10::AliasInfo**：别名/可变性标注的数据结构（支持 `Tensor(a!)` 语义）。
-- **c10::OperatorName**：算子名 + overload 的统一表示（用于查找/注册/解析）。
 - **Schema 解析器**：`torch::jit::parseSchema` / `parseSchemaOrName` 与 `SchemaTypeParser` 负责从字符串构造 `FunctionSchema` 与类型节点。
+
 
 ### 2.2 参数绑定（默认参数 + keyword 参数）
 **核心能力**：在调用时依据 schema 完成参数绑定与默认值注入。
 
 **实现要点**：
+- 注册表与函数对象均绑定结构化 schema：
+  - `OperatorRegistration` 的 schema 存储由 `std::string` 升级为 `std::optional<std::variant<std::string, FunctionSchema>>`；
+  - `register_schema`/`register_implementation` 会将 `FunctionSchema` 绑定到 `CppFunction`；
+  - `CppFunction::call_with_args` 在调用前执行 schema 驱动的参数归一化。
 - 输入：`positional args`、`keyword args`、`schema`；
 - 输出：`bound args`（按 schema 顺序排列），用于后续调用；
 - 处理规则：
   - 位置参数从左到右绑定；
   - `*` 之后参数仅允许通过 keyword；
   - 缺省参数按 schema 默认值填充；
-  - 位置参数与 keyword 参数重复绑定时报错；
-  - 传入不存在的 keyword 报错；
+- 位置参数与 keyword 参数重复绑定时报错；
+- 传入不存在的 keyword 报错；
 - 对 schema 不覆盖的类型，保持“透传”并延后到 kernel 内部处理。
+- `FunctionArgs` 支持 `named_args_` 与 `add_arg(torch::arg(...)=...)` 形式的 keyword 传参，并对重复 keyword/空 value 报错。
 
 **正确示例（默认值/keyword/kw-only/列表与可选）**：
 ```cpp
@@ -189,32 +183,22 @@ flowchart LR
 // 绑定结果: x, axis=1, use_cudnn=False
 // 非法: softmax(x, 1, False)  // kw-only 不能用位置参数
 
-// 4) Optional + List
-// schema: pad(Tensor x, int[] pad, float value=0.0, str? mode=None) -> Tensor
-// 调用: pad(x, [1, 1, 2, 2], mode="reflect")
-// 绑定结果: x, pad=[1,1,2,2], value=0.0, mode="reflect"
-
-// 5) keyword 覆盖默认值
+// 4) keyword 覆盖默认值
 // schema: clamp(Tensor x, float? min=None, float? max=None) -> Tensor
 // 调用: clamp(x, max=0.0)
 // 绑定结果: x, min=None, max=0.0
 
-// 10) List[T] 参数
-// schema: stack(Tensor[] tensors, int axis=0) -> Tensor
-// 调用: stack([t1, t2, t3], axis=1)
-// 绑定结果: tensors=[t1,t2,t3], axis=1
-
-// 11) Tuple 参数（作为单一入参）
+// 5) Tuple 参数（作为单一入参）
 // schema: blend((Tensor, Tensor) inputs, float alpha=0.5) -> Tensor
 // 调用: blend((x, y), alpha=0.3)
 // 绑定结果: inputs=(x,y), alpha=0.3
 
-// 12) Optional Tuple 参数（None 或三元组）
+// 6) Optional Tuple 参数（None 或三元组）
 // schema: add_video_stream(Tensor(a!) decoder, *, (Tensor, Tensor, Tensor)? custom_frame_mappings=None) -> ()
 // 调用: add_video_stream(decoder, custom_frame_mappings=None)
 // 绑定结果: decoder, custom_frame_mappings=None
 
-// 13) alias/mutation 标注（in-place 语义）
+// 7) alias/mutation 标注（in-place 语义）
 // schema: normalize_(Tensor(a!) x, float eps=1e-5) -> Tensor(a!)
 // 调用: normalize_(x, eps=1e-6)
 // 绑定结果: x, eps=1e-6  // x 被原地修改
@@ -244,37 +228,42 @@ flowchart LR
 ```
 
 ### 2.3 多 backend 注册与派发
-**核心能力**：支持不同设备后端的算子实现，并在运行时正确派发。
+**核心能力**：支持不同设备后端的算子实现登记，并按 `DispatchKey` 选择对应实现。
 
 **实现要点**：
 - 引入 `BackendKey`（示例）：CPU、CUDA 等；
 - `TORCH_LIBRARY_IMPL(ns, Backend, m)` 绑定 `backend_impls[Backend] = fn`；
-- 调用时按以下顺序派发：
-  1) 如果输入包含 Tensor，根据 `Place` 推导 backend；
-  2) 若无 Tensor，使用全局默认 backend 或显式 device 参数；
-  3) 优先选择 “精确 backend” 实现；
-  4) 若缺失，按 fallback 顺序选择（如 `Backend::Any`/`Composite`）；
-  5) 无匹配则报错并提示可用 backend。
+- 运行时通过注册表中的 `implementations[DispatchKey]` 命中具体实现；当前实现未新增基于 `Place` 的自动推导/fallback 派发器。
 
-**一致性约束**：
-- 多个 Tensor 输入必须在同一 backend；
-- 不同 backend 的混合输入默认报错（可通过显式拷贝由上层处理）。
+### 2.4 与现有兼容层的关系与衔接
+- **优先复用**（来自 `paddle/phi/api/include/compat/torch` 体系）：`IValue`、`FunctionArgs/FunctionResult`、`Library/OperatorRegistry/CppFunction`、`DispatchKey`、`ClassRegistry` 等基础设施与调用/注册路径。
+- **在 compat/torch 内部实现或轻量移植**：`FunctionSchema`/`Argument`/`TypePtr` 等结构，以及 schema 解析器、参数绑定器、schema registry 与 backend 派发策略。
+- **不直接引入 PyTorch 解析器/dispatcher**：避免引入大体量依赖、ABI/编译链复杂度与运行时耦合；保持 Paddle 兼容层轻量可控，便于与现有构建/发布体系对齐。
+- **工程集成**：
+  - 新增 `ATen/core/function_schema.*`、`ATen/core/alias_info.h`、`ATen/core/jit_type*.h`、`ATen/core/type_ptr.h`；
+  - 新增 `torch/csrc/jit/schema_parser_defs.h`、`schema_type_parser.*`、`function_schema_parser.*`；
+  - `paddle/phi/api/include/compat/CMakeLists.txt` 增加对应源码编译项。
 
-### 2.4 与飞桨自定义算子注册对接
-- `CompatSchema` 生成的 `KernelSignature` 与飞桨 custom op API 对齐；
-- 统一在兼容层提供 `OpMetaInfo` 构建入口，避免二次注册；
-- 尽量复用已有 `paddle/phi/api/include/compat/torch` 目录下的基础类型与工具。
+### 2.5 Schema 覆盖范围与边界
+**明确支持**（保证解析 + 绑定 + 调用通过）：  
+- 基础标量与字符串：`int/float/bool/str`  
+- `Tensor` 及 alias/mutation 标注（如 `Tensor(a!)`）  
+- `Optional[T]`  
+- `Tuple(T1, T2, ...)` 及可选形式 `Tuple(...)?`  
+- argument 级固定长度列表 `T[N]`（含 `T[N]?`）  
+- keyword / default / kw-only 绑定语义
+- vararg / varret 语义
 
-### 2.5 可选的 schema 校验
-- 默认仅用于参数绑定与类型推导；
-- 提供环境变量 `PADDLE_TORCH_COMPAT_SCHEMA_CHECK=1` 开启类型一致性校验；
-- 校验失败给出明确报错信息（用于调试和生态库自检）。
+**后续支持**：  
+- 更完整容器类型（如 `List[T]` 无固定长度、`Dict(K, V)` 及复杂嵌套）  
+- 更完整设备/布局相关类型与默认值解析分支  
+- `allow_typevars`、overload 名合法性校验等上游 parser 兼容细节  
 
 ## 3、主要影响的模块接口变化
 ### 核心接口变化
 - `TORCH_LIBRARY`：新增/补充 schema 解析与登记逻辑；
 - `TORCH_LIBRARY_IMPL`：支持 backend key 维度注册；
-- Python 兼容层调用路径：支持 keyword 参数与默认参数。
+- compat 调用路径：支持 keyword 参数与默认参数绑定。
 
 ### 对框架各环节的影响
 - 底层数据结构：新增 schema/dispatch registry 数据结构；
@@ -283,8 +272,7 @@ flowchart LR
 **验收标准**：
 - 完成 `TORCH_LIBRARY` 注册机制的 schema 支持，能够正确处理算子参数的类型，以及默认参数、keyword 参数传递功能，单测添加到 `test/cpp/compat/torch_library_test.cc`（合入 Paddle repo）；
 - 完成多 backend 支持的注册兼容层实现，并新增相关单测（合入 Paddle repo）；
-- 基于上述功能，减少适配 [paddlecodec](https://github.com/meta-pytorch/torchcodec/compare/main...PFCCLab:paddlecodec:paddle) 过程中进行的改动，并在相关改动恢复后仍能保证适配正确性（合入 [PFCCLab/paddlecodec](https://github.com/PFCCLab/paddlecodec) repo）。
-
+- 基于上述功能，后续继续验证 [paddlecodec](https://github.com/PFCCLab/paddlecodec) 适配改动可否进一步收敛。
 
 # 七、影响面
 ## 对用户的影响
@@ -302,7 +290,6 @@ flowchart LR
 
 ## 其他风险
 - Schema 覆盖范围不足导致个别算子仍需手工适配；
-- backend 派发规则需与飞桨 Place 语义一致，避免混合设备误判。
 
 # 八、排期规划
 - **第 1 周**：设计评审与方案确认；
