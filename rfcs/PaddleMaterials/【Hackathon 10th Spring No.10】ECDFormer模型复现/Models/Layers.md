@@ -17,7 +17,7 @@ ECFormer模型是基于Transformer架构的分子谱图预测模型，其底层L
 
 - **完整复现ECDFormer原仓库**的分子特征提取能力，包括原子编码器、键编码器、RBF径向基函数编码器、GINConv图卷积层等；
 - **支持Paddle静态图模式**及ONNX导出，彻底解决原仓库中`Data`对象作为模型输入导致的静态图编译失败问题；
-- **确保数值精度对齐**，所有Layer实现与PyTorch原版在`float64`精度下误差≤1e-8；
+- **确保数值精度对齐**，所有Layer实现与PyTorch原版在`float64`精度下误差≤1e-9；
 - **模块化解耦设计**，各Layer独立可复用，为ECFormer-ECD、ECFormer-IR等任务模型提供统一底层支持。
 
 ---
@@ -33,8 +33,6 @@ ECFormer模型是基于Transformer架构的分子谱图预测模型，其底层L
 | 批归一化 | ✅ `nn.BatchNorm1D` | 否 |
 | GINConv图卷积 | ❌ 无原生实现 | **是** |
 | RBF径向基函数编码 | ❌ 无原生实现 | **是** |
-| MultiheadAttention | ✅ `nn.MultiheadAttention` | **是（需定制batch_first）** |
-| TransformerEncoder | ✅ `nn.TransformerEncoder` | **是（需定制mask处理）** |
 
 ### 2.2 关键问题与绕行方案
 
@@ -48,7 +46,7 @@ ECFormer模型是基于Transformer架构的分子谱图预测模型，其底层L
 
 ### 3.1 ECDFormer原仓库实现分析
 
-ECDFormer原仓库（https://github.com/HowardLi1984/ECDFormer）的Layer层实现具有以下特点：
+ECDFormer原仓库( https://github.com/HowardLi1984/ECDFormer )的Layer层实现具有以下特点：
 
 | 模块 | 原实现方式 | 优点 | 缺点 |
 |------|---------|------|------|
@@ -57,7 +55,6 @@ ECDFormer原仓库（https://github.com/HowardLi1984/ECDFormer）的Layer层实�
 | `RBF` | 自定义RBF层 | 精确模拟高斯展宽 | 依赖`torch.arange`参数化 |
 | `BondFloatRBF` | RBF + Linear | 连续值编码 | 设备耦合紧 |
 | `GINConv` | 自定义MessagePassing | 标准GIN实现 | 与PyG耦合 |
-| `TransformerEncoder` | PyTorch原生 | C++实现forward核心计算 | 无 |
 
 **原仓库与Paddle生态的主要差异**：
 
@@ -77,7 +74,6 @@ ECDFormer原仓库（https://github.com/HowardLi1984/ECDFormer）的Layer层实�
 | `RBF` | 重写Parameter初始化 | 中 | 固定种子+数值比对 |
 | `BondFloatRBF` | 解耦设备依赖 | 中 | 固定输入测试 |
 | `GINConv` | 基于`paddle_geometric`重写 | 中 | 与PyG版本逐边对比 |
-| `TransformerEncoder` | 直接从PyTorch框架内迁移 | 高 | 完整模型对齐 |
 
 ---
 
@@ -109,14 +105,10 @@ ECDFormer原仓库（https://github.com/HowardLi1984/ECDFormer）的Layer层实�
 ```
 ppmat/models/ecformer/layers/
 ├── __init__.py                 # 模块导出
-├── atom_encoder.py            # 原子特征编码器
-├── bond_encoder.py           # 键特征编码器
-├── rbf.py                    # RBF及连续特征编码器
-├── gin_conv.py              # GIN图卷积层
-└── transgenders/            # Transformer组件（独立子模块）
-    ├── __init__.py
-    ├── activation.py        # MultiheadAttention实现
-    └── transgender.py       # Encoder/Decoder/Layer
+├── atom_encoder.py             # 原子特征编码器
+├── bond_encoder.py             # 键特征编码器
+├── rbf.py                      # RBF及连续特征编码器
+└── gin_conv.py                 # GIN图卷积层
 ```
 
 **设计哲学**：
@@ -160,28 +152,6 @@ ppmat/models/ecformer/layers/
 
 **验证方案**：构造小型分子图，确保Paddle版本与PyTorch版本在10^-8精度内完全一致。
 
-#### 5.2.4 Transgenders组件（`transformers`子模块）
-
-**设计思路**：本模块是从PyTorch官方Transformer实现到Paddle的**逐行移植**，并非调用Paddle原生`nn.Transformer`。选择此方案的原因：
-
-1. **batch_first统一**：原ECDFormer使用`batch_first=True`，Paddle原生`nn.Transformer`对该模式支持存在历史兼容问题；
-2. **mask处理逻辑**：原仓库依赖PyTorch的`src_key_padding_mask`和`attn_mask`交互行为，Paddle原生实现存在细微差异；
-3. **精度可追溯**：逐行移植可确保每一行计算逻辑与PyTorch完全一致，便于逐层精度对齐。
-
-**关键适配点**：
-
-| PyTorch实现 | Paddle本方案实现 | 适配说明 |
-|-------------|-----------------|---------|
-| `nn.MultiheadAttention` | `custom.MultiheadAttention` | 设置`batch_first=True`，重写`forward`签名 |
-| `F.linear` | `paddle.nn.functional.linear` | API直接对应 |
-| `F.softmax` | `paddle.nn.functional.softmax` | API直接对应 |
-| `attn_mask`布尔处理 | `_canonical_mask`工具函数 | 统一转换为浮点掩码 |
-
-**输入输出规格**（以`TransformerEncoderLayer`为例）：
-- 输入：`src` - 形状 `[batch, seq_len, embed_dim]`
-- 输入：`src_key_padding_mask` - 形状 `[batch, seq_len]`
-- 输出：`[batch, seq_len, embed_dim]`
-
 ---
 
 ## 六、测试与验收考量
@@ -190,7 +160,7 @@ ppmat/models/ecformer/layers/
 
 | 测试层级 | 测试方法 | 通过标准 |
 |---------|---------|---------|
-| **单元测试** | 各Layer独立测试，固定随机种子，与PyTorch原版逐元素对比 | 误差 ≤ 1e-10 |
+| **单元测试** | 各Layer独立测试，固定随机种子，与PyTorch原版逐元素对比 | 误差 ≤ 1e-9 |
 | **集成测试** | 完整ECFormer-ECD模型前向，与作者Release权重对比 | 误差 ≤ 1e-8 |
 | **静态图测试** | `paddle.jit.to_static`编译通过，推理结果一致 | 输出差异 ≤ 1e-7 |
 
@@ -212,14 +182,12 @@ ppmat/models/ecformer/layers/
 
 **正面影响**。二次开发用户可以：
 - 直接复用`AtomEncoder`、`GINConv`等Layer构建新的分子图模型；
-- 参考`transformers`子模块实现自定义的Transformer变体；
 - 基于本方案的设计模式，将其他PyTorch Geometric模型迁移至Paddle。
 
 **暴露的API**（均通过`ppmat.models.ecformer.layers`导出）：
 - `AtomEncoder`, `BondEncoder`
 - `RBF`, `BondFloatRBF`, `BondAngleFloatRBF`
 - `GINConv`
-- `TransformerEncoder`, `TransformerEncoderLayer`, `MultiheadAttention`
 
 ### 7.3 对框架架构的影响
 
