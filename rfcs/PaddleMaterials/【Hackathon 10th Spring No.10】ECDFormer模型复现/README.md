@@ -48,9 +48,7 @@
     1. **静态图限制**：`Batch.from_data_list` 返回的是 `Batch` 对象，非 `paddle.Tensor`，无法直接用于 `paddle.jit.to_static` 编译。
     2. **侵入式扩展**：若为每个新数据集在 `collate_fn.py` 中添加专用 collator，会导致文件臃肿且与数据集逻辑耦合。
 
-截至本RFC撰写完成前，PaddleMaterials仓库中尚未有开发者提交ECDFormer相关模型，也未发现对本项目或其他Hackathon任务的复现贡献。现有`spectrum_elucidation`目录下仅有DiffNMR模型及其配套的训练脚本，其数据加载流程依赖复杂的`build_dataset_infos`等API，与ECFormer模型的纯监督学习范式不符。这为本次采用“模块自治”的设计哲学提供了充分的创新空间。
-
-本项目通过 **“模块自治”** 的设计哲学，完美绕过了上述限制。
+截至本RFC撰写完成前，PaddleMaterials仓库中尚未有开发者提交ECDFormer相关模型，也未发现对本项目或其他Hackathon任务的复现贡献。现有`spectrum_elucidation`目录下仅有DiffNMR模型及其配套的训练脚本，其数据加载流程依赖复杂的`build_dataset_infos`等API，与ECFormer模型的纯监督学习范式不符。本项目通过 **“模块自治”** 的设计哲学，完美绕过了上述限制。
 
 ## 三、业内方案调研（原ECDFormer仓库分析）
 
