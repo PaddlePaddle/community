@@ -83,7 +83,7 @@ ECFormer/                         # 项目总览
 ├── Models/                       # 模型设计
 │   ├── README.md                 # 模型模块说明
 │   ├── ECFormers.md              # 高层模型API设计（ECD/IR子类）
-│   └── Layers.md                 # 底层组件设计（GNN、Transformer等）
+│   └── Layers.md                 # 底层组件设计（GNN等）
 ├── Dataset/                      # 数据集设计
 │   ├── README.md                 # 数据集设计哲学
 │   ├── ECD_dataset.md            # ECDFormerDataset实现说明
