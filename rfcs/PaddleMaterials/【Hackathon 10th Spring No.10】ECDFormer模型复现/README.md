@@ -122,7 +122,7 @@ ECFormer/                         # 项目总览
 
 各子模块的详细设计请参阅对应的 RFC 文档：
 
-- [**Models/ECFormers.md**](./Models/ECFormers.md)：阐述 `ECFormerBase`、`ECFormerECD`、`ECFormerIR` 的继承体系与接口设计。
+- [**Models/README.md**](./Models/README.md)：阐述 `ECFormerBase`、`ECFormerECD`、`ECFormerIR` 的继承体系与接口设计。
 - [**Dataset/README.md**](./Dataset/README.md)：阐述“模块自治”的设计哲学、缓存机制、按需读取等核心策略。
 - [**Train/README.md**](./Train/README.md)：阐述训练脚本与 DiffNMR 隔离运行的设计考量。
 
