@@ -40,7 +40,7 @@
 - **基础注册与调用**：支持 `TORCH_LIBRARY` + `TORCH_LIBRARY_IMPL` 注册，能通过 `OperatorRegistry` 查找并以 `FunctionArgs/IValue` 触发调用；当前测试均为 `DispatchKey::CPU`。
 - **增量注册**：支持 `TORCH_LIBRARY_FRAGMENT` 分片注册多个算子。
 - **自定义类**：支持 `ClassRegistry` 注册类、构造函数、成员方法与静态方法，并进行调用。
-- **参数类型覆盖**（已有测试涉及）：Tensor/ScalarType/int/double/string；int const/const& 入参；`torch::optional<T>`、`c10::optional<c10::ArrayRef<int64_t>>`；`c10::ArrayRef<int64_t>`；`optional<Tensor> const&`。
+- **参数类型覆盖**（已有测试涉及）：Tensor/ScalarType/int/double/string；int const/const& 入参；`std::optional<T>`、`std::optional<c10::ArrayRef<int64_t>>`；`c10::ArrayRef<int64_t>`；`std::optional<Tensor> const&`。
 - **返回类型覆盖**（已有测试涉及）：`Tensor`、`List<Tensor>`（`std::vector`）、`Tuple<Tensor,...>`（`std::tuple`）。
 - **IValue 基础类型**：None/bool/int/double/string/tensor/list/tuple 的构造与类型检查。
 
