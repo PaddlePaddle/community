@@ -17,3 +17,40 @@
 >   * PaddleOCR 1）古籍电子化保存
 > * 技术要求：熟练掌握OpenVINO python API与其他工具组件的使用方法
 > * 参考文档：[OpenVINO notebook仓库](https://github.com/openvinotoolkit/openvino_notebooks)、[OpenVINO notebook仓库代码贡献规范](https://github.com/openvinotoolkit/openvino_notebooks/blob/main/CONTRIBUTING.md)
+
+## 赛题详情（厂商排名不分先后）
+### 请 Intel 填写
+
+### 请 AMD 填写
+
+### 请 Arm 填写
+
+### 请 天数智芯 填写
+
+### 请 沐曦 填写
+
+### 请 燧原 填写
+
+### 请 海光 填写
+
+### 请 瀚博 填写
+
+### 请 飞腾 填写
+
+### 请 龙芯 填写
+
+### 请 高通 填写
+
+### 请 联发科技 填写
+
+### 请 紫光展锐 填写
+
+### 请 此芯 填写
+
+### 请 瑞芯微 填写
+
+### 请 地瓜机器人 填写
+
+### 请 麒麟 填写
+
+### 请 统信 填写
