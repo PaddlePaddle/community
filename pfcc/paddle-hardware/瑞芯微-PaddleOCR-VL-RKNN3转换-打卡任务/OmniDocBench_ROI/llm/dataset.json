@@ -1,0 +1,22 @@
+[
+    {"image_path": "../vision/images", "image": "docstructbench_00039896.1983.10545823.pdf_19_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "docstructbench_dianzishu_zhongwenzaixian-o.O-60368448.pdf_3434_roi_table.jpg", "input": "Table Recognition:", "target": ""},
+    {"image_path": "../vision/images", "image": "docstructbench_enbook-zlib-o.O-15322190.pdf_1383_roi_figure.jpg", "input": "Image Recognition:", "target": ""},
+    {"image_path": "../vision/images", "image": "docstructbench_llm-raw-scihub-o.O-adsc.201190003.pdf_60_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "docstructbench_llm-raw-scihub-o.O-j.1365-2117.1999.00104.x.pdf_117_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "docstructbench_llm-raw-the-eye-o.O-1_20Excel.pdf_123_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "eastmoney_2dea7cdb5a3e018ffec3c80eb4435de524f2a14bd32735b78f563adc355272ab.pdf_61_roi_table.jpg", "input": "Table Recognition:", "target": ""},
+    {"image_path": "../vision/images", "image": "jiaocai_71434495.pdf_013_roi_equation_isolated.jpg", "input": "Formula Recognition:", "target": ""},
+    {"image_path": "../vision/images", "image": "jiaocai_jiaocai_en_616_roi_title.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "jiaocai_P0-9.pdf_99_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "jiaocaineedrop_5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca.pdf_212_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "jiaocaineedrop_jiaocai_needrop_en_132_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "jiaocaineedrop_math-134115.pdf_6708_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "jiaocaineedrop_Proofs_From_The_Book(Aigner).pdf_543_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "newspaper_0b1bb8d03b4287eb95f67b68c2cf9f92_117_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "notes_1ba14cb325bc448f7201b20502ecf2b5_85_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "scihub_AEM.01420-09.pdf_31_roi_table.jpg", "input": "Table Recognition:", "target": ""},
+    {"image_path": "../vision/images", "image": "yanbaopptmerge_0b41cf8ff07c565b2b3eed6b269c036bb41bc38effea5d0d11b90c69d07fac21.pdf_12_roi_table.jpg", "input": "Table Recognition:", "target": ""},
+    {"image_path": "../vision/images", "image": "yanbaopptmerge_SE05.pdf_73_roi_text_block.jpg", "input": "OCR:", "target": ""},
+    {"image_path": "../vision/images", "image": "yanbaor2_0a47b1d6b03103a249101f13e89f2226a273a75378d8110d46eb42c1cfa65ffd.pdf_101_roi_figure.jpg", "input": "Chart Recognition:", "target": ""}
+  ]  
