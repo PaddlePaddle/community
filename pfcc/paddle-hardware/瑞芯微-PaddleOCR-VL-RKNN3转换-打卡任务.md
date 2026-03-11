@@ -1,4 +1,4 @@
-# PaddleOCR-VL RKNN3 模型转换热身打卡活动
+# 瑞芯微：PaddleOCR-VL RKNN3 模型转换热身打卡活动
 
 本节热身打卡活动，将介绍如何使用 RKNN3-Toolkit 转换 PaddleOCR-VL 模型，用于端侧部署。
 
