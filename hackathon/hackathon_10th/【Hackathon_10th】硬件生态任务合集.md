@@ -29,13 +29,13 @@
     * 需体现“文档/视觉理解”到“下游智能处理”的完整流程，并突出 OpenVINO 的部署价值。
 
 * 提交内容：
-    * PR代码提交
-      1. 提交地址： 提交到 [openvino_build_deploy](https://github.com/openvinotoolkit/openvino_build_deploy)  仓库（demos 目录下新增 Demo，结构与现有示例一致），标题加上【PaddlePaddle Hackathon 10】字样
-      2. 必备：源代码 + README + 依赖/模型说明 + 效果展示（截图/录屏/演示文稿）。
-      3. 该 PR 需满足 notebook 以及 openvino_build_deploy 仓库贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
-      4. 要求：使用 OpenVINO 完成全部推理部署；可复现、尽量一键运行。
-      5. 加分（可选）：支持 OpenVINO Model Server；多设备（CPU/GPU/NPU）切换；性能对比/优化说明。
-      6. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
+    1. 提交地址： 请将 PR 提交到 [openvino_build_deploy](https://github.com/openvinotoolkit/openvino_build_deploy)  仓库（demos 目录下新增 Demo，结构与现有示例一致），标题加上【PaddlePaddle Hackathon 10】字样。
+    2. 必备：
+       * 源代码 + README + 依赖/模型说明 + 效果展示（截图/录屏/演示文稿）。
+       * PR 需满足 notebook 以及 openvino_build_deploy 仓库贡献规范，开发者需要及时根据 review 的结果进行 PR 修改。
+       * 使用 OpenVINO 完成全部推理部署；可复现、尽量一键运行。
+    3. 加分（可选）：支持 OpenVINO Model Server；多设备（CPU/GPU/NPU）切换；性能对比/优化说明。
+    4. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结遇到的问题与挑战、并介绍后半段比赛的计划安排。
 * 参考示例：
    * openvino_build_deploy demos 的各 demo：[https://github.com/openvinotoolkit/openvino_build_deploy/demos](https://github.com/openvinotoolkit/openvino_build_deploy/demos)
    * OpenVINO notebooks：[https://github.com/openvinotoolkit/openvino_notebooks](https://github.com/openvinotoolkit/openvino_notebooks)
