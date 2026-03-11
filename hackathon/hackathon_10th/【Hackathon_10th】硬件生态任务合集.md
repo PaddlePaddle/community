@@ -37,8 +37,8 @@
       5. 加分（可选）：支持 OpenVINO Model Server；多设备（CPU/GPU/NPU）切换；性能对比/优化说明。
       6. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
 * 参考示例：
-   * openvino_build_deploy demos 的各 demo：openvinotoolkit/openvino_build_deploy/tree/master/demos
-   * OpenVINO notebooks：openvinotoolkit/openvino_notebooks/notebooks
+   * openvino_build_deploy demos 的各 demo：[https://github.com/openvinotoolkit/openvino_build_deploy/demos](https://github.com/openvinotoolkit/openvino_build_deploy/demos)
+   * OpenVINO notebooks：[https://github.com/openvinotoolkit/openvino_notebooks](https://github.com/openvinotoolkit/openvino_notebooks)
 * 技术要求：
    * 熟练使用 OpenVINO Python API 完成推理、后处理与可视化。
    * 将结构化输出对接到下游 LLM/Agent 流程（可用任意开源框架/模型，需说明）。
