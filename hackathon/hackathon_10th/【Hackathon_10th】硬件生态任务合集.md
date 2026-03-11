@@ -22,7 +22,7 @@
 ### Intel：基于 OpenVINO 的多模态文档理解与智能应用开发
 * 技术标签：OpenVINO、PaddleOCR-VL、Python、GenAI/LLM、Agent（可选）、OpenVINO Model Server（可选）
 
-* 详细描述：可参考以下场景之一，完成基于OpenVINO的多模态文档理解与智能应用开发。
+* 详细描述：在完成打卡任务的基础上，可参考以下场景之一，利用OpenVINO的优化部署，完成基于PaddleOCR-VL系列模型的多模态文档理解与智能应用开发，即利用OpenVINO优化部署运行PaddleOCR-VL系列模型的推理、完成文档解析后，参考以下场景描述的下游任务，完成多模态文档理解与智能应用开发。
     * 解析设计图/流程图/技术文档，将结构化内容交给 Coder 模型完成程序设计或代码生成。
     * 理解海报/版面设计稿/宣传材料，结合生成式模型完成改写、重构或多模态创作。
     * 解析论文/报告/说明书，实现摘要、问答、知识提炼或解读等下游任务。
@@ -39,6 +39,7 @@
 * 参考示例：
    * openvino_build_deploy demos 的各 demo：[https://github.com/openvinotoolkit/openvino_build_deploy/demos](https://github.com/openvinotoolkit/openvino_build_deploy/demos)
    * OpenVINO notebooks：[https://github.com/openvinotoolkit/openvino_notebooks](https://github.com/openvinotoolkit/openvino_notebooks)
+   * Paddleocr-vl OpenVINO Notebook: [https://github.com/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/paddleocr_vl](https://github.com/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/paddleocr_vl)
 * 技术要求：
    * 熟练使用 OpenVINO Python API 完成推理、后处理与可视化。
    * 将结构化输出对接到下游 LLM/Agent 流程（可用任意开源框架/模型，需说明）。
