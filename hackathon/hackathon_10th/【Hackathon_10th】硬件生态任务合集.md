@@ -23,6 +23,42 @@
 
 ### 请 AMD 填写
 
+#### 进阶任务：为 Paddle 框架适配 HIP BF16 精度类型
+* 技术标签：深度学习框架，C++/HIP，ROCm，MIOpen，PaddlePaddle
+* 任务难度：进阶
+* 详细描述：
+  * **背景**：当前 Paddle 框架在 ROCm 平台上未适配 HIP BF16 精度类型，导致该精度类型下的相关算子不可用。在 AMD GPU 上运行 PaddleOCR-VL 等包含卷积视觉编码器的模型时，由于 BF16 算子缺失，不得不通过 `_keep_in_fp32_modules` 等方式将视觉编码器强制回退到 FP32 精度运行。
+    HIP BF16 精度类型不可用对 Paddle 框架在 AMD GPU 上的推理能力有显著制约：
+    1. 显存开销倍增：FP32 相比 BF16 显存占用翻倍，制约了可部署的模型规模与批处理容量
+    2. 推理性能受损：无法利用 BF16 更高的计算吞吐，推理效率大幅降低
+    3. 框架生态受限：不仅影响 PaddleOCR-VL，也制约了 Paddle 框架上其他 LLM 及多模态模型在 AMD GPU 上的推理部署能力
+  * **现有 Workaround 参考**：目前 PaddleX 中通过以下方式临时绕过此问题：
+    1. 在 `paddlex/inference/utils/misc.py` 的 `is_bfloat16_available()` 中，对 ROCm 平台默认返回 False，强制使用 FP32 精度
+    2. 在 `PaddleOCRVLForConditionalGeneration` 模型类中设置 `_keep_in_fp32_modules = ["visual", "mlp_AR"]`，将视觉编码器保持在 FP32
+    3. 在静态推理配置中禁用 `conv2d_add_act_fuse_pass` 和 `conv2d_add_fuse_pass`（因依赖 cuDNN，HIP 上不可用）
+    4. 详细参考：https://github.com/PaddlePaddle/PaddleX/compare/release/3.3...vivienfanghuagood:PaddleX:dev_rocm70
+  * **任务目标**：在 Paddle 框架（https://github.com/PaddlePaddle/Paddle）中适配 HIP BF16 精度类型，使得：
+    1. PaddleOCR-VL 等模型在 ROCm 上可以原生使用 BF16 精度进行推理，无需将视觉编码器强制回退到 FP32
+    2. Paddle 框架的 ROCm BF16 算子能力得到完善，有利于框架上其他 LLM/多模态模型的 AMD GPU 推理
+  * **验收标准**：PaddleOCR-VL-1.5 能在 AMD GPU + ROCm 环境下以 BF16 精度完整运行并输出正确结果。
+* 提交内容：
+  1. 向 Paddle 主仓库（https://github.com/PaddlePaddle/Paddle）develop 分支提交 Issue 描述问题，并提交 PR 实现 HIP BF16 精度类型适配
+  2. 向 PaddleX 仓库（https://github.com/PaddlePaddle/PaddleX）develop 分支提交 Issue 和 PR，移除现有 ROCm BF16 的 workaround 代码
+  3. PR 中需包含测试用例和在 AMD GPU 上的验证结果截图
+* 提交方式：GitHub Issue + PR 并截图发送邮件
+* 技术要求：
+  * 熟悉 PaddlePaddle 框架的算子注册与编译机制
+  * 了解 ROCm/HIP 编程模型与 MIOpen 库的使用
+  * 熟悉 BF16 精度计算的基本原理
+  * 具备 C++ 和 Python 开发能力
+* 参考文档：
+  * [Paddle 主仓库](https://github.com/PaddlePaddle/Paddle)
+  * [PaddleX 仓库](https://github.com/PaddlePaddle/PaddleX)
+  * [PaddleX ROCm BF16 现有 workaround](https://github.com/PaddlePaddle/PaddleX/compare/release/3.3...vivienfanghuagood:PaddleX:dev_rocm70)
+  * [PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
+  * [MIOpen 文档](https://rocm.docs.amd.com/projects/MIOpen/en/latest/)
+  * PaddleOCR-VL AMD GPU 部署教程：参见本期打卡任务指导
+
 ### 请 Arm 填写
 
 ### 请 天数智芯 填写
