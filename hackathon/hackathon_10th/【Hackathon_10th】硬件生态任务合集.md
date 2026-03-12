@@ -75,7 +75,7 @@
 > * **技术要求**：模型架构理解、此芯 P1 硬件特性了解、开发工具链（推理框架，量化工具，编程语言 Python & C++）。
 > * **参考文档**：
 >   * [CIX AI Model Hub](https://modelscope.cn/models/cix/ai_model_hub/files?version=25_Q4)
->   * [CIX NOE SDK](https://developer.cixtech.com/) (找到 NeuralONE AI SDK，在注册后并下载)
+>   * [CIX NOE SDK](https://developer.cixtech.com/) (在此芯开发者中心找到 NeuralONE AI SDK，在注册后并下载)
 >   * [PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
 >   * [Paddle 主仓库](https://github.com/PaddlePaddle/Paddle)
 >   * [PaddleX 仓库](https://github.com/PaddlePaddle/PaddleX)
