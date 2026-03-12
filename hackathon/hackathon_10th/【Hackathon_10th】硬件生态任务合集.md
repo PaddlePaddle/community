@@ -48,8 +48,8 @@
 ### 请 此芯 填写
 进阶任务：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
 * 技术标签
-- **模型移植与优化**：将 PaddleOCR-VL-1.5 模型（0.9B 参数）移植到此芯 P1 芯片，实现高效模型推理。
-- **异构算力调度**：基于此芯 P1 的异构架构（Armv9 CPU + Arm Immortalis GPU + 周易 NPU），实现模型算子的最优分配与调度。
+**模型移植与优化**：将 PaddleOCR-VL-1.5 模型（0.9B 参数）移植到此芯 P1 芯片，实现高效模型推理。
+**异构算力调度**：基于此芯 P1 的异构架构（Armv9 CPU + Arm Immortalis GPU + 周易 NPU），实现模型算子的最优分配与调度。
 
 * 任务难度：级别：进阶
 
@@ -60,32 +60,32 @@
 优先同时完成“核心任务”和“挑战任务”的前两位开发者获胜。
 
 #### 1. 核心任务：实现基于此芯 P1 的 CPU / GPU 的异构推理
-- **实现 PaddleOCR-VL-1.5 的 Pipeline**：实现 PaddleOCR-VL-1.5 在 CPU/GPU 上的基础推理。
-- **量化加速**：使用 llama.cpp 或者 MNN 等推理框架，对 PaddleOCR-VL-1.5 在 CPU/GPU 上完成加速推理。
+**实现 PaddleOCR-VL-1.5 的 Pipeline**：实现 PaddleOCR-VL-1.5 在 CPU/GPU 上的基础推理。
+**量化加速**：使用 llama.cpp 或者 MNN 等推理框架，对 PaddleOCR-VL-1.5 在 CPU/GPU 上完成加速推理。
 
 #### 2. 可选挑战任务：实现基于此芯 P1 的 CPU + NPU 异构推理
 
 ## 环境准备
 
 ### 1. 开发环境配置
-- 搭建此芯 P1 开发环境，配置交叉编译工具链。
-- 安装此芯科技推理 NOE SDK。
+搭建此芯 P1 开发环境，配置交叉编译工具链。
+安装此芯科技推理 NOE SDK。
 
 ### 2. 模型格式转换
-- 将 Hugging Face 的 PaddleOCR-VL-1.5 转换为 Paddle/ONNX 格式。
+将 Hugging Face 的 PaddleOCR-VL-1.5 转换为 Paddle/ONNX 格式。
   > **重要**：若需完成挑战任务，必须执行此步骤。
 
 ## 具体实施步骤与挑战
 
 ### 1. 实现 PaddleOCR-VL-1.5 的 Pipeline
-- 实现 Layout（版面分析）推理。
-- 实现 PaddleOCR-VL-1.5 模型在 CPU/GPU 上的推理。
+实现 Layout（版面分析）推理。
+实现 PaddleOCR-VL-1.5 模型在 CPU/GPU 上的推理。
 
 ### 2. 量化加速
-- 对 PaddleOCR-VL-1.5 模型进行 Q4_0 的量化和推理。
+对 PaddleOCR-VL-1.5 模型进行 Q4_0 的量化和推理。
 
 ### 3. 进阶挑战
-- 对 Layout 模块使用 NPU SDK 进行量化，以降低内存占用。
+对 Layout 模块使用 NPU SDK 进行量化，以降低内存占用。
 
 * 提交内容
 需包含如下内容：
@@ -106,9 +106,9 @@
 考虑到通用性，选取的应用场景为 **实时解析文档**（发票、合同、表格等）。
 
 * 技术要求
-- 模型架构理解
-- 此芯 P1 硬件特性了解
-- 开发工具链（推理框架，量化工具，编程语言 Python & C++）
+模型架构理解
+此芯 P1 硬件特性了解
+开发工具链（推理框架，量化工具，编程语言 Python & C++）
 
 * 参考文档
 - [CIX AI Model Hub](https://modelscope.cn/models/cix/ai_model_hub/files?version=25_Q4)
