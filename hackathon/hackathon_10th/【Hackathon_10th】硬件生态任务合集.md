@@ -19,7 +19,33 @@
 > * 参考文档：[OpenVINO notebook仓库](https://github.com/openvinotoolkit/openvino_notebooks)、[OpenVINO notebook仓库代码贡献规范](https://github.com/openvinotoolkit/openvino_notebooks/blob/main/CONTRIBUTING.md)
 
 ## 赛题详情（厂商排名不分先后）
-### 请 Intel 填写
+### Intel：基于 OpenVINO 的多模态文档理解与智能应用开发
+* 技术标签：OpenVINO、PaddleOCR-VL、Python、GenAI/LLM、Agent（可选）、OpenVINO Model Server（可选）
+
+* 详细描述：在完成打卡任务的基础上，可参考以下场景之一，利用OpenVINO的优化部署，完成基于PaddleOCR-VL系列模型的多模态文档理解与智能应用开发，即利用OpenVINO优化部署运行PaddleOCR-VL系列模型的推理、完成文档解析后，参考以下场景描述的下游任务，完成多模态文档理解与智能应用开发。
+    * 解析设计图/流程图/技术文档，将结构化内容交给 Coder 模型完成程序设计或代码生成。
+    * 理解海报/版面设计稿/宣传材料，结合生成式模型完成改写、重构或多模态创作。
+    * 解析论文/报告/说明书，实现摘要、问答、知识提炼或解读等下游任务。
+    * 需体现“文档/视觉理解”到“下游智能处理”的完整流程，并突出 OpenVINO 的部署价值。
+
+* 提交内容：
+    1. 提交地址： 请将 PR 提交到 [openvino_build_deploy](https://github.com/openvinotoolkit/openvino_build_deploy)  仓库（demos 目录下新增 Demo，结构与现有示例一致），标题加上【PaddlePaddle Hackathon 10】字样。
+    2. 必备：
+       * 源代码 + README + 依赖/模型说明 + 效果展示（截图/录屏/演示文稿）。
+       * PR 需满足 notebook 以及 openvino_build_deploy 仓库贡献规范，开发者需要及时根据 review 的结果进行 PR 修改。
+       * 使用 OpenVINO 完成全部推理部署；可复现、尽量一键运行。
+    3. 加分（可选）：支持 OpenVINO Model Server；多设备（CPU/GPU/NPU）切换；性能对比/优化说明。
+    4. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结遇到的问题与挑战、并介绍后半段比赛的计划安排。
+* 参考示例：
+   * openvino_build_deploy demos 的各 demo：[https://github.com/openvinotoolkit/openvino_build_deploy/demos](https://github.com/openvinotoolkit/openvino_build_deploy/demos)
+   * OpenVINO notebooks：[https://github.com/openvinotoolkit/openvino_notebooks](https://github.com/openvinotoolkit/openvino_notebooks)
+   * Paddleocr-vl OpenVINO Notebook: [https://github.com/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/paddleocr_vl](https://github.com/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/paddleocr_vl)
+* 技术要求：
+   * 熟练使用 OpenVINO Python API 完成推理、后处理与可视化。
+   * 将结构化输出对接到下游 LLM/Agent 流程（可用任意开源框架/模型，需说明）。
+   * 保证可复现：环境说明、依赖安装、模型获取方式与一键运行命令。
+* 参考文档：[OpenVINO notebook仓库](https://github.com/openvinotoolkit/openvino_notebooks)、[OpenVINO notebook仓库代码贡献规范](https://github.com/openvinotoolkit/openvino_notebooks/blob/main/CONTRIBUTING.md)、[openvino_build_deploy仓库](https://github.com/openvinotoolkit/openvino_build_deploy)、[OpenVINO Model Server仓库](https://github.com/openvinotoolkit/model_server)
+
 
 ### 请 AMD 填写
 
