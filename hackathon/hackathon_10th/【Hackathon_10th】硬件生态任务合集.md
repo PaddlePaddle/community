@@ -31,26 +31,25 @@
 
 ### 请 燧原 填写
 
-> 进阶任务：基于燧原卡为 FastDeploy 新增应用
-> * 技术标签：PaddlePaddle，Python，FastDeploy
+> 进阶任务：基于燧原卡为`FastDeploy`新增应用
+> * 技术标签：PaddlePaddle，FastDeploy，Python
 > * 任务难度：进阶
-> * 详细描述：基于燧原GCU硬件，本地搭建 ERNIE-4.5-0.3B-Paddle 或者 ERNIE-4.5-21B-A3B-Paddle (需要8卡部署) ，以这俩模型为基础打造优秀的使用案例。参考 [AIstudio](https://aistudio.baidu.com/topic/applications) 。
+> * 详细描述：基于燧原GCU硬件，本地搭建 ERNIE-4.5-0.3B-Paddle，以该模型为基础打造优秀的使用案例。参考 [飞浆AI Studio](https://aistudio.baidu.com/topic/applications) 。
 > * 提交内容：
 >    * 第一阶段：RFC 方案提交
->      1. 提交方式：1）  , 2）标题处打上【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求
->      2. 基本要求：1）应用场景与现有 demo 不重复，2）
+>      1. 提交方式：1）以markdown文件的形式提交到 https://aistudio.baidu.com/projectoverview, 2）标题处打上【PaddlePaddle Hackathon 10】。
+>      2. 基本要求：1）应用场景与现有 demo 不重复，2）要求充分发挥 `ERNIE-4.5-0.3B-Paddle` 模型效果
 >      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）运行结果是否符合预期
->         
+>     
 >    * 第二阶段：PR代码提交
->      1. 提交地址： https://github.com/openvinotoolkit/openvino_notebooks ，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
+>      1. 提交地址：以notebooks格式提交到 https://aistudio.baidu.com/projectoverview 建立的自己的project项目，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
 >      2. 该 PR 需满足 notebook 贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
 >      3. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
 > * 参考示例：考虑到通用性，选取的应用场景尽量以英文为主，推荐方案场景有：
->   * PaddleDetection 1）行为识别（打架，抽烟，接打电话 ) 2）车辆追踪 3）高空抛物 4）产线上包装盒内产品计数
->   * PaddleOCR 1）古籍电子化保存
-> * 技术要求：熟练掌握OpenVINO python API与其他工具组件的使用方法
-> * 参考文档：[OpenVINO notebook仓库](https://github.com/openvinotoolkit/openvino_notebooks)、[OpenVINO notebook仓库代码贡献规范](https://github.com/openvinotoolkit/openvino_notebooks/blob/main/CONTRIBUTING.md)
-
+>   * 文本处理, 情感分析，文本分类等: [ERINE-4.5-0.3B老北京风格微调](https://aistudio.baidu.com/projectdetail/10000880?channelType=0&channel=0) 和  [基于ERNIE-4.5-0.3B 中文情感分析实战教程](https://aistudio.baidu.com/projectdetail/9385231)
+>  
+> * 技术要求：熟练掌握python和FastDeploy部署流程与其他工具组件的使用方法
+> * 参考文档：[FastDeploy](https://paddlepaddle.github.io/FastDeploy/zh/) 和 [飞浆AI Studio](https://aistudio.baidu.com/overview)
 
 ### 请 海光 填写
 
