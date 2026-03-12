@@ -46,15 +46,14 @@
 ### 请 紫光展锐 填写
 
 ### 请 此芯 填写
-# 进阶任务：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
-
-## 技术标签
+进阶任务：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
+* 技术标签
 - **模型移植与优化**：将 PaddleOCR-VL-1.5 模型（0.9B 参数）移植到此芯 P1 芯片，实现高效模型推理。
 - **异构算力调度**：基于此芯 P1 的异构架构（Armv9 CPU + Arm Immortalis GPU + 周易 NPU），实现模型算子的最优分配与调度。
 
-## 任务难度：级别：进阶
+* 任务难度：级别：进阶
 
-## 详细描述
+* 详细描述
 本任务旨在将 **PaddleOCR-VL-1.5** 模型移植到 **此芯 P1** 芯片平台，充分利用其 **CPU+GPU+NPU** 异构算力，实现文档解析的端侧高效推理，推动国产 AI 芯片在文档智能领域的应用落地。
 
 ### 获胜规则
@@ -88,13 +87,13 @@
 ### 3. 进阶挑战
 - 对 Layout 模块使用 NPU SDK 进行量化，以降低内存占用。
 
-## 4. 提交内容
+* 提交内容
 需包含如下内容：
 1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
 2. 此芯 P1 推理引擎的使用说明。
 3. 示例应用（命令行工具或 GUI 演示）。
 
-## 5. 提交方式
+* 提交方式
 1. **项目提交**：提交使用案例到 [AI Studio](https://aistudio.baidu.com/projectoverview) 的项目并公开，请提交全部源码。
 2. **标题规范**：标题处打上【PaddlePaddle Hackathon 10】。
 3. **基本要求**：需包含 PaddleOCR-VL-1.5 在此芯 P1 上的部署详细步骤、此芯 P1 推理引擎的示例应用步骤（包括命令行工具 / GUI 演示）。
@@ -103,19 +102,18 @@
    b) 该示例的流程逻辑是否清晰。
    c) 运行结果是否符合预期。
 
-## 参考示例
+* 参考示例
 考虑到通用性，选取的应用场景为 **实时解析文档**（发票、合同、表格等）。
 
-## 技术要求
+* 技术要求
 - 模型架构理解
 - 此芯 P1 硬件特性了解
 - 开发工具链（推理框架，量化工具，编程语言 Python & C++）
 
-## 参考文档 & 链接
-**此芯科技开发者网站**（含 NOE SDK、工具链下载）:
+* 参考文档
 - [CIX AI Model Hub](https://modelscope.cn/models/cix/ai_model_hub/files?version=25_Q4)
 
-- [NOE SDK](https://developer.cixtech.com/) 找到 NeuralONE AI SDK，在注册后并下载。
+- [CIX NOE SDK](https://developer.cixtech.com/) 找到 NeuralONE AI SDK，在注册后并下载。
 
 - [PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
 
