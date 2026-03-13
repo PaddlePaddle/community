@@ -21,11 +21,8 @@
 ## 赛题详情（厂商排名不分先后）
 ### 请 Intel 填写
 
-### 请 AMD 填写
-
-#### 进阶任务：为 Paddle 框架适配 HIP BF16 精度类型
+### AMD：进阶任务：为 Paddle 框架适配 HIP BF16 精度类型
 * 技术标签：深度学习框架，C++/HIP，ROCm，MIOpen，PaddlePaddle
-* 任务难度：进阶
 * 详细描述：
   * **背景**：当前 Paddle 框架在 ROCm 平台上未适配 HIP BF16 精度类型，导致该精度类型下的相关算子不可用。在 AMD GPU 上运行 PaddleOCR-VL 等包含卷积视觉编码器的模型时，由于 BF16 算子缺失，不得不通过 `_keep_in_fp32_modules` 等方式将视觉编码器强制回退到 FP32 精度运行。
     HIP BF16 精度类型不可用对 Paddle 框架在 AMD GPU 上的推理能力有显著制约：
@@ -42,8 +39,8 @@
     2. Paddle 框架的 ROCm BF16 算子能力得到完善，有利于框架上其他 LLM/多模态模型的 AMD GPU 推理
   * **验收标准**：PaddleOCR-VL-1.5 能在 AMD GPU + ROCm 环境下以 BF16 精度完整运行并输出正确结果。
 * 提交内容：
-  1. 向 Paddle 主仓库（https://github.com/PaddlePaddle/Paddle）develop 分支提交 Issue 描述问题，并提交 PR 实现 HIP BF16 精度类型适配
-  2. 向 PaddleX 仓库（https://github.com/PaddlePaddle/PaddleX）develop 分支提交 Issue 和 PR，移除现有 ROCm BF16 的 workaround 代码
+  1. 向 [Paddle 主仓库](https://github.com/PaddlePaddle/Paddle) develop 分支提交 Issue 描述问题，并提交 PR 实现 HIP BF16 精度类型适配
+  2. 向 [PaddleX 仓库](https://github.com/PaddlePaddle/PaddleX) develop 分支提交 Issue 和 PR，移除现有 ROCm BF16 的 workaround 代码
   3. PR 中需包含测试用例和在 AMD GPU 上的验证结果截图
 * 提交方式：GitHub Issue + PR 并截图发送邮件
 * 技术要求：
