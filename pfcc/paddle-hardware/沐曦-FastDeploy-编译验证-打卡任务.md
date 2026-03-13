@@ -2,11 +2,7 @@
 
 ## 一、Metax GPU + FastDeploy 编译打卡
 
-<<<<<<< HEAD
-—— 从源码编译开始，解锁国产GPU高性能推理框架开发之路
-=======
 从源码编译开始，解锁国产GPU高性能推理框架开发之路
->>>>>>> b95afb0 ([Metax] upload the task for Metax GPU platform)
 
 **各位飞桨开发者大家好！**
 

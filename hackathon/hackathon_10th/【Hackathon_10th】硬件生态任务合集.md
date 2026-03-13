@@ -6,8 +6,7 @@
 >    * 第一阶段：RFC 方案提交
 >      1. 提交方式：1）以 issue 的形式进行提交到[这儿](https://github.com/openvinotoolkit/openvino_notebooks/issues)，2）标题处打上【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求
 >      2. 基本要求：1）应用场景与现有 notebook demo 不重复，2）该示例中需要使用最新版本的 openvino 完成所有模型的推理部署
->      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）运行结果是否符合预期
->      
+>      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）运行结果是否符合预期    
 >    * 第二阶段：PR代码提交
 >      1. 提交地址： https://github.com/openvinotoolkit/openvino_notebooks ，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
 >      2. 该 PR 需满足 notebook 贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
@@ -97,7 +96,7 @@
 
 - 提交内容**：**
 
-  第一阶段：https://github.com/PaddlePaddle/FastDeploy/tree/develop
+  第一阶段：PR 提交地址[PaddlePaddle/FastDeploy: High-performance Inference and Deployment Toolkit for LLMs and VLMs based on PaddlePaddle](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
   第二阶段：PR 提交地址[PaddlePaddle/FastDeploy: High-performance Inference and Deployment Toolkit for LLMs and VLMs based on PaddlePaddle](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
 
 - 参考文档：
