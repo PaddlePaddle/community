@@ -7,7 +7,7 @@
 >      1. 提交方式：1）以 issue 的形式进行提交到[这儿](https://github.com/openvinotoolkit/openvino_notebooks/issues)，2）标题处打上【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求
 >      2. 基本要求：1）应用场景与现有 notebook demo 不重复，2）该示例中需要使用最新版本的 openvino 完成所有模型的推理部署
 >      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）运行结果是否符合预期
->         
+>      
 >    * 第二阶段：PR代码提交
 >      1. 提交地址： https://github.com/openvinotoolkit/openvino_notebooks ，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
 >      2. 该 PR 需满足 notebook 贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
@@ -54,6 +54,38 @@
 ### 请 天数智芯 填写
 
 ### 请 沐曦 填写
+
+### Metax: 优化PaddleOCR-VL-1.5 + Metax GPU 
+
+- 技术标签：深度学习框架，Python，PaddleOCR-VL-1.5，Metax GPU
+
+- 任务难度：进阶
+
+- 详细描述：*PaddleOCR* 是智能文档解析与文字识别工具，支持多语言识别与手写体识别，轻松处理PDF、图片等格式，高效提取文字信息。为此我们也想基于PaddlePaddle + FastDeploy + Metax GPU实现更优的推理性能。在这个任务中，你需要基于：
+
+  ```
+  paddlepaddle==3.4.0.dev20251223
+  paddle-metax-gpu==3.3.0.dev20251224
+  ```
+
+  [PaddlePaddle/FastDeploy at release/2.4](https://github.com/PaddlePaddle/FastDeploy/tree/release/2.4)
+
+- 本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份性能瓶颈分析评估报告(包含但不限于推理框架调度，GPU 利用率，5个以上kernel函数分析)； 在第二阶段中，我们将从第一阶段提交的结果中，挑选出需要进一步优化的方向，并请相对应的开发者根据确定的性能瓶颈点提交优化PR，预期性能提升目标20%+。
+
+- 提交内容**：**
+
+  第一阶段：可以通过邮件形式发送到指定邮箱；
+
+  第二阶段：PR 提交地址[PaddlePaddle/FastDeploy: High-performance Inference and Deployment Toolkit for LLMs and VLMs based on PaddlePaddle](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
+
+- 参考文档：
+
+  PaddlePaddle：[PaddlePaddle/Paddle: PArallel Distributed Deep LEarning: Machine Learning Framework from Industrial Practice （『飞桨』核心框架，深度学习&机器学习高性能单机、分布式训练和跨平台部署）](https://github.com/PaddlePaddle/Paddle)
+
+  FastDeploy：[PaddlePaddle/FastDeploy at release/2.4](https://github.com/PaddlePaddle/FastDeploy/tree/release/2.4)
+
+  PaddleOCR：[PaddlePaddle/PaddleOCR: Turn any PDF or image document into structured data for your AI. A powerful, lightweight OCR toolkit that bridges the gap between images/PDFs and LLMs. Supports 100+ languages.](https://github.com/PaddlePaddle/PaddleOCR)
+
 
 ### 请 燧原 填写
 
