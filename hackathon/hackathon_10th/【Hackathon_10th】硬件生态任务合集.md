@@ -55,6 +55,21 @@
 * **实现 PaddleOCR-VL-1.5 的 Pipeline**：实现 PaddleOCR-VL-1.5 在 CPU/GPU 上的基础推理。
 * **量化加速**：使用 llama.cpp 或者 MNN 等推理框架，对 PaddleOCR-VL-1.5 在 CPU/GPU 上完成加速推理。
 * **2. 可选挑战任务：实现基于此芯 P1 的 CPU + NPU 异构推理**
+* ## 环境准备
+### 1. 开发环境配置
+- 搭建此芯 P1 开发环境，配置交叉编译工具链。
+- 安装此芯科技推理 NOE SDK。
+### 2. 模型格式转换
+- 将 Hugging Face 的 PaddleOCR-VL-1.5 转换为 Paddle/ONNX 格式。
+  > **重要**：若需完成挑战任务，必须执行此步骤。
+## 具体实施步骤与挑战
+### 1. 实现 PaddleOCR-VL-1.5 的 Pipeline
+- 实现 Layout（版面分析）推理。
+- 实现 PaddleOCR-VL-1.5 模型在 CPU/GPU 上的推理。
+### 2. 量化加速
+- 对 PaddleOCR-VL-1.5 模型进行 Q4_0 的量化和推理。
+### 3. 进阶挑战
+- 对 Layout 模块使用 NPU SDK 进行量化，以降低内存占用。
 * **提交内容**：
 * 需包含如下内容：
 1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
