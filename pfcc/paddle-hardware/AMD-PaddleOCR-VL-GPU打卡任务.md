@@ -1,4 +1,4 @@
-# 打卡任务名称：PaddleOCR-VL-1.5 在 AMD GPU 上的部署与运行
+# AMD：PaddleOCR-VL-1.5 在 AMD GPU 上的部署与运行
 为了帮助更多小伙伴快速了解 PaddleOCR-VL-1.5 在 AMD GPU 上的部署流程，熟悉 ROCm 环境配置与 PaddleX 推理 Pipeline，飞桨社区联合 AMD 特推出本次 **PaddleOCR-VL-1.5 热身打卡活动**。
 通过亲手完成一次完整的 PaddleOCR-VL-1.5 部署与推理流程，你将正式具备在 AMD GPU 上运行飞桨模型的基础能力。
 
@@ -12,8 +12,6 @@
 
 ## 提交方式
 参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + Zijun.Wei@amd.com, Huaqiang.Fang@amd.com, bingqing.guo@amd.com
-
-回复邮件（xxx打卡任务，已通过），并抄送 ext_paddle_oss@baidu.com, Zijun.Wei@amd.com, Huaqiang.Fang@amd.com, bingqing.guo@amd.com
 
 ## 算力/环境支持
 本次热身打卡活动需要使用 AMD Radeon PRO W7900 GPU 及 ROCm 7.0 环境。可使用预构建的 Docker 镜像快速搭建环境，赶快行动起来吧~
@@ -157,7 +155,3 @@ paddlex --pipeline PaddleOCR-VL-vllm.yaml --input /tmp/test_ocr.png
    * 【打卡内容】：PaddleOCR-VL-1.5 推理
    * 【打卡截图】：
       * vLLM 后端或 Native 后端推理结果截图（任选其一）
-
-## 往期打卡任务参考
-1. [完成 Paddle 本地编译](https://github.com/PaddlePaddle/Paddle/issues/45347)（飞桨框架的打卡任务）
-2. [完成 FastDeploy 本地编译](https://github.com/PaddlePaddle/FastDeploy/issues/6225)（飞桨推理的打卡任务）
