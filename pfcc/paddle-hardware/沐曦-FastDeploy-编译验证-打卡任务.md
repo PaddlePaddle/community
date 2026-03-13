@@ -53,7 +53,7 @@ git clone https://github.com/PaddlePaddle/FastDeploy
 cd FastDeploy
 ```
 
-## 四、编译打卡流程
+## 五、编译打卡流程
 
 1）熟悉并了解编译脚本，编译参数配置，完成fastdeploy编译，编译产物位于~/fastdeploy/dist；
 运行成功后，终端输出结果如下：
@@ -62,5 +62,14 @@ cd FastDeploy
 2）完成fastdeploy 编译产物wheel包安装，了解安装路径；
 [Metax-infer-result](fastdeploy-Metax C5xx-infer-result2.png)
 
+
+## 邮件格式
+* 标题： [飞桨黑客松第十期FastDeploy编译任务打卡]
+* 内容：
+   * 飞桨团队你好，
+   * 【GitHub ID】：参赛选手本人 GitHub 打卡任务仓库地址
+   * 【打卡内容】：编译/安装 fastdeploy whl 包
+   * 【环境信息】：OS / CPU / GPU / FastDeploy / PaddlePaddle 版本
+   * 【打卡截图】：（粘贴截图或提供链接）
 
 
