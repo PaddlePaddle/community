@@ -70,12 +70,13 @@
 
   [PaddlePaddle/FastDeploy at release/2.4](https://github.com/PaddlePaddle/FastDeploy/tree/release/2.4)
 
-- 本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份性能瓶颈分析评估报告(包含但不限于推理框架调度，GPU 利用率，5个以上kernel函数分析)； 在第二阶段中，我们将从第一阶段提交的结果中，挑选出需要进一步优化的方向，并请相对应的开发者根据确定的性能瓶颈点提交优化PR，预期性能提升目标20%+。
+- 本次任务评估将分为两个阶段，
+第一阶段，开发者需要提供一份性能瓶颈分析评估报告(包含但不限于推理框架调度，GPU 利用率，5个以上kernel函数分析)，按照profiling trace文件+分析报告形式提交； 
+第二阶段，我们将从第一阶段提交的结果中，review并comment需要进一步优化的算子，并请相对应的开发者根据确定的性能瓶颈点提交优化PR，预期性能提升目标20%+。
 
 - 提交内容**：**
 
-  第一阶段：可以通过邮件形式发送到指定邮箱；
-
+  第一阶段：https://github.com/PaddlePaddle/FastDeploy/tree/develop
   第二阶段：PR 提交地址[PaddlePaddle/FastDeploy: High-performance Inference and Deployment Toolkit for LLMs and VLMs based on PaddlePaddle](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
 
 - 参考文档：

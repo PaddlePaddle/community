@@ -2,7 +2,11 @@
 
 ## 一、Metax GPU + FastDeploy 编译打卡
 
+<<<<<<< HEAD
 —— 从源码编译开始，解锁国产GPU高性能推理框架开发之路
+=======
+从源码编译开始，解锁国产GPU高性能推理框架开发之路
+>>>>>>> b95afb0 ([Metax] upload the task for Metax GPU platform)
 
 **各位飞桨开发者大家好！**
 
@@ -23,7 +27,12 @@
 
 注：本次热身打卡活动需要使用 Metax GPU 硬件**，赶快行动起来吧。
 
-## 三、准备环境
+
+## 三、提交方式
+
+参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com 与 kaichuang.gao@metax-tech.com。
+
+## 四、准备环境
 
 以MetaxGPU 版本为例：
 
@@ -51,8 +60,11 @@ cd FastDeploy
 ## 四、编译打卡流程
 
 1）熟悉并了解编译脚本，编译参数配置，完成fastdeploy编译，编译产物位于~/fastdeploy/dist；
+运行成功后，终端输出结果如下：
+[Metax-infer-result](fastdeploy-Metax C5xx-infer-result1.png)
 
-2）完成fastdeploy 编译产物wheel包安装，了解安装路径；尝试直接修改python文件，重新运行推理程序；
+2）完成fastdeploy 编译产物wheel包安装，了解安装路径；
+[Metax-infer-result](fastdeploy-Metax C5xx-infer-result2.png)
 
 
 
