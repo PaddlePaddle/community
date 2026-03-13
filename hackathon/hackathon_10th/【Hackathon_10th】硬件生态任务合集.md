@@ -89,7 +89,7 @@
 3. 示例应用（命令行工具或 GUI 演示）。
 
 * 提交方式：
-1. 项目提交：提交使用案例到 [AI Studio](https://aistudio.baidu.com/projectoverview) 的项目并公开 或 向Paddle主仓库（https://github.com/PaddlePaddle/Paddle）develop 分支提交，请提交全部源码。
+1. 项目提交：提交使用案例到 [AI Studio](https://aistudio.baidu.com/projectoverview) 的项目并公开，请提交全部源码。
 2. 标题规范：标题处打上【PaddlePaddle Hackathon 10】。
 3. 基本要求：需包含 PaddleOCR-VL-1.5 在此芯 P1 上的部署详细步骤、此芯 P1 推理引擎的示例应用步骤（包括命令行工具 / GUI 演示）。
 4. 筛选依据：
