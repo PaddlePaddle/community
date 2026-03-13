@@ -52,6 +52,29 @@
 ### 请 Arm 填写
 
 ### 请 天数智芯 填写
+> 天数智芯：进阶任务：基于天数智芯硬件与文心多模态模型的创新应用
+> * 技术标签：深度学习框架，Python，文心大模型，多模态
+> * 任务难度：进阶
+> * 详细描述：本任务旨在利用天数智芯硬件(BI-150S)的算力优势，结合文心系列多模态模型，打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。开发者可**任选其一**或组合使用以下模型进行应用开发：**ERNIE-4.5-VL-28B-A3B-Thinking** 与 **PaddleOCR-VL-1.5**，参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications)。本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份 RFC，用来描述本次任务的设计方案及预期性能指标；在第二阶段中，我们将从第一阶段提交的结果中，挑选出 2 份比较优秀的方案，并请相对应的开发者根据自己的方案提交 PR。
+> * 提交内容：
+>    * 第一阶段：RFC 方案提交
+>      1. 提交方式：1）以 markdown 文件的形式提交到 https://aistudio.baidu.com/projectoverview ，2）标题处打上【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求。
+>      2. 基本要求：1）应用场景避免与现有 Demo 重复，2）方案需明确说明选用哪个/哪些模型（ERNIE-4.5-VL-28B-A3B-Thinking 或 PaddleOCR-VL-1.5）及使用方式。
+>      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）所选模型的使用是否合理、流程逻辑是否清晰，3）预期效果与业务指标是否匹配。
+>
+>    * 第二阶段：PR 代码提交
+>      1. 提交地址：以 Notebook (ipynb) 格式提交完整代码到 https://aistudio.baidu.com/projectoverview 里自己的 project 项目，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址。
+>      2. 该提交需满足 notebook 贡献规范，包含完整训推代码、依赖环境说明及运行脚本，必须提供在天数智芯硬件上运行的成功截图或录屏证明；开发者需及时根据 review 结果进行修改。
+>      3. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排。
+> * 参考示例：推荐参赛者基于所选模型实现以下类型场景（可扩展），推荐方案方向有：
+>   * 文档智能：合同/票据关键信息抽取、表格理解与问答、多页文档摘要（OCR + 推理）。
+>   * 多模态理解：图文问答、图表解析与结论生成、说明书/手册理解与问答。
+>   * 垂直场景：古籍/档案数字化与知识问答、证照识别与信息核验、教育/试卷批改与解析。
+>   * 参考 Demo：
+>     * [基于 PaddleOCR-VL 构建论文格式规范器](https://aistudio.baidu.com/projectdetail/9469300?searchKeyword=paddle-ocr-vl&searchTab=PROJECT)
+>     * [基于 ERNIE-4.5-VL-28B-A3B-Thinking 的目标检测器](https://aistudio.baidu.com/projectdetail/9726489?searchKeyword=ERNIE-4.5-VL-28B-A3B-Thinking&searchTab=PROJECT)
+> * 技术要求：熟练掌握 Python、文心系列模型与 PaddleOCR-VL 的调用与部署方式，以及在天数智芯硬件上的运行环境配置。
+> * 参考文档：[飞桨 AI Studio](https://aistudio.baidu.com/modelsoverview)、[ERNIE-4.5-VL-28B-A3B-Thinking 模型](https://huggingface.co/baidu/ERNIE-4.5-VL-28B-A3B-Thinking)、[PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
 
 ### 请 沐曦 填写
 
