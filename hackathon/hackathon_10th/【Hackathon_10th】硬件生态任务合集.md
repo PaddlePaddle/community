@@ -55,7 +55,7 @@
 * **实现 PaddleOCR-VL-1.5 的 Pipeline**：实现 PaddleOCR-VL-1.5 在 CPU/GPU 上的基础推理。
 * **量化加速**：使用 llama.cpp 或者 MNN 等推理框架，对 PaddleOCR-VL-1.5 在 CPU/GPU 上完成加速推理。
 * **2. 可选挑战任务：实现基于此芯 P1 的 CPU + NPU 异构推理**
-> * **提交内容**：
+* **提交内容**：
 * 需包含如下内容：
 1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
 2. 此芯 P1 推理引擎的使用说明。
