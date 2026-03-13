@@ -17,8 +17,7 @@
 
 ### 1.2 提交方式
 
-参与热身打卡活动并按照邮件模板格式将截图发送至以下邮箱  
-ext_paddle_oss@baidu.com + developer@cixtech.com 
+参与热身打卡活动并按照邮件模板格式将截图发送至以下邮箱：ext_paddle_oss@baidu.com + developer@cixtech.com 
 
 ### 1.3 算力/环境支持
 
@@ -91,8 +90,5 @@ cd /home/radxa/llama.cpp/build/bin
 
 【示例截图】：
 
-![](./基础打卡截图1.png)
-![](./基础打卡截图2.png)
-
-
-
+![](./images/此芯-基础打卡截图1.png)
+![](./images/此芯-基础打卡截图2.png)
