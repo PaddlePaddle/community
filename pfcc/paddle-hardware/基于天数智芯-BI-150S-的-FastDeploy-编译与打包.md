@@ -1,4 +1,4 @@
-# 打卡任务名称：基于天数智芯 BI-150S 的 FastDeploy 编译与打包
+# 基于天数智芯 BI-150S 的 FastDeploy 编译与打包
 本任务为**天数智芯硬件赛道**的热身打卡，旨在帮助开发者在**天数智芯 BI-150S** 上完成 FastDeploy 的编译、打包与推理验证，熟悉在国产算力上的 FastDeploy 工程结构与编译流程。通过亲手完成一次在 BI-150S 环境下的完整流程，你将具备参与天数智芯 + FastDeploy 生态开发的基础能力。
 
 ## 任务目标
@@ -70,6 +70,6 @@ python3 demo.py
    * 【GitHub ID】：XXX
    * 【打卡内容】：编译/安装 whl 包/运行单元测试
    * 【打卡截图】：
-     * 编译：![编译截图](./build.png)
-     * 安装 whl 包：![安装截图](./install.png)
-     * 运行单元测试：![运行 demo 截图](./demo.png)
+     * 编译：![编译截图](./images/天数-build.png)
+     * 安装 whl 包：![安装截图](./images/天数-install.png)
+     * 运行单元测试：![运行 demo 截图](./images/天数-demo.png)
