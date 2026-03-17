@@ -9,7 +9,7 @@
 * 全链路部署：独立完成 ERNIE-4.5-0.3B 模型在国产算力平台上的环境搭建、模型下载及 API 调用。
 
 ## 提交方式
-参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + teemo.wang@enflame-tech.com
+参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + teemo.wang@enflame-tech.com + wenhao.zhang@enflame-tech.com
 
 ## 算力/环境支持
 本次任务需在 Gitee AI 算力广场 租赁燧原 S60 实例完成。
