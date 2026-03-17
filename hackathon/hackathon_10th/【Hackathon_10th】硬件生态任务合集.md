@@ -29,33 +29,29 @@
 
 ### 请 沐曦 填写
 
-### 请 燧原 填写
+### 基于燧原卡为`FastDeploy`新增应用
+* 技术标签：PaddlePaddle，FastDeploy，Python
 
-> 进阶任务：基于燧原卡为`FastDeploy`新增应用
-> * 技术标签：PaddlePaddle，FastDeploy，Python
-> * 任务难度：进阶
-> * 详细描述：本任务旨在利用 燧原 S60 加速卡 (GCU) 的算力优势，结合 FastDeploy 高性能推理框架，对 ERNIE-4.5-0.3B-Paddle 模型进行二次开发与应用。我们鼓励开发者打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications) 。
-> * 提交内容：
->    * 第一阶段：RFC 方案提交
->      1. 提交方式：1）以markdown文件的形式提交到 https://aistudio.baidu.com/projectoverview, 2）标题处打上【PaddlePaddle Hackathon 10】。
->      2. 基本要求：1）应用场景避免与现有 Demo（如简单的情感分析）重复，2）方案需充分挖掘 `ERNIE-4.5-0.3B-Paddle` 轻量且高效的特点。
->      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）预期的推理效果与业务指标是否匹配。
->     
->    * 第二阶段：PR代码提交
->      1. 提交地址：以 Notebook (ipynb) 格式提交完整代码到 https://aistudio.baidu.com/projectoverview 里自己的project项目，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
->      2. 该 PR 需满足 notebook 贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
->      3. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
-> * 参考示例：考虑到通用性，选取的应用场景尽量以英文为主，推荐方案场景有：
->   * 智能文本处理：长文摘要、垂直领域翻译。
->   * 语义理解应用：行业知识库问答、高级情感倾向挖掘。
->   * 参考Demo：
->     * [ERINE-4.5-0.3B老北京风格微调](https://aistudio.baidu.com/projectdetail/10000880?channelType=0&channel=0) 
->      * [基于ERNIE-4.5-0.3B 中文情感分析实战教程](https://aistudio.baidu.com/projectdetail/9385231)
->  
-> * 技术要求：熟练掌握python和FastDeploy部署流程与其他工具组件的使用方法
-> * 参考文档：
->    * [FastDeploy](https://paddlepaddle.github.io/FastDeploy/zh/) 
->    * [飞浆AI Studio](https://aistudio.baidu.com/overview)
+* 详细描述：本任务旨在利用 燧原 S60 加速卡 (GCU) 的算力优势，结合 FastDeploy 高性能推理框架，对 ERNIE-4.5-0.3B-Paddle 模型进行二次开发与应用。我们鼓励开发者打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications) 。
+* 提交内容：
+    * 第一阶段：RFC 方案提交
+      1. 提交方式：1）以markdown文件的形式提交到 https://aistudio.baidu.com/projectoverview, 2）标题处打上【PaddlePaddle Hackathon 10】。
+      2. 基本要求：1）应用场景避免与现有 Demo（如简单的情感分析）重复，2）方案需充分挖掘 `ERNIE-4.5-0.3B-Paddle` 轻量且高效的特点。
+      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）预期的推理效果与业务指标是否匹配。
+     
+    * 第二阶段：PR代码提交
+      1. 提交地址：以 Notebook (ipynb) 格式提交完整代码到 https://aistudio.baidu.com/projectoverview 里自己的project项目，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
+      2. 该 PR 需满足 notebook 贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
+      3. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
+* 参考示例：考虑到通用性，选取的应用场景尽量以英文为主，推荐方案场景有：
+   * 智能文本处理：长文摘要、垂直领域翻译。
+   * 语义理解应用：行业知识库问答、高级情感倾向挖掘。
+   * 参考Demo：
+     * [ERINE-4.5-0.3B老北京风格微调](https://aistudio.baidu.com/projectdetail/10000880?channelType=0&channel=0) 
+     * [基于ERNIE-4.5-0.3B 中文情感分析实战教程](https://aistudio.baidu.com/projectdetail/9385231)
+  
+* 技术要求：熟练掌握 python 和 FastDeploy 部署流程与其他工具组件的使用方法
+* 参考文档：[FastDeploy](https://paddlepaddle.github.io/FastDeploy/zh/) 、[飞桨AI Studio](https://aistudio.baidu.com/overview)
 
 ### 请 海光 填写
 
