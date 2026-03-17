@@ -76,39 +76,25 @@
 * 技术要求：熟练掌握 Python、文心系列模型与 PaddleOCR-VL 的调用与部署方式，以及在天数智芯硬件上的运行环境配置。
 * 参考文档：[飞桨 AI Studio](https://aistudio.baidu.com/modelsoverview)、[ERNIE-4.5-VL-28B-A3B-Thinking 模型](https://huggingface.co/baidu/ERNIE-4.5-VL-28B-A3B-Thinking)、[PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
 
-### 请 沐曦 填写
-
-### Metax: 优化PaddleOCR-VL-1.5 + Metax GPU 
+### 沐曦：优化 PaddleOCR-VL-1.5+Metax GPU 
 
 - 技术标签：深度学习框架，Python，PaddleOCR-VL-1.5，Metax GPU
-
-- 任务难度：进阶
 
 - 详细描述：*PaddleOCR* 是智能文档解析与文字识别工具，支持多语言识别与手写体识别，轻松处理PDF、图片等格式，高效提取文字信息。为此我们也想基于PaddlePaddle + FastDeploy + Metax GPU实现更优的推理性能。在这个任务中，你需要基于：
 
   ```
   paddlepaddle==3.4.0.dev20251223
   paddle-metax-gpu==3.3.0.dev20251224
+  https://github.com/PaddlePaddle/FastDeploy/tree/release/2.4
   ```
 
-  [PaddlePaddle/FastDeploy at release/2.4](https://github.com/PaddlePaddle/FastDeploy/tree/release/2.4)
+- 本次任务评估将分为两个阶段：
+  - 第一阶段，开发者需要提供一份性能瓶颈分析评估报告(包含但不限于推理框架调度，GPU 利用率，5个以上kernel函数分析)，按照 profiling trace 文件+分析报告形式提交； 
+  - 第二阶段，我们将从第一阶段提交的结果中，review 并 comment 需要进一步优化的算子，并请相对应的开发者根据确定的性能瓶颈点提交优化 PR，预期性能提升目标 20%+。
 
-- 本次任务评估将分为两个阶段，
-第一阶段，开发者需要提供一份性能瓶颈分析评估报告(包含但不限于推理框架调度，GPU 利用率，5个以上kernel函数分析)，按照profiling trace文件+分析报告形式提交； 
-第二阶段，我们将从第一阶段提交的结果中，review并comment需要进一步优化的算子，并请相对应的开发者根据确定的性能瓶颈点提交优化PR，预期性能提升目标20%+。
-
-- 提交内容**：**
-
-  第一阶段：PR 提交地址[PaddlePaddle/FastDeploy: High-performance Inference and Deployment Toolkit for LLMs and VLMs based on PaddlePaddle](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
-  第二阶段：PR 提交地址[PaddlePaddle/FastDeploy: High-performance Inference and Deployment Toolkit for LLMs and VLMs based on PaddlePaddle](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
-
-- 参考文档：
-
-  PaddlePaddle：[PaddlePaddle/Paddle: PArallel Distributed Deep LEarning: Machine Learning Framework from Industrial Practice （『飞桨』核心框架，深度学习&机器学习高性能单机、分布式训练和跨平台部署）](https://github.com/PaddlePaddle/Paddle)
-
-  FastDeploy：[PaddlePaddle/FastDeploy at release/2.4](https://github.com/PaddlePaddle/FastDeploy/tree/release/2.4)
-
-  PaddleOCR：[PaddlePaddle/PaddleOCR: Turn any PDF or image document into structured data for your AI. A powerful, lightweight OCR toolkit that bridges the gap between images/PDFs and LLMs. Supports 100+ languages.](https://github.com/PaddlePaddle/PaddleOCR)
+- 提交内容：
+  - 第一阶段：[PR 提交地址](https://github.com/PaddlePaddle/community/tree/master/rfcs/FastDeploy)
+  - 第二阶段：[PR 提交地址](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
 
 
 ### 基于燧原卡为`FastDeploy`新增应用
