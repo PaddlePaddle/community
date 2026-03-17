@@ -1,6 +1,5 @@
 > 模版：进阶任务：为 OpenVINO notebook 新增 demo 示例
 > * 技术标签：深度学习框架，Python，OpenVINO
-> * 任务难度：进阶
 > * 详细描述：作为深度学习工具套件，OpenVINO 可以被广泛应用于不同的应用场景，实现 AI 模型的推理部署，为此我们也想收集更多基于 PaddlePaddle 模型所打造的优秀应用案例，丰富示例仓库。 在这个任务中，你需要在 OpenVINO notebook 仓库新增一个 notebook 示例。本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份 RFC，用来描述本次任务的设计方案； 在第二阶段中，我们将从第一阶段提交的结果中，挑选出 2 份比较优秀的方案，并请相对应的开发者根据自己的方案提交 PR。
 > * 提交内容：
 >    * 第一阶段：RFC 方案提交
@@ -28,8 +27,12 @@
     * 需体现“文档/视觉理解”到“下游智能处理”的完整流程，并突出 OpenVINO 的部署价值。
 
 * 提交内容：
-    1. 提交地址： 请将 PR 提交到 [openvino_build_deploy](https://github.com/openvinotoolkit/openvino_build_deploy)  仓库（demos 目录下新增 Demo，结构与现有示例一致），标题加上【PaddlePaddle Hackathon 10】字样。
-    2. 必备：
+    * 第一阶段：RFC 方案提交
+      1. 提交方式：1）将方案说明提交到厂商邮件组 zhuo.wu@intel.com 及 ethan.yang@intel.com ，2）标题处打上【PaddlePaddle Hackathon 10方案说明】，3）RFC 语言不做强制要求
+      2. 基本要求：1）应用场景与现有 [openvino_notebooks/notebooks](https://github.com/openvinotoolkit/openvino_notebooks/notebooks) 中以及 [openvino_build_deploy/demos](https://github.com/openvinotoolkit/openvino_build_deploy/demos) 中的内容不重复，2）该方案说明中需要使用openvino 完成模型的推理部署
+      3. 筛选依据：1）应用价值；2）逻辑清晰度；3）可复现性与完成可行性。
+         
+    * 第二阶段：PR代码提交。请将 PR 提交到 [openvino_build_deploy](https://github.com/openvinotoolkit/openvino_build_deploy)  仓库（demos 目录下新增 Demo，结构与现有示例一致），标题加上【PaddlePaddle Hackathon 10】字样。必备：
        * 源代码 + README + 依赖/模型说明 + 效果展示（截图/录屏/演示文稿）。
        * PR 需满足 notebook 以及 openvino_build_deploy 仓库贡献规范，开发者需要及时根据 review 的结果进行 PR 修改。
        * 使用 OpenVINO 完成全部推理部署；可复现、尽量一键运行。
@@ -108,7 +111,30 @@
   PaddleOCR：[PaddlePaddle/PaddleOCR: Turn any PDF or image document into structured data for your AI. A powerful, lightweight OCR toolkit that bridges the gap between images/PDFs and LLMs. Supports 100+ languages.](https://github.com/PaddlePaddle/PaddleOCR)
 
 
-### 请 燧原 填写
+### 基于燧原卡为`FastDeploy`新增应用
+* 技术标签：PaddlePaddle，FastDeploy，Python
+
+* 详细描述：本任务旨在利用 燧原 S60 加速卡 (GCU) 的算力优势，结合 FastDeploy 高性能推理框架，对 ERNIE-4.5-0.3B-Paddle 模型进行二次开发与应用。我们鼓励开发者打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications) 。
+* 提交内容：
+    * 第一阶段：RFC 方案提交
+      1. 提交方式：1）以markdown文件的形式提交到 https://aistudio.baidu.com/projectoverview, 2）标题处打上【PaddlePaddle Hackathon 10】。
+      2. 基本要求：1）应用场景避免与现有 Demo（如简单的情感分析）重复，2）方案需充分挖掘 `ERNIE-4.5-0.3B-Paddle` 轻量且高效的特点。
+      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）预期的推理效果与业务指标是否匹配。
+     
+    * 第二阶段：PR代码提交
+      1. 提交地址：以 Notebook (ipynb) 格式提交完整代码到 https://aistudio.baidu.com/projectoverview 里自己的project项目，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
+      2. 该 PR 需满足 notebook 贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
+      3. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
+* 参考示例：考虑到通用性，选取的应用场景尽量以英文为主，推荐方案场景有：
+   * 智能文本处理：长文摘要、垂直领域翻译。
+   * 语义理解应用：行业知识库问答、高级情感倾向挖掘。
+   * 参考Demo：
+     * [ERINE-4.5-0.3B老北京风格微调](https://aistudio.baidu.com/projectdetail/10000880?channelType=0&channel=0) 
+     * [基于ERNIE-4.5-0.3B 中文情感分析实战教程](https://aistudio.baidu.com/projectdetail/9385231)
+  
+* 技术要求：熟练掌握 python 和 FastDeploy 部署流程与其他工具组件的使用方法
+* 参考文档：[FastDeploy](https://paddlepaddle.github.io/FastDeploy/zh/) 、[飞桨AI Studio](https://aistudio.baidu.com/overview)
+
 
 ### 请 海光 填写
 
@@ -118,7 +144,42 @@
 
 ### 请 龙芯 填写
 
-### 请 高通 填写
+### 高通：基于 Qualcomm AI Engine Direct (QNN) 部署 PaddleOCR-VL 模型，实现端侧页面级文档解析
+
+* 技术标签：PaddleOCR-VL，高通 QNN SDK，Hexagon NPU，Paddle2ONNX，Python，C/C++
+
+* 详细描述：PaddleOCR-VL 模型基于视觉语言大模型（PP-DocBee2-3B）实现了文本块、表格、公式及图表的统一识别，是 PaddleOCR 3.x 的旗舰文档解析方案。本赛题要求选手通过高通 QNN（Qualcomm Neural Networks）工具链，将 PaddleOCR-VL pipeline 中的关键子模型（布局检测模型、VL 识别模型等）转换并部署至高通 Hexagon NPU 进行端侧推理。参考 PaddleOCR CLI 中的 `doc_parser`，构建依赖端侧推理服务的完整页面级文档解析 pipeline，可使用 Python 或 C/C++ 语言进行开发。
+
+  **整体流程**：
+  1. 使用 Paddle2ONNX 将 PaddleOCR-VL 的子模型（布局检测模型、VL 识别模型）导出为 ONNX 格式
+  2. 使用 QNN SDK 工具链（`qnn-onnx-converter` → `qnn-model-lib-generator` → `qnn-context-binary-generator`）将 ONNX 模型转换为 QNN 格式并针对 HTP 后端进行优化
+  3. 对模型进行量化（INT8/INT16/FP16），以适配 HTP 高效推理
+  4. 搭建端侧推理服务，串联各子模型构建完整的文档解析 pipeline
+
+* 提交内容：
+   1. 模型转换脚本及说明文档（Paddle → ONNX → QNN 全链路）
+   2. 基于高通 QNN 部署的端侧推理服务代码
+   3. 基于端侧推理服务的完整页面级文档解析 pipeline 代码（参考 `doc_parser`）
+   4. 精度对比报告（端侧推理结果 vs 原始 PaddlePaddle 推理结果）
+   5. 单页文档解析性能及耗时测试报告
+
+* 验收要求（需全部满足）：
+   1. **模型转换完整**：完成布局检测模型和 VL 识别模型从 Paddle → ONNX → QNN 的全链路转换，提供可复现的转换脚本
+   2. **端侧推理可运行**：转换后的 QNN 模型可在高通 HTP-simulator 或实际高通设备上成功加载并执行推理
+   3. **文档解析 pipeline 可用**：参考 `doc_parser` 实现完整的页面级文档解析功能，输入单页文档图片，输出结构化 Markdown 解析结果，覆盖文本块与表格两种以上版面元素
+   4. **精度可接受**：端侧推理的文档解析结果与原始 PaddlePaddle 推理结果对比，文本识别准确率损失不超过 5%
+
+* 技术要求：
+   * 熟练掌握 Paddle2ONNX 模型导出工具的使用
+   * 熟悉高通 QNN SDK 工具链（qnn-onnx-converter、qnn-model-lib-generator、qnn-context-binary-generator）
+   * 具备在高通 Hexagon NPU 上进行模型量化与推理部署的经验
+   * 了解 PaddleOCR-VL 的模型结构与 pipeline 设计
+
+* 参考文档：
+   * [PaddleOCR-VL GitHub 仓库](https://github.com/PaddlePaddle/PaddleOCR)
+   * [Paddle2ONNX 文档](https://github.com/PaddlePaddle/Paddle2ONNX)
+   * [Qualcomm QNN SDK 文档](https://developer.qualcomm.com/software/qualcomm-neural-network-sdk)
+   * [高通 HTP 后端优化指南](https://developer.qualcomm.com/software/qualcomm-neural-network-sdk/getting-started)
 
 ### 请 联发科技 填写
 
@@ -128,13 +189,37 @@
 
 ### 请 瑞芯微 填写
 
+进阶任务：基于RK1820部署的PaddleOCR-VL模型，实现完整页面级文档解析功能
+ 
+ - 技术标签：PaddleOCR-VL，RK3588+RK1820部署，RKNN2、RKNN3工具链，Python，C/C++
+ 
+ - 详细描述：PaddleOCR-VL模型实现了文本块、表格、公式及图表的识别。通过RKNN3工具链，使用RK3588+RK1820进行模型端侧推理部署，搭建文本识别推理服务。参考PaddleOCR CLI中的doc_parser，构建依赖端侧识别推理服务的完整页面级文档解析服务，可使用Python或C/C++语言进行开发。本次任务评估将分为两个阶段，在第一阶段中，开发者需要实现基于RKNN3工具链的RK3588+RK1820部署的端侧识别推理服务，提供相应的解决方案报告。在第二阶段中，我们将从第一阶段提交的结果中，挑选出2份比较优秀的方案，并请相对应的开发者基于第一阶段中搭建的端侧识别推理服务，完成完整页面级文档解析功能。
+ 
+ - 提交内容：
+     - 第一阶段：
+         - 提交内容：基于RK3588+RK1820部署搭建的端侧识别推理API服务的解决方案
+         - 提交要求：解决方案报告（需包含技术思路，方案，测试结果及性能评估）；可复现的代码及环境
+         - 筛选依据：1）完整的端侧识别推理API服务方案报告，2）识别结果正确（忽略模型量化引入的个别识别错误），3）推理性能为应用端调用API服务的单次推理耗时，4）筛选推理性能top2的队伍进入第二阶段
+     - 第二阶段：
+         - 提交内容：1）基于端侧文本识别推理服务的完整页面级文档解析服务代码；2）单页文档解析性能及耗时测试报告
+         - 提交要求：代码需包含完整页面级文档解析功能，测试结果需包含单页文档解析性能及耗时测试报告
+         - 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
+ 
+ - 提交方式：Github
+ 
+ - 技术要求：
+ 
+     - 熟练掌握RK开发板模型部署及工具链使用技巧
+     - 熟悉Python或C/C++语言
+     - 熟悉文档解析流程
+
 ### 请 地瓜机器人 填写
 
 ### 请 麒麟 填写
 
 ### 统信：deepin Agent Teams 智能体团队协作系统
 
-**技术标签**：环境感知，意图识别，多智能体，MCP，Skills
+**技术标签**：环境感知，意图识别，多智能体， MCP， Skills
 
 **详细描述**：设计并实现一个运行在deepin操作系统上的智能体应用——**deepin Agent Teams**，该应用具备“环境感知”能力，通过分析用户的实时操作行为，如窗口标题、屏幕内容、交互动作等，主动理解用户意图并调用相应智能体提供辅助。
 

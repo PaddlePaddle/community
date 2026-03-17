@@ -156,7 +156,7 @@ python infer_simular.py --tokenizer_path ../model/PaddlePaddle/PaddleOCR-VL --im
 
 运行成功后，会打印出识别结果，如下：
 
-![simular-infer-result](paddleocr-vl-simular-infer-result.png)
+![simular-infer-result](images/瑞芯微-paddleocr-vl-simular-infer-result.png)
 
 ## 端侧部署[可选]
 
@@ -215,7 +215,7 @@ cd /userdata/rknn_paddleocr_vl_demo
 
 运行成功后，会打印出识别结果及推理性能，如下：
 
-![rk1820-infer-result](paddleocr-vl-rk1820-infer-result.png)
+![rk1820-infer-result](images/瑞芯微-paddleocr-vl-rk1820-infer-result.png)
 
 ## 打卡完成提交
 
