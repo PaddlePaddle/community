@@ -126,7 +126,47 @@
 
 ### 请 瀚博 填写
 
-### 请 飞腾 填写
+### 飞腾：基于飞腾 ARM64 的 OpenClaw 智能体协作系统
+
+**技术标签**：飞腾、ARM64、FastDeploy、ERNIE-4.5-21B-A3B、OpenClaw、多智能体协作
+
+**详细描述**：在完成飞腾平台 FastDeploy 打卡任务的基础上，本任务旨在利用已攻克的 ARM64 编译成果（已解决`R_AARCH64_CALL26`、CUTLASS 路径、MoE 内核缺失等问题），基于开源智能体框架 OpenClaw，打造一个可重复利用的**通用智能体协作系统**。
+
+该系统以 ERNIE-4.5-21B-A3B 为 “大脑”，通过 OpenClaw 的多智能体机制，实现复杂任务的自动化拆解与协同执行。系统具备高可复用性，可灵活适配不同场景——如文献综述、报告撰写、数据分析、信息聚合等知识密集型工作。核心在于体现从 “国产硬件适配” 到 “通用智能体能力” 的完整落地价值，突出 FastDeploy 在飞腾 ARM64 平台上的部署优势。
+
+**提交内容**：
+
+* **PR 提交地址**：提交完整代码至[仓库](https://github.com/zongwave/pixelcraft/tree/main/ai)，标题标注【PaddlePaddle Hackathon 10】，并关联本 RFC。
+
+* **必备**：
+  1. **源代码**：完整的 OpenClaw 多智能体配置代码及 ERNIE 模型调用示例。
+  2. **部署脚本**：飞腾平台 FastDeploy 一键环境脚本 (`phytium_install.sh`) 及 OpenClaw 配置指南。
+  3. **模型与依赖说明**：ERNIE-4.5-21B-A3B 模型获取方式及 Python 依赖清单。
+  4. **效果展示**：在飞腾 + L20 硬件上成功运行至少 2 个不同场景（如文献综述+报告撰写）的演示截图/录屏。
+  5. **可复现性**：所有步骤需确保能在同类飞腾环境下一键运行。
+
+* **中期检查**：汇报项目进度，展示已完成的核心智能体功能，并介绍后续多场景适配计划。
+
+**参考示例**：
+* OpenClaw 官方文档：https://docs.openclaw.ai
+* FastDeploy 仓库：https://github.com/PaddlePaddle/FastDeploy
+
+**技术要求**：
+
+1. **环境配置**：需在飞腾 S5000C + NVIDIA L20 上完成部署，提供已验证的编译参数。
+2. **模型支持**：核心调用 **ERNIE-4.5-21B-A3B-Thinking** 模型。
+3. **核心能力**：
+   * 实现 OpenClaw 多智能体（至少3个角色）的配置与协作机制。
+   * 对接 FastDeploy OpenAI API Server 完成模型推理。
+   * 确保智能体工作区隔离与权限控制，支持任务灵活编排。
+   * 至少适配 2 个不同场景，验证系统的可复用性。
+4. **可复现性**：提供完整的环境配置、依赖安装与一键运行命令。
+
+**参考文档**：
+* [飞桨 AI Studio](https://aistudio.baidu.com)
+* [ERNIE-4.5-21B-A3B 模型](https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-Thinking)
+* [FastDeploy 仓库](https://github.com/PaddlePaddle/FastDeploy)
+* [OpenClaw 官方文档](https://docs.openclaw.ai)
 
 ### 请 龙芯 填写
 
