@@ -97,7 +97,7 @@
 * **必备**：
   1. **源代码**：完整的 OpenClaw 多智能体配置代码及 ERNIE 模型调用示例。
   2. **部署脚本**：飞腾平台 FastDeploy 一键环境脚本 (`phytium_install.sh`) 及 OpenClaw 配置指南。
-  3. **模型与依赖说明**：ERNIE-4.5-21B 模型获取方式及 Python 依赖清单。
+  3. **模型与依赖说明**：ERNIE-4.5-21B-A3B 模型获取方式及 Python 依赖清单。
   4. **效果展示**：在飞腾 + L20 硬件上成功运行至少 2 个不同场景（如文献综述+报告撰写）的演示截图/录屏。
   5. **可复现性**：所有步骤需确保能在同类飞腾环境下一键运行。
 
@@ -120,7 +120,7 @@
 
 **参考文档**：
 * [飞桨 AI Studio](https://aistudio.baidu.com)
-* [ERNIE-4.5-21B 模型](https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-Thinking)
+* [ERNIE-4.5-21B-A3B 模型](https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-Thinking)
 * [FastDeploy 仓库](https://github.com/PaddlePaddle/FastDeploy)
 * [OpenClaw 官方文档](https://docs.openclaw.ai)
 
