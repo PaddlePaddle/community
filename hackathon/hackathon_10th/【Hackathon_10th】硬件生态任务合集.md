@@ -1,6 +1,5 @@
 > 模版：进阶任务：为 OpenVINO notebook 新增 demo 示例
 > * 技术标签：深度学习框架，Python，OpenVINO
-> * 任务难度：进阶
 > * 详细描述：作为深度学习工具套件，OpenVINO 可以被广泛应用于不同的应用场景，实现 AI 模型的推理部署，为此我们也想收集更多基于 PaddlePaddle 模型所打造的优秀应用案例，丰富示例仓库。 在这个任务中，你需要在 OpenVINO notebook 仓库新增一个 notebook 示例。本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份 RFC，用来描述本次任务的设计方案； 在第二阶段中，我们将从第一阶段提交的结果中，挑选出 2 份比较优秀的方案，并请相对应的开发者根据自己的方案提交 PR。
 > * 提交内容：
 >    * 第一阶段：RFC 方案提交
@@ -90,8 +89,6 @@
 
 * 技术标签：PaddleOCR-VL，高通 QNN SDK，Hexagon NPU，Paddle2ONNX，Python，C/C++
 
-* 任务难度：进阶
-
 * 详细描述：PaddleOCR-VL 模型基于视觉语言大模型（PP-DocBee2-3B）实现了文本块、表格、公式及图表的统一识别，是 PaddleOCR 3.x 的旗舰文档解析方案。本赛题要求选手通过高通 QNN（Qualcomm Neural Networks）工具链，将 PaddleOCR-VL pipeline 中的关键子模型（布局检测模型、VL 识别模型等）转换并部署至高通 Hexagon NPU 进行端侧推理。参考 PaddleOCR CLI 中的 `doc_parser`，构建依赖端侧推理服务的完整页面级文档解析 pipeline，可使用 Python 或 C/C++ 语言进行开发。
 
   **整体流程**：
@@ -139,7 +136,7 @@
 
 ### 统信：deepin Agent Teams 智能体团队协作系统
 
-**技术标签**：环境感知，意图识别，多智能体，MCP，Skills
+**技术标签**：环境感知，意图识别，多智能体， MCP， Skills
 
 **详细描述**：设计并实现一个运行在deepin操作系统上的智能体应用——**deepin Agent Teams**，该应用具备“环境感知”能力，通过分析用户的实时操作行为，如窗口标题、屏幕内容、交互动作等，主动理解用户意图并调用相应智能体提供辅助。
 
