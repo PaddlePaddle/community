@@ -6,18 +6,23 @@
 通过本次适配，你将掌握：
 * 在飞腾 S5000C (ARM64) + NVIDIA L20 环境下 FastDeploy 与 PaddlePaddle 的编译与运行
 * ARM64 平台特有的链接器问题（`R_AARCH64_CALL26`）分析与解决
-* CUTLASS 在 ARM64 + CUDA 13 环境下的集成与头文件路径处理
+* CUTLASS 在 ARM64 + CUDA 环境下的集成与头文件路径处理
 * 多卡 P2P 通信问题诊断与绕过方案
 * MoE 模型在异构环境下的部署与验证
 * 自定义算子编译、wheel 构建与依赖管理
 
+## 提交方式
+参与飞腾热身打卡活动并按照邮件模板格式将截图发送至 zongwei2845@phytium.com.cn
+
 ## 算力/环境信息
 * **CPU**: 飞腾 S5000C (ARM64, 128 cores)
 * **GPU**: NVIDIA L20 (48GB) × 2 (Compute Capability 8.9)
-* **CUDA**: 13.0
+* **CUDA**: 12.8
 * **OS**: Ubuntu 22.04.5
-* **Python**: 3.11
+* **Python**: 3.12
 * **Compiler**: GCC 12.3.0
+
+- 本次活动暂不提供算力支持
 
 ## 任务指导
 
@@ -30,7 +35,7 @@ sudo apt install build-essential cmake git python3-dev
 # 安装 conda 环境
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
 bash Miniconda3-latest-Linux-aarch64.sh
-conda create -n paddle python=3.11
+conda create -n paddle python=3.12
 conda activate paddle
 ```
 
@@ -52,14 +57,12 @@ git submodule update --init --recursive
 mkdir build && cd build
 
 time cmake .. \
-  -DPY_VERSION=3.11 \
-  -DCMAKE_C_COMPILER=/usr/bin/gcc-12 \
-  -DCMAKE_CXX_COMPILER=/usr/bin/g++-12 \
   -DWITH_GPU=ON \
   -DWITH_ARM=ON \
   -DWITH_DISTRIBUTE=ON \
   -DWITH_TESTING=OFF \
   -DWITH_CPP_TEST=OFF \
+  -DWITH_SLEEF=OFF \
   -DCMAKE_BUILD_TYPE=Release \
   -DWITH_CUTLASS=ON \
   -DWITH_XBYAK=OFF \
@@ -82,7 +85,7 @@ python -c "import paddle; print(f'Paddle version: {paddle.__version__}'); print(
 **预期输出示例**：
 ```bash
 Paddle version: 3.3.0.dev20251226
-CUDA: 13.0
+CUDA: 12.8
 GPU count: 4
 PaddlePaddle works well on 4 GPUs.
 PaddlePaddle is installed successfully! Let's start deep learning with PaddlePaddle now.
@@ -99,7 +102,7 @@ bash build.sh 1 python false [89]
 git clone --recursive https://github.com/dmlc/decord.git
 cd decord
 mkdir build && cd build
-cmake .. -DUSE_CUDA=0 -DCMAKE_BUILD_TYPE=Release
+cmake .. -DUSE_CUDA=ON -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 cd ../python
 python setup.py install --prefix=$CONDA_PREFIX
