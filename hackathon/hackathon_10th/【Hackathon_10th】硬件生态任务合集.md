@@ -28,8 +28,12 @@
     * 需体现“文档/视觉理解”到“下游智能处理”的完整流程，并突出 OpenVINO 的部署价值。
 
 * 提交内容：
-    1. 提交地址： 请将 PR 提交到 [openvino_build_deploy](https://github.com/openvinotoolkit/openvino_build_deploy)  仓库（demos 目录下新增 Demo，结构与现有示例一致），标题加上【PaddlePaddle Hackathon 10】字样。
-    2. 必备：
+    * 第一阶段：RFC 方案提交
+      1. 提交方式：1）将方案说明提交到厂商邮件组 zhuo.wu@intel.com 及 ethan.yang@intel.com ，2）标题处打上【PaddlePaddle Hackathon 10方案说明】，3）RFC 语言不做强制要求
+      2. 基本要求：1）应用场景与现有 [openvino_notebooks/notebooks](https://github.com/openvinotoolkit/openvino_notebooks/notebooks) 中以及 [openvino_build_deploy/demos](https://github.com/openvinotoolkit/openvino_build_deploy/demos) 中的内容不重复，2）该方案说明中需要使用openvino 完成模型的推理部署
+      3. 筛选依据：1）应用价值；2）逻辑清晰度；3）可复现性与完成可行性。
+         
+    * 第二阶段：PR代码提交。请将 PR 提交到 [openvino_build_deploy](https://github.com/openvinotoolkit/openvino_build_deploy)  仓库（demos 目录下新增 Demo，结构与现有示例一致），标题加上【PaddlePaddle Hackathon 10】字样。必备：
        * 源代码 + README + 依赖/模型说明 + 效果展示（截图/录屏/演示文稿）。
        * PR 需满足 notebook 以及 openvino_build_deploy 仓库贡献规范，开发者需要及时根据 review 的结果进行 PR 修改。
        * 使用 OpenVINO 完成全部推理部署；可复现、尽量一键运行。
