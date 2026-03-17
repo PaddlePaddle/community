@@ -1,5 +1,4 @@
-# 打卡任务名称：基于FastDeploy跑通ERNIE-4.5-0.3B-Paddle
-**燧原科技热身打卡活动**
+# 燧原科技：基于FastDeploy跑通ERNIE-4.5-0.3B-Paddle
 
 通过亲手完成 FastDeploy 在燧原 S60 加速卡（GCU）上的部署流程，体验国产算力与飞桨（PaddlePaddle）生态的深度融合。
 
@@ -11,8 +10,6 @@
 
 ## 提交方式
 参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + teemo.wang@enflame-tech.com
-
-燧原科技会安排研发工程师进行评审，回复邮件（xxx打卡任务，已通过），并抄送 ext_paddle_oss@baidu.com
 
 ## 算力/环境支持
 本次任务需在 Gitee AI 算力广场 租赁燧原 S60 实例完成。
@@ -79,7 +76,7 @@ I0310 07:41:04.741559   961 runtime.cc:101] Backend GCU Finalize
 
 ### 安装FastDeploy
 #### 安装FastDeploy依赖
-安装FastDeploy依赖文件requirements-gcu.txt，选择本地目录下requirements-gcu.txt或者[requirements-gcu.txt](#附录依赖说明-requirements-gcutxt)
+安装 FastDeploy 依赖文件 requirements-gcu.txt，选择 [requirements-gcu.txt](./requirements-gcu.txt)
 ```
 python -m pip install -r requirements-gcu.txt --extra-index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simplels
 ```
@@ -156,71 +153,3 @@ print('\n')
    * 【GitHub ID】：XXX
    * 【打卡内容】：基于 FastDeploy 跑通 ERNIE-4.5-0.3B-Paddle
    * 【打卡截图】：
-
-
-## 附录：依赖说明 (requirements-gcu.txt): 
-<details>
-<summary>展开查看完整依赖列表</summary>
-
-```
-setuptools==62.3.0
-pre-commit
-yapf
-flake8
-ruamel.yaml
-zmq
-aiozmq
-openai>=1.93.0
-tqdm
-pynvml
-uvicorn>=0.38.0
-fastapi
-paddleformers @ https://paddle-qa.bj.bcebos.com/ernie/paddleformers-0.4.0.post20251222-py3-none-any.whl
-redis
-etcd3
-httpx
-tool_helpers
-cupy-cuda12x
-pybind11[global]
-tabulate
-gradio
-xlwt
-visualdl
-setuptools-scm>=8
-prometheus-client
-decord
-moviepy
-triton==3.3
-crcmod
-msgpack
-gunicorn==25.0.3
-modelscope
-safetensors>=0.7.0
-opentelemetry-api>=1.24.0
-opentelemetry-sdk>=1.24.0
-opentelemetry-instrumentation-redis
-opentelemetry-instrumentation-mysql
-opentelemetry-distro
-opentelemetry-exporter-otlp
-opentelemetry-instrumentation-fastapi
-opentelemetry-instrumentation-logging>=0.57b0
-partial_json_parser
-msgspec
-einops
-setproctitle
-aistudio_sdk
-p2pstore
-py-cpuinfo
-flashinfer-python-paddle
-flash_mask @ https://paddle-qa.bj.bcebos.com/ernie/flash_mask-4.0.post20260128-py3-none-any.whl
-arctic_inference @ https://paddle-qa.bj.bcebos.com/ernie/arctic_inference-0.1.3-cp310-cp310-linux_x86_64.whl
-paddlefsl
-colorama
-seqeval
-paddle2onnx
-dill<0.3.5
-jieba
-onnx
-```
-
-</details>
