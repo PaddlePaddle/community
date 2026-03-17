@@ -5,8 +5,7 @@
 >    * 第一阶段：RFC 方案提交
 >      1. 提交方式：1）以 issue 的形式进行提交到[这儿](https://github.com/openvinotoolkit/openvino_notebooks/issues)，2）标题处打上【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求
 >      2. 基本要求：1）应用场景与现有 notebook demo 不重复，2）该示例中需要使用最新版本的 openvino 完成所有模型的推理部署
->      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）运行结果是否符合预期
->         
+>      3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）该示例的流程逻辑是否清晰，3）运行结果是否符合预期    
 >    * 第二阶段：PR代码提交
 >      1. 提交地址： https://github.com/openvinotoolkit/openvino_notebooks ，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址
 >      2. 该 PR 需满足 notebook 贡献规范，开发者需要及时根据 review 的结果进行 PR 修改
@@ -77,7 +76,26 @@
 * 技术要求：熟练掌握 Python、文心系列模型与 PaddleOCR-VL 的调用与部署方式，以及在天数智芯硬件上的运行环境配置。
 * 参考文档：[飞桨 AI Studio](https://aistudio.baidu.com/modelsoverview)、[ERNIE-4.5-VL-28B-A3B-Thinking 模型](https://huggingface.co/baidu/ERNIE-4.5-VL-28B-A3B-Thinking)、[PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
 
-### 请 沐曦 填写
+### 沐曦：优化 PaddleOCR-VL-1.5+Metax GPU 
+
+- 技术标签：深度学习框架，Python，PaddleOCR-VL-1.5，Metax GPU
+
+- 详细描述：*PaddleOCR* 是智能文档解析与文字识别工具，支持多语言识别与手写体识别，轻松处理PDF、图片等格式，高效提取文字信息。为此我们也想基于PaddlePaddle + FastDeploy + Metax GPU实现更优的推理性能。在这个任务中，你需要基于：
+
+  ```
+  paddlepaddle==3.4.0.dev20251223
+  paddle-metax-gpu==3.3.0.dev20251224
+  https://github.com/PaddlePaddle/FastDeploy/tree/release/2.4
+  ```
+
+- 本次任务评估将分为两个阶段：
+  - 第一阶段，开发者需要提供一份性能瓶颈分析评估报告(包含但不限于推理框架调度，GPU 利用率，5个以上kernel函数分析)，按照 profiling trace 文件+分析报告形式提交； 
+  - 第二阶段，我们将从第一阶段提交的结果中，review 并 comment 需要进一步优化的算子，并请相对应的开发者根据确定的性能瓶颈点提交优化 PR，预期性能提升目标 20%+。
+
+- 提交内容：
+  - 第一阶段：[PR 提交地址](https://github.com/PaddlePaddle/community/tree/master/rfcs/FastDeploy)
+  - 第二阶段：[PR 提交地址](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
+
 
 ### 基于燧原卡为`FastDeploy`新增应用
 * 技术标签：PaddlePaddle，FastDeploy，Python
@@ -102,6 +120,7 @@
   
 * 技术要求：熟练掌握 python 和 FastDeploy 部署流程与其他工具组件的使用方法
 * 参考文档：[FastDeploy](https://paddlepaddle.github.io/FastDeploy/zh/) 、[飞桨AI Studio](https://aistudio.baidu.com/overview)
+
 
 ### 请 海光 填写
 
