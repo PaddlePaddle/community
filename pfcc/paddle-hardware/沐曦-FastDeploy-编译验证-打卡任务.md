@@ -57,10 +57,10 @@ cd FastDeploy
 
 1）熟悉并了解编译脚本，编译参数配置，完成fastdeploy编译，编译产物位于~/fastdeploy/dist；
 运行成功后，终端输出结果如下：
-[Metax-infer-result](fastdeploy-Metax C5xx-infer-result1.png)
+![Metax-infer-result](./images/fastdeploy-Metax-C5xx-infer-result1.png)
 
-2）完成fastdeploy 编译产物wheel包安装，了解安装路径；
-[Metax-infer-result](fastdeploy-Metax C5xx-infer-result2.png)
+2）完成 fastdeploy 编译产物 wheel 包安装，了解安装路径；
+![Metax-infer-result](./images/fastdeploy-Metax-C5xx-infer-result2.png)
 
 
 ## 邮件格式
