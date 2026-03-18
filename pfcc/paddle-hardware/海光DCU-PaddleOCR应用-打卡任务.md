@@ -55,6 +55,14 @@ paddleocr doc_parser -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/
 ## 打卡任务
 ### 编写PaddleOCR应用
 - 任务：下载 https://github.com/PaddlePaddle/community/pfcc/paddle-hardware/images/dcu/ 下的10张图片，编写python代码，调用paddleocr-vl 1.5的模型，把他扫描成文本。
+- 启动vllm参考命令： 
+```
+   paddleocr genai_server \
+  --model_name PaddleOCR-VL-1.5-0.9B \
+  --host 0.0.0.0 \
+  --port 8118 \
+  --backend vllm
+``` 
 - 打卡提交物：编写的代码（python程序，后缀名改为'py_'，以防邮件被过滤），扫描出来的文本（txt文档）。
 
 ### 使用vllm后端加速OCR
