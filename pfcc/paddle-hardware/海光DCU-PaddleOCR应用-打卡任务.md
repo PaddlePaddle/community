@@ -73,7 +73,7 @@ paddleocr genai_server \
 ``` 
 - 验证vllm后端可以正常运行：
 ```
-paddleocr doc_parser --input paddleocr_vl_demo.png \
+paddleocr doc_parser --input paddleocr_vl_demo.png --device dcu \
   --vl_rec_backend vllm-server \
   --vl_rec_server_url http://localhost:8118/v1
 ```
