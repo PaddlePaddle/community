@@ -53,7 +53,7 @@
 
 ### 请 Arm 填写
 
-### 天数智芯：进阶任务：基于天数智芯硬件与文心多模态模型的创新应用
+### 天数智芯：基于天数智芯硬件与文心多模态模型的创新应用
 * 技术标签：深度学习框架，Python，文心大模型，多模态
 * 详细描述：本任务旨在利用天数智芯硬件(BI-150S)的算力优势，结合文心系列多模态模型，打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。开发者可**任选其一**或组合使用以下模型进行应用开发：**ERNIE-4.5-VL-28B-A3B-Thinking** 与 **PaddleOCR-VL-1.5**，参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications)。本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份 RFC，用来描述本次任务的设计方案及预期性能指标；在第二阶段中，我们将从第一阶段提交的结果中，挑选出 2 份比较优秀的方案，并请相对应的开发者根据自己的方案提交 PR。
 * 提交内容：
@@ -97,7 +97,7 @@
   - 第二阶段：[PR 提交地址](https://github.com/PaddlePaddle/FastDeploy/tree/develop)
 
 
-### 基于燧原卡为`FastDeploy`新增应用
+### 燧原：基于燧原卡为`FastDeploy`新增应用
 * 技术标签：PaddlePaddle，FastDeploy，Python
 
 * 详细描述：本任务旨在利用 燧原 S60 加速卡 (GCU) 的算力优势，结合 FastDeploy 高性能推理框架，对 ERNIE-4.5-0.3B-Paddle 模型进行二次开发与应用。我们鼓励开发者打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications) 。
@@ -211,7 +211,37 @@
 
 ### 请 紫光展锐 填写
 
-### 请 此芯 填写
+### 此芯：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
+
+* 详细描述：本任务旨在将 PaddleOCR-VL-1.5 模型移植到此芯P1芯片平台，充分利用其 CPU+GPU+NPU 异构算力，实现文档解析的端侧高效推理，推动国产 AI 芯片在文档智能领域的应用落地。开发者只要完成了任意一项任务，即视为成功。
+  * （任务1）**实现 PaddleOCR-VL-1.5 的 Pipeline**：将 PaddleOCR-VL-1.5 模型（0.9B 参数）移植到此芯 P1 芯片，实现其在 CPU/GPU 上的基础推理 & Layout（版面分析）推理。
+  * （任务2）**量化加速**：使用 llama.cpp 或者 MNN 等推理框架，对 PaddleOCR-VL-1.5 在 CPU/GPU 上完成加速推理，主要是 Q4_0 的量化和推理。
+  * （任务3）**实现基于此芯 P1 的 CPU + NPU 异构推理**：基于此芯 P1 的异构架构（Armv9 CPU + Arm Immortalis GPU + 周易 NPU），对 Layout 模块使用 NPU SDK 进行量化，以降低内存占用，实现模型算子的最优分配与调度。
+* 环境准备：
+  1. 搭建此芯 P1 开发环境，配置交叉编译工具链。
+  2. 安装此芯科技推理 NOE SDK。
+  3. 将 Hugging Face 的 PaddleOCR-VL-1.5 转换为 Paddle/ONNX 格式。
+* 提交内容：
+  1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
+  2. 此芯 P1 推理引擎的使用说明。
+  3. 示例应用（命令行工具或 GUI 演示）。
+* 提交方式：  
+  1. 项目提交：提交使用案例到 [AI Studio](https://aistudio.baidu.com/projectoverview) 的项目并公开，请提交全部源码。
+  2. 标题规范：标题处打上【PaddlePaddle Hackathon 10】。
+  3. 基本要求：需包含 PaddleOCR-VL-1.5 在此芯 P1 上的部署详细步骤、此芯 P1 推理引擎的示例应用步骤（包括命令行工具 / GUI 演示）。
+  4. 筛选依据：
+       1. 该示例在真实场景下是否具有实际应用价值。
+       2. 该示例的流程逻辑是否清晰。
+       3. 运行结果是否符合预期。
+  5. 验收标准（需全部满足）：部署流程清晰, 推理结果准确。具体包括：
+      1. 完善相关代码, 成功地将模型运行在目标硬件平台上。请提供每步的完整的模型部署过程技术文档/报告，同时提供配套的完整测试代码（需符合开源代码的代码规范）。确保他人可根据该技术文档和代码复现该部署流程。
+      2.  确保模型推理结果正确且稳定：请使用至少5张PaddleOCR-VL 代码库中提供的官方 OCR 测试图片进行结果测试验证, 确保其结构化输出结果正确。请将相关测试图片和结果截图添加至上述技术文档/报告中。
+          * 精度可接受：端侧推理的文档解析结果与原始文档图像，推理结果对比，文本识别准确率损失不超过 8 %
+          * 推理性能稳定：请使用指定的 210mm*297mm 大小文档图像（此芯提供），要求batch =1 的完整pipeline 推理时间应小于 60 s。
+* 参考示例：考虑到通用性，选取的应用场景需要严格符合实时解析文档（发票、合同、表格等）的要求。
+* 技术要求：模型架构理解、此芯 P1 硬件特性了解、开发工具链（推理框架，量化工具，编程语言 Python & C++）。
+* 参考文档：[CIX AI Model Hub](https://modelscope.cn/models/cix/ai_model_hub/files?version=25_Q4)，[CIX NOE SDK](https://developer.cixtech.com/) (在此芯开发者中心找到 NeuralONE AI SDK，注册并下载), [PaddleOCR-VL-1.5 模型](https://huggingface.com/PaddlePaddle/PaddleOCR-VL-1.5), [Paddle 主仓库](https://github.com/PaddlePaddle/Paddle), [PaddleX 仓库](https://github.com/PaddlePaddle/PaddleX)
+
 
 ### 请 瑞芯微 填写
 
