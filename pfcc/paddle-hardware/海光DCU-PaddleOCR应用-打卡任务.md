@@ -13,13 +13,15 @@
 参与热身打卡活动并按照邮件模板格式将截图，输出结果和代码发送至 ext_paddle_oss@baidu.com + liuyun@hygon.cn
 
 ## 算力/环境支持
-本次热身打卡活动需要使用海光第二代DCU K100-AI，我们将在国家超算互联网平台（www.scnet.cn）提供打卡所需的环境。
+本次热身打卡活动需要使用海光第二代DCU K100-AI，我们将在 [国家超算互联网平台](www.scnet.cn) 提供打卡所需的环境。
 我们将会为小伙伴们提供的手机号配置账号并分配活动所用卡时。
 
 ## 搭建环境指导
 ### 创建DCU实例
-登录www.scnet.cn，控制台页面中，进入【人工智能】页面，然后点击【创建Notebook】，选择一台【异构加速卡AI】的实例，
-然后镜像选择【PyTorch -> 2.5.1 -> py3.10-ubuntu22.04 -> DTK25.04.2】，创建后，等待启动实例，可以通过ssh登录到实例上来。
+- 登录 [国家超算互联网平台](www.scnet.cn) 中的控制台页面；
+- 进入【人工智能】页面，点击【创建Notebook】，选择一台【异构加速卡AI】的实例；
+- 镜像选择【PyTorch -> 2.5.1 -> py3.10-ubuntu22.04 -> DTK25.04.2】；
+- 镜像创建后，等待启动实例，可以通过 ssh 登录到实例上来。
 
 ### 升级paddlepaddle-dcu到最新版本
 ```
@@ -56,13 +58,13 @@ paddleocr doc_parser -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/
 
 ## 打卡任务
 ### 第一步：编写PaddleOCR应用
-- 任务：下载数据集：https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/paddleocr_dcu_task/，
-编写python代码，调用paddleocr-vl 1.5的模型，把他扫描成文本。
+- 下载 [数据集](https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/paddleocr_dcu_task/)，
+编写 python 代码，调用 PaddleOCR-vl 1.5的模型，把它扫描成文本。
 - 打卡提交物：编写的代码（python程序，后缀名改为'py_'，以防邮件被过滤），扫描出来的文本（txt文档）。
 
 ### 第二步：使用vllm后端加速OCR
-- 下载数据集：https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/MSRA-Text_Detection_500_Database/，
-对test下的200张图片进行OCR扫描。要求通过启动vllm后端的方式，通过打高batch的方式尽可能得到一个较高的性能。
+- 下载 [数据集](https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/MSRA-Text_Detection_500_Database/)，
+对test下的200张图片进行 OCR 扫描。要求通过启动 vllm 后端的方式，通过打高 batch 的方式尽可能得到一个较高的性能。
 - 启动vllm参考命令： 
 ```
 paddleocr genai_server \
@@ -77,7 +79,7 @@ paddleocr doc_parser --input paddleocr_vl_demo.png --device dcu \
   --vl_rec_backend vllm-server \
   --vl_rec_server_url http://localhost:8118/v1
 ```
-- 代码要求：输出时把扫描的文本内容保存进tet文件，并打印出处理200张图片的总耗时，以及batch_size等信息。
+- 代码要求：输出时把扫描的文本内容保存进txt文件，并打印出处理200张图片的总耗时，以及batch_size等信息。
 - 参考性能：batch=1时，扫描200张图片需要约411秒。
 - 打卡提交物：代码（python程序，后缀名改为'py_'），运行结果（txt文件），性能数据（屏幕截图）
 
