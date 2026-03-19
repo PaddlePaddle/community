@@ -221,10 +221,9 @@
     * 实现 PaddleOCR-VL-1.5 的 Pipeline：1）实现 Layout（版面分析）推理。 2）实现 PaddleOCR-VL-1.5 模型在 CPU + NPU 上的推理。
     * 量化加速：对 PaddleOCR-VL-1.5 模型进行 Q4_0 的量化和推理。
 * 提交内容：
-   * 需包含如下内容：
-      1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
-      2. 此芯 P1 推理引擎的使用说明。
-      3. 示例应用（命令行工具或 GUI 演示）。
+    1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
+    2. 此芯 P1 推理引擎的使用说明。
+    3. 示例应用（命令行工具或 GUI 演示）。
 * 提交方式：  
   1. 项目提交：提交使用案例到 [AI Studio](https://aistudio.baidu.com/projectoverview) 的项目并公开，请提交全部源码。
   2. 标题规范：标题处打上【PaddlePaddle Hackathon 10】。
