@@ -213,6 +213,7 @@
 
 ### 此芯：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
 
+* 技术标签：CIX P1，Armv9 CPU，CIX NOE SDK，PaddleOCR-VL-1.5，模型移植优化，异构算力调度 
 * 详细描述：本任务旨在将 PaddleOCR-VL-1.5 模型移植到此芯 P1 芯片平台，充分利用其 CPU+GPU+NPU 异构算力，实现文档解析的端侧高效推理，推动国产 AI 芯片在文档智能领域的应用落地。开发者只要完成任意一项任务，即视为成功。
   * **任务1：实现基于此芯 P1 的 CPU / GPU 的异构推理**
     * 实现 PaddleOCR-VL-1.5 的 Pipeline：实现 PaddleOCR-VL-1.5 在 CPU/GPU 上的基础推理。
@@ -234,9 +235,9 @@
        3. 运行结果是否符合预期。
   5. 验收标准（需全部满足）：部署流程清晰, 推理结果准确。具体包括：
       1. 完善相关代码, 成功地将模型运行在目标硬件平台上。请提供一步一步的完整的模型部署过程技术文档/报告，同时提供配套的完整测试代码（需符合开源代码的代码规范）。确保他人可根据该技术文档和代码复现该部署流程。
-      2. 确保模型推理结果正确且稳定：请使用至少3张PaddleOCR-VL 代码库中提供的官方 OCR 测试图片进行结果测试验证, 确保其结构化输出结果正确。请将相关测试图片和结果截图添加至上述技术文档/报告中。
+      2. 确保模型推理结果正确且稳定：请使用至少 3 张 PaddleOCR-VL 代码库中提供的官方 OCR 测试图片进行结果测试验证, 确保其结构化输出结果正确。请将相关测试图片和结果截图添加至上述技术文档/报告中。
           * 精度可接受：端侧推理的文档解析结果与原始文档图像，推理结果对比，文本识别准确率损失不超过 8 %。
-          * 推理性能稳定：请使用此芯提供的指定文档图像，要求batch =1 的完整pipeline 推理时间应小于 60 s。
+          * 推理性能稳定：请使用此芯提供的指定文档图像，要求 batch=1 的完整 pipeline 推理时间应小于 60 s。
 * 参考示例：考虑到通用性，选取的应用场景需要严格符合实时解析文档（发票、合同、表格等）的要求。
 * 技术要求：模型架构理解、此芯 P1 硬件特性了解、开发工具链（推理框架，量化工具，编程语言 Python & C++）。
 * 参考文档：[CIX AI Model Hub](https://modelscope.cn/models/cix/ai_model_hub/files?version=25_Q4)，[CIX NOE SDK](https://developer.cixtech.com/) (在此芯开发者中心找到 NeuralONE AI SDK，注册并下载)，[PaddleOCR-VL-1.5 模型](https://huggingface.com/PaddlePaddle/PaddleOCR-VL-1.5)，[Paddle 主仓库](https://github.com/PaddlePaddle/Paddle)，[PaddleX 仓库](https://github.com/PaddlePaddle/PaddleX)，[Paddle OCR使用教程](https://www.paddleocr.ai/main/version3.x/pipeline_usage/PaddleOCR-VL.html)
