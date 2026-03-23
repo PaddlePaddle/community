@@ -45,7 +45,7 @@
   1. 向 Paddle 主仓库（https://github.com/PaddlePaddle/Paddle）develop 分支提交 Issue 描述问题，并提交 PR 实现 HIP BF16 精度类型适配
   2. 向 PaddleX 仓库（https://github.com/PaddlePaddle/PaddleX）develop 分支提交 Issue 和 PR，移除现有 ROCm BF16 的 workaround 代码
   3. PR 中需包含测试用例和在 AMD GPU 上的验证结果截图
-* 提交方式：GitHub Issue + PR 并截图发送邮件
+* 提交方式：GitHub Issue + PR，并将验证结果截图发送邮件至 ext_paddle_oss@baidu.com，抄送 Zijun.Wei@amd.com, Huaqiang.Fang@amd.com, bingqing.guo@amd.com
 * 技术要求：
   * 熟悉 PaddlePaddle 框架的算子注册与编译机制
   * 了解 ROCm/HIP 编程模型与 MIOpen 库的使用
@@ -57,7 +57,7 @@
   * [PaddleX ROCm BF16 现有 workaround](https://github.com/PaddlePaddle/PaddleX/compare/release/3.3...vivienfanghuagood:PaddleX:dev_rocm70)
   * [PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
   * [MIOpen 文档](https://rocm.docs.amd.com/projects/MIOpen/en/latest/)
-  * PaddleOCR-VL AMD GPU 部署教程：参见本期打卡任务指导
+  * [PaddleOCR-VL AMD GPU 部署教程](../../pfcc/paddle-hardware/AMD-PaddleOCR-VL-GPU打卡任务.md)
 
 ### 请 Arm 填写
 

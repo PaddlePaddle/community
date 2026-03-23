@@ -154,4 +154,5 @@ paddlex --pipeline PaddleOCR-VL-vllm.yaml --input /tmp/test_ocr.png
    * 【GitHub ID】：XXX
    * 【打卡内容】：PaddleOCR-VL-1.5 推理
    * 【打卡截图】：
-      * vLLM 后端或 Native 后端推理结果截图（任选其一）
+      * 推理结果生成文件截图，截图样例：
+      ![打卡截图样例](./images/vllm_acc_output_example.png)
