@@ -86,18 +86,18 @@ _atom_site_fract_x
 
 模型通过自回归方式逐 token 生成 CIF 文本，使用自定义的 `CIFTokenizer` 分词器将 CIF 内容分解为原子符号、数字、CIF 关键字、空间群符号等 371 个 token。
 
-**模型架构参数**（small 配置）：
+**模型架构参数**（两种配置）：
 
-| 参数 | 值 |
-|-----|-----|
-| n_layer | 12 |
-| n_head | 12 |
-| n_embd | 768 |
-| block_size | 1024 |
-| vocab_size | 371 |
-| dropout | 0.0 |
-| bias | True |
-| 参数量 | ~124M |
+| 参数 | Small | Large |
+|-----|-------|-------|
+| n_layer | 8 | 16 |
+| n_head | 8 | 16 |
+| n_embd | 512 | 1024 |
+| block_size | 1024 | 2048 |
+| vocab_size | 371 | 371 |
+| dropout | 0.1 | 0.1 |
+| bias | True | True |
+| 参数量 | ~33M | ~250M |
 
 **评估指标**（原论文报告，MP-20 数据集，n=10000）：
 
@@ -190,16 +190,13 @@ ppmat/sampler/
 └── crystalllm_sampler.py    # 采样器（自回归采样 + MCTS 采样）
 
 configs/crystalllm/
-├── crystalllm_small.yaml    # small 模型配置
-└── crystalllm_pretrain.yaml # 预训练配置
-
-tools/
-└── convert_crystalllm_weights.py  # PyTorch .pt → Paddle .pdparams 权重转换脚本
+├── crystalllm_small.yaml    # small 模型配置（8层, ~33M 参数）
+└── crystalllm_large.yaml    # large 模型配置（16层, ~250M 参数）
 
 crystal_structure_generation/     # 新增任务类型目录
 ├── README.md                # 任务类型说明文档
 └── configs/crystalllm/
-    └── README.md             # 模型配置说明（含结果、预训练权重链接）
+    └── README.md             # 模型配置说明（含训练结果）
 
 examples/crystalllm/
 ├── README.md                # 任务说明文档（含结果及链接）
@@ -231,10 +228,10 @@ from dataclasses import dataclass
 class GPTConfig:
     block_size: int = 1024
     vocab_size: int = 371
-    n_layer: int = 12
-    n_head: int = 12
-    n_embd: int = 768
-    dropout: float = 0.0
+    n_layer: int = 8
+    n_head: int = 8
+    n_embd: int = 512
+    dropout: float = 0.1
     bias: bool = True
 
 class NewGELU(nn.Layer):
@@ -426,10 +423,10 @@ model:
   type: CrystalLLM
   block_size: 1024
   vocab_size: 371
-  n_layer: 12
-  n_head: 12
-  n_embd: 768
-  dropout: 0.0
+  n_layer: 8
+  n_head: 8
+  n_embd: 512
+  dropout: 0.1
   bias: true
 
 data:
@@ -440,13 +437,46 @@ data:
   auto_download: true
 
 trainer:
-  max_epochs: 50
-  batch_size: 64
-  learning_rate: 6.0e-4
+  max_iters: 100000
+  batch_size: 32
+  learning_rate: 1.0e-3
   weight_decay: 0.1
   warmup_iters: 2000
-  lr_decay_iters: 600000
-  min_lr: 6.0e-5
+  lr_decay_iters: 100000
+  min_lr: 1.0e-4
+  grad_clip: 1.0
+  log_interval: 10
+  eval_interval: 2000
+```
+
+示例配置片段（`configs/crystalllm/crystalllm_large.yaml`）：
+
+```yaml
+model:
+  type: CrystalLLM
+  block_size: 2048
+  vocab_size: 371
+  n_layer: 16
+  n_head: 16
+  n_embd: 1024
+  dropout: 0.1
+  bias: true
+
+data:
+  type: cif_text
+  train_path: data/crystalllm/mp20_train.bin
+  val_path: data/crystalllm/mp20_val.bin
+  block_size: 2048
+  auto_download: true
+
+trainer:
+  max_iters: 48000
+  batch_size: 16
+  learning_rate: 1.0e-3
+  weight_decay: 0.1
+  warmup_iters: 2000
+  lr_decay_iters: 48000
+  min_lr: 1.0e-4
   grad_clip: 1.0
   log_interval: 10
   eval_interval: 2000
@@ -463,11 +493,11 @@ trainer:
 
 | 注意事项 | 说明 |
 |---------|------|
-| `block_size` 必须为 1024 | 预训练权重基于此值训练，不可变更 |
+| `block_size` 配置相关 | small 模型使用 1024，large 模型使用 2048，与原论文一致 |
 | 分词器空间群消歧 | `Pm`（原子）与 `Pm`（空间群）通过添加 `_sg` 后缀消歧 |
 | `register_buffer` 用于因果掩码 | 非 Flash Attention 路径需维护下三角掩码 buffer |
 | 权重初始化 | 残差投影层 `c_proj` 使用缩放初始化 `std=0.02/sqrt(2*n_layer)` |
-| 预训练权重加载 | PyTorch `.pt` → Paddle `.pdparams` 转换脚本 `tools/convert_crystalllm_weights.py` |
+| 权重初始化验证 | 使用相同随机种子初始化 PyTorch 和 Paddle 模型，对比前向 logits 一致性 |
 | 版权声明 | 所有新增文件使用 Apache License 2.0，Copyright 2026 PaddlePaddle Authors |
 | 数据自动下载 | 预分词 bin 文件托管在百度 BCS，首次使用自动下载 |
 
@@ -486,7 +516,7 @@ trainer:
 
 ### 5.3 生成式采样指标
 
-在 MP-20 基准数据集上，使用预训练权重进行采样（n=10000，temperature=0.6），对比以下指标：
+在 MP-20 基准数据集上，使用训练完成的模型权重进行采样（n=10000，temperature=0.6），对比以下指标：
 
 | 指标 | 原论文值 | 允许误差 |
 |-----|---------|---------|
@@ -499,11 +529,6 @@ trainer:
 
 全部四个基准需可运行完整的 train → sample → evaluate 流程：
 - Perov-5、Carbon-24、MP-20、MPTS-52
-
-### 5.5 预训练权重转换验证
-
-- 提供 PyTorch→Paddle 权重转换脚本
-- 转换后权重的前向输出与原始权重完全一致（diff ≤ 1e-7）
 
 ## 6. 可行性分析和排期规划
 
@@ -522,7 +547,7 @@ trainer:
 | 阶段 | 内容 | 预计工期 |
 |-----|------|---------|
 | Phase 0：环境搭建 | AI Studio V100 环境配置、pymatgen 安装、原始实现验证 | 2天 |
-| Phase 1：模型迁移 | GPT 模型 + CIFTokenizer → Paddle，前向精度对齐 | 3天 |
+| Phase 1：模型迁移 | GPT 模型（small + large）+ CIFTokenizer → Paddle，前向精度对齐 | 3天 |
 | Phase 2：训练对齐 | Trainer 适配、反向训练 2+ 轮，loss 曲线对齐 | 3天 |
 | Phase 3：采样器 | 自回归采样 + MCTS 采样器 Paddle 实现 | 2天 |
 | Phase 4：数据集 | 预处理管线适配、build 工厂函数注册 | 2天 |
@@ -538,14 +563,13 @@ trainer:
 3. **新增采样器**：`ppmat/sampler/crystalllm_sampler.py`（~100 行），为后续 LLM 类材料模型提供基础
 4. **新增 Trainer**：`ppmat/trainer/crystalllm_trainer.py`（~80 行，继承 BaseTrainer）
 5. **新增任务类型目录**：`crystal_structure_generation/`（新增任务类型 README + 配置）
-6. **新增权重转换脚本**：`tools/convert_crystalllm_weights.py`（PyTorch → Paddle 权重映射）
-7. **修改已有文件**（仅新增注册行）：
+6. **修改已有文件**（仅新增注册行）：
    - `ppmat/models/__init__.py`：新增 `from .crystalllm import GPT, GPTConfig`
    - `ppmat/datasets/__init__.py`：新增 `build_cif_text` 工厂函数注册
-8. **依赖项**：pymatgen（已有）、omegaconf（可选，可使用 ppmat 现有 YAML 配置系统替代）
+7. **依赖项**：pymatgen（已有）、omegaconf（可选，可使用 ppmat 现有 YAML 配置系统替代）
 
 ### 对用户的影响
 
 - 提供开箱即用的晶体结构生成能力
-- 预训练权重通过百度网盘分发，用户可直接加载使用
+- 提供完整的训练脚本，用户可自行在 AI Studio 等 GPU 环境上从零训练
 - 新增 `examples/crystalllm/` 示例脚本降低使用门槛
