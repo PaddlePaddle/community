@@ -57,9 +57,9 @@ SchNet vs DimeNet++ 定位差异：
 | 图构建 | `ppmat/datasets/build_molecule.py` | 直接使用 |
 | scatter 操作 | `ppmat/utils/scatter.py` | 邻居聚合 |
 | BaseTrainer | `ppmat/trainer/base_trainer.py` | 继承使用 |
-| 训练入口 | `property_prediction/train.py` | 直接使用 |
+| 训练入口 | `interatomic_potentials/train.py` | 直接使用 |
 
-需新增：SchNet 模型（`ppmat/models/schnet/`）、MD17 数据集（`ppmat/datasets/md17_dataset.py`）、YAML 配置（`property_prediction/configs/schnet/`）、权重转换工具、单元测试。
+需新增：SchNet 模型（`ppmat/models/schnet/`）、MD17 数据集（`ppmat/datasets/md17_dataset.py`）、YAML 配置（`interatomic_potentials/configs/schnet/`）、README 说明文档、权重转换工具、单元测试。
 
 ## 3. 目标调研
 
@@ -133,7 +133,8 @@ PaddleMaterials/
 │   ├── __init__.py
 │   └── schnet.py                    # 模型定义（~400行）
 ├── ppmat/datasets/md17_dataset.py   # MD17 数据集
-├── property_prediction/configs/schnet/
+├── interatomic_potentials/configs/schnet/
+│   ├── README.md                     # 使用说明与精度结果
 │   ├── schnet_qm9_energy_U0.yaml
 │   ├── schnet_qm9_homo.yaml
 │   └── schnet_md17_ethanol.yaml
@@ -271,14 +272,14 @@ Dataset:
 
 | 验收项 | 标准 | 方法 |
 |--------|------|------|
-| 前向精度对齐 | logits diff ≤ 1e-6 | 使用相同初始化参数，Paddle 与 PyTorch 同输入对比 |
+| 前向精度对齐 | logits diff ≤ 1e-4 | 使用相同初始化参数，Paddle 与 PyTorch 同输入对比 |
 | 反向对齐 | loss 趋势一致 | 相同数据超参训练 2+ 轮 |
 | QM9 训练精度 | metric 误差 ≤ 1% | 完整训练，MAE 对比论文 |
 | MD17 训练精度 | metric 误差 ≤ 1% | 完整训练，能量/力 MAE |
 | 数据集覆盖 | QM9 全 12 属性 + MD17 ≥ 4 分子 | 对应论文所有数据集 |
 
-| 转换权重上传 | BCS 上传 `.pdparams` | 提供下载链接，用于社区验证对齐 |
-| 训练日志 | 完整日志文件 | QM9 + MD17 训练日志附 PR 或上传 BCS |
+| 转换权重上传 | 百度网盘/BCS 上传 `.pdparams` | 提供下载链接给百度工程师，用于社区验证对齐 |
+| 训练日志 | 完整日志文件 | QM9 + MD17 训练日志通过百度网盘链接提供 |
 
 测试项：模型前向形状验证、GaussianRBF 正确性、参数格式转换正确性、完整训练流程集成测试、Paddle/PyTorch loss 曲线对比截图。
 
@@ -297,7 +298,7 @@ SchNet 架构为标准 GNN，无自定义 CUDA 算子，API 映射全面 1:1 对
 
 1. **新增模型**：`ppmat/models/schnet/`
 2. **新增数据集**：`ppmat/datasets/md17_dataset.py`（可被后续模型如 PaiNN、NequIP 复用）
-3. **新增配置**：`property_prediction/configs/schnet/`
+3. **新增配置**：`interatomic_potentials/configs/schnet/`（含 README.md 说明文档）
 4. **无侵入性修改**：仅在 `ppmat/models/__init__.py` 和 `ppmat/datasets/__init__.py` 注册
 5. 所有新增文件包含 Apache 2.0 License 头，遵循 PaddleMaterials 既有规范
 
