@@ -306,7 +306,95 @@ submission/
    * [Qualcomm QNN SDK 文档](https://developer.qualcomm.com/software/qualcomm-neural-network-sdk)
    * [高通 HTP 后端优化指南](https://developer.qualcomm.com/software/qualcomm-neural-network-sdk/getting-started)
 
-### 请 联发科技 填写
+### 联发科技：在天玑9500 手机上运行 OpenClaw —— 基于文心大模型的移动端个人 AI 助手
+
+* 技术标签：天玑9500，MediaTek NPU，OpenClaw，文心大模型 API，Android，移动端 AI Agent，端云协同
+
+* 详细描述：
+  * **背景**：OpenClaw（openclaw.ai）是当下最火的开源个人 AI 助手平台，社区俗称"养龙虾"。它支持通过 WhatsApp、Telegram、Discord 等聊天应用与 AI 助手交互，能够执行邮件处理、日程管理、网页浏览、文件操作、Shell 命令等实际任务，并具备持久记忆、技能扩展（Skills）、主动行为（Heartbeats）等核心能力。联发科技天玑9500 是新一代旗舰移动平台，搭载强大的 APU（AI 处理单元），为端侧 AI 应用提供卓越的算力支持。
+  * **任务目标**：本任务旨在将 OpenClaw 移植并适配到天玑9500 Android 手机上运行，接入文心大模型 API 作为底层 LLM 能力，让用户可以在手机上"养龙虾"——拥有一个随身的、能真正做事的、更安全的个人 AI 助手。开发者需完成以下核心工作并可选择扩展方向：
+
+    **核心目标（必选）：**
+    1. **OpenClaw 移动端适配** —— 将 OpenClaw 移植到天玑9500 Android 设备上运行，确保 Gateway 核心服务、技能系统、持久记忆等基础功能正常工作
+    2. **接入文心大模型 API** —— 将 OpenClaw 的 LLM 后端对接到文心大模型 API（ERNIE-4.5 系列），使其成为 OpenClaw 的"大脑"
+
+    **扩展方向（可选加分项）：**
+    3. **NPU 加速端侧能力** —— 利用天玑9500 NPU 在端侧运行轻量模型，增强 OpenClaw 的本地能力（如语音识别、图像理解、OCR 等），减少对云端的依赖，提升响应速度
+    4. **移动端专属 Skills 开发** —— 针对手机场景开发 OpenClaw 专属技能，如：拍照识物、通讯录管理、手机设置控制、位置感知服务、健康数据分析等
+    5. **移动端交互优化** —— 适配移动端的用户交互体验，如通知栏快捷交互、悬浮窗助手、语音唤醒、Widget 小组件等
+
+  * **技术架构**：
+    * **云侧**：调用文心大模型 API（ERNIE-4.5 系列）作为 OpenClaw 的 LLM 后端，完成自然语言理解、任务规划、文本生成等核心 AI 能力
+    * **端侧**：在天玑9500 Android 设备上运行 OpenClaw Gateway 核心服务，管理 Sessions、Channels、Tools 和 Skills
+    * **端侧 NPU（加分项）**：利用天玑9500 APU 运行轻量端侧模型，提供低延迟的本地 AI 感知能力（语音、视觉等）
+
+  * **资源支持**：
+    * 联发科技将提供 1-2 台天玑9500 工程设备及 NPU 开发文档
+    * 百度将提供文心大模型 API 调用额度，支持开发者完成应用开发
+
+* 提交内容：
+  * **第一阶段：RFC 方案提交**
+    1. 提交方式：
+       - 以 markdown 文档形式提交到 github 仓库
+       - 标题格式：【PaddlePaddle Hackathon 10 方案说明】- 联发科技 OpenClaw 移动端 - 开发者姓名
+    2. 基本要求：
+       - 需说明 OpenClaw 移动端适配的技术方案（Node.js 运行环境、服务架构、资源限制应对等）
+       - 需说明文心大模型 API 的接入方案及选用的模型类型
+       - 如涉及 NPU 端侧能力，需说明端侧模型选择及加速方案
+       - 如涉及移动端专属 Skills，需描述技能设计及应用场景
+       - 需提供初步的技术可行性分析（内存/存储需求、功耗评估、网络依赖分析等）
+    3. 筛选依据：
+       - 可行性：移动端适配方案的合理性与完整度
+       - 创新性：移动端场景下的独特价值与创意
+       - 技术深度：对 OpenClaw 架构的理解深度，以及文心大模型 API 的合理运用
+       - 加分项：NPU 端侧能力利用、移动端专属 Skills 设计
+    4. 通过第一阶段筛选的开发者将获得天玑9500 工程设备使用权及文心大模型 API 调用额度
+
+  * **第二阶段：代码提交与应用演示**
+    1. 提交方式：
+       - 将完整代码提交至 GitHub 仓库（开发者自建）
+       - 以邮件形式提交演示视频及部署文档
+       - 标题标注【PaddlePaddle Hackathon 10】
+    2. 提交内容：
+       - 完整的移动端适配源码（含 OpenClaw 移植代码、文心大模型 API 接入代码）
+       - 部署文档：包括 Android 环境配置、依赖安装、文心 API 配置、运行说明
+       - 演示视频：展示 OpenClaw 在天玑9500 手机上的实际运行效果（时长不少于 3 分钟），需演示至少 3 个完整的 AI 任务执行流程
+       - 性能报告：包括内存占用、功耗表现、API 调用延迟、任务完成成功率等指标
+       - 如有移动端专属 Skills，需提供 Skills 代码及使用说明
+    3. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排
+
+* 验收要求（需全部满足）：
+  1. **OpenClaw 核心运行正常**：OpenClaw Gateway 在天玑9500 Android 设备上稳定运行，核心功能（会话管理、工具调用、持久记忆）正常工作
+  2. **文心大模型接入成功**：文心大模型 API 作为 LLM 后端正确接入，自然语言理解与生成功能正常
+  3. **任务执行能力**：至少能成功完成 3 类实际任务（如信息查询、文件操作、日程/提醒管理等）
+  4. **运行稳定性**：连续运行 30 分钟以上无崩溃，内存占用合理（< 2GB）
+  5. **代码可复现**：提交的代码与文档可在同类 Android 设备上完整复现部署和运行过程（API 密钥除外）
+
+* 参考示例：推荐参赛者实现以下场景（可扩展）：
+  * **随身信息助手**：通过聊天界面与 OpenClaw 对话，查询天气、新闻、翻译，或让它帮你搜索本地文件
+  * **移动端开发助手**：在手机上通过 OpenClaw 执行简单的 Shell 命令、查看日志、管理文件
+  * **智能日程管家**：OpenClaw 主动通过 Heartbeat 提醒待办事项，结合日历 API 管理日程
+  * **拍照识物助手**（NPU 加分项）：调用手机摄像头 + NPU 端侧视觉模型识别物体，再通过文心大模型 API 生成详细说明
+  * **语音交互模式**（NPU 加分项）：利用 NPU 进行端侧语音识别，实现免打字的语音控制体验
+
+* 技术要求：
+  * 熟悉 Node.js / TypeScript 开发
+  * 熟悉 Android 应用开发（了解 Termux 或 Android Node.js 运行环境方案）
+  * 了解 OpenClaw 的架构设计（Gateway、Sessions、Channels、Skills）
+  * 了解文心大模型 API 的调用方式（千帆平台 / ERNIE Bot SDK）
+  * 了解 MediaTek NeuroPilot SDK 的基本使用（加分项）
+
+* 参考文档：
+  * [OpenClaw 官网](https://openclaw.ai/)
+  * [OpenClaw GitHub 仓库](https://github.com/openclaw/openclaw)
+  * [OpenClaw 技能市场 ClawHub](https://clawhub.ai/)
+  * [文心大模型 API 支持](https://ai.baidu.com/ai-doc/AISTUDIO/rm344erns)
+  * [MediaTek NeuroPilot SDK](https://mediatek.gitlab.io/aiot/doc/neuropilot/)
+
+* 附加说明：
+  * 天玑9500 工程设备需在项目结束后归还联发科技
+  * 开发者需签署相关保密协议（如涉及未公开的技术资料）
+  * 联发科技将提供技术支持邮箱及工程师答疑渠道
 
 ### 请 紫光展锐 填写
 
