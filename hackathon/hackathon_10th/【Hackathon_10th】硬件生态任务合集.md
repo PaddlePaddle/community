@@ -320,6 +320,9 @@ submission/
   * **任务2 ：实现基于此芯 P1 的 CPU + NPU 异构推理**
     * 实现 PaddleOCR-VL-1.5 的 Pipeline：1）实现 Layout（版面分析）推理。 2）实现 PaddleOCR-VL-1.5 模型在 CPU + NPU 上的推理。
     * 量化加速：对 PaddleOCR-VL-1.5 模型进行 Q4_0 的量化和推理。
+* 硬件支持：
+  * 资源支持：提供硬件算力。
+  * 详情：提供此芯 P1 硬件（瑞莎星睿 O6 开发板或美高迷你 PC）供选手使用。
 * 提交内容：
     1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
     2. 此芯 P1 推理引擎的使用说明。
