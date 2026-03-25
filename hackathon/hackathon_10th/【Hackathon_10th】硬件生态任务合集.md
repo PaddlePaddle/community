@@ -268,7 +268,26 @@ submission/
 * [FastDeploy 仓库](https://github.com/PaddlePaddle/FastDeploy)
 * [OpenClaw 官方文档](https://docs.openclaw.ai)
 
-### 请 龙芯 填写
+### 龙芯中科：基于OpenClaw与AI算力驱动的龙芯LoongArch架构软件包自动化移植应用
+* 技术标签：二次开发、龙芯LoongArch架构、软件包自动化移植、AI算力集成
+
+- 详细描述：本次终极任务是基于打卡任务基础能力的进阶考察，核心围绕智能体、龙芯LoongArch架构软件包适配、AI算力融合三大核心方向，基于开源智能体框架OpenClaw ，打造LoongArch架构软件包的自动化移植，构建可复用、标准化的工具链体系。
+
+* 提交内容
+
+  1. 阶段1（需求分析与方案设计）：《龙芯LoongArch架构软件包自动化移植方案文档》（初版）
+  2. 阶段2（OpenClaw二次开发与AI算力集成）：OpenClaw二次开发代码、工具链主流程脚本（初版）
+  3. 阶段3（软件包自动化移植测试）：优化后的自动化移植工具链全套代码、《龙芯LoongArch架构软件包自动化移植测试报告》（初版）、LoongArch移植问题库
+  4. 阶段4（文档完善与PR提交）：工具链全套最终代码、所有终版技术文档（方案文档、测试报告、使用手册）、符合规范的PR提交记录
+
+* 提交方式：提 PR 到 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 `rfcs/hardware` 目录
+* 本阶段不提供算力/资源支持，需选手自备相应算力
+
+- 技术要求
+
+  1. OpenClaw开发能力：熟练掌握OpenClaw的核心实现原理、源码结构与可扩展接口，能基于其进行二次开发，新增LoongArch架构移植适配模块，代码符合开源开发规范。
+  2. LoongArch架构能力：精通龙芯LoongArch架构的系统操作、编译原理、依赖库适配、软件包移植流程，能独立解决该架构下软件包移植的各类典型问题。
+  3. AI集成能力：熟练使用文心API，能根据移植流程需求，设计合理的AI融合方案，实现移植自动化、报错智能排查及修复、适配方案智能推荐等核心AI能力。
 
 ### 高通：基于 Qualcomm AI Engine Direct (QNN) 部署 PaddleOCR-VL 模型，实现端侧页面级文档解析
 
