@@ -86,8 +86,6 @@
   * [MIOpen 文档](https://rocm.docs.amd.com/projects/MIOpen/en/latest/)
   * [PaddleOCR-VL AMD GPU 部署教程](../../pfcc/paddle-hardware/AMD-PaddleOCR-VL-GPU打卡任务.md)
 
-### 请 Arm 填写
-
 ### 天数智芯：基于天数智芯硬件与文心多模态模型的创新应用
 * 技术标签：深度学习框架，Python，文心大模型，多模态
 * 详细描述：本任务旨在利用天数智芯硬件(BI-150S)的算力优势，结合文心系列多模态模型，打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。开发者可**任选其一**或组合使用以下模型进行应用开发：**ERNIE-4.5-VL-28B-A3B-Thinking** 与 **PaddleOCR-VL-1.5**，参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications)。本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份 RFC，用来描述本次任务的设计方案及预期性能指标；在第二阶段中，我们将从第一阶段提交的结果中，挑选出 2 份比较优秀的方案，并请相对应的开发者根据自己的方案提交 PR。
@@ -310,9 +308,7 @@ submission/
 
 ### 请 联发科技 填写
 
-### 请 紫光展锐 填写
-
-### 此芯：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
+### 此芯 & Arm：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
 
 * 技术标签：CIX P1，Armv9 CPU，CIX NOE SDK，PaddleOCR-VL-1.5，模型移植优化，异构算力调度 
 * 详细描述：本任务旨在将 PaddleOCR-VL-1.5 模型移植到此芯 P1 芯片平台，充分利用其 CPU+GPU+NPU 异构算力，实现文档解析的端侧高效推理，推动国产 AI 芯片在文档智能领域的应用落地。开发者只要完成任意一项任务，即视为成功。
