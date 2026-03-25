@@ -279,7 +279,7 @@ submission/
   3. 阶段3（软件包自动化移植测试）：优化后的自动化移植工具链全套代码、《龙芯LoongArch架构软件包自动化移植测试报告》（初版）、LoongArch移植问题库
   4. 阶段4（文档完善与PR提交）：工具链全套最终代码、所有终版技术文档（方案文档、测试报告、使用手册）、符合规范的PR提交记录
 
-* 提交方式:代码托管于 GitHub
+* 提交方式：提 PR 到 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 `rfcs/hardware` 目录
 * 本阶段不提供算力/资源支持，需选手自备相应算力
 
 - 技术要求
