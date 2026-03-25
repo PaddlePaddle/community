@@ -317,7 +317,7 @@
 
 https://gitee.com/openkylin/community-management/tree/master/2026%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%A4%A7%E8%B5%9B-openKylin%E8%B5%9B%E9%81%93
  
-**作品提交成功后，请发送一封邮件附上pr链接到该邮箱：：contact@openkylin.top** 
+**作品提交成功后，请发送一封邮件附上pr链接到该邮箱：：contact@openkylin.top 、ext_paddle_oss@baidu.com** 
 
 
 ### 统信：deepin Agent Teams 智能体团队协作系统
