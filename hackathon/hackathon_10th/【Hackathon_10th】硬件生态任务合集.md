@@ -376,7 +376,22 @@ submission/
 
 ### 请 地瓜机器人 填写
 
-### 请 麒麟 填写
+### 麒麟 ：在openKylin桌面上运行的图形化AI助手demo应用
+# 【终极任务】开发一款图形化AI助手demo应用
+## 1、任务要求
+在打卡任务的基础上，开发一个可在openKylin桌面上运行的图形化AI助手demo应用，不限技术栈，基于ERNIE大模型的文本处理能力，实现基础对话功能即可。
+- 在openKylin操作系统实现并运行
+- 不限技术栈，如Qt、GTK等框架
+- 需基于在openKylin本地运行的ERNIE-4.5-0.3B-PT大模型能力
+- 可以实现基础的文本对话功能
+
+## 2、作品提交
+通过提交PR的方式，在如下仓库地址中，新建个人目录（以真实姓名为目录名），并将代码和运行效果视频上传到该目录下
+
+https://gitee.com/openkylin/community-management/tree/master/2026%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%A4%A7%E8%B5%9B-openKylin%E8%B5%9B%E9%81%93
+ 
+**作品提交成功后，请发送一封邮件附上pr链接到该邮箱：：contact@openkylin.top 、ext_paddle_oss@baidu.com** 
+
 
 ### 统信：deepin Agent Teams 智能体团队协作系统
 
