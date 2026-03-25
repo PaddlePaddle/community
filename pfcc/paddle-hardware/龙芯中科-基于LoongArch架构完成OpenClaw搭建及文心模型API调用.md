@@ -16,7 +16,7 @@
 
 ## 1.2 提交方式
 
-参与热身打卡活动并按照"邮件格式"要求，将全屏截图发送至：huangshuang@loongson.cn
+参与热身打卡活动并按照"邮件格式"要求，将全屏截图发送至：ext_paddle_oss@baidu.com + huangshuang@loongson.cn
 
 ## 1.3 算力/环境支持
 
