@@ -12,7 +12,7 @@
 参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + 厂商邮件组 zhuo.wu@intel.com 及 ethan.yang@intel.com 
 
 ## 算力/环境支持
-本次热身打卡活动需要使用 Intel 平台的CPU或GPU，赶快行动起来吧~
+本次热身打卡活动需要使用 Intel 平台的CPU或GPU，参与者需自行准备基于Intel平台的实体或虚拟设备完成打卡任务。赶快行动起来吧~
 
 ## 任务指导
 ### 获取并运行 OpenVINO Notebooks
