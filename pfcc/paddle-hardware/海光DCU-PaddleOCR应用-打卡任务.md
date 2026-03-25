@@ -1,92 +1,143 @@
-# 打卡任务名称：海光DCU平台PaddleOCR应用开发与实践
-海光的DCU是一款国产的GPGPU，在国内超算与智算中心被广泛采用，也全面接入了PaddlePaddle生态。
+# 🎯 海光打卡任务：免费领DCU算力资源
 
-小伙伴们可以通过此次打卡活动熟悉飞桨生态与DCU平台，然后进入DCU平台上的飞桨生态的高级功能开发。
+🎁 **报名海光打卡任务，可领 200小时 DCU卡时！** 名额限 **40名**！ <br/>
+ <br/>
+🚀 **完成进阶任务，额外再领第三代DCU BW系列显卡 200小时卡时！** 名额限 **20名**！ <br/>
 
-## 任务目标
-通过本次打卡，你将掌握：
-* 在DCU平台上搭建Paddle架构的方法
-* 基于PaddleOCR的应用开发
-* 通过vllm等工具加速PaddleOCR的方法
+---
 
-## 提交方式
-参与热身打卡活动并按照邮件模板格式将截图，输出结果和代码发送至 ext_paddle_oss@baidu.com + liuyun@hygon.cn
+## 📋 任务概览
 
-## 算力/环境支持
-本次热身打卡活动需要使用海光第二代DCU K100-AI，我们将在 [国家超算互联网平台](www.scnet.cn) 提供打卡所需的环境。
-我们将会为小伙伴们提供的手机号配置账号并分配活动所用卡时。
+| 项目 | 内容 |
+|:---|:---|
+| **任务名称** | 海光DCU平台PaddleOCR应用开发与实践 |
+| **平台** | 海光DCU（国产GPGPU，全面接入PaddlePaddle生态） |
+| **目标** | 熟悉飞桨生态与DCU平台，掌握高级功能开发 |
 
-## 搭建环境指导
-### 创建DCU实例
-- 登录 [国家超算互联网平台](www.scnet.cn) 中的控制台页面；
-- 进入【人工智能】页面，点击【创建Notebook】，选择一台【异构加速卡AI】的实例；
-- 镜像选择【PyTorch -> 2.5.1 -> py3.10-ubuntu22.04 -> DTK25.04.2】；
-- 镜像创建后，等待启动实例，可以通过 ssh 登录到实例上来。
+---
 
-### 升级paddlepaddle-dcu到最新版本
-```
+## 🎓 你将学到什么
+
+- ✅ 在DCU平台上搭建Paddle架构
+- ✅ 基于PaddleOCR的应用开发
+- ✅ 通过vLLM等工具加速PaddleOCR
+
+---
+
+## 📤 提交方式
+
+将以下内容按邮件模板格式发送至：
+- `ext_paddle_oss@baidu.com`
+- `liuyun@hygon.cn`
+
+📎 需包含：截图、输出结果、代码
+
+---
+
+## 💻 算力与环境支持
+
+| 配置项 | 详情 |
+|:---|:---|
+| **硬件** | 海光第二代DCU K100-AI |
+| **平台** | [国家超算互联网平台](https://www.scnet.cn) |
+| **账号** | 提供手机号即可配置，自动分配活动卡时 |
+
+---
+
+## 🛠️ 环境搭建指南
+
+### 1️⃣ 创建DCU实例
+
+1. 登录 [国家超算互联网平台](https://www.scnet.cn) 控制台
+2. 进入 **【人工智能】** → 点击 **【创建Notebook】**
+3. 选择 **【异构加速卡AI】** 实例
+4. **镜像选择**：`PyTorch 2.5.1` → `py3.10-ubuntu22.04` → `DTK25.04.2`
+5. 启动实例后，通过 SSH 登录
+
+### 2️⃣ 升级 PaddlePaddle-DCU
+
+```bash
 python -m pip install paddlepaddle-dcu -U -i https://www.paddlepaddle.org.cn/packages/stable/dcu/
 ```
 
-### 安装paddlex和paddleocr等上层应用框架
-```
+### 3️⃣ 升级 PaddlePaddle-DCU
+```bash
 python -m pip install paddleocr[doc-parser]
 pip install PyYAML==6.0.3 
 ```
 
-### 验证paddlepaddle-dcu可以正常运行
-```
+### 4️⃣ 验证安装
+```bash
 python3 -c "import paddle; paddle.utils.run_check()"
 ```
 
-### 设置环境变量
-设置如下环境变量，最好写入.bashrc中，每次登陆后自动执行：
-```
+### 5️⃣ 设置环境变量
+⚠️ 建议写入 ~/.bashrc，每次登录自动生效
+```bash
 export PADDLE_PDX_DISABLE_DEV_MODEL_WL=true
 export PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=true
 unset CUDA_HOME
 export LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | tr ':' '\n' | grep -v "cuda" | tr '\n' ':' | sed 's/:$//')
 export HOME=/root/private_data/
 ```
-退出后，重新ssh登录。以避免后续把paddleocr的模型文件下载到/root/下。（应下载到/root/private_data/下）
+🔁 退出后重新 SSH 登录，确保模型下载到 /root/private_data/ 而非 /root/
 
-### 运行示例
-```
+### 6️⃣ 运行示例
+```bash
 paddleocr doc_parser -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/paddleocr_vl_demo.png --device dcu
 ```
-此时会自动下载PaddleOCR的模型权重。
 
-## 打卡任务
-### 第一步：编写PaddleOCR应用
-- 下载 [数据集](https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/paddleocr_dcu_task/)，
-编写 python 代码，调用 PaddleOCR-vl 1.5的模型，把它扫描成文本。
-- 打卡提交物：编写的代码（python程序，后缀名改为'py_'，以防邮件被过滤），扫描出来的文本（txt文档）。
+## 📝 打卡任务
+### 任务一：编写PaddleOCR应用
+| 项目      | 要求                                                                           |
+| :------ | :--------------------------------------------------------------------------- |
+| **数据集** | [下载地址](https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/paddleocr_dcu_task/) |
+| **任务**  | 调用 PaddleOCR-vl 1.5 模型，将图片扫描成文本                                              |
+| **提交物** | Python代码（后缀改为`.py_`防过滤）、扫描结果（TXT）                                            |
 
-### 第二步：使用vllm后端加速OCR
-- 下载 [数据集](https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/MSRA-Text_Detection_500_Database/)，
-对test下的200张图片进行 OCR 扫描。要求通过启动 vllm 后端的方式，通过打高 batch 的方式尽可能得到一个较高的性能。
-- 启动vllm参考命令： 
-```
+### 任务二：使用vLLM后端加速OCR
+| 项目       | 要求                                                                                                                                    |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| **数据集**  | [MSRA-Text Detection 500 Database](https://www.scnet.cn/ui/aihub/dataset/acsepoahfb/MSRA-Text_Detection_500_Database/)（test目录下200张图片） |
+| **目标**   | 启动vLLM后端，通过高batch提升性能                                                                                                                 |
+| **参考性能** | batch=1时，200张图片约需411秒                                                                                                                 |
+| **提交物**  | 代码（`.py_`）、运行结果（TXT）、性能数据截图                                                                                                           |
+
+### 参考命令：
+启动vLLM服务
+```bash 
 paddleocr genai_server \
   --model_name PaddleOCR-VL-1.5-0.9B \
   --host 0.0.0.0 \
   --port 8118 \
   --backend vllm
-``` 
-- 验证vllm后端可以正常运行：
 ```
+
+验证vLLM后端
+```bash
 paddleocr doc_parser --input paddleocr_vl_demo.png --device dcu \
   --vl_rec_backend vllm-server \
   --vl_rec_server_url http://localhost:8118/v1
 ```
-- 代码要求：输出时把扫描的文本内容保存进txt文件，并打印出处理200张图片的总耗时，以及batch_size等信息。
-- 参考性能：batch=1时，扫描200张图片需要约411秒。
-- 打卡提交物：代码（python程序，后缀名改为'py_'），运行结果（txt文件），性能数据（屏幕截图）
 
-## 邮件格式
-* 标题： [飞桨黑客松第十期DCU平台任务打卡]
-* 内容：
-   * 飞桨团队你好，
-   * 【GitHub ID】：XXX
-   * 【打卡内容】：编写PaddleOCR应用 / 使用vllm后端加速OCR
-   * 【附件与截图】：
+代码要求
+ * 输出扫描文本保存为TXT文件
+ * 打印总耗时
+ * 显示batch_size等信息
+
+## 📧 邮件提交模板
+```
+标题：[飞桨黑客松第十期DCU平台任务打卡]
+
+飞桨团队你好，
+
+【GitHub ID】：XXX
+【打卡内容】：编写PaddleOCR应用 / 使用vllm后端加速OCR
+【附件与截图】：（请在此处添加）
+```
+
+# 🎁 领取算力资源
+<p>报名通过后，加入 【飞桨黑客松-海光】 微信群，辅导老师将为你充值账号。</p>
+<img src="images/hygon_group_260401.jpg" width="300">
+
+<p>💡 提示：名额有限，建议尽快报名并完成任务！</p>
