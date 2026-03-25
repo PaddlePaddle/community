@@ -12,7 +12,7 @@
 * 自定义算子编译、wheel 构建与依赖管理
 
 ## 提交方式
-参与飞腾热身打卡活动并按照邮件模板格式将截图发送至 zongwei2845@phytium.com.cn
+参与飞腾热身打卡活动并按照邮件模板格式将截图发送至 zongwei2845@phytium.com.cn 与 ext_paddle_oss@baidu.com
 
 ## 算力/环境信息
 * **CPU**: 飞腾 S5000C (ARM64, 128 cores)
