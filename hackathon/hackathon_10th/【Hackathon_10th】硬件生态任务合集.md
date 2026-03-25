@@ -335,7 +335,7 @@ submission/
 * 提交内容：
   * **第一阶段：RFC 方案提交**
     1. 提交方式：
-       - 以 markdown 文档形式提交到 github 仓库
+       - 以 markdown 文档形式提交到 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 `rfcs/hardware` 目录
        - 标题格式：【PaddlePaddle Hackathon 10 方案说明】- 联发科技 OpenClaw 移动端 - 开发者姓名
     2. 基本要求：
        - 需说明 OpenClaw 移动端适配的技术方案（Node.js 运行环境、服务架构、资源限制应对等）
