@@ -26,6 +26,8 @@
     * 解析论文/报告/说明书，实现摘要、问答、知识提炼或解读等下游任务。
     * 需体现“文档/视觉理解”到“下游智能处理”的完整流程，并突出 OpenVINO 的部署价值。
 
+* 算力支持：提供基于Intel酷睿Ultra处理器的迷你电脑用于任务开发。
+
 * 提交内容：
     * 第一阶段：RFC 方案提交
       1. 提交方式：1）将方案说明提交到厂商邮件组 zhuo.wu@intel.com 及 ethan.yang@intel.com ，2）标题处打上【PaddlePaddle Hackathon 10方案说明】，3）RFC 语言不做强制要求
@@ -83,8 +85,6 @@
   * [PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
   * [MIOpen 文档](https://rocm.docs.amd.com/projects/MIOpen/en/latest/)
   * [PaddleOCR-VL AMD GPU 部署教程](../../pfcc/paddle-hardware/AMD-PaddleOCR-VL-GPU打卡任务.md)
-
-### 请 Arm 填写
 
 ### 天数智芯：基于天数智芯硬件与文心多模态模型的创新应用
 * 技术标签：深度学习框架，Python，文心大模型，多模态
@@ -396,9 +396,7 @@ submission/
   * 开发者需签署相关保密协议（如涉及未公开的技术资料）
   * 联发科技将提供技术支持邮箱及工程师答疑渠道
 
-### 请 紫光展锐 填写
-
-### 此芯：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
+### 此芯 & Arm：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
 
 * 技术标签：CIX P1，Armv9 CPU，CIX NOE SDK，PaddleOCR-VL-1.5，模型移植优化，异构算力调度 
 * 详细描述：本任务旨在将 PaddleOCR-VL-1.5 模型移植到此芯 P1 芯片平台，充分利用其 CPU+GPU+NPU 异构算力，实现文档解析的端侧高效推理，推动国产 AI 芯片在文档智能领域的应用落地。开发者只要完成任意一项任务，即视为成功。
@@ -452,6 +450,8 @@ submission/
 
  - 提交方式：Github
 
+ - 算力/资源支持：提供RK3588+RK1820开发板
+
  - 技术要求：
 
      - 熟练掌握RK开发板模型部署及工具链使用技巧
@@ -460,7 +460,22 @@ submission/
 
 ### 请 地瓜机器人 填写
 
-### 请 麒麟 填写
+### 麒麟 ：在openKylin桌面上运行的图形化AI助手demo应用
+# 【终极任务】开发一款图形化AI助手demo应用
+## 1、任务要求
+在打卡任务的基础上，开发一个可在openKylin桌面上运行的图形化AI助手demo应用，不限技术栈，基于ERNIE大模型的文本处理能力，实现基础对话功能即可。
+- 在openKylin操作系统实现并运行
+- 不限技术栈，如Qt、GTK等框架
+- 需基于在openKylin本地运行的ERNIE-4.5-0.3B-PT大模型能力
+- 可以实现基础的文本对话功能
+
+## 2、作品提交
+通过提交PR的方式，在如下仓库地址中，新建个人目录（以真实姓名为目录名），并将代码和运行效果视频上传到该目录下
+
+https://gitee.com/openkylin/community-management/tree/master/2026%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%A4%A7%E8%B5%9B-openKylin%E8%B5%9B%E9%81%93
+ 
+**作品提交成功后，请发送一封邮件附上pr链接到该邮箱：：contact@openkylin.top 、ext_paddle_oss@baidu.com** 
+
 
 ### 统信：deepin Agent Teams 智能体团队协作系统
 
