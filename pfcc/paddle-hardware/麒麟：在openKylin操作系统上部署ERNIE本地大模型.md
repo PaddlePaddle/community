@@ -9,9 +9,8 @@ CLA签署地址：https://cla.openkylin.top/
 
 备注：如您没有gitee账号，需要先前往gitee平台:https://gitee.com/  申请账号，然后在签署CLA时的“gitee id”里填入您的id，方便社区后续识别您的贡献。
 ## 2、安装openKylin 2.0 SP2操作系统
-openKylin 2.0 SP2操作系统镜像下载地址：https://www.openkylin.top/downloads/index-cn.html
-
-系统安装指南：https://gitee.com/openkylin/docs/blob/master/01_%E5%AE%89%E8%A3%85%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97/openKylin%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97.md
+- openKylin 2.0 SP2操作系统镜像 [下载地址](https://www.openkylin.top/downloads/index-cn.html)
+- [系统安装指南](https://gitee.com/openkylin/docs/blob/master/01_%E5%AE%89%E8%A3%85%E5%8D%87%E7%BA%A7%E6%8C%87%E5%8D%97/openKylin%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97.md)
 
 ## 3、切换到维护模式
 打开设置-关于，鼠标左键连续点击5次”UKUI“图标，此时侧边栏出现”维护模式“，点进去开启维护模式，然后按照提示重启或重新登录系统。
@@ -87,6 +86,7 @@ https://gitee.com/openkylin/community-management
 【打卡内容】：在openKylin操作系统上部署ERNIE大模型
 
 【打卡截图（运行结果截图）】：
-![输入图片说明](images/openKylin运行截图.png)
+
+![输入图片说明](./images/openKylin运行结果截图.png)
 
 **打卡任务提交成功后，请发送一封邮件附上issue链接到该邮箱：contact@openkylin.top、ext_paddle_oss@baidu.com** 
