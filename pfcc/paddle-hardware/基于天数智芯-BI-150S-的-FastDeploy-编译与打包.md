@@ -11,7 +11,7 @@
 参与天数智芯热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com，并抄送 deepspark-bot@iluvatar.com
 
 ## 算力/环境支持
-本次热身打卡活动需要使用 BI-150S 硬件，赶快行动起来吧~也可 [申请 AI Studio 开发资源](https://github.com/PaddlePaddle/community/blob/master/pfcc/call-for-contributions/README.md#%E9%A3%9E%E6%A1%A8%E7%BA%BF%E4%B8%8A%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83ai-studio)
+本次热身打卡活动需要使用 BI-150S 硬件，可以申请使用星河平台 BI-150S 算力，赶快行动起来吧~
 
 ## 任务指导
 ### 安装 PaddlePaddle

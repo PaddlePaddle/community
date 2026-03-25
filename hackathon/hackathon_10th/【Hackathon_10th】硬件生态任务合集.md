@@ -91,6 +91,7 @@
 ### 天数智芯：基于天数智芯硬件与文心多模态模型的创新应用
 * 技术标签：深度学习框架，Python，文心大模型，多模态
 * 详细描述：本任务旨在利用天数智芯硬件(BI-150S)的算力优势，结合文心系列多模态模型，打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。开发者可**任选其一**或组合使用以下模型进行应用开发：**ERNIE-4.5-VL-28B-A3B-Thinking** 与 **PaddleOCR-VL-1.5**，参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications)。本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份 RFC，用来描述本次任务的设计方案及预期性能指标；在第二阶段中，我们将从第一阶段提交的结果中，挑选出 2 份比较优秀的方案，并请相对应的开发者根据自己的方案提交 PR。
+* 算力支持：本次任务需要使用 BI-150S 硬件，可以申请使用星河平台 BI-150S 算力。
 * 提交内容：
    * 第一阶段：RFC 方案提交
      1. 提交方式：1）以 markdown 文件的形式提交到 https://aistudio.baidu.com/projectoverview ，2）标题处打上【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求。
@@ -314,7 +315,7 @@ submission/
 
 ### 此芯：PaddleOCR-VL-1.5 在此芯 P1 芯片上的端侧部署与优化
 
-* 技术标签：CIX P1，Armv9 CPU，CIX NOE SDK，PaddleOCR-VL-1.5，模型移植优化，异构算力调度 
+* 技术标签：CIX P1，Armv9 CPU，CIX NOE SDK，PaddleOCR-VL-1.5，模型移植优化，异构算力调度
 * 详细描述：本任务旨在将 PaddleOCR-VL-1.5 模型移植到此芯 P1 芯片平台，充分利用其 CPU+GPU+NPU 异构算力，实现文档解析的端侧高效推理，推动国产 AI 芯片在文档智能领域的应用落地。开发者只要完成任意一项任务，即视为成功。
   * **任务1：实现基于此芯 P1 的 CPU / GPU 的异构推理**
     * 实现 PaddleOCR-VL-1.5 的 Pipeline：实现 PaddleOCR-VL-1.5 在 CPU/GPU 上的基础推理。
@@ -329,7 +330,7 @@ submission/
     1. PaddleOCR-VL-1.5 在此芯 P1 上的详细部署步骤。
     2. 此芯 P1 推理引擎的使用说明。
     3. 示例应用（命令行工具或 GUI 演示）。
-* 提交方式：  
+* 提交方式：
   1. 项目提交：提交使用案例到 [AI Studio](https://aistudio.baidu.com/projectoverview) 的项目并公开，请提交全部源码。
   2. 标题规范：标题处打上【PaddlePaddle Hackathon 10】。
   3. 基本要求：需包含 PaddleOCR-VL-1.5 在此芯 P1 上的部署详细步骤、此芯 P1 推理引擎的示例应用步骤（包括命令行工具 / GUI 演示）。
@@ -389,8 +390,8 @@ submission/
 通过提交PR的方式，在如下仓库地址中，新建个人目录（以真实姓名为目录名），并将代码和运行效果视频上传到该目录下
 
 https://gitee.com/openkylin/community-management/tree/master/2026%E9%BB%91%E5%AE%A2%E6%9D%BE%E5%A4%A7%E8%B5%9B-openKylin%E8%B5%9B%E9%81%93
- 
-**作品提交成功后，请发送一封邮件附上pr链接到该邮箱：：contact@openkylin.top 、ext_paddle_oss@baidu.com** 
+
+**作品提交成功后，请发送一封邮件附上pr链接到该邮箱：：contact@openkylin.top 、ext_paddle_oss@baidu.com**
 
 
 ### 统信：deepin Agent Teams 智能体团队协作系统
