@@ -149,5 +149,5 @@ The intellectual property of competition submissions (including but not limited 
 * **GitHub Discussions**: [Derivative Model Challenge](https://github.com/PaddlePaddle/PaddleOCR/discussions/categories/derivative-model-challenge)
 * **Official Website / PaddleOCR**: [paddleocr.com](https://paddleocr.com/)
 * **PaddleOCR GitHub**: [github.com/PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
-* **Domestic Community (China)**: Scan the Ruflow QR code to join the discussion group <img src="https://raw.githubusercontent.com/PaddlePaddle/community/master/hackathon/hackathon_10th/ocr_challenge_ruliu_qr.jpg" width="200px">
+* **Domestic Community (China)**: Scan the Ruflow QR code to join the discussion group <img src="https://github.com/user-attachments/assets/0c90e574-43a5-43ea-b5dd-b0b67e9f7cfc" width="200px">
 * **International Community**: [Discord](https://discord.gg/BzUBS6VXss)
