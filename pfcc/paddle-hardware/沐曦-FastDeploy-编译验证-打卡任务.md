@@ -1,4 +1,4 @@
-# 【热身打卡】Metax GPU+ PaddleOCR-VL-1.5 + FastDeploy 编译打卡
+# 【热身打卡】Metax GPU + PaddleOCR-VL-1.5 + FastDeploy 编译打卡
 
 ## 一、Metax GPU + FastDeploy 编译打卡
 
@@ -11,7 +11,7 @@
 
 ## 二、活动目标
 
-通过本次打卡，你将掌握：
+通过本次打卡，您将掌握：
 
 - **FastDeploy 源码结构**
 - **Paddle 运行时与 FastDeploy 的依赖关系**
@@ -21,36 +21,43 @@
 - **Metax GPU backend与paddle 框架的关系**
 - **基于Metax GPU 运行FastDeploy 推理框架**
 
-注：本次热身打卡活动需要使用 Metax GPU 硬件**，赶快行动起来吧。
-
+注：本次热身打卡活动需要使用 Metax GPU 硬件，赶快行动起来吧。
 
 ## 三、提交方式
 
-参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com 与 kaichuang.gao@metax-tech.com。
+参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com 与 kaichuang.gao@metax-tech.com，yang.yang2@metax-tech.com。
 
 ## 四、准备环境
 
 以MetaxGPU 版本为例：
 
-#### 容器镜像获取
+#### 算力/环境支持
+为让开发者无后顾之忧，专注技术攻坚，沐曦股份为所有报名本赛题的开发者提供每人300算力代金券专属福利，助力MetaX GPU上的开发、调试与验证！
+算力券领取三步骤：
+    完成百度飞桨黑客松-沐曦股份专属赛题[优化 PaddleOCR-VL-1.5+MetaX GPU]报名；
+    注册并登录沐曦股份开发者社区；
+    在社区活动页面填写与百度飞桨黑客松报名一致的 GitHub ID，后台核验通过后将发放算力券。
+    ***Tips***
+    若开发过程中需要更多算力资源，可将算力券诉求发送至邮箱：yang.yang2@metax-tech.com，沐曦股份将按需提供专属支持！
+    如有任何问题可加入沐曦MXMACA开发者社群，我们会为您及时答疑与提供帮助。
+    
+> 平台地址：[GiteeAi 算力广场](https://ai.gitee.com/compute) 曦云C500 单卡 64G instance\
+> 镜像选择: `Pytorch/2.6.0/Python 3.10/maca 3.2.1.3`  \
+> 领取算力券网址：https://developer.metax-tech.com/activities/4
 
-```
-https://ai.gitee.com/compute/instances/new?id=3
-Pytorch/2.6.0/Python 3.10/maca 3.2.1.3
-```
-
-#### paddle & custom backend 预安装
+#### paddlepaddle & custom device backend 预安装
 
 ```
 1）pip install paddlepaddle==3.4.0.dev20251223 -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/
 2）pip install paddle-metax-gpu==3.3.0.dev20251224 -i https://www.paddlepaddle.org.cn/packages/nightly/maca/
 ```
 
-#### FastDeploy代码下载并编译
+#### FastDeploy release2.4 代码下载并编译
 
 ```
 git clone https://github.com/PaddlePaddle/FastDeploy
 cd FastDeploy
+*** checkout to release2.4 branch ***
 ```
 
 ## 五、编译打卡流程
@@ -63,13 +70,15 @@ cd FastDeploy
 ![Metax-infer-result](./images/fastdeploy-Metax-C5xx-infer-result2.png)
 
 
-## 邮件格式
+#### 邮件格式
 * 标题： [飞桨黑客松第十期FastDeploy编译任务打卡]
 * 内容：
    * 飞桨团队你好，
-   * 【GitHub ID】：参赛选手本人 GitHub 打卡任务仓库地址
+   * 【GitHub ID】：参赛选手本人 GitHub ID 打卡任务仓库地址
    * 【打卡内容】：编译/安装 fastdeploy whl 包
    * 【环境信息】：OS / CPU / GPU / FastDeploy / PaddlePaddle 版本
    * 【打卡截图】：（粘贴截图或提供链接）
 
+#### MXMACA开发者交流群
+(./images/MXMACA-dev.png)
 
