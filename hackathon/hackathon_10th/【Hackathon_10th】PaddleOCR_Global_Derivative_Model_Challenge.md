@@ -25,9 +25,10 @@ This competition focuses on derivative model development in the OCR field, encou
 We look forward to participants focusing on real-world application areas not yet fully covered by academia or industry, tackling these "hard nut" scenarios, and producing derivative models with both technical depth and practical value.
 
 ## 3. Timeline
-|Phase|Date|Key Tasks|Submission Notes|
-|-|-|-|-|
-|**Preliminary Round**|April 1 – May 15|Participants submit their work; rankings are published every two weeks|**Evaluation set submission**: Must be submitted by **April 24**; no further updates accepted after that date (due to the length of the review cycle). **Training data report and open-source project** (GitHub + Hugging Face) **submission**: Must be submitted by **May 15**. If advancing to the finals, the final version may be submitted during the finals preparation phase.|
+
+| Phase | Date | Key Tasks | Submission Notes |
+|---|---|---|---|
+| **Preliminary Round** | April 1 – May 15 | Participants submit their work; rankings are published every two weeks | **Evaluation set**: Must be submitted by **April 24**; no further updates accepted after that date. **Training data report and open-source project** (GitHub + Hugging Face): Must be submitted by **May 15**. |
 |Leaderboard Release (Round 1)|Monday, April 13|First appearance: Number of registrants + number of submitted works published||
 |Leaderboard Release (Round 2)|Monday, April 27|Official leaderboard: Top 50 by composite score||
 |Leaderboard Release (Round 3)|Monday, May 11|Sprint leaderboard: Top 50 by composite score||
@@ -45,34 +46,32 @@ We look forward to participants focusing on real-world application areas not yet
 * All submitted materials must comply with the specifications in the "Submission Requirements" section.
 * The format of the finals defense (in-person/online) will be announced separately based on actual circumstances.
 
-****
-
 ## 4. Prizes
 The total cash prize pool for this competition is **70,000 RMB**, divided into preliminary round incentives and finals prizes. All cash prizes are pre-tax amounts; personal income tax will be withheld and remitted by the organizer before disbursement. In addition, participants have the opportunity to receive physical gifts and various ecosystem benefits.
 
-**1. Preliminary Round Incentives**
+### 1. Preliminary Round Incentives
 
-|Incentive|Quantity|Description|
-|-|-|-|
-|**Award Certificate (Digital)**|Unlimited|All participants who submit a complete work (open-source model link) will receive a digital participation certificate.|
-|**Baidu Merchandise**|50 sets|Participants ranked in the Top 50 by composite score will receive Baidu custom merchandise (Top 20: Xiaodu Smart Speaker Portable Edition; Ranks 21–50: Baidu multi-function retractable data cable).|
-|**High-Quality Evaluation Set Contribution Award**|10 people|1,000 RMB cash reward per person; evaluated by the R&D team based on the "evaluation set quality" dimension and awarded to the top 10 participants with the highest-quality evaluation sets.|
-|**Universal Computing Resource Package**|Unlimited|All participating contestants with fine-tuning projects in progress who submit a project link will receive GPU computing credits worth 100 RMB from the PaddlePaddle AIStudio community, to support project creation and model tuning.|
+| Incentive | Quantity | Description |
+|---|---|---|
+| **Award Certificate (Digital)** | Unlimited | All participants who submit a complete work (open-source model link) will receive a digital participation certificate. |
+| **Baidu Merchandise** | 50 sets | Participants ranked in the Top 50 by composite score will receive Baidu custom merchandise. |
+| **High-Quality Evaluation Set Contribution Award** | 10 people | 1,000 RMB cash reward per person; evaluated by the R&D team based on the "Evaluation Set Quality" dimension and awarded to the top 10 participants with the highest-quality evaluation sets. |
+| **Universal Computing Resource Package** | Unlimited | Participants who submit a project link will receive GPU computing credits worth 100 RMB from PaddlePaddle AI Studio, to support project creation and model tuning. |
 
-**2. Finals Prizes**
+### 2. Finals Prizes
 
 The Top 10 teams advance to the finals defense, and the following cash prizes (total **60,000 RMB**) are awarded:
 
-|Prize|Number of Winners|Prize per Person|Subtotal|
-|-|-|-|-|
-|1st Place (Champion)|1|20,000 RMB|20,000 RMB|
-|2nd Place (Runner-up)|1|12,000 RMB|12,000 RMB|
-|3rd Place|1|8,000 RMB|8,000 RMB|
-|4th–6th Place|3|4,000 RMB|12,000 RMB|
-|7th–10th Place|4|2,000 RMB|8,000 RMB|
-|**Total**|**10**||**60,000 RMB**|
+| Prize | Winners | Prize per Person | Subtotal |
+|---|:--:|--:|--:|
+| 1st Place (Champion) | 1 | 20,000 RMB | 20,000 RMB |
+| 2nd Place (Runner-up) | 1 | 12,000 RMB | 12,000 RMB |
+| 3rd Place | 1 | 8,000 RMB | 8,000 RMB |
+| 4th–6th Place | 3 | 4,000 RMB | 12,000 RMB |
+| 7th–10th Place | 4 | 2,000 RMB | 8,000 RMB |
+| **Total** | **10** | | **60,000 RMB** |
 
-**3. Ecosystem Benefits**
+### 3. Ecosystem Benefits
 
 To encourage open-source co-creation, outstanding works and their authors will also receive the following ecosystem benefits:
 
@@ -90,14 +89,14 @@ To encourage open-source co-creation, outstanding works and their authors will a
 ## 5. Scoring Criteria
 Both the preliminary round and finals use a unified scoring system that comprehensively evaluates participants' work across the following six dimensions, with a total of **100 points**. In addition, a separate **"High-Quality Evaluation Set Contribution Award"** is set, which is evaluated solely based on the "evaluation set quality" dimension.
 
-|Dimension|Full Score|Sub-items and Scores|
-|-|-|-|
-|**Evaluation Set Quality**|20 pts|Data scale (5 pts), annotation accuracy (5 pts), data diversity (5 pts), difficulty reasonableness (5 pts)|
-|**Scenario Scarcity**|15 pts|Research scarcity (6 pts), industrial demand value (7 pts), scenario uniqueness (2 pts)|
-|**Task Complexity**|15 pts|Visual complexity (7 pts), structural complexity (5 pts), comprehension complexity (3 pts)|
-|**Training Dataset Construction Rigor**|20 pts|Collection process standardization (5 pts), annotation standard completeness (5 pts), quality control mechanisms (5 pts), data statistical analysis (5 pts)|
-|**Model Fine-tuning Strategy and Innovation**|10 pts|Fine-tuning strategy appropriateness (5 pts), experiment thoroughness (3 pts), technical innovation (2 pts)|
-|**Technical Documentation and Open-Source Contribution**|20 pts|Documentation quality (5 pts), code reproducibility (5 pts), demo completeness (5 pts), community contribution value (5 pts)|
+| Dimension | Full Score | Sub-items and Scores |
+|---|:--:|---|
+| **Evaluation Set Quality** | 20 pts | Data scale (5 pts), annotation accuracy (5 pts), data diversity (5 pts), difficulty reasonableness (5 pts) |
+| **Scenario Scarcity** | 15 pts | Research scarcity (6 pts), industrial demand value (7 pts), scenario uniqueness (2 pts) |
+| **Task Complexity** | 15 pts | Visual complexity (7 pts), structural complexity (5 pts), comprehension complexity (3 pts) |
+| **Training Dataset Construction Rigor** | 20 pts | Collection process standardization (5 pts), annotation standard completeness (5 pts), quality control mechanisms (5 pts), data statistical analysis (5 pts) |
+| **Model Fine-tuning Strategy and Innovation** | 10 pts | Fine-tuning strategy appropriateness (5 pts), experiment thoroughness (3 pts), technical innovation (2 pts) |
+| **Technical Documentation and Open-Source Contribution** | 20 pts | Documentation quality (5 pts), code reproducibility (5 pts), demo completeness (5 pts), community contribution value (5 pts) |
 
 For detailed scoring criteria for each dimension, please refer to the [Detailed Scoring Rubric](https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_10th/详细评分表.md).
 
@@ -112,14 +111,14 @@ To ensure participants can compete smoothly, the organizer provides the followin
 * **Remote Technical Guidance**: If participants encounter issues not covered by the documentation, they can contact via the official community or email, and the R&D team will provide remote technical guidance.
 
 ## 7. Submission Requirements
-All submitted materials (except finals defense materials) should be sent via email to the official mailbox: **ext_paddle_oss@baidu.com**, with the email subject formatted as: **"PaddleOCR Derivative Model Challenge - [Material Name] - [GitHub ID]"** (e.g., PaddleOCR Derivative Model Challenge - Evaluation Set Submission - zhangshan). The submission method for finals defense materials will be communicated separately to advancing teams.
+All submitted materials (except finals defense materials) should be sent via email to: **ext_paddle_oss@baidu.com**, with the subject formatted as: `PaddleOCR Derivative Model Challenge - [Material Name] - [GitHub ID]` (e.g., `PaddleOCR Derivative Model Challenge - Evaluation Set - zhangsan`).
 
-|Submission Content|Deadline|Public Disclosure|Submission Format|Requirements|
-|-|-|-|-|-|
-|**Evaluation Set**|April 24|No requirement|Link|**Evaluation set data**: Must include at minimum: images/documents, annotations, task description, evaluation script. **Dataset description**: Must include: data sources, data scale, category distribution, difficulty analysis. **Storage location of your choice**: Baidu Netdisk / [Open Datasets - PaddlePaddle AI Studio Community](https://aistudio.baidu.com/datasetoverview?t=mention&mt=doc&dt=sdk), etc.|
-|**Training Data Construction Report**|May 15 (Preliminary) / June 5 (Finals)|No requirement|Report file (PDF/Markdown)|**Must include**: Data collection methods (including collection, synthesis, etc., with key code), annotation specifications (including use of large models for annotation, etc.), annotation tools, quality control workflows|
-|**Complete Open-Source Project**|May 15 (Preliminary) / June 5 (Finals)|**Must be public**|Two links|**GitHub repository**: Training/evaluation code, documentation, demo (training data not required to be open-sourced). **Hugging Face model**: Fine-tuned model with complete model card (metadata, usage examples, performance metrics, etc.); see [https://huggingface.co/jzhang533/PaddleOCR-VL-For-Manga](https://huggingface.co/jzhang533/PaddleOCR-VL-For-Manga) for reference.|
-|**Finals Defense Materials**|June 5|-|File|Submitted by advancing teams only: Presentation slides (10-minute presentation) and optional demo video (3–5 minutes). Submission method to be communicated separately.|
+| Submission Content | Deadline | Public? | Requirements |
+|---|---|:--:|---|
+| **Evaluation Set** | April 24 | Not required | images/documents + annotations + task description + evaluation script + dataset description (data sources, scale, category distribution, difficulty analysis). Host on Baidu Netdisk or [AI Studio Open Datasets](https://aistudio.baidu.com/datasetoverview) and submit the link. |
+| **Training Data Construction Report** | May 15 (Preliminary) / June 5 (Finals) | Not required | PDF/Markdown. Must include: data collection methods (with key code), annotation specifications, annotation tools, quality control workflows. |
+| **Complete Open-Source Project** | May 15 (Preliminary) / June 5 (Finals) | **Must be public** | **GitHub repository**: training/evaluation code, documentation, demo (training data not required to be open-sourced). **Hugging Face model**: fine-tuned model with complete model card; reference: [PaddleOCR-VL-For-Manga](https://huggingface.co/jzhang533/PaddleOCR-VL-For-Manga). |
+| **Finals Defense Materials** | June 5 | — | Advancing teams only: presentation slides (10 min) + optional demo video (3–5 min). Submission method to be communicated separately. |
 
 **Important Notes**:
 
@@ -134,25 +133,21 @@ This competition does not provide computing resources (machines); participants m
 The intellectual property of competition submissions (including but not limited to algorithms, models, etc.) is jointly owned by Baidu and the participants. The organizing committee has the right to use competition submissions, related works, and participating team information for promotional materials, related publications, media releases (designated and authorized), official website browsing and downloads, exhibitions (including touring exhibitions), and other activities. The competition organizing body retains priority partnership rights.
 
 ## 10. Important Notes
-1. **Eligibility**:
-    1. The competition is open to developers worldwide; individuals or teams (up to 5 members) may register.
-    2. Baidu internal employees are welcome to actively participate. Internal employees may receive rankings and honors normally, but per company policy, they do not participate in cash prize distribution.
-
-2. **Participation Agreement**: Registration constitutes agreement to the participation agreement, which clearly defines terms such as intellectual property ownership and data usage. Please read it carefully.
+1. **Eligibility**: The competition is open to developers worldwide; individuals or teams (up to 5 members) may register. Baidu internal employees may receive rankings and honors normally, but do not participate in cash prize distribution per company policy.
+2. **Participation Agreement**: Registration constitutes agreement to the participation agreement, which defines terms such as intellectual property ownership and data usage. Please read it carefully.
 3. **International Participants**: Prize distribution for overseas participants involves foreign exchange management; participants will need to cooperate with the organizer in providing necessary information. Please be aware of this in advance.
 4. **Academic Integrity**:
-    1. Works must be original; plagiarism or infringement of others' intellectual property rights is strictly prohibited and will result in disqualification upon discovery.
-    2. Participants are prohibited from exploiting rule loopholes or technical vulnerabilities outside the scope of the technical capability assessment to improve their rankings; violations will result in score cancellation and serious disciplinary action.
-    3. Personnel who have had access to competition-related data will have their submissions excluded from leaderboard rankings and prize evaluation.
-
-5. **Additional Competition Rules**: The organizing committee reserves the right to adjust and modify competition rules and event arrangements, the right to determine and handle cheating behavior, and the right to revoke or refuse to award prizes to teams that affect the organization and fairness of the competition.
+   * Works must be original; plagiarism or infringement of others' intellectual property rights is strictly prohibited and will result in disqualification.
+   * Participants are prohibited from exploiting rule loopholes or technical vulnerabilities to improve rankings; violations will result in score cancellation and serious disciplinary action.
+   * Personnel who have had access to competition-related data will have their submissions excluded from leaderboard rankings and prize evaluation.
+5. **Rule Adjustments**: The organizing committee reserves the right to adjust competition rules and event arrangements, determine and handle cheating behavior, and revoke or refuse to award prizes to teams that affect the organization and fairness of the competition.
 
 ## 11. Contact
-* **Official Email**: `ext_paddle_oss@baidu.com` for competition inquiries, material submissions, and administrative matters.
-* **Official Discussion Area**: For technical exchanges, feedback, and competition discussions via GitHub Issues / Discussions, please visit: [GitHub Issue](https://github.com/PaddlePaddle/PaddleOCR/issues/17858) / [GitHub Discussions](https://github.com/PaddlePaddle/PaddleOCR/discussions/categories/derivative-model-challenge)
-* **Official Website**: [paddleocr.com](https://paddleocr.com/)
-* **OCR Project Homepage**: For OCR technology details, base models, and tools, please visit:
-    * PaddleOCR Official Website: [https://paddleocr.com/](https://paddleocr.com/)
-    * PaddleOCR GitHub Repository: [https://github.com/PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
+
+* **Official Email**: ext_paddle_oss@baidu.com (competition inquiries, material submission)
+* **GitHub Issue**: [PaddlePaddle/PaddleOCR#17858](https://github.com/PaddlePaddle/PaddleOCR/issues/17858)
+* **GitHub Discussions**: [Derivative Model Challenge](https://github.com/PaddlePaddle/PaddleOCR/discussions/categories/derivative-model-challenge)
+* **Official Website / PaddleOCR**: [paddleocr.com](https://paddleocr.com/)
+* **PaddleOCR GitHub**: [github.com/PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
 * **Domestic Community (China)**: Scan the Ruflow QR code to join the discussion group <img src="https://raw.githubusercontent.com/PaddlePaddle/community/master/hackathon/hackathon_10th/ocr_challenge_ruliu_qr.jpg" width="200px">
 * **International Community**: [Discord](https://discord.gg/BzUBS6VXss)
