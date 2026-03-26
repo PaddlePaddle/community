@@ -1,6 +1,17 @@
 # PaddleOCR Global Derivative Model Challenge — Detailed Scoring Rubric
 
 **Total: 100 points across 6 dimensions**
+## Summary of Point Allocation
+
+| Dimension | Points |
+|-----------|--------|
+| 1. Evaluation Dataset Quality | 20 |
+| 2. Scenario Scarcity | 15 |
+| 3. Task Complexity | 15 |
+| 4. Training Data Construction Rigor | 20 |
+| 5. Model Fine-tuning Strategy & Innovation | 10 |
+| 6. Technical Documentation & Open Source Contribution | 20 |
+| **Total** | **100** |
 
 ---
 
@@ -78,15 +89,3 @@
 | 6.4 Community Contribution Value — Whether it has long-term value for the community | 5 | **5 pts:** Long-term community value, solves universal problems, widely reusable, high model downloads <br> **4 pts:** Some value but limited audience <br> **3 pts:** Has value but narrow scope <br> **2 pts:** Average value <br> **1 pt:** Low value <br> **0 pts:** No value |
 
 ---
-
-## Summary of Point Allocation
-
-| Dimension | Points |
-|-----------|--------|
-| 1. Evaluation Dataset Quality | 20 |
-| 2. Scenario Scarcity | 15 |
-| 3. Task Complexity | 15 |
-| 4. Training Data Construction Rigor | 20 |
-| 5. Model Fine-tuning Strategy & Innovation | 10 |
-| 6. Technical Documentation & Open Source Contribution | 20 |
-| **Total** | **100** |
