@@ -1,3 +1,8 @@
+# 参加海光DCU赛道，免费使用DCU算力资源
+* 打卡任务选手每人可分配**200卡时**海光DCU算力。
+* 进阶任务选手没人可再增加**200卡时**海光DCU算力。
+* 报名通过后，加入微信群（见文末），让管理员为您充算力。
+
 # 打卡任务名称：海光DCU平台PaddleOCR应用开发与实践
 海光的DCU是一款国产的GPGPU，在国内超算与智算中心被广泛采用，也全面接入了PaddlePaddle生态。
 
@@ -90,3 +95,8 @@ paddleocr doc_parser --input paddleocr_vl_demo.png --device dcu \
    * 【GitHub ID】：XXX
    * 【打卡内容】：编写PaddleOCR应用 / 使用vllm后端加速OCR
    * 【附件与截图】：
+
+# 进群领算力
+<p>报名通过后，加入下边微信群，辅导老师将为你的账号充值。</p>
+<img src="https://www.scnet.cn/acx/aihub/gitlab/dataset/acq1877t3t/Paddle_Hygon_wechat_group/image?filePath=hygon_group.jpg" width=300 />
+
