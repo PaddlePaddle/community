@@ -19,10 +19,14 @@
 ### 1.3 算力/环境支持
 
 - **系统镜像**：[deepin 25 最新版镜像](https://www.deepin.org/zh/download/ "null")，根据网页中的指导文档完成安装。
-  
-- **硬件要求**：支持 deepin 25 安装的物理机（推荐）或虚拟机环境。
-  
+
+- **硬件要求**：支持 deepin 25 安装的物理机（推荐）或虚拟机环境，参与者需自行准备实体或虚拟硬件设备完成打卡任务。
+
 - **API 资源**：开发者需提前获取 [飞桨 AI Studio 平台](https://aistudio.baidu.com/ "null") Access Token。
+
+  欢迎扫码加入“deepin赛道百度黑客松打卡任务群”:
+
+  <img src="./images/deepin赛道.png" width="200">
 
 ### 1.4 任务指导
 
