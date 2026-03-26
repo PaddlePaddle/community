@@ -13,6 +13,10 @@
 
 参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com 与 alex.hu@rock-chips.com。
 
+## 算力/资源支持
+
+本次热身打卡活动可在工作站或服务器上完成，建议配置GPU可加速完成进度，若无GPU也可使用CPU完成。本阶段不提供算力/资源支持，需选手自备相应算力。
+
 ## 任务指导
 
 ### 获取 RKNN3-Model-ZOO 并配置环境
@@ -156,7 +160,7 @@ python infer_simular.py --tokenizer_path ../model/PaddlePaddle/PaddleOCR-VL --im
 
 运行成功后，会打印出识别结果，如下：
 
-![simular-infer-result](paddleocr-vl-simular-infer-result.png)
+![simular-infer-result](images/瑞芯微-paddleocr-vl-simular-infer-result.png)
 
 ## 端侧部署[可选]
 
@@ -215,7 +219,7 @@ cd /userdata/rknn_paddleocr_vl_demo
 
 运行成功后，会打印出识别结果及推理性能，如下：
 
-![rk1820-infer-result](paddleocr-vl-rk1820-infer-result.png)
+![rk1820-infer-result](images/瑞芯微-paddleocr-vl-rk1820-infer-result.png)
 
 ## 打卡完成提交
 
