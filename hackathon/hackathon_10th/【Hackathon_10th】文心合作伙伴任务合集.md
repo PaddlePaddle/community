@@ -138,7 +138,36 @@
 * 参考文档：[FastDeploy](https://paddlepaddle.github.io/FastDeploy/zh/) 、[飞桨AI Studio](https://aistudio.baidu.com/overview)
 
 
-### 请 海光 填写
+
+### 海光：PaddleOCR-VL-1.5 应用性能分析与调优
+
+- 技术标签：PaddleX，PaddleOCR-VL，性能分析，性能调优，海光DCU
+
+- 详细描述：参赛选手在我们提供的DCU环境(scnet.cn)中完成了前置打卡任务后，可以挑战本任务。在本任务中，选手将继续使用scnet提供的开发环境（我们会加充200卡时时长），针对测试程序进行性能分析，增加对PaddleX/PaddleOCR框架的理解，并且进行对模型推理部分进行性能调优的尝试。最终我们对选手提交的 **性能分析报告** 和 **性能优化效果** 进行综合考量，选出优胜者。
+
+- 提交内容：
+    - 第一阶段：**性能分析报告**提交，报告中要回答以下问题：
+        - Paddleocr-vl-1.5-0.9b模型推理过程中，有几个步骤？分别是做什么的？VLLM加速的是哪个步骤？
+        - 使用VLLM加速推理时，调用的modeling程序是PaddleX中的哪个代码文件？
+        - 请在代码中添加一行，打印输入tensor的尺寸，把输出截图附在报告中。
+        - 启动vllm是加上profile参数，用（ui.perfetto.dev）工具打开prof报告，截图。
+        - 描述模型中一层推理的过程，例如包含几个norm，linear，attention算子？
+        - 在prof报告中整理出encoder层中执行的算子，查看耗时，把算子与耗时整理到表格里。
+
+    - 第二阶段：我们根据性能分析报告，选出2名理解比较深刻的同学，进行推理优化。
+        - 开发代码可以从这里fork: https://github.com/Yun1Liu/paddlex ，完成后向这个项目里提PR，不要直接向paddle社区提交PR。（针对DCU平台特殊的优化不一定有普适行，我们会推动优化成果向光源社区OpenDAS融合）
+        - 辅导老师会参与优化方案的讨论，可尝试的优化方法包含但不限于：
+            - 对VLLM参数进行优化，获得比默认参数更好的性能。
+            - 使用DCU优化算子，代替torch算子或python代码实现的算子。
+            - 手写triton算子，做算子融合。
+            - 混合精度的尝试，并做精度验证。
+        - 优化后，需要提供性能提升的数据和精度验证的结果。保证精度不下降。
+
+- 验收标准：优化后的性能比优化前有较明显提升(>=2%),精度无明显下降(<1%)，即可通过验收。
+
+- 参考文档：[海光DCU-PaddleOCR应用-打卡任务](https://github.com/PaddlePaddle/community/blob/master/pfcc/paddle-hardware/%E6%B5%B7%E5%85%89DCU-PaddleOCR%E5%BA%94%E7%94%A8-%E6%89%93%E5%8D%A1%E4%BB%BB%E5%8A%A1.md)
+
+
 
 ### 瀚博：基于瀚博载天系列加速卡部署文心 ERNIE-4.5 / PaddleOCR-VL 模型
 
