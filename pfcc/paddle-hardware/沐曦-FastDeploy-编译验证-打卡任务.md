@@ -71,7 +71,7 @@ cd FastDeploy
 
 
 #### 邮件格式
-* 标题： [飞桨黑客松第十期FastDeploy编译任务打卡]
+* 标题： 文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-沐曦-打卡-onecatcn）
 * 内容：
    * 飞桨团队你好，
    * 【GitHub ID】：参赛选手本人 GitHub ID 打卡任务仓库地址
@@ -81,4 +81,3 @@ cd FastDeploy
 
 #### MXMACA开发者交流群
 (./images/MXMACA-dev.png)
-
