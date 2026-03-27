@@ -1,4 +1,4 @@
-# 【Hackathon_10th】PaddleOCR-VL 全球衍生模型挑战赛
+# 【Hackathon_10th】PaddleOCR 全球衍生模型挑战赛
 
 ## 一、比赛背景
 

@@ -1,4 +1,4 @@
-# 【Hackathon_10th】PaddleOCR-VL Global Derivative Model Challenge
+# 【Hackathon_10th】PaddleOCR Global Derivative Model Challenge
 
 ## 1. Competition Background
 With the rapid advancement of large model technologies, the OCR field is undergoing a new wave of technological transformation. ERNIE, as Baidu's core AI capability, already possesses powerful general visual understanding abilities, but there remains enormous room for optimization and customization in specialized scenarios.
