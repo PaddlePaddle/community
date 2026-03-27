@@ -47,7 +47,7 @@ We look forward to participants focusing on real-world application areas not yet
 * The format of the finals defense (in-person/online) will be announced separately based on actual circumstances.
 
 ## 4. Prizes
-The total cash prize pool for this competition is **70,000 RMB**, divided into preliminary round incentives and finals prizes. All cash prizes are pre-tax amounts; personal income tax will be withheld and remitted by the organizer before disbursement. In addition, participants have the opportunity to receive physical gifts and various ecosystem benefits.
+The total cash prize pool for this competition is **70,000 RMB**, divided into preliminary round incentives and finals prizes. Cash prizes are pre-tax amounts; personal income tax will be withheld and remitted by the organizer before disbursement. In addition, participants have the opportunity to receive physical gifts and various ecosystem benefits.
 
 ### 1. Preliminary Round Incentives
 
