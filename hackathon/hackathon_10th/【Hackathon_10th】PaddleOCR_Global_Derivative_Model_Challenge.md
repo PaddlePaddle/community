@@ -47,7 +47,7 @@ We look forward to participants focusing on real-world application areas not yet
 * The format of the finals defense (in-person/online) will be announced separately based on actual circumstances.
 
 ## 4. Prizes
-The total cash prize pool for this competition is **70,000 RMB**, divided into preliminary round incentives and finals prizes. All cash prizes are pre-tax amounts; personal income tax will be withheld and remitted by the organizer before disbursement. In addition, participants have the opportunity to receive physical gifts and various ecosystem benefits.
+The total cash prize pool for this competition is **70,000 RMB**, divided into preliminary round incentives and finals prizes. Cash prizes are pre-tax amounts; personal income tax will be withheld and remitted by the organizer before disbursement. In addition, participants have the opportunity to receive physical gifts and various ecosystem benefits.
 
 ### 1. Preliminary Round Incentives
 
@@ -77,7 +77,7 @@ To encourage open-source co-creation, outstanding works and their authors will a
 
 * **Official Showcase and Promotion**: Outstanding award-winning works will be featured on the Hugging Face ERNIE Community topic page and Baidu's domestic and overseas social media channels. Additionally, some developers with notable contributions will receive public acknowledgment in release notes.
 * **In-Depth Collaboration Opportunities**: Authors of outstanding works may have the opportunity to receive further guidance and collaboration from Baidu engineers to jointly explore technology application scenarios; particularly outstanding teams may have the opportunity to co-publish papers at top conferences.
-* **ERNIE Community Ambassador Title**: Overseas participants who perform exceptionally well will be awarded the "ERNIE Large Model Community Honorary Ambassador" title and included in Baidu's key overseas developer ecosystem contact list.
+* **ERNIE Community Ambassador Title**: Participants who perform exceptionally well will be awarded the "ERNIE Large Model Community Honorary Ambassador" title and included in Baidu's key developer ecosystem contact list.
 * **AIStudio Community Computing and API Resources**: Outstanding participants can receive free GPU computing credits from PaddlePaddle AI Studio's AIStudio community and ERNIE API Token quotas, helping participants continue AI development and model iteration after the competition and reducing subsequent R&D hardware costs.
 * **Internship Opportunities and Fast Track**: Outstanding student teams will have the opportunity to receive a **fast-track interview channel for the PaddleOCR team**, with excellent members given priority consideration to join the **PaddleOCR team** and participate in core technology R&D and deployment.
 
