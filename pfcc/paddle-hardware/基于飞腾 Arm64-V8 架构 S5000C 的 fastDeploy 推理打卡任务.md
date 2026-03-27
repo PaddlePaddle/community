@@ -174,7 +174,7 @@ curl -X POST "http://0.0.0.0:8180/v1/chat/completions" \
 | decord 无 ARM64 wheel | 从源码编译安装 |
 
 ## 邮件格式
-* **标题**：[飞腾 S5000C + L20 FastDeploy 完整适配报告]
+* **标题**：文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-飞腾-打卡-onecatcn）
 * **内容**：
    * 飞桨团队你好，
    * 【GitHub ID】：zongwave
