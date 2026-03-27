@@ -80,7 +80,7 @@ openclaw --help
 
 ## 1.5 邮件格式
 
-标题：【飞桨黑客松打卡】基于LoongArch架构完成OpenClaw搭建及文心模型API调用 - [你的 GitHub ID 或姓名]
+标题：文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-龙芯-打卡-onecatcn）
 
 内容：
 

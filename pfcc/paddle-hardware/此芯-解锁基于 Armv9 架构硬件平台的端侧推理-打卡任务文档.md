@@ -62,7 +62,7 @@ cd /home/radxa/llama.cpp/build/bin
 ### 1.5、打卡邮件提交要求
 
 **邮件标题**  
-[此芯 × 百度飞桨热身打卡]  
+文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-此芯-打卡-onecatcn） 
 **邮件正文格式**  
 飞桨团队你好，  
 【GitHub ID】：XXX（例如 paddle-hack）  

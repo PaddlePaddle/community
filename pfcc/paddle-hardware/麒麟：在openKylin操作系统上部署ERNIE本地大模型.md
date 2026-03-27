@@ -90,3 +90,5 @@ https://gitee.com/openkylin/community-management
 ![输入图片说明](./images/openKylin运行结果截图.png)
 
 **打卡任务提交成功后，请发送一封邮件附上issue链接到该邮箱：contact@openkylin.top、ext_paddle_oss@baidu.com** 
+
+邮件标题：文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-麒麟-打卡-onecatcn）
