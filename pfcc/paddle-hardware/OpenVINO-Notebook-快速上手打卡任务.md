@@ -37,7 +37,7 @@ git clone https://github.com/openvinotoolkit/openvino_notebooks.git
 * 可选：录制 30~60 秒短视频，展示从输入样例到输出结果的完整过程。
 
 ## 邮件格式
-* 标题： [飞桨黑客松第十期OpenVINO任务打卡]
+* 标题： 文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-intel-打卡-onecatcn）
 * 内容：
    * 飞桨团队你好，
    * 【GitHub ID】：参赛选手本人 GitHub 打卡任务仓库地址
