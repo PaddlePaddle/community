@@ -89,7 +89,7 @@ paddleocr doc_parser --input paddleocr_vl_demo.png --device dcu \
 - 打卡提交物：代码（python程序，后缀名改为'py_'），运行结果（txt文件），性能数据（屏幕截图）
 
 ## 邮件格式
-* 标题： [飞桨黑客松第十期DCU平台任务打卡]
+* 标题： 文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-海光-打卡-onecatcn）
 * 内容：
    * 飞桨团队你好，
    * 【GitHub ID】：XXX

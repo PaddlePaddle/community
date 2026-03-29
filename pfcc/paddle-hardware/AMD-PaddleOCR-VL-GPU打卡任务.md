@@ -148,7 +148,7 @@ paddlex --pipeline PaddleOCR-VL-vllm.yaml --input /tmp/test_ocr.png
 截图保存推理结果。
 
 ## 邮件格式
-* 标题：[飞桨黑客松第十期 PaddleOCR-VL AMD 打卡任务]
+* 标题：文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-AMD-打卡-onecatcn）
 * 内容：
    * 飞桨团队你好，
    * 【GitHub ID】：XXX

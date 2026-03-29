@@ -232,7 +232,7 @@ cd /userdata/rknn_paddleocr_vl_demo
 ### 邮件格式
 
 ```bash
-标题：[飞桨黑客松第十期PaddleOCR-VL RKNN3模型转换任务打卡]
+标题：文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-瑞芯微-打卡-onecatcn）
 内容：
 飞桨团队你好，
   [GitHub ID]: XXX
