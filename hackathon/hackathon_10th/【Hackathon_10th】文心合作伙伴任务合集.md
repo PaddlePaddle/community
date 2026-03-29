@@ -523,6 +523,10 @@ submission/
   10. 通过阶段 1 验收的开发者，可进入阶段 2 的 RDK X3 硬件试用与深度实践。
 * 社区入口：地瓜机器人社区 https://developer.d-robotics.cc/
 
+#### 地瓜机器人入群邀请
+
+<img src="images/hackthon.png" width="300px">
+
 
 ### 麒麟：在openKylin桌面上运行的图形化AI助手demo应用
 * 任务描述：开发一个可在openKylin桌面上运行的图形化AI助手demo应用，不限技术栈（如 Qt、GTK 等框架），基于ERNIE大模型的文本处理能力，实现基础对话功能即可。
