@@ -156,5 +156,5 @@ Top 10 团队进入决赛答辩，最终评选出以下现金奖项（总额 **6
 * **GitHub Discussions**：[Derivative Model Challenge](https://github.com/PaddlePaddle/PaddleOCR/discussions/categories/derivative-model-challenge)
 * **赛事官网 / PaddleOCR 官网**：[paddleocr.com](https://paddleocr.com/)
 * **PaddleOCR GitHub**：[github.com/PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
-* **国内交流群**：扫描如流二维码加入 <img src="https://github.com/user-attachments/assets/0c90e574-43a5-43ea-b5dd-b0b67e9f7cfc" width="200px">
+* **国内交流群**：[点击加入](https://paddle.wjx.cn/vm/mVlHfvq.aspx#) <img src="https://github.com/user-attachments/assets/289b2f8b-9a87-4ef2-a187-47505d0b71c6" width="200px">
 * **海外社区**：[Discord](https://discord.gg/BzUBS6VXss)
