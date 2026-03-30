@@ -522,6 +522,11 @@ submission/
   9. 综合技术完整度、可复现性、演示效果进行评审。
   10. 通过阶段 1 验收的开发者，可进入阶段 2 的 RDK X3 硬件试用与深度实践。
 * 社区入口：地瓜机器人社区 https://developer.d-robotics.cc/
+* 联系邮箱：guosheng.xu@d-robotics.cc
+* 地瓜机器人入群邀请
+
+<img src="images/hackthon.png" width="300px">
+
 
 
 ### 麒麟：在openKylin桌面上运行的图形化AI助手demo应用
