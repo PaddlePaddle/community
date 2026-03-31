@@ -54,7 +54,9 @@ pip install einops
 git lfs pull https://huggingface.co/PaddlePaddle/PaddleOCR-VL
 ```
 
-下载并放到 rknn3-model-zoo 目录下，将paddleocr_vl转换示例代码及量化数据一并放到指定目录下，并用压缩包中的convert_hf_to_gguf.py文件替换rknn3-model-zoo/tokenizer/thirdparty/llama_vocab/convert_hf_to_gguf.py。目录结构如下：
+下载并放到 rknn3-model-zoo 目录下，将paddleocr_vl转换示例代码及量化数据一并放到指定目录下，并用压缩包中的convert_hf_to_gguf.py文件替换rknn3-model-zoo/tokenizer/thirdparty/llama_vocab/convert_hf_to_gguf.py。(转换示例代码、量化数据及相关代码文件可至 https://console.box.lenovo.com/l/x1dQ9x 提取码：fdhg 下载)
+
+目录结构如下：
 
 ```bash
 - rknn3-model-zoo/
