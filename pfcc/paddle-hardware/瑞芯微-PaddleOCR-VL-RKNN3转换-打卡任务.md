@@ -11,7 +11,7 @@
 
 ## 提交方式
 
-参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com 与 alex.hu@rock-chips.com。
+参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com 、 alex.hu@rock-chips.com 与 rachel.wu@rock-chips.com 。
 
 ## 算力/资源支持
 
