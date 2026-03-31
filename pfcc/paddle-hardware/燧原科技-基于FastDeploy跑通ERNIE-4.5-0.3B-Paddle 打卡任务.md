@@ -12,7 +12,7 @@
 参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + teemo.wang@enflame-tech.com + wenhao.zhang@enflame-tech.com
 
 ## 算力/环境支持
-本次任务需在 Gitee AI 算力广场 租赁燧原 S60 实例完成。
+为让开发者无后顾之忧，专注技术攻坚，燧原科技为所有报名本赛题的开发者提供每人200算力代金券专属福利，助力燧原科技GCU上的开发、调试与验证！ 算力券领取请联系邮箱：teemo.wang@enflame-tech.com，燧原科技将按需提供专属支持！
 > 平台地址：[GiteeAi 算力广场](https://ai.gitee.com/compute) \
 > 镜像选择: `vLLM / 0.8.0 / Python 3.10 / ef 1.5.0.604` 
 
