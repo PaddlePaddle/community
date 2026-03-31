@@ -80,4 +80,4 @@ cd FastDeploy
    * 【打卡截图】：（粘贴截图或提供链接）
 
 #### MXMACA开发者交流群
-(./images/MXMACA-dev.png)
+<img src="./images/MXMACA-dev.png" alt="MXMACA-dev" width="300">
