@@ -50,16 +50,39 @@
 ```
 1）pip install paddlepaddle==3.4.0.dev20251223 -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/
 2）pip install paddle-metax-gpu==3.3.0.dev20251224 -i https://www.paddlepaddle.org.cn/packages/nightly/maca/
+3) python -m pip install -U "paddleocr[doc-parser]"
+4) pip install opencv-contrib-python-headless==4.10.0.84
 ```
 
-#### FastDeploy release2.4 代码下载并编译
+#### FastDeploy release2.5 代码下载并编译
 
 ```
-git clone https://github.com/PaddlePaddle/FastDeploy
+git clone https://gitee.com/paddlepaddle/FastDeploy.git
 cd FastDeploy
-*** checkout to release2.4 branch ***
+*** checkout to release2.5 branch ***
 ```
+#### env 配置
+#!/bin/sh
+export MACA_PATH=/opt/maca
 
+if [ ! -d ${HOME}/cu-bridge ]; then
+  `${MACA_PATH}/tools/cu-bridge/tools/pre_make`
+fi
+
+export CUCC_PATH=/opt/maca/tools/cu-bridge
+export CUCC_CMAKE_ENTRY=2
+export CUDA_PATH=${HOME}/cu-bridge/CUDA_DIR
+export PATH=${CUDA_PATH}/bin:${MACA_PATH}/mxgpu_llvm/bin:${MACA_PATH}/bin:${CUCC_PATH}/tools:${CUCC_PATH}/bin:${PATH}
+export LD_LIBRARY_PATH=${CUDA_PATH}/lib64:${MACA_PATH}/lib:${MACA_PATH}/mxgpu_llvm/lib:$LD_LIBRARY_PATH
+export MACA_VISIBLE_DEVICES="0"
+export PADDLE_XCCL_BACKEND=metax_gpu
+export FLAGS_weight_only_linear_arch=80
+export FD_MOE_BACKEND=cutlass
+export ENABLE_V1_KVCACHE_SCHEDULER=1
+export FD_ENC_DEC_BLOCK_NUM=2
+export FD_SAMPLING_CLASS=rejection
+
+bash build.sh
 ## 五、编译打卡流程
 
 1）熟悉并了解编译脚本，编译参数配置，完成fastdeploy编译，编译产物位于~/fastdeploy/dist；
