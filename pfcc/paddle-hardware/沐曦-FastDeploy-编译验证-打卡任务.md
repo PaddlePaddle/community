@@ -57,11 +57,11 @@
 #### FastDeploy release2.5 代码下载并编译
 
 ```
-git clone https://gitee.com/paddlepaddle/FastDeploy.git
+git clone https://gitee.com/paddlepaddle/FastDeploy.git -b release/2.5
 cd FastDeploy
-*** checkout to release2.5 branch ***
 ```
 #### env 配置
+```
 #!/bin/sh
 export MACA_PATH=/opt/maca
 
@@ -83,6 +83,7 @@ export FD_ENC_DEC_BLOCK_NUM=2
 export FD_SAMPLING_CLASS=rejection
 
 bash build.sh
+```
 ## 五、编译打卡流程
 
 1）熟悉并了解编译脚本，编译参数配置，完成fastdeploy编译，编译产物位于~/fastdeploy/dist；
