@@ -14,7 +14,7 @@
 参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + Zijun.Wei@amd.com, Huaqiang.Fang@amd.com, bingqing.guo@amd.com
 
 ## 额外奖励
-为支持本次飞桨黑客松，AMD 额外准备了 **AMD Ryzen 电脑内胆包 × 10**。在完成本打卡任务且成功注册 AMD AI 开发者计划账户的选手中，按任务完成先后顺序排序，前 10 名可额外获得 AMD Ryzen 电脑内胆包 1 个。
+为支持本次飞桨黑客松，AMD 额外准备了 **AMD Ryzen 电脑内胆包 × 10**。在完成本打卡任务且成功注册 [AMD AI 开发者计划](https://www.amd.com/en/registration/ai-dev-program-sign-up-form.html?custtarg=aHR0cHM6Ly9kZXZlbG9wZXIuYW1kLmNvbT9SZWxheVN0YXRlPW51bGw=) 的选手中，按任务完成先后顺序排序，前 10 名可额外获得 AMD Ryzen 电脑内胆包 1 个。
 
 ## 算力/环境支持
 本次热身打卡活动需要使用 AMD Radeon PRO W7900 GPU 及 ROCm 7.0 环境。可使用预构建的 Docker 镜像快速搭建环境，赶快行动起来吧~
