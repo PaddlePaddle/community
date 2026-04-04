@@ -1,12 +1,11 @@
 # FastDeploy投机解码功能性能优化设计文档
 
-| 任务名称 | 【Hackathon 10th Spring No.49】为 FastDeploy 支持投机解码功能 |
+| 任务名称 | 为 FastDeploy 支持投机解码功能 |
 |------|------|
 | 提交作者 | NKNaN（V1.0）、cloudforge1（V2.0） |
 | 提交时间 | 2026-02-07（V1.0）、2026-04-04（V2.0） |
 | 版本号 | V2.0 |
 | 文件名 | 20260207_refine_speculate_decoding_ngram_for_fastdeploy.md |
-| 实现 PR | [#6960](https://github.com/PaddlePaddle/FastDeploy/pull/6960)（两阶段并行版）、[#7136](https://github.com/PaddlePaddle/FastDeploy/pull/7136)（模板特化优化版） |
 
 # 一、概述
 
