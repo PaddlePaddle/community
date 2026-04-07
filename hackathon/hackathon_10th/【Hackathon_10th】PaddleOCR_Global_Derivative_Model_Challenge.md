@@ -98,7 +98,7 @@ Both the preliminary round and finals use a unified scoring system that comprehe
 | **Model Fine-tuning Strategy and Innovation** | 10 pts | Fine-tuning strategy appropriateness (5 pts), experiment thoroughness (3 pts), technical innovation (2 pts) |
 | **Technical Documentation and Open-Source Contribution** | 20 pts | Documentation quality (5 pts), code reproducibility (5 pts), demo completeness (5 pts), community contribution value (5 pts) |
 
-For detailed scoring criteria for each dimension, please refer to the [Detailed Scoring Rubric](https://github.com/PaddlePaddle/community/blob/master/hackathon/hackathon_10th/详细评分表.md).
+For detailed scoring criteria for each dimension, please refer to the [Detailed Scoring Rubric](./【Hackathon_10th】PaddleOCR_Detailed_Scoring_Rubric.md).
 
 ### Special Note
 The finals submission deadline is **June 5**, which is more generous than the preliminary round deadline (May 15). Therefore, after the top 10 preliminary round participants advance to the finals, **the final rankings in the finals will be re-evaluated based on the quality of the finals submissions**; preliminary round scores will not be carried over to the finals.
@@ -111,7 +111,7 @@ To ensure participants can compete smoothly, the organizer provides the followin
 * **Remote Technical Guidance**: If participants encounter issues not covered by the documentation, they can contact via the official community or email, and the R&D team will provide remote technical guidance.
 
 ## 7. Submission Requirements
-All submitted materials (except finals defense materials) should be sent via email to: **ext_paddle_oss@baidu.com**, with the subject formatted as: `PaddleOCR Derivative Model Challenge - [Material Name] - [GitHub ID]` (e.g., `PaddleOCR Derivative Model Challenge - Evaluation Set - zhangsan`).
+All submitted materials (except finals defense materials) should be sent via email to: **ext_paddle_oss@baidu.com + paddleocr@baidu.com + cuicheng01@baidu.com + liujiaxuan01@baidu.com**, with the subject formatted as: `PaddleOCR Derivative Model Challenge - [Material Name] - [GitHub ID]` (e.g., `PaddleOCR Derivative Model Challenge - Evaluation Set - zhangsan`).
 
 | Submission Content | Deadline | Public? | Requirements |
 |---|---|:--:|---|
@@ -144,7 +144,7 @@ The intellectual property of competition submissions (including but not limited 
 
 ## 11. Contact
 
-* **Official Email**: ext_paddle_oss@baidu.com (competition inquiries, material submission)
+* **Official Email**: ext_paddle_oss@baidu.com (competition inquiries)
 * **GitHub Issue**: [PaddlePaddle/PaddleOCR#17858](https://github.com/PaddlePaddle/PaddleOCR/issues/17858)
 * **GitHub Discussions**: [Derivative Model Challenge](https://github.com/PaddlePaddle/PaddleOCR/discussions/categories/derivative-model-challenge)
 * **Official Website / PaddleOCR**: [paddleocr.com](https://paddleocr.com/)
