@@ -97,6 +97,4 @@ paddleocr doc_parser --input paddleocr_vl_demo.png --device dcu \
    * 【附件与截图】：
 
 # 进群领算力
-<p>报名通过后，加入下边微信群，辅导老师将为你的账号充值。</p>
-<img src="https://www.scnet.cn/acx/aihub/gitlab/dataset/acq1877t3t/Paddle_Hygon_wechat_group/image?filePath=hygon_group.jpg" width=300 />
-<p>如入群二维码过期，请点击: <a href="https://www.scnet.cn/acx/aihub/gitlab/dataset/acq1877t3t/Paddle_Hygon_wechat_group/image?filePath=hygon_group.jpg">海光赛道微信群 </a></p>
+<p>报名通过后，加入下边微信群，辅导老师将为你的账号充值: <a href="https://www.scnet.cn/acx/aihub/gitlab/dataset/acq1877t3t/Paddle_Hygon_wechat_group/image?filePath=hygon_group.jpg">海光赛道微信群 </a></p>
