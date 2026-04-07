@@ -1,6 +1,6 @@
 # 参加海光DCU赛道，免费使用DCU算力资源
 * 打卡任务选手每人可分配**200卡时**海光DCU算力。
-* 进阶任务选手没人可再增加**200卡时**海光DCU算力。
+* 进阶任务选手每人可再增加**200卡时**海光DCU算力。
 * 报名通过后，加入微信群（见文末），让管理员为您充算力。
 
 # 打卡任务名称：海光DCU平台PaddleOCR应用开发与实践
@@ -18,12 +18,12 @@
 参与热身打卡活动并按照邮件模板格式将截图，输出结果和代码发送至 ext_paddle_oss@baidu.com + liuyun@hygon.cn
 
 ## 算力/环境支持
-本次热身打卡活动需要使用海光第二代DCU K100-AI，我们将在 [国家超算互联网平台](www.scnet.cn) 提供打卡所需的环境。
+本次热身打卡活动需要使用海光第二代DCU K100-AI，我们将在 [国家超算互联网平台](https://www.scnet.cn) 提供打卡所需的环境。
 我们将会为小伙伴们提供的手机号配置账号并分配活动所用卡时。
 
 ## 搭建环境指导
 ### 创建DCU实例
-- 登录 [国家超算互联网平台](www.scnet.cn) 中的控制台页面；
+- 登录 [国家超算互联网平台](https://www.scnet.cn) 中的控制台页面；
 - 进入【人工智能】页面，点击【创建Notebook】，选择一台【异构加速卡AI】的实例；
 - 镜像选择【PyTorch -> 2.5.1 -> py3.10-ubuntu22.04 -> DTK25.04.2】；
 - 镜像创建后，等待启动实例，可以通过 ssh 登录到实例上来。
@@ -99,4 +99,4 @@ paddleocr doc_parser --input paddleocr_vl_demo.png --device dcu \
 # 进群领算力
 <p>报名通过后，加入下边微信群，辅导老师将为你的账号充值。</p>
 <img src="https://www.scnet.cn/acx/aihub/gitlab/dataset/acq1877t3t/Paddle_Hygon_wechat_group/image?filePath=hygon_group.jpg" width=300 />
-
+<p>如入群二维码过期，请点击: <a href="https://www.scnet.cn/acx/aihub/gitlab/dataset/acq1877t3t/Paddle_Hygon_wechat_group/image?filePath=hygon_group.jpg">海光赛道微信群 </a></p>
