@@ -57,7 +57,7 @@
 #### FastDeploy release2.5 代码下载并编译
 
 ```
-git clone https://gitee.com/paddlepaddle/FastDeploy.git -b release/2.5
+git clone https://gitee.com/paddlepaddle/FastDeploy.git
 cd FastDeploy
 ```
 #### env 配置
