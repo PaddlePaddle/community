@@ -60,6 +60,7 @@
 git clone https://gitee.com/paddlepaddle/FastDeploy.git
 cd FastDeploy
 ```
+**checkout to release2.5 branch**
 #### env 配置
 ```
 #!/bin/sh
