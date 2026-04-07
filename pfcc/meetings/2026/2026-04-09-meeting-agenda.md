@@ -8,9 +8,8 @@
 - 本次会议副主席：空缺
 
 ## 会议议程
-### 新人介绍：
-李溯寒@[xiaozhejiya](https://github.com/xiaozhejiya)，郭丰凯@[PlumBlossomMaid](https://github.com/PlumBlossomMaid)，李丹青@[lidanqing-vv](https://github.com/lidanqing-vv)，波兰籍开发者@[CloudForge1](https://github.com/cloudforge1)（5 mins）
-### 分享环节： agent开发工具使用经验分享
+1. 新人介绍：李溯寒@[xiaozhejiya](https://github.com/xiaozhejiya)，郭丰凯@[PlumBlossomMaid](https://github.com/PlumBlossomMaid)，李丹青@[lidanqing-vv](https://github.com/lidanqing-vv)，波兰籍开发者@[CloudForge1](https://github.com/cloudforge1)（5 mins）
+2. 分享环节： agent开发工具使用经验分享
 - **penclaw**：
   - 分享人：**Ian** (OpenBuld开源社区发起人:开源社理事)
   - 分享时长：15min
