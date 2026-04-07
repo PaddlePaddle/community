@@ -116,7 +116,7 @@ Top 10 团队进入决赛答辩，最终评选出以下现金奖项（总额 **6
 
 ## 七、作品提交要求
 
-所有提交材料（决赛答辩材料除外）请通过邮件发送至官方邮箱：**ext_paddle_oss@baidu.com**，邮件标题格式统一为：`PaddleOCR衍生模型挑战赛-【材料名称】-【GitHub ID】`（例如：`PaddleOCR衍生模型挑战赛-评估集提交-zhangsan`）。
+所有提交材料（决赛答辩材料除外）请通过邮件发送至官方邮箱：**ext_paddle_oss@baidu.com + paddleocr@baidu.com + cuicheng01@baidu.com + liujiaxuan01@baidu.com**，邮件标题格式统一为：`PaddleOCR衍生模型挑战赛-【材料名称】-【GitHub ID】`（例如：`PaddleOCR衍生模型挑战赛-评估集提交-zhangsan`）。
 
 | 提交内容 | 截止时间 | 是否公开 | 提交要求 |
 |---|---|:--:|---|
@@ -151,7 +151,7 @@ Top 10 团队进入决赛答辩，最终评选出以下现金奖项（总额 **6
 
 ## 十一、联系方式
 
-* **官方邮箱**：ext_paddle_oss@baidu.com（赛事咨询、材料提交）
+* **官方邮箱**：ext_paddle_oss@baidu.com（赛事咨询）
 * **GitHub Issue**：[PaddlePaddle/PaddleOCR#17858](https://github.com/PaddlePaddle/PaddleOCR/issues/17858)
 * **GitHub Discussions**：[Derivative Model Challenge](https://github.com/PaddlePaddle/PaddleOCR/discussions/categories/derivative-model-challenge)
 * **赛事官网 / PaddleOCR 官网**：[paddleocr.com](https://paddleocr.com/)
