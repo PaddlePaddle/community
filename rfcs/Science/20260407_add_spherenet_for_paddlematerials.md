@@ -23,7 +23,7 @@ SphereNet 的核心创新在于：
 
 - 原始代码仓库：https://github.com/divelab/DIG （SphereNet 在 `dig.threedgraph.method.SphereNet` 模块中）
 - 论文链接：https://arxiv.org/abs/2110.05170
-- 关联 issue：https://github.com/PaddlePaddle/PaddleMaterials/issues/194（模型列表第 14 项）
+- 关联 issue：https://github.com/PaddlePaddle/PaddleMaterials/issues/194 (模型列表第 14 项)
 
 ### 1.2 功能目标
 
