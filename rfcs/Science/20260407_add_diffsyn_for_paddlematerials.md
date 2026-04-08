@@ -12,7 +12,7 @@
 
 ### OSS 先验验证
 
-- **验证日期**：2026-07
+- **验证日期**：2026-04
 - **搜索范围**：GitHub 全站（仓库 + 代码搜索）
 - **关键词**：`diffsyn paddle`, `zeosyn paddle`, `zeolite synthesis diffusion paddle`, `conditional diffusion zeolite synthesis`
 - **结果**：**零** — 不仅无 Paddle 实现，全 GitHub 除原始仓库（`eltonpan/zeosyn_gen`）外无任何复现
