@@ -1,6 +1,6 @@
 # Paddle Framework Contributor Club 六十六次会议议程
 
-- 本次会议时间：2026/4/09 20:00-21:00 (GMT+08:00) 中国标准时间 - 北京
+- 本次会议时间：2026/4/09 19:00-21:00 (GMT+08:00) 中国标准时间 - 北京
 - 本次会议接入方式：【腾讯会议】
   - 会议密码：无
   - [点击链接入会](https://meeting.tencent.com/dm/TVZxMeQo6AqK)，或添加至会议列表
