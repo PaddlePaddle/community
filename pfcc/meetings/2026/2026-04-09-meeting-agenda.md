@@ -10,18 +10,18 @@
 ## 会议议程
 1. 新人介绍：李溯寒@[xiaozhejiya](https://github.com/xiaozhejiya)，郭丰凯@[PlumBlossomMaid](https://github.com/PlumBlossomMaid)，李丹青@[lidanqing-vv](https://github.com/lidanqing-vv)，ROBERT GRZELKA（罗伯特·格泽尔卡）@[CloudForge1](https://github.com/cloudforge1)（5 mins）
 2. 分享环节： agent开发工具使用经验分享
-- **penclaw**：
+- **openclaw**：
   - 分享人：**Ian** (OpenBuld开源社区发起人:开源社理事)
   - 分享时长：15min
 - **trae**：
-  - 分享人：**ailijian**(鲸汤科技联合创始人兼 CTO，百度飞桨开发者技术专家（PPDE）)
+  - 分享人：**[ailijian](https://github.com/ailijian)**(鲸汤科技联合创始人兼 CTO，百度飞桨开发者技术专家（PPDE）)
   - 分享时长：15min
 - **codex**：
-  - 分享人：**gravel-01**
+  - 分享人：**[gravel-01](https://github.com/gravel-01)**
   - 分享时长：15min
 - **cursor**：
-  - 分享人：**dayuxiaoshui**
+  - 分享人：**[dayuxiaoshui](https://github.com/Dayuxiaoshui)**
   - 分享时长：15min
 - **claude code**：
-  - 分享人：**onecatcn**
+  - 分享人：**[onecatcn](https://github.com/onecatcn)**
   - 分享时长：15min
