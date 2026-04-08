@@ -42,7 +42,7 @@
     如有任何问题可加入沐曦MXMACA开发者社群，我们会为您及时答疑与提供帮助。
     
 > 平台地址：[GiteeAi 算力广场](https://ai.gitee.com/compute) 曦云C500 单卡 64G instance\
-> 镜像选择: `Pytorch/2.6.0/Python 3.10/maca 3.2.1.3`  \
+> 镜像选择: `Pytorch/2.8.0/Python 3.12/maca 3.3.0.4`  \
 > 领取算力券网址：https://developer.metax-tech.com/activities/4
 
 #### paddlepaddle & custom device backend 预安装
