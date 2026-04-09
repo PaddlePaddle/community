@@ -67,6 +67,7 @@
   * [PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
   * [MIOpen 文档](https://rocm.docs.amd.com/projects/MIOpen/en/latest/)
   * [PaddleOCR-VL AMD GPU 部署教程](../../pfcc/paddle-hardware/AMD-PaddleOCR-VL-GPU打卡任务.md)
+* 额外奖励说明：AMD Radeon 9070 XT 16GB 显卡 × 1，PN54 AI 5 340 AMD 锐龙处理器 Mini PC × 1。最终完成代码合入的参赛者将成为本次赛事 AMD 赛道冠军，并可优先选择一项进阶礼品；第二名为除冠军外其余参赛选手中 PR 审核通过时间最早的提交者，可获得剩余的进阶礼品。
 
 ### 天数智芯：基于天数智芯硬件与文心多模态模型的创新应用
 * 技术标签：深度学习框架，Python，文心大模型，多模态
