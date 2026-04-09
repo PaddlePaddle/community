@@ -1,0 +1,155 @@
+# 燧原科技：基于FastDeploy跑通ERNIE-4.5-0.3B-Paddle
+
+通过亲手完成 FastDeploy 在燧原 S60 加速卡（GCU）上的部署流程，体验国产算力与飞桨（PaddlePaddle）生态的深度融合。
+
+## 🎯任务目标
+完成本次打卡后，你将掌握：
+* 硬件适配原理：理解 PaddlePaddle 与 PaddleCustomDevice（针对 GCU）的协同关系。
+* 推理框架应用：掌握 Paddle 运行时与 FastDeploy 的依赖集成。
+* 全链路部署：独立完成 ERNIE-4.5-0.3B 模型在国产算力平台上的环境搭建、模型下载及 API 调用。
+
+## 提交方式
+参与热身打卡活动并按照邮件模板格式将截图发送至 ext_paddle_oss@baidu.com + teemo.wang@enflame-tech.com + wenhao.zhang@enflame-tech.com
+
+## 算力/环境支持
+为让开发者无后顾之忧，专注技术攻坚，燧原科技为所有报名本赛题的开发者提供每人200算力代金券专属福利，助力燧原科技GCU上的开发、调试与验证！ 算力券领取请联系邮箱：teemo.wang@enflame-tech.com + ext_paddle_oss@baidu.com，燧原科技将按需提供专属支持！
+> 平台地址：[GiteeAi 算力广场](https://ai.gitee.com/compute) \
+> 镜像选择: `vLLM / 0.8.0 / Python 3.10 / ef 1.5.0.604` 
+
+## 任务指导
+
+### 创建虚拟环境
+为保证环境纯净，建议在宿主机创建独立的 Python 虚拟环境。
+```
+cd ~
+apt install python3.10-venv
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 安装 PaddlePaddle & PaddleCustomDevice
+```
+# PaddlePaddle『飞桨』深度学习框架，提供运算基础能力
+python -m pip install paddlepaddle==3.1.0a0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+
+# PaddleCustomDevice是PaddlePaddle『飞桨』深度学习框架的自定义硬件接入实现，提供GCU的算子实现
+python -m pip install paddle-custom-gcu==3.0.0.dev20250716 -i https://www.paddlepaddle.org.cn/packages/nightly/gcu/
+```
+
+#### 检查当前安装版本
+
+```
+python -c "import paddle_custom_device; paddle_custom_device.gcu.version()"
+```
+```
+version: 3.0.0.dev20260205
+commit: e3dbd3b36a0b6913fd8da10a51251e89acafaeff
+TopsPlatform: 1.5.0.601
+```
+```
+python -c "import paddle; paddle.utils.run_check()"
+```
+```
+I0310 07:41:04.107565   961 init.cc:238] ENV [CUSTOM_DEVICE_ROOT]=/usr/local/lib/python3.10/dist-packages/paddle_custom_device
+I0310 07:41:04.107585   961 init.cc:146] Try loading custom device libs from: [/usr/local/lib/python3.10/dist-packages/paddle_custom_device]
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0310 07:41:04.269114   961 runtime.cc:804] InitPlugin for backend GCU successfully.
+I0310 07:41:04.280309   961 runtime.cc:95] Backend GCU Init, get GCU count:1, current device id:0
+I0310 07:41:04.280344   961 custom_device_load.cc:51] Succeed in loading custom runtime in lib: /usr/local/lib/python3.10/dist-packages/paddle_custom_device/libpaddle-custom-gcu.so
+I0310 07:41:04.284910   961 custom_device_load.cc:78] Succeed in loading custom engine in lib: /usr/local/lib/python3.10/dist-packages/paddle_custom_device/libpaddle-custom-gcu.so
+I0310 07:41:04.287516   961 custom_kernel.cc:68] Succeed in loading 275 custom kernel(s) from loaded lib(s), will be used like native ones.
+I0310 07:41:04.287611   961 init.cc:158] Finished in LoadCustomDevice with libs_path: [/usr/local/lib/python3.10/dist-packages/paddle_custom_device]
+I0310 07:41:04.287631   961 init.cc:244] CustomDevice: gcu, visible devices count: 1
+Running verify PaddlePaddle program ... 
+I0310 07:41:04.597394   961 pir_interpreter.cc:1524] New Executor is Running ...
+I0310 07:41:04.598099   961 runtime.cc:133] Backend GCU init device:0
+I0310 07:41:04.617556   961 pir_interpreter.cc:1547] pir interpreter is running by multi-thread mode ...
+I0310 07:41:04.619024  1082 utils.cc:136] Kernels launch in JIT ONLY mode:false
+I0310 07:41:04.632437  1082 op_utils.cc:191] AOT kernel stream mode:async
+I0310 07:41:04.670130  1094 gcu_layout_funcs.cc:54] Enable transpose optimize:false
+PaddlePaddle works well on 1 gcu.
+PaddlePaddle is installed successfully! Let's start deep learning with PaddlePaddle now.
+I0310 07:41:04.741544   961 runtime.cc:149] Backend GCU finalize device:0
+I0310 07:41:04.741559   961 runtime.cc:101] Backend GCU Finalize
+```
+
+
+### 安装FastDeploy
+#### 安装FastDeploy依赖
+安装 FastDeploy 依赖文件 requirements-gcu.txt，选择 [requirements-gcu.txt](./requirements-gcu.txt)
+```
+python -m pip install -r requirements-gcu.txt --extra-index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simplels
+```
+
+#### 安装FastDeploy
+```
+python -m pip install fastdeploy -i https://www.paddlepaddle.org.cn/packages/stable/gcu/ --extra-index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simplels
+```
+
+### 下载 ERNIE-4.5-0.3B-Paddle 模型
+
+```
+huggingface-cli download baidu/ERNIE-4.5-0.3B-Paddle --local-dir baidu/ERNIE-4.5-0.3B-Paddle
+```
+
+### 推理
+执行下面命令推理
+
+```
+export ENABLE_V1_KVCACHE_SCHEDULER=1
+
+# 下面这个环境变量主要是为了绕过单卡的一个小bug。
+export CUDA_VISIBLE_DEVICES=0
+
+python -m fastdeploy.entrypoints.openai.api_server        --model baidu/ERNIE-4.5-0.3B-Paddle        --port 8180        --metrics-port 8181        --engine-worker-queue-port 8182        --max-model-len 32768        --max-num-seqs 32  --num-gpu-blocks-override 4896
+```
+
+新起一个终端，使用如下命令请求模型服务
+
+```
+curl -X POST "http://0.0.0.0:8180/v1/chat/completions" \
+-H "Content-Type: application/json" \
+-d '{
+  "messages": [
+    {"role": "user", "content": "Where is Beijing?"}
+  ]
+}'
+```
+
+成功运行后，可以查看到推理结果的生成，样例如下
+```
+{"id":"chatcmpl-525a4d8f-2f65-480e-b520-f69cc73547fb","object":"chat.completion","created":1773196831,"model":"default","choices":[{"index":0,"message":{"role":"assistant","content":"北京是中国的首都，位于中国北京市，是一个历史文化名城。","reasoning_content":null,"tool_calls":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":11,"total_tokens":26,"completion_tokens":15,"prompt_tokens_details":{"cached_tokens":0}}}
+```
+
+FastDeploy服务接口兼容OpenAI协议，可以通过如下Python代码发起服务请求。
+```
+import openai
+host = "0.0.0.0"
+port = "8180"
+client = openai.Client(base_url=f"http://{host}:{port}/v1", api_key="null")
+
+response = client.chat.completions.create(
+    model="null",
+    messages=[
+        {"role": "system", "content": "I'm a helpful AI assistant."},
+        {"role": "user", "content": "把李白的静夜思改写为现代诗"},
+    ],
+    stream=True,
+)
+for chunk in response:
+    if chunk.choices[0].delta:
+        print(chunk.choices[0].delta.content, end='')
+print('\n')
+```
+
+## ✉️ 提交与打卡
+完成上述流程后，请按以下要求提交：
+ * 打卡内容：提供一段自定义 Prompt 的推理结果截图（需包含终端输入的命令及返回的 JSON 或流式文字）。
+
+## 邮件格式
+* 标题： 文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-燧原-打卡-onecatcn）
+* 内容：
+   * 飞桨团队你好，
+   * 【GitHub ID】：XXX
+   * 【打卡内容】：基于 FastDeploy 跑通 ERNIE-4.5-0.3B-Paddle
+   * 【打卡截图】：
