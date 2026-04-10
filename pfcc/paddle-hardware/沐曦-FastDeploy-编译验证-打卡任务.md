@@ -42,7 +42,7 @@
     如有任何问题可加入沐曦MXMACA开发者社群，我们会为您及时答疑与提供帮助。
     
 > 平台地址：[GiteeAi 算力广场](https://ai.gitee.com/compute) 曦云C500 单卡 64G instance\
-> 镜像选择: `Pytorch/2.6.0/Python 3.10/maca 3.2.1.3`  \
+> 镜像选择: `Pytorch/2.8.0/Python 3.12/maca 3.3.0.4`  \
 > 领取算力券网址：https://developer.metax-tech.com/activities/4
 
 #### paddlepaddle & custom device backend 预安装
@@ -59,9 +59,10 @@
 ```
 git clone https://gitee.com/paddlepaddle/FastDeploy.git
 cd FastDeploy
-*** checkout to release2.5 branch ***
 ```
+**checkout to release2.5 branch**
 #### env 配置
+```
 #!/bin/sh
 export MACA_PATH=/opt/maca
 
@@ -83,6 +84,7 @@ export FD_ENC_DEC_BLOCK_NUM=2
 export FD_SAMPLING_CLASS=rejection
 
 bash build.sh
+```
 ## 五、编译打卡流程
 
 1）熟悉并了解编译脚本，编译参数配置，完成fastdeploy编译，编译产物位于~/fastdeploy/dist；
