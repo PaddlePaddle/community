@@ -61,7 +61,7 @@
 **验收说明**：
 
 - 完成 GCC 15 编译器升级，PaddlePaddle 在 GCC 15 下编译通过并通过单元测试；
-- 完成 CUDA 13.1 API 适配，PaddlePaddle 在 CUDA 13.1 环境下编译通过；
+- 完成 CUDA 13.1 API 适配，PaddlePaddle 在 CUDA 13.1 环境下编译通过，制作cuda13.1 almalinux编包镜像；
 - 相关第三方依赖库（cuDNN、NCCL、TensorRT 等）更新至兼容版本，全量单元测试在 CUDA 13.1 环境下通过；
 - 新增 GCC 15 + CUDA 13.1 的 CI Docker 镜像及流水线，持续监控编译与测试状态。
 
