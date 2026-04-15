@@ -187,7 +187,7 @@ docker run -d --name=maxkb --restart=always -p 8080:8080 -v ~/.maxkb:/opt/maxkb 
 * **标题**：文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-飞腾-打卡-onecatcn）
 * **内容**：
    * 飞桨团队你好，
-   * 【GitHub ID】：zongwave
+   * 【GitHub ID】：
    * 【打卡内容】：飞腾 CPU 百度文心大模型推理
    * 【打卡截图】：
      * 推理请求：![推理](./images/phytium-start-chat.png)
