@@ -4,14 +4,14 @@
 
 Dear participants, Thank you for your support and interest in this competition. The following adjustments have been made to the schedule and rules:
 1. **Schedule Extension**: The overall timeline has been postponed by half a month. The submission deadline for the preliminary round is extended to May 29.
-2. **Evaluation Set Submission Rules**:
+1. **Evaluation Set Submission Rules**:
    - The previous deadline of April 24 is no longer applicable. You may submit or update your evaluation set at any time before the preliminary deadline (May 29).
    - Important Note: ‼️ If synthetic data accounts for an excessively high proportion of the evaluation set, once discovered, the evaluation set will be directly scored as 0, resulting in a **one‑vote veto**. Under this circumstance, the other scoring dimensions will no longer carry any meaning, and the participant will be disqualified from any subsequent rankings or awards. Please ensure the authenticity and diversity of your evaluation set.
-4. **Leaderboard Release and Feedback Mechanism**:
+1. **Leaderboard Release and Feedback Mechanism**:
    - When each leaderboard is released, your overall score will be published, and each participant will receive a detailed dimension score along with personalized improvement suggestions from mentors via email.
    - The earlier you submit your work, the earlier you will receive feedback, helping you continuously optimize your model and dataset to improve your ranking.
-5. **Scoring Sheet Optimization**: The detailed scoring sheet has been revised to use descriptive labels (e.g., "high‑score tendencies" and "low‑score tendencies") instead of purely numeric values, making it easier to understand the evaluation criteria and areas for improvement.
-6. **Award Score Threshold Adjustments**:
+1. **Scoring Sheet Optimization**: The detailed scoring sheet has been revised to use descriptive labels (e.g., "high‑score tendencies" and "low‑score tendencies") instead of purely numeric values, making it easier to understand the evaluation criteria and areas for improvement.
+1. **Award Score Threshold Adjustments**:
    - Top 10 finalists: Minimum score thresholds are set for all awards. Your total score must be ≥ 60 points to enter the Top 10 ranking and be eligible for corresponding awards.
    - High‑Quality Evaluation Set Contribution Award: This award is evaluated independently. Your score in the "Evaluation Set Quality" dimension must be ≥ 12 points (out of 20) to be eligible.
 
