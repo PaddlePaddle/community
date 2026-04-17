@@ -6,7 +6,7 @@ Dear participants, Thank you for your support and interest in this competition. 
 1. **Schedule Extension**: The overall timeline has been postponed by half a month. The submission deadline for the preliminary round is extended to May 29.
 1. **Evaluation Set Submission Rules**:
    - The previous deadline of April 24 is no longer applicable. You may submit or update your evaluation set at any time before the preliminary deadline (May 29).
-   - Important Note: ‼️ If synthetic data accounts for an excessively high proportion of the evaluation set, once discovered, the evaluation set will be directly scored as 0, resulting in a **one‑vote veto**. Under this circumstance, the other scoring dimensions will no longer carry any meaning, and the participant will be disqualified from any subsequent rankings or awards. Please ensure the authenticity and diversity of your evaluation set.
+   - Important Note: ‼️ If synthetic data accounts for an excessively high proportion of the evaluation set, once discovered, the evaluation set will be directly scored as 0, resulting in a **one‑vote veto**. Under these circumstances, the other scoring dimensions will no longer carry any meaning, and the participant will be disqualified from any subsequent rankings or awards. Please ensure the authenticity and diversity of your evaluation set.
 1. **Leaderboard Release and Feedback Mechanism**:
    - When each leaderboard is released, your overall score will be published, and each participant will receive a detailed dimension score along with personalized improvement suggestions from mentors via email.
    - The earlier you submit your work, the earlier you will receive feedback, helping you continuously optimize your model and dataset to improve your ranking.
@@ -29,7 +29,7 @@ The industry currently faces three major challenges:
 To address these challenges and drive the evolution of OCR technology from "generally usable" to "scenario-excellent", this competition was created. We encourage participants to build on **PaddleOCR-VL series models** (e.g., PaddleOCR-VL, PaddleOCR-VL-1.5, etc.), focus on real-world scenarios, construct new **document parsing / OCR / document understanding** tasks, and solve practical problems through model fine-tuning.
 
 ## 2. Challenge Topics
-This competition focuses on derivative model development in the OCR field, encouraging participants to define their own task directions based on real-world scenarios and solve practical problems through model fine-tuning.
+This competition focuses on developing derivative models in OCR, encouraging participants to define their own task directions based on real-world scenarios and to solve practical problems through model fine-tuning.
 
 * **Reference scenario pool** (example directions provided by the organizer, for reference only, not mandatory): Ancient manuscript recognition, chart question answering, ethnic language recognition, minority language recognition, handwritten text recognition, handwritten formula recognition, artistic text recognition, regionOCR, ID information extraction, complex table recognition, receipt recognition, K12 exam paper recognition, flowchart recognition, code text recognition, organic chemical formula recognition, complex document reading order restoration, medical table recognition, SVG recognition, etc.
 * **Open topic selection**: Participants are not limited to the above examples and may independently choose any OCR sub-field of interest for model fine-tuning. Innovation and exploration are encouraged.
@@ -58,12 +58,12 @@ We look forward to participants focusing on real-world application areas not yet
 ### Notes
 * **All materials** (Evaluation set、training data construction report, complete open-source project): May be submitted early to participate in bi-weekly leaderboard rankings, and can be continuously iterated until **May 29**; the final version is determined by the last submission before the deadline.
 * After each leaderboard release, participants will receive an email containing detailed scores and mentor feedback. The earlier you submit, the sooner you receive feedback, helping you iteratively improve your model and dataset.
-* If advancing to the finals, the final optimized version of the above materials may be submitted during the finals preparation phase (before June 20).
+* If advancing to the finals, the final optimised version of the above materials may be submitted during the finals preparation phase (before June 20).
 * All submitted materials must comply with the specifications in the "Submission Requirements" section.
-* The format of the finals defense (in-person/online) will be announced separately based on actual circumstances.
+* The format of the finals defence (in-person/online) will be announced separately based on actual circumstances.
 
 ## 4. Prizes
-The total cash prize pool for this competition is **70,000 RMB**, divided into preliminary round incentives and finals prizes. Cash prizes are pre-tax amounts; personal income tax will be withheld and remitted by the organizer before disbursement. In addition, participants have the opportunity to receive physical gifts and various ecosystem benefits.
+The total cash prize pool for this competition is **70,000 RMB**, divided into preliminary round incentives and finals prizes. Cash prizes are pre-tax amounts; personal income tax will be withheld and remitted by the organiser before disbursement. In addition, participants have the opportunity to receive physical gifts and various ecosystem benefits.
 
 ### 1. Preliminary Round Incentives
 
@@ -76,7 +76,7 @@ The total cash prize pool for this competition is **70,000 RMB**, divided into p
 
 ### 2. Finals Prizes
 
-The Top 10 teams advance to the finals defense, and the following cash prizes (total **60,000 RMB**) are awarded:
+The Top 10 teams advance to the finals defence, and the following cash prizes (total **60,000 RMB**) are awarded:
 
 | Prize | Winners | Prize per Person | Subtotal | Minimum Total Score (out of 100) |Description|
 |---|:--:|--:|--:|--:|--:|
@@ -88,7 +88,7 @@ The Top 10 teams advance to the finals defense, and the following cash prizes (t
 | **Total** | **10** | | **60,000 RMB** | || 
 
 **Dynamic Award Distribution Rules for the Final Round**:
-* The final ranking is determined by the jury based on the participants’ final submissions and oral defence presentations, evaluated across six dimensions (total 100 points).
+* The final ranking is determined by the jury based on the participants’ final submissions and oral defence presentations, evaluated across six dimensions (a total of 100 points).
 * If the **highest score among the top 6 finalists is below 65 points** (i.e., no participant reaches the 3rd‑place minimum threshold), then the Champion, Runner‑Up, and 3rd Place awards will all be cancelled. The top 6 participants will instead each receive the award amount for 4th–6th place: RMB 4,000 per person.
 * If at least one of the top 6 finalists scores **≥ 65 points**, the original award structure applies as usual (Champion ≥ 75, Runner‑Up ≥ 70, 3rd Place ≥ 65, 4th–10th Place ≥ 60).
 * Awards for 4th–10th place also require a score of at least 60 points; otherwise, the corresponding awards will be left vacant.
@@ -124,14 +124,14 @@ Both the preliminary round and finals use a unified scoring system that comprehe
 For detailed scoring criteria for each dimension, please refer to the [Detailed Scoring Rubric](./【Hackathon_10th】PaddleOCR_Detailed_Scoring_Rubric.md).
 
 ### Special Note
-The finals submission deadline is **June 20**, which is more generous than the preliminary round deadline (May 29). Therefore, after the top 10 preliminary round participants advance to the finals, **the final rankings in the finals will be re-evaluated based on the quality of the finals submissions**; preliminary round scores will not be carried over to the finals.
+The final submission deadline is **June 20**, which is more generous than the preliminary round deadline (May 29). Therefore, after the top 10 preliminary round participants advance to the finals, **the final rankings in the finals will be re-evaluated based on the quality of the finals submissions**; preliminary round scores will not be carried over to the finals.
 
 ## 6. Technical Support
 
 To ensure participants can compete smoothly, the organizer provides the following technical support:
 
 * **Official Documentation**: The R&D team will provide detailed official documentation, including model fine-tuning methods, training workflows, evaluation standards, etc., to ensure participants can operate independently. See the [PaddleOCR-VL Best Practice Cases](https://github.com/PaddlePaddle/PaddleFormers/tree/develop/examples/best_practices/PaddleOCR-VL) for reference.
-* **Remote Technical Guidance**: If participants encounter issues not covered by the documentation, they can contact via the official community or email, and the R&D team will provide remote technical guidance.
+* **Remote Technical Guidance**: If participants encounter issues not covered by the documentation, they can contact the official community or email, and the R&D team will provide remote technical guidance.
 
 ## 7. Submission Requirements
 All submitted materials (except finals defense materials) should be sent via email to: **ext_paddle_oss@baidu.com + paddleocr@baidu.com + cuicheng01@baidu.com + liujiaxuan01@baidu.com**, with the subject formatted as: `PaddleOCR Derivative Model Challenge - [Material Name] - [GitHub ID]` (e.g., `PaddleOCR Derivative Model Challenge - Evaluation Set - zhangsan`).
@@ -139,7 +139,7 @@ All submitted materials (except finals defense materials) should be sent via ema
 | Submission Content | Deadline | Public? | Requirements |
 |---|---|:--:|---|
 | **Evaluation Set** | May 29 (Preliminary) / June 20 (Finals)  | Not required | images/documents + annotations + task description + evaluation script + dataset description (data sources, scale, category distribution, difficulty analysis). Host on Baidu Netdisk or [AI Studio Open Datasets](https://aistudio.baidu.com/datasetoverview) and submit the link. |
-| **Training Data Construction Report** | May 29 (Preliminary) / June 20 (Finals) | Not required | PDF/Markdown. Must include: data collection methods (with key code), annotation specifications, annotation tools, quality control workflows. |
+| **Training Data Construction Report** | May 29 (Preliminary) / June 20 (Finals) | Not required | PDF/Markdown. Must include: data collection methods (with key code), annotation specifications, annotation tools, and quality control workflows. |
 | **Complete Open-Source Project** |May 29 (Preliminary) / June 20 (Finals)  | **Must be public** | **GitHub repository**: training/evaluation code, documentation, demo (training data not required to be open-sourced). **Hugging Face model**: fine-tuned model with complete model card; reference: [PaddleOCR-VL-For-Manga](https://huggingface.co/jzhang533/PaddleOCR-VL-For-Manga). |
 | **Finals Defense Materials** | June 20 | — | Advancing teams only: presentation slides (10 min) + optional demo video (3–5 min). Submission method to be communicated separately. |
 
@@ -158,7 +158,7 @@ The intellectual property of competition submissions (including but not limited 
 ## 10. Important Notes
 1. **Eligibility**: The competition is open to developers worldwide; individuals or teams (up to 5 members) may register. Baidu internal employees may receive rankings and honors normally, but do not participate in cash prize distribution per company policy.
 2. **Participation Agreement**: Registration constitutes agreement to the participation agreement, which defines terms such as intellectual property ownership and data usage. Please read it carefully.
-3. **International Participants**: Prize distribution for overseas participants involves foreign exchange management; participants will need to cooperate with the organizer in providing necessary information. Please be aware of this in advance.
+3. **International Participants**: Prize distribution for overseas participants involves foreign exchange management; participants will need to cooperate with the organizer in providing the necessary information. Please be aware of this in advance.
 4. **Academic Integrity**:
    * Works must be original; plagiarism or infringement of others' intellectual property rights is strictly prohibited and will result in disqualification.
    * Participants are prohibited from exploiting rule loopholes or technical vulnerabilities to improve rankings; violations will result in score cancellation and serious disciplinary action.
