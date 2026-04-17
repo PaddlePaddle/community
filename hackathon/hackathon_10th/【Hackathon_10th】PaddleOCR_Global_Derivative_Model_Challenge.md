@@ -4,12 +4,14 @@
 
 Dear participants, Thank you for your support and interest in this competition. The following adjustments have been made to the schedule and rules:
 1. **Schedule Extension**: The overall timeline has been postponed by half a month. The submission deadline for the preliminary round is extended to May 29.
-2. **Evaluation Set Submission Rules**: The previous deadline of April 24 is no longer applicable. You may submit or update your evaluation set at any time before the preliminary deadline (May 29).
-3. **Leaderboard Release and Feedback Mechanism**:
+2. **Evaluation Set Submission Rules**:
+   - The previous deadline of April 24 is no longer applicable. You may submit or update your evaluation set at any time before the preliminary deadline (May 29).
+   - Important Note: ‼️ If synthetic data accounts for an excessively high proportion of the evaluation set, once discovered, the evaluation set will be directly scored as 0, resulting in a **one‑vote veto**. Under this circumstance, the other scoring dimensions will no longer carry any meaning, and the participant will be disqualified from any subsequent rankings or awards. Please ensure the authenticity and diversity of your evaluation set.
+4. **Leaderboard Release and Feedback Mechanism**:
    - When each leaderboard is released, your overall score will be published, and each participant will receive a detailed dimension score along with personalized improvement suggestions from mentors via email.
    - The earlier you submit your work, the earlier you will receive feedback, helping you continuously optimize your model and dataset to improve your ranking.
-4. **Scoring Sheet Optimization**: The detailed scoring sheet has been revised to use descriptive labels (e.g., "high‑score tendencies" and "low‑score tendencies") instead of purely numeric values, making it easier to understand the evaluation criteria and areas for improvement.
-5. **Award Score Threshold Adjustments**:
+5. **Scoring Sheet Optimization**: The detailed scoring sheet has been revised to use descriptive labels (e.g., "high‑score tendencies" and "low‑score tendencies") instead of purely numeric values, making it easier to understand the evaluation criteria and areas for improvement.
+6. **Award Score Threshold Adjustments**:
    - Top 10 finalists: Minimum score thresholds are set for all awards. Your total score must be ≥ 60 points to enter the Top 10 ranking and be eligible for corresponding awards.
    - High‑Quality Evaluation Set Contribution Award: This award is evaluated independently. Your score in the "Evaluation Set Quality" dimension must be ≥ 12 points (out of 20) to be eligible.
 
@@ -44,7 +46,7 @@ We look forward to participants focusing on real-world application areas not yet
 | Phase | Date | Key Tasks | Submission Notes |
 |---|---|---|---|
 | **Preliminary Round** | April 1 – May 29 | Participants submit their work; rankings are published every two weeks | **Evaluation set、Training data report and open-source project** (GitHub + Hugging Face): Must be submitted by **May 29**. |
-|Leaderboard Release (Round 1)|Monday, April 20|Official leaderboard: Top 50 Overall Scores (including total points)||
+|Leaderboard Release (Round 1)|Friday, April 17|Official leaderboard: Top 50 Overall Scores (including total points)||
 |Leaderboard Release (Round 2)|Monday, May 11|Official leaderboard: Top 50 Overall Scores (including total points)||
 |Leaderboard Release (Round 3)|Monday, May 25|Official leaderboard: Top 50 Overall Scores (including total points)||
 |**Preliminary Review**|May 31 – June 9|Review completed based on 6-dimension scoring; advancement list determined||
@@ -76,14 +78,14 @@ The total cash prize pool for this competition is **70,000 RMB**, divided into p
 
 The Top 10 teams advance to the finals defense, and the following cash prizes (total **60,000 RMB**) are awarded:
 
-| Prize | Winners | Prize per Person | Subtotal | Minimum Total Score (out of 100) |
-|---|:--:|--:|--:|--:|
-| 1st Place (Champion) | 1 | 20,000 RMB | 20,000 RMB | ≥ 75 |
-| 2nd Place (Runner-up) | 1 | 12,000 RMB | 12,000 RMB |≥ 70 |
-| 3rd Place | 1 | 8,000 RMB | 8,000 RMB |≥ 65 |
-| 4th–6th Place | 3 | 4,000 RMB | 12,000 RMB |≥ 60 |
-| 7th–10th Place | 4 | 2,000 RMB | 8,000 RMB |≥ 60 |
-| **Total** | **10** | | **60,000 RMB** | |
+| Prize | Winners | Prize per Person | Subtotal | Minimum Total Score (out of 100) |Description|
+|---|:--:|--:|--:|--:|--:|
+| 1st Place (Champion) | 1 | 20,000 RMB | 20,000 RMB | ≥ 75 | Demonstrates outstanding technical innovation, complete open‑source contributions, and a high‑quality evaluation set.| 
+| 2nd Place (Runner-up) | 1 | 12,000 RMB | 12,000 RMB |≥ 70 |Excellent overall capability with outstanding performance across all dimensions.| 
+| 3rd Place | 1 | 8,000 RMB | 8,000 RMB |≥ 65 |Strong overall capability with no obvious weaknesses in any dimension.| 
+| 4th–6th Place | 3 | 4,000 RMB | 12,000 RMB |≥ 60 |High completeness with good performance in most dimensions.| 
+| 7th–10th Place | 4 | 2,000 RMB | 8,000 RMB |≥ 60 |Complete submission with notable strengths in at least one dimension.| 
+| **Total** | **10** | | **60,000 RMB** | || 
 
 **Dynamic Award Distribution Rules for the Final Round**:
 * The final ranking is determined by the jury based on the participants’ final submissions and oral defence presentations, evaluated across six dimensions (total 100 points).
