@@ -1,222 +1,306 @@
-## **项目：在 FastDeploy 中原生支持 MiniMax-M1**
+# FastDeploy 新增 MiniMax-M1 模型支持
 
-**目标**: 实现一个高性能、功能完整的 MiniMax-M1 推理后端，支持其混合注意力、MoE、DeepNorm 及超长上下文特性。
+| 任务名称 | 【Hackathon 10th Spring No.47】为 FastDeploy 新增 MiniMax-M1 模型 |
+|------|------|
+| 提交作者 | bobby-cloudforge |
+| 提交时间 | 2026-04-20 |
+| 版本号 | V1.0 |
+| 文件名 | 20250916_add_minimax_m1_for_fastdeploy.md |
 
-**核心技术路径**:
-1.  **复用**: 最大化复用 GLM-4.5 PR 中已有的 Partial RoPE 和标准 GQA Attention 组件。
-2.  **翻译与开发**: 将 vLLM 的 `lightning_attn.py` (Triton) 翻译为高性能的 CUDA C++ 算子，以支持 MiniMax-M1 的线性注意力层。
-3.  **集成**: 在 Python 层构建完整的 MiniMax-M1 模型结构，并正确调度新开发的算子。
+# 一、概述
 
-**核心策略**: 并行推进 CUDA 开发与 Python 集成，以 5 层模型快速验证核心算子，然后无缝扩展到 80 层全量模型。
----
+## 1、相关背景
 
-### **Phase 0: 项目设置与配置 (1-2 天)**
+MiniMax-M1 是 MiniMax 发布的 4560 亿参数混合注意力大语言模型，采用 80 层混合架构：
 
-在写任何代码之前，先搭建好项目的骨架。
+- **70 层线性注意力**（Lightning Attention，O(n) 时间复杂度）
+- **10 层全注意力**（标准 GQA，分布在第 7, 15, 23, 31, 39, 47, 55, 63, 71, 79 层）
+- **MoE 路由**：32 个专家，Top-2 路由 + SharedExpert
+- **DeepNorm 预归一化**：独立 alpha/beta 缩放（线性注意力层 vs 全注意力层使用不同系数）
 
-**任务 1: 创建目录结构**
-在 FastDeploy 代码库中，创建以下新文件和目录的占位符：
-```bash
-# 1. 创建 Mamba 算子的 C++/CUDA 目录
-mkdir -p custom_ops/gpu_ops/mamba_attn
+该模型在长上下文推理和多轮对话上有优异表现，核心技术挑战在于 Lightning Attention 线性注意力内核的高性能实现。
 
-# 2. 创建 Mamba 算子的 Python 包装器目录和文件
-touch fastdeploy/model_executor/layers/attention/ops/mamba_attention.py
+## 2、功能目标
 
-# 3. 创建 Mamba 算子的 Python 后端文件
-touch fastdeploy/model_executor/layers/attention/mamba_backend.py
+1. ✅ 实现 MiniMax-M1 模型组网代码（826 行），包含混合注意力调度、DeepNorm 残差缩放、MoE 路由
+2. ✅ 移植 Lightning Attention Triton 内核（726 行），使用 `enable_compat_on_triton_kernel` 兼容 PaddlePaddle
+3. ✅ 适配 FastDeploy 低 bit 量化推理能力（WINT4/WINT8/W4A8/W4AFP8 权重映射）
+4. ✅ 提交中英文模型使用说明文档
+5. ✅ 提交 30 个单元测试方法（6 个测试类，528 行），覆盖组网、注意力调度、DeepNorm、MoE、权重加载
 
-# 4. 创建 MiniMax-M1 的模型定义文件
-touch fastdeploy/model_executor/models/minimax_m1.py
+## 3、意义
+
+- 填补 FastDeploy 在混合注意力（标准 GQA + Lightning Attention）架构上的空白
+- Lightning Attention 内核可复用于后续采用相同机制的模型
+- 首个在 FastDeploy 中使用 `triton_ops/` 路径的模型——验证了 Triton 内核集成管线的可行性和 `enable_compat_on_triton_kernel` 装饰器的 Paddle 兼容性
+- 完整的量化权重映射（FP16 → WINT8 → WINT4 → W4A8 → W4AFP8）覆盖推理全场景
+
+# 二、飞桨现状
+
+## 1、已有基础设施（直接复用）
+
+| 组件 | 文件 | 复用方式 |
+|------|------|----------|
+| GQA 注意力 (FlashAttn) | `layers/attention/flash_attn_backend.py` | 全注意力层直接通过 `Attention` 类复用 |
+| MoE 分派 (FusedMoE) | `layers/moe/fused_moe_*.py` | Top-2 路由 + 专家参数映射 |
+| Partial RoPE | `layers/rotary_embedding.py` | 全注意力层位置编码 |
+| RMSNorm | `layers/normalization.py` | 所有归一化层 |
+| ColumnParallelLinear / RowParallelLinear | `layers/linear.py` | QKV 投影、MLP 层 |
+| ReplicatedLinear | `layers/linear.py` | MoE Gate 路由器 |
+| VocabParallelEmbedding | `layers/embeddings.py` | 词嵌入 |
+| ParallelLMHead | `layers/lm_head.py` | 语言模型头 |
+| ModelRegistry | `models/model_base.py` | 架构注册 |
+| Triton 兼容层 | `ops/triton_ops/triton_utils.py` | `enable_compat_on_triton_kernel` 装饰器 |
+
+## 2、新增组件
+
+| 组件 | 说明 | 实现方式 |
+|------|------|----------|
+| Lightning Attention 内核 | 5 个 Triton JIT 内核 + 调度逻辑 | `ops/triton_ops/lightning_attn.py`（726 行） |
+| 混合注意力调度 | 逐层选择 GQA 或 Lightning Attention | `_build_attn_type_list()` 配置驱动 |
+| DeepNorm 残差缩放 | alpha/beta 独立系数（按层类型区分） | `MiniMaxM1DecoderLayer.forward()` |
+| 输出门控 | sigmoid(gate) × norm(attn_output) | `MiniMaxM1LinearAttention.forward()` |
+| HF→FD 权重映射 | q/k/v → qkv_proj 合并 + w1/w2/w3 → gate/up/down | `set_state_dict()` + `load_weights()` |
+
+# 三、业内方案调研
+
+## 1、vLLM 实现
+
+vLLM `minimax_text_01.py` 采用 Triton 实现 Lightning Attention（`lightning_attn.py`），包含 5 个 `@triton.jit` 内核。
+
+核心差异在于 vLLM 基于 PyTorch 张量，FastDeploy 基于 PaddlePaddle。
+
+## 2、方案对比
+
+| 方案 | 实现路径 | Paddle 兼容 | 优劣 |
+|------|----------|-------------|------|
+| CUDA C++ 翻译 | Triton → CUDA C++ 翻译，注册至 `cpp_extensions.cc` | ✅ 原生算子 | ❌ 工程量巨大（5 kernel × CUDA 逐行翻译），维护成本高 |
+| **Triton 直接移植（本方案）** | Triton 内核直接移植，使用 `enable_compat_on_triton_kernel` 装饰器 | ✅ 已验证 | ✅ 726 行完成全部 5 个内核，与 vLLM 上游保持同步 |
+
+FastDeploy 已在 `ops/triton_ops/` 建立了成熟的 Triton 兼容管线（`enable_compat_on_triton_kernel` 装饰器实现 Paddle 张量 ↔ Triton 指针的隐式转换），因此采用 Triton 直接移植方案，维护成本显著低于 CUDA C++ 翻译路线。
+
+# 四、设计思路与实现方案
+
+## 1、主体设计
+
+**核心策略**：直接移植 vLLM 5 个 Triton JIT 内核至 FastDeploy Triton 兼容层，模型组网代码复用 FastDeploy 已有的注意力、MoE、线性层等组件，通过 `attn_type_list` 配置实现逐层混合注意力调度。
+
+### 架构总览
+
+```
+minimax_m1.py (826 行 — 模型组网)
+├── MiniMaxM1ForCausalLM(ModelForCasualLM)    ← 顶层入口，注册 2 个架构名
+│   ├── MiniMaxM1Model
+│   │   ├── VocabParallelEmbedding             ← 词嵌入
+│   │   ├── MiniMaxM1DecoderLayer × 80         ← 混合解码层
+│   │   │   ├── [attn_type=1] MiniMaxM1Attention     → Attention(FlashAttn) (复用)
+│   │   │   ├── [attn_type=0] MiniMaxM1LinearAttention → lightning_attention()
+│   │   │   ├── MiniMaxM1MoE(FusedMoE)         ← Top-2 路由 + 32 专家
+│   │   │   ├── DeepNorm alpha/beta 缩放       ← 注意力 + MLP 分别缩放
+│   │   │   └── RMSNorm × 2 (input + post_attention)
+│   │   └── RMSNorm (final)
+│   └── ParallelLMHead
+│
+│   set_state_dict()    ← HF→FD 参数映射（q/k/v→qkv_proj + w1/w2/w3→gate/up/down）
+│   load_weights()      ← v1 loader 路径（stacked_params + expert_params）
+│
+lightning_attn.py (726 行 — Triton 内核)
+├── _fwd_diag_kernel         ← 对角块注意力（Prefill：query 与同块 key 的注意力）
+├── _fwd_kv_parallel         ← KV 并行前缀扫描（Prefill：跨块 KV 累积）
+├── _fwd_kv_reduce           ← KV 归约（Prefill：并行前缀结果合并）
+├── _fwd_none_diag_kernel    ← 非对角块注意力（Prefill：query 对历史块的注意力）
+├── _linear_attn_decode_kernel ← 解码阶段线性注意力（Decode：单 token 递推）
+├── lightning_attention_forward() ← Prefill 调度逻辑
+├── lightning_attention()     ← 统一入口（Prefill + Decode 自动切换）
+└── linear_decode_forward_triton() ← Decode 调度逻辑
 ```
 
-**任务 2: 更新 `FDConfig`**
-编辑 `fastdeploy/config.py`，在 `ModelConfig` 类中添加 MiniMax-M1 特有的配置项。
+### 文件结构
+
+| 路径 | 行数 | 说明 |
+|------|------|------|
+| `fastdeploy/model_executor/models/minimax_m1.py` | 826 | 模型定义 + 权重加载 + 混合调度 |
+| `fastdeploy/model_executor/ops/triton_ops/lightning_attn.py` | 726 | 5 个 Triton JIT 内核 + 调度器 |
+| `tests/model_executor/test_minimax_m1.py` | 528 | 30 个单元测试（6 类） |
+| `docs/best_practices/MiniMax-M1.md` | 45 | 英文使用文档 |
+| `docs/zh/best_practices/MiniMax-M1.md` | 46 | 中文使用文档 |
+| `docs/supported_models.md` | +1 | 注册至模型支持列表 |
+| `docs/zh/supported_models.md` | +1 | 中文模型支持列表 |
+| **合计** | **2173** | 7 个文件 |
+
+## 2、关键技术点
+
+### 2.1 Lightning Attention Triton 内核移植
+
+5 个 Triton JIT 内核直接从 vLLM 移植，使用 `@enable_compat_on_triton_kernel` 装饰器实现 Paddle 兼容。
+
+| 内核 | 用途 | 阶段 |
+|------|------|------|
+| `_fwd_diag_kernel` | 对角块注意力（同块 Q-K 交互） | Prefill |
+| `_fwd_kv_parallel` | KV 状态并行前缀扫描 | Prefill |
+| `_fwd_kv_reduce` | 并行 KV 归约合并 | Prefill |
+| `_fwd_none_diag_kernel` | 非对角块注意力（跨块历史交互） | Prefill |
+| `_linear_attn_decode_kernel` | 单 token 递推（线性 O(1) decode） | Decode |
+
+**Prefill 流程**：输入序列按 `block_size=256` 分块 → 对角块内核计算块内注意力 → 非对角块内核计算块间历史注意力 → KV 并行前缀扫描累积状态 → 归约输出最终结果。
+
+**Decode 流程**：单 token 直接调用 `_linear_attn_decode_kernel`，更新 KV 历史状态（形状 `[batch, heads, head_dim, head_dim]`），O(1) 推理。
+
+### 2.2 混合注意力调度
+
 ```python
-# fastdeploy/config.py -> class ModelConfig
-
-class ModelConfig:
-    def __init__(self, model: str, **args):
-        # ...
-        self.partial_rotary_factor: float = 1.0
-
-        # === 在这里添加新配置 ===
-        self.attn_type_list: list = []
-        self.layernorm_full_attention_alpha: float = 1.0
-        self.layernorm_full_attention_beta: float = 1.0
-        self.layernorm_linear_attention_alpha: float = 1.0
-        self.layernorm_linear_attention_beta: float = 1.0
-        self.layernorm_mlp_alpha: float = 1.0
-        self.layernorm_mlp_beta: float = 1.0
-        self.postnorm: bool = False
-        # =======================
-
-        for key, value in args.items():
-            # ...
+class MiniMaxM1DecoderLayer:
+    @staticmethod
+    def _build_attn_type_list(num_layers: int):
+        """70 linear (0) + 10 full (1) at indices 7,15,23,31,39,47,55,63,71,79"""
+        attn_type_list = [0] * num_layers
+        for idx in [7, 15, 23, 31, 39, 47, 55, 63, 71, 79]:
+            if idx < num_layers:
+                attn_type_list[idx] = 1
+        return attn_type_list
 ```
 
----
+配置通过 HF `config.json` 的 `attn_type_list` 字段传入，如缺失则使用上述默认规则。
 
-### **Phase 1: [核心开发] 实现 Mamba/线性注意力 CUDA 算子 (2-4 周)**
+### 2.3 DeepNorm 残差缩放
 
-这是整个项目中技术含量最高、最耗时的部分。
+MiniMax-M1 对注意力和 MLP 的残差连接分别应用独立的 alpha/beta 系数：
 
-**任务 1.1: 翻译 Triton Kernels 为 CUDA C++ (`mamba_impl.cuh`)**
-*   **目标**: 将 `vllm/model_executor/layers/lightning_attn.py` 中的所有 `@triton.jit` 函数翻译成 `__global__` CUDA kernel。
-*   **创建文件**: `custom_ops/gpu_ops/mamba_attn/mamba_impl.cuh`
-*   **翻译指南**:
-    1.  将 `_fwd_diag_kernel` 翻译为 `MambaFwdDiagKernel`。
-    2.  将 `_fwd_kv_parallel` 翻译为 `MambaFwdKVParallelKernel`。
-    3.  将 `_fwd_kv_reduce` 翻译为 `MambaFwdKVReduceKernel`。
-    4.  将 `_fwd_none_diag_kernel` 翻译为 `MambaFwdNonDiagKernel`。
-    5.  将 `_linear_attn_decode_kernel` 翻译为 `MambaDecodeKernel`。
-    *   **关键替换**: `tl.program_id` -> `blockIdx`, `tl.load/store` -> `if-guarded memory access`, `tl.dot` -> 手写寄存器级矩阵乘法，`tl.sum` -> Warp/Block 级归约。
+```python
+# 注意力残差
+residual = residual * layernorm_attention_alpha
+attn_output = attn_output * layernorm_attention_beta
 
-**任务 1.2: 编写 C++ Host 启动器 (`mamba.cu`)**
-*   **目标**: 编写一个 C++ Host 函数，模仿 `lightning_attn.py` 中的 `_attention.forward` 和 `linear_decode_forward_triton` 的调度逻辑。
-*   **创建文件**: `custom_ops/gpu_ops/mamba_attn/mamba.cu`
-*   **代码框架**:
-    ```cpp
-    #include "mamba_impl.cuh"
-    #include "paddle/extension.h"
+# MLP 残差  
+residual = residual * layernorm_mlp_alpha
+mlp_output = mlp_output * layernorm_mlp_beta
+```
 
-    void MambaAttentionForwardKernel(
-        const paddle::Tensor& q, const paddle::Tensor& k, const paddle::Tensor& v,
-        const paddle::Tensor& slope_rate, paddle::Tensor& mamba_state,
-        paddle::Tensor& out, /* ... 其他 ForwardMeta 参数 ... */
-    ) {
-        // 1. 从 ForwardMeta 解析出 is_prefill, b, h, n, d 等信息
-        bool is_prefill = ...; // 根据 seq_lens 判断
+alpha/beta 值按层类型区分（线性注意力层 vs 全注意力层），从 HF 配置的 `layernorm_full_attention_alpha`、`layernorm_linear_attention_alpha` 等字段读取。
 
-        // 2. 模仿 _attention.forward 和 linear_decode_forward_triton
-        if (is_prefill) {
-            // 计算 grid/block 维度
-            // 依次启动 MambaFwd... 系列的 CUDA Kernel
-        } else { // Decode
-            // 计算 grid/block 维度
-            // 启动 MambaDecodeKernel
-        }
-    }
-    ```
+### 2.4 输出门控（线性注意力层特有）
 
-**任务 1.3: 暴露自定义算子 (`mamba.cu` & `cpp_extensions.cc`)**
-1.  在 `mamba.cu` 文件末尾添加算子注册代码：
-    ```cpp
-    PD_BUILD_STATIC_OP(mamba_attention_forward)
-        .Inputs({ ... })
-        .Outputs({ "Out", "MambaStateOut" })
-        .SetKernelFn(PD_KERNEL(MambaAttentionForwardKernel));
-    ```
-2.  编辑 `custom_ops/gpu_ops/cpp_extensions.cc`，添加 `m.def("mamba_attention_forward", &MambaAttentionForward);`。
-3.  更新 `custom_ops/setup_ops.py` 或 `CMakeLists.txt`，将 `mamba.cu` 加入编译列表。
+线性注意力层的输出经过 RMSNorm → sigmoid 门控 → 输出投影：
 
-**里程碑**: 完成并编译通过后，拥有了一个底层的、可被调用的 Mamba/线性注意力算子。
+```python
+attn_output = self.norm(attn_output)
+gate = self.output_gate(hidden_states)  # sigmoid gate
+attn_output = sigmoid(gate) * attn_output
+output = self.out_proj(attn_output)
+```
 
----
+### 2.5 KV 历史状态管理
 
-### **Phase 2: 构建 Python 接口与后端 (1 周)**
+线性注意力层维护一个累积 KV 历史状态（形状 `[batch, heads, head_dim, head_dim]`），在 Prefill 和 Decode 阶段跨步传递。当前使用 Layer 实例属性 `_kv_history` 管理，预留向 `ForwardMeta.caches` 迁移的接口。
 
-**任务 2.1: 创建底层 Python 包装器**
-*   **文件**: `fastdeploy/model_executor/layers/attention/ops/mamba_attention.py`
-*   **代码**:
-    ```python
-    from paddle.fluid import core
+### 2.6 量化权重映射
 
-    def mamba_attention_forward(q, k, v, slope_rate, mamba_state, ...):
-        # 实际调用 C++ 扩展
-        out, mamba_state_out = core.eager._run_custom_op(
-            "mamba_attention_forward", q, k, v, slope_rate, mamba_state, ...
-        )
-        return out, mamba_state_out
-    ```
+通过 `MiniMaxM1MoE.__init__()` 中的条件分支为 5 种量化配置生成不同的 `weight_key_map`：
 
-**任务 2.2: 创建高级 MambaBackend**
-*   **文件**: `fastdeploy/model_executor/layers/attention/mamba_backend.py`
-*   **代码框架**:
-    ```python
-    from .ops.mamba_attention import mamba_attention_forward
-    from fastdeploy.model_executor.layers.attention.base_attention_backend import AttentionBackend
+| 量化类型 | 权重键 |
+|----------|--------|
+| FP16（默认） | `experts.{}.gate_proj.weight` / `down_proj.weight` |
+| W4A8 / tensor_wise_fp8 / block_wise_fp8 | `quant_weight` + `weight_scale` + `activation_scale` |
+| W4AFP8（动态） | `quant_weight` + `weight_scale`（无 activation_scale） |
 
-    class MambaBackend(AttentionBackend):
-        def __init__(self, fd_config, ...):
-            # 初始化 Mamba 需要的参数
-            pass
+### 2.7 HF→FD 权重名称映射
 
-        def init_attention_metadata(self, forward_meta: ForwardMeta):
-            # Mamba 可能需要一些独特的元数据准备
-            pass
+`set_state_dict()` 和 `load_weights()` 处理两类转换：
 
-        def forward(self, q, k, v, qkv, ..., layer: Attention, forward_meta: ForwardMeta):
-            # 1. 这里是核心业务逻辑，模仿 vLLM 的 MiniMaxText01LinearAttention._forward
-            #    它会从 forward_meta 中解析调度信息
+1. **全注意力层 QKV 合并**：`q_proj` + `k_proj` + `v_proj` → concat → `qkv_proj`
+2. **MoE 专家重命名**：`w1` → `gate_proj`，`w3` → `up_proj`，`w2` → `down_proj`
 
-            # 2. 调用底层算子
-            out, ssm_states_out = mamba_attention_forward(...)
+### 2.8 模型架构注册
 
-            # 3. 更新 mamba_state (可能通过 forward_meta.caches)
-            forward_meta.caches[layer.layer_id].copy_(ssm_states_out, False)
+通过 `@ModelRegistry.register_model_class` 注册两个架构名：
+- `MiniMaxM1ForCausalLM`（主名称）
+- `MiniMaxText01ForCausalLM`（别名，兼容 HF config 中的不同命名）
 
-            return out
-    ```
+### 2.9 ALiBi 风格 Slope Tensor
 
+线性注意力层使用按指数衰减的 slope 张量控制位置感知性：
 
----
+```python
+@staticmethod
+def _build_slope_tensor(n_heads: int):
+    """Build ALiBi-style slope tensor for exponential decay."""
+    # Power-of-2 head count: geometric sequence
+    # Non-power-of-2: concatenation strategy
+```
 
-### **Phase 3: 全量模型支持与性能验证 (1 周)**
+Slope 值按层深度缩放：`slope * (1 - layer_id / (num_layers - 1) + 1e-5)`，确保浅层有较强的位置衰减，深层关注更远距离。
 
-**目标**: 将已在 5 层模型上验证通过的核心组件无缝扩展至 80 层全量模型。
+## 3、postnorm 模式
 
-修改 `minimax_m1.py` 中的 `load_weights` 函数，使其能够加载并正确映射**全部 80 层**的权重。在启动脚本中，将 `num_hidden_layers` 设置为 80，并且对齐vllm精度。
+MiniMax-M1 默认使用 `postnorm=True`（区别于多数 Transformer 的 pre-norm）。在 postnorm 模式下，残差流携带的是归一化后的激活值而非归一化前的累加值，这与 vLLM 参考实现保持一致。
 
----
+# 五、测试和验收的考量
 
-### **Phase 4: 模型集成与测试 (1 周)**
+## 1、单元测试覆盖
 
-**任务 4.1: 编写 `minimax_m1.py`**
-*   **文件**: `fastdeploy/model_executor/models/minimax_m1.py`
-*   **核心逻辑**:
-    ```python
-    from fastdeploy.model_executor.layers.attention.mamba_backend import MambaBackend
-    from fastdeploy.model_executor.layers.attention.mla_attention_backend import MLAAttentionBackend
+已提交 30 个单元测试方法，6 个测试类，528 行：
 
-    class MiniMaxM1DecoderLayer(nn.Layer):
-        def __init__(self, fd_config, layer_id):
-            attn_type = fd_config.model_config.attn_type_list[layer_id]
-            if attn_type == 0: # 线性注意力
-                self.self_attn = MiniMaxM1LinearAttention(fd_config, layer_id) # 这是一个新的 nn.Layer
-            else: # 标准注意力
-                self.self_attn = MiniMaxM1StandardAttention(fd_config, layer_id) # 复用/包装标准 Attention
+| 测试类 | 方法数 | 验证内容 |
+|--------|--------|---------|
+| `TestBuildAttnTypeList` | 4 | 80 层默认调度、短模型、单层、全线性 |
+| `TestBuildSlopeTensor` | 4 | power-of-2、非 power-of-2、64 heads、正值验证 |
+| `TestModelRegistration` | 5 | 主名称、别名、注册类、name 方法、pretrained_name |
+| `TestDecoderLayerConstruction` | 9 | 线性注意力层、全注意力层、DeepNorm 默认值、MoE、Dense MLP、fallback、weight_key_map、W4A8、W4AFP8 |
+| `TestDecoderLayerForward` | 4 | 线性层输出形状、全注意力层输出形状、DeepNorm 缩放、postnorm |
+| `TestLightningAttentionPurePython` | 4 | 单 token、多 token 因果、KV 历史传播、多头 |
 
-            # DeepNorm 参数
-            self.layernorm_attention_alpha = ...
+## 2、CI 验证
 
-        def forward(self, hidden_states, ...):
-            # 实现 DeepNorm 和 MoE+SharedExpert 逻辑
-            attn_output = self.self_attn(...)
-            layernorm_input = residual * self.layernorm_attention_alpha + attn_output * self.layernorm_attention_beta
-            ...
+GitHub Actions 完整 CI 通过：codestyle、license-check、build_and_test（CPU/GPU × 多卡）、Coverage 等。
 
-    # 建议为两种 Attention 创建独立的 nn.Layer 包装类
-    class MiniMaxM1LinearAttention(nn.Layer):
-        def __init__(...):
-            self.backend = MambaBackend(...)
-            self.qkv_proj = ...
-            self.out_proj = ...
-            self.norm = ...
-            # ...
-        def forward(...):
-            qkv = self.qkv_proj(...)
-            # ... 准备输入 ...
-            attn_out = self.backend.forward(...)
-            # ... 后处理 ...
-            return final_out
+## 3、GPU 验证
 
-    # MiniMaxM1StandardAttention 类似
-    ```
+Lightning Attention Triton 内核需要 GPU 执行环境。端到端 GPU 验证可通过以下方式完成：
+- 多卡 A100/H100 环境加载 MiniMax-M1 模型权重
+- 或运行 AI Studio V100 + Triton 兼容性测试
 
-**任务 4.2: 编写测试用例**
-*   **单元测试**: 编写一个 Python 测试脚本，直接调用 `ops.mamba_attention_forward`，并与一个纯 Python/Paddle 实现的、功能等价的 Mamba 算法进行对比，验证数值精度。
-*   **端到端测试**: 创建一个完整的 MiniMax-M1 模型实例，加载权重，并运行推理。将输出与 Hugging Face `transformers` 的参考输出进行对比。
+# 六、影响面
 
-**任务 4.3: 性能基准测试**
-*   在与 vLLM 相同的硬件和环境下，测试 FastDeploy 实现的吞吐量和时延，确保性能达标。
+## 对用户的影响
+- 新增模型选项 `MiniMaxM1ForCausalLM`，无 breaking changes
+- 使用方式符合 FastDeploy 标准推理 API
+
+## 对框架架构的影响
+- **新增 Triton 内核文件**：`ops/triton_ops/lightning_attn.py`（独立模块，不修改已有文件）
+- **新增模型文件**：`models/minimax_m1.py`（独立注册，不修改已有模型）
+- **文档更新**：`supported_models.md` 新增一行
+
+## 对性能的影响
+- 不影响现有模型性能
+- 线性注意力层 O(n) Prefill + O(1) Decode，长序列推理延迟显著低于纯全注意力模型
+- 70/80 层为线性注意力，仅 10 层需要全注意力 KV Cache—大幅降低显存占用
+
+# 七、排期规划
+
+| 阶段 | 任务 | 实际用时 |
+|------|------|---------|
+| Phase 0 | 项目搭建 + HF 配置解析 + 目录结构 | 0.5 天 |
+| Phase 1 | Lightning Attention Triton 内核移植（5 个 kernel） | 2 天 |
+| Phase 2 | 模型组网 + 权重加载 + 混合注意力调度 + DeepNorm + MoE | 3 天 |
+| Phase 3 | 单元测试（30 个测试方法） + CI 验证 | 2 天 |
+| Phase 4 | 中英文文档 + PR 提交 + Bot 审查响应 | 1 天 |
+| **合计** | | **~8.5 天** |
+
+# 八、名词解释
+
+| 名词 | 说明 |
+|------|------|
+| Lightning Attention | MiniMax 提出的线性注意力机制，基于分块计算和前缀扫描实现 O(n) 时间复杂度 |
+| DeepNorm | 深层残差连接的归一化策略，使用独立 alpha/beta 系数防止深层网络梯度消失 |
+| MoE (Mixture of Experts) | 混合专家模型，每个 token 路由到 Top-K 专家处理，减少激活参数量 |
+| ALiBi Slopes | Attention with Linear Biases — 用指数衰减斜率替代绝对位置编码 |
+| postnorm | 残差流携带归一化后的激活值（区别于 pre-norm 的归一化前累加值） |
+| `enable_compat_on_triton_kernel` | FastDeploy Triton 兼容装饰器，实现 Paddle 张量 ↔ Triton 指针的隐式转换 |
+
+# 附件及参考资料
+
+1. MiniMax-M1 HuggingFace: https://huggingface.co/MiniMaxAI/MiniMax-M1-80B
+2. MiniMax-M1 技术报告: https://arxiv.org/abs/2501.08313
+3. vLLM MiniMax-M1 实现: `vllm/model_executor/models/minimax_text_01.py`
+4. vLLM Lightning Attention: `vllm/model_executor/layers/lightning_attn.py`
+5. FastDeploy Triton 兼容层: `fastdeploy/model_executor/ops/triton_ops/triton_utils.py`
