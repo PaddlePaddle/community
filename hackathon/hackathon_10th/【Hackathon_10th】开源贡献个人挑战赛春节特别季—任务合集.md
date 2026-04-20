@@ -46,6 +46,60 @@
 - [跨生态自定义算子接入 - 原理和迁移方式](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/custom_op/cross_ecosystem_custom_op/design_and_migration_cn.html)
 - [兼容性生态库 paddlecodec](https://github.com/PFCCLab/paddlecodec)
 
+### NO.51 PaddlePaddle GCC 15 编译器升级与 CUDA 13.1 适配
+
+**详细描述：**
+
+作为深耕高性能计算的深度学习框架，底层编译工具链与 GPU 计算库的版本直接决定了框架的运行时性能与硬件覆盖能力。本任务旨在推动 PaddlePaddle 完成 Linux 平台编译器升级和最新 CUDA 版本适配，并建立对应的 CI 监控体系。
+
+主要工作包括：
+
+- **GCC 15 升级**：将 Linux 编译器基准升级至 GCC 15，处理新版编译器引入的警告与错误，确保全量代码在 GCC 15 下编译通过；
+- **CUDA 13.1 适配**：适配 CUDA 13.1 新增和变更的 API，处理废弃 API 的迁移与替换，解决 CUDA 13.1 与现有代码的编译兼容性问题，更新相关第三方依赖库（如 cuDNN、NCCL、TensorRT 等）至与 CUDA 13.1 兼容的版本；
+- **CI 监控建设**：新增 GCC 15 + CUDA 13.1 环境的 CI Docker 镜像，配置对应的持续集成流水线，确保后续代码变更在新工具链下持续受监控，编译与单元测试稳定通过。
+
+**验收说明**：
+
+- 完成 GCC 15 编译器升级，PaddlePaddle 在 GCC 15 下编译通过并通过单元测试；
+- 完成 CUDA 13.1 API 适配，PaddlePaddle 在 CUDA 13.1 环境下编译通过；
+- 相关第三方依赖库（cuDNN、NCCL、TensorRT 等）更新至兼容版本，全量单元测试在 CUDA 13.1 环境下通过；
+- 新增 GCC 15 + CUDA 13.1 的 CI Docker 镜像及流水线，持续监控编译与测试状态，制作cuda13.1 almalinux编包镜像。
+
+**技术要求**：
+
+- 熟悉 C/C++，具有底层开发或大型项目迁移经验
+- 熟悉 CMake 编译体系，了解 Linux（GCC）环境下的工具链配置与调试
+- 熟悉 CUDA 编程模型，了解 CUDA 版本间的 API 差异与兼容性处理
+- 熟悉 Docker 容器技术及 CI/CD 流水线配置
+
+### NO.52 PaddlePaddle C++20 标准升级与 Python 3.14 适配及跨平台 CI 现代化
+
+**详细描述：**
+
+为保持 PaddlePaddle 在语言标准和多平台环境下的技术领先性，本任务聚焦于 C++ 语言标准升级、Python 新版本适配以及 Windows 编译器更新与 CI 基础设施的全面升级。
+
+主要工作包括：
+
+- **C++20 语言标准提升**：将底层 C++ 语言标准从现有版本全面提升至 C++20，处理新标准下的语法兼容性冲突，优化代码以利用 C++20 特性（如 Concepts、Ranges 或性能更优的 STL 实现）；
+- **Python 3.14 适配**：将 Python 环境适配至 Python 3.14，解决新版本带来的 API 变更（如废弃接口移除、C API 变化、类型标注更新等），确保 PaddlePaddle 的 Python 绑定层和全部 Python 代码在 3.14 下正常运行；
+- **Windows VS2022 编译器更新**：同步跟进 Windows 平台 Visual Studio 2022 的编译器更新，确保 C++20 新特性在 MSVC 环境下的稳定支持，处理 MSVC 特有的兼容性问题；
+- **CI/Docker 环境全面更新**：同步更新 CI 系统的全套 Docker 镜像及 Windows 构建环境，重构构建脚本，确保在 C++20 + Python 3.14 + VS2022 全新工具链环境下，PaddlePaddle 的编译、单元测试及分布式集成测试能够稳健运行。
+
+**验收说明**：
+
+- 完成 C++20 语言标准全面升级，处理语法兼容性冲突，通过全量单元测试；
+- 完成 Python 3.14 环境适配，PaddlePaddle 在 Python 3.14 下编译通过并通过单元测试；
+- 完成 Windows 平台 Visual Studio 2022 编译器适配，C++20 新特性在 MSVC 环境下稳定支持；
+- 完成 CI 系统 Docker 镜像及 Windows 构建环境更新，全平台编译、单元测试及分布式集成测试稳健运行。
+
+**技术要求**：
+
+- 熟悉 Python 与 C/C++，具有底层开发或大型项目迁移经验
+- 对 C++20 新特性（如 Ranges, Coroutines, Concepts）有深入了解，并具备处理复杂语法兼容性问题能力优先
+- 熟悉 CMake 编译体系，了解 Linux（GCC）与 Windows（MSVC/VS2022）环境下的工具链配置与调试
+- 熟悉 Docker 容器技术及大型开源项目的 CI/CD 流程
+- 了解 Python 版本间的 API 差异与 CPython C API 兼容性处理
+
 ## 【开源贡献个人挑战赛春节特别季-套件开发】任务详情
 
 ### PaddleScience套件开发
