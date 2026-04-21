@@ -149,7 +149,7 @@ def test_data_loading():
 
         # 创建数据集（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -232,7 +232,7 @@ def test_model_forward():
 
         # 创建数据加载器（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -311,7 +311,7 @@ def test_training_step():
 
         # 创建数据加载器（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -401,7 +401,7 @@ def test_solvgnn_xmlp_forward():
 
         # 创建数据加载器（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -477,7 +477,7 @@ def test_solvgnn_xmlp_training():
 
         # 创建数据加载器（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -566,7 +566,7 @@ def test_gegnn_forward():
 
         # 创建数据加载器（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -644,7 +644,7 @@ def test_gegnn_training():
 
         # 创建数据加载器（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -1046,7 +1046,7 @@ def test_gibbs_duhem_loss_with_model():
         
         # 创建数据加载器
         dataset = BinaryActivityDataset(
-            data_path=config.train_binary_path,
+            path=config.train_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False
@@ -1155,7 +1155,7 @@ def test_prediction():
 
         # 创建测试数据加载器（GDI-NN 格式）
         dataset = BinaryActivityDataset(
-            data_path=config.test_binary_path,
+            path=config.test_binary_path,
             solvent_list_path=config.solvent_list_output_path,
             add_self_loop=True,
             preload_graphs=False

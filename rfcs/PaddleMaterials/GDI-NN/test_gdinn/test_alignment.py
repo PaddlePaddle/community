@@ -198,7 +198,7 @@ def test_gnn_alignment():
         
         # 创建 Paddle 数据集（自动计算 HB 特征）
         paddle_dataset = BinaryActivityDataset(
-            data_path=config.binary_data_path,
+            path=config.binary_data_path,
             solvent_list_path=config.solvent_list_path,
             add_self_loop=True,
             preload_graphs=False
@@ -329,15 +329,22 @@ def paddle_graph_to_dgl(paddle_g):
     # 获取节点和边信息
     # pgl.Graph.edges is a tensor of shape [num_edges, 2]
     edges_tensor = paddle_g.edges
-    src = edges_tensor[:, 0].numpy()
-    dst = edges_tensor[:, 1].numpy()
+    # Handle both numpy arrays and paddle tensors
+    if hasattr(edges_tensor, 'numpy'):
+        src = edges_tensor[:, 0].numpy()
+        dst = edges_tensor[:, 1].numpy()
+    else:
+        src = np.asarray(edges_tensor[:, 0])
+        dst = np.asarray(edges_tensor[:, 1])
     num_nodes = int(paddle_g.num_nodes)
     
     # 获取节点特征 (Paddle 使用 node_feat 字典)
     if paddle_g.node_feat and 'h' in paddle_g.node_feat:
-        node_feats = paddle_g.node_feat['h'].numpy()
+        h_feat = paddle_g.node_feat['h']
+        node_feats = h_feat.numpy() if hasattr(h_feat, 'numpy') else np.asarray(h_feat)
     elif paddle_g.node_feat and 'feat' in paddle_g.node_feat:
-        node_feats = paddle_g.node_feat['feat'].numpy()
+        feat = paddle_g.node_feat['feat']
+        node_feats = feat.numpy() if hasattr(feat, 'numpy') else np.asarray(feat)
     else:
         node_feats = np.random.randn(num_nodes, config.IN_DIM).astype(np.float32)
     
@@ -349,13 +356,15 @@ def paddle_graph_to_dgl(paddle_g):
     # 设置 batch 信息 (如果存在)
     # pgl uses graph_node_id to identify which graph each node belongs to
     # Count nodes per graph
-    graph_node_id = paddle_g.graph_node_id.numpy()
+    graph_node_id_raw = paddle_g.graph_node_id
+    graph_node_id = graph_node_id_raw.numpy() if hasattr(graph_node_id_raw, 'numpy') else np.asarray(graph_node_id_raw)
     num_graphs = int(paddle_g.num_graph)
     batch_num_nodes = np.array([np.sum(graph_node_id == i) for i in range(num_graphs)])
     g.set_batch_num_nodes(batch_num_nodes)
     
     # Count edges per graph
-    graph_edge_id = paddle_g.graph_edge_id.numpy()
+    graph_edge_id_raw = paddle_g.graph_edge_id
+    graph_edge_id = graph_edge_id_raw.numpy() if hasattr(graph_edge_id_raw, 'numpy') else np.asarray(graph_edge_id_raw)
     batch_num_edges = np.array([np.sum(graph_edge_id == i) for i in range(num_graphs)])
     g.set_batch_num_edges(batch_num_edges)
     
@@ -571,14 +580,19 @@ def test_mean_nodes_alignment():
             # 使用相同的边
             # pgl.Graph.edges is a tensor of shape [num_edges, 2]
             edges_tensor = paddle_graphs[i].edges
-            src_np = edges_tensor[:, 0].numpy()
-            dst_np = edges_tensor[:, 1].numpy()
+            if hasattr(edges_tensor, 'numpy'):
+                src_np = edges_tensor[:, 0].numpy()
+                dst_np = edges_tensor[:, 1].numpy()
+            else:
+                src_np = np.asarray(edges_tensor[:, 0])
+                dst_np = np.asarray(edges_tensor[:, 1])
             
             # 创建 DGL 图
             g = dgl.graph((src_np, dst_np), num_nodes=num_nodes)
             
             # 使用相同的节点特征
-            node_feat_np = paddle_graphs[i].node_feat['h'].numpy()
+            h_feat = paddle_graphs[i].node_feat['h']
+            node_feat_np = h_feat.numpy() if hasattr(h_feat, 'numpy') else np.asarray(h_feat)
             g.ndata['h'] = torch.from_numpy(node_feat_np)
             
             dgl_graphs.append(g)
@@ -653,7 +667,7 @@ def test_hb_features():
         
         # 创建数据集
         dataset = BinaryActivityDataset(
-            data_path=config.binary_data_path,
+            path=config.binary_data_path,
             solvent_list_path=config.solvent_list_path,
             add_self_loop=True,
             preload_graphs=False
