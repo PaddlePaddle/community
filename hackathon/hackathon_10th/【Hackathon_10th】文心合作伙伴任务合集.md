@@ -214,10 +214,8 @@
 
 * 提交内容
   * 第一阶段：方案认领（RFC）。以 Markdown 文件形式提交至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 `rfcs/hardware` 目录，内容需包含如下四方面。组委会将从报名者中挑选 **1-2 名**合适的认领者，确认后进入第二阶段。
-    1. **方案概述**：选用的模型、应用场景、预期效果
-    2. **硬件环境**：使用的瀚博硬件型号（VA1 / VA10 /VA16/ VE1S / VE1M ）、驱动版本、VACC SDK 版本
-    3. **技术方案**：模型部署路径（直接推理 / 模型转换 / 量化等）、部署架构
-    4. **预期指标**：推理延迟、吞吐量等性能目标
+    1. **简历**：开发者个人信息简介
+    2. **过往项目介绍**：列举开发者参与过的项目概要与贡献
 
  * 第二阶段：代码与 Demo 提交。认领者提交完整的可复现代码和 Demo，以 Notebook (ipynb) 形式提交至 [AI Studio](https://aistudio.baidu.com)。提交物必须包含：
 
