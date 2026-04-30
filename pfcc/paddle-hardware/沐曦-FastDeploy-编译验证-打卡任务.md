@@ -48,10 +48,11 @@
 #### paddlepaddle & custom device backend 预安装
 
 ```
-1）pip install paddlepaddle==3.4.0.dev20251223 -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/
-2）pip install paddle-metax-gpu==3.3.0.dev20251224 -i https://www.paddlepaddle.org.cn/packages/nightly/maca/
+1）pip install paddlepaddle==3.4.0.dev20260127 -i https://www.paddlepaddle.org.cn/packages/nightly/cpu/
+2）pip install paddle-metax-gpu==3.3.0.dev20260128 -i https://www.paddlepaddle.org.cn/packages/nightly/maca/
 3) python -m pip install -U "paddleocr[doc-parser]"
 4) pip install opencv-contrib-python-headless==4.10.0.84
+5）apt-get update && apt-get install -y libgl1
 ```
 
 #### FastDeploy release2.5 代码下载并编译
