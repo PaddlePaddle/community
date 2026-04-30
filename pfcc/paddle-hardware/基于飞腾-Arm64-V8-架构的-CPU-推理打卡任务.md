@@ -112,6 +112,11 @@ VLLM_USE_MODELSCOPE=true vllm serve PaddlePaddle/ERNIE-4.5-0.3B-PT \
 ```cpp
 docker load -i vllm-ft-0.11.2.tar
 ```
+> 镜像文件 vllm-ft-0.11.2.tar 可通过以下百度网盘链接下载：
+> https://pan.baidu.com/s/17fgt_uQw2HVeOVoJP2NHFg?pwd=13ih
+> 提取码: 13ih 
+
+
 #### **启动容器** 
 一行命令启动环境，直接进入正题 ：
 
