@@ -365,3 +365,28 @@ FastDeploy支持在Windows平台编译
 
 * 熟悉常见的 LLM 模型结构和计算流程. 了解 MiniCPM4.1-8B 类模型结构.
 * 熟悉 python, 熟悉 cuda
+
+### NO.53 离散 KV Cache 管理和 AppendAttention 算子的性能优化
+
+**详细描述：**
+
+在大模型推理系统中，KV Cache 的常见布局为：`layer_num * [block_num, head_num, block_size, head_dim]`。
+* 对于 Full Attention，推理引擎为所有层、所有头统一分配 Cache，仅需指定一维的 `block_idx` 即可，例如 `[0, 1, 2]`。
+* 对于 Head-wise 形式的 SWA Attention，引擎为每一层的每个头单独指定 `block_idx`，例如（3个head）：`[[0,4,5], [3,1,2], [6,7,8]]`。
+
+针对使用 Head-wise 形式 SWA Attention 的模型，模型管理模块需要适配支持，精细化管理每层不同头的 Cache；同时当同一层内各头的 Cache 呈离散分布时，现有算子的访存与计算效率会明显退化，亟需针对性的性能优化。
+
+**提交内容**
+
+* 第一个PR：在 CacheManagerV1 模块（ https://github.com/PaddlePaddle/FastDeploy/pull/7097 ）下适配支持 Head-wise 形式 SWA Attentiond 的 Cache 管理，推理超出Window 后及时回收 SWA Head 的 Cache，可以参考适配 CacheManagerV0 模块的前置 PR：https://github.com/PaddlePaddle/FastDeploy/pull/6702
+* 第二个PR：实现优化后的 AppendAttention 算子
+
+**验收要求：**
+
+* 使用 Full Attention 模型（ https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-Paddle ，假定每层第一组 Head 是 SWA Head ）、开启 CacheManagerV1 模块，进行测试
+* 测试PR1：
+    * 使用特定输入输出长度的数据集、相同的显存空间，对比开启及时回收 SWA Head Cache 前后的吞吐，及时回收 SWA Head Cache 预期可以提升推理并发，吞吐提升30%以上
+* 测试PR2：
+    * 不开启及时回收 SWA Head Cache，分别在一维 block_idx（统一分配）与二维 block_idx（离散分配）两种模式下进行性能对比
+    * 在 H卡或B卡 上运行，要求 TTFT 和 TBT 均提升 5% 以上
+* 推荐使用 FastDeploy 自带的 benchmark 工具进行测速：https://github.com/PaddlePaddle/FastDeploy/tree/develop/benchmarks
