@@ -3,8 +3,9 @@
 ## Competition Adjustments (May 11)
 
 Dear participants, Thank you for your support and interest in this competition. The following adjustments have been made to the schedule and rules:
-1. **Schedule Extension**: The overall timeline has been postponed by one month. The submission deadline for the preliminary round is extended to June 28.
-2. **Evaluation Criteria Upgrade**: We encourage all participants to actively promote and showcase their projects through multiple channels and methods, to expand community influence and technological reach. Project impact, data quality, and model innovation will together serve as the three core elements for award evaluation. Please consider this.
+1. **Schedule Extension**: The overall timeline has been postponed by one month. The submission deadline for the preliminary round is extended to **June 28**.
+2. **Evaluation Criteria Upgrade**: We encourage all participants to actively promote and showcase their projects through multiple channels and methods, to expand community influence and technological reach. **Project impact, data quality, and model innovation** will together serve as the three core elements for award evaluation. Please consider this.
+3. **Submission Deadline Reminder**: To ensure that judges have sufficient time to evaluate the works for each leaderboard release, please note that **2:00 PM on the day before each leaderboard release** is the cutoff time for submissions/updates to be considered for that round. Any submissions or updates made after that time will automatically be included in the evaluation for the next leaderboard release.
 
 We wish you excellent results!
 
