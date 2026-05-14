@@ -355,7 +355,7 @@ FastDeploy支持在Windows平台编译
 
 为 FastDeploy 提供部署高性能的 [openbmb/MiniCPM4.1-8B](https://huggingface.co/openbmb/MiniCPM4.1-8B) 系列模型的能力. 
 
-**提交内容**
+**提交内容：**
 
 * MiniCPM4.1-8B相关模型的组网代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档. 
 * 如需开发自定义算子, 提交至 FastDeploy/custom_ops/gpu_ops/ 目录下.
@@ -376,7 +376,7 @@ FastDeploy支持在Windows平台编译
 
 针对使用 Head-wise 形式 SWA Attention 的模型，模型管理模块需要适配支持，精细化管理每层不同头的 Cache；同时当同一层内各头的 Cache 呈离散分布时，现有算子的访存与计算效率会明显退化，亟需针对性的性能优化。
 
-**提交内容**
+**提交内容：**
 
 * 第一个PR：在 CacheManagerV1 模块（ https://github.com/PaddlePaddle/FastDeploy/pull/7097 ）下适配支持 Head-wise 形式 SWA Attentiond 的 Cache 管理，推理超出Window 后及时回收 SWA Head 的 Cache，可以参考适配 CacheManagerV0 模块的前置 PR：https://github.com/PaddlePaddle/FastDeploy/pull/6702
 * 第二个PR：实现优化后的 AppendAttention 算子
@@ -390,3 +390,16 @@ FastDeploy支持在Windows平台编译
     * 不开启及时回收 SWA Head Cache，分别在一维 block_idx（统一分配）与二维 block_idx（离散分配）两种模式下进行性能对比
     * 在 H卡或B卡 上运行，要求 TTFT 和 TBT 均提升 5% 以上
 * 推荐使用 FastDeploy 自带的 benchmark 工具进行测速：https://github.com/PaddlePaddle/FastDeploy/tree/develop/benchmarks
+
+### NO.54 ngram 及 hybrid_mtp_ngram 端到端验证
+
+**详细描述：**
+* 涉及两个投机解码方法，分别是 ngram 和 mtp + with_ngram
+* 两个方法均端到端打通，要求无新增 H->D / D->H 拷贝，且与 overlap + cudaGraph + logprob 兼容
+
+**提交内容：**
+* 第一个PR：支持 Ngram 以及覆盖全面的单测
+* 第二个PR：支持 mtp + with_ngram 以及覆盖全面的单测
+
+**验收要求：**
+* 正确性、接受率均能自证
