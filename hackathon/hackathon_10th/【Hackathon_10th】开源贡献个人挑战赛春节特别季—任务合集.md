@@ -46,7 +46,7 @@
 - [跨生态自定义算子接入 - 原理和迁移方式](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/guides/custom_op/cross_ecosystem_custom_op/design_and_migration_cn.html)
 - [兼容性生态库 paddlecodec](https://github.com/PFCCLab/paddlecodec)
 
-### NO.51 PaddlePaddle GCC 15 编译器升级与 CUDA 13.1 适配
+### NO.51 PaddlePaddle GCC 15 编译器升级与 CUDA 13.2 适配
 
 **详细描述：**
 
@@ -55,15 +55,15 @@
 主要工作包括：
 
 - **GCC 15 升级**：将 Linux 编译器基准升级至 GCC 15，处理新版编译器引入的警告与错误，确保全量代码在 GCC 15 下编译通过；
-- **CUDA 13.1 适配**：适配 CUDA 13.1 新增和变更的 API，处理废弃 API 的迁移与替换，解决 CUDA 13.1 与现有代码的编译兼容性问题，更新相关第三方依赖库（如 cuDNN、NCCL、TensorRT 等）至与 CUDA 13.1 兼容的版本；
-- **CI 监控建设**：新增 GCC 15 + CUDA 13.1 环境的 CI Docker 镜像，配置对应的持续集成流水线，确保后续代码变更在新工具链下持续受监控，编译与单元测试稳定通过。
+- **CUDA 13.2 适配**：适配 CUDA 13.2 新增和变更的 API，处理废弃 API 的迁移与替换，解决 CUDA 13.2 与现有代码的编译兼容性问题，更新相关第三方依赖库（如 cuDNN、NCCL、TensorRT 等）至与 CUDA 13.2 兼容的版本；
+- **CI 监控建设**：新增 GCC 15 + CUDA 13.2 环境的 CI Docker 镜像，配置对应的持续集成流水线，确保后续代码变更在新工具链下持续受监控，编译与单元测试稳定通过。
 
 **验收说明**：
 
 - 完成 GCC 15 编译器升级，PaddlePaddle 在 GCC 15 下编译通过并通过单元测试；
-- 完成 CUDA 13.1 API 适配，PaddlePaddle 在 CUDA 13.1 环境下编译通过；
-- 相关第三方依赖库（cuDNN、NCCL、TensorRT 等）更新至兼容版本，全量单元测试在 CUDA 13.1 环境下通过；
-- 新增 GCC 15 + CUDA 13.1 的 CI Docker 镜像及流水线，持续监控编译与测试状态，制作cuda13.1 almalinux编包镜像。
+- 完成 CUDA 13.2 API 适配，PaddlePaddle 在 CUDA 13.2 环境下编译通过；
+- 相关第三方依赖库（cuDNN、NCCL、TensorRT 等）更新至兼容版本，全量单元测试在 CUDA 13.2 环境下通过；
+- 新增 GCC 15 + CUDA 13.2 的 CI Docker 镜像及流水线，持续监控编译与测试状态，制作cuda13.2 almalinux编包镜像。
 
 **技术要求**：
 
