@@ -1,5 +1,16 @@
 # 【Hackathon_10th】PaddleOCR Global Derivative Model Challenge
 
+## Authenticity Verification of Award-Winning Works (May 25)
+To ensure fairness and integrity of the competition and protect the rights of all participants, the organizing committee will conduct **authenticity verification** on works that may receive cash awards (including the top 10 finalists and the High-Quality Evaluation Set Contribution Award) **before the announcement of preliminary results**.
+
+The verification includes, but is not limited to:
+- Reproducibility of experimental steps (based on the code, model, and documentation submitted by participants)
+- Quality and authenticity of the evaluation set (whether it complies with submission guidelines, and whether there are issues such as data fabrication or excessive synthetic data)
+- Consistency between reported results and submitted materials
+
+If a work fails the verification, the organizing committee will **cancel its awards and all prize money**, and may subsequently promote the next-ranked team as appropriate. All participants must ensure that their submitted materials are authentic, complete, and reproducible.
+> **Note**: Due to the large number of entries, the organizing committee may conduct full or sample verification of the award-winning works based on actual circumstances. **All participants who are potential award recipients may be subject to verification**. Please do not take any chances, and together we uphold a healthy academic and competitive atmosphere.
+
 ## Competition Adjustments (May 11)
 
 Dear participants, Thank you for your support and interest in this competition. The following adjustments have been made to the schedule and rules:
