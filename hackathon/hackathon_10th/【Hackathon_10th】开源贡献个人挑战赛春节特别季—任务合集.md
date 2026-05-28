@@ -403,3 +403,15 @@ FastDeploy支持在Windows平台编译
 
 **验收要求：**
 * 正确性、接受率均能自证
+
+### NO.55 为 FastDeploy 新增 MiniMax-M2.5模型
+
+**详细描述：**
+
+- 为FastDeploy 提供部署高性能的MiniMax-M1模型的能力.
+
+**提交内容**：
+
+1. MiniMax-M2.5 模型组网代码, 提交至 FastDeploy/fastdeploy/model_executor/models/ 目录下. 同时提交模型使用说明文档.
+2. 如需开发自定义算子, 提交至 FastDeploy/custom_ops/gpu_ops/ 目录下.
+3. 为MiniMax-M2.5适配FastDeploy现有的各种低bit量化推理的能力.
