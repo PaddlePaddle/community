@@ -177,7 +177,7 @@ curl -X POST "http://0.0.0.0:8180/v1/chat/completions" \
 * **标题**：文心伙伴赛道-【厂商】-【打卡】-【GithubID】（例如：文心伙伴赛道-飞腾-打卡-onecatcn）
 * **内容**：
    * 飞桨团队你好，
-   * 【GitHub ID】：zongwave
+   * 【GitHub ID】：
    * 【打卡内容】：Paddle 编译 / CUTLASS 集成 / FastDeploy 编译 / MoE 多卡推理
    * 【打卡截图】：
      * MoE 多卡服务：![21B 服务](./images/phytium-fd-ernie-4.5-21b-a3b-thinking.png)

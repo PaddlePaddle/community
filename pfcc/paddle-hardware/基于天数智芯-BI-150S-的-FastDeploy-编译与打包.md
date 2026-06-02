@@ -19,6 +19,7 @@
 ### 安装 PaddlePaddle
 以 ILUVATAR_GPU 版本为例（CPU 同理）：
 ```
+python -m pip uninstall paddlepaddle paddle-iluvatar-gpu -y
 python -m pip install --pre paddlepaddle-iluvatar -i https://www.paddlepaddle.org.cn/packages/nightly/ixuca/
 ```
 ### 克隆 FastDeploy 源码

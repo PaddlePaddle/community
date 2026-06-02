@@ -67,30 +67,57 @@
   * [PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
   * [MIOpen 文档](https://rocm.docs.amd.com/projects/MIOpen/en/latest/)
   * [PaddleOCR-VL AMD GPU 部署教程](../../pfcc/paddle-hardware/AMD-PaddleOCR-VL-GPU打卡任务.md)
+* 额外奖励说明：AMD Radeon 9070 XT 16GB 显卡 × 1，PN54 AI 5 340 AMD 锐龙处理器 Mini PC × 1。最终完成代码合入的参赛者将成为本次赛事 AMD 赛道冠军，并可优先选择一项进阶礼品；第二名为除冠军外其余参赛选手中 PR 审核通过时间最早的提交者，可获得剩余的进阶礼品。
 
 ### 天数智芯：基于天数智芯硬件与文心多模态模型的创新应用
 * 技术标签：深度学习框架，Python，文心大模型，多模态
-* 详细描述：本任务旨在利用天数智芯硬件(BI-150S)的算力优势，结合文心系列多模态模型，打造具有真实落地价值、逻辑闭环且体验优秀的创新案例。开发者可**任选其一**或组合使用以下模型进行应用开发：**ERNIE-4.5-VL-28B-A3B-Thinking** 与 **PaddleOCR-VL-1.5**，参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications)。本次任务评估将分为两个阶段，在第一阶段中，开发者需要提供一份 RFC，用来描述本次任务的设计方案及预期性能指标；在第二阶段中，我们将从第一阶段提交的结果中，挑选出 2 份比较优秀的方案，并请相对应的开发者根据自己的方案提交 PR。
-* 算力支持：本次任务需要使用 BI-150S 硬件，可以申请使用星河平台 BI-150S 算力。
-* 提交内容：
-   * 第一阶段：RFC 方案提交
-     1. 提交方式：1）以 markdown 文件的形式提交到 https://aistudio.baidu.com/projectoverview ，2）标题处打上【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求。
-     2. 基本要求：1）应用场景避免与现有 Demo 重复，2）方案需明确说明选用哪个/哪些模型（ERNIE-4.5-VL-28B-A3B-Thinking 或 PaddleOCR-VL-1.5）及使用方式。
-     3. 筛选依据：1）该示例在真实场景下是否具有实际应用价值，2）所选模型的使用是否合理、流程逻辑是否清晰，3）预期效果与业务指标是否匹配。
+* 详细描述：本任务基于天数智芯 BI-150S，围绕 **PaddleOCR-VL-1.5**、**ERNIE-4.5-VL-28B-A3B-Thinking** 两类文心多模态模型完成选型与开发（选型规则见下「模型范围」），搭建可复现的创新应用 Demo 并形成业务闭环。参考 [飞桨 AI Studio 应用案例库](https://aistudio.baidu.com/topic/applications)。
 
-   * 第二阶段：PR 代码提交
-     1. 提交地址：以 Notebook (ipynb) 格式提交完整代码到 https://aistudio.baidu.com/projectoverview 里自己的 project 项目，标题加上【PaddlePaddle Hackathon 10】字样，并在描述处链接之前的 RFC 地址。
-     2. 该提交需满足 notebook 贡献规范，包含完整训推代码、依赖环境说明及运行脚本，必须提供在天数智芯硬件上运行的成功截图或录屏证明；开发者需及时根据 review 结果进行修改。
-     3. 在比赛过半时设置中期检查会，开发者需汇报项目进度、展示已完成的功能、总结当前遇到的问题与挑战、并介绍后半段比赛的计划安排。
-* 参考示例：推荐参赛者基于所选模型实现以下类型场景（可扩展），推荐方案方向有：
+  * **模型范围**：**PaddleOCR-VL-1.5** 与 **ERNIE-4.5-VL-28B-A3B-Thinking** 中任选其一作为主能力即可完成赛题。
+
+  * **端侧与模型分工**
+    * 所选模型的接入方式：可在 BI-150S 上 本地推理，也可通过 文心大模型 API 调用云端能力。RFC 中需写清选用哪一种模型及其接入方式（「本地推理」或「API」），并围绕该模型形成完整应用闭环。
+    * 加分项：在 BI-150S 上对所选模型做本地推理，可在 RFC 与最终报告中单独说明。
+    * 必须在 BI-150S 侧体现的部分：主流程须在可接入 BI-150S 的环境中完成运行与证明材料；所选模型能力可走 本地推理 或 文心 API，但该环境下须能复现端到端执行（含鉴权、请求与结果处理）。
+
+* 算力支持：可申请使用星河平台 BI-150S 算力。
+
+* 提交内容：
+   * **第一阶段：RFC 方案提交**
+     1. 提交方式：1）以 Markdown 文件提交到 https://aistudio.baidu.com/projectoverview ，2）标题含【PaddlePaddle Hackathon 10】，3）RFC 语言不做强制要求。
+     2. 基本要求：
+        1）应用场景避免与现有 Demo 简单重复；
+        2）任选其一：明确本方案选用 PaddleOCR-VL-1.5 与 ERNIE-4.5-VL-28B-A3B-Thinking 中哪一种；并写明接入方式（本地推理 或 文心 API）；
+        3）说明在 BI-150S 环境中具体执行哪些环节（本地推理模块、API 编排、前后处理等）；
+        4）列出预期业务指标（如端到端延迟、准确率等），与场景匹配即可。
+     3. 筛选依据：应用价值；技术方案逻辑是否清晰；可复现性与完成可行性；在 BI-150S 环境中的验证路径是否清晰。
+
+   * **第二阶段：脚本与材料提交**（由第一阶段入选者完成）
+     1. 提交地址：以可复现源码与说明文档为主，提交到 https://aistudio.baidu.com/projectoverview 个人公开项目，标题含【PaddlePaddle Hackathon 10】，描述中附上 RFC 链接。
+     2. 必备交付物：
+        * 完整可运行源码（脚本、模块、环境等）；
+        * README：环境（含 BI-150S 驱动/镜像或星河任务说明）、依赖安装、模型与 API 配置方式、一键或分步运行命令；
+        * 依赖与模型说明：针对 RFC 中声明选用的模型——若走本地推理，说明权重或模型获取方式；若走 文心 API，说明所用接口与鉴权方式；
+        * 效果展示：截图或录屏，须能体现应用在 BI-150S 环境（含星河 BI-150S 任务）下主流程已成功执行；
+        * 根据 review 及时修改。
+     3. 在比赛过半时设置中期检查会：汇报进度、已完成功能、问题与后半程计划。
+
+* **验收要求**
+  1. 天数环境参与：提交材料能证明端到端主流程在 BI-150S 环境中成功执行，并附截图/录屏。
+  2. 端到端闭环：从用户输入（如文档/图片/问题）到可展示的输出（结构化字段、摘要、问答答案等）链路完整，非仅单接口调用演示。
+  3. 可复现：他人按 README 可在同类 BI-150S / 星河任务环境中复现。
+  4. 稳定性：对主流程给出基本说明；录屏或文档中体现一次完整成功运行即可。
+
+* 参考示例：推荐参赛者实现以下类型场景：
   * 文档智能：合同/票据关键信息抽取、表格理解与问答、多页文档摘要（OCR + 推理）。
   * 多模态理解：图文问答、图表解析与结论生成、说明书/手册理解与问答。
   * 垂直场景：古籍/档案数字化与知识问答、证照识别与信息核验、教育/试卷批改与解析。
   * 参考 Demo：
     * [基于 PaddleOCR-VL 构建论文格式规范器](https://aistudio.baidu.com/projectdetail/9469300?searchKeyword=paddle-ocr-vl&searchTab=PROJECT)
     * [基于 ERNIE-4.5-VL-28B-A3B-Thinking 的目标检测器](https://aistudio.baidu.com/projectdetail/9726489?searchKeyword=ERNIE-4.5-VL-28B-A3B-Thinking&searchTab=PROJECT)
-* 技术要求：熟练掌握 Python、文心系列模型与 PaddleOCR-VL 的调用与部署方式，以及在天数智芯硬件上的运行环境配置。
-* 参考文档：[飞桨 AI Studio](https://aistudio.baidu.com/modelsoverview)、[ERNIE-4.5-VL-28B-A3B-Thinking 模型](https://huggingface.co/baidu/ERNIE-4.5-VL-28B-A3B-Thinking)、[PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
+
+* 技术要求：熟练掌握 Python；能在 BI-150S 环境中完成应用联调与运行；对所选模型须掌握 文心 API 或本地部署与推理之一。
+* 参考文档：[飞桨 AI Studio](https://aistudio.baidu.com/modelsoverview)、[文心大模型 API 说明](https://ai.baidu.com/ai-doc/AISTUDIO/rm344erns)、[ERNIE-4.5-VL-28B-A3B-Thinking 模型](https://huggingface.co/baidu/ERNIE-4.5-VL-28B-A3B-Thinking)、[PaddleOCR-VL-1.5 模型](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5)
 
 ### 沐曦：优化 PaddleOCR-VL-1.5+Metax GPU
 
@@ -169,28 +196,26 @@
 
 
 
-### 瀚博：基于瀚博载天系列加速卡部署文心 ERNIE-4.5 / PaddleOCR-VL 模型
+### 瀚博：基于瀚博载天系列加速卡部署文心 ERNIE-4.5 / PP-OCRv4 模型
 
-* 技术标签：ERNIE-4.5, PaddleOCR-VL, 瀚博载天(VA1/VA10/VA16/VE1), VACC, Python, 大模型推理, 多模态
+* 技术标签：ERNIE-4.5, PP-OCRv4, 瀚博载天(VA1/VA10/VA16/VE1), VACC, Python, 大模型推理, 多模态
 
-* 详细描述：瀚博半导体（Vastai）载天系列 AI 加速卡覆盖云端推理（VA1、VA10、VA16）、边缘计算（VE1S、VE1M）等场景，基于自研 VUCA 统一计算架构，在视频处理、大模型推理、智能视觉等领域已有广泛部署。本任务面向**已有瀚博硬件资源的开发者和企业用户**，征集基于瀚博载天系列加速卡部署**文心 ERNIE-4.5 系列开源模型**或**PaddleOCR-VL 多模态文档理解模型**的应用 Demo，展示模型在瀚博硬件上的推理效果与性能表现。**说明**：本赛题不提供免费算力资源，需认领者使用自有或所在单位的瀚博硬件环境完成开发。
+* 详细描述：瀚博半导体（Vastai）载天系列 AI 加速卡覆盖云端推理（VA1、VA10、VA16）、边缘计算（VE1S、VE1M）等场景，基于自研 VUCA 统一计算架构，在视频处理、大模型推理、智能视觉等领域已有广泛部署。本任务面向**已有瀚博硬件资源的开发者和企业用户**，征集基于瀚博载天系列加速卡部署**文心 ERNIE-4.5 系列开源模型**或**PP-OCRv4 多模态文档理解模型**的应用 Demo，展示模型在瀚博硬件上的推理效果与性能表现。**说明**：本赛题瀚博提供免费算力资源。
 
-* 可选模型范围：认领者须基于 ERNIE-4.5 系列模型或者 PaddleOCR-VL（任选其一或组合）完成部署。推荐应用场景（非强制，仅供参考）：
+* 可选模型范围：认领者须基于 ERNIE-4.5 系列模型或者 PP-OCRv4（任选其一或组合）完成部署。推荐应用场景（非强制，仅供参考）：
 
 | 场景 | 说明 | 推荐模型 |
 |------|------|---------|
-| **智能文档处理** | 合同/票据/报表的端到端解析，输出结构化数据 | PaddleOCR-VL-1.5 |
+| **智能文档处理** | 合同/票据/报表的端到端解析，输出结构化数据 | PP-OCRv4 |
 | **多模态问答** | 基于图片+文本的视觉问答、图表解读、说明书理解 | ERNIE-4.5-VL-28B-A3B-Thinking |
 | **轻量推理服务** | 在边缘设备上提供大模型对话/摘要/翻译服务 | ERNIE-4.5-0.3B |
-| **文档智能审核** | 论文格式校验、合规性检查、关键信息提取 | PaddleOCR-VL-1.5 + ERNIE-4.5 |
+| **文档智能审核** | 论文格式校验、合规性检查、关键信息提取 | PP-OCRv4 + ERNIE-4.5 |
 | **其他创新场景** | 认领者可自行提出场景，不限于以上列表 | 任一可选模型 |
 
 * 提交内容
   * 第一阶段：方案认领（RFC）。以 Markdown 文件形式提交至 [PaddlePaddle/community](https://github.com/PaddlePaddle/community) 的 `rfcs/hardware` 目录，内容需包含如下四方面。组委会将从报名者中挑选 **1-2 名**合适的认领者，确认后进入第二阶段。
-    1. **方案概述**：选用的模型、应用场景、预期效果
-    2. **硬件环境**：使用的瀚博硬件型号（VA1 / VA10 /VA16/ VE1S / VE1M ）、驱动版本、VACC SDK 版本
-    3. **技术方案**：模型部署路径（直接推理 / 模型转换 / 量化等）、部署架构
-    4. **预期指标**：推理延迟、吞吐量等性能目标
+    1. **简历**：开发者个人信息简介
+    2. **过往项目介绍**：列举开发者参与过的项目概要与贡献
 
  * 第二阶段：代码与 Demo 提交。认领者提交完整的可复现代码和 Demo，以 Notebook (ipynb) 形式提交至 [AI Studio](https://aistudio.baidu.com)。提交物必须包含：
 
@@ -210,7 +235,7 @@ submission/
 
 | 编号 | 验收项 | 验收标准 | 验证方式 |
 |------|--------|---------|---------|
-| V1 | **模型成功运行** | 所选的 ERNIE-4.5 系列或 PaddleOCR-VL 模型在瀚博硬件上成功完成推理，输出结果正确合理 | 运行截图/录屏 + 输出日志 |
+| V1 | **模型成功运行** | 所选的 ERNIE-4.5 系列或 PP-OCRv4 模型在瀚博硬件上成功完成推理，输出结果正确合理 | 运行截图/录屏 + 输出日志 |
 | V2 | **硬件运行证据** | 提供在瀚博硬件上实际运行的截图或录屏，须包含硬件设备信息（如 `vastai-smi` 或等效命令输出），证明确实在瀚博设备上运行 | 截图/录屏审查 |
 | V3 | **环境可复现** | 提供完整的环境配置文档，包括瀚博驱动版本、VACC SDK 版本、Python 依赖列表及安装步骤，使另一台同型号瀚博设备可据此文档复现 | 文档审查 |
 | V4 | **代码完整可运行** | 代码包含从模型下载/加载到推理输出的完整流程，结构清晰，无硬编码绝对路径，有必要的注释和说明 | 代码审查 |
@@ -219,19 +244,19 @@ submission/
 | V7 | **文档质量** | README 包含：(1) 一键运行的快速开始指南；(2) 适配过程中的关键步骤说明；(3) 遇到的问题及解决方案记录 | 文档审查 |
 
 * 参考示例（非强制，仅供启发）：
-  1. **智能文档解析服务**：在 VA1/VA10/VA16 上部署 PaddleOCR-VL-1.5，输入合同/票据图片，输出结构化 JSON（含文字内容、表格、版面结构）。提供 REST API 封装和前端可视化页面。
+  1. **智能文档解析服务**：在 VA1/VA10/VA16 上部署 PP-OCRv4，输入合同/票据图片，输出结构化 JSON（含文字内容、表格、版面结构）。提供 REST API 封装和前端可视化页面。
   2. **多模态视觉问答助手**：在 VA1/VA10/VA16 上部署 ERNIE-4.5-VL-28B-A3B-Thinking，实现"上传图片 + 提问"的交互式视觉问答 Demo，支持图表解读、场景描述等。
   3. **边缘端轻量对话服务**：在 VE1M/VE1S 上部署 ERNIE-4.5-0.3B，提供低延迟的文本摘要/翻译/问答推理服务，展示边缘场景下的实用性。
 
 * 技术要求：
   * 硬件：瀚博载天系列任一型号（VA1 / VA10 /VA16/ VE1S / VE1M ）
-  * 模型：ERNIE-4.5 系列开源模型 或 PaddleOCR-VL-1.5（见可选模型范围）
+  * 模型：ERNIE-4.5 系列开源模型 或 PP-OCRv4（见可选模型范围）
   * 编程语言：Python（主），C++ 可选
   * 操作系统：Linux（Ubuntu 20.04/22.04 推荐）
 
-* 参考文档：[ERNIE-4.5 模型仓库](https://huggingface.co/baidu)，[PaddleOCR-VL](https://github.com/PaddlePaddle/PaddleOCR)，[FastDeploy](https://github.com/PaddlePaddle/FastDeploy)，[Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX)，[瀚博半导体官网](https://www.vastaitech.com)
+* 参考文档：[ERNIE-4.5 模型仓库](https://huggingface.co/baidu)，[PP-OCRv4](https://github.com/PaddlePaddle/PaddleOCR)，[FastDeploy](https://github.com/PaddlePaddle/FastDeploy)，[Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX)，[瀚博半导体官网](https://www.vastaitech.com)
 * 其他说明：
-  1. **算力自备**：本赛题不提供免费算力资源，需认领者使用自有或所在单位的瀚博硬件设备。
+  1. **算力资源**：本赛题瀚博提供免费算力资源。
   2. **认领制**：组委会从第一阶段报名者中挑选 1-2 名认领者，确认后进入开发阶段。满足全部验收标准即可获得奖金。
   3. **硬件真实性**：仅在模拟器或其他硬件上运行的提交不予通过，必须提供瀚博设备上的真实运行证据。
   4. **成果开源**：鼓励认领者将成果以 Apache 2.0 协议开源，优秀方案将有机会合入官方仓库作为社区参考。
@@ -650,3 +675,33 @@ submission/
 	- **deepin 开发者社区**：[deepin 社区论坛](https://bbs.deepin.org/) （可用于获取 deepin 系统相关的开发帮助）
 	- **飞桨星河社区：**[飞桨星河社区链接](https://aistudio.baidu.com/)
 	- **赛题咨询：**[deepin 当前赛题相关咨询、公告等](https://github.com/deepin-mozart/Hackathon-deepin/issues)
+
+## 💎 开源贡献任务
+
+部分合作伙伴特别设立「开源贡献任务」，鼓励开发者在参赛过程中积极发现问题、提出建议（ISSUE）、贡献代码（PR）。您的每一次高质量贡献都可能获得额外奖励！
+
+### 参与厂商
+
+| 厂商 | 奖励内容 | 认定标准 |
+|:--:|---|---|
+| 沐曦 | 额外好礼，价值不低于100元 | 对沐曦 GPU 平台适配有实质性帮助的 Issue/PR |
+| AMD | 额外好礼，价值不低于100元 | 对 AMD GPU 平台适配有实质性帮助的 Issue/PR |
+
+> 💡 更多厂商持续加入中，欢迎关注更新！
+
+### 贡献类型示例
+
+| 类型 | 说明 | 示例 |
+|:--:|---|---|
+| 🐛 Bug 反馈 | 发现平台/工具链中的 Bug，提供复现步骤 | 编译报错、运行时异常、性能问题等 |
+| 💡 功能建议 | 提出有价值的功能改进建议 | 新算子支持、API 改进、文档完善等 |
+| 🔧 代码贡献 | 提交 PR 修复问题或新增功能 | Bug 修复、性能优化、功能实现等 |
+| 📖 文档贡献 | 完善文档、教程、示例代码 | 补充缺失文档、修正错误、添加用例等 |
+
+
+### 评选流程
+
+1. **厂商评审**：厂商工程师对提交的贡献进行评审
+2. **认定标准**：是否对平台/工具有实质性改进价值
+3. **榜单公示**：每两周随动态公示同步更新本榜单
+4. **奖励发放**：活动结束后统一发放
