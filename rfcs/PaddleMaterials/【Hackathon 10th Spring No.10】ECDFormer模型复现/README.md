@@ -3,11 +3,12 @@
 | 所属任务 | 【Hackathon 10th Spring No.10】ECDFormer模型复现 |
 | --- | --- |
 | **提交作者**     | PlumBlossomMaid |
-| **提交时间**     | 2026-02-13 |
-| **版本号**       | V1.0 |
+| **提交时间**     | 2026-02-13 (V1.0) → 2026-06-08 (V2.0) |
+| **版本号**       | V2.0 |
 | **依赖飞桨版本** | paddlepaddle-gpu 3.3.0 |
 | **文件名**       | README.md |
 | **计算平台**     | Windows 10 Python 3.13.1 AMD64 64bit |
+| **PR状态**       | 🎉 已合并至 [PaddleMaterials](https://github.com/PaddlePaddle/PaddleMaterials) 主仓库 |
 
 ## 一、概述
 
@@ -92,13 +93,15 @@ ECFormer/                         # 项目总览
     └── README.md                 # 训练脚本组织说明
 ```
 
-#### 代码落地位置
+#### 代码落地位置（最终合并版）
 
 | 模块 | 代码位置 | 说明 |
 |------|---------|------|
-| **Models** | `ppmat/models/ecformer/` | 包含基类、子类、底层组件 |
-| **Datasets** | `ppmat/datasets/ECDFormerDataset/`<br>`ppmat/datasets/IRDataset/` | 模块自治，通过`__init__.py`导出 |
-| **Train** | `spectrum_elucidation/ECFormer/` | 独立训练脚本，与DiffNMR隔离 |
+| **Models** | `ppmat/models/ecformer/` | 包含基类、子类、底层组件、GNN编码器 |
+| **Datasets** | `ppmat/datasets/ecd_dataset.py`<br>`ppmat/datasets/ir_dataset.py` | 扁平文件结构，collator统一在`collate_fn.py`中 |
+| **数据构建** | `ppmat/datasets/build_ecd.py`<br>`ppmat/datasets/build_ir.py` | 图构建、光谱读取、对映体增强等核心逻辑 |
+| **工具模块** | `ppmat/utils/compound_tools.py`<br>`ppmat/utils/graph_utils.py`<br>`ppmat/utils/PlaceEnv.py` | 特征定义、图填充工具、设备上下文管理器 |
+| **Train** | `spectrum_prediction/` | 独立训练目录，与DiffNMR完全隔离 |
 
 #### 主体设计具体描述
 
@@ -106,9 +109,13 @@ ECFormer/                         # 项目总览
 
 | 模块 | RFC文档 | 代码位置 | 设计哲学 |
 |------|---------|---------|---------|
-| **Models** | `ECFormer/Models/ECFormers.md` | `ppmat/models/ecformer/` | **基类继承 + 子类特化**，模板方法模式固化流程 |
-| **Dataset** | `ECFormer/Dataset/ECD_dataset.md`<br>`ECFormer/Dataset/IR_dataset.md` | `ppmat/datasets/ECDFormerDataset/`<br>`ppmat/datasets/IRDataset/` | **模块自治**，独立处理加载、缓存、DataLoader |
-| **Train** | `ECFormer/Train/README.md` | `spectrum_elucidation/ECFormer/train.py` | **独立训练脚本**，隔离配置，自由演进 |
+| **Models** | `ECFormer/Models/ECFormers.md` | `ppmat/models/ecformer/models/` (base_ecformer.py, ECD.py, IR.py) | **基类继承 + 子类特化**，模板方法模式固化流程 |
+| **Encoders** | `ECFormer/Models/Layers.md` | `ppmat/models/ecformer/encoders/gin_node_embedding.py` | **GINNodeEmbedding**，双图几何增强编码 |
+| **Layers** | `ECFormer/Models/Layers.md` | `ppmat/models/ecformer/layers/` (atom_encoder.py, bond_encoder.py, gin_conv.py, rbf.py) | **纯Tensor输入**，解耦Data对象 |
+| **Dataset ECD** | `ECFormer/Dataset/ECDFormerDataset.md` | `ppmat/datasets/ecd_dataset.py` + `build_ecd.py` | **ECDDataset**类，自动下载+缓存+对映体增强 |
+| **Dataset IR** | `ECFormer/Dataset/IR_dataset.md` | `ppmat/datasets/ir_dataset.py` + `build_ir.py` | **IRDataset**类，三种模式(100/10000/all)按需读取 |
+| **Collator** | - | `ppmat/datasets/collate_fn.py` (ECDCollator, IRCollator) | 继承DefaultCollator，解包Data为Tensor字典 |
+| **Train** | `ECFormer/Train/README.md` | `spectrum_prediction/train.py` + `configs/ecd.yaml` + `configs/ir.yaml` | 独立训练脚本，OmegaConf配置，ECFormerTrainer |
 
 #### 命名哲学：为何使用`ECFormer*`而非`ECDFormer*`
 
@@ -142,9 +149,9 @@ ECFormer/                         # 项目总览
 
 #### 核心设计对应的直接接口变化
 - **新增模型API**：`from ppmat.models.ecformer import ECFormerECD, ECFormerIR`
-- **新增数据集API**：`from ppmat.datasets import ECDFormerDataset, IRDataset`
-- **新增数据加载器API**：`from ppmat.datasets import ECDFormerDataLoader, IRDataLoader`
-- **新增模型训练逻辑**：`spectrum_elucidation/ECFormer/train.py`
+- **新增数据集API**：`from ppmat.datasets import ECDDataset, IRDataset`
+- **新增数据加载方式**：通过`ppmat.datasets.build_dataloader`工厂函数，配置`collate_fn: ECDCollator`或`collate_fn: IRCollator`
+- **新增模型训练逻辑**：`spectrum_prediction/train.py`
 
 #### 对框架各环节的影响排查
 - **网络定义**：✅ 无影响，继承`nn.Layer`标准范式
@@ -175,23 +182,24 @@ ECFormer/                         # 项目总览
 ## 七、影响面
 
 ### 对用户的影响
-- **正向影响**：开箱即用，秒级加载，工业级精度。用户只需3行代码即可体验SOTA谱图预测：
+- **正向影响**：开箱即用，秒级加载，工业级精度。配合数据集自动下载机制，用户只需配置数据路径和模型参数即可运行完整训练流程。
   ```python
-  from ppmat.datasets import ECDFormerDataset
+  from ppmat.datasets import ECDDataset
   from ppmat.models.ecformer import ECFormerECD
-  dataset = ECDFormerDataset("./data")
-  model = ECFormerECD()  # 预训练权重自动加载
+  dataset = ECDDataset(data_path="./data")  # 自动下载
+  model = ECFormerECD(...)
   ```
+- **体验优化**：数据集支持`download=True`自动下载，ECD与IR数据集均提供MD5校验。用户无需手动准备数据。
 
 ### 对二次开发用户的影响
-- **新增暴露的API**：`ECFormerBase`（供实现新谱图任务继承）、`ECFormerECD`/`ECFormerIR`（供终端用户实例化）、`ECDFormerDataset`/`IRDataset`。
-- **扩展成本**：新增谱图任务（如质谱）只需继承 `ECFormerBase` 并实现 3 个方法，新增数据集只需参考 `ECDFormerDataset` 模板。
+- **新增暴露的API**：`ECFormerBase`（供实现新谱图任务继承）、`ECFormerECD`/`ECFormerIR`（供终端用户实例化）、`ECDDataset`/`IRDataset`。
+- **扩展成本**：新增谱图任务（如质谱）只需继承 `ECFormerBase` 并实现 3 个方法，新增数据集只需参考 `ECDDataset` 模板。
 
 ### 对框架架构的影响
-- 为 `ppmat/models` 新增 `ecformer` 模型家族，与 `diffnmr` 等并列。
-- 为 `ppmat/datasets` 新增两个自治模块，验证了“模块自治”设计模式的可行性。
-- `place_env.py` 中的设备上下文管理器有潜力贡献给 Paddle 主框架。
-- 为`spectrum_elucidation`新增独立训练目录
+- 为 `ppmat/models` 新增 `ecformer` 模型家族（含 `encoders/`、`layers/`、`models/` 三层架构），与 `diffnmr` 等并列。
+- 为 `ppmat/datasets` 新增 `ecd_dataset.py` 和 `ir_dataset.py`，配套 `build_ecd.py`、`build_ir.py` 数据构建模块及 `ECDCollator`/`IRCollator`。
+- `place_env.py` 中的设备上下文管理器 `PlaceEnv` 贡献至 `ppmat/utils/` 目录。
+- 为 `spectrum_prediction` 新增独立训练目录（含 `train.py` + 配置文件），不从属于 `spectrum_elucidation`。
 
 ### 对性能的影响
 | 数据集 | 首次加载 | 二次加载 | **收益** |
@@ -206,7 +214,8 @@ ECFormer/                         # 项目总览
 | 代码质量 | 冗余、耦合 | **高内聚、低耦合** | ✅ 维护成本降低 70% |
 | 模型部署 | 需依赖 `torch.jit`，图结构数据难导出 | **原生静态图支持** | ✅ 生产可用 |
 | 任务扩展 | 复制修改全文件 | **继承基类，新增 <100 行** | ✅ 效率提升 90% |
-| 数据加载 | 分散、低效 | **模块自治 + 缓存** | ✅ 用户时间节省 99% |
+| 数据加载 | 分散、低效 | **扁平文件 + 缓存 + 自动下载** | ✅ 用户时间节省 99% |
+| 训练流程 | 耦合在单文件 | **独立训练目录 + OmegaConf配置 + ECFormerTrainer** | ✅ 工程化就绪 |
 
 ### 其他风险
 **无**。所有代码已完成开发与精度对齐，本设计文档是对已完成工作的系统性总结。
@@ -224,7 +233,10 @@ ECFormer/                         # 项目总览
 | 对接原数据集并测试训练 | 2026年2月12日晚上 | ✅ 已完成 |
 | 完善数据集加载相关代码 | 2026年2月13日下午 | ✅ 已完成 |
 | 根据模型新结构设计文档 | 2026年2月14日凌晨 | ✅ 已完成 |
-| 等待官方回复并进行调整 | 2026年2月 | ❓ 看父母管得严不严 |
+| 等待官方回复并进行调整 | 2026年2月 | ✅ 已完成 |
+| PR评审与修改 | 2026年3-5月 | ✅ 已完成 |
+| **🎉 PR合入PaddleMaterials主仓库** | **2026年** | **✅ 已合并** |
+| RFC文档更新（V1.0 → V2.0） | 2026年6月8日 | ✅ 已完成 |
 
 ## 名词解释
 

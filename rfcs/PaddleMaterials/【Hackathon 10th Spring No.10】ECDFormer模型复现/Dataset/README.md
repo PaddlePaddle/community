@@ -3,11 +3,12 @@
 | 所属任务 | 【Hackathon 10th Spring No.10】ECDFormer模型复现 |
 | --- | --- |
 | **提交作者**     | PlumBlossomMaid |
-| **提交时间**     | 2026-02-14 |
-| **版本号**       | 1.0 |
+| **提交时间**     | 2026-02-14 (V1.0) → 2026-06-08 (V2.0) |
+| **版本号**       | 2.0 |
 | **依赖飞桨版本** | paddlepaddle-gpu 3.3.0 |
 | **文件名** | README.md |
 | **计算平台**     | Windows 10 Python 3.13.1 AMD64 64bit |
+| **PR状态**       | 🎉 已合并至 [PaddleMaterials](https://github.com/PaddlePaddle/PaddleMaterials) |
 
 ---
 
@@ -93,107 +94,109 @@ def build_dataloader(cfg: Dict):
 
 ### 1、主体设计思路
 
-#### 整体架构图
+#### 最终合并的目录结构
 
 ```
 ppmat/datasets/
-├── __init__.py                 # 统一导出所有数据集
-├── collate_fn.py               # 框架通用collator（保持不变）
-├── msd_nmr_dataset.py          # 已有NMR数据集
-├── ... (其他数据集)
-├── ECDFormerDataset/           # ECD数据集模块（自治）
-│   ├── __init__.py             # 导出ECDFormerDataset和ECDFormerDataLoader
-│   ├── dataloader.py           # 自定义DataLoader + collate_fn
-│   ├── compound_tools.py       # 分子特征提取工具
-│   ├── eval_func.py            # 峰值检测等评估函数
-│   ├── util_func.py            # 归一化等工具函数
-│   ├── place_env.py            # 设备上下文管理器
-│   └── colored_tqdm.py         # 彩虹进度条（美化）
-└── IRDataset/                   # IR数据集模块（自治）
-    ├── __init__.py             # 导出IRDataset和IRDataLoader
-    ├── compound_tools.py       # 复用ECD的分子工具（或独立实现）
-    ├── place_env.py            # 设备上下文管理器（复用）
-    └── colored_tqdm.py         # 彩虹进度条（复用）
+├── __init__.py                 # 统一导出，新增ECDDataset, IRDataset
+├── collate_fn.py               # 新增ECDCollator, IRCollator
+├── ecd_dataset.py              # ECD数据集（核心文件）
+├── ir_dataset.py               # IR数据集（核心文件）
+├── build_ecd.py                # ECD图构建&光谱读取&对映体增强
+├── build_ir.py                 # IR图构建&光谱读取
+├── geometric_data_type/        # 自定义Data/Batch类型
+│   ├── data.py
+│   └── batch.py
+├── transform/                  # 预处理/后处理变换
+│   ├── preprocess.py
+│   ├── post_process.py
+│   └── dataset.py
+└── ... (其他已有数据集)
+
+ppmat/utils/                    # 共享工具模块
+├── compound_tools.py           # 原子/键特征维度定义
+├── graph_utils.py              # pad_node_features, feat_padding_mask
+└── PlaceEnv.py                 # 设备上下文管理器
 ```
 
-#### 模块自治的核心设计
+#### 从"模块自治"到"扁平文件"的设计演进
 
-每个数据集模块都是**独立、完整、可插拔**的：
+RFC V1.0 提出了"模块自治"设计理念——每个数据集是一个独立 Python 包（含自己的 `__init__.py`, `dataloader.py`, `compound_tools.py` 等）。在最终的PR合入过程中，经过与PaddleMaterials维护团队的沟通，采用了**扁平文件结构**，核心考量如下：
 
-```python
-# ECDFormerDataset/__init__.py
-from .dataloader import ECDFormerDataLoader
-from . import ECDFormerDataset
+| 对比项 | 模块自治（V1.0设计） | **扁平文件（最终合并）** | 选型原因 |
+|-------|-------------------|----------------------|---------|
+| 文件结构 | 每个数据集一个目录 | **每个数据集一个文件** | ✅ 维护者更习惯PaddleMaterials既有风格 |
+| collator | 数据集自带DataLoader | **统一在`collate_fn.py`** | ✅ 与框架`build_dataloader`工厂函数兼容 |
+| 共享工具 | 各数据集各自维护 | **集中到`ppmat/utils/`** | ✅ 避免重复代码，便于其他数据集复用 |
+| 扩展成本 | 新建目录+注册 | **新建文件+注册** | 成本相当 |
+| 数据构建 | 放在数据集包内 | **独立为`build_ecd.py`/`build_ir.py`** | ✅ 职责分离，数据集类更简洁 |
 
-__all__ = ['ECDFormerDataset', 'ECDFormerDataLoader']
-
-# IRDataset/__init__.py  
-from . import IRDataset, IRDataLoader
-
-__all__ = ['IRDataset', 'IRDataLoader']
-
-# ppmat/datasets/__init__.py
-from ppmat.datasets.ECDFormerDataset import ECDFormerDataset, ECDFormerDataLoader
-from ppmat.datasets.IRDataset import IRDataset, IRDataLoader
-
-__all__ += ['ECDFormerDataset', 'ECDFormerDataLoader', 'IRDataset', 'IRDataLoader']
-```
+**核心设计原则不变**：
+- ✅ 自定义collate_fn将Data解包为Tensor字典
+- ✅ 类级别缓存（`_cache`模块变量）
+- ✅ 按需读取（IR只读index_all中的文件）
+- ✅ `PlaceEnv`设备上下文管理器
 
 ### 2、关键技术点
 
-#### 技术点1：自定义DataLoader与collate_fn
+#### 技术点1：自定义Collator（最终采用`collate_fn.py`集成方案）
 
-每个数据集模块实现自己的 `DataLoader` 子类，包含解包逻辑：
+最终合入版本中，collator通过`ppmat/datasets/collate_fn.py`中的`ECDCollator`和`IRCollator`实现，继承自`DefaultCollator`，通过`build_dataloader`工厂函数使用：
 
 ```python
-class ECDFormerDataLoader(DataLoader):
-    def __init__(self, dataset, batch_size=64, shuffle=True, **kwargs):
-        super().__init__(
-            dataset=dataset,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            collate_fn=self._collate_fn,
-            **kwargs
+# collate_fn.py
+class ECDCollator(DefaultCollator):
+    def __call__(self, batch):
+        batch = [list(x) for x in zip(*batch)]  # transpose
+        for i in range(len(batch)):
+            batch[i] = Batch.from_data_list(batch[i])
+
+        batch_atom_bond, batch_bond_angle = batch[0], batch[1]
+        # 解包为Tensor字典（静态图就绪！）
+        return (
+            {
+                "x": batch_atom_bond.x,
+                "edge_index": batch_atom_bond.edge_index,
+                "edge_attr": batch_atom_bond.edge_attr,
+                "batch_data": batch_atom_bond.batch,
+                "ba_edge_index": batch_bond_angle.edge_index,
+                "ba_edge_attr": batch_bond_angle.edge_attr,
+                "query_mask": batch_atom_bond.query_mask,
+            },
+            {
+                "peak_number": batch_atom_bond.peak_num,
+                "peak_position": batch_atom_bond.peak_position,
+                "peak_height": batch_atom_bond.peak_height,
+            },
         )
-    
-    @staticmethod
-    def _collate_fn(batch):
-        # 1. 分别batch化两个图
-        batch_atom_bond = Batch.from_data_list([item[0] for item in batch])
-        batch_bond_angle = Batch.from_data_list([item[1] for item in batch])
-        
-        # 2. 解包为Tensor字典（静态图就绪！）
-        return {
-            "x": batch_atom_bond.x,
-            "edge_index": batch_atom_bond.edge_index,
-            "edge_attr": batch_atom_bond.edge_attr,
-            "batch_data": batch_atom_bond.batch,
-            "ba_edge_index": batch_bond_angle.edge_index,
-            "ba_edge_attr": batch_bond_angle.edge_attr,
-            "query_mask": batch_atom_bond.query_mask
-        }, {
-            "peak_number_gt": batch_atom_bond.peak_num,
-            "peak_position_gt": batch_atom_bond.peak_position,
-            "peak_height_gt": batch_atom_bond.peak_height
-        }
 ```
 
-**收益**：模型可直接接收Tensor字典，完美支持 `paddle.jit.to_static`。
+**与V1.0设计的差异**：不再为每个数据集单独定义`DataLoader`子类，而是定义`Collator`类，通过配置文件中的`collate_fn`参数指定：
 
+```yaml
+# configs/ecd.yaml
+Dataset:
+  train:
+    loader:
+      collate_fn: ECDCollator  # 使用ECDCollator
+```
+        
 #### 技术点2：类级别缓存
 
 ```python
-class ECDFormerDataset(Dataset):
-    _cache = None  # 类级别缓存
-    
-    def __init__(self, path, ...):
-        if self._cache:
-            self.graph_atom_bond, self.graph_bond_angle = self._cache
-            return
-        # ... 首次加载 ...
-        self._cache = (self.graph_atom_bond, self.graph_bond_angle)
-```
+# ecd_dataset.py
+_cache = ()  # 模块级别缓存元组
 
+class ECDDataset(Dataset):
+    @PlaceEnv(paddle.CPUPlace())
+    def _build_graph_dataset(self):
+        global _cache
+        if len(_cache) > 0:
+            self.graph_atom_bond, self.graph_bond_angle = _cache
+            return
+        # ... 首次加载图数据 ...
+        _cache = (self.graph_atom_bond, self.graph_bond_angle)
+```
 **收益**：用户创建train/val/test三个数据集实例时，只有第一次需要等待（30-60秒），后两次瞬间返回。
 
 #### 技术点3：按需读取（IRDataset关键优化）
@@ -223,16 +226,12 @@ def __init__(self, ...):
 
 ```python
 # 用户代码中可直接导入使用
-from ppmat.datasets import ECDFormerDataset, ECDFormerDataLoader
-from ppmat.datasets import IRDataset, IRDataLoader
+from ppmat.datasets import ECDDataset, IRDataset
 
-# ECD数据集
-ecd_dataset = ECDFormerDataset(path="./dataset/ECD")
-ecd_loader = ECDFormerDataLoader(ecd_dataset, batch_size=32)
-
+# ECD数据集（自动下载+缓存）
+ecd_dataset = ECDDataset(data_path="./dataset/ECD")
 # IR数据集（默认100样本快速测试）
-ir_dataset = IRDataset(path="./dataset/IR", mode='100')
-ir_loader = IRDataLoader(ir_dataset, batch_size=64)
+ir_dataset = IRDataset(data_path="./dataset/IR", mode='100')
 ```
 
 #### 对框架各环节的影响排查

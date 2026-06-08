@@ -3,11 +3,12 @@
 | 所属任务 | 【Hackathon 10th Spring No.10】ECDFormer模型复现 |
 | --- | --- |
 | **提交作者**     | PlumBlossomMaid |
-| **提交时间**     | 2026-02-13 |
-| **版本号**       | 1.0 |
+| **提交时间**     | 2026-02-13 (V1.0) → 2026-06-08 (V2.0) |
+| **版本号**       | 2.0 |
 | **依赖飞桨版本** | paddlepaddle-gpu 3.3.0 |
 | **文件名**       | Layers.md |
 | **计算平台**     | Windows 10 Python 3.13.1 AMD64 64bit |
+| **PR状态**       | 🎉 已合并至 [PaddleMaterials](https://github.com/PaddlePaddle/PaddleMaterials) |
 
 ---
 
@@ -225,3 +226,8 @@ ppmat/models/ecformer/layers/
 3. PaddlePaddle Issue #77754：DataLoader cannot return non-Tensor data when using multi-process mode. https://github.com/PaddlePaddle/Paddle/issues/77754
 4. Paddle Geometric文档：https://github.com/PaddlePaddle/Paddle-Geometric
 5. 本方案代码位置：`PaddleMaterials/ppmat/models/ecformer/layers/`
+   - `atom_encoder.py` - 原子特征编码器 (AtomEncoder)
+   - `bond_encoder.py` - 键特征编码器 (BondEncoder)
+   - `rbf.py` - RBF/连续特征编码器 (RBF, BondFloatRBF, BondAngleFloatRBF)
+   - `gin_conv.py` - GIN卷积层 (GINConv, 基于ppmat自定义MessagePassing)
+   - 配套编码器：`encoders/gin_node_embedding.py` (GINNodeEmbedding, 含双图几何增强)

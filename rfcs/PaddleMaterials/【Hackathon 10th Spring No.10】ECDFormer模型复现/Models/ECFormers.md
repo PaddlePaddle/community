@@ -3,11 +3,12 @@
 | 所属任务 | 【Hackathon 10th Spring No.10】ECDFormer模型复现 |
 | --- | --- |
 | **提交作者**     | PlumBlossomMaid |
-| **提交时间**     | 2026-02-13 |
-| **版本号**       | V1.0 |
+| **提交时间**     | 2026-02-13 (V1.0) → 2026-06-08 (V2.0) |
+| **版本号**       | V2.0 |
 | **依赖飞桨版本** | paddlepaddle-gpu 3.3.0 |
 | **文件名**       | ECFormers.md |
 | **计算平台**     | Windows 10 Python 3.13.1 AMD64 64bit |
+| **PR状态**       | 🎉 已合并至 [PaddleMaterials](https://github.com/PaddlePaddle/PaddleMaterials) |
 
 ---
 
@@ -129,20 +130,35 @@ def forward(self,
 ```python
 # ECD子类
 class ECFormerECD(ECFormerBase):
-    def __init__(self, **kwargs):
-        kwargs['max_peaks'] = 9
-        kwargs['num_position_classes'] = 20
-        kwargs['num_height_classes'] = 2
+    def __init__(self, num_position_classes=20, height_classes=2, **kwargs):
         super().__init__(**kwargs)
-        # ... 初始化预测头
+        # 峰数预测头：输出 [batch, max_peaks] (ECD: max_peaks=9)
+        self.pred_number_layer = nn.Sequential(
+            nn.Linear(self.emb_dim, self.emb_dim * 2),
+            nn.ReLU(),
+            nn.Linear(self.emb_dim * 2, self.max_peaks)
+        )
+        # 峰位置预测头：20个位置类别
+        self.pred_position_layer = nn.Sequential(...)
+        # 峰符号预测头：2分类(正/负)
+        self.pred_height_layer = nn.Sequential(...)
 
-# IR子类  
+# IR子类
 class ECFormerIR(ECFormerBase):
-    def __init__(self, **kwargs):
-        kwargs['max_peaks'] = 15
-        kwargs['num_position_classes'] = 36
-        kwargs['num_height_classes'] = 1  # 回归
+    def __init__(self, num_position_classes=36, use_height_prediction=True, **kwargs):
+        kwargs['max_peaks'] = kwargs.get('max_peaks', 15)
         super().__init__(**kwargs)
+        # 峰数预测头：输出 [batch, max_peaks+1] (IR输出含0峰情况)
+        self.pred_number_layer = nn.Sequential(
+            nn.Linear(self.emb_dim, self.emb_dim * 2),
+            nn.ReLU(),
+            nn.Linear(self.emb_dim * 2, self.max_peaks + 1)
+        )
+        # 峰位置预测头：36个波数区间
+        self.pred_position_layer = nn.Sequential(...)
+        # 峰强度预测头：1维回归 (不使用height_classes参数)
+        if use_height_prediction:
+            self.pred_height_layer = nn.Sequential(...)
 ```
 **选型考量**：此方案**比在基类中暴露大量任务开关更清晰**。新增任务（如质谱）时，开发者只需新建子类，**无需修改基类代码**，符合开闭原则。
 
@@ -164,20 +180,33 @@ def get_metrics(self, predictions, targets):
 
 #### 直接接口变化（新增）
 ```python
-# 用户代码中可直按导入使用
+# 用户代码中可直接导入使用
 from ppmat.models.ecformer import ECFormerECD, ECFormerIR
 
+# ECD模型：emb_dim=256, num_layers=5, max_node_num=63
 model_ecd = ECFormerECD(
-    full_atom_feature_dims=...,
-    full_bond_feature_dims=...,
-    emb_dim=128,
-    num_layers=5
+    full_atom_feature_dims=[119, 9, 12, 14, 17, 9, 14, 2, 10],
+    full_bond_feature_dims=[8, 23, 3],
+    bond_float_names=['bond_length'],
+    bond_angle_float_names=['bond_angle'],
+    bond_id_names=['bond_type'],
+    emb_dim=256,
+    num_layers=5,
+    num_position_classes=20,  # ECD: 20个位置类别
+    height_classes=2         # ECD: 2分类(正/负)
 )
 
+# IR模型：emb_dim=128, max_peaks=15
 model_ir = ECFormerIR(
-    full_atom_feature_dims=...,
-    full_bond_feature_dims=...,
-    emb_dim=256,
+    full_atom_feature_dims=[119, 9, 12, 14, 17, 9, 14, 2, 10],
+    full_bond_feature_dims=[8, 23, 3],
+    bond_float_names=['bond_length'],
+    bond_angle_float_names=['bond_angle'],
+    bond_id_names=['bond_type'],
+    emb_dim=128,
+    num_layers=5,
+    num_position_classes=36,  # IR: 36个波数区间
+    max_peaks=15,
     use_geometry_enhanced=False
 )
 ```

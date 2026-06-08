@@ -3,11 +3,12 @@
 | 所属任务 | 【Hackathon 10th Spring No.10】ECDFormer模型复现 |
 | --- | --- |
 | **提交作者**     | PlumBlossomMaid |
-| **提交时间**     | 2026-02-13 |
-| **版本号**       | V1.0 |
+| **提交时间**     | 2026-02-13 (V1.0) → 2026-06-08 (V2.0) |
+| **版本号**       | V2.0 |
 | **依赖飞桨版本** | paddlepaddle-gpu 3.3.0 |
 | **文件名**       | README.md |
 | **计算平台**     | Windows 10 Python 3.13.1 AMD64 64bit |
+| **PR状态**       | 🎉 已合并至 [PaddleMaterials](https://github.com/PaddlePaddle/PaddleMaterials) |
 
 ---
 
@@ -93,29 +94,33 @@ ECFormer是**纯监督学习模型**，需求完全不同：
 
 ---
 
-## 三、解决方案：独立目录、隔离运行、尊重原作
+## 三、最终方案：独立目录`spectrum_prediction/`
 
-### 3.1 目录重构方案
+经过与PaddleMaterials维护团队的沟通，最终采用**独立目录`spectrum_prediction/`**作为ECFormer的训练入口，而不改动原有的`spectrum_elucidation/`目录结构。这个决策的关键原因如下：
+
+| 原方案（V1.0） | **最终方案（V2.0）** | 选型原因 |
+|---------------|---------------------|---------|
+| 在`spectrum_elucidation/`下新建`ECFormer/`子目录 | **新建`spectrum_prediction/`顶层目录** | ✅ 零侵入既有结构，DiffNMR完全不受影响 |
+| 移动DiffNMR至子目录 | **DiffNMR保持不变** | ✅ 避免对既有贡献者的影响 |
+| 共享`spectrum_elucidation/`命名空间 | **完全独立的任务目录** | ✅ 清晰区分"结构与谱图互映射"(elucidation)与"从结构预测谱图"(prediction) |
+
+### 3.1 目录结构
 
 ```
-spectrum_elucidation/
-├── README.md                    # 谱图解析任务总览
-├── DiffNMR/                    # ✅ 原有DiffNMR模型保持不动
-│   ├── configs/
-│   ├── models/
-│   ├── train.py                 # 原train.py移至此
-│   ├── README.md                # 说明文档
-│   └── ...
-└── ECFormer/                   # ✅ 新增ECFormer独立目录
-    ├── configs/
-    │   ├── ecformer_ecd.yaml    # ECD任务配置
-    │   └── ecformer_ir.yaml     # IR任务配置
-    ├── data/                    # 数据集放置处
-    ├── train.py                 # ✅ ECFormer专用训练脚本
-    ├── test.py                  # 测试脚本
-    ├── README.md                # 说明文档
-    └── ...
+spectrum_prediction/                # ✅ ECFormer专用训练目录（V2.0最终版）
+├── README.md                       # 说明文档
+├── train.py                        # 主训练脚本（argparse+OmegaConf）
+├── test.py                         # 测试脚本
+├── configs/
+│   ├── ecd.yaml                    # ECD训练配置
+│   └── ir.yaml                     # IR训练配置
+└── data/                           # 数据集放置处（或使用自动下载）
 ```
+
+**与V1.0设计的关键差异**：
+1. **全新的顶层目录**：`spectrum_prediction/`不从属于`spectrum_elucidation/`，是两个并列的一级目录
+2. **DiffNMR不变**：`spectrum_elucidation/`下的DiffNMR代码未做任何移动或修改
+3. **配置驱动**：通过OmegaConf + YAML配置文件管理所有超参数
 
 ### 3.2 设计原则
 
@@ -143,75 +148,114 @@ Model:
 
 ---
 
-## 四、ECFormer训练脚本设计
+## 四、ECFormer训练脚本设计（V2.0最终版）
 
-### 4.1 整体架构
-> 此脚本为初步设想，后续具体实现需根据官方回复进行调整
+### 4.1 实际合入代码
 
 ```python
-# spectrum_elucidation/ECFormer/train.py
+# spectrum_prediction/train.py（实际合入版本）
 
 def main():
-    # 1. 加载配置
-    config = OmegaConf.load(args.config)
-    
-    # 2. 构建数据集（直接使用ECFormer专用Dataset）
-    train_dataset = ECFormerECDDataset(config.DATA.ROOT)
-    val_dataset = ECFormerECDDataset(config.DATA.ROOT, split='val')
-    
-    # 3. 构建DataLoader（使用专用collate_fn）
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.DATA.BATCH_SIZE,
-        collate_fn=ecformer_collate_fn  # ✅ 返回Tensor字典
+    # 1. 加载配置（argparse + OmegaConf）
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", type=str, default="./configs/ecd.yaml")
+    parser.add_argument("--resume", type=str, default=None)
+    parser.add_argument("--eval-only", action="store_true")
+    parser.add_argument("--test-only", action="store_true")
+    parser.add_argument("--predict", type=str, default=None)
+
+    # 2. 构建数据集（通过build_dataloader工厂函数）
+    dataloaders["train"] = build_dataloader(train_cfg)
+    dataloaders["val"] = build_dataloader(val_cfg)
+
+    # 3. 构建模型（通过build_model工厂函数）
+    model = build_model(model_cfg)
+
+    # 4. 构建优化器（通过build_optimizer工厂函数）
+    optimizer, lr_scheduler = build_optimizer(...)
+
+    # 5. ECFormerTrainer 统一管理训练/评估/预测
+    trainer = ECFormerTrainer(
+        config=config["Trainer"],
+        model=model,
+        train_dataloader=dataloaders.get("train"),
+        val_dataloader=dataloaders.get("val"),
+        optimizer=optimizer,
+        lr_scheduler=lr_scheduler,
     )
-    
-    # 4. 构建模型
-    model = ECFormerECD(**config.MODEL)
-    
-    # 5. 训练循环（标准监督学习）
-    for epoch in range(config.TRAIN.EPOCHS):
-        for batch in train_loader:
-            predictions = model(**batch)  # ✅ 纯Tensor输入
-            loss = model.get_loss(predictions, batch)
-            loss.backward()
-            optimizer.step()
+
+    # 6. 执行训练/评估/测试/预测
+    if do_train: trainer.train()
+    if do_eval: trainer.eval(dataloaders["val"])
+    if do_test: trainer.eval(dataloaders["test"])
+    if do_predict: trainer.predict(dataloaders["predict"])
 ```
 
-### 4.2 与DiffNMR训练脚本的对比
+### 4.2 与V1.0设计的差异
 
-| 维度 | DiffNMR训练脚本 | **ECFormer训练脚本** | **优势** |
-|------|----------------|---------------------|---------|
-| 代码复杂度 | ~200行（含大量预处理） | **预估 \~80行** | 简洁、易读 |
-| 依赖模块 | `ExtraFeatures`, `CLIP`, `MolecularVisualization` | **仅依赖模型自身** | 零耦合 |
-| 数据加载 | 需通过`build_dataloader`工厂 | **直接使用Dataset** | 透明可控 |
-| 模型调用 | 需通过`build_model`工厂 | **直接实例化** | 便于调试 |
-| 扩展新任务 | 需修改工厂函数 | **直接继承Dataset** | 灵活 |
+| 维度 | V1.0设计 | **V2.0最终版** | 原因 |
+|------|---------|---------------|------|
+| 脚本位置 | `spectrum_elucidation/ECFormer/train.py` | **`spectrum_prediction/train.py`** | 独立顶层目录 |
+| 数据加载 | 直接实例化DataLoader | **通过`build_dataloader`工厂函数** | 与PaddleMaterials框架集成 |
+| 模型构建 | 直接实例化ECFormerECD | **通过`build_model`工厂函数** | 支持配置驱动 |
+| 优化器 | 直接在脚本中定义 | **通过`build_optimizer`工厂函数** | 统一管理 |
+| 训练循环 | 自定义训练循环 | **ECFormerTrainer类** | 复用框架基础设施 |
+| 配置管理 | 简单dict | **OmegaConf + YAML** | 灵活、可嵌套、支持命令行覆盖 |
+| 训练模式 | 仅训练 | **支持train/eval/test/predict四种模式** | 更完整的生命周期 |
 
-### 4.3 关键创新：纯Tensor输入
+### 4.3 配置示例
 
-受Paddle [Issue #77754](https://github.com/PaddlePaddle/Paddle/issues/77754)影响，ECFormer训练脚本采用**纯Tensor输入**设计：
+```yaml
+# spectrum_prediction/configs/ecd.yaml
+Global:
+  do_train: True
+  do_eval: True
+
+Dataset:
+  train:
+    dataset:
+      __class_name__: ECDDataset
+      __init_params__:
+        data_path: ./data/ECD
+    loader:
+      batch_size: 128
+      collate_fn: ECDCollator
+
+Model:
+  __class_name__: ECFormerECD
+  __init_params__:
+    emb_dim: 256
+    num_layers: 5
+
+Optimizer:
+  __class_name__: AdamW
+  __init_params__:
+    learning_rate: 0.001
+
+Trainer:
+  output_dir: ./output/ecd
+  max_epochs: 100
+```
+
+### 4.4 纯Tensor输入（核心设计原则不变）
+
+Paddle [Issue #77754](https://github.com/PaddlePaddle/Paddle/issues/77754) 的影响持续到最终版本。ECFormer坚持**纯Tensor输入**设计：
 
 ```python
 # DataLoader返回的是Tensor字典，而非Data对象
-batch = {
-    'x': paddle.Tensor,           # [N, F]
-    'edge_index': paddle.Tensor,  # [2, E]
-    'edge_attr': paddle.Tensor,   # [E, D]
-    'batch': paddle.Tensor,       # [N]
-    'peak_num': paddle.Tensor,    # [B]
-    'peak_position': paddle.Tensor, # [B, 9]
-    'peak_height': paddle.Tensor,   # [B, 9]
-    'query_mask': paddle.Tensor,    # [B, 9]
-}
-
-# 模型直接接收解包后的Tensor
-predictions = model(**batch)  # ✅ 静态图完美支持
+# ECDCollator负责解包
+return (
+    {
+        "x": x, "edge_index": edge_index, "edge_attr": edge_attr,
+        "batch_data": batch_data,
+        "ba_edge_index": ba_edge_index, "ba_edge_attr": ba_edge_attr,
+        "query_mask": query_mask,
+    },
+    {
+        "peak_number": num_gt, "peak_position": pos_gt, "peak_height": height_gt,
+    },
+)
 ```
-
-**意义**：
-- **静态图就绪**：可无缝执行`paddle.jit.to_static`
-- **调试友好**：Tensor形状一目了然
 
 ---
 
@@ -223,23 +267,30 @@ predictions = model(**batch)  # ✅ 静态图完美支持
 PaddleMaterials/
 ├── ppmat/                          # 核心库（安装后存在）
 │   ├── datasets/
-│   │   ├── ECDFormer_dataset/      # ECFormer数据集实现
-│   │   └── ...              
-│   └── models/
-│       ├── ecformer/               # ECFormer模型实现
-│       └── ...             
-├── spectrum_elucidation/           # 谱图解析任务示例
-│   ├── DiffNMR/                    # DiffNMR示例（原样保留）
-│   │   ├── configs/
-│   │   ├── train.py
+│   │   ├── ecd_dataset.py          # ECDDataset
+│   │   ├── ir_dataset.py           # IRDataset
+│   │   ├── build_ecd.py            # ECD数据构建
+│   │   ├── build_ir.py             # IR数据构建
+│   │   ├── collate_fn.py           # ECDCollator, IRCollator
 │   │   └── ...
-│   └── ECFormer/                   # ECFormer示例（新增）
-│       ├── configs/
-│       ├── data/
-│       ├── train.py
-│       ├── test.py
-│       ├── README.md
-│       └── ...
+│   ├── models/
+│   │   ├── ecformer/               # ECFormer模型实现
+│   │   │   ├── models/             # base_ecformer.py, ECD.py, IR.py
+│   │   │   ├── encoders/           # GINNodeEmbedding
+│   │   │   └── layers/             # AtomEncoder, BondEncoder, GINConv, RBF
+│   │   └── ...
+│   └── utils/
+│       ├── compound_tools.py       # 特征维度定义
+│       ├── graph_utils.py          # 图填充工具
+│       └── PlaceEnv.py             # 设备上下文管理器
+├── spectrum_prediction/            # ✅ ECFormer训练入口
+│   ├── train.py
+│   ├── configs/
+│   │   ├── ecd.yaml
+│   │   └── ir.yaml
+│   └── README.md
+├── spectrum_elucidation/           # 原DiffNMR目录（未改动）
+│   └── ...
 └── ...
 ```
 
@@ -278,14 +329,14 @@ PaddleMaterials/
 
 ### 7.1 对现有DiffNMR用户的影响
 
-**无影响**。DiffNMR代码仅被移动位置，未修改一行。原训练命令需调整路径：
+**无影响**。DiffNMR代码未被修改或移动，原有的训练命令完全不变：
 
 ```bash
-# 原命令（不再有效）
+# 原命令仍然有效
 python spectrum_elucidation/train.py -c spectrum_elucidation/configs/DiffNMR.yaml
 
-# 新命令
-python spectrum_elucidation/DiffNMR/train.py -c spectrum_elucidation/DiffNMR/configs/DiffNMR.yaml
+# ECFormer使用独立训练命令
+python spectrum_prediction/train.py -c spectrum_prediction/configs/ecd.yaml
 ```
 
 ### 7.2 对ECFormer用户的影响

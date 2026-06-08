@@ -3,11 +3,12 @@
 | 所属任务 | 【Hackathon 10th Spring No.10】ECDFormer模型复现 |
 | --- | --- |
 | **提交作者**     | PlumBlossomMaid |
-| **提交时间**     | 2026-02-13 |
-| **版本号**       | V1.0 |
+| **提交时间**     | 2026-02-13 (V1.0) → 2026-06-08 (V2.0) |
+| **版本号**       | V2.0 |
 | **依赖飞桨版本** | paddlepaddle-gpu 3.3.0 |
 | **文件名**       | README.md |
 | **计算平台**     | Windows 10 Python 3.13.1 AMD64 64bit |
+| **PR状态**       | 🎉 已合并至 [PaddleMaterials](https://github.com/PaddlePaddle/PaddleMaterials) |
 
 ---
 
@@ -230,4 +231,8 @@ class ECFormerWithGAT(ECFormerBase):
 4. 本方案详细设计文档：
    - [Layers.md](./Layers.md) - 底层Layer实现细节
    - [ECFormers.md](./ECFormers.md) - 高层模型实现细节
-5. 代码位置(提交PR之后才会有)：`PaddleMaterials/ppmat/models/ecformer/`
+5. 代码位置：`PaddleMaterials/ppmat/models/ecformer/`
+   - `models/base_ecformer.py` - ECFormerBase（~350行）
+   - `models/ECD.py` / `models/IR.py` - 子类（各~80行）
+   - `encoders/gin_node_embedding.py` - GINNodeEmbedding
+   - `layers/` - AtomEncoder, BondEncoder, GINConv, RBF
