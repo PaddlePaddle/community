@@ -1,0 +1,16 @@
+groups:
+  - name: zawrs
+    description: RISC-V Wait-on-Reservation-Set Semantics
+
+semantics:
+  wrs_nto:
+    description: "wrs.nto"
+    operations: []
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  wrs_sto:
+    description: "wrs.sto"
+    operations: []
+    implicit_pc_read: false
+    implicit_pc_write: false

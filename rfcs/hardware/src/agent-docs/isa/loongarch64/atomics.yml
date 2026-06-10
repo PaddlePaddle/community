@@ -1,0 +1,1020 @@
+groups:
+- name: base
+  description: LoongArch Base Integer Instructions
+instructions:
+- name: LL.W
+  group: base
+  encoding:
+    match: 00100000????????????????????????
+  assembly: ll.w $d, $j, $imm
+  semantics:
+    description: ll.w rd, si14(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:14:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 4
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: SC.W
+  group: base
+  encoding:
+    match: 00100001????????????????????????
+  assembly: sc.w $d, $j, $imm
+  semantics:
+    description: sc.w rd, si14(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:14:signed
+    - type: store
+      addr: $temp:0
+      src: $r.d
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: LLACQ.W
+  group: base
+  encoding:
+    match: 0011100001010111100000??????????
+  assembly: llacq.w $d, $j
+  semantics:
+    description: llacq.w rd, (rj)
+    operations:
+    - type: load
+      dest: $r.d
+      addr: $r.j
+      size: 4
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: SCREL.W
+  group: base
+  encoding:
+    match: 0011100001010111100001??????????
+  assembly: screl.w $d, $j
+  semantics:
+    description: screl.w rd, (rj)
+    operations:
+    - type: store
+      addr: $r.j
+      src: $r.d
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: AMCAS.B
+  group: base
+  encoding:
+    match: 00111000010110000???????????????
+  assembly: amcas.b $d, $j, $k
+  semantics:
+    description: amcas.b rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 1
+      ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMCAS.H
+  group: base
+  encoding:
+    match: 00111000010110001???????????????
+  assembly: amcas.h $d, $j, $k
+  semantics:
+    description: amcas.h rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 2
+      ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMCAS.W
+  group: base
+  encoding:
+    match: 00111000010110010???????????????
+  assembly: amcas.w $d, $j, $k
+  semantics:
+    description: amcas.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 4
+      ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMCAS_DB.B
+  group: base
+  encoding:
+    match: 00111000010110100???????????????
+  assembly: amcas_db.b $d, $j, $k
+  semantics:
+    description: amcas_db.b rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 1
+      ordering: SeqCst
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMCAS_DB.H
+  group: base
+  encoding:
+    match: 00111000010110101???????????????
+  assembly: amcas_db.h $d, $j, $k
+  semantics:
+    description: amcas_db.h rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 2
+      ordering: SeqCst
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMCAS_DB.W
+  group: base
+  encoding:
+    match: 00111000010110110???????????????
+  assembly: amcas_db.w $d, $j, $k
+  semantics:
+    description: amcas_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 4
+      ordering: SeqCst
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMSWAP.B
+  group: base
+  encoding:
+    match: 00111000010111000???????????????
+  assembly: amswap.b $d, $j, $k
+  semantics:
+    description: amswap.b rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMSWAP.H
+  group: base
+  encoding:
+    match: 00111000010111001???????????????
+  assembly: amswap.h $d, $j, $k
+  semantics:
+    description: amswap.h rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD.B
+  group: base
+  encoding:
+    match: 00111000010111010???????????????
+  assembly: amadd.b $d, $j, $k
+  semantics:
+    description: amadd.b rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD.H
+  group: base
+  encoding:
+    match: 00111000010111011???????????????
+  assembly: amadd.h $d, $j, $k
+  semantics:
+    description: amadd.h rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMSWAP_DB.B
+  group: base
+  encoding:
+    match: 00111000010111100???????????????
+  assembly: amswap_db.b $d, $j, $k
+  semantics:
+    description: amswap_db.b rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMSWAP_DB.H
+  group: base
+  encoding:
+    match: 00111000010111101???????????????
+  assembly: amswap_db.h $d, $j, $k
+  semantics:
+    description: amswap_db.h rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD_DB.B
+  group: base
+  encoding:
+    match: 00111000010111110???????????????
+  assembly: amadd_db.b $d, $j, $k
+  semantics:
+    description: amadd_db.b rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD_DB.H
+  group: base
+  encoding:
+    match: 00111000010111111???????????????
+  assembly: amadd_db.h $d, $j, $k
+  semantics:
+    description: amadd_db.h rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMSWAP.W
+  group: base
+  encoding:
+    match: 00111000011000000???????????????
+  assembly: amswap.w $d, $j, $k
+  semantics:
+    description: amswap.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD.W
+  group: base
+  encoding:
+    match: 00111000011000010???????????????
+  assembly: amadd.w $d, $j, $k
+  semantics:
+    description: amadd.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMAND.W
+  group: base
+  encoding:
+    match: 00111000011000100???????????????
+  assembly: amand.w $d, $j, $k
+  semantics:
+    description: amand.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: And
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMOR.W
+  group: base
+  encoding:
+    match: 00111000011000110???????????????
+  assembly: amor.w $d, $j, $k
+  semantics:
+    description: amor.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Or
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMXOR.W
+  group: base
+  encoding:
+    match: 00111000011001000???????????????
+  assembly: amxor.w $d, $j, $k
+  semantics:
+    description: amxor.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Xor
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMAX.W
+  group: base
+  encoding:
+    match: 00111000011001010???????????????
+  assembly: ammax.w $d, $j, $k
+  semantics:
+    description: ammax.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Max
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMIN.W
+  group: base
+  encoding:
+    match: 00111000011001100???????????????
+  assembly: ammin.w $d, $j, $k
+  semantics:
+    description: ammin.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Min
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMSWAP_DB.W
+  group: base
+  encoding:
+    match: 00111000011010010???????????????
+  assembly: amswap_db.w $d, $j, $k
+  semantics:
+    description: amswap_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD_DB.W
+  group: base
+  encoding:
+    match: 00111000011010100???????????????
+  assembly: amadd_db.w $d, $j, $k
+  semantics:
+    description: amadd_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMAND_DB.W
+  group: base
+  encoding:
+    match: 00111000011010110???????????????
+  assembly: amand_db.w $d, $j, $k
+  semantics:
+    description: amand_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: And
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMOR_DB.W
+  group: base
+  encoding:
+    match: 00111000011011000???????????????
+  assembly: amor_db.w $d, $j, $k
+  semantics:
+    description: amor_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Or
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMXOR_DB.W
+  group: base
+  encoding:
+    match: 00111000011011010???????????????
+  assembly: amxor_db.w $d, $j, $k
+  semantics:
+    description: amxor_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Xor
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMAX_DB.W
+  group: base
+  encoding:
+    match: 00111000011011100???????????????
+  assembly: ammax_db.w $d, $j, $k
+  semantics:
+    description: ammax_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Max
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMIN_DB.W
+  group: base
+  encoding:
+    match: 00111000011011110???????????????
+  assembly: ammin_db.w $d, $j, $k
+  semantics:
+    description: ammin_db.w rd, rj, rk
+    operations:
+    - type: atomic
+      op: Min
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: LL.D
+  group: base
+  encoding:
+    match: 00100010????????????????????????
+  assembly: ll.d $d, $j, $imm
+  semantics:
+    description: ll.d rd, si14(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:14:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 8
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: SC.D
+  group: base
+  encoding:
+    match: 00100011????????????????????????
+  assembly: sc.d $d, $j, $imm
+  semantics:
+    description: sc.d rd, si14(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:14:signed
+    - type: store
+      addr: $temp:0
+      src: $r.d
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: SC.Q
+  group: base
+  encoding:
+    match: 00111000010101110???????????????
+  assembly: sc.q $d, $j, $k
+  semantics:
+    description: sc.q rd, rj, rk (store 128-bit, rj at rd, rk at rd+8)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.d
+      src2: 8
+    - type: store
+      addr: $r.d
+      src: $r.j
+      size: 8
+    - type: store
+      addr: $temp:0
+      src: $r.k
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: LLACQ.D
+  group: base
+  encoding:
+    match: 0011100001010111100010??????????
+  assembly: llacq.d $d, $j
+  semantics:
+    description: llacq.d rd, (rj)
+    operations:
+    - type: load
+      dest: $r.d
+      addr: $r.j
+      size: 8
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: SCREL.D
+  group: base
+  encoding:
+    match: 0011100001010111100011??????????
+  assembly: screl.d $d, $j
+  semantics:
+    description: screl.d rd, (rj)
+    operations:
+    - type: store
+      addr: $r.j
+      src: $r.d
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: AMCAS.D
+  group: base
+  encoding:
+    match: 00111000010110011???????????????
+  assembly: amcas.d $d, $j, $k
+  semantics:
+    description: amcas.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 8
+      ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMCAS_DB.D
+  group: base
+  encoding:
+    match: 00111000010110111???????????????
+  assembly: amcas_db.d $d, $j, $k
+  semantics:
+    description: amcas_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Cas
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      compare: $r.d
+      size: 8
+      ordering: SeqCst
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMSWAP.D
+  group: base
+  encoding:
+    match: 00111000011000001???????????????
+  assembly: amswap.d $d, $j, $k
+  semantics:
+    description: amswap.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD.D
+  group: base
+  encoding:
+    match: 00111000011000011???????????????
+  assembly: amadd.d $d, $j, $k
+  semantics:
+    description: amadd.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMAND.D
+  group: base
+  encoding:
+    match: 00111000011000101???????????????
+  assembly: amand.d $d, $j, $k
+  semantics:
+    description: amand.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: And
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMOR.D
+  group: base
+  encoding:
+    match: 00111000011000111???????????????
+  assembly: amor.d $d, $j, $k
+  semantics:
+    description: amor.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Or
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMXOR.D
+  group: base
+  encoding:
+    match: 00111000011001001???????????????
+  assembly: amxor.d $d, $j, $k
+  semantics:
+    description: amxor.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Xor
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMAX.D
+  group: base
+  encoding:
+    match: 00111000011001011???????????????
+  assembly: ammax.d $d, $j, $k
+  semantics:
+    description: ammax.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Max
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMIN.D
+  group: base
+  encoding:
+    match: 00111000011001101???????????????
+  assembly: ammin.d $d, $j, $k
+  semantics:
+    description: ammin.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Min
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Relaxed
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMAX.WU
+  group: base
+  encoding:
+    match: 00111000011001110???????????????
+  assembly: ammax.wu $d, $j, $k
+  format: DJK
+- name: AMMAX.DU
+  group: base
+  encoding:
+    match: 00111000011001111???????????????
+  assembly: ammax.du $d, $j, $k
+  format: DJK
+- name: AMMIN.WU
+  group: base
+  encoding:
+    match: 00111000011010000???????????????
+  assembly: ammin.wu $d, $j, $k
+  format: DJK
+- name: AMMIN.DU
+  group: base
+  encoding:
+    match: 00111000011010001???????????????
+  assembly: ammin.du $d, $j, $k
+  format: DJK
+- name: AMSWAP_DB.D
+  group: base
+  encoding:
+    match: 00111000011010011???????????????
+  assembly: amswap_db.d $d, $j, $k
+  semantics:
+    description: amswap_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Swap
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMADD_DB.D
+  group: base
+  encoding:
+    match: 00111000011010101???????????????
+  assembly: amadd_db.d $d, $j, $k
+  semantics:
+    description: amadd_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Add
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMAND_DB.D
+  group: base
+  encoding:
+    match: 00111000011010111???????????????
+  assembly: amand_db.d $d, $j, $k
+  semantics:
+    description: amand_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: And
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMOR_DB.D
+  group: base
+  encoding:
+    match: 00111000011011001???????????????
+  assembly: amor_db.d $d, $j, $k
+  semantics:
+    description: amor_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Or
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMXOR_DB.D
+  group: base
+  encoding:
+    match: 00111000011011011???????????????
+  assembly: amxor_db.d $d, $j, $k
+  semantics:
+    description: amxor_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Xor
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMAX_DB.D
+  group: base
+  encoding:
+    match: 00111000011011101???????????????
+  assembly: ammax_db.d $d, $j, $k
+  semantics:
+    description: ammax_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Max
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMIN_DB.D
+  group: base
+  encoding:
+    match: 00111000011011111???????????????
+  assembly: ammin_db.d $d, $j, $k
+  semantics:
+    description: ammin_db.d rd, rj, rk
+    operations:
+    - type: atomic
+      op: Min
+      dest: $r.d
+      addr: $r.j
+      src: $r.k
+      ordering: Acquire
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AMMAX_DB.WU
+  group: base
+  encoding:
+    match: 00111000011100000???????????????
+  assembly: ammax_db.wu $d, $j, $k
+  format: DJK
+- name: AMMAX_DB.DU
+  group: base
+  encoding:
+    match: 00111000011100001???????????????
+  assembly: ammax_db.du $d, $j, $k
+  format: DJK
+- name: AMMIN_DB.WU
+  group: base
+  encoding:
+    match: 00111000011100010???????????????
+  assembly: ammin_db.wu $d, $j, $k
+  format: DJK
+- name: AMMIN_DB.DU
+  group: base
+  encoding:
+    match: 00111000011100011???????????????
+  assembly: ammin_db.du $d, $j, $k
+  format: DJK

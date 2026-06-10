@@ -1,0 +1,320 @@
+groups:
+  - name: base
+    description: LoongArch Base Instructions Semantics
+
+semantics:
+  rdtimel_w:
+    description: "rdtimel.w rd"
+    operations:
+      - type: read_time
+        dest: $r.d
+        part: Low32
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rdtimeh_w:
+    description: "rdtimeh.w rd"
+    operations:
+      - type: read_time
+        dest: $r.d
+        part: High32
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rdtime_d:
+    description: "rdtime.d rd"
+    operations:
+      - type: read_time
+        dest: $r.d
+        part: Full64
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  cpucfg:
+    description: "cpucfg rd, rj"
+    operations:
+      - type: move
+        dest: $r.d
+        src: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  maskeqz:
+    description: "maskeqz rd, rj, rk"
+    operations:
+      - type: select
+        dest: $r.d
+        cond: $r.k
+        src_true: $r.j
+        src_false: 0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  masknez:
+    description: "masknez rd, rj, rk"
+    operations:
+      - type: select
+        dest: $r.d
+        cond: $r.k
+        src_true: 0
+        src_false: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rotr_w:
+    description: "rotr.w rd, rj, rk"
+    operations:
+      - type: alu
+        op: Rorw
+        dest: $r.d
+        src1: $r.j
+        src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  dbgcall:
+    description: "dbgcall"
+    operations:
+      - type: trap
+        exception: "DebugCall"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  slli_w:
+    description: "slli.w rd, rj, ui5"
+    operations:
+      - type: alu
+        op: Shlw
+        dest: $r.d
+        src1: $r.j
+        src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  srli_w:
+    description: "srli.w rd, rj, ui5"
+    operations:
+      - type: alu
+        op: Shrw
+        dest: $r.d
+        src1: $r.j
+        src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  srai_w:
+    description: "srai.w rd, rj, ui5"
+    operations:
+      - type: alu
+        op: Sarw
+        dest: $r.d
+        src1: $r.j
+        src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rotri_w:
+    description: "rotri.w rd, rj, ui5"
+    operations:
+      - type: alu
+        op: Rorw
+        dest: $r.d
+        src1: $r.j
+        src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  addi_w:
+    description: "addi.w rd, rj, si12"
+    operations:
+      - type: alu
+        op: Addw
+        dest: $r.d
+        src1: $r.j
+        src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  preld:
+    description: "preld hint, rj, si12"
+    operations: []
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldx_b:
+    description: "ldx.b rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: load
+        dest: $r.d
+        addr: $temp:0
+        size: 1
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldx_h:
+    description: "ldx.h rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: load
+        dest: $r.d
+        addr: $temp:0
+        size: 2
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldx_w:
+    description: "ldx.w rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: load
+        dest: $r.d
+        addr: $temp:0
+        size: 4
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stx_b:
+    description: "stx.b rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: store
+        addr: $temp:0
+        src: $r.d
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stx_h:
+    description: "stx.h rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: store
+        addr: $temp:0
+        src: $r.d
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stx_w:
+    description: "stx.w rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: store
+        addr: $temp:0
+        src: $r.d
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldx_bu:
+    description: "ldx.bu rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: load
+        dest: $r.d
+        addr: $temp:0
+        size: 1
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldx_hu:
+    description: "ldx.hu rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: load
+        dest: $r.d
+        addr: $temp:0
+        size: 2
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldx_d:
+    description: "ldx.d rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: load
+        dest: $r.d
+        addr: $temp:0
+        size: 8
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stx_d:
+    description: "stx.d rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: store
+        addr: $temp:0
+        src: $r.d
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldx_wu:
+    description: "ldx.wu rd, rj, rk"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: load
+        dest: $r.d
+        addr: $temp:0
+        size: 4
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  preldx:
+    description: "preldx hint, rj, rk"
+    operations: []
+    implicit_pc_read: false
+    implicit_pc_write: false
