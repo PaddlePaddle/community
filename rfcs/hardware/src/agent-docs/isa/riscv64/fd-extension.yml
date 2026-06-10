@@ -1,0 +1,562 @@
+groups:
+- name: float_load_store
+  description: 浮点加载存储
+- name: float_compute
+  description: 浮点运算
+- name: float_convert
+  description: 浮点转换
+- name: float_compare
+  description: 浮点比较
+instructions:
+- name: FLW
+  group: float_load_store
+  encoding:
+    match: ??????? ????? ????? 010 ????? 0000111
+  assembly: flw {rd}, {imm}({rs1})
+  format: I-type
+- name: FLD
+  group: float_load_store
+  encoding:
+    match: ??????? ????? ????? 011 ????? 0000111
+  assembly: fld {rd}, {imm}({rs1})
+  format: I-type
+- name: FSW
+  group: float_load_store
+  encoding:
+    match: ??????? ????? ????? 010 ????? 0100111
+  assembly: fsw {rs2}, {imm}({rs1})
+  format: S-type
+- name: FSD
+  group: float_load_store
+  encoding:
+    match: ??????? ????? ????? 011 ????? 0100111
+  assembly: fsd {rs2}, {imm}({rs1})
+  format: S-type
+- name: FADD_S
+  group: float_compute
+  encoding:
+    match: 0000000 ????? ????? ??? ????? 1010011
+  assembly: fadd.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSUB_S
+  group: float_compute
+  encoding:
+    match: 0000100 ????? ????? ??? ????? 1010011
+  assembly: fsub.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMUL_S
+  group: float_compute
+  encoding:
+    match: 0001000 ????? ????? ??? ????? 1010011
+  assembly: fmul.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FDIV_S
+  group: float_compute
+  encoding:
+    match: 0001100 ????? ????? ??? ????? 1010011
+  assembly: fdiv.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSQRT_S
+  group: float_compute
+  encoding:
+    match: 0101100 00000 ????? ??? ????? 1010011
+  assembly: fsqrt.s {rd}, {rs1}
+  format: R-type-unary
+- name: FMADD_S
+  group: float_compute
+  encoding:
+    match: ????? 00 ????? ????? ??? ????? 1000011
+  assembly: fmadd.s {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FMSUB_S
+  group: float_compute
+  encoding:
+    match: ????? 00 ????? ????? ??? ????? 1000111
+  assembly: fmsub.s {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FNMSUB_S
+  group: float_compute
+  encoding:
+    match: ????? 00 ????? ????? ??? ????? 1001011
+  assembly: fnmsub.s {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FNMADD_S
+  group: float_compute
+  encoding:
+    match: ????? 00 ????? ????? ??? ????? 1001111
+  assembly: fnmadd.s {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FMADD_D
+  group: float_compute
+  encoding:
+    match: ????? 01 ????? ????? ??? ????? 1000011
+  assembly: fmadd.d {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FMSUB_D
+  group: float_compute
+  encoding:
+    match: ????? 01 ????? ????? ??? ????? 1000111
+  assembly: fmsub.d {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FNMSUB_D
+  group: float_compute
+  encoding:
+    match: ????? 01 ????? ????? ??? ????? 1001011
+  assembly: fnmsub.d {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FNMADD_D
+  group: float_compute
+  encoding:
+    match: ????? 01 ????? ????? ??? ????? 1001111
+  assembly: fnmadd.d {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FADD_D
+  group: float_compute
+  encoding:
+    match: 0000001 ????? ????? ??? ????? 1010011
+  assembly: fadd.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSUB_D
+  group: float_compute
+  encoding:
+    match: 0000101 ????? ????? ??? ????? 1010011
+  assembly: fsub.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMUL_D
+  group: float_compute
+  encoding:
+    match: 0001001 ????? ????? ??? ????? 1010011
+  assembly: fmul.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FDIV_D
+  group: float_compute
+  encoding:
+    match: 0001101 ????? ????? ??? ????? 1010011
+  assembly: fdiv.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSQRT_D
+  group: float_compute
+  encoding:
+    match: 0101101 00000 ????? ??? ????? 1010011
+  assembly: fsqrt.d {rd}, {rs1}
+  format: R-type-unary
+- name: FSGNJ_S
+  group: float_compute
+  encoding:
+    match: 0010000 ????? ????? 000 ????? 1010011
+  assembly: fsgnj.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSGNJN_S
+  group: float_compute
+  encoding:
+    match: 0010000 ????? ????? 001 ????? 1010011
+  assembly: fsgnjn.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSGNJX_S
+  group: float_compute
+  encoding:
+    match: 0010000 ????? ????? 010 ????? 1010011
+  assembly: fsgnjx.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSGNJ_D
+  group: float_compute
+  encoding:
+    match: 0010001 ????? ????? 000 ????? 1010011
+  assembly: fsgnj.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSGNJN_D
+  group: float_compute
+  encoding:
+    match: 0010001 ????? ????? 001 ????? 1010011
+  assembly: fsgnjn.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSGNJX_D
+  group: float_compute
+  encoding:
+    match: 0010001 ????? ????? 010 ????? 1010011
+  assembly: fsgnjx.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FCLASS_S
+  group: float_compute
+  encoding:
+    match: 1110000 00000 ????? 001 ????? 1010011
+  assembly: fclass.s {rd}, {rs1}
+  format: R-type-unary
+- name: FCLASS_D
+  group: float_compute
+  encoding:
+    match: 1110001 00000 ????? 001 ????? 1010011
+  assembly: fclass.d {rd}, {rs1}
+  format: R-type-unary
+- name: FEQ_S
+  group: float_compare
+  encoding:
+    match: 1010000 ????? ????? 010 ????? 1010011
+  assembly: feq.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLT_S
+  group: float_compare
+  encoding:
+    match: 1010000 ????? ????? 001 ????? 1010011
+  assembly: flt.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLE_S
+  group: float_compare
+  encoding:
+    match: 1010000 ????? ????? 000 ????? 1010011
+  assembly: fle.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FEQ_D
+  group: float_compare
+  encoding:
+    match: 1010001 ????? ????? 010 ????? 1010011
+  assembly: feq.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLT_D
+  group: float_compare
+  encoding:
+    match: 1010001 ????? ????? 001 ????? 1010011
+  assembly: flt.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLE_D
+  group: float_compare
+  encoding:
+    match: 1010001 ????? ????? 000 ????? 1010011
+  assembly: fle.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FCVT_S_W
+  group: float_convert
+  encoding:
+    match: 1101000 00000 ????? ??? ????? 1010011
+  assembly: fcvt.s.w {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_S_WU
+  group: float_convert
+  encoding:
+    match: 1101000 00001 ????? ??? ????? 1010011
+  assembly: fcvt.s.wu {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_S_L
+  group: float_convert
+  encoding:
+    match: 1101000 00010 ????? ??? ????? 1010011
+  assembly: fcvt.s.l {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_S_LU
+  group: float_convert
+  encoding:
+    match: 1101000 00011 ????? ??? ????? 1010011
+  assembly: fcvt.s.lu {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_W_S
+  group: float_convert
+  encoding:
+    match: 1100000 00000 ????? ??? ????? 1010011
+  assembly: fcvt.w.s {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_WU_S
+  group: float_convert
+  encoding:
+    match: 1100000 00001 ????? ??? ????? 1010011
+  assembly: fcvt.wu.s {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_L_S
+  group: float_convert
+  encoding:
+    match: 1100000 00010 ????? ??? ????? 1010011
+  assembly: fcvt.l.s {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_LU_S
+  group: float_convert
+  encoding:
+    match: 1100000 00011 ????? ??? ????? 1010011
+  assembly: fcvt.lu.s {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_D_W
+  group: float_convert
+  encoding:
+    match: 1101001 00000 ????? ??? ????? 1010011
+  assembly: fcvt.d.w {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_D_L
+  group: float_convert
+  encoding:
+    match: 1101001 00010 ????? ??? ????? 1010011
+  assembly: fcvt.d.l {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_W_D
+  group: float_convert
+  encoding:
+    match: 1100001 00000 ????? ??? ????? 1010011
+  assembly: fcvt.w.d {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_L_D
+  group: float_convert
+  encoding:
+    match: 1100001 00010 ????? ??? ????? 1010011
+  assembly: fcvt.l.d {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_S_D
+  group: float_convert
+  encoding:
+    match: 0100000 00001 ????? ??? ????? 1010011
+  assembly: fcvt.s.d {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_D_S
+  group: float_convert
+  encoding:
+    match: 0100001 00000 ????? ??? ????? 1010011
+  assembly: fcvt.d.s {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_D_WU
+  group: float_convert
+  encoding:
+    match: 1101001 00001 ????? ??? ????? 1010011
+  assembly: fcvt.d.wu {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_D_LU
+  group: float_convert
+  encoding:
+    match: 1101001 00011 ????? ??? ????? 1010011
+  assembly: fcvt.d.lu {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_WU_D
+  group: float_convert
+  encoding:
+    match: 1100001 00001 ????? ??? ????? 1010011
+  assembly: fcvt.wu.d {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_LU_D
+  group: float_convert
+  encoding:
+    match: 1100001 00011 ????? ??? ????? 1010011
+  assembly: fcvt.lu.d {rd}, {rs1}
+  format: R-type-unary
+- name: FMV_W_X
+  group: float_convert
+  encoding:
+    match: 1111000 00000 ????? ??? ????? 1010011
+  assembly: fmv.w.x {rd}, {rs1}
+  format: R-type-unary
+- name: FMV_X_W
+  group: float_convert
+  encoding:
+    match: 1110000 00000 ????? 000 ????? 1010011
+  assembly: fmv.x.w {rd}, {rs1}
+  format: R-type-unary
+- name: FMV_D_X
+  group: float_convert
+  encoding:
+    match: 1111001 00000 ????? ??? ????? 1010011
+  assembly: fmv.d.x {rd}, {rs1}
+  format: R-type-unary
+- name: FMV_X_D
+  group: float_convert
+  encoding:
+    match: 1110001 00000 ????? 000 ????? 1010011
+  assembly: fmv.x.d {rd}, {rs1}
+  format: R-type-unary
+- name: FMIN_S
+  group: float_compute
+  encoding:
+    match: 0010100 ????? ????? 000 ????? 1010011
+  assembly: fmin.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMAX_S
+  group: float_compute
+  encoding:
+    match: 0010100 ????? ????? 001 ????? 1010011
+  assembly: fmax.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMIN_D
+  group: float_compute
+  encoding:
+    match: 0010101 ????? ????? 000 ????? 1010011
+  assembly: fmin.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMAX_D
+  group: float_compute
+  encoding:
+    match: 0010101 ????? ????? 001 ????? 1010011
+  assembly: fmax.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMINM_S
+  group: float_compute
+  encoding:
+    match: 0010100 ????? ????? 010 ????? 1010011
+  assembly: fminm.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMAXM_S
+  group: float_compute
+  encoding:
+    match: 0010100 ????? ????? 011 ????? 1010011
+  assembly: fmaxm.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMINM_D
+  group: float_compute
+  encoding:
+    match: 0010101 ????? ????? 010 ????? 1010011
+  assembly: fminm.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMAXM_D
+  group: float_compute
+  encoding:
+    match: 0010101 ????? ????? 011 ????? 1010011
+  assembly: fmaxm.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLI_H
+  group: float_load_imm
+  encoding:
+    match: 1111010 00001 ????? 000 ????? 1010011
+    variables:
+      imm:
+      - 19
+      - 15
+  assembly: fli.h {rd}, {imm}
+  format: R-type-unary
+- name: FMINM_H
+  group: float_compute
+  encoding:
+    match: 0010110 ????? ????? 010 ????? 1010011
+  assembly: fminm.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMAXM_H
+  group: float_compute
+  encoding:
+    match: 0010110 ????? ????? 011 ????? 1010011
+  assembly: fmaxm.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FROUND_H
+  group: float_compute
+  encoding:
+    match: 0100010 00100 ????? ??? ????? 1010011
+    variables:
+      rm:
+      - 14
+      - 12
+  assembly: fround.h {rd}, {rs1}, {rm}
+  format: R-type-unary
+- name: FROUNDNX_H
+  group: float_compute
+  encoding:
+    match: 0100010 00101 ????? ??? ????? 1010011
+    variables:
+      rm:
+      - 14
+      - 12
+  assembly: froundnx.h {rd}, {rs1}, {rm}
+  format: R-type-unary
+- name: FLEQ_H
+  group: float_compare
+  encoding:
+    match: 1010010 ????? ????? 100 ????? 1010011
+  assembly: fleq.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLTQ_H
+  group: float_compare
+  encoding:
+    match: 1010010 ????? ????? 101 ????? 1010011
+  assembly: fltq.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLEQ_S
+  group: float_compare
+  encoding:
+    match: 1010000 ????? ????? 100 ????? 1010011
+  assembly: fleq.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLTQ_S
+  group: float_compare
+  encoding:
+    match: 1010000 ????? ????? 101 ????? 1010011
+  assembly: fltq.s {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLEQ_D
+  group: float_compare
+  encoding:
+    match: 1010001 ????? ????? 100 ????? 1010011
+  assembly: fleq.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLTQ_D
+  group: float_compare
+  encoding:
+    match: 1010001 ????? ????? 101 ????? 1010011
+  assembly: fltq.d {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLI_S
+  group: float_load_imm
+  encoding:
+    match: 1111000 00001 ????? 000 ????? 1010011
+    variables:
+      imm:
+      - 19
+      - 15
+  assembly: fli.s {rd}, {imm}
+  format: R-type-unary
+- name: FLI_D
+  group: float_load_imm
+  encoding:
+    match: 1111001 00001 ????? 000 ????? 1010011
+    variables:
+      imm:
+      - 19
+      - 15
+  assembly: fli.d {rd}, {imm}
+  format: R-type-unary
+- name: FROUND_S
+  group: float_compute
+  encoding:
+    match: 0100000 00100 ????? ??? ????? 1010011
+    variables:
+      rm:
+      - 14
+      - 12
+  assembly: fround.s {rd}, {rs1}, {rm}
+  format: R-type-unary
+- name: FROUNDNX_S
+  group: float_compute
+  encoding:
+    match: 0100000 00101 ????? ??? ????? 1010011
+    variables:
+      rm:
+      - 14
+      - 12
+  assembly: froundnx.s {rd}, {rs1}, {rm}
+  format: R-type-unary
+- name: FROUND_D
+  group: float_compute
+  encoding:
+    match: 0100001 00100 ????? ??? ????? 1010011
+    variables:
+      rm:
+      - 14
+      - 12
+  assembly: fround.d {rd}, {rs1}, {rm}
+  format: R-type-unary
+- name: FROUNDNX_D
+  group: float_compute
+  encoding:
+    match: 0100001 00101 ????? ??? ????? 1010011
+    variables:
+      rm:
+      - 14
+      - 12
+  assembly: froundnx.d {rd}, {rs1}, {rm}
+  format: R-type-unary
+- name: FCVTMOD_W_D
+  group: float_convert
+  encoding:
+    match: 1100001 01000 ????? 001 ????? 1010011
+  assembly: fcvtmod.w.d {rd}, {rs1}
+  format: R-type-unary
+- name: FMVH_X_D
+  group: float_convert
+  encoding:
+    match: 1110001 00001 ????? 000 ????? 1010011
+  assembly: fmvh.x.d {rd}, {rs1}
+  format: R-type-unary
+- name: FMVP_D_X
+  group: float_convert
+  encoding:
+    match: 1011001 ????? ????? 000 ????? 1010011
+  assembly: fmvp.d.x {rd}, {rs1}, {rs2}
+  format: R-type
