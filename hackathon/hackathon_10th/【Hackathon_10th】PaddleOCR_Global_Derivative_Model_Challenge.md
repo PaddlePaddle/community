@@ -1,5 +1,16 @@
 # 【Hackathon_10th】PaddleOCR Global Derivative Model Challenge
 
+## Competition Adjustments (June 22)
+Dear participants, Thank you for your support and interest in this competition.
+
+Due to the concentrated submission of entries during the **Dragon Boat Festival holiday (June 19–21)**, and to ensure the quality of evaluation, we have made the following adjustments to the schedule:
+- The leaderboard originally scheduled for June 22 will be postponed to **June 23**.
+- Accordingly, the preliminary submission deadline will be extended by one day, from June 28 to **24:00 on June 29**.
+
+Please strictly adhere to **the preliminary submission deadline**. Any submissions or updates made after the deadline will not be considered for evaluation. We strongly recommend that you plan ahead and submit early to avoid any last‑minute issues such as network congestion or other unforeseen circumstances.
+
+We wish you all excellent results!
+
 ## Authenticity Verification of Award-Winning Works (May 25)
 To ensure fairness and integrity of the competition and protect the rights of all participants, the organizing committee will conduct **authenticity verification** on works that may receive cash awards (including the top 10 finalists and the High-Quality Evaluation Set Contribution Award) **before the announcement of preliminary results**.
 
