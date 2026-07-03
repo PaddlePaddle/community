@@ -10,5 +10,5 @@
 ## 会议议程
 
 1. 新人介绍：@[Ihebdhouibi](https://github.com/Ihebdhouibi)，@[vslyu](https://github.com/vslyu)，@[IDhammaI](https://github.com/IDhammaI)，@[wyh16](https://github.com/wyh16)，@[PrayerQX](https://github.com/PrayerQX)，@[xu6831](https://github.com/xu6831)，@[Thalia325](https://github.com/Thalia325)，@[fchange](https://github.com/fchange)，@[sshnuke3](https://github.com/sshnuke3)，@[austin1997](https://github.com/austin1997)（10 mins）
-2. call for contribution to SWE-Paddle @[sunzhongkai588](https://github.com/sunzhongkai588)（15 mins）
-3. ask me anything（20 mins）
+2. Call for Contribution to SWE-Paddle @[sunzhongkai588](https://github.com/sunzhongkai588)（15 mins）
+3. Ask [jzhang533](https://github.com/jzhang533) Anything（20 mins）
