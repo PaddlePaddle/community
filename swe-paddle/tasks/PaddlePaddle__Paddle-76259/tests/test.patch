@@ -1,0 +1,213 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2f5c0a2..0b785a1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -41,6 +41,17 @@ endif()
+ 
+ project(paddle CXX C)
+ 
++if(PADDLE_INFERENCE_UTF8_PATH_TEST_ONLY)
++  set(CMAKE_DISABLE_FIND_PACKAGE_CUDA TRUE CACHE BOOL "" FORCE)
++  set(CUDA_FOUND OFF CACHE BOOL "" FORCE)
++  set(WITH_GPU OFF CACHE BOOL "Disable GPU for UTF-8 path verification" FORCE)
++  set(WITH_CRYPTO OFF CACHE BOOL "Disable crypto for UTF-8 path verification" FORCE)
++  set(WITH_PYTHON OFF CACHE BOOL "Disable Python for UTF-8 path verification" FORCE)
++  set(BUILD_WHL_PACKAGE OFF CACHE BOOL "Disable wheel package for UTF-8 path verification" FORCE)
++  set(WITH_NCCL OFF CACHE BOOL "Disable NCCL for UTF-8 path verification" FORCE)
++  set(WITH_DISTRIBUTE OFF CACHE BOOL "Disable distributed for UTF-8 path verification" FORCE)
++endif()
++
+ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+   if(WIN32)
+     # windows not support flag sanitize=address
+diff --git a/test/CMakeLists.txt b/test/CMakeLists.txt
+index 63a76c4..5ecac50 100644
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -1,3 +1,8 @@
++if(WIN32 AND PADDLE_INFERENCE_UTF8_PATH_TEST_ONLY)
++  add_subdirectory(cpp)
++  return()
++endif()
++
+ remove_definitions(-DPADDLE_DLL_EXPORT)
+ set(CC_TESTS_DIR ${PADDLE_BINARY_DIR}/test/cpp CACHE INTERNAL "c++ tests directory")
+ set(PYTHON_TESTS_DIR ${PADDLE_BINARY_DIR}/test CACHE INTERNAL "python tests directory")
+diff --git a/test/cpp/CMakeLists.txt b/test/cpp/CMakeLists.txt
+index 65226ca..479580b 100644
+--- a/test/cpp/CMakeLists.txt
++++ b/test/cpp/CMakeLists.txt
+@@ -1,3 +1,8 @@
++if(WIN32 AND PADDLE_INFERENCE_UTF8_PATH_TEST_ONLY)
++  add_subdirectory(inference)
++  return()
++endif()
++
+ if(NOT WITH_CPP_TEST)
+   return()
+ endif()
+diff --git a/test/cpp/inference/CMakeLists.txt b/test/cpp/inference/CMakeLists.txt
+index 13b9d57..435b962 100644
+--- a/test/cpp/inference/CMakeLists.txt
++++ b/test/cpp/inference/CMakeLists.txt
+@@ -1,5 +1,10 @@
+ add_definitions(-DPADDLE_DLL_EXPORT)
+ 
++if(WIN32 AND PADDLE_INFERENCE_UTF8_PATH_TEST_ONLY)
++  add_subdirectory(api)
++  return()
++endif()
++
+ if(WITH_TESTING)
+   include(test.cmake) # some generic cmake function for inference
+   include(test_cases.cmake)
+diff --git a/test/cpp/inference/api/CMakeLists.txt b/test/cpp/inference/api/CMakeLists.txt
+index 4236f11..f558dae 100644
+--- a/test/cpp/inference/api/CMakeLists.txt
++++ b/test/cpp/inference/api/CMakeLists.txt
+@@ -3,6 +3,25 @@
+ # of build folder by 30G.
+ 
+ set(inference_api_tester_deps paddle_inference_api analysis_config)
++
++if(WIN32 AND PADDLE_INFERENCE_UTF8_PATH_TEST_ONLY)
++  cc_test_old(
++    inference_api_path_test
++    SRCS utf8_path_test.cc
++    DEPS ${inference_api_tester_deps} common)
++
++  add_test(
++    NAME inference_api_path_p2p_test
++    COMMAND $<TARGET_FILE:inference_api_path_test>
++            "--gtest_filter=InferencePath.P2P*")
++
++  add_test(
++    NAME inference_api_utf8_path_f2p_test
++    COMMAND $<TARGET_FILE:inference_api_path_test>
++            "--gtest_filter=InferencePath.F2P*")
++
++  return()
++endif()
+ 
+ if(NOT WIN32)
+   cc_test(
+diff --git a/test/cpp/inference/api/utf8_path_test.cc b/test/cpp/inference/api/utf8_path_test.cc
+new file mode 100644
+index 0000000..705d81e
+--- /dev/null
++++ b/test/cpp/inference/api/utf8_path_test.cc
+@@ -0,0 +1,116 @@
++/* Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License. */
++
++#include <windows.h>
++
++#include <string>
++
++#include "gtest/gtest.h"
++#include "paddle/fluid/inference/api/helper.h"
++
++namespace {
++
++std::string WideToUtf8(const std::wstring& value) {
++  if (value.empty()) {
++    return {};
++  }
++
++  int size = WideCharToMultiByte(CP_UTF8,
++                                 0,
++                                 value.data(),
++                                 static_cast<int>(value.size()),
++                                 nullptr,
++                                 0,
++                                 nullptr,
++                                 nullptr);
++  if (size <= 0) {
++    return {};
++  }
++
++  std::string result(size, '\0');
++  int converted = WideCharToMultiByte(CP_UTF8,
++                                      0,
++                                      value.data(),
++                                      static_cast<int>(value.size()),
++                                      &result[0],
++                                      size,
++                                      nullptr,
++                                      nullptr);
++  return converted == size ? result : std::string();
++}
++
++std::wstring TestPath(const wchar_t* name) {
++  wchar_t buffer[MAX_PATH];
++  DWORD len = GetCurrentDirectoryW(MAX_PATH, buffer);
++  EXPECT_GT(len, 0UL);
++  EXPECT_LT(len, static_cast<DWORD>(MAX_PATH));
++
++  std::wstring base(buffer, len);
++  if (!base.empty() && base.back() != L'\\') {
++    base += L"\\";
++  }
++  return base + name + std::to_wstring(GetCurrentProcessId());
++}
++
++void Cleanup(const std::wstring& dir, const std::wstring& file) {
++  DeleteFileW(file.c_str());
++  RemoveDirectoryW(dir.c_str());
++}
++
++void Touch(const std::wstring& file) {
++  HANDLE handle = CreateFileW(file.c_str(),
++                              GENERIC_WRITE,
++                              0,
++                              nullptr,
++                              CREATE_ALWAYS,
++                              FILE_ATTRIBUTE_NORMAL,
++                              nullptr);
++  ASSERT_NE(handle, INVALID_HANDLE_VALUE);
++  CloseHandle(handle);
++}
++
++}  // namespace
++
++TEST(InferencePath, P2PAsciiPathsKeepExistingBehavior) {
++  std::wstring dir = TestPath(L"paddle_ascii_");
++  std::wstring file = dir + L"\\inference.pdmodel";
++  std::wstring missing = dir + L"\\missing.pdmodel";
++
++  Cleanup(dir, file);
++  ASSERT_TRUE(CreateDirectoryW(dir.c_str(), nullptr));
++  Touch(file);
++
++  EXPECT_TRUE(paddle::inference::IsDirectory(WideToUtf8(dir)));
++  EXPECT_TRUE(paddle::inference::IsFileExists(WideToUtf8(file)));
++  EXPECT_FALSE(paddle::inference::IsDirectory(WideToUtf8(file)));
++  EXPECT_FALSE(paddle::inference::IsFileExists(WideToUtf8(missing)));
++
++  Cleanup(dir, file);
++}
++
++TEST(InferencePath, F2PUtf8PathsAreRecognizedOnWindows) {
++  std::wstring dir = TestPath(L"paddle_utf8_\u6A21\u578B\u8DEF\u5F84_");
++  std::wstring file = dir + L"\\inference.pdmodel";
++
++  Cleanup(dir, file);
++  ASSERT_TRUE(CreateDirectoryW(dir.c_str(), nullptr));
++  Touch(file);
++
++  EXPECT_TRUE(paddle::inference::IsDirectory(WideToUtf8(dir)));
++  EXPECT_TRUE(paddle::inference::IsFileExists(WideToUtf8(file)));
++
++  Cleanup(dir, file);
++}
