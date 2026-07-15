@@ -1,0 +1,337 @@
+diff --git a/paddle/fluid/eager/auto_code_generator/generator/monkey_patch_gen.py b/paddle/fluid/eager/auto_code_generator/generator/monkey_patch_gen.py
+index e23b1d1e089d6e..cb777aaabf4af6 100644
+--- a/paddle/fluid/eager/auto_code_generator/generator/monkey_patch_gen.py
++++ b/paddle/fluid/eager/auto_code_generator/generator/monkey_patch_gen.py
+@@ -21,6 +21,8 @@
+ )
+ 
+ IMPORT_TEMPLATE = """
++import importlib
++
+ import paddle
+ from paddle import _C_ops
+ from paddle.tensor import magic_method_func
+@@ -31,24 +33,22 @@
+ def {func_name}():
+ """
+ 
+-NAME_METHOD_MAPPING_TEMPLATE = """  ('{op_name}',_{op_name})"""
++# Unified template entry format: ('module.path', 'method_name', _op_name)
++UNIFIED_NAME_METHOD_MAPPING_TEMPLATE = (
++    """  ('{module_path}', '{method_name}', _{op_name})"""
++)
+ 
+-METHODS_MAP_TEMPLATE = """
+-methods_map = [
++# Unified map template for all module paths
++UNIFIED_FUNCS_MAP_TEMPLATE = """
++# Unified map: (module_path, method_name, func) for all APIs
++_all_funcs_map = [
+ {}
+ ]
+ 
+-"""
+-FUNCTIONS_MAP_TEMPLATE = """
+-funcs_map = [
+-{}
+-]
+-
+-"""
+-NN_FUNCTIONS_MAP_TEMPLATE = """
+-nn_funcs_map = [
+-{}
+-]
++# Backward-compatible exports derived from unified map
++methods_map = [(name, func) for path, name, func in _all_funcs_map if path == 'paddle.Tensor']
++funcs_map = [(name, func) for path, name, func in _all_funcs_map if path == 'paddle']
++nn_funcs_map = [(name, func) for path, name, func in _all_funcs_map if path == 'paddle.nn.functional']
+ 
+ """
+ 
+@@ -56,39 +56,33 @@ def {func_name}():
+ def _{name}(*args, **kwargs):
+     return _C_ops.{name}(*args, **kwargs)
+ """
+-SET_METHOD_TEMPLATE = """
+-    # set methods && magical methods for paddle.Tensor in dygraph
+-    local_tensor = core.eager.Tensor
+ 
++SET_UNIFIED_FUNCTION_TEMPLATE = """
++    # set methods and functions for all modules using unified approach
++    local_tensor = core.eager.Tensor
+     magic_method_dict = {v: k for k, v in magic_method_func}
+ 
+-    for method_name, method in methods_map:
+-        setattr(local_tensor, method_name, method)
+-
+-        magic_name = magic_method_dict.get(method_name)
+-        if magic_name:
+-            setattr(local_tensor, magic_name, method)
+-
+-        setattr(paddle.tensor, method_name, method)
+-
++    for module_path, method_name, method in _all_funcs_map:
++        try:
++            # Special handling for paddle.Tensor (not a real module)
++            if module_path == 'paddle.Tensor':
++                setattr(local_tensor, method_name, method)
++                magic_name = magic_method_dict.get(method_name)
++                if magic_name:
++                    setattr(local_tensor, magic_name, method)
++                # Also set on paddle.tensor module
++                setattr(paddle.tensor, method_name, method)
++            else:
++                module = importlib.import_module(module_path)
++                setattr(module, method_name, method)
++        except Exception as e:
++            raise RuntimeError(
++                f"Failed to set {method_name} on module {module_path}: {e}"
++            )
+ """
+-SET_FUNCTION_TEMPLATE = """
+-    # set functions for paddle
+-    for method_name, method in funcs_map:
+-        setattr(paddle, method_name, method)
+ 
+-"""
+-SET_NN_FUNCTION_TEMPLATE = """
+-    # set functions for paddle.nn.functional
+-    for method_name, method in nn_funcs_map:
+-        setattr(paddle.nn.functional, method_name, method)
+-"""
+-# The pair of name and func which should be added to paddle
+-paddle_func_map = []
+-# The pair of name and func which should be added to paddle.Tensor
+-tensor_method_map = []
+-# The pair of name and func which should be added to paddle.nn.functional
+-nn_func_map = []
++# Unified map: list of (module_path, method_name, func) for all module paths
++unified_func_map = []
+ # The python api info which not in ops.yaml
+ python_api_info_from_yaml = {}
+ 
+@@ -122,19 +116,29 @@ def GenerateMethod(name):
+ 
+ 
+ def ClassifyAPIByPrefix(python_api_info, op_name):
++    """Classify API by prefix and add to unified map.
++
++    All APIs are stored in a unified format: (module_path, method_name, func)
++    """
+     python_api_names = python_api_info["name"]
+-    name_func_mapping = NAME_METHOD_MAPPING_TEMPLATE.format(op_name=op_name)
+     for name in python_api_names:
+         prefix = ExtractPrefix(name)
+-        if prefix == "paddle.":
+-            paddle_func_map.append(name_func_mapping)
+-        elif prefix == "paddle.Tensor.":
+-            tensor_method_map.append(name_func_mapping)
+-        elif prefix == "paddle.nn.functional.":
+-            nn_func_map.append(name_func_mapping)
+-        else:
++        method_name = name.split(".")[
++            -1
++        ]  # Extract the method name from full path
++
++        if not prefix.startswith("paddle."):
+             raise Exception("Unsupported Prefix " + prefix, "API : " + name)
+ 
++        # Remove trailing dot to get module_path
++        module_path = prefix.rstrip('.')
++        unified_mapping = UNIFIED_NAME_METHOD_MAPPING_TEMPLATE.format(
++            module_path=module_path,
++            method_name=method_name,
++            op_name=op_name,
++        )
++        unified_func_map.append(unified_mapping)
++
+ 
+ class MonkeyPatchTensorMethodsGenerator(GeneratorBase):
+     def __init__(self, path):
+@@ -151,12 +155,11 @@ def GenerateMonkeyPatchTensorMethods(self):
+         self.MonkeyPatchTensorMethods_str += IMPORT_TEMPLATE
+ 
+         forward_api_list = self.forward_api_list
+-        methods_map = []  # [("method_name",method),]
+         method_str = ""
+         # some python api info in ops.yaml
+         for forward_api_content in forward_api_list:
+             f_generator = MethodGenerator(forward_api_content, None)
+-            status = f_generator.run()
++            f_generator.run()
+             method_str += f_generator.Method_str
+         # some python api info not in ops.yaml but in python_api_info.yaml
+         for ops_name, python_api_info in python_api_info_from_yaml.items():
+@@ -164,22 +167,15 @@ def GenerateMonkeyPatchTensorMethods(self):
+             ClassifyAPIByPrefix(python_api_info, ops_name)
+ 
+         self.MonkeyPatchTensorMethods_str += method_str
+-        result = ',\n '.join(tensor_method_map)
+-        self.MonkeyPatchTensorMethods_str += METHODS_MAP_TEMPLATE.format(result)
+-        result = ',\n '.join(paddle_func_map)
+-        self.MonkeyPatchTensorMethods_str += FUNCTIONS_MAP_TEMPLATE.format(
+-            result
+-        )
+-        result = ',\n '.join(nn_func_map)
+-        self.MonkeyPatchTensorMethods_str += NN_FUNCTIONS_MAP_TEMPLATE.format(
++        # Use unified map for all module paths
++        result = ',\n '.join(unified_func_map)
++        self.MonkeyPatchTensorMethods_str += UNIFIED_FUNCS_MAP_TEMPLATE.format(
+             result
+         )
+         self.MonkeyPatchTensorMethods_str += FUNCTION_NAME_TEMPLATE.format(
+             func_name="monkey_patch_generated_methods_for_tensor"
+         )
+-        self.MonkeyPatchTensorMethods_str += SET_METHOD_TEMPLATE
+-        self.MonkeyPatchTensorMethods_str += SET_FUNCTION_TEMPLATE
+-        self.MonkeyPatchTensorMethods_str += SET_NN_FUNCTION_TEMPLATE
++        self.MonkeyPatchTensorMethods_str += SET_UNIFIED_FUNCTION_TEMPLATE
+ 
+     def run(self):
+         # Read Yaml file
+diff --git a/paddle/phi/ops/yaml/python_api_info.yaml b/paddle/phi/ops/yaml/python_api_info.yaml
+index 16365ed6c232fd..173125df22262e 100644
+--- a/paddle/phi/ops/yaml/python_api_info.yaml
++++ b/paddle/phi/ops/yaml/python_api_info.yaml
+@@ -269,6 +269,11 @@
+   args_alias :
+     use_default_mapping : True
+ 
++- op : inverse
++  name : [paddle.inverse, paddle.Tensor.inverse, paddle.linalg.inv]
++  args_alias:
++    use_default_mapping : True
++
+ - op : log
+   name : [paddle.log, paddle.Tensor.log]
+   args_alias :
+diff --git a/python/paddle/_paddle_docs.py b/python/paddle/_paddle_docs.py
+index bc6ee7a1a5de8e..0956c4072a4e60 100644
+--- a/python/paddle/_paddle_docs.py
++++ b/python/paddle/_paddle_docs.py
+@@ -3936,6 +3936,49 @@ def baddbmm(
+ """,
+ )
+ 
++add_doc_and_signature(
++    "inverse",
++    r"""
++    Takes the inverse of the square matrix. A square matrix is a matrix with
++    the same number of rows and columns. The input can be a square matrix
++    (2-D Tensor) or batches of square matrices.
++
++    Args:
++        x (Tensor): The input tensor. The last two
++            dimensions should be equal. When the number of dimensions is
++            greater than 2, it is treated as batches of square matrix. The data
++            type can be float32, float64, complex64, complex128.
++            Alias: ``input``.
++        name (str|None, optional): Name for the operation (optional, default is None). For more information, please refer to :ref:`api_guide_Name`.
++        out (Tensor, optional): The output Tensor. If set, the result will be stored in this Tensor. Default: None.
++
++    Returns:
++        Tensor: A Tensor holds the inverse of x. The shape and data type
++                        is the same as x.
++
++    Examples:
++        .. code-block:: pycon
++
++            >>> import paddle
++
++            >>> mat = paddle.to_tensor([[2, 0], [0, 2]], dtype='float32')
++            >>> inv = paddle.inverse(mat)
++            >>> print(inv)
++            Tensor(shape=[2, 2], dtype=float32, place=Place(cpu), stop_gradient=True,
++            [[0.50000000, 0.        ],
++             [0.        , 0.50000000]])
++
++""",
++    """
++def inverse(
++    x: Tensor,
++    name: str | None = None,
++    *,
++    out: Tensor | None = None,
++) -> Tensor
++""",
++)
++
+ add_doc_and_signature(
+     "allclose",
+     r"""
+diff --git a/python/paddle/tensor/math.py b/python/paddle/tensor/math.py
+index e9e5244ec5c127..08dd4e2eca2b1f 100644
+--- a/python/paddle/tensor/math.py
++++ b/python/paddle/tensor/math.py
+@@ -38,6 +38,7 @@
+     i0e,
+     i1,
+     i1e,
++    inverse,
+     isfinite,
+     isinf,
+     isnan,
+@@ -2652,63 +2653,6 @@ def outer(
+         return out
+ 
+ 
+-def inverse(x: Tensor, name: str | None = None) -> Tensor:
+-    """
+-    Takes the inverse of the square matrix. A square matrix is a matrix with
+-    the same number of rows and columns. The input can be a square matrix
+-    (2-D Tensor) or batches of square matrices.
+-
+-    Args:
+-        x (Tensor): The input tensor. The last two
+-            dimensions should be equal. When the number of dimensions is
+-            greater than 2, it is treated as batches of square matrix. The data
+-            type can be float32, float64, complex64, complex128.
+-        name (str|None, optional): Name for the operation (optional, default is None). For more information, please refer to :ref:`api_guide_Name`.
+-
+-    Returns:
+-        Tensor: A Tensor holds the inverse of x. The shape and data type
+-                        is the same as x.
+-
+-    Examples:
+-        .. code-block:: python
+-
+-            >>> import paddle
+-
+-            >>> mat = paddle.to_tensor([[2, 0], [0, 2]], dtype='float32')
+-            >>> inv = paddle.inverse(mat)
+-            >>> print(inv)
+-            Tensor(shape=[2, 2], dtype=float32, place=Place(cpu), stop_gradient=True,
+-            [[0.50000000, 0.        ],
+-             [0.        , 0.50000000]])
+-
+-    """
+-    if in_dynamic_or_pir_mode():
+-        return _C_ops.inverse(x)
+-    else:
+-
+-        def _check_input(x):
+-            check_variable_and_dtype(
+-                x,
+-                'x',
+-                ['float32', 'float64', 'complex64', 'complex128'],
+-                'inverse',
+-            )
+-            if len(x.shape) < 2:
+-                raise ValueError(
+-                    "The input of inverse is expected to be a Tensor whose number "
+-                    f"of dimensions is no less than 2. But received: {len(x.shape)}, "
+-                    f"x's shape: {x.shape}."
+-                )
+-
+-        _check_input(x)
+-        helper = LayerHelper('inverse', **locals())
+-        out = helper.create_variable_for_type_inference(dtype=x.dtype)
+-        helper.append_op(
+-            type='inverse', inputs={'Input': [x]}, outputs={'Output': [out]}
+-        )
+-        return out
+-
+-
+ @ForbidKeywordsDecorator(
+     illegal_keys={"input", "dim", "other"},
+     func_name="paddle.max",
