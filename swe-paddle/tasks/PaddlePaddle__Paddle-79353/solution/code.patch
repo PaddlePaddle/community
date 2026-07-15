@@ -1,0 +1,21 @@
+diff --git a/python/paddle/distributed/fleet/meta_parallel/pp_utils/p2p_communication.py b/python/paddle/distributed/fleet/meta_parallel/pp_utils/p2p_communication.py
+index f93a4311ef..418acc7db5 100644
+--- a/python/paddle/distributed/fleet/meta_parallel/pp_utils/p2p_communication.py
++++ b/python/paddle/distributed/fleet/meta_parallel/pp_utils/p2p_communication.py
+@@ -818,6 +818,7 @@ class P2pHelper:
+             _timers("recv_forward").start()
+         if pp_first_stage:
+             input_tensor = None
++            wait_handles = None
+         else:
+             self._recv_meta()
+ 
+@@ -933,6 +934,8 @@ class P2pHelper:
+             )
+             if self._dynamic_shape:
+                 self._dynamic_cnt += 1
++        else:
++            wait_handles = None
+         if _timers is not None:
+             _timers("send_backward").stop()
+ 
