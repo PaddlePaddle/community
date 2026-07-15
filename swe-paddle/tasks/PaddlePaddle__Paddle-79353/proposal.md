@@ -6,8 +6,8 @@
 - PR 链接：https://github.com/PaddlePaddle/Paddle/pull/79353
 - PR 标题：`[Bug Fix] Fix p2p local_var bug`
 - `base_commit`：`406c7afec699c23158e7ff62a0f1afb306e72afe`
-- `gold_commit`：`15c873afa5dd01faeddbd39f6d985a69926c384e`
 - merged 时间：`2026-06-23`
+- 你的身份：熟悉该模块的 contributor
 - 后续联系人：TBD
 
 ## 2. 问题一句话
