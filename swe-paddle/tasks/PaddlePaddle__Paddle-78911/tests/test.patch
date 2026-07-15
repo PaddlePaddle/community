@@ -1,0 +1,76 @@
+diff --git a/test/legacy_test/test_recompute_context.py b/test/legacy_test/test_recompute_context.py
+new file mode 100644
+index 0000000..18d7357
+--- /dev/null
++++ b/test/legacy_test/test_recompute_context.py
+@@ -0,0 +1,70 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import unittest
++
++import numpy as np
++
++import paddle
++from paddle.distributed.fleet.recompute.recompute import (
++    is_in_recompute,
++    recompute,
++)
++
++
++_RECOMPUTE_STATES = []
++
++
++def _recording_square(x):
++    _RECOMPUTE_STATES.append(is_in_recompute())
++    return x * x + 1.0
++
++
++class TestRecomputeContext(unittest.TestCase):
++    def setUp(self):
++        paddle.disable_static()
++        _RECOMPUTE_STATES.clear()
++
++    def tearDown(self):
++        self.assertFalse(is_in_recompute())
++
++    def _run_recompute(self, preserve_rng_state):
++        x = paddle.to_tensor([1.0, 2.0, 3.0], stop_gradient=False)
++        out = recompute(
++            _recording_square,
++            x,
++            preserve_rng_state=preserve_rng_state,
++            use_reentrant=True,
++        )
++        out.sum().backward()
++        return list(_RECOMPUTE_STATES), x.grad.numpy()
++
++    def test_context_active_with_rng_state(self):
++        states, _ = self._run_recompute(preserve_rng_state=True)
++        self.assertEqual(states, [True, True])
++
++    def test_context_active_without_rng_state(self):
++        states, _ = self._run_recompute(preserve_rng_state=False)
++        self.assertEqual(states, [True, True])
++
++    def test_gradient_and_context_cleanup(self):
++        self.assertFalse(is_in_recompute())
++        states, grad = self._run_recompute(preserve_rng_state=False)
++        self.assertEqual(len(states), 2)
++        np.testing.assert_allclose(grad, [2.0, 4.0, 6.0])
++        self.assertFalse(is_in_recompute())
++
++
++if __name__ == '__main__':
++    unittest.main()
