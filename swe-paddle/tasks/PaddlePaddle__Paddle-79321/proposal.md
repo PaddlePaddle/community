@@ -7,8 +7,7 @@
 - PR 标题：`[API Compatibility] Return _IncompatibleKeys for set_state_dict`
 - `base_commit`：`3cb4059b8e870c818031779af94eae728177c2ac`
 - merged 时间：`2026-06-18T08:46:05Z`
-- 你的身份：熟悉该模块的 contributor
-- 后续联系人：TBD
+- 你的身份：contributor
 
 ## 2. 问题一句话
 
