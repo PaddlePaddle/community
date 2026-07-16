@@ -2,8 +2,7 @@
 
 ## 详细描述
 
-完善 `paddle.cdist` 对 0-size Tensor 的支持，覆盖高维 batch 输入及动态图求导场景。 本 issue 中，0-size Tensor 指 shape 中至少存在一个 size 为 `0` 的 dimension，即 `tensor.numel() == 0`。该 dimension 可能位于 batch dimensions，也可能位于 `paddle.cdist` 输入的 point dimension。
-
+完善 `paddle.cdist` 对 0-size Tensor 的支持，覆盖高维 batch 输入及动态图求导场景。本 issue 中，0-size Tensor 是指 `Tensor.shape` 中至少存在一个 size 为 `0` 的 dimension，因此该 Tensor 的元素个数为 `0`，但仍具有 `shape`、`dtype`、`place` 等 Tensor metadata。
 
 ## 验收说明
 
