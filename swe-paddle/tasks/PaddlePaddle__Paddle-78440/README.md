@@ -17,15 +17,15 @@ This directory converts Paddle PR #78440 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 `paddle.cdist` 处理零尺寸 Tensor 时的 batch shape 计算和 `stop_gradient` 传播问题。
+修复 `paddle.cdist` 处理 0-size Tensor 时的 batch shape 计算和 `stop_gradient` propagation 问题。
 
-## Why This Is A Good Candidate
+## Why This Is a Good Candidate
 
-- 来自 Paddle 主仓已合入的真实 bug-fix。
-- 问题集中在 `paddle.cdist` 的零尺寸特殊分支，边界清楚。
-- 同时覆盖高维 batch 广播和 Eager autograd 状态传播。
-- 不依赖 GPU、网络服务或外部模型。
-- Python-only patch，验证成本低，F2P/P2P 行为稳定。
+* Based on a real bug-fix PR merged into the PaddlePaddle main repository.
+* The scope is well defined and limited to the 0-size Tensor path in `paddle.cdist`.
+* Covers both high-dimensional batch broadcasting and Eager autograd state propagation.
+* Requires no GPU, network service, or external model.
+* Uses a Python-only patch with low verification cost and stable F2P/P2P behavior.
 
 ## Files
 
