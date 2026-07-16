@@ -1,0 +1,104 @@
+diff --git a/test/legacy_test/test_check_memory_usage.py b/test/legacy_test/test_check_memory_usage.py
+new file mode 100644
+index 0000000..9a50200
+--- /dev/null
++++ b/test/legacy_test/test_check_memory_usage.py
+@@ -0,0 +1,98 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import subprocess
++import unittest
++from contextlib import ExitStack
++from types import SimpleNamespace
++from unittest.mock import Mock, patch
++
++from paddle.distributed.fleet.utils import log_util
++
++
++FREE_OUTPUT = """\
++              total        used        free      shared  buff/cache   available
++Mem:           16Gi       4Gi       8Gi       0Gi       4Gi        12Gi
++Swap:           2Gi       0Gi       2Gi
++"""
++
++
++class TestCheckMemoryUsage(unittest.TestCase):
++    def _runtime_patches(self, cpu_device):
++        stack = ExitStack()
++        cuda = log_util.paddle.device.cuda
++        for name in (
++            'max_memory_allocated',
++            'max_memory_reserved',
++            'memory_allocated',
++            'memory_reserved',
++            'max_pinned_memory_allocated',
++            'max_pinned_memory_reserved',
++            'pinned_memory_allocated',
++            'pinned_memory_reserved',
++        ):
++            stack.enter_context(
++                patch.object(cuda, name, return_value=0, create=True)
++            )
++
++        stack.enter_context(
++            patch.object(log_util.paddle.device, 'cpu', cpu_device)
++        )
++        stack.enter_context(
++            patch.object(
++                log_util.subprocess,
++                'run',
++                return_value=subprocess.CompletedProcess(
++                    args=['free', '-h'],
++                    returncode=0,
++                    stdout=FREE_OUTPUT,
++                    stderr='',
++                ),
++            )
++        )
++        return stack
++
++    def test_existing_memory_logging(self):
++        with self._runtime_patches(SimpleNamespace()), patch.object(
++            log_util.logger, 'info'
++        ) as info:
++            log_util.check_memory_usage('unit-test')
++
++        messages = [str(call.args[0]) for call in info.call_args_list]
++        self.assertTrue(
++            any('checking gpu memory usage unit-test' in msg for msg in messages)
++        )
++        self.assertTrue(
++            any('checking CPU memory usage: unit-test' in msg for msg in messages)
++        )
++
++    def test_unsupported_cpu_allocator_api(self):
++        unsupported = Mock(side_effect=RuntimeError('unsupported CPU memory API'))
++        cpu_device = SimpleNamespace(
++            max_memory_allocated=unsupported,
++            max_memory_reserved=unsupported,
++            memory_allocated=unsupported,
++            memory_reserved=unsupported,
++        )
++
++        with self._runtime_patches(cpu_device), patch.object(
++            log_util.logger, 'info'
++        ):
++            log_util.check_memory_usage('unit-test')
++
++        unsupported.assert_not_called()
++
++
++if __name__ == '__main__':
++    unittest.main()
