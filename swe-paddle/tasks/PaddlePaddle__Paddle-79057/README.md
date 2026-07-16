@@ -18,7 +18,7 @@ This directory converts Paddle PR #79057 into a SWE-Paddle community task candid
 
 ## Summary
 
-完善受限反序列化器对继承链中危险反序列化钩子的识别，避免仅检查当前类而遗漏父类定义的方法。
+完善 `RestrictedUnpickler` 对 MRO 中 unsafe pickle hooks 的识别，避免因仅检查当前 class 而遗漏 base class 定义的方法。
 
 ## Why This Is A Good SWE-Paddle Candidate
 

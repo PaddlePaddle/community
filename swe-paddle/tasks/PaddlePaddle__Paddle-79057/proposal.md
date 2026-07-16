@@ -12,16 +12,16 @@
 
 ## 2. 问题一句话
 
-修复 `RestrictedUnpickler` 只检查当前类、未检查继承链中的危险反序列化钩子，从而允许子类绕过安全类判定的问题。
+修复 `RestrictedUnpickler` 的 safe-class check 未检查完整 MRO，导致继承 unsafe pickle hooks 的 subclass 绕过安全校验的问题。
 
 ## 3. 为什么适合作为 SWE-Paddle 样本
 
-- **真实性**：任务来自已合入的 Paddle 安全修复 PR，不是合成问题。
-- **边界清楚**：生产修改仅涉及一个 Python 安全判定函数，代码范围小且职责单一。
-- **可验证性**：修复前继承危险钩子的子类会被错误接受；修复后应被拒绝。
-- **行为导向**：测试覆盖安全类判定和真实受限反序列化入口，不依赖源码文本匹配。
-- **安全可控**：测试使用无外部副作用的内存标记模拟危险状态恢复，不执行命令、不访问网络。
-- **环境稳定**：测试仅依赖 Python 标准库和 pytest，不要求编译 Paddle 或加载设备运行时。
+* **真实性**：任务来自已合入的 Paddle security bug-fix PR，不是合成问题。
+* **边界清楚**：production change 仅涉及一个 Python safe-class check，代码范围小且职责单一。
+* **可验证性**：修复前，继承 unsafe pickle hooks 的 subclass 会被错误接受；修复后应被拒绝。
+* **行为导向**：测试覆盖 safe-class check 和实际 restricted unpickling path，不依赖 source-code text matching。
+* **安全可控**：测试使用无外部副作用的 in-memory flag 模拟 unsafe state restoration，不执行命令、不访问网络。
+* **环境稳定**：测试仅依赖 Python standard library 和 pytest，不要求编译 Paddle 或加载 device runtime。
 
 ## 4. 任务类型和标签
 
@@ -34,9 +34,9 @@
 
 - 目标测试命令：`bash tests/test.sh`
 - 目标测试文件：`test/legacy_test/test_restricted_unpickler_mro.py`
-- P2P：普通用户类继续被接受，直接声明危险钩子的类继续被拒绝。
-- F2P 1：继承四类危险序列化钩子的子类在修复前被错误接受，修复后应被拒绝。
-- F2P 2：带有继承状态恢复钩子的 pickle 在修复前可进入钩子，修复后应在执行钩子前抛出 `pickle.UnpicklingError`。
+- P2P：普通 user-defined class 继续被接受，直接声明 unsafe pickle hooks 的 class 继续被拒绝。
+- F2P 1：继承 `__reduce__`、`__reduce_ex__`、`__getstate__` 或 `__setstate__` 的 subclass 在修复前被错误接受，修复后应被拒绝。
+- F2P 2：带有 inherited `__setstate__` hook 的 pickle 在修复前会执行该 hook，修复后应在 hook 执行前抛出 `pickle.UnpicklingError`。
 - 修复后预期：目标测试文件全部通过。
 
 ## 6. 环境与资源
