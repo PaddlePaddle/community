@@ -7,8 +7,8 @@
 - PR 标题：`fix add_n 0-size bug`
 - `base_commit`：`8cacdfd15bc89296682c784df5b1685a7ca6e408`
 - merged 时间：`2026-06-09T08:17:29Z`
-- 你的身份：熟悉该模块的 contributor
-- 后续联系人：TBD
+- 你的身份：contributor
+
 
 ## 2. 问题一句话
 
