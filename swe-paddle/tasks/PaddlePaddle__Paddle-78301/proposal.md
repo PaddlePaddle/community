@@ -37,24 +37,31 @@
 - 目标测试文件：
   - `test/legacy_test/test_api_compatibility_part3.py`
   - `test/legacy_test/test_base_layer.py`
-- 目标测试类：`TestLayerAndTensorToAPI`；P2P 护栏为 `TestLayerTo::test_main`
+- 目标测试类：`TestLayerAndTensorToAPI`、`TestTensorToCopyCompatibility`；P2P 护栏为 `TestLayerTo::test_main`
 - 目标测试命令：
 
   ```bash
+  export PYTHONPATH="$(pwd)/test/legacy_test:$(pwd)/test/dygraph_to_static${PYTHONPATH:+:$PYTHONPATH}"
+  export FLAGS_enable_pir_api=0
   python -m pytest \
     test/legacy_test/test_api_compatibility_part3.py::TestLayerAndTensorToAPI \
+    -q
+  python -m pytest \
+    test/legacy_test/test_api_compatibility_part3.py::TestTensorToCopyCompatibility::test_copy_as_positional_argument \
+    -q
+  python -m pytest \
     test/legacy_test/test_base_layer.py::TestLayerTo::test_main \
     -q
   ```
 
 - 关键 F2P 场景：
   - `Layer.to` 和 `Tensor.to` 接受 dtype、device、参考 Tensor 的位置参数，以及对应的关键字参数组合。
-  - 支持 `blocking`、`non_blocking` 和 `copy` 的合法调用形式；测试补丁应至少增加一个 `Tensor.to(dtype='float64', copy=True)` 或等价的 `copy` smoke case。新增 benchmark 测试可以补充原 PR 未覆盖的边界，但不能引入 #78593 之后的语义。
+  - 支持 `blocking`、`non_blocking` 和 `copy` 的合法调用形式；测试补丁增加同 dtype Tensor 的位置参数用例 `tensor.to(paddle.float64, True, True)`，并验证 `copy=True` 返回不同对象。该用例不得引入 #78593 之后的语义。
   - 同时设置互相冲突的阻塞参数时抛出 `TypeError`；无参数调用保持合法；参数过多或未知关键字抛出 `TypeError`；无法识别的首个位置参数抛出 `ValueError`。
   - `Layer.to` 返回原对象，并对子层执行一致的转换。
   - 按 #78301 合入时的行为，使用 dtype 转换 Layer 时，测试中的整数 buffer 也会转换到目标 dtype。后续 #78839 对这一行为的修正不纳入本任务。
 - 修复前预期：在 `base_commit` 上应用围绕 #78301 目标行为构造的 `tests/test.patch` 后，新增兼容性用例应出现失败或错误。例如 dtype 作为首个位置参数时会被错误解释为 device，部分位置参数组合、无参数调用或阻塞参数冲突无法按目标行为执行，且新增的 Layer/Tensor 统一调用场景不能全部通过。
-- 修复后预期：继续应用仅来自 #78301 非测试文件的 `solution/code.patch` 后，`TestLayerAndTensorToAPI` 及指定的既有 Layer 回归测试全部通过，并满足 #78301 合入时的参数解析和转换行为。
+- 修复后预期：继续应用仅来自 #78301 非测试文件的 `solution/code.patch` 后，`TestLayerAndTensorToAPI`、`TestTensorToCopyCompatibility::test_copy_as_positional_argument` 及指定的既有 Layer 回归测试全部通过，并满足 #78301 合入时的参数解析和转换行为。
 - P2P 候选：`test/legacy_test/test_base_layer.py::TestLayerTo::test_main` 在 #78301 中未被修改，可作为 Layer.to 既有行为回归护栏；完整任务包阶段还应从同模块中挑选未被 `test.patch` 修改、且在 base 和修复后都通过的存量用例。
 
 ## 6. 环境与资源
