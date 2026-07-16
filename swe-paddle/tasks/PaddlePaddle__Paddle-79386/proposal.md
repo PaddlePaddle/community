@@ -7,8 +7,7 @@
 - PR 标题：`[API Compatibility] Bug Fix`
 - `base_commit`：`9aa3379edbee8ccd6cec772b22ad37733357f8df`
 - merged 时间：`2026-06-29T08:47:50Z`
-- 你的身份：熟悉该模块的 contributor
-- 后续联系人：TBD
+- 你的身份：contributor
 
 ## 2. 问题一句话
 
