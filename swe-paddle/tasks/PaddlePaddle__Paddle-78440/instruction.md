@@ -1,16 +1,17 @@
-# 完善 paddle.cdist 对零尺寸 Tensor 的支持
+# 完善 paddle.cdist 对 0-size Tensor 的支持
 
 ## 详细描述
 
-完善 `paddle.cdist` 对零尺寸 Tensor 的支持，覆盖高维 batch 输入及动态图求导场景。
+完善 `paddle.cdist` 对 0-size Tensor 的支持，覆盖高维 batch 输入及动态图求导场景。 本 issue 中，0-size Tensor 指 shape 中至少存在一个 size 为 `0` 的 dimension，即 `tensor.numel() == 0`。该 dimension 可能位于 batch dimensions，也可能位于 `paddle.cdist` 输入的 point dimension。
+
 
 ## 验收说明
 
-- 零尺寸输入下，输出 shape 应符合 batch 维度广播规则
+- 0-size 输入下，输出 shape 应符合 batch 维度广播规则
 - 正确处理不同 `stop_gradient` 状态的输入组合
-- 支持对零尺寸输出执行允许 unused gradient 的求导流程
+- 支持对 0-size 输出执行允许 unused gradient 的求导流程
 - 在对应单测中增加高维 batch、可求导和不可求导场景
-- 非零尺寸输入的现有行为保持不变
+- 非 0-size 输入的现有行为保持不变
 
 ## 技术要求
 
