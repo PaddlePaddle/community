@@ -12,7 +12,7 @@
 
 ## 2. 问题一句话
 
-完善动态图 reentrant recompute 的上下文状态，使前向执行与反向重计算均可被正确识别。
+完善动态图 recompute 的 context detection，使 `is_in_recompute()` 在 forward execution 和 backward recomputation 期间均能正确识别 recompute context。
 
 ## 3. 为什么适合作为 SWE-Paddle 样本
 

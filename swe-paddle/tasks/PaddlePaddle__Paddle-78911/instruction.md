@@ -1,16 +1,16 @@
-# 完善 recompute 执行阶段检测
+# 完善 recompute 的 context detection
 
 ## 详细描述
 
-完善动态图 reentrant recompute 流程中的执行阶段检测，使计算函数在前向执行和反向重计算期间都能通过 `is_in_recompute()` 获得一致、准确的状态。
+完善动态图 recompute 的 context detection，使 `is_in_recompute()` 在 forward execution 和 backward recomputation 期间均能正确识别 recompute context。
 
 ## 验收说明
 
-- 使用 reentrant recompute 时，计算函数在首次前向执行期间应处于 recompute 上下文
+- 使用 recompute 时，计算函数在首次前向执行期间应处于 recompute 上下文
 - 反向传播触发重新计算时，计算函数仍应处于 recompute 上下文
 - 启用或关闭 RNG 状态保存时，上述行为均应保持一致
-- recompute 执行结束后，上下文状态应被正确清理
-- 现有梯度计算和 recompute 行为不得退化
+- recompute 执行结束后，context state 应被正确清理
+- 现有 gradient computation 和 recompute behavior 不得退化
 
 ## 技术要求
 
