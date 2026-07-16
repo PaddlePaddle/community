@@ -21,11 +21,11 @@ This directory converts Paddle PR #78440 into a SWE-Paddle community task candid
 
 ## Why This Is a Good Candidate
 
-* Based on a real bug-fix PR merged into the PaddlePaddle main repository.
-* The scope is well defined and limited to the 0-size Tensor path in `paddle.cdist`.
-* Covers both high-dimensional batch broadcasting and Eager autograd state propagation.
-* Requires no GPU, network service, or external model.
-* Uses a Python-only patch with low verification cost and stable F2P/P2P behavior.
+- Based on a real bug-fix PR merged into the PaddlePaddle main repository.
+- The scope is well defined and limited to the 0-size Tensor path in `paddle.cdist`.
+- Covers both high-dimensional batch broadcasting and Eager autograd state propagation.
+- Requires no GPU, network service, or external model.
+- Uses a Python-only patch with low verification cost and stable F2P/P2P behavior.
 
 ## Files
 
