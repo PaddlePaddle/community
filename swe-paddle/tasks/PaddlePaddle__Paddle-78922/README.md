@@ -16,7 +16,7 @@ This directory converts Paddle PR #78922 into a SWE-Paddle community task candid
 
 ## Summary
 
-完善 FlexCheckpoint `flatten_state_dict` 的对象生命周期管理，避免调用结束后继续保留已无外部引用的 Tensor，同时保持扁平化结果和映射行为不变。
+修复 FlexCheckpoint `flatten_state_dict` 调用结束后残留额外 Tensor reference 的问题，同时保持现有 flatten result、key mapping 和 unflatten behavior 不变。
 
 ## Files
 
