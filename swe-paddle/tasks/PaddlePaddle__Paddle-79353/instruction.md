@@ -1,21 +1,22 @@
-# 完善 Pipeline P2P overlap 无通信路径的返回行为
+# 完善 pipeline P2P overlap no-communication path 的返回行为
 
 ## 详细描述
 
-完善 Pipeline 并行 P2P 通信辅助接口在无需执行实际通信的 stage 边界场景下，对 overlap 模式返回值的处理。
+完善 pipeline parallel P2P communication helper 在 first pipeline stage 无需执行实际 communication 时的 overlap return behavior。
 
 ## 验收说明
 
-- 首个 Pipeline stage 调用 overlap `recv_forward` 时，应返回空输入及空等待句柄
-- 首个 Pipeline stage 调用 overlap `send_backward` 时，应返回空等待句柄
-- 非 overlap 模式的现有返回行为保持不变
-- 不需要执行通信的路径不得因局部状态未正确处理而异常
+- first pipeline stage 调用 overlap recv_forward 时，应返回 (None, None)
+- first pipeline stage 调用 overlap send_backward 时，应返回 None
+- non-overlap path 的现有 return behavior 保持不变
+- no-communication path 不得因 wait handle 状态缺失而异常
+- 其他需要执行实际 P2P communication 的路径不得退化
 
 ## 技术要求
 
 - 熟悉 Python
-- 了解 Pipeline 并行与 P2P 通信流程
-- 了解同步与 overlap 通信接口的返回约定
+- 了解 pipeline parallel 和 P2P communication flow
+- 了解 synchronous 与 overlap communication API 的 return contract
 
 ## Acceptance Criteria
 

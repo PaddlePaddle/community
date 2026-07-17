@@ -6,27 +6,28 @@
 - PR 链接：https://github.com/PaddlePaddle/Paddle/pull/79353
 - PR 标题：`[Bug Fix] Fix p2p local_var bug`
 - `base_commit`：`406c7afec699c23158e7ff62a0f1afb306e72afe`
-- merged 时间：`2026-06-23`
+- Merged date：`2026-06-23`
 - 你的身份：熟悉该模块的 contributor
 - 后续联系人：TBD
 
 ## 2. 问题一句话
 
-完善 Pipeline P2P overlap 模式在 stage 边界无通信路径下的返回行为。
+修复 pipeline P2P communication 在 first-stage no-communication path 下启用 overlap 时访问未初始化 `wait_handles` 的问题。
 
 ## 3. 为什么适合作为 SWE-Paddle 样本
 
-- **真实性**：任务来自已合入的 Paddle 分布式训练 bug fix。
-- **边界清楚**：生产代码仅涉及一个 Python 文件中的两个边界分支。
-- **可复现性**：测试可直接调用通信辅助接口，不需要启动多进程或真实通信后端。
-- **区分度**：修复需要理解 overlap 模式的返回约定，而不是仅规避异常。
+- **真实性**：任务来自已合入的 Paddle distributed-training bug-fix PR。
+- **边界清楚**：production change 仅涉及一个 Python 文件中 `recv_forward` 和 `send_backward` 的 first-stage branches。
+- **可复现性**：目标分支不会发起实际 P2P communication，可通过直接调用 communication helper 进行验证，无需启动 multi-process distributed environment。
+- **行为明确**：无 communication request 时，overlap path 应返回 `None` 作为 wait-handle result，而不是因访问未初始化的 local variable 而失败。
+- **规模适中**：patch 较小，但需要保持 overlap 和 non-overlap paths 的既有 return contract。
 
 ## 4. 任务类型和标签
 
 - 任务类型：`bug_fix`
-- 执行后端：`cpu`
-- 设备范围：`cpu_only`
-- 模块标签：`[distributed, pipeline_parallel, p2p, overlap, python]`
+- Execution backend：`cpu`
+- Device scope：`cpu_only`
+- Module tags：`[distributed, pipeline_parallel, p2p, overlap, python]`
 
 ## 5. 验证思路
 
@@ -39,11 +40,12 @@
 
 - 资源需求：CPU
 - Paddle 来源：`PaddlePaddle/Paddle` source checkout at `base_commit`
-- patch 类型：Python-only
+- Patch type：Python-only
 - 最小测试命令：`bash tests/test.sh`
+- 不需要 GPU、NCCL、multi-process distributed execution 或实际 communication backend
 
 ## 7. 风险自查
 
-- 泄露风险：任务说明只描述接口行为和验收标准，不指出具体修改位置。
-- 环境风险：无需 GPU、NCCL 或多进程分布式环境。
-- flaky 风险：测试不执行真实通信，结果应稳定。
+- 泄露风险：任务说明仅描述 observable behavior 和 return contract，不指定具体修改位置或实现方式。
+- 环境风险：目标分支不执行实际 P2P communication，无需 GPU、NCCL 或 multi-process distributed environment。
+- Flaky 风险：测试仅检查确定性的返回值和异常行为，不依赖 timing、network 或 device state。
