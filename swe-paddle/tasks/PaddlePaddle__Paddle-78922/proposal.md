@@ -12,14 +12,14 @@
 
 ## 2. 问题一句话
 
-完善 `flatten_state_dict` 的对象生命周期管理，避免函数返回后继续持有已无外部用途的 Tensor 引用。
+修复 `flatten_state_dict` 调用结束后残留额外 Tensor reference 的问题，避免 repeated checkpoint saves 持续累积 memory usage。
 
 ## 3. 为什么适合作为 SWE-Paddle 样本
 
 - **真实性**：来自已合入的 Paddle FlexCheckpoint bug-fix PR。
 - **边界清楚**：生产修改集中在一个 Python 函数，目标行为可通过确定性的引用计数测试验证。
 - **可复现性**：CPU-only，不依赖 GPU 显存、系统 RSS、分布式进程或外部服务。
-- **回归护栏**：同时验证扁平化 key、mapping 和反向还原行为未发生变化。
+- **回归护栏**：同时验证 nested state dict 的 flatten、key mapping 和 unflatten behavior 保持不变。
 
 ## 4. 任务类型和标签
 
@@ -39,7 +39,16 @@
 
 ## 6. 环境与资源
 
-- Python 3
-- Paddle Python runtime
-- CPU
-- `pytest`
+- 资源需求：CPU
+- Paddle 来源：`PaddlePaddle/Paddle` source checkout at `base_commit`
+- Patch type：Python-only
+- Python 依赖：PaddlePaddle、pytest
+- 最小测试命令：`bash tests/test.sh`
+- 不需要 GPU、distributed execution、external services 或额外 dataset
+
+## 7. 风险自查
+
+- 泄露风险：`instruction.md` 仅描述 observable reference-retention behavior 和预期结果，不指定具体 helper、代码位置或 reference-cycle cleanup 方案。
+- 环境风险：verifier 使用 reference count 作为 GPU memory leak 的 deterministic proxy，无需实际分配 GPU memory。
+- Flaky 风险：测试不依赖 Python cyclic GC 的自动触发时机、GPU allocator 状态或 process RSS。
+- 回归风险：测试覆盖 flatten、key mapping、unflatten 以及 Tensor identity，避免通过复制 Tensor 规避 reference leak。
