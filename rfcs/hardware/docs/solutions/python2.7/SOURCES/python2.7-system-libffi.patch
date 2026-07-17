@@ -1,0 +1,12 @@
+--- a/setup.py
++++ b/setup.py
+@@ -2116,7 +2116,7 @@ class PyBuildExt(build_ext):
+             return
+
+     def detect_ctypes(self, inc_dirs, lib_dirs):
+-        self.use_system_libffi = False
++        self.use_system_libffi = False  # controlled via --with-system-ffi configure flag
+         include_dirs = []
+         extra_compile_args = []
+         extra_link_args = []
+

@@ -1,0 +1,37 @@
+groups:
+  - name: zbc
+    description: RISC-V Carry-less Multiplication Semantics
+
+semantics:
+  clmul:
+    description: "clmul rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Clmul
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  clmulh:
+    description: "clmulh rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Clmulh
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  clmulr:
+    description: "clmulr rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Clmulr
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
