@@ -15,12 +15,12 @@
 
 ## 2. 问题一句话
 
-`paddle.cdist` 在零尺寸输入下可能返回错误的高维 batch shape，并丢失输入的梯度需求。
+`paddle.cdist` 在 0-size 输入下可能返回错误的高维 batch shape，并丢失输入的梯度需求。
 
 ## 3. 为什么适合作为 SWE-Paddle 样本
 
 - **真实性**：来自 Paddle 主仓已合入的真实 bug-fix。
-- **边界清楚**：实现修改集中在 `paddle.cdist` 的零尺寸特殊分支。
+- **边界清楚**：实现修改集中在 `paddle.cdist` 的 0-size 特殊分支。
 - **外部行为明确**：修复前 shape 和 `stop_gradient` 断言稳定失败，修复后通过。
 - **非平凡性**：需要同时理解 batch 广播语义和 Eager autograd 状态传播。
 - **成本低**：Python-only patch，不需要重新编译 C++ core。
