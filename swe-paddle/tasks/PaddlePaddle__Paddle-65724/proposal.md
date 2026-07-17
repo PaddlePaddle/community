@@ -7,7 +7,6 @@
 - PR 链接：https://github.com/PaddlePaddle/Paddle/pull/65724
 - PR 标题：`[Bugfix] fix dataloader when setting persistent_workers=True`
 - `base_commit`：`9a4caad68bca019e85847eb99da57f060e01caa5`
-- `gold_commit`：`b7c8439cd489e26c09c1db8b929285a96c64e3ed`
 - merged 时间：`2024-07-17`
 - 你的身份：熟悉该模块的 contributor
 - 后续联系人：TBD
