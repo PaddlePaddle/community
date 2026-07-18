@@ -1,0 +1,122 @@
+diff --git a/test/legacy_test/test_hybrid_parallel_mode_selection.py b/test/legacy_test/test_hybrid_parallel_mode_selection.py
+new file mode 100644
+index 00000000000000..9edef404f2f197
+--- /dev/null
++++ b/test/legacy_test/test_hybrid_parallel_mode_selection.py
+@@ -0,0 +1,116 @@
++# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import ast
++import copy
++import types
++from pathlib import Path
++
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_SOURCE_PATH = (
++    _REPO_ROOT
++    / 'python'
++    / 'paddle'
++    / 'distributed'
++    / 'fleet'
++    / 'base'
++    / 'topology.py'
++)
++
++
++def _load_checkout_mode_selector():
++    source = _SOURCE_PATH.read_text(encoding='utf-8')
++    tree = ast.parse(source, filename=str(_SOURCE_PATH))
++
++    parallel_mode = None
++    selector = None
++
++    for node in tree.body:
++        if isinstance(node, ast.ClassDef) and node.name == 'ParallelMode':
++            parallel_mode = copy.deepcopy(node)
++        elif (
++            isinstance(node, ast.ClassDef)
++            and node.name == 'HybridCommunicateGroup'
++        ):
++            for member in node.body:
++                if (
++                    isinstance(member, ast.FunctionDef)
++                    and member.name == 'get_parallel_mode'
++                ):
++                    selector = copy.deepcopy(member)
++                    selector.name = '_get_parallel_mode'
++                    selector.decorator_list = []
++                    break
++
++    assert parallel_mode is not None
++    assert selector is not None
++
++    namespace = {}
++    module = ast.Module(
++        body=[parallel_mode, selector],
++        type_ignores=[],
++    )
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(_SOURCE_PATH), 'exec'), namespace, namespace)
++
++    return namespace['ParallelMode'], namespace['_get_parallel_mode']
++
++
++def _classify(dp, sharding, mp=1, pp=1):
++    parallel_mode, selector = _load_checkout_mode_selector()
++    topology = types.SimpleNamespace(
++        _dp_degree=dp,
++        _sharding_degree=sharding,
++        _mp_degree=mp,
++        _pp_degree=pp,
++    )
++    return selector(topology), parallel_mode
++
++
++def test_existing_data_and_pure_sharding_modes():
++    data_result, mode = _classify(dp=4, sharding=1)
++    sharding_result, _ = _classify(dp=1, sharding=4)
++
++    assert data_result == mode.DATA_PARALLEL
++    assert sharding_result == mode.SHARDING_PARALLEL
++
++
++def test_tensor_and_pipeline_modes_take_precedence():
++    tensor_result, mode = _classify(
++        dp=2,
++        sharding=2,
++        mp=2,
++        pp=1,
++    )
++    pipeline_result, _ = _classify(
++        dp=2,
++        sharding=2,
++        mp=2,
++        pp=2,
++    )
++
++    assert tensor_result == mode.TENSOR_PARALLEL
++    assert pipeline_result == mode.PIPELINE_PARALLEL
++
++
++def test_sharding_with_data_parallel_uses_sharding_mode():
++    result, mode = _classify(
++        dp=2,
++        sharding=4,
++        mp=1,
++        pp=1,
++    )
++
++    assert result == mode.SHARDING_PARALLEL
