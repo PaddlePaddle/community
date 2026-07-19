@@ -1,0 +1,24 @@
+diff --git a/paddle/fluid/operators/controlflow/conditional_block_op.cc b/paddle/fluid/operators/controlflow/conditional_block_op.cc
+index f11bf6612c8cab0131a20d1e08aaa1776ffddacf..f44a93e0c3549a7505b0a5772256ec88a636bd03 100644
+--- a/paddle/fluid/operators/controlflow/conditional_block_op.cc
++++ b/paddle/fluid/operators/controlflow/conditional_block_op.cc
+@@ -78,17 +78,8 @@ class ConditionalBlockOp : public ConditionalOp {
+               "got a null Scope variable. Please set the Scope variable."));
+ 
+       auto *scopes = scope_var->GetMutable<std::vector<framework::Scope *>>();
+-
+-      if (scopes->size() == 0 || !FLAGS_control_flow_use_new_executor) {
+-        scopes->resize(1);
+-        scopes->front() = &scope.NewScope();
+-      }
+-
+-      // We need to know whether the scope we cached is still valid.
+-      // If not, we need to create a new one.
+-      if (scope.kids().size() == 0) {
+-        scopes->front() = &scope.NewScope();
+-      }
++      scopes->resize(1);
++      scopes->front() = &scope.NewScope();
+ 
+       auto &cur_scope = *scopes->front();
+ #ifdef PADDLE_WITH_MKLDNN
