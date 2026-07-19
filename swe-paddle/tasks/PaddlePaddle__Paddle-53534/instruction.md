@@ -19,10 +19,6 @@
 - 了解 Paddle static graph 与 Tensor/Variable
 - 了解 dtype conversion 和 nested sequence handling
 
-## 参考资料
-
-- https://github.com/PaddlePaddle/Paddle/pull/53534
-
 ## Acceptance Criteria
 
 - The behavior described above should be fixed.
