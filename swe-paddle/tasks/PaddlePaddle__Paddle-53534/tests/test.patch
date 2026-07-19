@@ -1,0 +1,208 @@
+diff --git a/test/legacy_test/test_to_tensor_numpy124_contract.py b/test/legacy_test/test_to_tensor_numpy124_contract.py
+new file mode 100644
+index 00000000000000..d84d97523827f0
+--- /dev/null
++++ b/test/legacy_test/test_to_tensor_numpy124_contract.py
+@@ -0,0 +1,202 @@
++# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import ast
++import copy
++import types
++from pathlib import Path
++
++import numpy as _real_numpy
++import pytest
++
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_SOURCE_PATH = (
++    _REPO_ROOT / 'python' / 'paddle' / 'tensor' / 'creation.py'
++)
++
++
++class _Variable:
++    def __init__(self, value, dtype=None):
++        self.value = _real_numpy.array(value, dtype=dtype)
++        self.dtype = str(self.value.dtype)
++        self.shape = self.value.shape
++        self.stop_gradient = None
++
++    def __len__(self):
++        return len(self.value)
++
++    def __getitem__(self, index):
++        return self.value[index]
++
++    def astype(self, dtype):
++        return _Variable(self.value.astype(str(dtype)))
++
++
++class _Numpy124Proxy:
++    number = _real_numpy.number
++    ndarray = _real_numpy.ndarray
++    isscalar = staticmethod(_real_numpy.isscalar)
++
++    def array(self, data, *args, **kwargs):
++        if isinstance(data, (list, tuple)) and any(
++            isinstance(item, _Variable) for item in data
++        ):
++            raise ValueError(
++                'setting an array element with a sequence'
++            )
++        return _real_numpy.array(data, *args, **kwargs)
++
++    def __getattr__(self, name):
++        return getattr(_real_numpy, name)
++
++
++def _load_checkout_function():
++    source = _SOURCE_PATH.read_text(encoding='utf-8')
++    tree = ast.parse(source, filename=str(_SOURCE_PATH))
++
++    target = None
++    for node in tree.body:
++        if (
++            isinstance(node, ast.FunctionDef)
++            and node.name == '_to_tensor_static'
++        ):
++            target = copy.deepcopy(node)
++            target.decorator_list = []
++            break
++
++    assert target is not None
++
++    events = []
++
++    def assign(data):
++        events.append(('assign', type(data).__name__))
++        if isinstance(data, _Variable):
++            return _Variable(data.value.copy(), data.dtype)
++        if isinstance(data, dict):
++            raise TypeError('assign received unsupported data')
++        return _Variable(_real_numpy.array(data))
++
++    def cast(data, dtype):
++        events.append(('cast', data.dtype, str(dtype)))
++        return _Variable(data.value.astype(str(dtype)))
++
++    def stack(items):
++        events.append(('stack', len(items)))
++        return _Variable(
++            _real_numpy.stack([item.value for item in items], axis=0)
++        )
++
++    def squeeze(data, axis):
++        events.append(('squeeze', axis))
++        return _Variable(_real_numpy.squeeze(data.value, axis=axis))
++
++    paddle_double = types.SimpleNamespace(
++        get_default_dtype=lambda: 'float32',
++        cast=cast,
++        stack=stack,
++        squeeze=squeeze,
++    )
++
++    namespace = {
++        'Variable': _Variable,
++        'np': _Numpy124Proxy(),
++        'paddle': paddle_double,
++        'assign': assign,
++        'convert_dtype': lambda dtype: str(dtype),
++    }
++
++    module = ast.Module(body=[target], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(
++        compile(module, str(_SOURCE_PATH), 'exec'),
++        namespace,
++        namespace,
++    )
++
++    return namespace['_to_tensor_static'], events
++
++
++def test_numeric_sequence_behavior_remains_valid():
++    function, events = _load_checkout_function()
++
++    result = function(
++        [1.0, 2.0, 3.0],
++        stop_gradient=False,
++    )
++
++    _real_numpy.testing.assert_array_equal(
++        result.value,
++        _real_numpy.array([1.0, 2.0, 3.0], dtype='float32'),
++    )
++    assert result.dtype == 'float32'
++    assert result.stop_gradient is False
++    assert not any(event[0] in {'stack', 'squeeze'} for event in events)
++
++
++def test_variable_passthrough_and_explicit_cast_remain_valid():
++    function, events = _load_checkout_function()
++    source = _Variable([1.5], dtype='float32')
++
++    same = function(source, stop_gradient=True)
++    converted = function(
++        source,
++        dtype='float64',
++        stop_gradient=False,
++    )
++
++    assert same is source
++    assert same.stop_gradient is True
++    assert converted is not source
++    assert converted.dtype == 'float64'
++    assert converted.stop_gradient is False
++    _real_numpy.testing.assert_array_equal(
++        converted.value,
++        _real_numpy.array([1.5], dtype='float64'),
++    )
++    assert ('cast', 'float32', 'float64') in events
++
++
++def test_nested_variable_sequence_uses_recursive_conversion():
++    function, events = _load_checkout_function()
++
++    result = function(
++        [
++            _Variable([1.0], dtype='float32'),
++            _Variable([2], dtype='int64'),
++            [1],
++        ],
++        dtype='float32',
++        stop_gradient=False,
++    )
++
++    _real_numpy.testing.assert_array_equal(
++        result.value,
++        _real_numpy.array([1.0, 2.0, 1.0], dtype='float32'),
++    )
++    assert result.shape == (3,)
++    assert result.dtype == 'float32'
++    assert result.stop_gradient is False
++    assert ('stack', 3) in events
++    assert ('squeeze', -1) in events
++
++
++def test_unsupported_mapping_has_clear_error():
++    function, _ = _load_checkout_function()
++
++    with pytest.raises(
++        RuntimeError,
++        match=r"Do not support transform type `<class 'dict'>` to tensor",
++    ):
++        function({1: 1})
