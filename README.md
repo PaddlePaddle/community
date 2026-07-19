@@ -28,4 +28,3 @@ We have implemented several mechanisms to enhance community engagement and decis
 
 ## Further Information
 - For a complete overview, please visit: [https://www.paddlepaddle.org.cn/developercommunity](https://www.paddlepaddle.org.cn/developercommunity)
-
