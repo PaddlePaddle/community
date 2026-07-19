@@ -20,6 +20,10 @@
 - 了解 Tensor shape representation 和 broadcasting semantics
 - 了解 Paddle Python API 单元测试开发流程
 
+## 参考资料
+
+- https://github.com/PaddlePaddle/Paddle/issues/60780
+
 ## Acceptance Criteria
 
 - A valid shape list containing 0-D Tensor dimensions is accepted by `broadcast_to`.
