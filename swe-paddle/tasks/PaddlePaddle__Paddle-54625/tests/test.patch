@@ -1,0 +1,92 @@
+diff --git a/test/swe_paddle/test_pr54625_pipeline_output_release.py b/test/swe_paddle/test_pr54625_pipeline_output_release.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..f55cea71100256656b0a71da82925f4ab01905a0
+--- /dev/null
++++ b/test/swe_paddle/test_pr54625_pipeline_output_release.py
+@@ -0,0 +1,86 @@
++from __future__ import annotations
++
++import ast
++import copy
++import types
++from pathlib import Path
++
++
++TARGET = Path(
++    "python/paddle/distributed/fleet/meta_parallel/pipeline_parallel.py"
++)
++
++
++class _Tensor:
++    def __init__(self, *, initialized=True, inplace_version=0):
++        self._initialized = initialized
++        self.inplace_version = inplace_version
++        self.clear_calls = 0
++
++    def _is_initialized(self):
++        return self._initialized
++
++    def _clear_dataptr(self):
++        self.clear_calls += 1
++
++
++def _load_checkout_function():
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    function = None
++    for node in tree.body:
++        if isinstance(node, ast.ClassDef) and node.name == "PipelineParallel":
++            for item in node.body:
++                if (
++                    isinstance(item, ast.FunctionDef)
++                    and item.name == "_release_output"
++                ):
++                    function = copy.deepcopy(item)
++                    break
++
++    assert function is not None, "PipelineParallel._release_output not found"
++    module = ast.Module(body=[function], type_ignores=[])
++    ast.fix_missing_locations(module)
++    namespace = {
++        "paddle": types.SimpleNamespace(Tensor=_Tensor),
++    }
++    exec(compile(module, str(TARGET), "exec"), namespace)
++    return namespace["_release_output"]
++
++
++def test_initialized_pristine_outputs_are_released():
++    function = _load_checkout_function()
++    single = _Tensor()
++    tuple_tensor = _Tensor()
++    list_tensor = _Tensor()
++
++    function(object(), single)
++    function(object(), (tuple_tensor, None, object()))
++    function(object(), [list_tensor, "not-a-tensor"])
++
++    assert single.clear_calls == 1
++    assert tuple_tensor.clear_calls == 1
++    assert list_tensor.clear_calls == 1
++
++
++def test_uninitialized_outputs_are_not_released():
++    function = _load_checkout_function()
++    single = _Tensor(initialized=False)
++    sequence_item = _Tensor(initialized=False)
++
++    function(object(), single)
++    function(object(), [sequence_item])
++
++    assert single.clear_calls == 0
++    assert sequence_item.clear_calls == 0
++
++
++def test_inplace_modified_outputs_are_not_released():
++    function = _load_checkout_function()
++    single = _Tensor(inplace_version=1)
++    sequence_item = _Tensor(inplace_version=3)
++
++    function(object(), single)
++    function(object(), (sequence_item,))
++
++    assert single.clear_calls == 0
++    assert sequence_item.clear_calls == 0
