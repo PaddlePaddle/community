@@ -16,10 +16,6 @@
 - 了解 Paddle control-flow operator 和 Scope lifecycle
 - 了解 pointer ownership、cached runtime state 和 executor reuse
 
-## 参考资料
-
-- https://github.com/PaddlePaddle/Paddle/pull/50086
-
 ## Acceptance Criteria
 
 - The behavior described above should be fixed.
