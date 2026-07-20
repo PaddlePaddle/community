@@ -7,7 +7,7 @@
 - PR 标题：`[BugFix]Fix bug in vpp+ sharding/dp overlap`
 - `base_commit`：`42ab2c34b3dd76b54b547613e12393413350c285`
 - merged 时间：`2023-08-02`
-- 你的身份：原 PR 作者 / reviewer / 熟悉该模块的 contributor
+- 你的身份：熟悉该模块的 contributor
 - 后续联系人：TBD
 
 ## 2. 问题一句话
