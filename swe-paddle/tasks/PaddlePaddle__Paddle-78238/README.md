@@ -18,7 +18,7 @@ This directory converts Paddle PR #78238 into a SWE-Paddle community task candid
 
 ## Summary
 
-完善 `paddle.put_along_axis` 和 `Tensor.put_along_axis_` 对 0-size `indices` Tensor 的支持。
+Fix `paddle.put_along_axis` and `Tensor.put_along_axis_` to correctly handle zero-size `indices` tensors.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
