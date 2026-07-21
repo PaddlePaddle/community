@@ -1,0 +1,20 @@
+diff --git a/python/paddle/distributed/flex_checkpoint/dcp/utils.py b/python/paddle/distributed/flex_checkpoint/dcp/utils.py
+index 9db0aa7d0304f35a057a476ff352350933af9acf..efcd550a7b2f458ab27e174895143f735be7e93e 100644
+--- a/python/paddle/distributed/flex_checkpoint/dcp/utils.py
++++ b/python/paddle/distributed/flex_checkpoint/dcp/utils.py
+@@ -113,6 +113,7 @@ def flatten_state_dict(state_dict):
+     mapping = {}
+ 
+     def _flatten(key, value):
++        nonlocal _flatten
+         if isinstance(value, dict):
+             for k, v in value.items():
+                 assert isinstance(k, str), f"The key should be str, but is {k}"
+@@ -127,6 +128,7 @@ def flatten_state_dict(state_dict):
+             )
+ 
+     _flatten((), state_dict)
++    del _flatten  # force python gc of recursive closure
+ 
+     return flatten_state_dict, mapping
+ 
