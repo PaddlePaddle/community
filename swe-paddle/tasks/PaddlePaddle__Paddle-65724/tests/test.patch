@@ -1,0 +1,214 @@
+diff --git a/test/legacy_test/test_dataloader_persistent_workers_structure.py b/test/legacy_test/test_dataloader_persistent_workers_structure.py
+new file mode 100644
+index 00000000000000..d5a016371c1d15
+--- /dev/null
++++ b/test/legacy_test/test_dataloader_persistent_workers_structure.py
+@@ -0,0 +1,208 @@
++# Copyright (c) 2024 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import ast
++import copy
++import queue
++import threading
++import types
++from pathlib import Path
++
++import numpy as np
++import paddle
++from paddle.io.dataloader import dataloader_iter as runtime_iter
++
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_SOURCE_PATH = (
++    _REPO_ROOT
++    / 'python'
++    / 'paddle'
++    / 'io'
++    / 'dataloader'
++    / 'dataloader_iter.py'
++)
++
++
++def _load_checkout_iterator_classes():
++    source = _SOURCE_PATH.read_text(encoding='utf-8')
++    tree = ast.parse(source, filename=str(_SOURCE_PATH))
++
++    wanted = {
++        '_DataLoaderIterBase',
++        '_DataLoaderIterSingleProcess',
++        '_DataLoaderIterMultiProcess',
++    }
++    selected = []
++    for node in tree.body:
++        if isinstance(node, ast.ClassDef) and node.name in wanted:
++            selected.append(copy.deepcopy(node))
++
++    assert {node.name for node in selected} == wanted
++
++    namespace = dict(runtime_iter.__dict__)
++    namespace['__name__'] = 'checkout_dataloader_iter'
++    namespace['multiprocessing'] = __import__(
++        'paddle.incubate.multiprocessing',
++        fromlist=['multiprocessing'],
++    )
++
++    module = ast.Module(body=selected, type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(_SOURCE_PATH), 'exec'), namespace, namespace)
++
++    return (
++        namespace['_DataLoaderIterSingleProcess'],
++        namespace['_DataLoaderIterMultiProcess'],
++        namespace,
++    )
++
++
++_SINGLE_ITER, _MULTI_ITER, _TARGET_NAMESPACE = (
++    _load_checkout_iterator_classes()
++)
++
++
++def _make_loader():
++    dataset_kind = _TARGET_NAMESPACE['_DatasetKind']
++    return types.SimpleNamespace(
++        dataset=[np.array([1], dtype='int64')],
++        feed_list=[],
++        places=[paddle.CPUPlace()],
++        return_list=True,
++        batch_sampler=[[0]],
++        drop_last=False,
++        auto_collate_batch=True,
++        num_workers=0,
++        use_buffer_reader=False,
++        prefetch_factor=2,
++        use_shared_memory=False,
++        timeout=0,
++        worker_init_fn=None,
++        dataset_kind=dataset_kind.MAP,
++        pin_memory=False,
++        collate_fn=None,
++    )
++
++
++def _new_single_process_iterator():
++    iterator_type = _SINGLE_ITER
++    original_init_thread = iterator_type._init_thread
++    iterator_type._init_thread = lambda self: None
++    try:
++        iterator = iterator_type(_make_loader())
++    finally:
++        iterator_type._init_thread = original_init_thread
++    return iterator
++
++
++def _put(storage, value):
++    if hasattr(storage, 'put'):
++        storage.put(value)
++    else:
++        storage.append(value)
++
++
++def _get(storage):
++    if hasattr(storage, 'get'):
++        return storage.get(timeout=2)
++    return storage.pop(0)
++
++
++def _close_storage(storage):
++    close = getattr(storage, 'close', None)
++    if close is not None:
++        close()
++    join_thread = getattr(storage, 'join_thread', None)
++    if join_thread is not None:
++        join_thread()
++
++
++def test_existing_fifo_structure_handoff():
++    iterator = _new_single_process_iterator()
++    storage = iterator._structure_infos
++
++    try:
++        first = ('tuple', 1)
++        second = {'kind': 'dict', 'depth': 2}
++        _put(storage, first)
++        _put(storage, second)
++
++        assert _get(storage) == first
++        assert _get(storage) == second
++    finally:
++        iterator._try_shutdown_all()
++        _close_storage(storage)
++
++
++def test_structure_metadata_supports_thread_handoff():
++    iterator = _new_single_process_iterator()
++    storage = iterator._structure_infos
++    errors = []
++
++    def producer():
++        try:
++            storage.put(('nested', {'batch': 3}))
++        except BaseException as error:
++            errors.append(error)
++
++    thread = threading.Thread(target=producer)
++    thread.start()
++    thread.join(timeout=2)
++
++    try:
++        assert not thread.is_alive()
++        assert not errors
++        assert storage.get(timeout=2) == ('nested', {'batch': 3})
++    finally:
++        iterator._try_shutdown_all()
++        _close_storage(storage)
++
++
++class _EmptyBlockingQueue:
++    def size(self):
++        return 0
++
++
++def test_persistent_worker_reset_preserves_shared_metadata_channel():
++    storage = queue.Queue()
++    storage.put(('stale-epoch', 1))
++
++    fake_iterator = types.SimpleNamespace(
++        _thread_lock=threading.Lock(),
++        _resume_worker_cnt=0,
++        _num_workers=0,
++        _indices_queues=[],
++        _batches_outstanding=0,
++        _blocking_queue=_EmptyBlockingQueue(),
++        _places=[paddle.CPUPlace()],
++        _return_list=True,
++        _reader=None,
++        _send_idx=9,
++        _rcvd_idx=4,
++        _task_infos={4: ('cached',)},
++        _structure_infos=storage,
++        _worker_status=[],
++        _index_sampler=[],
++        _outstanding_capacity=0,
++        _try_put_indices=lambda: None,
++    )
++
++    _MULTI_ITER._reset(fake_iterator)
++
++    assert fake_iterator._structure_infos is storage
++    assert storage.empty()
++    assert fake_iterator._send_idx == 0
++    assert fake_iterator._rcvd_idx == 0
++    assert fake_iterator._task_infos == {}
