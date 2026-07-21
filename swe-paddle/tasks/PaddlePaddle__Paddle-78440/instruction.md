@@ -18,9 +18,3 @@
 - 了解 Tensor shape 广播规则
 - 了解 Paddle 动态图自动微分机制
 - 了解 Paddle 单元测试开发流程
-
-## Acceptance Criteria
-
-- The behavior described above should be supported correctly.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.

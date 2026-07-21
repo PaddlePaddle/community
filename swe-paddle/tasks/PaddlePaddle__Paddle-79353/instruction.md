@@ -17,9 +17,3 @@
 - 熟悉 Python
 - 了解 pipeline parallel 和 P2P communication flow
 - 了解 synchronous 与 overlap communication API 的 return contract
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
