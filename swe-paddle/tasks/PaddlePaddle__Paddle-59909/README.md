@@ -16,7 +16,7 @@ This directory converts Paddle PR #59909 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 hybrid parallel topology 在 sharding 与 data parallel 同时启用时错误选择 `DATA_PARALLEL` 的问题。
+Fix the issue where the hybrid parallel topology incorrectly selects `DATA_PARALLEL` when both sharding and data parallelism are enabled.
 
 ## Why This Is A Good SWE-Paddle Candidate
 

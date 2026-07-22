@@ -16,7 +16,7 @@ This directory converts Paddle PR #56135 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 `paddle.bmm` 在 static graph 下处理包含 unknown dimension 的 dynamic shape 时，错误拒绝合法输入或无法正确推导 output shape 的问题。
+Fix `paddle.bmm` in static graph mode so that it does not incorrectly reject valid inputs or fail to infer the output shape when handling dynamic shapes with unknown dimensions.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
