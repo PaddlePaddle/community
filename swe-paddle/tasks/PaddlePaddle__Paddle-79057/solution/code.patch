@@ -1,0 +1,21 @@
+diff --git a/python/paddle/framework/restricted_unpickler.py b/python/paddle/framework/restricted_unpickler.py
+index 986e350ae3a4eece1d2fae20adcc441537b0a91c..b8e3eeb659b6c15b3275a3a790d83b81491c31b9 100644
+--- a/python/paddle/framework/restricted_unpickler.py
++++ b/python/paddle/framework/restricted_unpickler.py
+@@ -143,8 +143,14 @@ def _is_safe_class(cls) -> bool:
+         '__setstate__',
+     }
+     for method in dangerous_methods:
+-        if method in cls_dict:
+-            return False
++        # Check each class in the MRO for dangerous method definitions
++        for base in cls.__mro__:
++            # Skip object - its default __reduce__ is safe for user-defined classes
++            if base is object:
++                continue
++            # Check if this base class defines the dangerous method
++            if method in getattr(base, '__dict__', {}):
++                return False
+ 
+     return True
+ 

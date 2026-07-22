@@ -1,0 +1,292 @@
+diff --git a/test/legacy_test/test_bmm_dynamic_shape_contract.py b/test/legacy_test/test_bmm_dynamic_shape_contract.py
+new file mode 100644
+index 00000000000000..69264c5caf457d
+--- /dev/null
++++ b/test/legacy_test/test_bmm_dynamic_shape_contract.py
+@@ -0,0 +1,286 @@
++import ast
++import copy
++import hashlib
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import types
++from pathlib import Path
++
++import pytest
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_PY_SOURCE = _REPO_ROOT / 'python/paddle/tensor/linalg.py'
++_CPP_SOURCE = _REPO_ROOT / 'paddle/phi/infermeta/binary.cc'
++
++class _Tensor:
++    def __init__(self, shape, dtype='float32'):
++        self.shape = tuple(shape)
++        self.dtype = dtype
++
++class _Output:
++    def __init__(self, dtype):
++        self.dtype = dtype
++
++
++def _load_checkout_bmm():
++    tree = ast.parse(_PY_SOURCE.read_text(encoding='utf-8'), filename=str(_PY_SOURCE))
++    target = None
++    for node in tree.body:
++        if isinstance(node, ast.FunctionDef) and node.name == 'bmm':
++            target = copy.deepcopy(node)
++            target.decorator_list = []
++            break
++    assert target is not None
++    events = []
++    class _LayerHelper:
++        def __init__(self, *args, **kwargs):
++            pass
++        def create_variable_for_type_inference(self, dtype):
++            return _Output(dtype)
++        def append_op(self, **kwargs):
++            events.append(kwargs)
++    namespace = {
++        'in_dynamic_mode': lambda: False,
++        '_C_ops': types.SimpleNamespace(bmm=lambda x, y: None),
++        'LayerHelper': _LayerHelper,
++    }
++    module = ast.Module(body=[target], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(_PY_SOURCE), 'exec'), namespace, namespace)
++    return namespace['bmm'], events
++
++
++def _extract_cpp_function():
++    source = _CPP_SOURCE.read_text(encoding='utf-8')
++    marker = 'void BmmInferMeta('
++    start = source.index(marker)
++    brace = source.index('{', start)
++    depth = 0
++    i = brace
++    in_string = False
++    quote = ''
++    escape = False
++    while i < len(source):
++        ch = source[i]
++        if in_string:
++            if escape:
++                escape = False
++            elif ch == '\\':
++                escape = True
++            elif ch == quote:
++                in_string = False
++        else:
++            if ch in ('"', "'"):
++                in_string = True
++                quote = ch
++            elif ch == '{':
++                depth += 1
++            elif ch == '}':
++                depth -= 1
++                if depth == 0:
++                    return source[start:i+1]
++        i += 1
++    raise AssertionError('BmmInferMeta closing brace not found')
++
++
++def _render_cpp_harness(function_source):
++    return f'''\
++#include <cstdint>
++#include <iostream>
++#include <stdexcept>
++#include <string>
++#include <vector>
++
++namespace phi {{
++using DDim = std::vector<int64_t>;
++
++template <typename T>
++std::vector<int64_t> vectorize(const T& value) {{ return value; }}
++
++inline DDim make_ddim(const std::vector<int64_t>& value) {{ return value; }}
++
++namespace errors {{
++template <typename... Args>
++std::string InvalidArgument(const std::string& message, Args&&...) {{
++  return message;
++}}
++}}  // namespace errors
++
++struct MetaTensor {{
++  DDim dims_value;
++  DDim output_dims;
++  int dtype_value = 1;
++  int layout_value = 2;
++
++  MetaTensor() = default;
++  explicit MetaTensor(DDim dims) : dims_value(std::move(dims)) {{}}
++  const DDim& dims() const {{ return dims_value; }}
++  void set_dims(const DDim& dims) {{ output_dims = dims; }}
++  void share_lod(const MetaTensor&) {{}}
++  int dtype() const {{ return dtype_value; }}
++  void set_dtype(int dtype) {{ dtype_value = dtype; }}
++  int layout() const {{ return layout_value; }}
++  void set_layout(int layout) {{ layout_value = layout; }}
++}};
++}}  // namespace phi
++
++#define PADDLE_ENFORCE_EQ(lhs, rhs, error) \
++  do {{ \
++    if (!((lhs) == (rhs))) {{ \
++      throw std::invalid_argument(error); \
++    }} \
++  }} while (0)
++
++namespace phi {{
++{function_source}
++}}  // namespace phi
++
++static std::vector<int64_t> parse_dims(const char* text) {{
++  std::vector<int64_t> result;
++  std::string token;
++  for (const char* p = text;; ++p) {{
++    const char ch = *p;
++    if (ch == ',' || ch == '\\0') {{
++      result.push_back(std::stoll(token));
++      token.clear();
++      if (ch == '\\0') break;
++    }} else {{
++      token.push_back(ch);
++    }}
++  }}
++  return result;
++}}
++
++int main(int argc, char** argv) {{
++  if (argc != 3) return 64;
++  try {{
++    phi::MetaTensor x(parse_dims(argv[1]));
++    phi::MetaTensor y(parse_dims(argv[2]));
++    phi::MetaTensor out;
++    phi::BmmInferMeta(x, y, &out);
++    for (std::size_t i = 0; i < out.output_dims.size(); ++i) {{
++      if (i) std::cout << ',';
++      std::cout << out.output_dims[i];
++    }}
++    std::cout << '\\n';
++    return 0;
++  }} catch (const std::exception& error) {{
++    std::cerr << error.what() << '\\n';
++    return 2;
++  }}
++}}
++'''
++
++
++def _compile_with_setuptools(source_path, cache_dir):
++    from setuptools._distutils import ccompiler
++    from setuptools._distutils import sysconfig as du_sysconfig
++    compiler = ccompiler.new_compiler()
++    du_sysconfig.customize_compiler(compiler)
++    extra = ['/std:c++17', '/EHsc'] if compiler.compiler_type == 'msvc' else ['-std=c++17']
++    objects = compiler.compile([str(source_path)], output_dir=str(cache_dir), extra_postargs=extra)
++    output_name = 'bmm_infermeta_harness'
++    compiler.link_executable(
++        objects,
++        output_name,
++        output_dir=str(cache_dir),
++        target_lang='c++',
++    )
++    candidates = [cache_dir / output_name, cache_dir / f'{output_name}.exe']
++    for candidate in candidates:
++        if candidate.exists():
++            return candidate
++    raise RuntimeError(f'compiler did not create executable: {candidates}')
++
++
++def _compile_native(source_path, cache_dir):
++    output = cache_dir / ('bmm_infermeta_harness.exe' if os.name == 'nt' else 'bmm_infermeta_harness')
++    for name in ('g++', 'clang++'):
++        compiler = shutil.which(name)
++        if compiler:
++            completed = subprocess.run(
++                [compiler, '-std=c++17', '-O2', str(source_path), '-o', str(output)],
++                capture_output=True,
++                text=True,
++                check=False,
++            )
++            if completed.returncode == 0:
++                return output
++            raise RuntimeError(completed.stderr or completed.stdout)
++    return _compile_with_setuptools(source_path, cache_dir)
++
++
++def _native_harness():
++    function_source = _extract_cpp_function()
++    source = _render_cpp_harness(function_source)
++    cache_root = Path(os.environ.get('PR56135_CPP_CACHE', '.pytest_cache/pr56135-native'))
++    key = hashlib.sha256((source + sys.platform).encode()).hexdigest()[:20]
++    cache_dir = (cache_root / key).resolve()
++    cache_dir.mkdir(parents=True, exist_ok=True)
++    source_path = cache_dir / 'bmm_infermeta_harness.cc'
++    source_path.write_text(source, encoding='utf-8', newline='\n')
++    exe_candidates = [cache_dir / 'bmm_infermeta_harness', cache_dir / 'bmm_infermeta_harness.exe']
++    for exe in exe_candidates:
++        if exe.exists():
++            return exe
++    try:
++        return _compile_with_setuptools(source_path, cache_dir)
++    except Exception as error:
++        raise AssertionError(
++            'Unable to compile the lightweight BmmInferMeta harness. '
++            'Install or expose a C++17 compiler; a full Paddle build is not required. '
++            f'Original error: {error}'
++        ) from error
++
++
++def _run_infermeta(x_shape, y_shape):
++    exe = _native_harness()
++    completed = subprocess.run(
++        [str(exe), ','.join(map(str, x_shape)), ','.join(map(str, y_shape))],
++        capture_output=True,
++        text=True,
++        check=False,
++    )
++    return completed.returncode, completed.stdout.strip(), completed.stderr.strip()
++
++
++def test_known_shape_behavior_remains_valid():
++    bmm, events = _load_checkout_bmm()
++    result = bmm(_Tensor([2, 3, 4]), _Tensor([2, 4, 5]))
++    assert result.dtype == 'float32'
++    assert len(events) == 1
++    rc, out, err = _run_infermeta([2, 3, 4], [2, 4, 5])
++    assert (rc, out, err) == (0, '2,3,5', '')
++
++
++def test_known_incompatible_shapes_are_rejected():
++    bmm, _ = _load_checkout_bmm()
++    with pytest.raises(ValueError, match="width must be equal"):
++        bmm(_Tensor([2, 3, 4]), _Tensor([2, 6, 5]))
++    with pytest.raises(ValueError, match="batch"):
++        bmm(_Tensor([2, 3, 4]), _Tensor([7, 4, 5]))
++    rc, _, _ = _run_infermeta([2, 3, 4], [2, 6, 5])
++    assert rc != 0
++
++
++def test_python_static_bmm_accepts_unknown_dimensions():
++    bmm, events = _load_checkout_bmm()
++    first = bmm(_Tensor([-1, 3, 4]), _Tensor([2, 4, 5]))
++    second = bmm(_Tensor([2, 3, -1]), _Tensor([2, 4, 5]))
++    assert first.dtype == second.dtype == 'float32'
++    assert len(events) == 2
++
++
++def test_cpp_infermeta_resolves_unknown_dimensions():
++    cases = [
++        ((-1, 3, 4), (2, 4, 5), '2,3,5'),
++        ((2, 3, -1), (2, 4, 5), '2,3,5'),
++        ((2, 3, 4), (-1, 4, 5), '2,3,5'),
++    ]
++    for x_shape, y_shape, expected in cases:
++        rc, out, err = _run_infermeta(x_shape, y_shape)
++        assert rc == 0, err
++        assert out == expected

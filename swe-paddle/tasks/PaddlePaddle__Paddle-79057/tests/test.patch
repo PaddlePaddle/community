@@ -1,0 +1,110 @@
+diff --git a/test/legacy_test/test_restricted_unpickler_mro.py b/test/legacy_test/test_restricted_unpickler_mro.py
+new file mode 100644
+index 00000000000000..d9f0722df346c0
+--- /dev/null
++++ b/test/legacy_test/test_restricted_unpickler_mro.py
+@@ -0,0 +1,104 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import importlib.util
++import pickle
++import unittest
++from pathlib import Path
++
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_MODULE_PATH = (
++    _REPO_ROOT / 'python' / 'paddle' / 'framework' / 'restricted_unpickler.py'
++)
++_SPEC = importlib.util.spec_from_file_location(
++    'restricted_unpickler_under_test', _MODULE_PATH
++)
++restricted_unpickler = importlib.util.module_from_spec(_SPEC)
++assert _SPEC.loader is not None
++_SPEC.loader.exec_module(restricted_unpickler)
++
++
++_STATE_HOOK_CALLED = False
++
++
++class PlainUserClass:
++    pass
++
++
++class DirectDangerousClass:
++    def __reduce__(self):
++        return (str, ('blocked',))
++
++
++class InheritedSetStateBase:
++    def __setstate__(self, state):
++        global _STATE_HOOK_CALLED
++        _STATE_HOOK_CALLED = True
++        self.__dict__.update(state)
++
++
++class InheritedSetStatePayload(InheritedSetStateBase):
++    pass
++
++
++class TestRestrictedUnpicklerMRO(unittest.TestCase):
++    def test_existing_safe_class_policy(self):
++        self.assertTrue(restricted_unpickler._is_safe_class(PlainUserClass))
++        self.assertFalse(
++            restricted_unpickler._is_safe_class(DirectDangerousClass)
++        )
++
++    def test_inherited_dangerous_methods_are_rejected(self):
++        for method_name in (
++            '__reduce__',
++            '__reduce_ex__',
++            '__getstate__',
++            '__setstate__',
++        ):
++            with self.subTest(method=method_name):
++                def dangerous_method(*args, **kwargs):
++                    return None
++
++                dangerous_base = type(
++                    f'DangerousBase_{method_name}',
++                    (),
++                    {method_name: dangerous_method},
++                )
++                inherited_class = type(
++                    f'InheritedClass_{method_name}',
++                    (dangerous_base,),
++                    {},
++                )
++
++                self.assertFalse(
++                    restricted_unpickler._is_safe_class(inherited_class)
++                )
++
++    def test_inherited_setstate_payload_is_blocked(self):
++        global _STATE_HOOK_CALLED
++        _STATE_HOOK_CALLED = False
++
++        value = InheritedSetStatePayload()
++        value.message = 'benign test state'
++        payload = pickle.dumps(value, protocol=4)
++
++        with self.assertRaises(pickle.UnpicklingError):
++            restricted_unpickler.safe_loads_pickle(payload)
++
++        self.assertFalse(_STATE_HOOK_CALLED)
++
++
++if __name__ == '__main__':
++    unittest.main()

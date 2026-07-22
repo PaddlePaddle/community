@@ -1,0 +1,110 @@
+diff --git a/test/swe_paddle/test_pr55890_vpp_overlap_schedule.py b/test/swe_paddle/test_pr55890_vpp_overlap_schedule.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..c8f4a970f9707317201ca92e789554b6e3e85055
+--- /dev/null
++++ b/test/swe_paddle/test_pr55890_vpp_overlap_schedule.py
+@@ -0,0 +1,104 @@
++import ast
++import copy
++from pathlib import Path
++
++
++TARGET = Path("python/paddle/distributed/fleet/meta_parallel/pipeline_parallel.py")
++
++
++class _Buffer:
++    def __init__(self):
++        self.calls = 0
++
++    def comm_grads(self):
++        self.calls += 1
++
++
++class _State:
++    pass
++
++
++def _load_checkout_function():
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    for node in ast.walk(tree):
++        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "_overlap_comm_grads":
++            function = copy.deepcopy(node)
++            function.decorator_list = []
++            module = ast.Module(body=[function], type_ignores=[])
++            ast.fix_missing_locations(module)
++            namespace = {}
++            exec(compile(module, str(TARGET), "exec"), namespace)
++            return namespace["_overlap_comm_grads"]
++    raise AssertionError("checkout does not define _overlap_comm_grads")
++
++
++def _make_state(*, accumulate_steps, num_stages, num_model_chunks, virtual_pp_world_size, stage_id, backward_step_count):
++    state = _State()
++    state._comm_overlap = True
++    state.accumulate_steps = accumulate_steps
++    state.num_stages = num_stages
++    state.num_model_chunks = num_model_chunks
++    state._virtual_pp_world_size = virtual_pp_world_size
++    state.stage_id = stage_id
++    state._backward_step_count = backward_step_count
++    state._chunk_2_comm_buffers = {0: [_Buffer()], 1: [_Buffer()]}
++    return state
++
++
++def _calls(state):
++    return {chunk: buffers[0].calls for chunk, buffers in state._chunk_2_comm_buffers.items()}
++
++
++def test_aligned_legacy_schedule_keeps_existing_chunk_selection():
++    function = _load_checkout_function()
++    state = _make_state(
++        accumulate_steps=2,
++        num_stages=2,
++        num_model_chunks=2,
++        virtual_pp_world_size=2,
++        stage_id=0,
++        backward_step_count=1,
++    )
++
++    function(state)
++
++    assert state._backward_step_count == 2
++    assert _calls(state) == {0: 0, 1: 1}
++
++
++def test_overlap_communication_uses_pipeline_stage_cadence():
++    function = _load_checkout_function()
++    state = _make_state(
++        accumulate_steps=4,
++        num_stages=2,
++        num_model_chunks=2,
++        virtual_pp_world_size=2,
++        stage_id=0,
++        backward_step_count=1,
++    )
++
++    function(state)
++
++    assert _calls(state) == {0: 0, 1: 1}, (
++        "The second backward step should communicate model chunk 1 according "
++        "to the two-stage pipeline cadence, even when accumulate_steps is 4."
++    )
++
++
++def test_nonzero_stage_flushes_first_chunk_at_model_chunk_boundary():
++    function = _load_checkout_function()
++    state = _make_state(
++        accumulate_steps=8,
++        num_stages=2,
++        num_model_chunks=2,
++        virtual_pp_world_size=2,
++        stage_id=1,
++        backward_step_count=3,
++    )
++
++    function(state)
++
++    assert _calls(state) == {0: 1, 1: 0}, (
++        "A nonzero pipeline stage should flush chunk 0 after all stage/chunk "
++        "backward steps, independently of the micro-batch accumulation count."
++    )

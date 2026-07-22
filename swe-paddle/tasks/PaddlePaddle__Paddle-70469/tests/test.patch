@@ -1,0 +1,220 @@
+diff --git a/test/legacy_test/test_fused_dropout_add_fallback.py b/test/legacy_test/test_fused_dropout_add_fallback.py
+new file mode 100644
+index 00000000000000..99f26b1ae35e83
+--- /dev/null
++++ b/test/legacy_test/test_fused_dropout_add_fallback.py
+@@ -0,0 +1,214 @@
++# Copyright (c) 2024 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import ast
++import copy
++import types
++import warnings
++from pathlib import Path
++
++import pytest
++
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_SOURCE_PATH = (
++    _REPO_ROOT
++    / 'python'
++    / 'paddle'
++    / 'incubate'
++    / 'nn'
++    / 'functional'
++    / 'fused_dropout_add.py'
++)
++
++
++class _Tensor:
++    def __init__(self, value):
++        self.value = float(value)
++
++    def __add__(self, other):
++        return _Tensor(self.value + other.value)
++
++
++def _load_checkout_function():
++    source = _SOURCE_PATH.read_text(encoding='utf-8')
++    tree = ast.parse(source, filename=str(_SOURCE_PATH))
++
++    selected = []
++    for node in tree.body:
++        if isinstance(node, ast.Assign):
++            names = {
++                target.id
++                for target in node.targets
++                if isinstance(target, ast.Name)
++            }
++            if 'flag' in names:
++                selected.append(copy.deepcopy(node))
++        elif isinstance(node, ast.FunctionDef) and node.name in {
++            'paddle_dropout_add',
++            'fused_dropout_add',
++        }:
++            selected.append(copy.deepcopy(node))
++
++    assert any(
++        isinstance(node, ast.FunctionDef)
++        and node.name == 'fused_dropout_add'
++        for node in selected
++    )
++
++    dropout_calls = []
++    fused_calls = []
++
++    def dropout(x, p, training=True, mode='upscale_in_train'):
++        dropout_calls.append(
++            {
++                'p': p,
++                'training': training,
++                'mode': mode,
++            }
++        )
++        if training:
++            value = (
++                x.value / (1.0 - p)
++                if mode == 'upscale_in_train'
++                else x.value
++            )
++        else:
++            value = (
++                x.value
++                if mode == 'upscale_in_train'
++                else x.value * (1.0 - p)
++            )
++        return _Tensor(value)
++
++    def fused_dropout_add(
++        x,
++        y,
++        seed_tensor,
++        p,
++        is_test,
++        mode,
++        seed,
++        fix_seed,
++    ):
++        fused_calls.append(
++            {
++                'p': p,
++                'is_test': is_test,
++                'mode': mode,
++            }
++        )
++        return _Tensor(1000.0), object()
++
++    paddle_double = types.SimpleNamespace(
++        nn=types.SimpleNamespace(
++            functional=types.SimpleNamespace(dropout=dropout)
++        )
++    )
++    c_ops_double = types.SimpleNamespace(
++        fused_dropout_add=fused_dropout_add
++    )
++
++    namespace = {
++        'warnings': warnings,
++        'paddle': paddle_double,
++        '_C_ops': c_ops_double,
++        'core': types.SimpleNamespace(),
++        'default_main_program': lambda: types.SimpleNamespace(
++            random_seed=0
++        ),
++        'LayerHelper': object,
++        'in_dynamic_or_pir_mode': lambda: True,
++    }
++
++    module = ast.Module(body=selected, type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(_SOURCE_PATH), 'exec'), namespace, namespace)
++
++    return (
++        namespace['fused_dropout_add'],
++        dropout_calls,
++        fused_calls,
++    )
++
++
++def test_zero_probability_result_remains_valid():
++    function, _, fused_calls = _load_checkout_function()
++
++    result = function(_Tensor(2.0), _Tensor(3.0), p=0)
++
++    assert result.value == pytest.approx(5.0)
++    assert fused_calls == []
++
++
++def test_training_uses_reference_dropout_add_semantics():
++    function, dropout_calls, fused_calls = _load_checkout_function()
++
++    result = function(
++        _Tensor(2.0),
++        _Tensor(2.0),
++        p=0.5,
++        training=True,
++        mode='upscale_in_train',
++    )
++
++    assert result.value == pytest.approx(6.0)
++    assert dropout_calls == [
++        {
++            'p': 0.5,
++            'training': True,
++            'mode': 'upscale_in_train',
++        }
++    ]
++    assert fused_calls == []
++
++
++def test_inference_fallback_warns_once_and_preserves_arguments():
++    function, dropout_calls, fused_calls = _load_checkout_function()
++
++    with warnings.catch_warnings(record=True) as caught:
++        warnings.simplefilter('always')
++        first = function(
++            _Tensor(8.0),
++            _Tensor(2.0),
++            p=0.25,
++            training=False,
++            mode='downscale_in_infer',
++        )
++        second = function(
++            _Tensor(4.0),
++            _Tensor(1.0),
++            p=0.25,
++            training=False,
++            mode='downscale_in_infer',
++        )
++
++    assert first.value == pytest.approx(8.0)
++    assert second.value == pytest.approx(4.0)
++    assert dropout_calls == [
++        {
++            'p': 0.25,
++            'training': False,
++            'mode': 'downscale_in_infer',
++        },
++        {
++            'p': 0.25,
++            'training': False,
++            'mode': 'downscale_in_infer',
++        },
++    ]
++    assert fused_calls == []
++    assert len(caught) == 1
++    assert 'precision problem' in str(caught[0].message)
++    assert 'falls back to dropout + add' in str(caught[0].message)
