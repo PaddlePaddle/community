@@ -1,0 +1,20 @@
+diff --git a/python/paddle/__init__.py b/python/paddle/__init__.py
+index 6abf27963cb4089b3d49b16adc49354de9fdc26a..387e50b2e85dfc8152e0e62aa8cf6b0dee891d57 100644
+--- a/python/paddle/__init__.py
++++ b/python/paddle/__init__.py
+@@ -366,6 +366,7 @@ from .nn.functional.distance import (
+     pdist,
+ )
+ from .nn.initializer.lazy_init import LazyGuard
++from .random import initial_seed
+ from .tensor.attribute import (
+     imag,
+     is_complex,
+@@ -1577,6 +1578,7 @@ __all__ = [
+     'enable_compat',
+     'disable_compat',
+     'use_compat_guard',
++    'initial_seed',
+ ]
+ import os
+ 
