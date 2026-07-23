@@ -1,0 +1,341 @@
+diff --git a/paddle/fluid/pybind/arg_pre_process.cc b/paddle/fluid/pybind/arg_pre_process.cc
+index 5b05f08ca8b43c..4e2c338e904475 100644
+--- a/paddle/fluid/pybind/arg_pre_process.cc
++++ b/paddle/fluid/pybind/arg_pre_process.cc
+@@ -212,6 +212,31 @@ void IsClosePreProcess(Value* x, Value* y, Value* rtol, Value* atol) {
+       "is_close", "atol", pir::GetValueDtype(*atol), {phi::DataType::FLOAT64});
+ }
+
++void AllClosePreProcess(Value* x, Value* y, Value* rtol, Value* atol) {
++  CheckDataType("allclose",
++                "x",
++                pir::GetValueDtype(*x),
++                {phi::DataType::BOOL,
++                 phi::DataType::INT32,
++                 phi::DataType::INT64,
++                 phi::DataType::FLOAT16,
++                 phi::DataType::FLOAT32,
++                 phi::DataType::FLOAT64});
++  CheckDataType("allclose",
++                "y",
++                pir::GetValueDtype(*y),
++                {phi::DataType::BOOL,
++                 phi::DataType::INT32,
++                 phi::DataType::INT64,
++                 phi::DataType::FLOAT16,
++                 phi::DataType::FLOAT32,
++                 phi::DataType::FLOAT64});
++  CheckDataType(
++      "allclose", "rtol", pir::GetValueDtype(*rtol), {phi::DataType::FLOAT64});
++  CheckDataType(
++      "allclose", "atol", pir::GetValueDtype(*atol), {phi::DataType::FLOAT64});
++}
++
+ void GridSamplePreProcess(Tensor* x,
+                           Tensor* grid,
+                           std::string* mode,
+diff --git a/paddle/fluid/pybind/arg_pre_process.h b/paddle/fluid/pybind/arg_pre_process.h
+index d6bf37dc50ae79..d5387319e26c71 100644
+--- a/paddle/fluid/pybind/arg_pre_process.h
++++ b/paddle/fluid/pybind/arg_pre_process.h
+@@ -44,6 +44,7 @@ void LogsumexpPreProcess(Value* x, std::vector<int>* axis, bool* reduce_all);
+
+ void SumPreProcess(Value* x, Value* axis);
+ void IsClosePreProcess(Value* x, Value* y, Value* rtol, Value* atol);
++void AllClosePreProcess(Value* x, Value* y, Value* rtol, Value* atol);
+
+ void GridSamplePreProcess(Tensor* x,
+                           Tensor* grid,
+diff --git a/paddle/phi/ops/yaml/python_api_info.yaml b/paddle/phi/ops/yaml/python_api_info.yaml
+index fe90be364217db..7bbe5119c74665 100644
+--- a/paddle/phi/ops/yaml/python_api_info.yaml
++++ b/paddle/phi/ops/yaml/python_api_info.yaml
+@@ -111,6 +111,14 @@
+   args_alias:
+     use_default_mapping : True
+
++- op : allclose
++  name : [paddle.allclose, paddle.Tensor.allclose]
++  args_alias:
++    x: [input]
++    y: [other]
++  pre_process:
++    static_func: AllClosePreProcess(x, y, rtol,atol)
++
+ - op : bmm
+   name : [paddle.bmm, paddle.Tensor.bmm]
+   args_alias:
+diff --git a/python/paddle/_paddle_docs.py b/python/paddle/_paddle_docs.py
+index 518bd22e03df7c..e8f9edf077c59f 100644
+--- a/python/paddle/_paddle_docs.py
++++ b/python/paddle/_paddle_docs.py
+@@ -3293,3 +3293,67 @@ def asin(
+ ) -> Tensor
+ """,
+ )
++
++
++add_doc_and_signature(
++    "allclose",
++    r"""
++    Check if all :math:`x` and :math:`y` satisfy the condition:
++
++    .. math::
++        \left| x - y \right| \leq atol + rtol \times \left| y \right|
++
++    elementwise, for all elements of :math:`x` and :math:`y`. This is analogous to :math:`numpy.allclose`, namely that it returns :math:`True` if
++    two tensors are elementwise equal within a tolerance.
++
++    Args:
++        x (Tensor): The input tensor, it's data type should be float16, float32, float64.
++            Alias: ``input``.
++        y (Tensor): The input tensor, it's data type should be float16, float32, float64.
++            Alias: ``other``.
++        rtol (float, optional): The relative tolerance. Default: :math:`1e-5` .
++        atol (float, optional): The absolute tolerance. Default: :math:`1e-8` .
++        equal_nan (bool, optional): ${equal_nan_comment}. Default: False.
++        name (str|None, optional): Name for the operation. For more information, please
++            refer to :ref:`api_guide_Name`. Default: None.
++
++    Returns:
++        Tensor: The output tensor, it's data type is bool.
++
++    Examples:
++        .. code-block:: python
++
++            >>> import paddle
++
++            >>> x = paddle.to_tensor([10000., 1e-07])
++            >>> y = paddle.to_tensor([10000.1, 1e-08])
++            >>> result1 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=False, name="ignore_nan")
++            >>> print(result1)
++            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
++            False)
++            >>> result2 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=True, name="equal_nan")
++            >>> print(result2)
++            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
++            False)
++            >>> x = paddle.to_tensor([1.0, float('nan')])
++            >>> y = paddle.to_tensor([1.0, float('nan')])
++            >>> result1 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=False, name="ignore_nan")
++            >>> print(result1)
++            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
++            False)
++            >>> result2 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=True, name="equal_nan")
++            >>> print(result2)
++            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
++            True)
++    """,
++    """
++def allclose(
++    x: Tensor,
++    y: Tensor,
++    rtol: float = 1e-05,
++    atol: float = 1e-08,
++    equal_nan: bool = False,
++    name: str | None = None
++) -> Tensor
++""",
++)
+diff --git a/python/paddle/compat/__init__.py b/python/paddle/compat/__init__.py
+index fae0f469f8a3c5..e797399da2a14e 100644
+--- a/python/paddle/compat/__init__.py
++++ b/python/paddle/compat/__init__.py
+@@ -44,6 +44,7 @@
+     from paddle import Tensor
+
+ __all__ = [
++    'allclose',
+     'equal',
+     'slogdet',
+     'sort',
+@@ -62,6 +63,59 @@ def __getattr__(name):
+         return paddle_triton_fun()
+
+
++@ForbidKeywordsDecorator(
++    illegal_keys={"x", "y"},
++    func_name="paddle.compat.allclose",
++    correct_name="paddle.allclose",
++)
++def allclose(
++    input: Tensor,
++    other: Tensor,
++    rtol: float = 1e-05,
++    atol: float = 1e-08,
++    equal_nan: bool = False,
++    name: str | None = None,
++) -> bool:
++    """
++    Check if all :math:`input` and :math:`other` satisfy the condition:
++
++    .. math::
++        \\left| input - other \\right| \\leq atol + rtol \\times \\left| other \\right|
++
++    elementwise, for all elements of :math:`input` and :math:`other`. This is analogous to :math:`numpy.allclose`, namely that it returns :math:`True` if
++    two tensors are elementwise equal within a tolerance.
++
++    Args:
++        input (Tensor): The input tensor, it's data type should be float16, float32, float64.
++        other (Tensor): The input tensor, it's data type should be float16, float32, float64.
++        rtol (float, optional): The relative tolerance. Default: :math:`1e-5` .
++        atol (float, optional): The absolute tolerance. Default: :math:`1e-8` .
++        equal_nan (bool, optional): ${equal_nan_comment}. Default: False.
++        name (str|None, optional): Name for the operation. For more information, please
++            refer to :ref:`api_guide_Name`. Default: None.
++
++    Returns:
++        bool: True if the two tensors are elementwise equal within a tolerance, False otherwise.
++
++    Examples:
++        .. code-block:: python
++
++            >>> import paddle
++
++            >>> x = paddle.to_tensor([10000., 1e-07])
++            >>> y = paddle.to_tensor([10000.1, 1e-08])
++            >>> result1 = paddle.compat.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=False, name="ignore_nan")
++            >>> print(result1)
++            False
++            >>> result2 = paddle.compat.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=True, name="equal_nan")
++            >>> print(result2)
++            False
++    """
++    return paddle.allclose(
++        input, other, rtol=rtol, atol=atol, equal_nan=equal_nan, name=name
++    ).item()
++
++
+ @ForbidKeywordsDecorator(
+     illegal_keys={"x", "y"},
+     func_name="paddle.compat.equal",
+diff --git a/python/paddle/tensor/logic.py b/python/paddle/tensor/logic.py
+index e2efdacffc76c9..89b610a37afe85 100755
+--- a/python/paddle/tensor/logic.py
++++ b/python/paddle/tensor/logic.py
+@@ -21,6 +21,7 @@
+ import paddle
+ from paddle import _C_ops
+ from paddle._C_ops import (  # noqa: F401
++    allclose,
+     greater_than,
+     isclose,
+     logical_and,
+@@ -268,117 +269,6 @@ def equal_all(x: Tensor, y: Tensor, name: str | None = None) -> Tensor:
+         return out
+
+
+-def allclose(
+-    x: Tensor,
+-    y: Tensor,
+-    rtol: float = 1e-05,
+-    atol: float = 1e-08,
+-    equal_nan: bool = False,
+-    name: str | None = None,
+-) -> Tensor:
+-    r"""
+-    Check if all :math:`x` and :math:`y` satisfy the condition:
+-
+-    .. math::
+-        \left| x - y \right| \leq atol + rtol \times \left| y \right|
+-
+-    elementwise, for all elements of :math:`x` and :math:`y`. This is analogous to :math:`numpy.allclose`, namely that it returns :math:`True` if
+-    two tensors are elementwise equal within a tolerance.
+-
+-    Args:
+-        x (Tensor): The input tensor, it's data type should be float16, float32, float64.
+-        y (Tensor): The input tensor, it's data type should be float16, float32, float64.
+-        rtol (float, optional): The relative tolerance. Default: :math:`1e-5` .
+-        atol (float, optional): The absolute tolerance. Default: :math:`1e-8` .
+-        equal_nan (bool, optional): ${equal_nan_comment}. Default: False.
+-        name (str|None, optional): Name for the operation. For more information, please
+-            refer to :ref:`api_guide_Name`. Default: None.
+-
+-    Returns:
+-        Tensor: The output tensor, it's data type is bool.
+-
+-    Examples:
+-        .. code-block:: python
+-
+-            >>> import paddle
+-
+-            >>> x = paddle.to_tensor([10000., 1e-07])
+-            >>> y = paddle.to_tensor([10000.1, 1e-08])
+-            >>> result1 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=False, name="ignore_nan")
+-            >>> print(result1)
+-            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
+-            False)
+-            >>> result2 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=True, name="equal_nan")
+-            >>> print(result2)
+-            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
+-            False)
+-            >>> x = paddle.to_tensor([1.0, float('nan')])
+-            >>> y = paddle.to_tensor([1.0, float('nan')])
+-            >>> result1 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=False, name="ignore_nan")
+-            >>> print(result1)
+-            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
+-            False)
+-            >>> result2 = paddle.allclose(x, y, rtol=1e-05, atol=1e-08, equal_nan=True, name="equal_nan")
+-            >>> print(result2)
+-            Tensor(shape=[], dtype=bool, place=Place(cpu), stop_gradient=True,
+-            True)
+-    """
+-
+-    if in_dynamic_mode():
+-        return _C_ops.allclose(x, y, rtol, atol, equal_nan)
+-    elif in_pir_mode():
+-        check_variable_and_dtype(
+-            x,
+-            "input",
+-            ['bool', 'int32', 'int64', 'float16', 'float32', 'float64'],
+-            'allclose',
+-        )
+-        check_variable_and_dtype(
+-            y,
+-            "input",
+-            ['bool', 'int32', 'int64', 'float16', 'float32', 'float64'],
+-            'allclose',
+-        )
+-        if not isinstance(rtol, (float, paddle.pir.Value)):
+-            raise TypeError(
+-                f"Type of input rtol must be float, but received type {type(rtol)}"
+-            )
+-        if not isinstance(atol, (float, paddle.pir.Value)):
+-            raise TypeError(
+-                f"Type of input atol must be float, but received type {type(atol)}"
+-            )
+-        check_type(equal_nan, 'equal_nan', bool, 'allclose')
+-        return _C_ops.allclose(x, y, rtol, atol, equal_nan)
+-    else:
+-        check_variable_and_dtype(
+-            x,
+-            "input",
+-            ['bool', 'int32', 'int64', 'float16', 'float32', 'float64'],
+-            'allclose',
+-        )
+-        check_variable_and_dtype(
+-            y,
+-            "input",
+-            ['bool', 'int32', 'int64', 'float16', 'float32', 'float64'],
+-            'allclose',
+-        )
+-        check_type(rtol, 'rtol', float, 'allclose')
+-        check_type(atol, 'atol', float, 'allclose')
+-        check_type(equal_nan, 'equal_nan', bool, 'allclose')
+-
+-        helper = LayerHelper("allclose", **locals())
+-        out = helper.create_variable_for_type_inference(dtype='bool')
+-
+-        inputs = {'Input': x, 'Other': y}
+-        outputs = {'Out': out}
+-        attrs = {'rtol': str(rtol), 'atol': str(atol), 'equal_nan': equal_nan}
+-        helper.append_op(
+-            type='allclose', inputs=inputs, outputs=outputs, attrs=attrs
+-        )
+-
+-        return out
+-
+-
+ @param_two_alias(["x", "input"], ["y", "other"])
+ def equal(
+     x: Tensor, y: Tensor, name: str | None = None, *, out: Tensor | None = None
