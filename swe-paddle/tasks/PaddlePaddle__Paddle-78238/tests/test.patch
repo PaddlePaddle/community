@@ -1,0 +1,67 @@
+diff --git a/test/legacy_test/test_put_along_axis_zero_size.py b/test/legacy_test/test_put_along_axis_zero_size.py
+new file mode 100644
+--- /dev/null
++++ b/test/legacy_test/test_put_along_axis_zero_size.py
+@@ -0,0 +1,62 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import unittest
++
++import numpy as np
++import paddle
++
++
++class TestPutAlongAxisZeroSize(unittest.TestCase):
++    def setUp(self):
++        paddle.disable_static()
++
++    def test_non_empty_indices_existing_behavior(self):
++        arr = paddle.to_tensor(
++            [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], dtype="float32"
++        )
++        indices = paddle.to_tensor([[1], [0]], dtype="int64")
++        values = paddle.to_tensor([[9.0], [8.0]], dtype="float32")
++
++        out = paddle.put_along_axis(arr, indices, values, axis=1)
++
++        np.testing.assert_allclose(
++            out.numpy(),
++            np.array([[1.0, 9.0, 3.0], [8.0, 5.0, 6.0]], dtype="float32"),
++        )
++
++    def test_zero_size_indices_out_of_place(self):
++        arr = paddle.rand([2, 60], dtype="float32")
++        indices = paddle.zeros([2, 0], dtype="int64")
++        values = paddle.rand([2, 4], dtype="float32")
++
++        out = paddle.put_along_axis(arr, indices, values, axis=1)
++
++        self.assertEqual(list(out.shape), [2, 60])
++        np.testing.assert_allclose(out.numpy(), arr.numpy(), rtol=0, atol=0)
++
++    def test_zero_size_indices_in_place(self):
++        arr = paddle.rand([2, 60], dtype="float32")
++        expected = arr.clone()
++        indices = paddle.zeros([2, 0], dtype="int64")
++        values = paddle.rand([2, 4], dtype="float32")
++
++        result = arr.put_along_axis_(indices, values, axis=1)
++
++        self.assertIs(result, arr)
++        np.testing.assert_allclose(arr.numpy(), expected.numpy(), rtol=0, atol=0)
++
++
++if __name__ == "__main__":
++    unittest.main()
