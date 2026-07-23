@@ -1,0 +1,46 @@
+diff --git a/python/paddle/pir/math_op_patch.py b/python/paddle/pir/math_op_patch.py
+index ad7ecbc4a1..6f0acfaedb 100644
+--- a/python/paddle/pir/math_op_patch.py
++++ b/python/paddle/pir/math_op_patch.py
+@@ -368,6 +368,28 @@ def monkey_patch_opresult():
+             '__rtruediv__',
+             _binary_creator_('__rtruediv__', paddle.tensor.divide, True, None),
+         ),
++        (
++            '__pow__',
++            _binary_creator_('__pow__', paddle.tensor.pow, False, None),
++        ),
++        (
++            '__rpow__',
++            _binary_creator_('__rpow__', paddle.tensor.pow, True, None),
++        ),
++        (
++            '__floordiv__',
++            _binary_creator_(
++                '__floordiv__', paddle.tensor.floor_divide, False, None
++            ),
++        ),
++        (
++            '__mod__',
++            _binary_creator_('__mod__', paddle.tensor.remainder, False, None),
++        ),
++        (
++            '__matmul__',
++            _binary_creator_('__matmul__', paddle.tensor.matmul, False, None),
++        ),
+     ]
+ 
+     global _already_patch_opresult
+diff --git a/python/paddle/tensor/math.py b/python/paddle/tensor/math.py
+index acdd3a35b5..36e92aeabb 100644
+--- a/python/paddle/tensor/math.py
++++ b/python/paddle/tensor/math.py
+@@ -941,7 +941,7 @@ def floor_divide(x, y, name=None):
+             [2, 0, 2, 2])
+ 
+     """
+-    if in_dynamic_mode():
++    if in_dynamic_or_pir_mode():
+         return _C_ops.floor_divide(x, y)
+     else:
+         return _elementwise_op(LayerHelper('elementwise_floordiv', **locals()))

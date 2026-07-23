@@ -37,3 +37,5 @@
 |  48   | 🌟🌟🌟 | FastDeploy 新增 SD、Flux扩散模型                  |       是         |
 |  49   | 🌟🌟🌟 | FastDeploy 支持投机解码功能                       |       是         |
 |  50   | 🌟🌟 | FastDeploy 新增 MiniCPM4.1-8B 模型               |       是         |
+|  53   | 🌟🌟🌟🌟 | 离散 KV Cache 管理和 AppendAttention 算子的性能优化  |       是         |
+|  54   | 🌟🌟🌟 | ngram 及 hybrid_mtp_ngram 端到端验证  |       是         |

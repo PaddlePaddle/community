@@ -1,5 +1,36 @@
 # 【Hackathon_10th】PaddleOCR Global Derivative Model Challenge
 
+## Competition Adjustments (June 22)
+Dear participants, Thank you for your support and interest in this competition.
+
+Due to the concentrated submission of entries during the **Dragon Boat Festival holiday (June 19–21)**, and to ensure the quality of evaluation, we have made the following adjustments to the schedule:
+- The leaderboard originally scheduled for June 22 will be postponed to **June 23**.
+- Accordingly, the preliminary submission deadline will be extended by one day, from June 28 to **24:00 on June 29**.
+
+Please strictly adhere to **the preliminary submission deadline**. Any submissions or updates made after the deadline will not be considered for evaluation. We strongly recommend that you plan ahead and submit early to avoid any last‑minute issues such as network congestion or other unforeseen circumstances.
+
+We wish you all excellent results!
+
+## Authenticity Verification of Award-Winning Works (May 25)
+To ensure fairness and integrity of the competition and protect the rights of all participants, the organizing committee will conduct **authenticity verification** on works that may receive cash awards (including the top 10 finalists and the High-Quality Evaluation Set Contribution Award) **before the announcement of preliminary results**.
+
+The verification includes, but is not limited to:
+- Reproducibility of experimental steps (based on the code, model, and documentation submitted by participants)
+- Quality and authenticity of the evaluation set (whether it complies with submission guidelines, and whether there are issues such as data fabrication or excessive synthetic data)
+- Consistency between reported results and submitted materials
+
+If a work fails the verification, the organizing committee will **cancel its awards and all prize money**, and may subsequently promote the next-ranked team as appropriate. All participants must ensure that their submitted materials are authentic, complete, and reproducible.
+> **Note**: Due to the large number of entries, the organizing committee may conduct full or sample verification of the award-winning works based on actual circumstances. **All participants who are potential award recipients may be subject to verification**. Please do not take any chances, and together we uphold a healthy academic and competitive atmosphere.
+
+## Competition Adjustments (May 11)
+
+Dear participants, Thank you for your support and interest in this competition. The following adjustments have been made to the schedule and rules:
+1. **Schedule Extension**: The overall timeline has been postponed by one month. The submission deadline for the preliminary round is extended to **June 28**.
+2. **Evaluation Criteria Upgrade**: We encourage all participants to actively promote and showcase their projects through multiple channels and methods, to expand community influence and technological reach. **Project impact, data quality, and model innovation** will together serve as the three core elements for award evaluation. Please consider this.
+3. **Submission Deadline Reminder**: To ensure that judges have sufficient time to evaluate the works for each leaderboard release, please note that **2:00 PM on the day before each leaderboard release** is the cutoff time for submissions/updates to be considered for that round. Any submissions or updates made after that time will automatically be included in the evaluation for the next leaderboard release.
+
+We wish you excellent results!
+
 ## Competition Adjustments (April 17)
 
 Dear participants, Thank you for your support and interest in this competition. The following adjustments have been made to the schedule and rules:
@@ -45,18 +76,20 @@ We look forward to participants focusing on real-world application areas not yet
 
 | Phase | Date | Key Tasks | Submission Notes |
 |---|---|---|---|
-| **Preliminary Round** | April 1 – May 29 | Participants submit their work; rankings are published every two weeks | **Evaluation set、Training data report and open-source project** (GitHub + Hugging Face): Must be submitted by **May 29**. |
+| **Preliminary Round** | April 1 – June 28 | Participants submit their work; rankings are published every two weeks | **Evaluation set、Training data report and open-source project** (GitHub + Hugging Face): Must be submitted by **June 28**. |
 |Leaderboard Release (Round 1)|Friday, April 17|Official leaderboard: Top 50 Overall Scores (including total points)||
 |Leaderboard Release (Round 2)|Monday, May 11|Official leaderboard: Top 50 Overall Scores (including total points)||
 |Leaderboard Release (Round 3)|Monday, May 25|Official leaderboard: Top 50 Overall Scores (including total points)||
-|**Preliminary Review**|May 31 – June 9|Review completed based on 6-dimension scoring; advancement list determined||
-|**Preliminary Results Announcement**|Monday, June 9|**Final preliminary leaderboard** published (Top 10 advancement list + 10 High-Quality Data Contribution Award winners)||
-|**Finals Preparation**|June 10– June 20|Advancing teams prepare presentation materials and submit final versions|Advancing teams must submit the final training data construction report, open-source project (GitHub + Hugging Face), and presentation slides by **June 20**|
-|**Finals Defense**|June 24 – June 26|In-person or online defense with on-site scoring||
-|**Results Announcement**|June 30|**Award winners list** published||
+|Leaderboard Release (Round 4)|Monday, Jun 8|Official leaderboard: Top 50 Overall Scores (including total points)||
+|Leaderboard Release (Round 5)|Monday, Jun 22|Official leaderboard: Top 50 Overall Scores (including total points)||
+|**Preliminary Review**|Jun 30 – Jul 5|Review completed based on 6-dimension scoring; advancement list determined||
+|**Preliminary Results Announcement**|Monday, Jul 6|**Final preliminary leaderboard** published (Top 10 advancement list + 10 High-Quality Data Contribution Award winners)||
+|**Finals Preparation**|Jul 7 – Jul 20|Advancing teams prepare presentation materials and submit final versions|Advancing teams must submit the final training data construction report, open-source project (GitHub + Hugging Face), and presentation slides by **June 20**|
+|**Finals Defense**|Jul 22 – Jul 24|In-person or online defense with on-site scoring||
+|**Results Announcement**|Jul 28|**Award winners list** published||
 
 ### Notes
-* **All materials** (Evaluation set、training data construction report, complete open-source project): May be submitted early to participate in bi-weekly leaderboard rankings, and can be continuously iterated until **May 29**; the final version is determined by the last submission before the deadline.
+* **All materials** (Evaluation set、training data construction report, complete open-source project): May be submitted early to participate in bi-weekly leaderboard rankings, and can be continuously iterated until **June 28**; the final version is determined by the last submission before the deadline.
 * After each leaderboard release, participants will receive an email containing detailed scores and mentor feedback. The earlier you submit, the sooner you receive feedback, helping you iteratively improve your model and dataset.
 * If advancing to the finals, the final optimised version of the above materials may be submitted during the finals preparation phase (before June 20).
 * All submitted materials must comply with the specifications in the "Submission Requirements" section.
@@ -124,7 +157,7 @@ Both the preliminary round and finals use a unified scoring system that comprehe
 For detailed scoring criteria for each dimension, please refer to the [Detailed Scoring Rubric](./【Hackathon_10th】PaddleOCR_Detailed_Scoring_Rubric.md).
 
 ### Special Note
-The final submission deadline is **June 20**, which is more generous than the preliminary round deadline (May 29). Therefore, after the top 10 preliminary round participants advance to the finals, **the final rankings in the finals will be re-evaluated based on the quality of the finals submissions**; preliminary round scores will not be carried over to the finals.
+The final submission deadline is **Jul 20**, which is more generous than the preliminary round deadline (Jun 28). Therefore, after the top 10 preliminary round participants advance to the finals, **the final rankings in the finals will be re-evaluated based on the quality of the finals submissions**; preliminary round scores will not be carried over to the finals.
 
 ## 6. Technical Support
 
@@ -138,10 +171,10 @@ All submitted materials (except finals defense materials) should be sent via ema
 
 | Submission Content | Deadline | Public? | Requirements |
 |---|---|:--:|---|
-| **Evaluation Set** | May 29 (Preliminary) / June 20 (Finals)  | Not required | images/documents + annotations + task description + evaluation script + dataset description (data sources, scale, category distribution, difficulty analysis). Host on Baidu Netdisk or [AI Studio Open Datasets](https://aistudio.baidu.com/datasetoverview) and submit the link. |
-| **Training Data Construction Report** | May 29 (Preliminary) / June 20 (Finals) | Not required | PDF/Markdown. Must include: data collection methods (with key code), annotation specifications, annotation tools, and quality control workflows. |
-| **Complete Open-Source Project** |May 29 (Preliminary) / June 20 (Finals)  | **Must be public** | **GitHub repository**: training/evaluation code, documentation, demo (training data not required to be open-sourced). **Hugging Face model**: fine-tuned model with complete model card; reference: [PaddleOCR-VL-For-Manga](https://huggingface.co/jzhang533/PaddleOCR-VL-For-Manga). |
-| **Finals Defense Materials** | June 20 | — | Advancing teams only: presentation slides (10 min) + optional demo video (3–5 min). Submission method to be communicated separately. |
+| **Evaluation Set** | Jun 28 (Preliminary) / Jul 20 (Finals)  | Not required | images/documents + annotations + task description + evaluation script + dataset description (data sources, scale, category distribution, difficulty analysis). Host on Baidu Netdisk or [AI Studio Open Datasets](https://aistudio.baidu.com/datasetoverview) and submit the link. |
+| **Training Data Construction Report** | Jun 28 (Preliminary) / Jul 20 (Finals) | Not required | PDF/Markdown. Must include: data collection methods (with key code), annotation specifications, annotation tools, and quality control workflows. |
+| **Complete Open-Source Project** |Jun 28 (Preliminary) / Jul 20 (Finals)  | **Must be public** | **GitHub repository**: training/evaluation code, documentation, demo (training data not required to be open-sourced). **Hugging Face model**: fine-tuned model with complete model card; reference: [PaddleOCR-VL-For-Manga](https://huggingface.co/jzhang533/PaddleOCR-VL-For-Manga). |
+| **Finals Defense Materials** | Jul 20 | — | Advancing teams only: presentation slides (10 min) + optional demo video (3–5 min). Submission method to be communicated separately. |
 
 **Important Notes**:
 
