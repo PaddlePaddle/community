@@ -1,0 +1,236 @@
+diff --git a/test/swe_paddle/test_pr79268_distributed_sampler.py b/test/swe_paddle/test_pr79268_distributed_sampler.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..c21101bfa6084b9f66f1c6476fe79df61f6211f7
+--- /dev/null
++++ b/test/swe_paddle/test_pr79268_distributed_sampler.py
+@@ -0,0 +1,230 @@
++import ast
++import copy
++import math
++import sys
++import types
++from collections.abc import Iterator, Sized
++from contextlib import contextmanager
++from pathlib import Path
++
++import numpy as np
++
++
++BATCH_TARGET = Path("python/paddle/io/dataloader/batch_sampler.py")
++DATA_INIT_TARGET = Path("python/paddle/utils/data/__init__.py")
++DISTRIBUTED_TARGET = Path("python/paddle/utils/data/distributed.py")
++
++
++def _extract_class(path, name, namespace):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    node = next(
++        copy.deepcopy(item)
++        for item in tree.body
++        if isinstance(item, ast.ClassDef) and item.name == name
++    )
++    module = ast.Module(body=[node], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(path), "exec"), namespace)
++    return namespace[name]
++
++
++def _load_batch_sampler_class():
++    namespace = {
++        "BatchSampler": object,
++        "Iterator": Iterator,
++        "Sized": Sized,
++        "math": math,
++        "np": np,
++    }
++    return _extract_class(BATCH_TARGET, "DistributedBatchSampler", namespace)
++
++
++@contextmanager
++def _parallel_env_modules(nranks=1, local_rank=0):
++    old_paddle = sys.modules.get("paddle")
++    old_distributed = sys.modules.get("paddle.distributed")
++
++    paddle_module = types.ModuleType("paddle")
++    paddle_module.__path__ = []
++    distributed_module = types.ModuleType("paddle.distributed")
++
++    class ParallelEnv:
++        def __init__(self):
++            self.nranks = nranks
++            self.local_rank = local_rank
++
++    distributed_module.ParallelEnv = ParallelEnv
++    paddle_module.distributed = distributed_module
++    sys.modules["paddle"] = paddle_module
++    sys.modules["paddle.distributed"] = distributed_module
++    try:
++        yield
++    finally:
++        if old_paddle is None:
++            sys.modules.pop("paddle", None)
++        else:
++            sys.modules["paddle"] = old_paddle
++        if old_distributed is None:
++            sys.modules.pop("paddle.distributed", None)
++        else:
++            sys.modules["paddle.distributed"] = old_distributed
++
++
++def _construct(sampler_class, *args, **kwargs):
++    with _parallel_env_modules():
++        return sampler_class(*args, **kwargs)
++
++
++@contextmanager
++def _temporary_modules(modules):
++    previous = {name: sys.modules.get(name) for name in modules}
++    sys.modules.update(modules)
++    try:
++        yield
++    finally:
++        for name, old_value in previous.items():
++            if old_value is None:
++                sys.modules.pop(name, None)
++            else:
++                sys.modules[name] = old_value
++
++
++def _load_public_data_namespace(batch_sampler_class):
++    distributed_sampler_class = None
++    if DISTRIBUTED_TARGET.exists():
++        distributed_sampler_class = _extract_class(
++            DISTRIBUTED_TARGET,
++            "DistributedSampler",
++            {
++                "DistributedBatchSampler": batch_sampler_class,
++                "Sized": Sized,
++            },
++        )
++
++    package_name = "_swe_checkout_data_79268"
++    package = types.ModuleType(package_name)
++    package.__path__ = []
++
++    dataloader = types.ModuleType(f"{package_name}.dataloader")
++    dataloader.default_collate = object()
++    dataloader.get_worker_info = object()
++
++    dataset = types.ModuleType(f"{package_name}.dataset")
++    for name in (
++        "ChainDataset",
++        "ConcatDataset",
++        "Dataset",
++        "IterableDataset",
++        "Subset",
++        "TensorDataset",
++        "random_split",
++    ):
++        setattr(dataset, name, object())
++
++    sampler = types.ModuleType(f"{package_name}.sampler")
++    for name in ("BatchSampler", "RandomSampler", "Sampler", "SequentialSampler"):
++        setattr(sampler, name, object())
++
++    modules = {
++        package_name: package,
++        f"{package_name}.dataloader": dataloader,
++        f"{package_name}.dataset": dataset,
++        f"{package_name}.sampler": sampler,
++    }
++    if distributed_sampler_class is not None:
++        distributed = types.ModuleType(f"{package_name}.distributed")
++        distributed.DistributedSampler = distributed_sampler_class
++        modules[f"{package_name}.distributed"] = distributed
++
++    tree = ast.parse(
++        DATA_INIT_TARGET.read_text(encoding="utf-8"),
++        filename=str(DATA_INIT_TARGET),
++    )
++    selected = []
++    for node in tree.body:
++        if isinstance(node, ast.ImportFrom):
++            selected.append(copy.deepcopy(node))
++        elif isinstance(node, ast.Assign) and any(
++            isinstance(target, ast.Name) and target.id == "__all__"
++            for target in node.targets
++        ):
++            selected.append(copy.deepcopy(node))
++
++    module = ast.Module(body=selected, type_ignores=[])
++    ast.fix_missing_locations(module)
++    namespace = {
++        "__name__": package_name,
++        "__package__": package_name,
++    }
++    with _temporary_modules(modules):
++        exec(compile(module, str(DATA_INIT_TARGET), "exec"), namespace)
++    return namespace
++
++
++def test_existing_distributed_batch_sampler_behavior_remains_valid():
++    sampler_class = _load_batch_sampler_class()
++    sampler = _construct(
++        sampler_class,
++        range(8),
++        batch_size=2,
++        num_replicas=2,
++        rank=0,
++        shuffle=False,
++        drop_last=False,
++    )
++
++    assert list(sampler) == [[0, 1], [4, 5]]
++    assert len(sampler) == 2
++
++
++def test_distributed_batch_sampler_seed_controls_shuffle():
++    sampler_class = _load_batch_sampler_class()
++
++    def collect(seed, epoch):
++        sampler = _construct(
++            sampler_class,
++            range(20),
++            batch_size=2,
++            num_replicas=2,
++            rank=0,
++            shuffle=True,
++            drop_last=False,
++            seed=seed,
++        )
++        sampler.set_epoch(epoch)
++        return list(sampler)
++
++    assert collect(17, 3) == collect(17, 3)
++    assert collect(17, 3) != collect(17, 4)
++    assert collect(17, 3) != collect(18, 3)
++
++
++def test_distributed_sampler_is_public_and_forwards_arguments():
++    batch_sampler_class = _load_batch_sampler_class()
++    namespace = _load_public_data_namespace(batch_sampler_class)
++
++    distributed_sampler_class = namespace["DistributedSampler"]
++    assert "DistributedSampler" in namespace["__all__"]
++
++    alias_sampler = _construct(
++        distributed_sampler_class,
++        range(10),
++        num_replicas=2,
++        rank=1,
++        shuffle=True,
++        seed=23,
++        drop_last=False,
++    )
++    direct_sampler = _construct(
++        batch_sampler_class,
++        range(10),
++        batch_size=1,
++        num_replicas=2,
++        rank=1,
++        shuffle=True,
++        seed=23,
++        drop_last=False,
++    )
++
++    assert alias_sampler.seed == 23
++    assert list(alias_sampler) == list(direct_sampler)
