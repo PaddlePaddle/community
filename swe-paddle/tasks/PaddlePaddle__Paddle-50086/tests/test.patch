@@ -1,0 +1,325 @@
+diff --git a/test/legacy_test/test_conditional_block_scope_lifecycle.py b/test/legacy_test/test_conditional_block_scope_lifecycle.py
+new file mode 100644
+index 00000000000000..bfe210ec11e2b3
+--- /dev/null
++++ b/test/legacy_test/test_conditional_block_scope_lifecycle.py
+@@ -0,0 +1,319 @@
++# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import hashlib
++import os
++import shutil
++import subprocess
++import sys
++from pathlib import Path
++
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_SOURCE_PATH = (
++    _REPO_ROOT
++    / 'paddle'
++    / 'fluid'
++    / 'operators'
++    / 'controlflow'
++    / 'conditional_block_op.cc'
++)
++
++
++def _extract_scope_selection():
++    source = _SOURCE_PATH.read_text(encoding='utf-8')
++    start = source.index('auto *scopes =')
++    end_marker = 'auto &cur_scope = *scopes->front();'
++    end = source.index(end_marker, start) + len(end_marker)
++    return source[start:end]
++
++
++def _render_harness(statement_block):
++    template = r'''
++#include <cstddef>
++#include <iostream>
++#include <memory>
++#include <string>
++#include <utility>
++#include <vector>
++
++bool FLAGS_control_flow_use_new_executor = true;
++
++namespace framework {
++
++class Scope {
++ public:
++  explicit Scope(int id = 0) : id_(id) {}
++
++  Scope& NewScope() const {
++    auto child = std::make_unique<Scope>(next_child_id_++);
++    Scope* pointer = child.get();
++    storage_.push_back(std::move(child));
++    kids_.push_back(pointer);
++    return *pointer;
++  }
++
++  const std::vector<Scope*>& kids() const { return kids_; }
++
++  void RetireVisibleChildrenAndAddReplacement() const {
++    for (Scope* child : kids_) {
++      child->alive_ = false;
++    }
++    kids_.clear();
++    NewScope();
++  }
++
++  int id() const { return id_; }
++  bool alive() const { return alive_; }
++
++ private:
++  int id_ = 0;
++  bool alive_ = true;
++  mutable int next_child_id_ = 1;
++  mutable std::vector<std::unique_ptr<Scope>> storage_;
++  mutable std::vector<Scope*> kids_;
++};
++
++}  // namespace framework
++
++class Variable {
++ public:
++  template <typename T>
++  T* GetMutable();
++
++  std::vector<framework::Scope*> scopes;
++};
++
++template <>
++std::vector<framework::Scope*>*
++Variable::GetMutable<std::vector<framework::Scope*>>() {
++  return &scopes;
++}
++
++framework::Scope* SelectScope(const framework::Scope& scope,
++                              Variable* scope_var) {
++__STATEMENT_BLOCK__
++  return &cur_scope;
++}
++
++void PrintResult(framework::Scope* first,
++                 framework::Scope* second,
++                 const framework::Scope& parent,
++                 const Variable& variable) {
++  std::cout << first->id() << ','
++            << (second ? second->id() : -1) << ','
++            << first->alive() << ','
++            << (second ? second->alive() : false) << ','
++            << parent.kids().size() << ','
++            << variable.scopes.size() << ','
++            << (first == second) << '\n';
++}
++
++int main(int argc, char** argv) {
++  if (argc != 2) return 64;
++
++  const std::string scenario = argv[1];
++  framework::Scope parent;
++  Variable variable;
++
++  if (scenario == "first") {
++    FLAGS_control_flow_use_new_executor = true;
++    framework::Scope* first = SelectScope(parent, &variable);
++    PrintResult(first, nullptr, parent, variable);
++    return 0;
++  }
++
++  if (scenario == "legacy") {
++    FLAGS_control_flow_use_new_executor = false;
++    framework::Scope* first = SelectScope(parent, &variable);
++    framework::Scope* second = SelectScope(parent, &variable);
++    PrintResult(first, second, parent, variable);
++    return 0;
++  }
++
++  if (scenario == "repeated") {
++    FLAGS_control_flow_use_new_executor = true;
++    framework::Scope* first = SelectScope(parent, &variable);
++    framework::Scope* second = SelectScope(parent, &variable);
++    PrintResult(first, second, parent, variable);
++    return 0;
++  }
++
++  if (scenario == "stale") {
++    FLAGS_control_flow_use_new_executor = true;
++    framework::Scope* first = SelectScope(parent, &variable);
++    parent.RetireVisibleChildrenAndAddReplacement();
++    framework::Scope* second = SelectScope(parent, &variable);
++    PrintResult(first, second, parent, variable);
++    return 0;
++  }
++
++  return 65;
++}
++'''
++    return template.replace('__STATEMENT_BLOCK__', statement_block)
++
++
++def _compile_with_setuptools(source_path, cache_dir):
++    from setuptools._distutils import ccompiler
++    from setuptools._distutils import sysconfig as du_sysconfig
++
++    compiler = ccompiler.new_compiler()
++    du_sysconfig.customize_compiler(compiler)
++    extra = (
++        ['/std:c++17', '/EHsc']
++        if compiler.compiler_type == 'msvc'
++        else ['-std=c++17']
++    )
++    objects = compiler.compile(
++        [str(source_path)],
++        output_dir=str(cache_dir),
++        extra_postargs=extra,
++    )
++    output_name = 'conditional_scope_harness'
++    compiler.link_executable(
++        objects,
++        output_name,
++        output_dir=str(cache_dir),
++        target_lang='c++',
++    )
++
++    for candidate in (
++        cache_dir / output_name,
++        cache_dir / f'{output_name}.exe',
++    ):
++        if candidate.exists():
++            return candidate
++
++    raise RuntimeError('setuptools compiler did not create executable')
++
++
++def _compile_native(source_path, cache_dir):
++    output = cache_dir / (
++        'conditional_scope_harness.exe'
++        if os.name == 'nt'
++        else 'conditional_scope_harness'
++    )
++
++    for name in ('g++', 'clang++'):
++        compiler = shutil.which(name)
++        if compiler:
++            completed = subprocess.run(
++                [
++                    compiler,
++                    '-std=c++17',
++                    '-O2',
++                    str(source_path),
++                    '-o',
++                    str(output),
++                ],
++                capture_output=True,
++                text=True,
++                check=False,
++            )
++            if completed.returncode == 0:
++                return output
++            raise RuntimeError(completed.stderr or completed.stdout)
++
++    return _compile_with_setuptools(source_path, cache_dir)
++
++
++def _harness():
++    statements = _extract_scope_selection()
++    source = _render_harness(statements)
++    cache_root = Path(
++        os.environ.get(
++            'PR50086_CPP_CACHE',
++            '.pytest_cache/pr50086-native',
++        )
++    )
++    key = hashlib.sha256(
++        (source + sys.platform).encode()
++    ).hexdigest()[:20]
++    cache_dir = (cache_root / key).resolve()
++    cache_dir.mkdir(parents=True, exist_ok=True)
++
++    source_path = cache_dir / 'conditional_scope_harness.cc'
++    source_path.write_text(source, encoding='utf-8', newline='\n')
++
++    for candidate in (
++        cache_dir / 'conditional_scope_harness',
++        cache_dir / 'conditional_scope_harness.exe',
++    ):
++        if candidate.exists():
++            return candidate
++
++    try:
++        return _compile_native(source_path, cache_dir)
++    except Exception as error:
++        raise AssertionError(
++            'Unable to compile the lightweight ConditionalBlock scope '
++            'harness. Install or expose a C++17 compiler; a full Paddle '
++            f'build is not required. Original error: {error}'
++        ) from error
++
++
++def _run_scenario(name):
++    completed = subprocess.run(
++        [str(_harness()), name],
++        capture_output=True,
++        text=True,
++        check=False,
++    )
++    assert completed.returncode == 0, completed.stderr
++    values = [int(value) for value in completed.stdout.strip().split(',')]
++    return {
++        'first_id': values[0],
++        'second_id': values[1],
++        'first_alive': bool(values[2]),
++        'second_alive': bool(values[3]),
++        'visible_children': values[4],
++        'scope_slots': values[5],
++        'same_pointer': bool(values[6]),
++    }
++
++
++def test_first_run_and_legacy_executor_behavior_remain_valid():
++    first = _run_scenario('first')
++    legacy = _run_scenario('legacy')
++
++    assert first['first_alive']
++    assert first['visible_children'] == 1
++    assert first['scope_slots'] == 1
++
++    assert legacy['first_alive']
++    assert legacy['second_alive']
++    assert not legacy['same_pointer']
++    assert legacy['visible_children'] == 2
++    assert legacy['scope_slots'] == 1
++
++
++def test_new_executor_repeated_run_uses_fresh_child_scope():
++    result = _run_scenario('repeated')
++
++    assert result['first_alive']
++    assert result['second_alive']
++    assert not result['same_pointer']
++    assert result['visible_children'] == 2
++    assert result['scope_slots'] == 1
++
++
++def test_stale_cached_scope_is_not_reused():
++    result = _run_scenario('stale')
++
++    assert not result['first_alive']
++    assert result['second_alive']
++    assert not result['same_pointer']
++    assert result['visible_children'] == 2
++    assert result['scope_slots'] == 1
