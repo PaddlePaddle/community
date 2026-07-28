@@ -15,9 +15,3 @@
 - 熟悉 Python
 - 熟悉 Paddle dynamic graph 和 Tensor lifecycle
 - 了解 pipeline parallel 中间输出的发送、缓存与释放流程
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
