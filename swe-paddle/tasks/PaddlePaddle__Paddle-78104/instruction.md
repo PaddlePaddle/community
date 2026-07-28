@@ -15,9 +15,3 @@ Tensor 的 `place` 可能表现为 generic `Place` 对象，而不是直接暴�
 - 熟悉 Python
 - 了解 Paddle Place 与 device context
 - 了解 CPU、CUDA、XPU 和 custom device 表示
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
