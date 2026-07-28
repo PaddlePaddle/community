@@ -16,7 +16,7 @@ This directory converts Paddle PR #56705 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 dynamic graph model-parallel identity 和 all-reduce 操作重复调用时产生的 Python-side runtime type 累积与长期内存增长问题。
+Fixed the issue of Python-side runtime type accumulation and long-term memory growth caused by repeated calls to dynamic graph model-parallel identity and all-reduce operations.
 
 ## Why This Is The Starter Example
 
