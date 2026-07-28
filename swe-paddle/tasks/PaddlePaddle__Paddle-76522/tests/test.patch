@@ -1,0 +1,136 @@
+diff --git a/test/swe_paddle/test_pr76522_torch_proxy_compat_overrides.py b/test/swe_paddle/test_pr76522_torch_proxy_compat_overrides.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..768c137ea71136d1ed4cc2c39839efe5da9fd1e6
+--- /dev/null
++++ b/test/swe_paddle/test_pr76522_torch_proxy_compat_overrides.py
+@@ -0,0 +1,130 @@
++from __future__ import annotations
++
++import sys
++import types
++from pathlib import Path
++
++import pytest
++
++
++TARGET = Path("python/paddle/compat/proxy.py")
++
++
++def _load_checkout_namespace():
++    namespace = {"__name__": "checkout_proxy", "__file__": str(TARGET)}
++    source = TARGET.read_text(encoding="utf-8")
++    exec(compile(source, str(TARGET), "exec"), namespace)
++    return namespace
++
++
++def _install_fake_compat_modules(monkeypatch):
++    paddle = types.ModuleType("paddle")
++    paddle.__path__ = []
++
++    compat = types.ModuleType("paddle.compat")
++    compat.__path__ = ["compat"]
++    compat.__package__ = "paddle"
++
++    compat_nn = types.ModuleType("paddle.compat.nn")
++    compat_nn.__all__ = ["Linear", "_private"]
++    compat_linear = object()
++    compat_nn.Linear = compat_linear
++    compat_nn._private = object()
++
++    compat_functional = types.ModuleType("paddle.compat.nn.functional")
++    compat_functional.__all__ = ["softmax"]
++    compat_softmax = object()
++    compat_functional.softmax = compat_softmax
++
++    compat.nn = compat_nn
++    paddle.compat = compat
++
++    monkeypatch.setitem(sys.modules, "paddle", paddle)
++    monkeypatch.setitem(sys.modules, "paddle.compat", compat)
++    monkeypatch.setitem(sys.modules, "paddle.compat.nn", compat_nn)
++    monkeypatch.setitem(
++        sys.modules, "paddle.compat.nn.functional", compat_functional
++    )
++
++    return compat_linear, compat_softmax
++
++
++def test_existing_proxy_module_falls_back_to_original_attribute():
++    namespace = _load_checkout_namespace()
++    original = types.ModuleType("paddle.fake")
++    marker = object()
++    original.answer = marker
++
++    proxied = namespace["ProxyModule"](original, "torch.fake", {})
++
++    assert proxied.answer is marker
++
++
++def test_enable_torch_proxy_auto_registers_public_compat_exports(monkeypatch):
++    namespace = _load_checkout_namespace()
++    compat_linear, compat_softmax = _install_fake_compat_modules(monkeypatch)
++
++    module_infos = [
++        types.SimpleNamespace(name="paddle.compat.nn"),
++        types.SimpleNamespace(name="paddle.compat.nn.functional"),
++    ]
++    if "pkgutil" in namespace:
++        monkeypatch.setattr(
++            namespace["pkgutil"],
++            "walk_packages",
++            lambda *args, **kwargs: module_infos,
++        )
++
++    namespace["_clear_torch_modules"] = lambda: None
++    fake_sys = types.SimpleNamespace(meta_path=[], modules={})
++    namespace["sys"] = fake_sys
++
++    namespace["enable_torch_proxy"]()
++
++    linear_override = namespace["GLOBAL_OVERRIDES"]["torch.nn.Linear"]
++    softmax_override = namespace["GLOBAL_OVERRIDES"][
++        "torch.nn.functional.softmax"
++    ]
++
++    assert linear_override.get_value() is compat_linear
++    assert softmax_override.get_value() is compat_softmax
++    assert namespace["TORCH_PROXY_FINDER"] in fake_sys.meta_path
++    assert "torch.nn._private" not in namespace["GLOBAL_OVERRIDES"]
++
++
++def test_nested_override_is_visible_through_parent_proxy(monkeypatch):
++    namespace = _load_checkout_namespace()
++
++    source_nn = types.ModuleType("paddle.nn")
++    source_nn.__path__ = ["nn"]
++    source_functional = types.ModuleType("paddle.nn.functional")
++    original_softmax = object()
++    source_functional.softmax = original_softmax
++    source_nn.functional = source_functional
++
++    override_softmax = object()
++
++    class OverrideValue:
++        def get_value(self):
++            return override_softmax
++
++    namespace["GLOBAL_OVERRIDES"] = {
++        "torch.nn.functional.softmax": OverrideValue(),
++    }
++
++    real_import_module = namespace["importlib"].import_module
++
++    def fake_import_module(name, package=None):
++        if name == "paddle.nn":
++            return source_nn
++        return real_import_module(name, package)
++
++    monkeypatch.setattr(namespace["importlib"], "import_module", fake_import_module)
++
++    finder = namespace["TorchProxyMetaFinder"]()
++    spec = finder._find_spec_for_torch_module("torch.nn")
++    proxied_nn = spec.loader.create_module(spec)
++    spec.loader.exec_module(proxied_nn)
++
++    assert proxied_nn.functional.softmax is override_softmax
++    assert source_functional.softmax is original_softmax
