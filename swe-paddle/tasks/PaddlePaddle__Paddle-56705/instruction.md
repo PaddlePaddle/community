@@ -15,9 +15,3 @@
 - 熟悉 Python
 - 熟悉 Paddle dynamic graph 和 autograd
 - 了解 model-parallel process group、identity 和 all-reduce 的执行语义
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
