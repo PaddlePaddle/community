@@ -16,7 +16,7 @@ This directory converts Paddle PR #54625 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 pipeline parallel 在释放中间输出时错误清理未初始化或已发生 in-place 修改的 Tensor 数据的问题。
+Fixed an issue in pipeline parallelism where tensor data that was uninitialized or had undergone in-place modification was incorrectly cleaned up when releasing intermediate outputs.
 
 ## Why This Is The Starter Example
 
