@@ -18,7 +18,7 @@ This directory converts Paddle PR #65724 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 `DataLoader` 在 `persistent_workers=True` 且一个 epoch 被提前终止后，复用 workers 进入后续 epoch 时可能因 batch structure metadata 不一致而崩溃的问题。
+Fixed an issue where `DataLoader` could crash when reusing workers for a subsequent epoch—after an epoch was terminated early with `persistent_workers=True`—due to inconsistent batch structure metadata.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
