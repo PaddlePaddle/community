@@ -16,7 +16,7 @@ This directory converts Paddle PR #78104 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 device context 接收 Tensor 返回的 generic `Place` 时，无法按其真实 device type 和 device id 转换为对应 concrete Place 的问题。
+Fixed an issue where a generic `Place` returned by a Tensor could not be converted into the corresponding concrete `Place` based on its actual device type and device ID when received by the device context.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
