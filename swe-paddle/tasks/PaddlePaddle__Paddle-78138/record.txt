@@ -1,0 +1,83 @@
+# 修复前 F2P
+λ /workspace/Paddle python3.10 test/legacy_test/test_api_compatibility.py
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+W0728 09:11:28.556013   998 gpu_resources.cc:116] Please NOTE: device: 0, GPU Compute Capability: 7.0, Driver API Version: 12.6, Runtime API Version: 11.8
+..I0728 09:11:28.699822   998 pir_interpreter.cc:1528] New Executor is Running ...
+I0728 09:11:28.700899   998 pir_interpreter.cc:1551] pir interpreter is running by multi-thread mode ...
+.................................<frozen importlib._bootstrap>:914: ImportWarning: _SixMetaPathImporter.find_spec() not found; falling back to find_module()
+........W0728 09:11:29.120426   998 eager_utils.cc:3618] Paddle static graph(PIR) not support input out tensor for now!!!!!
+..........................................EE............................
+======================================================================
+ERROR: test_dygraph_Compatibility (__main__.TestPixelShuffleAPI_Compatibility)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Paddle/test/legacy_test/test_api_compatibility.py", line 2496, in test_dygraph_Compatibility
+    out3 = F.pixel_shuffle(input=x, upscale_factor=3)
+TypeError: pixel_shuffle() got an unexpected keyword argument 'input'
+
+======================================================================
+ERROR: test_static_Compatibility (__main__.TestPixelShuffleAPI_Compatibility)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/Paddle/test/legacy_test/test_api_compatibility.py", line 2521, in test_static_Compatibility
+    out3 = F.pixel_shuffle(input=x, upscale_factor=3)
+TypeError: pixel_shuffle() got an unexpected keyword argument 'input'
+
+----------------------------------------------------------------------
+Ran 115 tests in 1.463s
+
+FAILED (errors=2)
+
+# 修复前 P2P
+λ /workspace/Paddle python3.10 test/legacy_test/test_pixel_shuffle_op.py
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+W0728 09:12:30.456383  1671 gpu_resources.cc:116] Please NOTE: device: 0, GPU Compute Capability: 7.0, Driver API Version: 12.6, Runtime API Version: 11.8
+I0728 09:12:30.560915  1671 program_interpreter.cc:255] New Executor is Running.
+I0728 09:12:30.564375  1671 interpreter_util.cc:624] Standalone Executor is Used.
+W0728 09:12:30.609403  1671 eager_utils.cc:3618] Paddle static graph(PIR) not support input out tensor for now!!!!!
+/usr/local/lib/python3.10/dist-packages/paddle/pir/math_op_patch.py:261: UserWarning: Tensor do not have 'place' interface for pir graph mode, try not to use it. None will be returned.
+  warnings.warn(
+I0728 09:12:30.665400  1671 pir_interpreter.cc:1528] New Executor is Running ...
+I0728 09:12:30.666040  1671 pir_interpreter.cc:1551] pir interpreter is running by multi-thread mode ...
+.......ss../usr/local/lib/python3.10/dist-packages/paddle/pir/math_op_patch.py:261: UserWarning: Tensor do not have 'place' interface for pir graph mode, try not to use it. None will be returned.
+  warnings.warn(
+......
+----------------------------------------------------------------------
+Ran 17 tests in 0.926s
+
+OK (skipped=2)
+
+
+
+# 修复后 F2P
+λ /workspace/Paddle/build python3.10 test/legacy_test/test_api_compatibility.py
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+W0728 09:31:52.277604 28465 gpu_resources.cc:116] Please NOTE: device: 0, GPU Compute Capability: 7.0, Driver API Version: 12.6, Runtime API Version: 11.8
+..I0728 09:31:52.426563 28465 pir_interpreter.cc:1528] New Executor is Running ...
+I0728 09:31:52.427740 28465 pir_interpreter.cc:1551] pir interpreter is running by multi-thread mode ...
+.................................<frozen importlib._bootstrap>:914: ImportWarning: _SixMetaPathImporter.find_spec() not found; falling back to find_module()
+........W0728 09:31:52.962091 28465 eager_utils.cc:3618] Paddle static graph(PIR) not support input out tensor for now!!!!!
+........................................................................
+----------------------------------------------------------------------
+Ran 115 tests in 1.406s
+
+OK
+
+# 修复后 P2P
+λ /workspace/Paddle/build python3.10 test/legacy_test/test_pixel_shuffle_op.py
+grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
+W0728 09:33:22.736580 29221 gpu_resources.cc:116] Please NOTE: device: 0, GPU Compute Capability: 7.0, Driver API Version: 12.6, Runtime API Version: 11.8
+I0728 09:33:22.839797 29221 program_interpreter.cc:255] New Executor is Running.
+I0728 09:33:22.843321 29221 interpreter_util.cc:624] Standalone Executor is Used.
+W0728 09:33:22.887786 29221 eager_utils.cc:3618] Paddle static graph(PIR) not support input out tensor for now!!!!!
+/usr/local/lib/python3.10/dist-packages/paddle/pir/math_op_patch.py:261: UserWarning: Tensor do not have 'place' interface for pir graph mode, try not to use it. None will be returned.
+  warnings.warn(
+I0728 09:33:22.937182 29221 pir_interpreter.cc:1528] New Executor is Running ...
+I0728 09:33:22.937832 29221 pir_interpreter.cc:1551] pir interpreter is running by multi-thread mode ...
+.......ss../usr/local/lib/python3.10/dist-packages/paddle/pir/math_op_patch.py:261: UserWarning: Tensor do not have 'place' interface for pir graph mode, try not to use it. None will be returned.
+  warnings.warn(
+......
+----------------------------------------------------------------------
+Ran 17 tests in 0.873s
+
+OK (skipped=2)
