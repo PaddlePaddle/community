@@ -20,7 +20,6 @@
 - **代表性**：它覆盖 API compatibility、新公共 API 暴露以及 shape broadcasting contract。
 - **边界清楚**：production change 仅涉及 `python/paddle/__init__.py`、`python/paddle/tensor/__init__.py` 和 `python/paddle/tensor/math.py`，原 PR test 可与 Gold production patch 严格分离。
 - **非平凡性**：需要同时处理多 shape 逐步广播、零/单输入 identity，以及不兼容输入错误传播，同时保持已有二元 `broadcast_shape` 行为不退化。
-- **环境友好性**：核心逻辑是 Python-only shape orchestration，可通过 AST overlay 和 controlled `core.broadcast_shape` double 在 CPU 环境稳定验证，无需 source build 或 GPU。
 
 ## 4. 任务类型和标签
 

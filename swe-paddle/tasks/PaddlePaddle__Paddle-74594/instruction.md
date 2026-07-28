@@ -16,14 +16,3 @@ Paddle 需要提供一个公开的 `broadcast_shapes` API，用于根据常规 b
 
 - 熟悉 Tensor broadcasting 规则与 shape 推导语义。
 - 理解 Paddle Python API 的公共导出和 tensor math API 组织方式。
-- 测试应验证返回值、异常和兼容行为，不依赖源码字符串、局部变量名或具体循环实现。
-
-## 参考资料
-
-- https://github.com/PaddlePaddle/Paddle/pull/74594
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid broadcasting behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or broadly bypassing shape validation.
