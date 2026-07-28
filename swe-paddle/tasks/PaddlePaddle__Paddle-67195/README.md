@@ -18,7 +18,7 @@ This directory converts Paddle PR #67195 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 Pipeline Parallel P2P communication 的 NaN/Inf checker 执行时序，确保 invalid outgoing Tensor 在任何 send/recv operation 启动前被拒绝。
+Fixed the execution timing of the NaN/Inf checker for pipeline parallel P2P communication to ensure that invalid outgoing tensors are rejected before any send/recv operation begins.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
