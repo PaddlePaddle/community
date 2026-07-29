@@ -18,7 +18,7 @@
 - **真实性**：该问题来自 Paddle 的「0-size Tensor 机制建设」系列任务，是真实研发需求，目标是为 `unique` 算子补齐 0-size tensor 支持。
 - **代表性**：覆盖 Python API 层面的算子边界处理，涉及 dynamic mode 下的 tensor 维度判断和多返回值语义（inverse、counts、index），是 Paddle API 算子机制增强的典型样本。
 - **边界清楚**：目标仅限 0-size tensor 输入的动态图早期返回逻辑，返回值为空 tensor 且保持 dtype 一致；正向非零尺寸输入不应受影响。
-- **非平凡性**：修复需要在 `manipulation.py` 中为 `unique` API 添加 `math.prod(x.shape) == 0` 的早期返回分支，涉及返回 dtype（int32/int64）判断、以及多返回值解包，不是简单机械修改。
+- **非平凡性**：修复需要在 `manipulation.py` 中为 `unique` API 添加 `math.prod(x.shape) == 0` 的早期返回分支，涉及 axis 为 `[]` 的展平情况、返回 dtype（int32/int64）判断、以及多返回值解包，不是简单机械修改。
 - **回归护栏明确**：目标 F2P 可覆盖 0-size tensor 输入的 `unique` 动态图调用；同文件已有的标准唯一化算子测试用例可作为 P2P 护栏。
 
 ## 4. 任务类型和标签
