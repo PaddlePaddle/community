@@ -1,17 +1,24 @@
-# 为 paddle.set_rng_state 增加 new_state 参数别名
+# 为 `paddle.set_rng_state` 支持 `new_state` 参数别名
 
 ## 详细描述
 
-`paddle.set_rng_state` 当前仅接受 `state_list` 作为随机数生成器状态参数。使用其他框架风格代码或自动迁移工具时，调用方可能使用语义等价的 `new_state` 参数，导致现有 API 无法直接兼容。该 API 应支持 `new_state` 作为 `state_list` 的等价别名，同时保持原有调用方式和错误语义稳定。
+`paddle.set_rng_state` 当前使用 `state_list` 接收需要恢复的随机数生成器状态。为提升接口兼容性，该函数还需要支持语义相同的 `new_state` 参数名称。
+
+通过位置参数、`state_list=` 或 `new_state=` 传入相同状态时，应产生一致的状态设置结果。原有的参数形式以及设备选择行为不得受到影响。
+
+当一次调用同时使用 `state_list` 和 `new_state` 时，应将其视为冲突输入并给出明确的异常。
 
 ## 验收说明
 
-- `paddle.set_rng_state(new_state=...)` 应与使用 `state_list=...` 产生相同的状态设置行为。
-- positional 参数和原有 `state_list=` 关键字调用应保持兼容。
-- 同时传入 `state_list` 与 `new_state` 时，应明确拒绝冲突输入。
+* `paddle.set_rng_state` 应支持通过 `new_state` 传入随机数生成器状态
+* 使用 `new_state=` 和 `state_list=` 传入相同状态时，应产生一致的结果
+* 原有的位置参数调用方式应保持有效
+* 原有的 `state_list=` 关键字调用方式应保持有效
+* 同时传入 `state_list` 和 `new_state` 时，应抛出 `ValueError`
+* 现有 `device` 参数及其他合法调用方式的行为不得发生变化
 
 ## 技术要求
 
-- 熟悉 Python function signature 和 decorator 行为。
-- 了解 Paddle random generator state API。
-- 能够编写稳定的 API compatibility behavior tests。
+* 熟悉 Python 函数参数和关键字参数处理
+* 了解 Paddle 随机数生成器状态相关 API
+* 理解参数别名和冲突参数的兼容性要求
