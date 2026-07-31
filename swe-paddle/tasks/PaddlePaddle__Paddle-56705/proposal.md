@@ -12,14 +12,14 @@
 
 ## 2. 问题一句话
 
-修复 dynamic graph model-parallel identity 和 all-reduce 操作重复调用时产生的 Python-side runtime type 累积与长期内存增长问题。
+修复动态图模式下 model-parallel `identity` 和 `all-reduce` 被反复调用时产生的运行时类型累积与内存泄漏问题。
 
 ## 3. 为什么适合作为 SWE-Paddle 样本
 
-- **真实性**：该任务来自已合入的 Paddle PR #56705，不是合成任务。
-- **代表性**：它覆盖 distributed model parallel、dynamic graph、autograd lifecycle 和 communication contract。
-- **边界清楚**：production change 集中在 `python/paddle/distributed/fleet/layers/mpu/mp_ops.py`，目标行为可以由独立测试直接暴露。
-- **非平凡性**：正确修复既要消除重复创建 runtime type 的问题，也要保持 identity 和 all-reduce 原有的 forward/backward behavior。
+- **真实性**：该任务来自 Paddle 已合入的 PR #56705，并非人工构造的问题。
+- **代表性**：该任务涉及 distributed model parallel、动态图、自动求导生命周期，以及模型并行操作的前向和反向通信行为。
+- **边界清楚**：production change 集中在 `python/paddle/distributed/fleet/layers/mpu/mp_ops.py`，问题范围明确，相关行为可以通过独立测试稳定验证。
+- **非平凡性**：修复不仅需要消除重复调用造成的运行时类型累积，还必须保持 `identity` 和 `all-reduce` 原有的前向、反向及通信行为不变。
 
 ## 4. 任务类型和标签
 
@@ -32,9 +32,9 @@
 
 - 目标测试命令：`bash tests/test.sh`
 - 目标测试文件：`test/swe_paddle/test_pr56705_mp_ops_pylayer_lifecycle.py`
-- 修复前预期：在 `base_commit` 上应用 `tests/test.patch` 后，已有 identity/all-reduce communication contract 测试应 pass，重复调用产生多个 distinct `PyLayer` runtime type 的测试应 fail。
-- 修复后预期：继续应用 `solution/code.patch` 后，已有行为测试和 runtime type reuse 测试均应 pass。
-- P2P 候选：identity 和 all-reduce 原有的 forward/backward communication behavior。
+- 修复前预期：在 `base_commit` 上应用 `tests/test.patch` 后，`identity` 和 `all-reduce` 原有通信行为的测试应通过；验证重复调用是否持续产生不同 `PyLayer` 运行时类型的测试应失败。
+- 修复后预期：继续应用 `solution/code.patch` 后，原有行为测试和运行时类型复用测试均应通过。
+- P2P 候选：`identity` 和 `all-reduce` 原有的前向、反向及通信行为。
 
 ## 6. 环境与资源
 
@@ -42,13 +42,13 @@
 - Paddle 来源：`PaddlePaddle/Paddle` source checkout at `base_commit`
 - 是否能提供 Docker：暂无
 - patch 类型：Python-only
-- 环境建议：使用可运行 `pytest` 的 Python 环境，通过 AST overlay 执行 checkout 中的目标控制流，并使用 controlled doubles 提供依赖；无需 Paddle source build 或 distributed launch
+- 环境建议：使用能够运行 `pytest` 的 Python 环境，通过 AST overlay 加载 source checkout 中的目标逻辑，并使用可控的测试替身补充运行依赖；无需编译 Paddle 源码，也无需启动真实的分布式任务。
 - 最小测试命令：`bash tests/test.sh`
 - 是否有 oracle 日志：由 SWE-Paddle verifier 结果另行维护
 
 ## 7. 风险自查
 
-- 泄露风险：正式 `instruction.md` 只描述目标行为和验收标准，不直接给出 production code 的具体修改方式。
-- 环境风险：测试不依赖历史 Paddle 模块的完整 import，通过 AST overlay 隔离版本兼容问题。
-- flaky 风险：测试不测真实 RSS、不启动多进程、不依赖 GC timing，而是验证稳定的 runtime type reuse contract。
-- 拆分风险：identity 和 all-reduce 属于同一 runtime lifecycle 问题，并由同一 production file 中的修改共同修复，适合作为一个样本。
+- 泄露风险：正式 `instruction.md` 仅描述模型并行操作重复调用时的内存泄漏现象及预期行为，不直接说明 `PyLayer` 的定义位置、类型复用方式或具体代码修改方案。
+- 环境风险：测试不依赖历史版本 Paddle 模块的完整导入，通过 AST overlay 隔离源码版本和运行环境之间的兼容性问题。
+- flaky 风险：测试不直接测量真实 RSS，不启动多进程，也不依赖垃圾回收时机，而是验证重复调用过程中运行时类型数量是否保持稳定。
+- 拆分风险：`identity` 和 `all-reduce` 的问题具有相同成因，并由同一 production file 中的相关修改共同解决，适合作为一个完整样本。
