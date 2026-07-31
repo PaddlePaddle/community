@@ -1,29 +1,25 @@
-# 完善 Torch Proxy 的 Compat Override 行为
+# 完善 Torch Proxy 对兼容接口的覆盖行为
 
 ## 详细描述
 
-Paddle 的 torch proxy 在启用后需要自动暴露 `paddle.compat` 中声明为公开接口的兼容实现，使调用方可以通过对应的 `torch` 命名空间访问这些实现，而不需要额外手工注册 override。
+启用 Paddle 的 Torch Proxy 后，`paddle.compat` 中公开提供的兼容接口应能够通过对应的 `torch` 命名空间直接访问，无需调用方逐一配置。
 
-当兼容接口位于嵌套模块中时，从父模块访问子模块也应继续应用相应的 override，而不是回退到原始 Paddle 子模块中的同名对象。已有的 proxy fallback 行为需要保持兼容。
+当前代理对这类兼容接口的处理不完整。特别是当接口位于嵌套模块中时，通过父级模块访问或使用 import 语句导入，可能无法得到预期的兼容实现。
+
+请完善 Torch Proxy 的接口覆盖行为，确保公开的兼容接口在对应命名空间中正确生效，同时保持现有的接口覆盖和默认代理行为不变。
 
 ## 验收说明
 
-- 启用 torch proxy 后，`paddle.compat` 子模块公开导出的兼容接口应自动出现在对应的 `torch` 命名空间中，私有接口不应被注册。
-- 位于嵌套子模块中的兼容接口应能通过父级 proxy 模块正确访问，并返回兼容实现而不是原始 Paddle 对象。
-- 对没有 override 的属性，已有的 proxy fallback 行为应保持不变。
+* 启用 Torch Proxy 后，`paddle.compat` 各子模块公开提供的接口应能够通过对应的 `torch` 命名空间访问
+* 未公开的兼容接口不应被暴露到 `torch` 命名空间
+* 嵌套模块中的兼容接口通过属性访问时，应返回对应的兼容实现
+* 嵌套模块中的兼容接口通过 import 语句导入时，应返回对应的兼容实现
+* 已有的接口覆盖行为不得发生变化
+* 对于没有兼容实现或已有覆盖的属性，现有的默认代理行为不得发生变化
 
 ## 技术要求
 
-- 熟悉 Python import system、module proxy 和动态属性访问机制。
-- 理解 Paddle torch compatibility layer 的模块映射与生命周期。
-- 测试应验证运行期可观察行为，不依赖源码字符串、局部变量名或具体内部容器实现。
-
-## 参考资料
-
-- https://github.com/PaddlePaddle/Paddle/pull/76522
-
-## Acceptance Criteria
-
-- The behavior described above should be implemented correctly.
-- Existing valid proxy behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or broadly bypassing proxy validation.
+* 熟悉 Python import system、模块代理和动态属性访问机制
+* 理解 Paddle Torch compatibility layer 的模块映射方式
+* 了解嵌套模块的加载、导入和属性解析过程
+* 测试应验证运行时可观察行为，不依赖源码文本、局部变量名或特定的内部数据结构
