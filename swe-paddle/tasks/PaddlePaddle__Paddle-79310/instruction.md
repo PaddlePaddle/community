@@ -1,19 +1,26 @@
-# 新增二维 Tensor 稀疏初始化 API
+# 新增 `paddle.nn.init.sparse_` 并统一原地初始化返回值
 
 ## 详细描述
 
-Paddle 的函数式 initializer 接口需要支持二维 Tensor 的稀疏初始化能力。调用方应能够通过稀疏比例和标准差控制初始化结果，并保持函数式 initializer 的原地操作语义。
+Paddle 需要为二维 Tensor 提供函数式稀疏初始化接口。调用方应能够通过稀疏比例控制每列中被置零的元素，并通过标准差控制其余元素的随机分布。
 
-同时，动态图模式下现有函数式原地 initializer 的返回语义需要保持一致：完成初始化后应返回被修改的输入 Tensor。非动态图路径的既有行为应继续保持兼容。
+请新增 `paddle.nn.init.sparse_`，使其能够原地修改输入 Tensor，并返回初始化后的同一个 Tensor。对于不满足维度要求的输入，应给出明确的异常。
+
+同时，现有函数式原地初始化接口在动态图模式下应具有一致的返回行为，即完成初始化后返回被修改的输入 Tensor。非动态图模式下的现有行为不得受到影响。
 
 ## 验收说明
 
-- 提供可用于二维 Tensor 的 `paddle.nn.init.sparse_()`，并正确处理稀疏比例、标准差以及非法维度输入。
-- `sparse_` 应原地初始化并返回输入 Tensor；动态图下现有函数式原地 initializer 也应返回输入 Tensor 本身。
-- 非动态图路径以及已有合法 initializer 用法的行为应保持不变。
+* 提供公开的 `paddle.nn.init.sparse_` API
+* `sparse_` 应支持通过 `tensor`、`sparsity` 和 `std` 参数调用
+* 输入为二维 Tensor 时，应按照指定稀疏比例对每列元素进行置零，并使用指定标准差初始化其余元素
+* 输入不是二维 Tensor 时，应抛出 `ValueError`
+* `sparse_` 应原地修改输入，并返回输入 Tensor 本身
+* 动态图模式下，现有函数式原地初始化接口应返回被修改的输入 Tensor 本身
+* 现有初始化接口的数值行为和合法调用方式不得发生变化
+* 非动态图模式下的现有行为不得发生变化
 
 ## 技术要求
 
-- 熟悉 Paddle initializer API 和 Tensor 原地操作语义。
-- 了解 dynamic graph 与非 dynamic graph 执行模式的差异。
-- 能够为随机初始化行为设计稳定、可重复的回归测试。
+* 熟悉 Paddle initializer API 和 Tensor 原地操作语义
+* 了解动态图与非动态图执行模式的差异
+* 理解二维 Tensor 的稀疏初始化语义
