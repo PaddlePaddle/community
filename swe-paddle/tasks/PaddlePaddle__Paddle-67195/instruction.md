@@ -1,21 +1,26 @@
-# 修复 Pipeline Parallel P2P send 前的 NaN/Inf 检查时序
+# 修复 Pipeline Parallel P2P 通信中的 NaN/Inf 检查
 
 ## 详细描述
 
-启用 `FLAGS_pp_check_naninf` 后，Pipeline Parallel 的 batched P2P communication 会检查 outgoing Tensor 是否包含 NaN 或 Inf。
+在 Pipeline Parallel 中，启用 `FLAGS_pp_check_naninf` 后，系统会检查待发送的 Tensor 是否包含 NaN 或 Inf。
 
-当待发送 Tensor 包含 invalid value 时，当前行为可能先启动 send/recv operations，随后才抛出 `ValueError`。这会使 invalid data 已经进入 communication path，错误也无法在 communication side effect 发生前被阻止。
+当前检查时机存在问题：当待发送的 Tensor 包含 NaN 或 Inf 时，P2P 通信可能已经开始，之后才抛出异常。这可能导致异常数据被发送，或者使其他参与通信的进程进入不符合预期的状态。
+
+请修复该问题，确保在启用检查的情况下，待发送 Tensor 中的 NaN 或 Inf 能够在本批次 P2P 通信开始前被检测出来。
 
 ## 验收说明
 
-- 启用 NaN/Inf checker 时，包含 NaN 或 Inf 的 outgoing Tensor 必须在任何 batched P2P operation 启动前被拒绝
-- 同一 batch 中包含 receive operation 时，也不得在 invalid outgoing Tensor 被确认前启动 communication
-- finite outgoing Tensor 和 receive-only Tensor 的现有行为不得退化
-- 错误信息应能够标识当前 rank，且不得通过关闭 checker 或跳过 P2P logic 来规避失败
+- 启用 `FLAGS_pp_check_naninf` 后，待发送 Tensor 包含 NaN 或 Inf 时，应抛出 `ValueError`
+- 检测到异常数值时，本批次中的 P2P 通信不应已经开始
+- 同一批次同时包含发送和接收操作时，也应在通信开始前完成待发送 Tensor 的检查
+- 不包含 NaN 或 Inf 的发送操作应保持原有行为
+- 仅包含接收操作时应保持原有行为
+- 未启用 `FLAGS_pp_check_naninf` 时，现有通信行为不得受到影响
+- 异常信息应包含当前进程的 rank
 
 ## 技术要求
 
 - 熟悉 Python
-- 了解 Paddle distributed communication 和 Pipeline Parallel
-- 了解 batched P2P operation 与 communication side effects
-- 了解 NaN/Inf validation 和 Paddle 单元测试开发流程
+- 了解 Paddle 分布式通信与 Pipeline Parallel
+- 了解批量 P2P 通信的基本流程
+- 了解 Tensor 的 NaN/Inf 检查
