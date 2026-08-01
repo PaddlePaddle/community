@@ -1,8 +1,8 @@
-# 为 `paddle.set_rng_state` 支持 `new_state` 参数别名
+# 为 `paddle.set_rng_state` 的 `state_list` 参数添加 `new_state` 别名
 
 ## 详细描述
 
-`paddle.set_rng_state` 当前使用 `state_list` 接收需要恢复的随机数生成器状态。为提升接口兼容性，该函数还需要支持语义相同的 `new_state` 参数名称。
+`paddle.set_rng_state` 当前使用 `state_list` 接收需要恢复的随机数生成器状态。为提升接口兼容性，该函数还需要支持与 `state_list` 语义相同的 `new_state` 参数名称。
 
 通过位置参数、`state_list=` 或 `new_state=` 传入相同状态时，应产生一致的状态设置结果。原有的参数形式以及设备选择行为不得受到影响。
 
