@@ -1,14 +1,14 @@
-# 新增 DistributedSampler 公共入口并支持配置 shuffle seed
+# 为 `paddle.io.DistributedBatchSampler` 增加 `DistributedSampler` 别名和 `seed` 参数
 
 ## 详细描述
 
-Paddle 当前提供了 `DistributedBatchSampler`，但 `paddle.utils.data` 中缺少与常见数据加载接口对齐的 `DistributedSampler` 公共入口。
+Paddle 当前提供了 `paddle.io.DistributedBatchSampler`，但缺少与其对应的 `paddle.utils.data.DistributedSampler` API。
 
-请新增 `paddle.utils.data.DistributedSampler`，使调用方能够通过 dataset、副本数量、当前 rank、是否打乱、随机种子和是否丢弃末尾数据等参数配置分布式采样。
+请为 `paddle.io.DistributedBatchSampler` 增加 `paddle.utils.data.DistributedSampler` 别名，并支持通过 `dataset`、`num_replicas`、`rank`、`shuffle`、`seed` 和 `drop_last` 参数进行构造。
 
-同时，为 `DistributedBatchSampler` 增加可选的 `seed` 参数。启用 shuffle 后，采样顺序应由 seed 和 epoch 共同决定：相同配置应产生一致的采样顺序，不同 seed 应能够产生不同的打乱结果。
+同时，为 `DistributedBatchSampler` 增加可选的 `seed` 参数。启用 shuffle 时，相同的 seed 和 epoch 应产生一致的采样顺序，不同的 seed 应能够产生不同的采样顺序。
 
-未显式传入 seed 的现有调用方式以及关闭 shuffle 时的采样行为不得受到影响。
+现有未传入 seed 的调用方式不得受到影响。
 
 ## 验收说明
 
