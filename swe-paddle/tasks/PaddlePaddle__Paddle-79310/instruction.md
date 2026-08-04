@@ -1,26 +1,29 @@
-# 新增 `paddle.nn.init.sparse_` 并统一原地初始化返回值
+# 新增 `paddle.nn.init.sparse_` 并补齐动态图下的返回值
 
 ## 详细描述
 
-Paddle 需要为二维 Tensor 提供函数式稀疏初始化接口。调用方应能够通过稀疏比例控制每列中被置零的元素，并通过标准差控制其余元素的随机分布。
+`paddle.nn.init` 目前缺少用于二维 Tensor 的稀疏初始化接口。
 
-请新增 `paddle.nn.init.sparse_`，使其能够原地修改输入 Tensor，并返回初始化后的同一个 Tensor。对于不满足维度要求的输入，应给出明确的异常。
+所以需要新增 `paddle.nn.init.sparse_(tensor, sparsity, std=0.01)`。该接口直接修改输入 Tensor：先按照均值为 0、标准差为 `std` 的正态分布初始化，再将每一列中的部分元素置为 0。每列置零的元素数量为 `ceil(sparsity * 行数)`。
 
-同时，现有函数式原地初始化接口在动态图模式下应具有一致的返回行为，即完成初始化后返回被修改的输入 Tensor。非动态图模式下的现有行为不得受到影响。
+该接口只支持二维 Tensor，其他维度的输入应抛出 `ValueError`，并返回修改后的输入 Tensor。
+
+此外，现有函数式初始化接口在动态图下完成初始化后，也应返回传入的 Tensor，而不是返回 `None`。非动态图模式下的现有行为保持不变。
 
 ## 验收说明
 
-* 提供公开的 `paddle.nn.init.sparse_` API
-* `sparse_` 应支持通过 `tensor`、`sparsity` 和 `std` 参数调用
-* 输入为二维 Tensor 时，应按照指定稀疏比例对每列元素进行置零，并使用指定标准差初始化其余元素
-* 输入不是二维 Tensor 时，应抛出 `ValueError`
-* `sparse_` 应原地修改输入，并返回输入 Tensor 本身
-* 动态图模式下，现有函数式原地初始化接口应返回被修改的输入 Tensor 本身
-* 现有初始化接口的数值行为和合法调用方式不得发生变化
-* 非动态图模式下的现有行为不得发生变化
+- 提供 `paddle.nn.init.sparse_`
+- `sparse_` 支持 `tensor`、`sparsity` 和 `std` 参数，其中 `std` 默认为 `0.01`
+- 输入为二维 Tensor 时，每列应有 `ceil(sparsity * 行数)` 个元素被置为 0
+- 其余元素应按照均值为 0、标准差为 `std` 的正态分布初始化
+- 输入不是二维 Tensor 时应抛出 `ValueError`
+- `sparse_` 应直接修改并返回输入 Tensor
+- 动态图下，现有函数式初始化接口也应返回被修改的输入 Tensor
+- 现有初始化结果、参数用法以及非动态图模式下的行为保持不变
 
 ## 技术要求
 
-* 熟悉 Paddle initializer API 和 Tensor 原地操作语义
-* 了解动态图与非动态图执行模式的差异
-* 理解二维 Tensor 的稀疏初始化语义
+- 熟悉 Python
+- 了解 Paddle 的初始化接口
+- 了解 Tensor 的稀疏初始化
+- 了解 Paddle 动态图和非动态图模式
