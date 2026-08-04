@@ -19,7 +19,9 @@ When `pin_memory=True` is active on a supported dynamic execution path:
   - if neither allocator is compiled in, raise `RuntimeError` with a clear message containing `Pinning memory is not supported`.
 - Unsupported place kinds raise the same explicit `RuntimeError` rather than silently falling back.
 
-The CPU behavior applies whether the device is supplied as a string or as a Paddle place object. Preserve existing device defaults, shapes, dtypes, gradient flags, output semantics, and static/PIR behavior outside the dynamic pinned-memory path.
+Here, "a CPU place" describes the requested tensor placement; it does not require evaluation in a CPU-only Paddle build. Complete evaluation requires a build with either CUDA or XPU support and does not require separate CUDA, XPU, and CPU-only runs. In a CPU-only build, only the unsupported-path `RuntimeError` is expected because no pinned host allocator is available.
+
+The CPU-place behavior applies whether the device is supplied as a string or as a Paddle place object. Preserve existing device defaults, shapes, dtypes, gradient flags, output semantics, and static/PIR behavior outside the dynamic pinned-memory path.
 
 ## Affected API families
 
