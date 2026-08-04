@@ -18,8 +18,7 @@ This directory converts Paddle PR #58219 into a SWE-Paddle community task candid
 
 ## Summary
 
-为 PIR 静态图中的 `OpResult` 补齐 `**`、`//`、`%`、`@` 运算能力，并修复
-`floor_divide` 未进入 PIR 分支的问题，使运算结果可由 CPU executor 正确执行。
+Add support for the `**`, `//`, `%`, and `@` operators to `OpResult` in PIR static graphs, and fix `floor_divide` so that it correctly enters the PIR branch, allowing the resulting operations to be executed by the CPU executor.
 
 ## Why This Sample
 

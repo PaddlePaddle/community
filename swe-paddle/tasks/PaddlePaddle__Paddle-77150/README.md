@@ -16,7 +16,7 @@ This directory converts Paddle PR #77150 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复自定义 `PyLayer` 返回部分不可导输出时，`paddle.grad` 可能因 Eager autograd 节点状态不完整而异常退出的问题。
+Fix an issue where `paddle.grad` may crash due to incomplete Eager autograd node state when a custom `PyLayer` returns outputs that are only partially differentiable.
 
 ## Why This Is A Good Candidate
 

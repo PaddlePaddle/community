@@ -1,50 +1,47 @@
 # PaddlePaddle__Paddle-77078
 
-This directory converts Paddle PR #77078 into a SWE-Paddle community task candidate.
+This directory converts Paddle PR #77078 into a candidate SWE-Paddle community task.
 
 ## Source
 
 | Field | Value |
 | --- | --- |
-| Repo | `PaddlePaddle/Paddle` |
+| Repository | `PaddlePaddle/Paddle` |
 | PR | [77078](https://github.com/PaddlePaddle/Paddle/pull/77078) |
-| PR title | [API Compatibility] Improve Cpp sink mechanism and sink paddle.inverse to cpp -part |
+| PR title | [API Compatibility] Improve the C++ sinking mechanism and partially sink `paddle.inverse` to C++ |
 | Base commit | `f2de7486a07cbdbb6586771b5943df4bccc6d35c` |
-| Merged at | `2026-01-30` (merge commit `78499bd`) |
-| Related issue | [#76301](https://github.com/PaddlePaddle/Paddle/issues/76301) API 兼容性增强（启航计划） |
+| Merged on | `2026-01-30` (merge commit `78499bd`) |
+| Related issue | [#76301](https://github.com/PaddlePaddle/Paddle/issues/76301) API Compatibility Enhancement (Sailing Program) |
 | Task type | `feature_enhancement` |
 | Resource | CPU (source build required) |
 
 ## Summary
 
-将 `paddle.inverse` 下沉到 C++，补齐参数别名 `input` 与新的 `out` 参数（对齐 PyTorch），
-并将 Cpp sink 的代码生成机制重构为支持任意模块路径，使 `paddle.inverse`、
-`paddle.Tensor.inverse`、`paddle.linalg.inv` 三条路径在下沉后行为一致。
+Sink `paddle.inverse` to C++, add support for the `input` parameter alias and the new `out` parameter to align with PyTorch, and refactor the C++ sinking code-generation mechanism to support arbitrary module paths. This ensures that `paddle.inverse`, `paddle.Tensor.inverse`, and `paddle.linalg.inv` behave consistently after the API is sunk to C++.
 
 ## Why This Sample
 
-- **真实闭环**：下沉后触发真实 CE-Framework 测试失败（`paddle.linalg.inv` undefined），作者据此定位并修复。
-- **代码生成 + API 兼容组合**：既要理解构建期 eager 代码生成器，又要处理多路径 API 语义对齐（`input` 别名、`out` 参数），是 benchmark 中稀缺的类型。
-- **非平凡**：需要把只硬编码支持三个前缀的分类逻辑重构为支持任意模块路径的统一映射，而非简单加一条 YAML 配置。
-- **边界清晰**：目标行为集中在三条路径的一致性与新参数，不改变 inverse 数值语义。
+- **Real end-to-end failure and fix**: After the API was sunk to C++, an actual CE-Framework test failure occurred because `paddle.linalg.inv` was undefined. The PR author identified and fixed the issue based on this failure.
+- **Combination of code generation and API compatibility**: The task requires understanding the build-time eager code generator and aligning API semantics across multiple entry points, including the `input` alias and `out` parameter. This combination is uncommon in the benchmark.
+- **Non-trivial implementation**: The existing classification logic, which hard-coded support for only three prefixes, must be refactored into a unified mapping that supports arbitrary module paths. The task cannot be solved by simply adding one YAML configuration entry.
+- **Well-defined scope**: The target behavior is limited to consistency across the three API paths and support for the new parameters. The numerical semantics of `inverse` remain unchanged.
 
 ## Files
 
-- `proposal.md`: approved proposal (maintainer triage context).
-- `instruction.md`: self-contained problem statement for the coding agent.
-- `solution/code.patch`: gold patch from the merged PR (4 code files).
-- `tests/test.patch`: test patch exposing the target behavior (`test_inverse_op.py`).
-- `tests/test.sh`: minimal target test command.
-- `environment/README.md`: base commit, build path, and reproduction notes.
+- `proposal.md`: Approved proposal containing maintainer triage context.
+- `instruction.md`: Self-contained problem statement for the coding agent.
+- `solution/code.patch`: Gold patch from the merged PR, covering four source files.
+- `tests/test.patch`: Test patch that exposes the target behavior in `test_inverse_op.py`.
+- `tests/test.sh`: Minimal command for running the target tests.
+- `environment/README.md`: Base commit, build instructions, and reproduction notes.
 
 ## Verification
 
 ```bash
 bash tests/test.sh
-```
+````
 
-Expected behavior: with `tests/test.patch` applied on `base_commit`, the new
-compatibility cases (`input=` alias, `out=` parameter, `paddle.linalg.inv`
-consistency) should fail/error. After also applying `solution/code.patch` and
-rebuilding, the target tests should pass. Note this patch touches build-time code
-generation, so a rebuild is required for the fix to take effect.
+Expected behavior: With `tests/test.patch` applied to `base_commit`, the new compatibility cases—the `input=` alias, the `out=` parameter, and consistency with `paddle.linalg.inv`—should fail or raise errors. After applying `solution/code.patch` as well and rebuilding the project, the target tests should pass.
+
+Note that this patch modifies build-time code generation, so a rebuild is required for the fix to take effect.
+
