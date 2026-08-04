@@ -1,0 +1,27 @@
+diff --git a/python/paddle/tensor/manipulation.py b/python/paddle/tensor/manipulation.py
+index 6048900844ce0..7341ed30d0cbe 100644
+--- a/python/paddle/tensor/manipulation.py
++++ b/python/paddle/tensor/manipulation.py
+@@ -3738,6 +3756,22 @@ def unique(
+         axis = [axis]
+     attr_dtype = convert_np_dtype_to_dtype_(dtype)
+     if in_dynamic_mode():
++        if math.prod(x.shape) == 0:
++            outs = [x.clone()]
++            if dtype == 'int32' or dtype == paddle.int32:
++                return_dtype = paddle.int32
++            else:
++                return_dtype = paddle.int64
++            if return_index:
++                outs.append(paddle.to_tensor([], dtype=return_dtype))
++            if return_inverse:
++                outs.append(paddle.to_tensor([], dtype=return_dtype))
++            if return_counts:
++                outs.append(paddle.to_tensor([], dtype=return_dtype))
++            if len(outs) == 1:
++                return outs[0]
++            return tuple(outs)
++
+         out, indices, inverse, counts = _C_ops.unique(
+             x, return_index, return_inverse, return_counts, axis, attr_dtype
+         )
