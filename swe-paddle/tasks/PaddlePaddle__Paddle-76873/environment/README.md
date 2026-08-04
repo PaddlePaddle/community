@@ -19,9 +19,9 @@ SWE-Paddle task candidate for PaddlePaddle/Paddle PR #76873 + follow-up #77103.
 
 1. Check out `PaddlePaddle/Paddle` at the base commit and build from source.
 2. Apply `tests/test.patch`.
-3. Run `bash tests/test.sh`; inplace / compatibility F2P cases should
-   **fail / error**. Existing non-inplace cases in the same modules should still
-   pass where applicable (P2P candidates).
+3. Run `bash tests/test.sh`; inplace / compatibility F2P cases for the listed
+   activation functions should **fail / error**. Existing non-inplace cases in
+   the same modules should still pass where applicable (P2P candidates).
 4. Apply `solution/code.patch` and **rebuild**.
 5. Run `bash tests/test.sh` again; all target cases should **pass**.
 
@@ -35,7 +35,7 @@ bash tests/test.sh
 
 - Source build / rebuild is mandatory for YAML and C++ symbolic-shape changes.
 - Symbolic / CINN-related tests may need a richer environment; verifier can keep
-  a stable F2P subset focused on legacy activation inplace tests if needed.
+  a stable F2P subset focused on legacy activation-function inplace tests if needed.
 - `RReLU` and similar randomized paths need fixed seeds for stable node IDs.
 - Gold patch is the **net** of #76873 and #77103 relative to the base commit
   (sequential PR diffs applied on base; not a raw `base..later-merge` tree diff).

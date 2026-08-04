@@ -19,15 +19,15 @@ This directory converts Paddle PR #76873 and follow-up PR #77103 into one SWE-Pa
 
 ## Summary
 
-为 `CELU`、`RReLU`、`Swish`、`Mish`、`HardSigmoid`、`SELU` 等激活 API 补齐 inplace 能力，
+为 `CELU`、`RReLU`、`Swish`、`Mish`、`HardSigmoid`、`SELU` 等激活函数 API 补齐 inplace 能力，
 使动态图与相关静态 / 符号形状路径行为一致。Gold 为两 PR 相对 base 的净效果。
 
 ## Why This Sample
 
-- **真实 Hackathon 闭环**：先 partial 合入 `CELU`，再补齐其余激活。
+- **真实 Hackathon 闭环**：先 partial 合入 `CELU`，再补齐其余激活函数。
 - **API + 算子/符号形状组合**：不只改 Python 层，还需算子配置与 PIR 符号形状路径对齐。
 - **双 PR 合一**：合并后样本对应完整 Sprint No.4 目标，而不是停留在中间态。
-- **边界清晰**：只覆盖上述激活的 inplace；不要求一次覆盖全部 `paddle.nn.*`。
+- **边界清晰**：只覆盖上述激活函数的 inplace；不要求一次覆盖全部 `paddle.nn.*`。
 
 ## Files
 
