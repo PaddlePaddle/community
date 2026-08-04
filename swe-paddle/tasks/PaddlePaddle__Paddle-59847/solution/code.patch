@@ -1,8 +1,8 @@
 diff --git a/paddle/phi/api/yaml/backward.yaml b/paddle/phi/api/yaml/backward.yaml
-index d5748145ffe49d..6376aab046c813 100644
+index e3f27b4e6b..450c735dad 100644
 --- a/paddle/phi/api/yaml/backward.yaml
 +++ b/paddle/phi/api/yaml/backward.yaml
-@@ -912,6 +912,26 @@
+@@ -923,6 +923,26 @@
      data_type : out_grad
    no_need_buffer : x
  
@@ -30,10 +30,10 @@ index d5748145ffe49d..6376aab046c813 100644
    forward : frame(Tensor x, int frame_length, int hop_length, int axis=-1) -> Tensor(out)
    args : (Tensor x, Tensor out_grad, int frame_length, int hop_length, int axis)
 diff --git a/paddle/phi/api/yaml/ops.yaml b/paddle/phi/api/yaml/ops.yaml
-index 835046c1e7911b..8e48813182440b 100644
+index 8f63db05a6..8fd20e0eba 100755
 --- a/paddle/phi/api/yaml/ops.yaml
 +++ b/paddle/phi/api/yaml/ops.yaml
-@@ -1021,6 +1021,24 @@
+@@ -1052,6 +1052,24 @@
      func: fold
    backward: fold_grad
  
@@ -59,10 +59,10 @@ index 835046c1e7911b..8e48813182440b 100644
    args : (Tensor x, int frame_length, int hop_length, int axis=-1)
    output : Tensor(out)
 diff --git a/paddle/phi/infermeta/unary.cc b/paddle/phi/infermeta/unary.cc
-index 39cec09e3db86f..581379fca7446c 100644
+index 94ef53782c..0fc2f8b3e5 100644
 --- a/paddle/phi/infermeta/unary.cc
 +++ b/paddle/phi/infermeta/unary.cc
-@@ -1719,6 +1719,44 @@ void FoldInferMeta(const MetaTensor& x,
+@@ -1729,6 +1729,44 @@ void FoldInferMeta(const MetaTensor& x,
    }
  }
  
@@ -108,10 +108,10 @@ index 39cec09e3db86f..581379fca7446c 100644
                      int frame_length,
                      int hop_length,
 diff --git a/paddle/phi/infermeta/unary.h b/paddle/phi/infermeta/unary.h
-index aaa85da1f85242..d26da27405e0b8 100644
+index 18126a73d3..53026c1ee3 100644
 --- a/paddle/phi/infermeta/unary.h
 +++ b/paddle/phi/infermeta/unary.h
-@@ -269,6 +269,15 @@ void FoldInferMeta(const MetaTensor& x,
+@@ -275,6 +275,15 @@ void FoldInferMeta(const MetaTensor& x,
                     const std::vector<int>& dilations,
                     MetaTensor* out);
  
@@ -128,7 +128,7 @@ index aaa85da1f85242..d26da27405e0b8 100644
                      int frame_length,
                      int hop_length,
 diff --git a/paddle/phi/kernels/cpu/pool_grad_kernel.cc b/paddle/phi/kernels/cpu/pool_grad_kernel.cc
-index 904a674890b513..4511d9164f0025 100644
+index 904a674890..4511d9164f 100644
 --- a/paddle/phi/kernels/cpu/pool_grad_kernel.cc
 +++ b/paddle/phi/kernels/cpu/pool_grad_kernel.cc
 @@ -44,3 +44,23 @@ PD_REGISTER_KERNEL(max_pool3d_with_index_grad,
@@ -156,7 +156,7 @@ index 904a674890b513..4511d9164f0025 100644
 +  kernel->InputAt(1).SetDataType(phi::CppTypeToDataType<int>::Type());
 +}
 diff --git a/paddle/phi/kernels/cpu/pool_kernel.cc b/paddle/phi/kernels/cpu/pool_kernel.cc
-index 30e23b850d6f8c..e606173919d746 100644
+index 30e23b850d..e606173919 100644
 --- a/paddle/phi/kernels/cpu/pool_kernel.cc
 +++ b/paddle/phi/kernels/cpu/pool_kernel.cc
 @@ -36,3 +36,23 @@ PD_REGISTER_KERNEL(max_pool3d_with_index,
@@ -184,7 +184,7 @@ index 30e23b850d6f8c..e606173919d746 100644
 +  kernel->OutputAt(1).SetDataType(phi::CppTypeToDataType<int>::Type());
 +}
 diff --git a/paddle/phi/kernels/funcs/pooling.cc b/paddle/phi/kernels/funcs/pooling.cc
-index 0573430c2010c5..99281f62cef37d 100644
+index 0573430c20..99281f62ce 100644
 --- a/paddle/phi/kernels/funcs/pooling.cc
 +++ b/paddle/phi/kernels/funcs/pooling.cc
 @@ -13,10 +13,8 @@ See the License for the specific language governing permissions and
@@ -552,7 +552,7 @@ index 0573430c2010c5..99281f62cef37d 100644
  }  // namespace funcs
  }  // namespace phi
 diff --git a/paddle/phi/kernels/funcs/pooling.cu b/paddle/phi/kernels/funcs/pooling.cu
-index 2f89b51815e64f..e5af38b4d2b798 100644
+index 2f89b51815..e5af38b4d2 100644
 --- a/paddle/phi/kernels/funcs/pooling.cu
 +++ b/paddle/phi/kernels/funcs/pooling.cu
 @@ -14,10 +14,18 @@ limitations under the License. */
@@ -1226,7 +1226,7 @@ index 2f89b51815e64f..e5af38b4d2b798 100644
  }  // namespace funcs
  }  // namespace phi
 diff --git a/paddle/phi/kernels/funcs/pooling.h b/paddle/phi/kernels/funcs/pooling.h
-index 7fa3e68be5a111..3e91175e8a3920 100644
+index 7fa3e68be5..3e91175e8a 100644
 --- a/paddle/phi/kernels/funcs/pooling.h
 +++ b/paddle/phi/kernels/funcs/pooling.h
 @@ -100,6 +100,45 @@ HOSTDEVICE inline int AdaptEndIndex(int ph, int input_size, int output_size) {
@@ -1341,7 +1341,7 @@ index 7fa3e68be5a111..3e91175e8a3920 100644
                            int filter_size,
                            int padding_1,
 diff --git a/paddle/phi/kernels/gpu/pool_grad_kernel.cu b/paddle/phi/kernels/gpu/pool_grad_kernel.cu
-index c625977543558b..450bfc07a7b464 100644
+index c625977543..450bfc07a7 100644
 --- a/paddle/phi/kernels/gpu/pool_grad_kernel.cu
 +++ b/paddle/phi/kernels/gpu/pool_grad_kernel.cu
 @@ -62,3 +62,25 @@ PD_REGISTER_KERNEL(max_pool3d_with_index_grad,
@@ -1371,7 +1371,7 @@ index c625977543558b..450bfc07a7b464 100644
 +  kernel->InputAt(1).SetDataType(phi::CppTypeToDataType<int>::Type());
 +}
 diff --git a/paddle/phi/kernels/gpu/pool_kernel.cu b/paddle/phi/kernels/gpu/pool_kernel.cu
-index 511cc263bc7602..33abba0a51a50d 100644
+index 511cc263bc..33abba0a51 100644
 --- a/paddle/phi/kernels/gpu/pool_kernel.cu
 +++ b/paddle/phi/kernels/gpu/pool_kernel.cu
 @@ -56,3 +56,25 @@ PD_REGISTER_KERNEL(max_pool3d_with_index,
@@ -1401,7 +1401,7 @@ index 511cc263bc7602..33abba0a51a50d 100644
 +  kernel->OutputAt(1).SetDataType(phi::CppTypeToDataType<int>::Type());
 +}
 diff --git a/paddle/phi/kernels/impl/pool_grad_kernel_impl.h b/paddle/phi/kernels/impl/pool_grad_kernel_impl.h
-index 436c77cc65213a..c8a42e0265fb80 100644
+index 436c77cc65..c8a42e0265 100644
 --- a/paddle/phi/kernels/impl/pool_grad_kernel_impl.h
 +++ b/paddle/phi/kernels/impl/pool_grad_kernel_impl.h
 @@ -330,4 +330,79 @@ void MaxPool3dWithIndexGradKernel(const Context& ctx,
@@ -1485,7 +1485,7 @@ index 436c77cc65213a..c8a42e0265fb80 100644
 +
  }  // namespace phi
 diff --git a/paddle/phi/kernels/impl/pool_kernel_impl.h b/paddle/phi/kernels/impl/pool_kernel_impl.h
-index dc0b7ad2108ac5..50a5195e771e8f 100644
+index dc0b7ad210..50a5195e77 100644
 --- a/paddle/phi/kernels/impl/pool_kernel_impl.h
 +++ b/paddle/phi/kernels/impl/pool_kernel_impl.h
 @@ -322,4 +322,59 @@ void MaxPool3dWithIndexKernel(const Context& ctx,
@@ -1549,7 +1549,7 @@ index dc0b7ad2108ac5..50a5195e771e8f 100644
 +
  }  // namespace phi
 diff --git a/paddle/phi/kernels/pool_grad_kernel.h b/paddle/phi/kernels/pool_grad_kernel.h
-index 64ad99a6d3eae1..2f813aa9dc050d 100644
+index 64ad99a6d3..2f813aa9dc 100644
 --- a/paddle/phi/kernels/pool_grad_kernel.h
 +++ b/paddle/phi/kernels/pool_grad_kernel.h
 @@ -144,4 +144,26 @@ void MaxPool3dWithIndexGradKernel(const Context& ctx,
@@ -1580,7 +1580,7 @@ index 64ad99a6d3eae1..2f813aa9dc050d 100644
 +
  }  // namespace phi
 diff --git a/paddle/phi/kernels/pool_kernel.h b/paddle/phi/kernels/pool_kernel.h
-index c1a7dd471a02f7..e958d62d8c225a 100644
+index c1a7dd471a..e958d62d8c 100644
 --- a/paddle/phi/kernels/pool_kernel.h
 +++ b/paddle/phi/kernels/pool_kernel.h
 @@ -104,4 +104,24 @@ void MaxPool3dWithIndexKernel(const Context& ctx,
@@ -1609,10 +1609,10 @@ index c1a7dd471a02f7..e958d62d8c225a 100644
 +
  }  // namespace phi
 diff --git a/python/paddle/nn/__init__.py b/python/paddle/nn/__init__.py
-index f96b5e9b8c42bb..7818c2398494d2 100644
+index f96b5e9b8c..7818c23984 100644
 --- a/python/paddle/nn/__init__.py
 +++ b/python/paddle/nn/__init__.py
-@@ -132,6 +132,8 @@
+@@ -132,6 +132,8 @@ from .layer.pooling import (
      AvgPool1D,
      AvgPool2D,
      AvgPool3D,
@@ -1621,7 +1621,7 @@ index f96b5e9b8c42bb..7818c2398494d2 100644
      MaxPool1D,
      MaxPool2D,
      MaxPool3D,
-@@ -294,4 +296,6 @@
+@@ -294,4 +296,6 @@ __all__ = [
      'SoftMarginLoss',
      'GaussianNLLLoss',
      'Unflatten',
@@ -1629,10 +1629,10 @@ index f96b5e9b8c42bb..7818c2398494d2 100644
 +    'FractionalMaxPool3D',
  ]
 diff --git a/python/paddle/nn/functional/__init__.py b/python/paddle/nn/functional/__init__.py
-index 6d9682340c3aa7..2ab7ddc2cb5813 100644
+index 6d9682340c..2ab7ddc2cb 100644
 --- a/python/paddle/nn/functional/__init__.py
 +++ b/python/paddle/nn/functional/__init__.py
-@@ -137,6 +137,8 @@
+@@ -137,6 +137,8 @@ from .pooling import (
      avg_pool1d,
      avg_pool2d,
      avg_pool3d,
@@ -1641,7 +1641,7 @@ index 6d9682340c3aa7..2ab7ddc2cb5813 100644
      max_pool1d,
      max_pool2d,
      max_pool3d,
-@@ -225,6 +227,8 @@
+@@ -225,6 +227,8 @@ __all__ = [
      'adaptive_max_pool1d',
      'adaptive_max_pool2d',
      'adaptive_max_pool3d',
@@ -1651,7 +1651,7 @@ index 6d9682340c3aa7..2ab7ddc2cb5813 100644
      'binary_cross_entropy_with_logits',
      'cross_entropy',
 diff --git a/python/paddle/nn/functional/pooling.py b/python/paddle/nn/functional/pooling.py
-index 398c99949623f0..95aeb623e20f62 100755
+index 398c999496..95aeb623e2 100755
 --- a/python/paddle/nn/functional/pooling.py
 +++ b/python/paddle/nn/functional/pooling.py
 @@ -2087,3 +2087,319 @@ def adaptive_max_pool3d(x, output_size, return_mask=False, name=None):
@@ -1975,10 +1975,10 @@ index 398c99949623f0..95aeb623e20f62 100755
 +
 +        return (pool_out, mask) if return_mask else pool_out
 diff --git a/python/paddle/nn/layer/__init__.py b/python/paddle/nn/layer/__init__.py
-index 9271c5ecc10e11..6516c85bdefffb 100644
+index 9271c5ecc1..6516c85bde 100644
 --- a/python/paddle/nn/layer/__init__.py
 +++ b/python/paddle/nn/layer/__init__.py
-@@ -100,6 +100,8 @@
+@@ -100,6 +100,8 @@ from .pooling import (  # noqa: F401
      AvgPool1D,
      AvgPool2D,
      AvgPool3D,
@@ -1988,10 +1988,10 @@ index 9271c5ecc10e11..6516c85bdefffb 100644
      MaxPool2D,
      MaxPool3D,
 diff --git a/python/paddle/nn/layer/pooling.py b/python/paddle/nn/layer/pooling.py
-index 3108aeebeded4d..a118af0a395a1f 100755
+index 3108aeebed..a118af0a39 100755
 --- a/python/paddle/nn/layer/pooling.py
 +++ b/python/paddle/nn/layer/pooling.py
-@@ -1414,3 +1414,235 @@ def forward(self, x, indices):
+@@ -1414,3 +1414,235 @@ class MaxUnPool3D(Layer):
  
      def extra_repr(self):
          return f'output_size={self.output_size}'
