@@ -23,11 +23,3 @@
 ## 参考资料
 
 - https://github.com/PaddlePaddle/Paddle/issues/60780
-
-## Acceptance Criteria
-
-- A valid shape list containing 0-D Tensor dimensions is accepted by `broadcast_to`.
-- Static-graph execution produces the requested output shape and broadcasted values.
-- Existing integer-list and 1-D shape Tensor behavior remains unchanged.
-- Invalid shape inputs continue to be rejected.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.

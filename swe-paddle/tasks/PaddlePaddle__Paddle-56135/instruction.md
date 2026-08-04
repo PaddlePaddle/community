@@ -15,9 +15,3 @@
 - 熟悉 Python 和 C++
 - 了解 Paddle static graph 与 infermeta
 - 了解 batched matrix multiplication 和 dynamic shape
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.

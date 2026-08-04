@@ -21,9 +21,3 @@ FlexCheckpoint 的 `flatten_state_dict` 在处理 nested state dict 时，可能
 - 了解 reference cycle、closure 和 recursive function
 - 了解 Paddle Tensor memory lifecycle
 - 了解 FlexCheckpoint state dict utilities
-
-## Acceptance Criteria
-
-- Temporary references created during flattening are released promptly.
-- Existing flattening and unflattening behavior remains unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, forcing broad garbage collection, or bypassing validation.

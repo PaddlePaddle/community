@@ -18,9 +18,3 @@ Paddle 自定义 `PyLayer` 可以返回多个值，其中 Tensor 输出既可以
 - 熟悉 Python、C++ 和 Paddle Eager autograd。
 - 了解自定义 `PyLayer` 的前向、反向和梯度节点生命周期。
 - 修复应局限于必要的节点状态传播，不应通过禁用梯度、吞掉异常或改变所有输出的可导状态来规避问题。
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid multi-output `PyLayer` behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, swallowing exceptions, disabling gradients, or bypassing `paddle.grad`.

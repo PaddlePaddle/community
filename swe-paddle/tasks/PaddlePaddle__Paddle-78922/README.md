@@ -16,7 +16,7 @@ This directory converts Paddle PR #78922 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 FlexCheckpoint `flatten_state_dict` 调用结束后残留额外 Tensor reference 的问题，同时保持现有 flatten result、key mapping 和 unflatten behavior 不变。
+Fix the issue where FlexCheckpoint's `flatten_state_dict` leaves additional tensor references after the call completes, while preserving the existing flattening results, key mappings, and unflattening behavior.
 
 ## Files
 

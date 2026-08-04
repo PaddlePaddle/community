@@ -19,7 +19,7 @@ This directory converts Paddle PR #75274 into a SWE-Paddle task candidate.
 
 ## Summary
 
-修复 `normal` 算子单元测试对全局静态图/动态图状态的隐式依赖，使静态测试路径在不同执行顺序下都能正确构图和运行。
+Fix the implicit dependency of the `normal` operator unit tests on the global static/dynamic graph mode, ensuring that the static test path can correctly construct and execute the graph regardless of test execution order.
 
 ## Why This Is A Good SWE-Paddle Candidate
 

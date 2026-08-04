@@ -16,9 +16,3 @@
 - 熟悉 Python 和单元测试
 - 了解 Paddle 设备 API 与 Fleet 工具模块
 - 了解 mock 在外部接口隔离中的使用
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.

@@ -1,0 +1,211 @@
+diff --git a/test/swe_paddle/test_pr56705_mp_ops_pylayer_lifecycle.py b/test/swe_paddle/test_pr56705_mp_ops_pylayer_lifecycle.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..a3e20080a1fbb0b537dc5fb8266749380ae10b6b
+--- /dev/null
++++ b/test/swe_paddle/test_pr56705_mp_ops_pylayer_lifecycle.py
+@@ -0,0 +1,205 @@
++from __future__ import annotations
++
++import ast
++import copy
++import sys
++import types
++from pathlib import Path
++
++import pytest
++
++
++TARGET = Path("python/paddle/distributed/fleet/layers/mpu/mp_ops.py")
++SELECTED_NODES = {
++    "c_identity_eager",
++    "mp_allreduce_eager",
++    "_c_identity",
++    "_mp_allreduce",
++}
++
++
++class FakePyLayer:
++    invocations = []
++
++    @classmethod
++    def apply(cls, *args):
++        ctx = types.SimpleNamespace()
++        FakePyLayer.invocations.append((cls, ctx, args))
++        return cls.forward(ctx, *args)
++
++
++class FakeLegacyOps:
++    def __init__(self):
++        self.calls = []
++
++    def c_identity(self, tensor, *attrs):
++        self.calls.append(("c_identity", tensor, attrs))
++        return ("identity", tensor)
++
++    def c_allreduce_sum_(self, tensor, *attrs):
++        self.calls.append(("c_allreduce_sum_", tensor, attrs))
++        return ("allreduce", tensor)
++
++
++class FakeProcessGroup:
++    def __init__(self):
++        self.calls = []
++
++    def all_reduce_on_calc_stream(self, tensor, op_type):
++        self.calls.append((tensor, op_type))
++
++
++class FakeGroup:
++    def __init__(self, group_id=17):
++        self.id = group_id
++        self.process_group = FakeProcessGroup()
++
++    def is_member(self):
++        return True
++
++
++class ReduceOp:
++    SUM = "sum"
++
++
++def _get_reduce_op(op, name):
++    return (op, name)
++
++
++def _attrs_to_dict(attrs):
++    assert len(attrs) % 2 == 0
++    return dict(zip(attrs[0::2], attrs[1::2]))
++
++
++def _load_checkout_overlay(monkeypatch):
++    source = TARGET.read_text(encoding="utf-8")
++    tree = ast.parse(source, filename=str(TARGET))
++    body = []
++    for node in tree.body:
++        if isinstance(node, (ast.ClassDef, ast.FunctionDef)) and node.name in SELECTED_NODES:
++            body.append(copy.deepcopy(node))
++
++    names = {node.name for node in body}
++    assert "_c_identity" in names
++    assert "_mp_allreduce" in names
++
++    fake_autograd = types.ModuleType("paddle.autograd")
++    fake_autograd.PyLayer = FakePyLayer
++    fake_paddle = types.ModuleType("paddle")
++    fake_paddle.autograd = fake_autograd
++    monkeypatch.setitem(sys.modules, "paddle", fake_paddle)
++    monkeypatch.setitem(sys.modules, "paddle.autograd", fake_autograd)
++
++    legacy = FakeLegacyOps()
++    default_group = FakeGroup(group_id=31)
++    namespace = {
++        "PyLayer": FakePyLayer,
++        "_legacy_C_ops": legacy,
++        "ReduceOp": ReduceOp,
++        "_get_reduce_op": _get_reduce_op,
++        "in_dygraph_mode": lambda: True,
++        "collective": types.SimpleNamespace(_get_default_group=lambda: default_group),
++        "LayerHelper": object,
++        "check_variable_and_dtype": lambda *args, **kwargs: None,
++    }
++    module = ast.Module(body=body, type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(TARGET), "exec"), namespace)
++    return namespace, legacy
++
++
++@pytest.fixture(autouse=True)
++def _reset_fake_pylayer():
++    FakePyLayer.invocations.clear()
++
++
++def test_c_identity_forward_backward_contract(monkeypatch):
++    namespace, legacy = _load_checkout_overlay(monkeypatch)
++    group = FakeGroup(group_id=23)
++    tensor = object()
++
++    output = namespace["_c_identity"](tensor, group=group)
++
++    assert output == ("identity", tensor)
++    assert len(FakePyLayer.invocations) == 1
++    cls, ctx, _ = FakePyLayer.invocations[-1]
++    op_name, called_tensor, attrs = legacy.calls[-1]
++    assert op_name == "c_identity"
++    assert called_tensor is tensor
++    assert _attrs_to_dict(attrs) == {
++        "use_calc_stream": True,
++        "ring_id": 23,
++        "use_model_parallel": True,
++    }
++
++    dy = object()
++    assert cls.backward(ctx, dy) is dy
++    assert group.process_group.calls == [(dy, (ReduceOp.SUM, "_c_identity"))]
++
++
++def test_mp_allreduce_forward_backward_contract(monkeypatch):
++    namespace, legacy = _load_checkout_overlay(monkeypatch)
++    group = FakeGroup(group_id=29)
++    tensor = object()
++
++    output = namespace["_mp_allreduce"](
++        tensor,
++        op=ReduceOp.SUM,
++        group=group,
++        use_calc_stream=True,
++        use_model_parallel=True,
++    )
++
++    assert output is tensor
++    assert group.process_group.calls == [
++        (tensor, (ReduceOp.SUM, "_mp_allreduce"))
++    ]
++    cls, ctx, _ = FakePyLayer.invocations[-1]
++
++    dy = object()
++    backward_output = cls.backward(ctx, dy)
++    assert backward_output == ("identity", dy)
++    op_name, called_tensor, attrs = legacy.calls[-1]
++    assert op_name == "c_identity"
++    assert called_tensor is dy
++    assert _attrs_to_dict(attrs) == {
++        "use_calc_stream": True,
++        "ring_id": 29,
++        "use_model_parallel": True,
++    }
++
++
++def test_c_identity_reuses_pylayer_class_across_calls(monkeypatch):
++    namespace, _ = _load_checkout_overlay(monkeypatch)
++    group = FakeGroup(group_id=37)
++
++    for _ in range(4):
++        namespace["_c_identity"](object(), group=group)
++
++    dispatched_classes = [item[0] for item in FakePyLayer.invocations]
++    assert len(set(dispatched_classes)) == 1, (
++        "Repeated _c_identity calls created distinct PyLayer runtime types; "
++        "this deterministic type growth is a proxy for the reported long-run "
++        "Python-side memory accumulation."
++    )
++
++
++def test_mp_allreduce_reuses_pylayer_class_across_calls(monkeypatch):
++    namespace, _ = _load_checkout_overlay(monkeypatch)
++    group = FakeGroup(group_id=41)
++
++    for _ in range(4):
++        namespace["_mp_allreduce"](
++            object(),
++            op=ReduceOp.SUM,
++            group=group,
++            use_calc_stream=True,
++            use_model_parallel=True,
++        )
++
++    dispatched_classes = [item[0] for item in FakePyLayer.invocations]
++    assert len(set(dispatched_classes)) == 1, (
++        "Repeated _mp_allreduce calls created distinct PyLayer runtime types; "
++        "this deterministic type growth is a proxy for the reported long-run "
++        "Python-side memory accumulation."
++    )

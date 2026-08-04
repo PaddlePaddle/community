@@ -25,9 +25,3 @@
 
 - 熟悉 Python 与 C++
 - 了解 Paddle 公开 API 的实现与暴露方式
-
-## Acceptance Criteria
-
-- The behavior described above should be implemented.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.

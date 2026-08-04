@@ -15,9 +15,3 @@
 - 熟悉 Python
 - 了解 Paddle hybrid parallel topology
 - 了解 data parallel、tensor parallel、pipeline parallel 和 sharding
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
