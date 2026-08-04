@@ -18,7 +18,7 @@ This directory converts Paddle PR #79057 into a SWE-Paddle community task candid
 
 ## Summary
 
-完善 `RestrictedUnpickler` 对 MRO 中 unsafe pickle hooks 的识别，避免因仅检查当前 class 而遗漏 base class 定义的方法。
+Improve `RestrictedUnpickler` to detect unsafe pickle hooks throughout the MRO, preventing methods defined on base classes from being missed when only the current class is inspected.
 
 ## Why This Is A Good SWE-Paddle Candidate
 

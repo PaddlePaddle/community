@@ -1,0 +1,93 @@
+diff --git a/test/swe_paddle/test_pr56470_upsampling_single_int.py b/test/swe_paddle/test_pr56470_upsampling_single_int.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..bfc0452a9297f8ef60614069ab1bd3aa4c09a85f
+--- /dev/null
++++ b/test/swe_paddle/test_pr56470_upsampling_single_int.py
+@@ -0,0 +1,87 @@
++from __future__ import annotations
++
++import ast
++import copy
++import types
++from pathlib import Path
++
++
++TARGET = Path("python/paddle/nn/layer/common.py")
++CLASS_NAMES = ("UpsamplingNearest2D", "UpsamplingBilinear2D")
++
++
++class _Layer:
++    def __init__(self):
++        pass
++
++
++class _Functional:
++    @staticmethod
++    def interpolate(x, **kwargs):
++        return {"x": x, **kwargs}
++
++
++def _load_checkout_classes():
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    classes = []
++    for node in tree.body:
++        if isinstance(node, ast.ClassDef) and node.name in CLASS_NAMES:
++            classes.append(copy.deepcopy(node))
++
++    found = {node.name for node in classes}
++    assert found == set(CLASS_NAMES), f"Missing target classes: {set(CLASS_NAMES) - found}"
++
++    module = ast.Module(body=classes, type_ignores=[])
++    ast.fix_missing_locations(module)
++    namespace = {
++        "Layer": _Layer,
++        "F": _Functional,
++    }
++    exec(compile(module, str(TARGET), "exec"), namespace)
++    return tuple(namespace[name] for name in CLASS_NAMES)
++
++
++def test_existing_sequence_and_scale_factor_behavior_remains_valid():
++    nearest_cls, bilinear_cls = _load_checkout_classes()
++
++    nearest = nearest_cls(size=[3, 5], data_format="NHWC", name="nearest")
++    nearest_call = nearest.forward(object())
++    assert nearest.size == [3, 5]
++    assert nearest_call["size"] == [3, 5]
++    assert nearest_call["mode"] == "nearest"
++    assert nearest_call["data_format"] == "NHWC"
++    assert nearest_call["name"] == "nearest"
++
++    bilinear = bilinear_cls(size=(4, 6), data_format="NCHW")
++    bilinear_call = bilinear.forward(object())
++    assert bilinear.size == (4, 6)
++    assert bilinear_call["size"] == (4, 6)
++    assert bilinear_call["mode"] == "bilinear"
++    assert bilinear_call["align_corners"] is True
++
++    scaled = nearest_cls(scale_factor=2)
++    scaled_call = scaled.forward(object())
++    assert scaled.size is None
++    assert scaled.scale_factor == 2
++    assert scaled_call["scale_factor"] == 2
++
++
++def test_nearest_2d_accepts_single_integer_size():
++    nearest_cls, _ = _load_checkout_classes()
++    layer = nearest_cls(size=7)
++    call = layer.forward(object())
++
++    assert layer.size == [7, 7]
++    assert call["size"] == [7, 7]
++    assert call["mode"] == "nearest"
++
++
++def test_bilinear_2d_accepts_single_integer_size():
++    _, bilinear_cls = _load_checkout_classes()
++    layer = bilinear_cls(size=9)
++    call = layer.forward(object())
++
++    assert layer.size == [9, 9]
++    assert call["size"] == [9, 9]
++    assert call["mode"] == "bilinear"
++    assert call["align_corners"] is True

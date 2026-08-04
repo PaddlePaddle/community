@@ -16,7 +16,7 @@ This directory converts Paddle PR #78911 into a SWE-Paddle community task candid
 
 ## Summary
 
-完善动态图 recompute 的 context detection，使 `is_in_recompute()` 在前向执行和反向重计算期间均能正确识别 recompute context。
+Improve recompute context detection in dynamic graph mode so that `is_in_recompute()` correctly identifies the recompute context during both the forward pass and backward recomputation.
 
 ## Files
 

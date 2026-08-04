@@ -18,7 +18,7 @@ This directory converts Paddle PR #68432 into a SWE-Paddle community task candid
 
 ## Summary
 
-为稀疏计算 multiply_coo_coo/multiply_csr_csr/divide_coo_coo/divide_csr_csr 添加复数支持
+Add complex-number support for the sparse operations `multiply_coo_coo`, `multiply_csr_csr`, `divide_coo_coo`, and `divide_csr_csr`.
 
 ## Why This Is The Starter Example
 

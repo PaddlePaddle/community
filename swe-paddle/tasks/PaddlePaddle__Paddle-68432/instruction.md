@@ -19,9 +19,3 @@
 ## 参考资料
 
 - https://github.com/PaddlePaddle/Paddle/issues/61975
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
