@@ -1,25 +1,24 @@
-# 完善 Torch Proxy 对兼容接口的覆盖行为
+# 完善 Torch Proxy 对 `paddle.compat` 接口的支持
 
 ## 详细描述
 
-启用 Paddle 的 Torch Proxy 后，`paddle.compat` 中公开提供的兼容接口应能够通过对应的 `torch` 命名空间直接访问，无需调用方逐一配置。
+`paddle.compat` 中已经提供了一些用于兼容 PyTorch 的接口，但启用 Torch Proxy 后，这些接口还不能自动通过对应的 `torch` 路径使用。
 
-当前代理对这类兼容接口的处理不完整。特别是当接口位于嵌套模块中时，通过父级模块访问或使用 import 语句导入，可能无法得到预期的兼容实现。
+需要完善 Torch Proxy 对 `paddle.compat` 的支持，使已有的兼容接口能够在 `torch` 及其子模块中正常使用。通过属性访问或 `import` 导入子模块接口时，结果应保持一致。
 
-请完善 Torch Proxy 的接口覆盖行为，确保公开的兼容接口在对应命名空间中正确生效，同时保持现有的接口覆盖和默认代理行为不变。
+对于 `paddle.compat` 中没有提供兼容实现的接口，继续使用现有的代理逻辑。
 
 ## 验收说明
 
-* 启用 Torch Proxy 后，`paddle.compat` 各子模块公开提供的接口应能够通过对应的 `torch` 命名空间访问
-* 未公开的兼容接口不应被暴露到 `torch` 命名空间
-* 嵌套模块中的兼容接口通过属性访问时，应返回对应的兼容实现
-* 嵌套模块中的兼容接口通过 import 语句导入时，应返回对应的兼容实现
-* 已有的接口覆盖行为不得发生变化
-* 对于没有兼容实现或已有覆盖的属性，现有的默认代理行为不得发生变化
+- 启用 Torch Proxy 后，`paddle.compat` 中已有的兼容接口可以通过对应的 `torch` 路径使用
+- `torch.nn`、`torch.nn.functional` 等子模块中的兼容接口应正常生效
+- 通过属性访问和 `import` 导入接口时，结果应保持一致
+- 现有的接口覆盖行为应保持不变
+- 没有兼容实现的接口继续使用原有代理逻辑
+- 未启用 Torch Proxy 时，现有行为保持不变
 
 ## 技术要求
 
-* 熟悉 Python import system、模块代理和动态属性访问机制
-* 理解 Paddle Torch compatibility layer 的模块映射方式
-* 了解嵌套模块的加载、导入和属性解析过程
-* 测试应验证运行时可观察行为，不依赖源码文本、局部变量名或特定的内部数据结构
+- 熟悉 Python
+- 了解 Python 模块导入机制
+- 了解 Paddle Torch Proxy 和 `paddle.compat`
