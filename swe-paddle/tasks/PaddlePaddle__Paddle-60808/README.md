@@ -18,7 +18,7 @@ This directory converts Paddle PR #60808 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 `paddle.broadcast_to` 在 static graph 或 dynamic-to-static 场景中处理包含 0-D Tensor dimension 的 `shape` list 时失败的问题。
+Fix the failure of `paddle.broadcast_to` in static graph or dynamic-to-static scenarios when the `shape` list contains a 0-D tensor dimension.
 
 ## Why This Is A Good SWE-Paddle Candidate
 

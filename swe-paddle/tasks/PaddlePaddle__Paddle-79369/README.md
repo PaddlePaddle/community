@@ -17,7 +17,7 @@ This directory converts Paddle PR #79369 into a SWE-Paddle community task candid
 
 ## Summary
 
-完善 Fleet `check_memory_usage` 在 CPU 运行环境中的内存日志行为。
+Improve the memory logging behavior of Fleet's `check_memory_usage` in CPU environments.
 
 ## Why This Is A Good Candidate
 

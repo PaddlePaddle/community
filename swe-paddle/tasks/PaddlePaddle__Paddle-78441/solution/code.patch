@@ -1,0 +1,460 @@
+diff --git a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.cc b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.cc
+index f14a61b025..211294b485 100644
+--- a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.cc
++++ b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.cc
+@@ -307,6 +307,24 @@ bool AminOpInferSymbolicShape(pir::Operation *op,
+                                  axis.size() == 0 /*reduce_all*/);
+ }
+ 
++bool AminmaxOpInferSymbolicShape(
++    pir::Operation *op, pir::InferSymbolicShapeContext *infer_context) {
++  const auto &axis = details::GetVectorAttr(op, "axis");
++  bool keepdim = GetBoolAttr(op, "keepdim");
++  bool reduce_all = axis.size() == 0;
++
++  // ReduceInferDim only sets result(0). We need the same shape for both
++  // outputs, so call it for result(0) then copy to result(1).
++  bool ret =
++      details::ReduceInferDim(op, infer_context, axis, keepdim, reduce_all);
++  if (ret) {
++    const auto &out_shape =
++        infer_context->GetShapeOrDataForValue(op->result(0));
++    infer_context->SetShapeOrDataForValue(op->result(1), out_shape);
++  }
++  return ret;
++}
++
+ bool AnyOpInferSymbolicShape(pir::Operation *op,
+                              pir::InferSymbolicShapeContext *infer_context) {
+   const auto &axis = details::GetVectorAttr(op, "axis");
+diff --git a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.h b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.h
+index 18a21a6746..99409f402c 100644
+--- a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.h
++++ b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/unary_infer_sym.h
+@@ -21,6 +21,7 @@ OP_DECLARE_INFER_SYMBOLIC_SHAPE(AffineGrid)
+ OP_DECLARE_INFER_SYMBOLIC_SHAPE(All)
+ OP_DECLARE_INFER_SYMBOLIC_SHAPE(Amax)
+ OP_DECLARE_INFER_SYMBOLIC_SHAPE(Amin)
++OP_DECLARE_INFER_SYMBOLIC_SHAPE(Aminmax)
+ OP_DECLARE_INFER_SYMBOLIC_SHAPE(Any)
+ OP_DECLARE_INFER_SYMBOLIC_SHAPE(Argmax)
+ OP_DECLARE_INFER_SYMBOLIC_SHAPE(Argmin)
+diff --git a/paddle/phi/infermeta/unary.cc b/paddle/phi/infermeta/unary.cc
+index ccc37c6418..4843140b25 100644
+--- a/paddle/phi/infermeta/unary.cc
++++ b/paddle/phi/infermeta/unary.cc
+@@ -4291,6 +4291,24 @@ void ReduceInferMeta(const MetaTensor& x,
+   ReduceInferMetaBase(x, axis, keep_dim, reduce_all, out);
+ }
+ 
++void AMinMaxInferMeta(const MetaTensor& x,
++                      const std::vector<int64_t>& axis,
++                      bool keep_dim,
++                      MetaTensor* min,
++                      MetaTensor* max) {
++  bool reduce_all = false;
++  if (axis.empty()) {
++    reduce_all = true;
++  }
++  DDim out_dim = ReduceInferDim(x, axis, keep_dim, reduce_all);
++  min->set_dims(out_dim);
++  min->set_dtype(x.dtype());
++  min->set_layout(x.layout());
++  max->set_dims(out_dim);
++  max->set_dtype(x.dtype());
++  max->set_layout(x.layout());
++}
++
+ DDim ReduceInferDimForIntArrayAxis(const MetaTensor& x,
+                                    const IntArray& axis,
+                                    bool keep_dim,
+diff --git a/paddle/phi/infermeta/unary.h b/paddle/phi/infermeta/unary.h
+index 7032fef96d..991d2dfea7 100644
+--- a/paddle/phi/infermeta/unary.h
++++ b/paddle/phi/infermeta/unary.h
+@@ -69,6 +69,12 @@ PADDLE_API void ArgMinMaxInferMeta(const MetaTensor& x,
+                                    MetaTensor* out,
+                                    MetaConfig config = MetaConfig());
+ 
++PADDLE_API void AMinMaxInferMeta(const MetaTensor& x,
++                                 const std::vector<int64_t>& axis,
++                                 bool keep_dim,
++                                 MetaTensor* min,
++                                 MetaTensor* max);
++
+ PADDLE_API void MinMaxWithIndexInferMeta(const MetaTensor& x,
+                                          const Scalar& axis,
+                                          bool keepdims,
+diff --git a/paddle/phi/kernels/aminmax_grad_kernel.cc b/paddle/phi/kernels/aminmax_grad_kernel.cc
+new file mode 100644
+index 0000000000..c656e8746d
+--- /dev/null
++++ b/paddle/phi/kernels/aminmax_grad_kernel.cc
+@@ -0,0 +1,77 @@
++// Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++#include "paddle/phi/kernels/aminmax_grad_kernel.h"
++
++#include "paddle/phi/backends/all_context.h"
++#include "paddle/phi/core/kernel_registry.h"
++#include "paddle/phi/kernels/elementwise_add_kernel.h"
++#include "paddle/phi/kernels/reduce_amax_grad_kernel.h"
++#include "paddle/phi/kernels/reduce_amin_grad_kernel.h"
++
++namespace phi {
++
++template <typename T, typename Context>
++void AMinMaxGradKernel(const Context& dev_ctx,
++                       const DenseTensor& x,
++                       const DenseTensor& min,
++                       const DenseTensor& max,
++                       const DenseTensor& min_grad,
++                       const DenseTensor& max_grad,
++                       const std::vector<int64_t>& dims,
++                       bool keep_dim,
++                       bool reduce_all,
++                       DenseTensor* x_grad) {
++  if (x_grad && x_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(x_grad);
++    return;
++  }
++  reduce_all = recompute_reduce_all(x, dims, reduce_all);
++
++  // Compute amax grad contribution into x_grad
++  ReduceAMaxGradKernel<T, Context>(
++      dev_ctx, x, max, max_grad, dims, keep_dim, reduce_all, x_grad);
++
++  // Compute amin grad contribution into a temporary tensor
++  DenseTensor amin_x_grad;
++  amin_x_grad.Resize(x_grad->dims());
++  dev_ctx.template Alloc<T>(&amin_x_grad);
++  ReduceAMinGradKernel<T, Context>(
++      dev_ctx, x, min, min_grad, dims, keep_dim, reduce_all, &amin_x_grad);
++
++  // x_grad = amax_grad_result + amin_grad_result
++  Add<T, Context>(dev_ctx, *x_grad, amin_x_grad, x_grad);
++}
++
++}  // namespace phi
++
++PD_REGISTER_KERNEL(aminmax_grad,
++                   CPU,
++                   ALL_LAYOUT,
++                   phi::AMinMaxGradKernel,
++                   float,
++                   double,
++                   int,
++                   int64_t) {}
++
++#if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
++PD_REGISTER_KERNEL(aminmax_grad,
++                   GPU,
++                   ALL_LAYOUT,
++                   phi::AMinMaxGradKernel,
++                   float,
++                   double,
++                   int,
++                   int64_t) {}
++#endif
+diff --git a/paddle/phi/kernels/aminmax_grad_kernel.h b/paddle/phi/kernels/aminmax_grad_kernel.h
+new file mode 100644
+index 0000000000..8ad0c4810f
+--- /dev/null
++++ b/paddle/phi/kernels/aminmax_grad_kernel.h
+@@ -0,0 +1,31 @@
++// Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++#pragma once
++
++#include "paddle/phi/core/dense_tensor.h"
++
++namespace phi {
++template <typename T, typename Context>
++void AMinMaxGradKernel(const Context& dev_ctx,
++                       const DenseTensor& x,
++                       const DenseTensor& min,
++                       const DenseTensor& max,
++                       const DenseTensor& min_grad,
++                       const DenseTensor& max_grad,
++                       const std::vector<int64_t>& axis,
++                       bool keep_dim,
++                       bool reduce_all,
++                       DenseTensor* x_grad);
++}  // namespace phi
+diff --git a/paddle/phi/kernels/aminmax_kernel.cc b/paddle/phi/kernels/aminmax_kernel.cc
+new file mode 100644
+index 0000000000..7e89df957a
+--- /dev/null
++++ b/paddle/phi/kernels/aminmax_kernel.cc
+@@ -0,0 +1,50 @@
++// Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++#include "paddle/phi/kernels/aminmax_kernel.h"
++
++#include "paddle/phi/backends/all_context.h"
++#include "paddle/phi/core/kernel_registry.h"
++#include "paddle/phi/kernels/reduce_amax_kernel.h"
++#include "paddle/phi/kernels/reduce_amin_kernel.h"
++
++namespace phi {
++
++template <typename T, typename Context>
++void AMinMaxKernel(const Context& dev_ctx,
++                   const DenseTensor& x,
++                   const std::vector<int64_t>& dims,
++                   bool keep_dim,
++                   DenseTensor* min,
++                   DenseTensor* max) {
++  bool reduce_all = recompute_reduce_all(x, dims);
++  AMinRawKernel<T>(dev_ctx, x, dims, keep_dim, reduce_all, min);
++  AMaxRawKernel<T>(dev_ctx, x, dims, keep_dim, reduce_all, max);
++}
++
++}  // namespace phi
++
++PD_REGISTER_KERNEL(
++    aminmax, CPU, ALL_LAYOUT, phi::AMinMaxKernel, float, double, int, int64_t) {
++}
++
++#if defined(PADDLE_WITH_CUDA) || defined(PADDLE_WITH_HIP)
++PD_REGISTER_KERNEL(
++    aminmax, GPU, ALL_LAYOUT, phi::AMinMaxKernel, float, double, int, int64_t) {
++}
++#endif
++
++#if defined(PADDLE_WITH_XPU_KP)
++PD_REGISTER_KERNEL(aminmax, KPS, ALL_LAYOUT, phi::AMinMaxKernel, float) {}
++#endif
+diff --git a/paddle/phi/kernels/aminmax_kernel.h b/paddle/phi/kernels/aminmax_kernel.h
+new file mode 100644
+index 0000000000..ab4ebcacb7
+--- /dev/null
++++ b/paddle/phi/kernels/aminmax_kernel.h
+@@ -0,0 +1,29 @@
++// Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++#pragma once
++
++#include "paddle/phi/core/dense_tensor.h"
++
++namespace phi {
++
++template <typename T, typename Context>
++void AMinMaxKernel(const Context& dev_ctx,
++                   const DenseTensor& x,
++                   const std::vector<int64_t>& dims,
++                   bool keep_dim,
++                   DenseTensor* min,
++                   DenseTensor* max);
++
++}  // namespace phi
+diff --git a/paddle/phi/ops/yaml/backward.yaml b/paddle/phi/ops/yaml/backward.yaml
+index 355611abe6..4d3b2fb19c 100644
+--- a/paddle/phi/ops/yaml/backward.yaml
++++ b/paddle/phi/ops/yaml/backward.yaml
+@@ -141,6 +141,16 @@
+   kernel :
+     func : amin_grad
+ 
++- backward_op : aminmax_grad
++  forward : aminmax (Tensor x, int64_t[] axis={}, bool keepdim=false) -> Tensor(min), Tensor(max)
++  args : (Tensor x, Tensor min, Tensor max, Tensor min_grad, Tensor max_grad, int64_t[] axis={}, bool keepdim=false, bool reduce_all=false)
++  output : Tensor(x_grad)
++  infer_meta :
++    func : UnchangedInferMeta
++    param : [x]
++  kernel :
++    func : aminmax_grad
++
+ - backward_op : angle_grad
+   forward : angle (Tensor x) -> Tensor(out)
+   args : (Tensor x, Tensor out_grad)
+diff --git a/paddle/phi/ops/yaml/op_compat.yaml b/paddle/phi/ops/yaml/op_compat.yaml
+index 97ba24befe..0583723c22 100755
+--- a/paddle/phi/ops/yaml/op_compat.yaml
++++ b/paddle/phi/ops/yaml/op_compat.yaml
+@@ -206,6 +206,14 @@
+     amin_grad : GetReduceGradExpectedKernelType
+   manual_signature : [amin]
+ 
++- op : aminmax
++  backward : aminmax_grad
++  inputs :
++    x : X
++  outputs :
++    {min : Min, max : Max}
++  manual_signature : [aminmax]
++
+ - op : anchor_generator
+   inputs:
+     input : Input
+diff --git a/paddle/phi/ops/yaml/ops.yaml b/paddle/phi/ops/yaml/ops.yaml
+index 6723d6d55b..e95a65b5b3 100644
+--- a/paddle/phi/ops/yaml/ops.yaml
++++ b/paddle/phi/ops/yaml/ops.yaml
+@@ -258,6 +258,16 @@
+   backward : amin_grad
+   interfaces : paddle::dialect::InferSymbolicShapeInterface, paddle::dialect::LayoutTransformationInterface
+ 
++- op : aminmax
++  args : (Tensor x, int64_t[] axis={}, bool keepdim=false)
++  output : Tensor(min), Tensor(max)
++  infer_meta :
++    func : AMinMaxInferMeta
++  kernel :
++    func : aminmax
++  backward : aminmax_grad
++  interfaces : paddle::dialect::InferSymbolicShapeInterface
++
+ - op : angle
+   args : (Tensor x)
+   output : Tensor
+diff --git a/paddle/phi/ops/yaml/python_api_info.yaml b/paddle/phi/ops/yaml/python_api_info.yaml
+index 3e5aa5018b..fa79d453f5 100644
+--- a/paddle/phi/ops/yaml/python_api_info.yaml
++++ b/paddle/phi/ops/yaml/python_api_info.yaml
+@@ -55,6 +55,11 @@
+   args_alias :
+     use_default_mapping : True
+ 
++- op : aminmax
++  name : [paddle.aminmax, paddle.Tensor.aminmax]
++  args_alias :
++    use_default_mapping : True
++
+ - op : angle
+   name : [paddle.angle, paddle.Tensor.angle]
+   args_alias :
+diff --git a/python/paddle/__init__.py b/python/paddle/__init__.py
+index 7ac6009986..23c779c177 100644
+--- a/python/paddle/__init__.py
++++ b/python/paddle/__init__.py
+@@ -1143,6 +1143,7 @@ __all__ = [
+     'min',
+     'narrow',
+     'amin',
++    'aminmax',
+     'any',
+     'slice',
+     'slice_scatter',
+diff --git a/python/paddle/_paddle_docs.py b/python/paddle/_paddle_docs.py
+index 5bd3301bd6..ade0d82674 100644
+--- a/python/paddle/_paddle_docs.py
++++ b/python/paddle/_paddle_docs.py
+@@ -329,6 +329,56 @@ def amin(
+ """,
+ )
+ 
++add_doc_and_signature(
++    "aminmax",
++    r"""
++    Computes both the minimum and maximum of tensor elements over the given axis.
++
++    Note:
++        Like amin and amax, if there are multiple minimum/maximum elements,
++        aminmax evenly distributes gradient between these equal values.
++
++    Args:
++        x (Tensor): A tensor, the data type is float32, float64, int32, int64.
++            Alias: ``input``.
++        axis (int|list|tuple|None, optional): The axis along which the minimum and maximum
++            are computed. If :attr:`None`, compute over all elements of
++            `x` and return Tensors with a single element,
++            otherwise must be in the range :math:`[-x.ndim, x.ndim)`.
++            If :math:`axis[i] < 0`, the axis to reduce is :math:`x.ndim + axis[i]`.
++            Alias: ``dim``.
++        keepdim (bool, optional): Whether to reserve the reduced dimension in the
++            output Tensors. The result tensors will have one fewer dimension
++            than the `x` unless :attr:`keepdim` is true, default
++            value is False.
++
++    Keyword args:
++        out(tuple(Tensor, Tensor), optional): The output tensors.
++
++    Returns:
++        tuple(Tensor, Tensor), the minimum and maximum results on the specified axis
++        of input tensor, the data type is the same as `x`.
++
++    Examples:
++        .. code-block:: pycon
++
++            >>> import paddle
++            >>> x = paddle.to_tensor([[0.1, 0.9, 0.9, 0.9],
++            ...                       [0.9, 0.9, 0.6, 0.7]],
++            ...                       dtype='float64', stop_gradient=False)
++            >>> # min_val, max_val = paddle.aminmax(x)  # doctest to be enabled after API is merged
++""",
++    """
++def aminmax(
++    x: Tensor,
++    axis: int | Sequence[int] | None = None,
++    keepdim: bool = False,
++    *,
++    out: tuple[Tensor, Tensor] | None = None,
++) -> tuple[Tensor, Tensor]
++""",
++)
++
+ add_doc_and_signature(
+     "amax",
+     r"""
+diff --git a/python/paddle/tensor/__init__.py b/python/paddle/tensor/__init__.py
+index 7907c9ee0d..ee05261e70 100644
+--- a/python/paddle/tensor/__init__.py
++++ b/python/paddle/tensor/__init__.py
+@@ -625,6 +625,7 @@ tensor_method_func = [
+     'positive',
+     'min',
+     'amin',
++    'aminmax',
+     'minimum',
+     'fmax',
+     'fmin',

@@ -29,9 +29,3 @@
 - 熟悉 Python 运算符协议。
 - 了解 Paddle PIR 静态图和 `OpResult` 的公开行为。
 - 修复应局限于必要的 Python API 行为，不修改算子数值语义或底层 kernel。
-
-## Acceptance Criteria
-
-- The PIR `OpResult` behavior described above should be implemented.
-- Existing valid `OpResult` methods and attributes should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, leaving PIR mode, or bypassing execution.

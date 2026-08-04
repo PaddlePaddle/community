@@ -17,7 +17,7 @@ This directory converts Paddle PR #79353 into a SWE-Paddle community task candid
 
 ## Summary
 
-完善 pipeline P2P communication helper 在 no-communication path 下启用 overlap 时的返回行为。
+Improve the return behavior of the pipeline P2P communication helper when overlap is enabled on the no-communication path.
 
 ## Files
 
