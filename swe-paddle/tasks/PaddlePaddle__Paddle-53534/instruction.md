@@ -18,9 +18,3 @@
 - 熟悉 Python 和 NumPy
 - 了解 Paddle static graph 与 Tensor/Variable
 - 了解 dtype conversion 和 nested sequence handling
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.

@@ -15,9 +15,3 @@
 - 熟悉 C++
 - 了解 Paddle control-flow operator 和 Scope lifecycle
 - 了解 pointer ownership、cached runtime state 和 executor reuse
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.

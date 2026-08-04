@@ -18,7 +18,7 @@ This directory converts Paddle PR #70469 into a SWE-Paddle community task candid
 
 ## Summary
 
-为规避 `fused_dropout_add` fused execution path 中已知的 precision issue，暂时回退到标准 `dropout + add` 实现，并提供一次性 warning。
+Temporarily fall back to the standard `dropout + add` implementation to avoid a known precision issue in the `fused_dropout_add` fused execution path, and emit a one-time warning.
 
 ## Why This Is A Good SWE-Paddle Candidate
 

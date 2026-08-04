@@ -17,9 +17,3 @@
 - 熟悉 Python 和 Paddle 动态图
 - 了解自动微分与 activation recompute 流程
 - 了解 Python 上下文管理器
-
-## Acceptance Criteria
-
-- The behavior described above should be fixed.
-- Existing valid behavior should remain unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
