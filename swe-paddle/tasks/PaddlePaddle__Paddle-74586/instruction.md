@@ -2,27 +2,34 @@
 
 ## 详细描述
 
-Paddle 当前缺少用于按索引累加 Tensor 元素的 `scatter_add` 公共接口。为提升接口兼容性，调用方需要能够指定操作维度，并根据索引将源 Tensor 中的值累加到输入 Tensor 的对应位置。
+Paddle 目前缺少 `scatter_add` 接口。
 
-请新增 `paddle.scatter_add`。当多个源元素指向同一位置时，应对这些值进行累加，而不是相互覆盖。返回结果应保留输入 Tensor 的形状和数据类型。
+现在需要新增 `paddle.scatter_add(input, dim, index, src)`，以 `input` 为初始结果，按照 `index` 指定的位置，将 `src` 中的值沿 `dim` 维累加进去。
 
-该接口应支持动态图和静态图模式，并能够从 `paddle` 和 `paddle.tensor` 公共命名空间访问。现有 Tensor 操作接口的合法调用方式和行为不得受到影响。
+当多个索引指向同一位置时，这些值都应累加，不能相互覆盖。该接口返回新的 Tensor，不修改输入的 `input`。
+
+同时支持以下调用方式：
+
+```python
+paddle.scatter_add(input, dim, index, src)
+paddle.tensor.scatter_add(input, dim, index, src)
+input.scatter_add(dim, index, src)
+````
 
 ## 验收说明
 
-* 提供公开的 `paddle.scatter_add` API，并能够通过 `paddle.tensor.scatter_add` 访问
-* API 应支持通过 `input`、`dim`、`index` 和 `src` 参数调用
-* 应根据 `index` 在指定维度上将 `src` 中的值累加到 `input` 的对应位置
-* 多个索引指向同一位置时，对应值应正确累加
-* 返回 Tensor 的形状和数据类型应与输入保持一致
-* 有效的正维度和负维度参数均应得到正确处理
-* API 应能够在动态图和静态图模式下正常使用
-* 反向传播行为应保持正确
-* 索引类型不合法、输入形状不兼容或索引越界时，应给出明确的异常
-* 现有 Tensor manipulation API 的行为不得发生变化
+* 支持 `input`、`dim`、`index` 和 `src` 参数
+* 应在 `input` 原有数据的基础上累加 `src`
+* 多个索引指向同一位置时，应正确累加所有对应值
+* 返回结果的 shape 和 dtype 应与 `input` 保持一致
+* `index` 支持 `int32` 和 `int64`
+* `src` 的 dtype 应与 `input` 一致
+* 调用后不应修改 `input`
+* 三种调用方式应得到相同结果
+* 现有 Tensor 操作接口的行为保持不变
 
 ## 技术要求
 
-* 熟悉 Paddle Python Tensor API 及公共接口导出方式
-* 理解 scatter 类操作的维度、索引和累加语义
-* 了解 Paddle 动态图、静态图和自动求导机制
+* 熟悉 Python
+* 了解 Paddle Tensor API
+* 了解按索引进行数据更新和累加的方式
