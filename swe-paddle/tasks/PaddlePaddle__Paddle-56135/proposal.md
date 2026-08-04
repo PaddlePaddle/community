@@ -1,11 +1,9 @@
-主要需要把 `static graph` 统一改为原 PR 使用的 `static mode`，同时删掉 `contract`、`propagation`、`unknown dimension` 等生硬表达。原 PR 只修改了 `python/paddle/tensor/linalg.py` 和 `paddle/phi/infermeta/binary.cc`：Python 侧放宽对 `-1` 维度的检查，C++ 侧在一边为 `-1` 时使用另一边已知的维度推导结果。([GitHub][1])
-
 # Task Proposal: PaddlePaddle__Paddle-56135
 
 ## 1. 来源信息
 
 * Instance ID：`PaddlePaddle__Paddle-56135`
-* PR 链接：[https://github.com/PaddlePaddle/Paddle/pull/56135](https://github.com/PaddlePaddle/Paddle/pull/56135)
+* PR 链接：https://github.com/PaddlePaddle/Paddle/pull/56135
 * PR 标题：`[BugFix] fix bmm op bugs in static mode with dynamic shape`
 * `base_commit`：`4f2cf7fbcaca52bb9625dc6be944f552ea1d71d5`
 * merged 时间：`2023-08-16`
@@ -54,6 +52,3 @@
 * 环境风险：测试需要可用的 C++17 编译器，但不需要完整编译 Paddle，也不依赖 CUDA 或 GPU。
 * flaky 风险：测试使用固定 shape，不涉及随机数、并发或外部数据。
 * 拆分风险：Python 侧的输入检查和 C++ 侧的 shape 推导共同决定 `paddle.bmm` 对 dynamic shape 的处理，属于同一个问题，不适合拆成两个样本。
-
-[1]: https://github.com/PaddlePaddle/Paddle/pull/56135 "[BugFix] fix bmm op bugs in static mode with dynamic shape by 2742195759 · Pull Request #56135 · PaddlePaddle/Paddle · GitHub"
-[2]: https://github.com/PaddlePaddle/Paddle/pull/56135/changes "[BugFix] fix bmm op bugs in static mode with dynamic shape by 2742195759 · Pull Request #56135 · PaddlePaddle/Paddle · GitHub"
