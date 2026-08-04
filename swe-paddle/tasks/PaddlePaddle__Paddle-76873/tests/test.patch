@@ -1,0 +1,1141 @@
+diff --git a/test/ir/pir/cinn/symbolic/test_infer_sym_shape_multinary_op.py b/test/ir/pir/cinn/symbolic/test_infer_sym_shape_multinary_op.py
+index 1111111..2222222 100644
+--- a/test/ir/pir/cinn/symbolic/test_infer_sym_shape_multinary_op.py
++++ b/test/ir/pir/cinn/symbolic/test_infer_sym_shape_multinary_op.py
+@@ -383,5 +383,37 @@
+         return out
+ 
+ 
++class CELUInplaceNet(paddle.nn.Layer):
++    def __init__(self):
++        super().__init__()
++
++    def forward(self, x):
++        F.celu(x, inplace=True)
++
++        return x
++
++
++class CELUOpInferSymbolicShapeTest(TestBase):
++    def prepare_data(self):
++        self.cases = [np.random.rand(2, 3, 4)]
++        self.expected = ['shape[S0, S1, S2], data[NULL]']
++
++    def test_eval_symbolic(self):
++        net = CELUInplaceNet()
++
++        for i in range(len(self.cases)):
++            x = self.cases[i]
++            x_spec = InputSpec(
++                shape=[None for index in range(len(x.shape))], dtype='float32'
++            )
++
++            input_spec = [x_spec]
++            net = apply_to_static(net, True, input_spec)
++            net.eval()
++            check_infer_results(net, input_spec, 'pd_op.celu_', self.expected)
++
++        return True
++
++
+ if __name__ == '__main__':
+     unittest.main()
+diff --git a/test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py b/test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py
+index 1111111..2222222 100644
+--- a/test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py
++++ b/test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py
+@@ -831,5 +831,173 @@
+         return True
+ 
+ 
++class RRELUInplaceNet(paddle.nn.Layer):
++    def __init__(self):
++        super().__init__()
++
++    def forward(self, x):
++        F.rrelu(x, training=False, inplace=True)
++        return x
++
++
++class RRELUOpInferSymbolicShapeTest(TestBase):
++    def prepare_data(self):
++        self.cases = [
++            np.random.uniform(-1.0, 1.0, [1, 2, 3, 4]).astype('float32')
++        ]
++        self.expected = ['shape[S0, S1, S2, S3], data[NULL]']
++
++    def test_eval_symbolic(self):
++        net = RRELUInplaceNet()
++
++        for i in range(len(self.cases)):
++            x = self.cases[i]
++            x_spec = InputSpec(
++                shape=[None for index in range(len(x.shape))], dtype='float32'
++            )
++
++            input_spec = [x_spec]
++            net = paddle.jit.to_static(
++                net,
++                input_spec=input_spec,
++                backend=None,
++                full_graph=True,
++            )
++            net.eval()
++            check_infer_results(net, input_spec, 'pd_op.rrelu_', self.expected)
++
++        return True
++
++
++class SELUInplaceNet(paddle.nn.Layer):
++    def __init__(self):
++        super().__init__()
++
++    def forward(self, x):
++        F.selu(x, inplace=True)
++
++        return x
++
++
++class SELUOpInferSymbolicShapeTest(TestBase):
++    def prepare_data(self):
++        self.cases = [np.random.normal(size=[3, 5, 5, 10]).astype('float32')]
++        self.expected = ['shape[S0, S1, S2, S3], data[NULL]']
++
++    def test_eval_symbolic(self):
++        net = SELUInplaceNet()
++
++        for i in range(len(self.cases)):
++            x = self.cases[i]
++            x_spec = InputSpec(
++                shape=[None for index in range(len(x.shape))], dtype='float32'
++            )
++
++            input_spec = [x_spec]
++            net = apply_to_static(net, True, input_spec)
++            net.eval()
++            check_infer_results(net, input_spec, 'pd_op.selu_', self.expected)
++
++        return True
++
++
++class HardSigmoidInplaceNet(paddle.nn.Layer):
++    def __init__(self):
++        super().__init__()
++
++    def forward(self, x):
++        F.hardsigmoid(x, inplace=True)
++
++        return x
++
++
++class HardSigmoidInferSymbolicShapeTest(TestBase):
++    def prepare_data(self):
++        self.cases = [np.random.normal(size=[3, 5, 5, 10]).astype('float32')]
++        self.expected = ['shape[S0, S1, S2, S3], data[NULL]']
++
++    def test_eval_symbolic(self):
++        net = HardSigmoidInplaceNet()
++
++        for i in range(len(self.cases)):
++            x = self.cases[i]
++            x_spec = InputSpec(
++                shape=[None for index in range(len(x.shape))], dtype='float32'
++            )
++
++            input_spec = [x_spec]
++            net = apply_to_static(net, True, input_spec)
++            net.eval()
++            check_infer_results(
++                net, input_spec, 'pd_op.hardsigmoid_', self.expected
++            )
++
++        return True
++
++
++class MishInplaceNet(paddle.nn.Layer):
++    def __init__(self):
++        super().__init__()
++
++    def forward(self, x):
++        F.mish(x, inplace=True)
++
++        return x
++
++
++class MishOpInferSymbolicShapeTest(TestBase):
++    def prepare_data(self):
++        self.cases = [np.random.normal(size=[3, 5, 5, 10]).astype('float32')]
++        self.expected = ['shape[S0, S1, S2, S3], data[NULL]']
++
++    def test_eval_symbolic(self):
++        net = MishInplaceNet()
++
++        for i in range(len(self.cases)):
++            x = self.cases[i]
++            x_spec = InputSpec(
++                shape=[None for index in range(len(x.shape))], dtype='float32'
++            )
++
++            input_spec = [x_spec]
++            net = apply_to_static(net, True, input_spec)
++            net.eval()
++            check_infer_results(net, input_spec, 'pd_op.mish_', self.expected)
++
++        return True
++
++
++class SwishInplaceNet(paddle.nn.Layer):
++    def __init__(self):
++        super().__init__()
++
++    def forward(self, x):
++        F.swish(x, inplace=True)
++
++        return x
++
++
++class SwishOpInferSymbolicShapeTest(TestBase):
++    def prepare_data(self):
++        self.cases = [np.random.normal(size=[3, 5, 5, 10]).astype('float32')]
++        self.expected = ['shape[S0, S1, S2, S3], data[NULL]']
++
++    def test_eval_symbolic(self):
++        net = SwishInplaceNet()
++
++        for i in range(len(self.cases)):
++            x = self.cases[i]
++            x_spec = InputSpec(
++                shape=[None for index in range(len(x.shape))], dtype='float32'
++            )
++
++            input_spec = [x_spec]
++            net = apply_to_static(net, True, input_spec)
++            net.eval()
++            check_infer_results(net, input_spec, 'pd_op.swish_', self.expected)
++
++        return True
++
++
+ if __name__ == '__main__':
+     unittest.main()
+diff --git a/test/legacy_test/test_celu_op.py b/test/legacy_test/test_celu_op.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/test/legacy_test/test_celu_op.py
+@@ -0,0 +1,175 @@
++#   Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import copy
++import unittest
++
++import numpy as np
++from op_test import get_device_place, get_places, is_custom_device
++
++import paddle
++import paddle.base.dygraph as dg
++import paddle.nn.functional as F
++from paddle import base, nn
++
++
++def celu(x, alpha):
++    y_ref = np.maximum(0, x) + np.minimum(0, alpha * (np.exp(x / alpha) - 1))
++    return y_ref.astype(x.dtype)
++
++
++class TestCELUOpClass_Inplace(unittest.TestCase):
++    def _test_case1_cpu(self):
++        x = np.random.uniform(-1, 1, size=(15, 17)).astype(np.float32)
++        alpha = 1.0
++        y_ref = celu(x, alpha)
++
++        place = base.CPUPlace()
++        with dg.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.celu(x_var1, alpha, True)
++            y_test1 = y_var1.numpy()
++
++            func = nn.CELU(alpha, True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def _test_case1_gpu(self):
++        x = np.random.uniform(-1, 1, size=(15, 17)).astype(np.float32)
++        alpha = 1.0
++        y_ref = celu(x, alpha)
++
++        place = get_device_place()
++        with dg.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.celu(x_var1, alpha, True)
++            y_test1 = y_var1.numpy()
++
++            func = nn.CELU(alpha, True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def test_cases(self):
++        self._test_case1_cpu()
++        if base.is_compiled_with_cuda() or is_custom_device():
++            self._test_case1_gpu()
++
++
++class TestCELUParamDecorator(unittest.TestCase):
++    def setUp(self):
++        paddle.disable_static()
++        self.x_np = np.random.random((10, 3, 4)).astype("float64")
++        self.alpha = 1.0
++        self.test_types = ["decorator"]
++
++    def do_test(self, test_type):
++        x = paddle.to_tensor(self.x_np, stop_gradient=False)
++        if test_type == 'raw':
++            result = F.celu(x, self.alpha, False)
++            result.mean().backward()
++            return result, x.grad
++        elif test_type == 'decorator':
++            result = F.celu(x=x, alpha=self.alpha, inplace=False)
++            result.mean().backward()
++            return result, x.grad
++        else:
++            raise ValueError(f"Unknown test type: {test_type}")
++
++    def test_all(self):
++        out_std, grad_x_std = self.do_test('raw')
++        for test_type in self.test_types:
++            out, grad_x = self.do_test(test_type)
++            np.testing.assert_allclose(out.numpy(), out_std.numpy(), rtol=1e-7)
++            np.testing.assert_allclose(
++                grad_x.numpy(), grad_x_std.numpy(), rtol=1e-7
++            )
++
++
++class TestCELUAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(0)
++        self.shape = [10, 10]
++        self.x_np = np.random.random(self.shape).astype(np.float32)
++        self.alpha = 1.0
++        self.place = get_places()
++        self.x_feed = copy.deepcopy(self.x_np)
++
++    def test_api_static(self):
++        paddle.enable_static()
++
++        def run(place, inplace):
++            with paddle.static.program_guard(paddle.static.Program()):
++                x = paddle.static.data('X', self.shape)
++                out = F.celu(x, self.alpha, inplace)
++                exe = paddle.static.Executor(self.place[0])
++                res = exe.run(
++                    feed={
++                        'X': self.x_feed,
++                    },
++                    fetch_list=[out],
++                )
++            target = copy.deepcopy(self.x_np)
++            out_ref = celu(target, self.alpha)
++
++            for out in res:
++                np.testing.assert_allclose(out, out_ref, rtol=0.001)
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++    def test_api_dygraph(self):
++        def run(place, inplace):
++            paddle.disable_static(place)
++            x_tensor = paddle.to_tensor(self.x_np)
++            out = F.celu(x_tensor, self.alpha, inplace)
++
++            target = copy.deepcopy(self.x_np)
++            out_ref = celu(target, self.alpha)
++
++            np.testing.assert_allclose(out.numpy(), out_ref, rtol=0.001)
++
++            paddle.enable_static()
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/test/legacy_test/test_imperative_layers.py b/test/legacy_test/test_imperative_layers.py
+index 1111111..2222222 100644
+--- a/test/legacy_test/test_imperative_layers.py
++++ b/test/legacy_test/test_imperative_layers.py
+@@ -23,7 +23,7 @@
+         self.assertEqual(str(module), 'ELU(alpha=0.2)')
+ 
+         module = nn.CELU(0.2)
+-        self.assertEqual(str(module), 'CELU(alpha=0.2)')
++        self.assertEqual(str(module), 'CELU(alpha=0.2, inplace=False)')
+ 
+         module = nn.GELU(True)
+         self.assertEqual(str(module), 'GELU(approximate=True)')
+@@ -48,6 +48,12 @@
+             'PReLU(num_parameters=1, data_format=NCHW, init=0.25, dtype=float32, name=PReLU)',
+         )
+ 
++        module = nn.RReLU(lower=0.1, upper=0.3, inplace=True)
++        self.assertEqual(
++            str(module),
++            'RReLU(lower=0.1, upper=0.3, training=True, dtype=float32, inplace=True)',
++        )
++
+         module = nn.ReLU()
+         self.assertEqual(str(module), 'ReLU()')
+ 
+@@ -57,7 +63,7 @@
+         module = nn.SELU()
+         self.assertEqual(
+             str(module),
+-            'SELU(scale=1.0507009873554805, alpha=1.6732632423543772)',
++            'SELU(scale=1.0507009873554805, alpha=1.6732632423543772, inplace=False)',
+         )
+ 
+         module = nn.LeakyReLU()
+@@ -67,7 +73,7 @@
+         self.assertEqual(str(module), 'Sigmoid()')
+ 
+         module = nn.Hardsigmoid()
+-        self.assertEqual(str(module), 'Hardsigmoid()')
++        self.assertEqual(str(module), 'Hardsigmoid(inplace=False)')
+ 
+         module = nn.Softplus()
+         self.assertEqual(str(module), 'Softplus(beta=1, threshold=20)')
+@@ -79,7 +85,10 @@
+         self.assertEqual(str(module), 'Softsign()')
+ 
+         module = nn.Swish()
+-        self.assertEqual(str(module), 'Swish()')
++        self.assertEqual(str(module), 'Swish(inplace=False)')
++
++        module = nn.Mish()
++        self.assertEqual(str(module), 'Mish(inplace=False)')
+ 
+         module = nn.Tanhshrink()
+         self.assertEqual(str(module), 'Tanhshrink()')
+diff --git a/test/legacy_test/test_hardsigmoid_op.py b/test/legacy_test/test_hardsigmoid_op.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/test/legacy_test/test_hardsigmoid_op.py
+@@ -0,0 +1,147 @@
++#   Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import copy
++import unittest
++
++import numpy as np
++from op_test import get_device_place, get_places, is_custom_device
++
++import paddle
++import paddle.base.dygraph as dg
++import paddle.nn.functional as F
++from paddle import base, nn
++
++
++def ref_hardsigmoid(x, slope=0.1666667, offset=0.5):
++    return np.maximum(np.minimum(x * slope + offset, 1.0), 0.0).astype(x.dtype)
++
++
++class TestHardSigmoidOpClass_Inplace(unittest.TestCase):
++    def _test_case1_cpu(self):
++        slope = 0.1666667
++        offset = 0.5
++        x = np.random.uniform(-5, 5, [10, 12]).astype("float32")
++        y_ref = ref_hardsigmoid(x, slope, offset)
++
++        place = base.CPUPlace()
++        with dg.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.hardsigmoid(x_var1, slope, offset, True)
++            y_test1 = y_var1.numpy()
++
++            func = nn.Hardsigmoid(inplace=True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def _test_case1_gpu(self):
++        slope = 0.1666667
++        offset = 0.5
++        x = np.random.uniform(-5, 5, [10, 12]).astype("float32")
++        y_ref = ref_hardsigmoid(x, slope, offset)
++
++        place = get_device_place()
++        with dg.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.hardsigmoid(x_var1, slope, offset, True)
++            y_test1 = y_var1.numpy()
++
++            func = nn.Hardsigmoid(inplace=True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def test_cases(self):
++        self._test_case1_cpu()
++        if base.is_compiled_with_cuda() or is_custom_device():
++            self._test_case1_gpu()
++
++
++class TestHardSigmoidAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(0)
++        self.slope = 0.1666667
++        self.offset = 0.5
++        self.shape = [10, 10]
++        self.x_np = np.random.uniform(-5, 5, self.shape).astype("float32")
++        self.place = get_places()
++        self.x_feed = copy.deepcopy(self.x_np)
++
++    def test_api_static(self):
++        paddle.enable_static()
++
++        def run(place, inplace):
++            with paddle.static.program_guard(paddle.static.Program()):
++                x = paddle.static.data('X', self.shape)
++                out = F.hardsigmoid(x, self.slope, self.offset, inplace)
++                exe = paddle.static.Executor(self.place[0])
++                res = exe.run(
++                    feed={
++                        'X': self.x_feed,
++                    },
++                    fetch_list=[out],
++                )
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_hardsigmoid(target, self.slope, self.offset)
++
++            for out in res:
++                np.testing.assert_allclose(out, out_ref, rtol=0.001)
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++    def test_api_dygraph(self):
++        def run(place, inplace):
++            paddle.disable_static(place)
++            x_tensor = paddle.to_tensor(self.x_np)
++            out = F.hardsigmoid(x_tensor, self.slope, self.offset, inplace)
++
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_hardsigmoid(target, self.slope, self.offset)
++
++            np.testing.assert_allclose(out.numpy(), out_ref, rtol=0.001)
++
++            paddle.enable_static()
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/test/legacy_test/test_mish_op.py b/test/legacy_test/test_mish_op.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/test/legacy_test/test_mish_op.py
+@@ -0,0 +1,113 @@
++#   Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import copy
++import unittest
++
++import numpy as np
++from op_test import get_device_place, get_places
++
++import paddle
++import paddle.base.dygraph as dg
++import paddle.nn.functional as F
++from paddle import nn
++
++
++def ref_mish(x, threshold=20.0):
++    softplus = np.select(
++        [x <= threshold, x > threshold], [np.log(1 + np.exp(x)), x]
++    )
++    return x * np.tanh(softplus)
++
++
++class TestMishOpClass_Inplace(unittest.TestCase):
++    def test_case(self):
++        x = np.random.uniform(-1, 1, [10, 12]).astype(np.float32)
++        y_ref = ref_mish(x)
++
++        place = get_device_place()
++        with dg.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.mish(x_var1, True)
++            y_test1 = y_var1.numpy()
++
++            func = nn.Mish(True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++
++class TestMishAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(0)
++        self.shape = [10, 12]
++        self.x_np = np.random.uniform(-1, 1, self.shape).astype(np.float32)
++        self.place = get_places()
++        self.x_feed = copy.deepcopy(self.x_np)
++
++    def test_api_static(self):
++        paddle.enable_static()
++
++        def run(place, inplace):
++            with paddle.static.program_guard(paddle.static.Program()):
++                x = paddle.static.data('X', self.shape)
++                out = F.mish(x, inplace)
++                exe = paddle.static.Executor(self.place[0])
++                res = exe.run(
++                    feed={
++                        'X': self.x_feed,
++                    },
++                    fetch_list=[out],
++                )
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_mish(target)
++
++            for out in res:
++                np.testing.assert_allclose(out, out_ref, rtol=0.001)
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++    def test_api_dygraph(self):
++        def run(place, inplace):
++            paddle.disable_static(place)
++            x_tensor = paddle.to_tensor(self.x_np)
++            out = F.mish(x_tensor, inplace)
++
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_mish(target)
++
++            np.testing.assert_allclose(out.numpy(), out_ref, rtol=0.001)
++
++            paddle.enable_static()
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/test/legacy_test/test_rrelu_op.py b/test/legacy_test/test_rrelu_op.py
+index 1111111..2222222 100644
+--- a/test/legacy_test/test_rrelu_op.py
++++ b/test/legacy_test/test_rrelu_op.py
+@@ -12,6 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
++import copy
+ import unittest
+ 
+ import numpy as np
+@@ -510,5 +511,105 @@
+         }
+ 
+ 
++class TestRRELUOpClass_Inplace(unittest.TestCase):
++    def test_case(self):
++        x_np = np.random.uniform(-1.0, 1.0, [1, 2, 3, 4]).astype('float32')
++        lower_0 = 0.05
++        upper_0 = 0.25
++        y_ref = ref_rrelu(x_np, lower_0, upper_0)
++        place = get_device_place()
++        with dygraph.guard(place) as g:
++            x_var1 = paddle.to_tensor(x_np)
++            x_var2 = paddle.to_tensor(x_np)
++
++            y_var1 = F.rrelu(
++                x_var1, lower_0, upper_0, training=False, inplace=True
++            )
++            y_test1 = y_var1.numpy()
++
++            func = paddle.nn.RReLU(lower_0, upper_0, True)
++            func.training = False
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++
++class TestRRELUAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(0)
++        self.shape = [1, 2, 3, 4]
++        self.x_np = np.random.uniform(-1.0, 1.0, self.shape).astype('float32')
++        self.lower_1 = 0.1
++        self.upper_1 = 0.33
++        self.place = [get_device_place()]
++        self.x_feed = copy.deepcopy(self.x_np)
++
++    def test_api_static(self):
++        paddle.enable_static()
++
++        def run(place, inplace):
++            with paddle.static.program_guard(paddle.static.Program()):
++                x = paddle.static.data('X', self.shape)
++                out = F.rrelu(
++                    x,
++                    self.lower_1,
++                    self.upper_1,
++                    training=False,
++                    inplace=inplace,
++                )
++                exe = paddle.static.Executor(place)
++                res = exe.run(
++                    feed={
++                        'X': self.x_feed,
++                    },
++                    fetch_list=[out],
++                )
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_rrelu(target, self.lower_1, self.upper_1)
++
++            for out in res:
++                np.testing.assert_allclose(out, out_ref, rtol=0.001)
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++    def test_api_dygraph(self):
++        def run(place, inplace):
++            paddle.disable_static(place)
++            x_tensor = paddle.to_tensor(self.x_np)
++            out = F.rrelu(
++                x_tensor,
++                self.lower_1,
++                self.upper_1,
++                training=False,
++                inplace=inplace,
++            )
++
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_rrelu(
++                target,
++                self.lower_1,
++                self.upper_1,
++            )
++
++            np.testing.assert_allclose(out.numpy(), out_ref, rtol=0.001)
++
++            paddle.enable_static()
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/test/legacy_test/test_selu_op.py b/test/legacy_test/test_selu_op.py
+index 1111111..2222222 100644
+--- a/test/legacy_test/test_selu_op.py
++++ b/test/legacy_test/test_selu_op.py
+@@ -12,6 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
++import copy
+ import unittest
+ 
+ import numpy as np
+@@ -25,7 +26,7 @@
+ import paddle
+ import paddle.nn.functional as F
+ from paddle import base
+-from paddle.base import core
++from paddle.base import core, dygraph
+ 
+ 
+ def ref_selu(
+@@ -194,6 +195,123 @@
+                 F.selu(x_fp16)
+ 
+ 
++class TestSELUOpClass_Inplace(unittest.TestCase):
++    def _test_case1_cpu(self):
++        x_np = np.random.normal(size=[3, 5, 5, 10]).astype(np.float32)
++        alpha = 2.0
++        scale = 1.5
++        y_ref = ref_selu(x_np, alpha, scale)
++
++        place = base.CPUPlace()
++        with dygraph.guard(place) as g:
++            x_var1 = paddle.to_tensor(x_np)
++            x_var2 = paddle.to_tensor(x_np)
++
++            y_var1 = F.selu(x_var1, alpha, scale, True)
++            y_test1 = y_var1.numpy()
++
++            func = paddle.nn.SELU(alpha, scale, True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def _test_case1_gpu(self):
++        x = np.random.normal(size=[3, 5, 5, 10]).astype(np.float32)
++        x[np.abs(x) < 0.005] = 0.02
++        alpha = 1.6732632423543772848170429916717
++        scale = 1.0507009873554804934193349852946
++        y_ref = ref_selu(x, alpha, scale)
++
++        place = get_device_place()
++        with dygraph.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.selu(x_var1, alpha, scale, True)
++            y_test1 = y_var1.numpy()
++
++            func = paddle.nn.SELU(alpha, scale, True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def test_cases(self):
++        self._test_case1_cpu()
++        if base.is_compiled_with_cuda() or is_custom_device():
++            self._test_case1_gpu()
++
++
++class TestSELUAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(0)
++        self.shape = [3, 5, 5, 10]
++        self.x_np = np.random.normal(size=self.shape).astype(np.float32)
++        self.x_np[np.abs(self.x_np) < 0.005] = 0.02
++        self.alpha = 1.6732632423543772848170429916717
++        self.scale = 1.0507009873554804934193349852946
++        self.place = [get_device_place()]
++        self.x_feed = copy.deepcopy(self.x_np)
++
++    def test_api_static(self):
++        paddle.enable_static()
++
++        def run(place, inplace):
++            with paddle.static.program_guard(paddle.static.Program()):
++                x = paddle.static.data('X', self.shape)
++                out = F.selu(x, self.alpha, self.scale, inplace)
++                exe = paddle.static.Executor(place)
++                res = exe.run(
++                    feed={
++                        'X': self.x_feed,
++                    },
++                    fetch_list=[out],
++                )
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_selu(target, self.alpha, self.scale)
++
++            for out in res:
++                np.testing.assert_allclose(out, out_ref, rtol=0.001)
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++    def test_api_dygraph(self):
++        def run(place, inplace):
++            paddle.disable_static(place)
++            x_tensor = paddle.to_tensor(self.x_np)
++            out = F.selu(x_tensor, self.alpha, self.scale, inplace)
++
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_selu(target, self.alpha, self.scale)
++
++            np.testing.assert_allclose(out.numpy(), out_ref, rtol=0.001)
++
++            paddle.enable_static()
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++
+ if __name__ == "__main__":
+     paddle.enable_static()
+     unittest.main()
+diff --git a/test/legacy_test/test_swish_op.py b/test/legacy_test/test_swish_op.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/test/legacy_test/test_swish_op.py
+@@ -0,0 +1,143 @@
++#   Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import copy
++import unittest
++
++import numpy as np
++from op_test import get_device_place, get_places, is_custom_device
++from scipy.special import expit
++
++import paddle
++import paddle.base.dygraph as dg
++import paddle.nn.functional as F
++from paddle import base, nn
++
++
++def ref_swish(x):
++    out = x * expit(x)
++    return out
++
++
++class TestSwishOpClass_Inplace(unittest.TestCase):
++    def _test_case1_cpu(self):
++        x = np.random.uniform(-1, 1, [10, 12]).astype(np.float32)
++        y_ref = ref_swish(x)
++
++        place = base.CPUPlace()
++        with dg.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.swish(x_var1, True)
++            y_test1 = y_var1.numpy()
++
++            func = nn.Swish(True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def _test_case1_gpu(self):
++        x = np.random.uniform(-1, 1, [10, 12]).astype(np.float32)
++        y_ref = ref_swish(x)
++
++        place = get_device_place()
++        with dg.guard(place) as g:
++            x_var1 = paddle.to_tensor(x)
++            x_var2 = paddle.to_tensor(x)
++
++            y_var1 = F.swish(x_var1, True)
++            y_test1 = y_var1.numpy()
++
++            func = nn.Swish(True)
++            y_var2 = func(x_var2)
++            y_test2 = y_var2.numpy()
++
++        np.testing.assert_allclose(y_ref, y_test1, rtol=1e-05, atol=1e-08)
++        np.testing.assert_allclose(y_ref, y_test2, rtol=1e-05, atol=1e-08)
++
++        np.testing.assert_allclose(
++            y_ref, x_var1.numpy(), rtol=1e-05, atol=1e-08
++        )
++        np.testing.assert_allclose(
++            y_ref, x_var2.numpy(), rtol=1e-05, atol=1e-08
++        )
++
++    def test_cases(self):
++        self._test_case1_cpu()
++        if base.is_compiled_with_cuda() or is_custom_device():
++            self._test_case1_gpu()
++
++
++class TestSwishAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(0)
++        self.shape = [10, 12]
++        self.x_np = np.random.uniform(-1, 1, self.shape).astype(np.float32)
++        self.place = get_places()
++        self.x_feed = copy.deepcopy(self.x_np)
++
++    def test_api_static(self):
++        paddle.enable_static()
++
++        def run(place, inplace):
++            with paddle.static.program_guard(paddle.static.Program()):
++                x = paddle.static.data('X', self.shape)
++                out = F.swish(x, inplace)
++                exe = paddle.static.Executor(self.place[0])
++                res = exe.run(
++                    feed={
++                        'X': self.x_feed,
++                    },
++                    fetch_list=[out],
++                )
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_swish(target)
++
++            for out in res:
++                np.testing.assert_allclose(out, out_ref, rtol=0.001)
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++    def test_api_dygraph(self):
++        def run(place, inplace):
++            paddle.disable_static(place)
++            x_tensor = paddle.to_tensor(self.x_np)
++            out = F.swish(x_tensor, inplace)
++
++            target = copy.deepcopy(self.x_np)
++            out_ref = ref_swish(target)
++
++            np.testing.assert_allclose(out.numpy(), out_ref, rtol=0.001)
++
++            paddle.enable_static()
++
++        for place in self.place:
++            run(place, True)
++            run(place, False)
++
++
++if __name__ == '__main__':
++    unittest.main()
