@@ -1,0 +1,1944 @@
+diff --git a/test/legacy_test/CMakeLists.txt b/test/legacy_test/CMakeLists.txt
+index 2d3116d5ad69b1..3ca147526bf8b2 100644
+--- a/test/legacy_test/CMakeLists.txt
++++ b/test/legacy_test/CMakeLists.txt
+@@ -1434,3 +1434,6 @@ endif()
+ 
+ set_tests_properties(test_linalg_matrix_exp PROPERTIES TIMEOUT 120)
+ set_pit_tests_properties()
++
++set_tests_properties(test_fractional_max_pool2d_op PROPERTIES TIMEOUT 120)
++set_tests_properties(test_fractional_max_pool3d_op PROPERTIES TIMEOUT 120)
+diff --git a/test/legacy_test/test_fractional_max_pool2d_api.py b/test/legacy_test/test_fractional_max_pool2d_api.py
+new file mode 100644
+index 00000000000000..0882c05d8c31ff
+--- /dev/null
++++ b/test/legacy_test/test_fractional_max_pool2d_api.py
+@@ -0,0 +1,600 @@
++# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import unittest
++
++import numpy as np
++from op_test import check_out_dtype
++
++import paddle
++import paddle.nn.functional as F
++from paddle import base
++from paddle.base import core
++
++
++def fractional_rational_u(u, alpha, input, output, pool_size=0):
++    if pool_size > 0:
++        return u
++
++    base = input // output
++
++    u_max1 = (base + 2) / alpha - 1
++    u_max2 = (input + 1 - base) / alpha - (output - 1)
++    max_u = min(u_max1, u_max2)
++
++    return u * max_u
++
++
++def fractional_start_index(idx, alpha, u, pool_size=0):
++    return int((idx + u) * alpha) - int(u * alpha)
++
++
++def fractional_end_index(idx, alpha, u, pool_size=0):
++    if pool_size > 0:
++        return int((idx + u) * alpha) - int(u * alpha) + pool_size
++    return int((idx + 1 + u) * alpha) - int(u * alpha)
++
++
++def fractional_pool2d_forward(
++    x,
++    output_size,
++    kernel_size=None,
++    random_u=None,
++    data_format='NCHW',
++    pool_type="max",
++):
++    N = x.shape[0]
++    C, H, W = (
++        [x.shape[1], x.shape[2], x.shape[3]]
++        if data_format == 'NCHW'
++        else [x.shape[3], x.shape[1], x.shape[2]]
++    )
++
++    if kernel_size is None:
++        pool_height = 0
++        pool_width = 0
++    elif isinstance(kernel_size, int):
++        pool_height = kernel_size
++        pool_width = kernel_size
++    else:
++        pool_height, pool_width = kernel_size
++
++    if isinstance(output_size, int):
++        H_out = output_size
++        W_out = output_size
++        output_size = [H_out, W_out]
++    else:
++        H_out, W_out = output_size
++
++    if output_size[0] is None:
++        output_size[0] = H
++        H_out = H
++    if output_size[1] is None:
++        output_size[1] = W
++        W_out = W
++
++    out = (
++        np.zeros((N, C, H_out, W_out))
++        if data_format == 'NCHW'
++        else np.zeros((N, H_out, W_out, C))
++    )
++
++    u = random_u
++
++    alpha_height = (H - pool_height) / (H_out - (1 if pool_height > 0 else 0))
++    alpha_width = (W - pool_width) / (W_out - (1 if pool_width > 0 else 0))
++
++    u_height = fractional_rational_u(u, alpha_height, H, H_out, pool_height)
++    u_width = fractional_rational_u(u, alpha_width, W, W_out, pool_width)
++
++    for i in range(H_out):
++        h_start = fractional_start_index(i, alpha_height, u_height, pool_height)
++        h_end = fractional_end_index(i, alpha_height, u_height, pool_height)
++        h_start = max(h_start, 0)
++        h_end = min(h_end, H)
++
++        for j in range(W_out):
++            w_start = fractional_start_index(
++                j, alpha_width, u_width, pool_width
++            )
++            w_end = fractional_end_index(j, alpha_width, u_width, pool_width)
++            w_start = max(w_start, 0)
++            w_end = min(w_end, W)
++
++            if data_format == 'NCHW':
++                x_masked = x[:, :, h_start:h_end, w_start:w_end]
++                if pool_type == 'avg':
++                    field_size = (h_end - h_start) * (w_end - w_start)
++                    out[:, :, i, j] = np.sum(x_masked, axis=(2, 3)) / field_size
++                elif pool_type == 'max':
++                    out[:, :, i, j] = np.max(x_masked, axis=(2, 3))
++            elif data_format == 'NHWC':
++                x_masked = x[:, h_start:h_end, w_start:w_end, :]
++                if pool_type == 'avg':
++                    field_size = (h_end - h_start) * (w_end - w_start)
++                    out[:, i, j, :] = np.sum(x_masked, axis=(1, 2)) / field_size
++                elif pool_type == 'max':
++                    out[:, i, j, :] = np.max(x_masked, axis=(1, 2))
++    return out
++
++
++class TestFractionalMaxPool2DAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(2023)
++        self.x_np = np.random.random([2, 3, 7, 7]).astype("float32")
++        self.res_1_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=[3, 3], random_u=0.3
++        )
++
++        self.res_2_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=5, random_u=0.5
++        )
++
++        self.res_3_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=[2, 5], random_u=0.7
++        )
++
++        self.res_4_np = fractional_pool2d_forward(
++            x=self.x_np, kernel_size=2, output_size=[3, 3], random_u=0.6
++        )
++
++        self.res_5_np = fractional_pool2d_forward(
++            x=self.x_np, kernel_size=[2, 2], output_size=[3, 3], random_u=0.6
++        )
++
++        self.res_6_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=[None, 3], random_u=0.6
++        )
++
++        self.res_7_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=[3, None], random_u=0.6
++        )
++
++    def test_static_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place = paddle.CUDAPlace(0) if use_cuda else paddle.CPUPlace()
++            paddle.enable_static()
++            x = paddle.static.data(
++                name="x", shape=[2, 3, 7, 7], dtype="float32"
++            )
++
++            out_1 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[3, 3], random_u=0.3
++            )
++
++            out_2 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=5, random_u=0.5
++            )
++
++            out_3 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[2, 5], random_u=0.7
++            )
++
++            out_4 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, kernel_size=2, output_size=[3, 3], random_u=0.6
++            )
++
++            out_5 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, kernel_size=[2, 2], output_size=[3, 3], random_u=0.6
++            )
++
++            out_6 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[None, 3], random_u=0.6
++            )
++
++            out_7 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[3, None], random_u=0.6
++            )
++
++            exe = paddle.static.Executor(place=place)
++            [res_1, res_2, res_3, res_4, res_5, res_6, res_7] = exe.run(
++                base.default_main_program(),
++                feed={"x": self.x_np},
++                fetch_list=[out_1, out_2, out_3, out_4, out_5, out_6, out_7],
++            )
++
++            np.testing.assert_allclose(res_1, self.res_1_np)
++            np.testing.assert_allclose(res_2, self.res_2_np)
++            np.testing.assert_allclose(res_3, self.res_3_np)
++            np.testing.assert_allclose(res_4, self.res_4_np)
++            np.testing.assert_allclose(res_5, self.res_5_np)
++            np.testing.assert_allclose(res_6, self.res_6_np)
++            np.testing.assert_allclose(res_7, self.res_7_np)
++
++    def test_static_graph_return_mask(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place = paddle.CUDAPlace(0) if use_cuda else paddle.CPUPlace()
++            paddle.enable_static()
++            x = paddle.static.data(
++                name="x", shape=[2, 3, 7, 7], dtype="float32"
++            )
++
++            out_1 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[3, 3], return_mask=True, random_u=0.3
++            )
++
++            out_2 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=5, return_mask=True, random_u=0.5
++            )
++
++            out_3 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[2, 5], return_mask=True, random_u=0.7
++            )
++
++            out_4 = paddle.nn.functional.fractional_max_pool2d(
++                x=x,
++                kernel_size=2,
++                output_size=[3, 3],
++                return_mask=True,
++                random_u=0.6,
++            )
++
++            out_5 = paddle.nn.functional.fractional_max_pool2d(
++                x=x,
++                kernel_size=[2, 2],
++                output_size=[3, 3],
++                return_mask=True,
++                random_u=0.6,
++            )
++
++            out_6 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[None, 3], return_mask=True, random_u=0.6
++            )
++
++            out_7 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[3, None], return_mask=True, random_u=0.6
++            )
++
++            exe = paddle.static.Executor(place=place)
++            [
++                res_1,
++                mask_1,
++                res_2,
++                mask_2,
++                res_3,
++                mask_3,
++                res_4,
++                mask_4,
++                res_5,
++                mask_5,
++                res_6,
++                mask_6,
++                res_7,
++                mask_7,
++            ] = exe.run(
++                base.default_main_program(),
++                feed={"x": self.x_np},
++                fetch_list=[out_1, out_2, out_3, out_4, out_5, out_6, out_7],
++            )
++
++            self.assertEqual(res_1.shape, mask_1.shape)
++            self.assertEqual(res_2.shape, mask_2.shape)
++            self.assertEqual(res_3.shape, mask_3.shape)
++            self.assertEqual(res_4.shape, mask_4.shape)
++            self.assertEqual(res_5.shape, mask_5.shape)
++            self.assertEqual(res_6.shape, mask_6.shape)
++            self.assertEqual(res_7.shape, mask_7.shape)
++
++    def test_dynamic_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            x = paddle.to_tensor(self.x_np)
++
++            out_1 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, return_mask=False, output_size=[3, 3], random_u=0.3
++            )
++
++            out_2 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=5, random_u=0.5
++            )
++
++            out_3 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[2, 5], random_u=0.7
++            )
++
++            out_4 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, kernel_size=2, output_size=[3, 3], random_u=0.6
++            )
++
++            out_5 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, kernel_size=[2, 2], output_size=[3, 3], random_u=0.6
++            )
++
++            out_6 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[None, 3], random_u=0.6
++            )
++
++            out_7 = paddle.nn.functional.fractional_max_pool2d(
++                x=x, output_size=[3, None], random_u=0.6
++            )
++
++            np.testing.assert_allclose(out_1.numpy(), self.res_1_np)
++            np.testing.assert_allclose(out_2.numpy(), self.res_2_np)
++            np.testing.assert_allclose(out_3.numpy(), self.res_3_np)
++            np.testing.assert_allclose(out_4.numpy(), self.res_4_np)
++            np.testing.assert_allclose(out_5.numpy(), self.res_5_np)
++            np.testing.assert_allclose(out_6.numpy(), self.res_6_np)
++            np.testing.assert_allclose(out_7.numpy(), self.res_7_np)
++
++
++class TestFractionalMaxPool2DClassAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(2023)
++        self.x_np = np.random.random([2, 3, 7, 7]).astype("float32")
++        self.res_1_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=[3, 3], random_u=0.3
++        )
++
++        self.res_2_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=5, random_u=0.5
++        )
++
++        self.res_3_np = fractional_pool2d_forward(
++            x=self.x_np, output_size=[2, 5], random_u=0.7
++        )
++
++        self.res_4_np = fractional_pool2d_forward(
++            x=self.x_np, kernel_size=2, output_size=[3, 3], random_u=0.6
++        )
++
++        self.res_5_np = fractional_pool2d_forward(
++            x=self.x_np, kernel_size=[2, 2], output_size=[3, 3], random_u=0.6
++        )
++
++    def test_static_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place = paddle.CUDAPlace(0) if use_cuda else paddle.CPUPlace()
++            paddle.enable_static()
++            x = paddle.static.data(
++                name="x", shape=[2, 3, 7, 7], dtype="float32"
++            )
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                output_size=[3, 3], random_u=0.3
++            )
++            out_1 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                output_size=5, random_u=0.5
++            )
++            out_2 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                output_size=[2, 5], random_u=0.7
++            )
++            out_3 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                kernel_size=2, output_size=[3, 3], random_u=0.6
++            )
++            out_4 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                kernel_size=[2, 2], output_size=[3, 3], random_u=0.6
++            )
++            out_5 = fractional_max_pool(x=x)
++
++            exe = paddle.static.Executor(place=place)
++            [res_1, res_2, res_3, res_4, res_5] = exe.run(
++                base.default_main_program(),
++                feed={"x": self.x_np},
++                fetch_list=[out_1, out_2, out_3, out_4, out_5],
++            )
++
++            np.testing.assert_allclose(res_1, self.res_1_np)
++            np.testing.assert_allclose(res_2, self.res_2_np)
++            np.testing.assert_allclose(res_3, self.res_3_np)
++            np.testing.assert_allclose(res_4, self.res_4_np)
++            np.testing.assert_allclose(res_5, self.res_5_np)
++
++    def test_dynamic_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            x = paddle.to_tensor(self.x_np)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                output_size=[3, 3], random_u=0.3
++            )
++            out_1 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                output_size=5, random_u=0.5
++            )
++            out_2 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                output_size=[2, 5], random_u=0.7
++            )
++            out_3 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                kernel_size=2, output_size=[3, 3], random_u=0.6
++            )
++            out_4 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool2D(
++                kernel_size=[2, 2], output_size=[3, 3], random_u=0.6
++            )
++            out_5 = fractional_max_pool(x=x)
++
++            np.testing.assert_allclose(out_1.numpy(), self.res_1_np)
++            np.testing.assert_allclose(out_2.numpy(), self.res_2_np)
++            np.testing.assert_allclose(out_3.numpy(), self.res_3_np)
++            np.testing.assert_allclose(out_4.numpy(), self.res_4_np)
++            np.testing.assert_allclose(out_5.numpy(), self.res_5_np)
++
++
++class TestOutDtype(unittest.TestCase):
++    def test_max_pool(self):
++        api_fn = F.fractional_max_pool2d
++        shape = [1, 3, 32, 32]
++        check_out_dtype(
++            api_fn,
++            in_specs=[(shape,)],
++            expect_dtypes=['uint16', 'float16', 'float32', 'float64'],
++            output_size=16,
++        )
++
++
++class TestFractionalMaxPool2DAPIDtype(unittest.TestCase):
++    def test_dtypes(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            dtypes = ['float32', 'float64']
++
++            if core.is_float16_supported(place):
++                dtypes += ['float16']
++
++            if use_cuda and core.is_bfloat16_supported(place):
++                dtypes += ['uint16']
++
++            for dtype in dtypes:
++                np.random.seed(2023)
++                x_np = np.random.random([2, 3, 7, 7]).astype(dtype)
++                res_np = fractional_pool2d_forward(
++                    x=x_np, output_size=[3, 3], random_u=0.3
++                )
++
++                x_paddle = paddle.to_tensor(x_np)
++                out = paddle.nn.functional.fractional_max_pool2d(
++                    x=x_paddle, output_size=[3, 3], random_u=0.3
++                )
++
++                np.testing.assert_allclose(out.numpy(), res_np)
++
++
++class TestFractionalMaxPool2DAPIRandomU(unittest.TestCase):
++    def test_none_random_u(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            np.random.seed(2023)
++            x_np = paddle.to_tensor(np.random.random([2, 3, 7, 7]))
++
++            res_np = paddle.nn.functional.fractional_max_pool2d(
++                x=x_np, output_size=[3, 3], random_u=None
++            )
++
++            self.assertTrue(list(res_np.shape) == [2, 3, 3, 3])
++
++    def test_error_random_u(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            np.random.seed(2023)
++            x_np = np.random.random([2, 3, 7, 7])
++
++            # error random_u of `<0`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool2d(
++                    x=x_np, output_size=[3, 3], random_u=-0.2
++                )
++
++            # error random_u of `0`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool2d(
++                    x=x_np, output_size=[3, 3], random_u=0
++                )
++
++            # error random_u of `1`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool2d(
++                    x=x_np, output_size=[3, 3], random_u=1
++                )
++
++            # error random_u of `>1`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool2d(
++                    x=x_np, output_size=[3, 3], random_u=1.2
++                )
++
++
++class TestFractionalMaxPool2DAPIErrorOutputSize(unittest.TestCase):
++    def test_error_output_size(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            np.random.seed(2023)
++            x_np = np.random.random([2, 3, 7, 7])
++
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool2d(
++                    x=x_np, output_size=[7, 7], random_u=0.2
++                )
++
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool2d(
++                    x=x_np, kernel_size=2, output_size=[6, 6], random_u=0.2
++                )
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/test/legacy_test/test_fractional_max_pool2d_op.py b/test/legacy_test/test_fractional_max_pool2d_op.py
+new file mode 100644
+index 00000000000000..84870aa0e4aaf6
+--- /dev/null
++++ b/test/legacy_test/test_fractional_max_pool2d_op.py
+@@ -0,0 +1,291 @@
++#   Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import unittest
++
++import numpy as np
++from op_test import (
++    OpTest,
++    convert_float_to_uint16,
++    convert_uint16_to_float,
++    get_numeric_gradient,
++)
++from testsuite import create_op
++
++import paddle
++from paddle.base import core
++
++
++def fractional_rational_u(u, alpha, input, output, pool_size=0):
++    if pool_size > 0:
++        return u
++
++    base = input // output
++
++    u_max1 = (base + 2) / alpha - 1
++    u_max2 = (input + 1 - base) / alpha - (output - 1)
++    max_u = min(u_max1, u_max2)
++
++    return u * max_u
++
++
++def fractional_start_index(idx, alpha, u, pool_size=0):
++    return int((idx + u) * alpha) - int(u * alpha)
++
++
++def fractional_end_index(idx, alpha, u, pool_size=0):
++    if pool_size > 0:
++        return int((idx + u) * alpha) - int(u * alpha) + pool_size
++    return int((idx + 1 + u) * alpha) - int(u * alpha)
++
++
++def fractional_max_pool2D_forward_naive(
++    x,
++    output_size,
++    kernel_size=[0, 0],
++    random_u=None,
++    return_mask=True,
++):
++    N, C, H, W = x.shape
++    H_out, W_out = output_size
++    pool_height, pool_width = kernel_size
++
++    u = random_u
++
++    alpha_height = (H - pool_height) / (H_out - (1 if pool_height > 0 else 0))
++    alpha_width = (W - pool_width) / (W_out - (1 if pool_width > 0 else 0))
++
++    u_height = fractional_rational_u(u, alpha_height, H, H_out, pool_height)
++    u_width = fractional_rational_u(u, alpha_width, W, W_out, pool_width)
++
++    out = np.zeros((N, C, H_out, W_out))
++    mask = np.zeros((N, C, H_out, W_out))
++    for i in range(H_out):
++        h_start = fractional_start_index(i, alpha_height, u_height, pool_height)
++        h_end = fractional_end_index(i, alpha_height, u_height, pool_height)
++        h_start = max(h_start, 0)
++        h_end = min(h_end, H)
++
++        for j in range(W_out):
++            w_start = fractional_start_index(
++                j, alpha_width, u_width, pool_width
++            )
++            w_end = fractional_end_index(j, alpha_width, u_width, pool_width)
++            w_start = max(w_start, 0)
++            w_end = min(w_end, W)
++
++            x_masked = x[:, :, h_start:h_end, w_start:w_end]
++
++            out[:, :, i, j] = np.max(x_masked, axis=(2, 3))
++
++            for n in range(N):
++                for c in range(C):
++                    arr = x_masked[n, c, :, :]
++                    index = np.where(arr == np.max(arr))
++                    sub_row = index[0][0]
++                    sub_col = index[1][0]
++                    index = (h_start + sub_row) * W + w_start + sub_col
++                    mask[n, c, i, j] = index
++
++    return out, mask
++
++
++# ----------------fractional_max_pool2d----------------
++def fractional_max_pool2d_wapper(
++    x,
++    output_size=None,
++    kernel_size=[0, 0],
++    random_u=None,
++    return_mask=True,
++):
++    return paddle._C_ops.fractional_max_pool2d(
++        x,
++        output_size,
++        kernel_size,
++        random_u,
++        return_mask,
++    )
++
++
++class TestMaxPoolWithIndex_Op(OpTest):
++    def setUp(self):
++        self.op_type = "fractional_max_pool2d"
++        self.python_api = fractional_max_pool2d_wapper
++        self.pool_forward_naive = fractional_max_pool2D_forward_naive
++
++        self.init_test_case()
++        self.init_fractional()
++        self.init_dtype()
++
++        if self.is_bfloat16_op():
++            np.random.seed(2023)
++            input = np.random.random(self.shape).astype(np.float32)
++            input = convert_uint16_to_float(
++                convert_float_to_uint16(np.round(input * 100.0, 2))
++            )
++
++        else:
++            np.random.seed(2023)
++            input = np.random.random(self.shape).astype(self.dtype)
++            input = np.round(input * 100.0, 2)
++
++        output, mask = self.pool_forward_naive(
++            input,
++            self.output_size,
++            self.kernel_size,
++            self.random_u,
++            self.return_mask,
++        )
++        mask = mask.astype("int32")
++        if self.is_bfloat16_op():
++            output = output.astype(np.float32)
++        else:
++            output = output.astype(self.dtype)
++
++        self.attrs = {
++            'output_size': self.output_size,
++            'kernel_size': self.kernel_size,
++            'random_u': self.random_u,
++            'return_mask': self.return_mask,
++        }
++
++        if self.is_bfloat16_op():
++            self.inputs = {'x': convert_float_to_uint16(input)}
++            self.outputs = {
++                'out': convert_float_to_uint16(output),
++                'mask': mask,
++            }
++            self.inputs_fp32 = {'x': input}
++
++        else:
++            self.inputs = {'x': input}
++            self.outputs = {'out': output, 'mask': mask}
++
++    def init_dtype(self):
++        self.dtype = np.float64
++
++    def test_check_output(self):
++        self.check_output()
++
++    def test_check_grad(self):
++        self.check_grad({'x'}, ['out'])
++
++    def init_test_case(self):
++        self.shape = [2, 3, 7, 7]
++        self.output_size = [3, 3]
++        self.kernel_size = [0, 0]
++        self.return_mask = True
++
++    def init_fractional(self):
++        self.random_u = 0.3
++
++
++class TestCase1(TestMaxPoolWithIndex_Op):
++    def init_test_case(self):
++        self.shape = [3, 5, 9, 9]
++        self.output_size = [5, 5]
++        self.kernel_size = [0, 0]
++        self.return_mask = False
++
++
++class TestCase2(TestCase1):
++    def init_fractional(self):
++        self.random_u = 0.5
++
++
++class TestCase3(TestMaxPoolWithIndex_Op):
++    def init_test_case(self):
++        self.shape = [3, 5, 9, 9]
++        self.output_size = [7, 7]
++        self.kernel_size = [2, 2]
++        self.return_mask = True
++
++
++# ----------------fractional_max_pool2d_fp16----------------
++def create_test_fp16_class(parent):
++    @unittest.skipIf(
++        not core.is_compiled_with_cuda(), "core is not compiled with CUDA"
++    )
++    class TestMaxPool2dFP16(parent):
++        def init_dtype(self):
++            self.dtype = np.float16
++
++        def test_check_output(self):
++            if core.is_compiled_with_cuda():
++                place = core.CUDAPlace(0)
++                if core.is_float16_supported(place):
++                    self.check_output_with_place(place)
++
++        def test_check_grad(self):
++            place = core.CUDAPlace(0)
++            if core.is_float16_supported(place):
++                self.check_grad_with_place(place, {'x'}, ['out'])
++
++    cls_name = "{}_{}".format(parent.__name__, "FP16OP")
++    TestMaxPool2dFP16.__name__ = cls_name
++    globals()[cls_name] = TestMaxPool2dFP16
++
++
++create_test_fp16_class(TestMaxPoolWithIndex_Op)
++create_test_fp16_class(TestCase1)
++create_test_fp16_class(TestCase2)
++create_test_fp16_class(TestCase3)
++
++
++# ----------------fractional_max_pool2d_bf16----------------
++def create_test_bf16_class(parent):
++    @unittest.skipIf(
++        not core.is_compiled_with_cuda()
++        or not core.is_bfloat16_supported(core.CUDAPlace(0)),
++        "core is not compiled with CUDA and do not support bfloat16",
++    )
++    class TestMaxPool2dBF16(parent):
++        def init_dtype(self):
++            self.dtype = np.uint16
++
++        def get_numeric_grad(self, place, check_name):
++            scope = core.Scope()
++            self._check_grad_helper()
++            op = create_op(
++                scope, self.op_type, self.inputs, self.outputs, self.attrs
++            )
++            return get_numeric_gradient(
++                place, scope, op, self.inputs_fp32, check_name, ['out']
++            )
++
++        def test_check_output(self):
++            place = core.CUDAPlace(0)
++            if core.is_bfloat16_supported(place):
++                self.check_output_with_place(place)
++
++        def test_check_grad(self):
++            place = core.CUDAPlace(0)
++            numeric_grads = self.get_numeric_grad(place, 'x')
++            if core.is_bfloat16_supported(place):
++                self.check_grad_with_place(
++                    place, {'x'}, ['out'], user_defined_grads=[numeric_grads]
++                )
++
++    cls_name = "{}_{}".format(parent.__name__, "BF16OP")
++    TestMaxPool2dBF16.__name__ = cls_name
++    globals()[cls_name] = TestMaxPool2dBF16
++
++
++create_test_bf16_class(TestMaxPoolWithIndex_Op)
++create_test_bf16_class(TestCase1)
++create_test_bf16_class(TestCase2)
++create_test_bf16_class(TestCase3)
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/test/legacy_test/test_fractional_max_pool3d_api.py b/test/legacy_test/test_fractional_max_pool3d_api.py
+new file mode 100644
+index 00000000000000..e345c39a27e166
+--- /dev/null
++++ b/test/legacy_test/test_fractional_max_pool3d_api.py
+@@ -0,0 +1,683 @@
++#   Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import unittest
++
++import numpy as np
++from op_test import check_out_dtype
++
++import paddle
++import paddle.nn.functional as F
++from paddle import base
++from paddle.base import core
++
++
++def fractional_rational_u(u, alpha, input, output, pool_size=0):
++    if pool_size > 0:
++        return u
++
++    base = input // output
++
++    u_max1 = (base + 2) / alpha - 1
++    u_max2 = (input + 1 - base) / alpha - (output - 1)
++    max_u = min(u_max1, u_max2)
++
++    return u * max_u
++
++
++def fractional_start_index(idx, alpha, u, pool_size=0):
++    return int((idx + u) * alpha) - int(u * alpha)
++
++
++def fractional_end_index(idx, alpha, u, pool_size=0):
++    if pool_size > 0:
++        return int((idx + u) * alpha) - int(u * alpha) + pool_size
++    return int((idx + 1 + u) * alpha) - int(u * alpha)
++
++
++def fractional_pool3d_forward(
++    x,
++    output_size,
++    kernel_size=None,
++    random_u=None,
++    data_format='NCDHW',
++    pool_type='max',
++):
++    N = x.shape[0]
++    C, D, H, W = (
++        [x.shape[1], x.shape[2], x.shape[3], x.shape[4]]
++        if data_format == 'NCDHW'
++        else [x.shape[4], x.shape[1], x.shape[2], x.shape[3]]
++    )
++
++    if kernel_size is None:
++        pool_depth = 0
++        pool_height = 0
++        pool_width = 0
++    elif isinstance(kernel_size, int):
++        pool_depth = kernel_size
++        pool_height = kernel_size
++        pool_width = kernel_size
++    else:
++        pool_depth, pool_height, pool_width = kernel_size
++
++    if isinstance(output_size, int):
++        H_out = output_size
++        W_out = output_size
++        D_out = output_size
++        output_size = [D_out, H_out, W_out]
++    else:
++        D_out, H_out, W_out = output_size
++
++    if output_size[0] is None:
++        output_size[0] = D
++        D_out = D
++    if output_size[1] is None:
++        output_size[1] = H
++        H_out = H
++    if output_size[2] is None:
++        output_size[2] = W
++        W_out = W
++
++    out = (
++        np.zeros((N, C, D_out, H_out, W_out))
++        if data_format == 'NCDHW'
++        else np.zeros((N, D_out, H_out, W_out, C))
++    )
++
++    u = random_u
++
++    alpha_depth = (D - pool_depth) / (D_out - (1 if pool_depth > 0 else 0))
++    alpha_height = (H - pool_height) / (H_out - (1 if pool_height > 0 else 0))
++    alpha_width = (W - pool_width) / (W_out - (1 if pool_width > 0 else 0))
++
++    u_depth = fractional_rational_u(u, alpha_depth, D, D_out, pool_depth)
++    u_height = fractional_rational_u(u, alpha_height, H, H_out, pool_height)
++    u_width = fractional_rational_u(u, alpha_width, W, W_out, pool_width)
++
++    for k in range(D_out):
++        d_start = fractional_start_index(k, alpha_depth, u_depth, pool_depth)
++        d_end = fractional_end_index(k, alpha_depth, u_depth, pool_depth)
++        d_start = max(d_start, 0)
++        d_end = min(d_end, D)
++
++        for i in range(H_out):
++            h_start = fractional_start_index(
++                i, alpha_height, u_height, pool_height
++            )
++            h_end = fractional_end_index(i, alpha_height, u_height, pool_height)
++            h_start = max(h_start, 0)
++            h_end = min(h_end, H)
++
++            for j in range(W_out):
++                w_start = fractional_start_index(
++                    j, alpha_width, u_width, pool_width
++                )
++                w_end = fractional_end_index(
++                    j, alpha_width, u_width, pool_width
++                )
++                w_start = max(w_start, 0)
++                w_end = min(w_end, W)
++
++                if data_format == 'NCDHW':
++                    x_masked = x[
++                        :, :, d_start:d_end, h_start:h_end, w_start:w_end
++                    ]
++                    if pool_type == 'avg':
++                        field_size = (
++                            (d_end - d_start)
++                            * (h_end - h_start)
++                            * (w_end - w_start)
++                        )
++                        out[:, :, k, i, j] = (
++                            np.sum(x_masked, axis=(2, 3, 4)) / field_size
++                        )
++                    elif pool_type == 'max':
++                        out[:, :, k, i, j] = np.max(x_masked, axis=(2, 3, 4))
++
++                elif data_format == 'NDHWC':
++                    x_masked = x[
++                        :, d_start:d_end, h_start:h_end, w_start:w_end, :
++                    ]
++                    if pool_type == 'avg':
++                        field_size = (
++                            (d_end - d_start)
++                            * (h_end - h_start)
++                            * (w_end - w_start)
++                        )
++                        out[:, k, i, j, :] = (
++                            np.sum(x_masked, axis=(1, 2, 3)) / field_size
++                        )
++                    elif pool_type == 'max':
++                        out[:, k, i, j, :] = np.max(x_masked, axis=(1, 2, 3))
++    return out
++
++
++class TestFractionalMaxPool3DAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(2023)
++        self.x_np = np.random.random([2, 3, 7, 7, 7]).astype("float32")
++        self.res_1_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=[3, 3, 3], random_u=0.3
++        )
++
++        self.res_2_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=5, random_u=0.5
++        )
++
++        self.res_3_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=[2, 3, 5], random_u=0.7
++        )
++
++        self.res_4_np = fractional_pool3d_forward(
++            x=self.x_np,
++            kernel_size=2,
++            output_size=[3, 3, 3],
++            random_u=0.6,
++        )
++
++        self.res_5_np = fractional_pool3d_forward(
++            x=self.x_np,
++            kernel_size=[2, 2, 2],
++            output_size=[3, 3, 3],
++            random_u=0.6,
++        )
++
++        self.res_6_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=[None, 3, 3], random_u=0.6
++        )
++
++        self.res_7_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=[3, None, 3], random_u=0.6
++        )
++
++        self.res_8_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=[3, 3, None], random_u=0.6
++        )
++
++    def test_static_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place = paddle.CUDAPlace(0) if use_cuda else paddle.CPUPlace()
++            paddle.enable_static()
++            x = paddle.static.data(
++                name="x", shape=[2, 3, 7, 7, 7], dtype="float32"
++            )
++
++            out_1 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, 3, 3], random_u=0.3
++            )
++
++            out_2 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=5, random_u=0.5
++            )
++
++            out_3 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[2, 3, 5], random_u=0.7
++            )
++
++            out_4 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, kernel_size=2, output_size=[3, 3, 3], random_u=0.6
++            )
++
++            out_5 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, kernel_size=[2, 2, 2], output_size=[3, 3, 3], random_u=0.6
++            )
++
++            out_6 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[None, 3, 3], random_u=0.6
++            )
++
++            out_7 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, None, 3], random_u=0.6
++            )
++
++            out_8 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, 3, None], random_u=0.6
++            )
++
++            exe = paddle.static.Executor(place=place)
++            [res_1, res_2, res_3, res_4, res_5, res_6, res_7, res_8] = exe.run(
++                base.default_main_program(),
++                feed={"x": self.x_np},
++                fetch_list=[
++                    out_1,
++                    out_2,
++                    out_3,
++                    out_4,
++                    out_5,
++                    out_6,
++                    out_7,
++                    out_8,
++                ],
++            )
++
++            np.testing.assert_allclose(res_1, self.res_1_np)
++            np.testing.assert_allclose(res_2, self.res_2_np)
++            np.testing.assert_allclose(res_3, self.res_3_np)
++            np.testing.assert_allclose(res_4, self.res_4_np)
++            np.testing.assert_allclose(res_5, self.res_5_np)
++            np.testing.assert_allclose(res_6, self.res_6_np)
++            np.testing.assert_allclose(res_7, self.res_7_np)
++            np.testing.assert_allclose(res_8, self.res_8_np)
++
++    def test_static_graph_return_mask(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place = paddle.CUDAPlace(0) if use_cuda else paddle.CPUPlace()
++            paddle.enable_static()
++            x = paddle.static.data(
++                name="x", shape=[2, 3, 7, 7, 7], dtype="float32"
++            )
++
++            out_1 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, 3, 3], return_mask=True, random_u=0.3
++            )
++
++            out_2 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=5, return_mask=True, random_u=0.5
++            )
++
++            out_3 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[2, 3, 5], return_mask=True, random_u=0.7
++            )
++
++            out_4 = paddle.nn.functional.fractional_max_pool3d(
++                x=x,
++                kernel_size=2,
++                output_size=[3, 3, 3],
++                return_mask=True,
++                random_u=0.6,
++            )
++
++            out_5 = paddle.nn.functional.fractional_max_pool3d(
++                x=x,
++                kernel_size=[2, 2, 2],
++                output_size=[3, 3, 3],
++                return_mask=True,
++                random_u=0.6,
++            )
++
++            out_6 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[None, 3, 3], return_mask=True, random_u=0.6
++            )
++
++            out_7 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, None, 3], return_mask=True, random_u=0.6
++            )
++
++            out_8 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, 3, None], return_mask=True, random_u=0.6
++            )
++
++            exe = paddle.static.Executor(place=place)
++            [
++                res_1,
++                mask_1,
++                res_2,
++                mask_2,
++                res_3,
++                mask_3,
++                res_4,
++                mask_4,
++                res_5,
++                mask_5,
++                res_6,
++                mask_6,
++                res_7,
++                mask_7,
++                res_8,
++                mask_8,
++            ] = exe.run(
++                base.default_main_program(),
++                feed={"x": self.x_np},
++                fetch_list=[
++                    out_1,
++                    out_2,
++                    out_3,
++                    out_4,
++                    out_5,
++                    out_6,
++                    out_7,
++                    out_8,
++                ],
++            )
++
++            self.assertEqual(res_1.shape, mask_1.shape)
++            self.assertEqual(res_2.shape, mask_2.shape)
++            self.assertEqual(res_3.shape, mask_3.shape)
++            self.assertEqual(res_4.shape, mask_4.shape)
++            self.assertEqual(res_5.shape, mask_5.shape)
++            self.assertEqual(res_6.shape, mask_6.shape)
++            self.assertEqual(res_7.shape, mask_7.shape)
++            self.assertEqual(res_8.shape, mask_8.shape)
++
++    def test_dynamic_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            x = paddle.to_tensor(self.x_np)
++
++            out_1 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, 3, 3], random_u=0.3
++            )
++
++            out_2 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=5, random_u=0.5
++            )
++
++            out_3 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[2, 3, 5], random_u=0.7
++            )
++
++            out_4 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, kernel_size=2, output_size=[3, 3, 3], random_u=0.6
++            )
++
++            out_5 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, kernel_size=[2, 2, 2], output_size=[3, 3, 3], random_u=0.6
++            )
++
++            out_6 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[None, 3, 3], random_u=0.6
++            )
++
++            out_7 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, None, 3], random_u=0.6
++            )
++
++            out_8 = paddle.nn.functional.fractional_max_pool3d(
++                x=x, output_size=[3, 3, None], random_u=0.6
++            )
++
++            np.testing.assert_allclose(out_1.numpy(), self.res_1_np)
++            np.testing.assert_allclose(out_2.numpy(), self.res_2_np)
++            np.testing.assert_allclose(out_3.numpy(), self.res_3_np)
++            np.testing.assert_allclose(out_4.numpy(), self.res_4_np)
++            np.testing.assert_allclose(out_5.numpy(), self.res_5_np)
++            np.testing.assert_allclose(out_6.numpy(), self.res_6_np)
++            np.testing.assert_allclose(out_7.numpy(), self.res_7_np)
++            np.testing.assert_allclose(out_8.numpy(), self.res_8_np)
++
++
++class TestFractionalMaxPool3DClassAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(2023)
++        self.x_np = np.random.random([2, 3, 7, 7, 7]).astype("float32")
++        self.res_1_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=[3, 3, 3], random_u=0.3
++        )
++
++        self.res_2_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=5, random_u=0.5
++        )
++
++        self.res_3_np = fractional_pool3d_forward(
++            x=self.x_np, output_size=[2, 3, 5], random_u=0.7
++        )
++
++        self.res_4_np = fractional_pool3d_forward(
++            x=self.x_np, kernel_size=2, output_size=[3, 3, 3], random_u=0.6
++        )
++
++        self.res_5_np = fractional_pool3d_forward(
++            x=self.x_np,
++            kernel_size=[2, 2, 2],
++            output_size=[3, 3, 3],
++            random_u=0.6,
++        )
++
++    def test_static_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place = paddle.CUDAPlace(0) if use_cuda else paddle.CPUPlace()
++            paddle.enable_static()
++            x = paddle.static.data(
++                name="x", shape=[2, 3, 7, 7, 7], dtype="float32"
++            )
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                output_size=[3, 3, 3], random_u=0.3
++            )
++            out_1 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                output_size=5, random_u=0.5
++            )
++            out_2 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                output_size=[2, 3, 5], random_u=0.7
++            )
++            out_3 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                kernel_size=2, output_size=[3, 3, 3], random_u=0.6
++            )
++            out_4 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                kernel_size=[2, 2, 2], output_size=[3, 3, 3], random_u=0.6
++            )
++            out_5 = fractional_max_pool(x=x)
++
++            exe = paddle.static.Executor(place=place)
++            [res_1, res_2, res_3, res_4, res_5] = exe.run(
++                base.default_main_program(),
++                feed={"x": self.x_np},
++                fetch_list=[out_1, out_2, out_3, out_4, out_5],
++            )
++
++            np.testing.assert_allclose(res_1, self.res_1_np)
++            np.testing.assert_allclose(res_2, self.res_2_np)
++            np.testing.assert_allclose(res_3, self.res_3_np)
++            np.testing.assert_allclose(res_4, self.res_4_np)
++            np.testing.assert_allclose(res_5, self.res_5_np)
++
++    def test_dynamic_graph(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            x = paddle.to_tensor(self.x_np)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                output_size=[3, 3, 3], random_u=0.3
++            )
++            out_1 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                output_size=5, random_u=0.5
++            )
++            out_2 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                output_size=[2, 3, 5], random_u=0.7
++            )
++            out_3 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                kernel_size=2, output_size=[3, 3, 3], random_u=0.6
++            )
++            out_4 = fractional_max_pool(x=x)
++
++            fractional_max_pool = paddle.nn.FractionalMaxPool3D(
++                kernel_size=[2, 2, 2], output_size=[3, 3, 3], random_u=0.6
++            )
++            out_5 = fractional_max_pool(x=x)
++
++            np.testing.assert_allclose(out_1.numpy(), self.res_1_np)
++            np.testing.assert_allclose(out_2.numpy(), self.res_2_np)
++            np.testing.assert_allclose(out_3.numpy(), self.res_3_np)
++            np.testing.assert_allclose(out_4.numpy(), self.res_4_np)
++            np.testing.assert_allclose(out_5.numpy(), self.res_5_np)
++
++
++class TestOutDtype(unittest.TestCase):
++    def test_max_pool(self):
++        api_fn = F.fractional_max_pool3d
++        shape = [1, 3, 32, 32, 32]
++        check_out_dtype(
++            api_fn,
++            in_specs=[(shape,)],
++            expect_dtypes=['uint16', 'float16', 'float32', 'float64'],
++            output_size=16,
++        )
++
++
++class TestFractionalMaxPool3DAPIDtype(unittest.TestCase):
++    def test_dtypes(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            dtypes = ['float32', 'float64']
++
++            if core.is_float16_supported(place):
++                dtypes += ['float16']
++
++            if use_cuda and core.is_bfloat16_supported(place):
++                dtypes += ['uint16']
++
++            for dtype in dtypes:
++                np.random.seed(2023)
++                x_np = np.random.random([2, 3, 7, 7, 7]).astype(dtype)
++                res_np = fractional_pool3d_forward(
++                    x=x_np, output_size=[3, 3, 3], random_u=0.3
++                )
++
++                x_paddle = paddle.to_tensor(x_np)
++                out = paddle.nn.functional.fractional_max_pool3d(
++                    x=x_paddle, output_size=[3, 3, 3], random_u=0.3
++                )
++
++                np.testing.assert_allclose(out.numpy(), res_np)
++
++
++class TestFractionalMaxPool3DAPIRandomU(unittest.TestCase):
++    def test_none_random_u(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            np.random.seed(2023)
++            x_np = paddle.to_tensor(np.random.random([2, 3, 7, 7, 7]))
++
++            res_np = paddle.nn.functional.fractional_max_pool3d(
++                x=x_np, output_size=[3, 3, 3], random_u=None
++            )
++
++            self.assertTrue(list(res_np.shape) == [2, 3, 3, 3, 3])
++
++    def test_error_random_u(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            np.random.seed(2023)
++            x_np = paddle.to_tensor(np.random.random([2, 3, 7, 7, 7]))
++
++            # error random_u of `<0`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool3d(
++                    x=x_np, output_size=[3, 3, 3], random_u=-0.2
++                )
++
++            # error random_u of `0`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool3d(
++                    x=x_np, output_size=[3, 3, 3], random_u=0
++                )
++
++            # error random_u of `1`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool3d(
++                    x=x_np, output_size=[3, 3, 3], random_u=1
++                )
++
++            # error random_u of `>1`
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool3d(
++                    x=x_np, output_size=[3, 3, 3], random_u=1.2
++                )
++
++
++class TestFractionalMaxPool3DAPIErrorOutputSize(unittest.TestCase):
++    def test_error_output_size(self):
++        for use_cuda in (
++            [False, True] if core.is_compiled_with_cuda() else [False]
++        ):
++            place, device = (
++                (paddle.CUDAPlace(0), 'gpu')
++                if use_cuda
++                else (paddle.CPUPlace(), 'cpu')
++            )
++            paddle.disable_static(place=place)
++            paddle.set_device(device)
++
++            np.random.seed(2023)
++            x_np = np.random.random([2, 3, 7, 7, 7])
++
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool3d(
++                    x=x_np, output_size=[7, 7, 7], random_u=0.2
++                )
++
++            with self.assertRaises(ValueError):
++                res_np = paddle.nn.functional.fractional_max_pool3d(
++                    x=x_np, kernel_size=2, output_size=[6, 6, 6], random_u=0.2
++                )
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/test/legacy_test/test_fractional_max_pool3d_op.py b/test/legacy_test/test_fractional_max_pool3d_op.py
+new file mode 100644
+index 00000000000000..418be4d3abbe0b
+--- /dev/null
++++ b/test/legacy_test/test_fractional_max_pool3d_op.py
+@@ -0,0 +1,309 @@
++#   Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import unittest
++
++import numpy as np
++from op_test import (
++    OpTest,
++    convert_float_to_uint16,
++    convert_uint16_to_float,
++    get_numeric_gradient,
++)
++from testsuite import create_op
++
++import paddle
++from paddle.base import core
++
++
++def fractional_rational_u(u, alpha, input, output, pool_size=0):
++    if pool_size > 0:
++        return u
++
++    base = input // output
++
++    u_max1 = (base + 2) / alpha - 1
++    u_max2 = (input + 1 - base) / alpha - (output - 1)
++    max_u = min(u_max1, u_max2)
++
++    return u * max_u
++
++
++def fractional_start_index(idx, alpha, u, pool_size=0):
++    return int((idx + u) * alpha) - int(u * alpha)
++
++
++def fractional_end_index(idx, alpha, u, pool_size=0):
++    if pool_size > 0:
++        return int((idx + u) * alpha) - int(u * alpha) + pool_size
++    return int((idx + 1 + u) * alpha) - int(u * alpha)
++
++
++def fractional_max_pool3D_forward_naive(
++    x,
++    output_size,
++    kernel_size=[0, 0, 0],
++    random_u=None,
++    return_mask=True,
++):
++    N, C, D, H, W = x.shape
++    D_out, H_out, W_out = output_size
++    pool_depth, pool_height, pool_width = kernel_size
++
++    u = random_u
++
++    alpha_depth = (D - pool_depth) / (D_out - (1 if pool_depth > 0 else 0))
++    alpha_height = (H - pool_height) / (H_out - (1 if pool_height > 0 else 0))
++    alpha_width = (W - pool_width) / (W_out - (1 if pool_width > 0 else 0))
++
++    u_depth = fractional_rational_u(u, alpha_depth, D, D_out, pool_depth)
++    u_height = fractional_rational_u(u, alpha_height, H, H_out, pool_height)
++    u_width = fractional_rational_u(u, alpha_width, W, W_out, pool_width)
++
++    out = np.zeros((N, C, D_out, H_out, W_out))
++    mask = np.zeros((N, C, D_out, H_out, W_out))
++    for k in range(D_out):
++        d_start = fractional_start_index(k, alpha_depth, u_depth, pool_depth)
++        d_end = fractional_end_index(k, alpha_depth, u_depth, pool_depth)
++        d_start = max(d_start, 0)
++        d_end = min(d_end, D)
++
++        for i in range(H_out):
++            h_start = fractional_start_index(
++                i, alpha_height, u_height, pool_height
++            )
++            h_end = fractional_end_index(i, alpha_height, u_height, pool_height)
++            h_start = max(h_start, 0)
++            h_end = min(h_end, H)
++
++            for j in range(W_out):
++                w_start = fractional_start_index(
++                    j, alpha_width, u_width, pool_width
++                )
++                w_end = fractional_end_index(
++                    j, alpha_width, u_width, pool_width
++                )
++                w_start = max(w_start, 0)
++                w_end = min(w_end, W)
++
++                x_masked = x[:, :, d_start:d_end, h_start:h_end, w_start:w_end]
++
++                out[:, :, k, i, j] = np.max(x_masked, axis=(2, 3, 4))
++
++                for n in range(N):
++                    for c in range(C):
++                        arr = x_masked[n, c, :, :, :]
++                        index = np.where(arr == np.max(arr))
++                        sub_deep = index[0][0]
++                        sub_row = index[1][0]
++                        sub_col = index[2][0]
++                        index = (
++                            ((d_start + sub_deep) * H + (h_start + sub_row)) * W
++                            + w_start
++                            + sub_col
++                        )
++                        mask[n, c, k, i, j] = index
++
++    return out, mask
++
++
++# ----------------fractional_max_pool3d----------------
++def fractional_max_pool3d_wapper(
++    x,
++    output_size=None,
++    kernel_size=[0, 0, 0],
++    random_u=None,
++    return_mask=True,
++):
++    return paddle._C_ops.fractional_max_pool3d(
++        x,
++        output_size,
++        kernel_size,
++        random_u,
++        return_mask,
++    )
++
++
++class TestMaxPoolWithIndex_Op(OpTest):
++    def setUp(self):
++        self.op_type = "fractional_max_pool3d"
++        self.python_api = fractional_max_pool3d_wapper
++        self.pool_forward_naive = fractional_max_pool3D_forward_naive
++
++        self.init_test_case()
++        self.init_fractional()
++        self.init_dtype()
++
++        if self.is_bfloat16_op():
++            np.random.seed(2023)
++            input = np.random.random(self.shape).astype(np.float32)
++            input = convert_uint16_to_float(
++                convert_float_to_uint16(np.round(input * 100.0, 2))
++            )
++
++        else:
++            np.random.seed(2023)
++            input = np.random.random(self.shape).astype(self.dtype)
++            input = np.round(input * 100.0, 2)
++
++        output, mask = self.pool_forward_naive(
++            input,
++            self.output_size,
++            self.kernel_size,
++            self.random_u,
++            self.return_mask,
++        )
++        mask = mask.astype("int32")
++        if self.is_bfloat16_op():
++            output = output.astype(np.float32)
++        else:
++            output = output.astype(self.dtype)
++
++        self.attrs = {
++            'output_size': self.output_size,
++            'kernel_size': self.kernel_size,
++            'random_u': self.random_u,
++            'return_mask': self.return_mask,
++        }
++
++        if self.is_bfloat16_op():
++            self.inputs = {'x': convert_float_to_uint16(input)}
++            self.outputs = {
++                'out': convert_float_to_uint16(output),
++                'mask': mask,
++            }
++            self.inputs_fp32 = {'x': input}
++
++        else:
++            self.inputs = {'x': input}
++            self.outputs = {'out': output, 'mask': mask}
++
++    def init_dtype(self):
++        self.dtype = np.float64
++
++    def test_check_output(self):
++        self.check_output()
++
++    def test_check_grad(self):
++        self.check_grad({'x'}, ['out'])
++
++    def init_test_case(self):
++        self.shape = [2, 3, 7, 7, 7]
++        self.output_size = [3, 3, 3]
++        self.kernel_size = [0, 0, 0]
++        self.return_mask = True
++
++    def init_fractional(self):
++        self.random_u = 0.3
++
++
++class TestCase1(TestMaxPoolWithIndex_Op):
++    def init_test_case(self):
++        self.shape = [2, 5, 9, 9, 9]
++        self.output_size = [5, 5, 5]
++        self.kernel_size = [0, 0, 0]
++        self.return_mask = False
++
++
++class TestCase2(TestCase1):
++    def init_fractional(self):
++        self.random_u = 0.5
++
++
++class TestCase3(TestMaxPoolWithIndex_Op):
++    def init_test_case(self):
++        self.shape = [2, 5, 7, 7, 7]
++        self.output_size = [5, 5, 5]
++        self.kernel_size = [2, 2, 2]
++        self.return_mask = True
++
++
++# ----------------fractional_max_pool3d_fp16----------------
++def create_test_fp16_class(parent):
++    @unittest.skipIf(
++        not core.is_compiled_with_cuda(), "core is not compiled with CUDA"
++    )
++    class TestMaxPool3dFP16(parent):
++        def init_dtype(self):
++            self.dtype = np.float16
++
++        def test_check_output(self):
++            if core.is_compiled_with_cuda():
++                place = core.CUDAPlace(0)
++                if core.is_float16_supported(place):
++                    self.check_output_with_place(place)
++
++        def test_check_grad(self):
++            place = core.CUDAPlace(0)
++            if core.is_float16_supported(place):
++                self.check_grad_with_place(place, {'x'}, ['out'])
++
++    cls_name = "{}_{}".format(parent.__name__, "FP16OP")
++    TestMaxPool3dFP16.__name__ = cls_name
++    globals()[cls_name] = TestMaxPool3dFP16
++
++
++create_test_fp16_class(TestMaxPoolWithIndex_Op)
++create_test_fp16_class(TestCase1)
++create_test_fp16_class(TestCase2)
++create_test_fp16_class(TestCase3)
++
++
++# ----------------fractional_max_pool3d_bf16----------------
++def create_test_bf16_class(parent):
++    @unittest.skipIf(
++        not core.is_compiled_with_cuda()
++        or not core.is_bfloat16_supported(core.CUDAPlace(0)),
++        "core is not compiled with CUDA and do not support bfloat16",
++    )
++    class TestMaxPool3dBF16(parent):
++        def init_dtype(self):
++            self.dtype = np.uint16
++
++        def get_numeric_grad(self, place, check_name):
++            scope = core.Scope()
++            self._check_grad_helper()
++            op = create_op(
++                scope, self.op_type, self.inputs, self.outputs, self.attrs
++            )
++            return get_numeric_gradient(
++                place, scope, op, self.inputs_fp32, check_name, ['out']
++            )
++
++        def test_check_output(self):
++            place = core.CUDAPlace(0)
++            if core.is_bfloat16_supported(place):
++                self.check_output_with_place(place)
++
++        def test_check_grad(self):
++            place = core.CUDAPlace(0)
++            numeric_grads = self.get_numeric_grad(place, 'x')
++            if core.is_bfloat16_supported(place):
++                self.check_grad_with_place(
++                    place, {'x'}, ['out'], user_defined_grads=[numeric_grads]
++                )
++
++    cls_name = "{}_{}".format(parent.__name__, "BF16OP")
++    TestMaxPool3dBF16.__name__ = cls_name
++    globals()[cls_name] = TestMaxPool3dBF16
++
++
++create_test_bf16_class(TestMaxPoolWithIndex_Op)
++create_test_bf16_class(TestCase1)
++create_test_bf16_class(TestCase2)
++create_test_bf16_class(TestCase3)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/test/white_list/op_accuracy_white_list.py b/test/white_list/op_accuracy_white_list.py
+index 3027f4960c050d..98429a013f8297 100644
+--- a/test/white_list/op_accuracy_white_list.py
++++ b/test/white_list/op_accuracy_white_list.py
+@@ -44,6 +44,8 @@
+     'max_pool2d_v2',
+     'max_pool2d_with_index',
+     'max_pool3d_with_index',
++    'fractional_max_pool2d',
++    'fractional_max_pool3d',
+     'minus',
+     'modified_huber_loss',
+     'nce',
+diff --git a/test/white_list/op_threshold_white_list.py b/test/white_list/op_threshold_white_list.py
+index c5eb0862cb7176..9b9d590fd0a210 100644
+--- a/test/white_list/op_threshold_white_list.py
++++ b/test/white_list/op_threshold_white_list.py
+@@ -29,6 +29,8 @@
+     'lstm',
+     'max_pool2d_with_index',
+     'max_pool3d_with_index',
++    'fractional_max_pool2d',
++    'fractional_max_pool3d',
+     'norm',
+     'pool3d',
+     'reduce_prod',
