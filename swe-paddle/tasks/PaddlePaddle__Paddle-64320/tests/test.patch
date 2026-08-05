@@ -1,8 +1,8 @@
 diff --git a/test/legacy_test/CMakeLists.txt b/test/legacy_test/CMakeLists.txt
-index f84458dd494f30..33aa88c3a7c516 100644
+index 8cd5c972437466f3abc5f4e1bfc7b0d8c01a8783..4b390ca18a3f18a0e131d7001664d48c23b52315 100644
 --- a/test/legacy_test/CMakeLists.txt
 +++ b/test/legacy_test/CMakeLists.txt
-@@ -1131,6 +1131,7 @@ set_pir_tests_properties()
+@@ -1140,6 +1140,7 @@ set_pir_tests_properties()
  set_tests_properties(test_nadam_op PROPERTIES TIMEOUT 100)
  set_tests_properties(test_radam_op PROPERTIES TIMEOUT 100)
  set_tests_properties(test_nan_inf PROPERTIES TIMEOUT 120)
@@ -174,3 +174,4 @@ index 00000000000000..f4cd639452b5d3
 +
 +
 +if __name__ == "__main__":
++    unittest.main()
