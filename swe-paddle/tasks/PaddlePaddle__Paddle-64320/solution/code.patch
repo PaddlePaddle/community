@@ -1,6 +1,6 @@
 diff --git a/paddle/phi/kernels/sparse/cpu/mask_grad_kernel.cc b/paddle/phi/kernels/sparse/cpu/mask_grad_kernel.cc
 new file mode 100644
-index 00000000000000..3503c88b2ef8b4
+index 0000000000..3503c88b2e
 --- /dev/null
 +++ b/paddle/phi/kernels/sparse/cpu/mask_grad_kernel.cc
 @@ -0,0 +1,56 @@
@@ -61,7 +61,7 @@ index 00000000000000..3503c88b2ef8b4
 +  kernel->InputAt(1).SetDataLayout(phi::DataLayout::SPARSE_CSR);
 +}
 diff --git a/paddle/phi/kernels/sparse/cpu/mask_kernel.cc b/paddle/phi/kernels/sparse/cpu/mask_kernel.cc
-index 5213dd44a4c07c..658a26452dafb6 100644
+index 423844d8fd..7b8d24a440 100644
 --- a/paddle/phi/kernels/sparse/cpu/mask_kernel.cc
 +++ b/paddle/phi/kernels/sparse/cpu/mask_kernel.cc
 @@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
@@ -72,7 +72,7 @@ index 5213dd44a4c07c..658a26452dafb6 100644
  
  #include "paddle/common/ddim.h"
  #include "paddle/phi/api/ext/dispatch.h"
-@@ -75,16 +76,116 @@ void MaskCooCPUKernel(const CPUContext& dev_ctx,
+@@ -74,16 +75,116 @@ void MaskCooCPUKernel(const CPUContext& dev_ctx,
   * x and mask must have the same shape.
   **/
  template <typename T, typename Context>
@@ -193,9 +193,9 @@ index 5213dd44a4c07c..658a26452dafb6 100644
  template <typename T, typename IntT>
  void MaskHelperCooCPUKernel(const CPUContext& dev_ctx,
                              const SparseCooTensor& x,
-@@ -157,10 +258,26 @@ void MaskHelperCooKernel(const Context& dev_ctx,
- }  // namespace sparse
- }  // namespace phi
+@@ -155,10 +256,26 @@ void MaskHelperCooKernel(const Context& dev_ctx,
+ 
+ }  // namespace phi::sparse
  
 -PD_REGISTER_KERNEL(mask_coo,
 +PD_REGISTER_KERNEL(mask_helper_coo,
@@ -222,7 +222,7 @@ index 5213dd44a4c07c..658a26452dafb6 100644
                     float,
                     double,
                     uint8_t,
-@@ -174,18 +291,19 @@ PD_REGISTER_KERNEL(mask_coo,
+@@ -172,18 +289,19 @@ PD_REGISTER_KERNEL(mask_coo,
    kernel->InputAt(1).SetDataLayout(phi::DataLayout::SPARSE_COO);
  }
  
@@ -248,7 +248,7 @@ index 5213dd44a4c07c..658a26452dafb6 100644
  }
 diff --git a/paddle/phi/kernels/sparse/gpu/mask_grad_kernel.cu b/paddle/phi/kernels/sparse/gpu/mask_grad_kernel.cu
 new file mode 100644
-index 00000000000000..1e4e3276d82e15
+index 0000000000..1e4e3276d8
 --- /dev/null
 +++ b/paddle/phi/kernels/sparse/gpu/mask_grad_kernel.cu
 @@ -0,0 +1,56 @@
@@ -309,7 +309,7 @@ index 00000000000000..1e4e3276d82e15
 +  kernel->InputAt(1).SetDataLayout(phi::DataLayout::SPARSE_CSR);
 +}
 diff --git a/paddle/phi/kernels/sparse/gpu/mask_kernel.cu b/paddle/phi/kernels/sparse/gpu/mask_kernel.cu
-index 0941ad69b0dd2d..3459f6802b8819 100644
+index 0941ad69b0..3459f6802b 100644
 --- a/paddle/phi/kernels/sparse/gpu/mask_kernel.cu
 +++ b/paddle/phi/kernels/sparse/gpu/mask_kernel.cu
 @@ -12,7 +12,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -639,7 +639,7 @@ index 0941ad69b0dd2d..3459f6802b8819 100644
  }
 diff --git a/paddle/phi/kernels/sparse/mask_grad_kernel.h b/paddle/phi/kernels/sparse/mask_grad_kernel.h
 new file mode 100644
-index 00000000000000..687562aa300d1c
+index 0000000000..687562aa30
 --- /dev/null
 +++ b/paddle/phi/kernels/sparse/mask_grad_kernel.h
 @@ -0,0 +1,45 @@
@@ -689,7 +689,7 @@ index 00000000000000..687562aa300d1c
 +}  // namespace sparse
 +}  // namespace phi
 diff --git a/paddle/phi/kernels/sparse/mask_kernel.h b/paddle/phi/kernels/sparse/mask_kernel.h
-index 5ffc7fb4aa44d9..5be993e243b193 100644
+index 5ffc7fb4aa..5be993e243 100644
 --- a/paddle/phi/kernels/sparse/mask_kernel.h
 +++ b/paddle/phi/kernels/sparse/mask_kernel.h
 @@ -16,21 +16,28 @@ limitations under the License. */
@@ -728,10 +728,10 @@ index 5ffc7fb4aa44d9..5be993e243b193 100644
  }  // namespace sparse
  }  // namespace phi
 diff --git a/paddle/phi/kernels/sparse/sparse_utils_grad_kernel.cc b/paddle/phi/kernels/sparse/sparse_utils_grad_kernel.cc
-index f5915c7acb84ce..2b802615486f42 100644
+index 7305dc9f5b..4933aac3c2 100644
 --- a/paddle/phi/kernels/sparse/sparse_utils_grad_kernel.cc
 +++ b/paddle/phi/kernels/sparse/sparse_utils_grad_kernel.cc
-@@ -32,7 +32,7 @@ void CooToDenseGradKernel(const Context& dev_ctx,
+@@ -31,7 +31,7 @@ void CooToDenseGradKernel(const Context& dev_ctx,
                            const SparseCooTensor& x,
                            const DenseTensor& out_grad,
                            SparseCooTensor* x_grad) {
@@ -739,9 +739,9 @@ index f5915c7acb84ce..2b802615486f42 100644
 +  MaskAsCooKernel<T, Context>(dev_ctx, out_grad, x, x_grad);
  }
  
- }  // namespace sparse
+ }  // namespace phi::sparse
 diff --git a/paddle/phi/ops/yaml/sparse_backward.yaml b/paddle/phi/ops/yaml/sparse_backward.yaml
-index 3e614b942d3019..f7734af1bf6ecd 100644
+index 3e614b942d..f7734af1bf 100644
 --- a/paddle/phi/ops/yaml/sparse_backward.yaml
 +++ b/paddle/phi/ops/yaml/sparse_backward.yaml
 @@ -184,6 +184,17 @@
@@ -763,7 +763,7 @@ index 3e614b942d3019..f7734af1bf6ecd 100644
    forward : masked_matmul(Tensor x, Tensor y, Tensor mask) -> Tensor(out)
    args : (Tensor x, Tensor y, Tensor out_grad)
 diff --git a/paddle/phi/ops/yaml/sparse_ops.yaml b/paddle/phi/ops/yaml/sparse_ops.yaml
-index ac230be485c095..80cef73a6c1f5e 100644
+index ac230be485..80cef73a6c 100644
 --- a/paddle/phi/ops/yaml/sparse_ops.yaml
 +++ b/paddle/phi/ops/yaml/sparse_ops.yaml
 @@ -497,6 +497,18 @@
@@ -786,10 +786,10 @@ index ac230be485c095..80cef73a6c1f5e 100644
    args : (Tensor x, Tensor y, Tensor mask)
    output : Tensor(out)
 diff --git a/python/paddle/sparse/__init__.py b/python/paddle/sparse/__init__.py
-index 661143f12dae8f..98f5ca0b13ee54 100644
+index 661143f12d..98f5ca0b13 100644
 --- a/python/paddle/sparse/__init__.py
 +++ b/python/paddle/sparse/__init__.py
-@@ -17,6 +17,7 @@
+@@ -17,6 +17,7 @@ from .binary import (
      add,
      divide,
      is_same_shape,
@@ -797,7 +797,7 @@ index 661143f12dae8f..98f5ca0b13ee54 100644
      masked_matmul,
      matmul,
      multiply,
-@@ -77,6 +78,7 @@
+@@ -77,6 +78,7 @@ __all__ = [
      'expm1',
      'mv',
      'matmul',
@@ -806,7 +806,7 @@ index 661143f12dae8f..98f5ca0b13ee54 100644
      'addmm',
      'add',
 diff --git a/python/paddle/sparse/binary.py b/python/paddle/sparse/binary.py
-index 3aac3d5e7f1446..abc943ac3c1fc2 100644
+index 3aac3d5e7f..abc943ac3c 100644
 --- a/python/paddle/sparse/binary.py
 +++ b/python/paddle/sparse/binary.py
 @@ -452,3 +452,60 @@ def is_same_shape(x, y):
