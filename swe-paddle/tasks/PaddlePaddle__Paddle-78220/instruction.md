@@ -12,7 +12,7 @@ The operation must be callable through all of these routes:
 - `paddle.special.log_softmax`
 - `paddle.compat.nn.functional.log_softmax`
 
-For equivalent arguments, all five routes must produce numerically equivalent results.
+When the dimension is explicitly specified with equivalent `axis`/`dim` values, all five routes must produce numerically equivalent results. The routes do not need to produce the same result when the dimension is omitted: `paddle.nn.functional.log_softmax` keeps Paddle's default `axis=-1`, while the compatibility-style routes use the PyTorch-compatible `dim=None` rule, which selects a dimension based on the input rank.
 
 ## Standard Paddle API behavior
 

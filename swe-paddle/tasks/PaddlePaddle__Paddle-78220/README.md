@@ -16,7 +16,7 @@ This directory packages Paddle PR #78220 as a SWE-Paddle task.
 
 ## Behavior Summary
 
-The task adds PyTorch-compatible `log_softmax` access and parameter semantics while preserving Paddle's existing behavior. The operation is available through `paddle.nn.functional`, `paddle`, `Tensor`, `paddle.special`, and `paddle.compat.nn.functional`; the public routes produce consistent results.
+The task adds PyTorch-compatible `log_softmax` access and parameter semantics while preserving Paddle's existing behavior. The operation is available through `paddle.nn.functional`, `paddle`, `Tensor`, `paddle.special`, and `paddle.compat.nn.functional`; when equivalent dimensions are explicitly specified, the public routes produce numerically consistent results. Their omitted-dimension defaults are intentionally not identical: the standard Paddle functional API keeps `axis=-1`, while compatibility-style routes use the rank-dependent `dim=None` rule.
 
 The standard Paddle API continues to accept `x`, `axis`, and `name`, and also accepts the `input` and `dim` aliases plus `dtype` and `out`. The compatibility API accepts `input`, `dim`, `dtype`, and `out`, defaults `dim=None` by input rank (0D/1D/3D to dimension 0, otherwise dimension 1), ignores an integer `_stacklevel`, and rejects Paddle-only compatibility keywords. Alias conflicts are rejected. Existing numerical, gradient, static-graph, and PIR behavior remains covered by the regression tests.
 
@@ -27,7 +27,7 @@ The standard Paddle API continues to accept `x`, `axis`, and `name`, and also ac
 
 ## Artifact Map
 
-- `proposal.md`: approved source proposal; preserved unchanged.
+- `proposal.md`: approved source proposal with an added clarification of the rank-dependent default-dimension behavior.
 - `instruction.md`: self-contained observable requirements for the implementation.
 - `solution/code.patch`: exact base-to-gold diff for the six production files.
 - `tests/test.patch`: exact base-to-gold diff for the two test files.
