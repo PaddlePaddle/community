@@ -1,0 +1,120 @@
+diff --git a/paddle/phi/kernels/gpu/determinant_kernel.cu b/paddle/phi/kernels/gpu/determinant_kernel.cu
+index fb8f98c5d7771..79f110e4706a9 100644
+--- a/paddle/phi/kernels/gpu/determinant_kernel.cu
++++ b/paddle/phi/kernels/gpu/determinant_kernel.cu
+@@ -218,6 +218,10 @@ template <typename T, typename Context>
+ void DeterminantKernel(const Context& dev_ctx,
+                        const DenseTensor& x,
+                        DenseTensor* out) {
++  if (out && out->numel() == 0) {
++    dev_ctx.template Alloc<T>(out);
++    return;
++  }
+   auto input_dim = common::vectorize(x.dims());
+   auto input_dim_size = input_dim.size();
+ 
+diff --git a/paddle/phi/kernels/gpu/slogdeterminant_kernel.cu b/paddle/phi/kernels/gpu/slogdeterminant_kernel.cu
+index 7f36e14081884..3f290b67f5dbd 100644
+--- a/paddle/phi/kernels/gpu/slogdeterminant_kernel.cu
++++ b/paddle/phi/kernels/gpu/slogdeterminant_kernel.cu
+@@ -215,6 +215,25 @@ void SlogDeterminantKernel(const Context& dev_ctx,
+   auto input_dim = common::vectorize(x.dims());
+   auto input_dim_size = input_dim.size();
+ 
++  // shape [*, M, M], check whether it contains 0 in '*'.
++  if (input_dim.size() > 2) {
++    bool size_0 = false;
++    std::vector<int> tmp_dim_vec(input_dim.begin(), input_dim.end() - 2);
++    for (size_t i = 0; i < tmp_dim_vec.size(); ++i) {
++      if (tmp_dim_vec[i] == 0) {
++        size_0 = true;
++        break;
++      }
++    }
++    if (size_0) {
++      tmp_dim_vec.insert(tmp_dim_vec.begin(),
++                         2);  // make the output dims as same as numpy
++      out->Resize(common::make_ddim(tmp_dim_vec));
++      dev_ctx.template Alloc<T>(out);
++      return;
++    }
++  }
++
+   auto batch_count = detail::GetBatchCount(x.dims());
+   VLOG(2) << "input dim:" << x.dims();
+   PADDLE_ENFORCE_GE(
+diff --git a/paddle/phi/kernels/impl/determinant_grad_kernel_impl.h b/paddle/phi/kernels/impl/determinant_grad_kernel_impl.h
+index 90d7697664b8b..6364d17059fbc 100644
+--- a/paddle/phi/kernels/impl/determinant_grad_kernel_impl.h
++++ b/paddle/phi/kernels/impl/determinant_grad_kernel_impl.h
+@@ -82,6 +82,10 @@ void DeterminantGradKernel(const Context& dev_ctx,
+                            const DenseTensor& out,
+                            const DenseTensor& out_grad,
+                            DenseTensor* x_grad) {
++  if (x_grad && x_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(x_grad);
++    return;
++  }
+   auto input_dims_size = x.dims().size();
+   if (input_dims_size > 2) {
+     PADDLE_ENFORCE_EQ(
+diff --git a/paddle/phi/kernels/impl/determinant_kernel_impl.h b/paddle/phi/kernels/impl/determinant_kernel_impl.h
+index 87b7f8b355ee2..f3451bc9806da 100644
+--- a/paddle/phi/kernels/impl/determinant_kernel_impl.h
++++ b/paddle/phi/kernels/impl/determinant_kernel_impl.h
+@@ -136,6 +136,10 @@ template <typename T, typename Context>
+ void DeterminantKernel(const Context& dev_ctx,
+                        const DenseTensor& x,
+                        DenseTensor* out) {
++  if (out && out->numel() == 0) {
++    dev_ctx.template Alloc<T>(out);
++    return;
++  }
+   auto input_dim = common::vectorize(x.dims());
+   auto input_dim_size = input_dim.size();
+ 
+diff --git a/paddle/phi/kernels/impl/slogdeterminant_grad_kernel_impl.h b/paddle/phi/kernels/impl/slogdeterminant_grad_kernel_impl.h
+index ddf8e4e68da6d..8bb97ff81d5a2 100644
+--- a/paddle/phi/kernels/impl/slogdeterminant_grad_kernel_impl.h
++++ b/paddle/phi/kernels/impl/slogdeterminant_grad_kernel_impl.h
+@@ -35,6 +35,10 @@ void SlogDeterminantGradKernel(const Context& dev_ctx,
+                                const DenseTensor& out,
+                                const DenseTensor& out_grad,
+                                DenseTensor* x_grad) {
++  if (x_grad && x_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(x_grad);
++    return;
++  }
+   PADDLE_ENFORCE_EQ(
+       out_grad.dims()[0],
+       2,
+diff --git a/paddle/phi/kernels/impl/slogdeterminant_kernel_impl.h b/paddle/phi/kernels/impl/slogdeterminant_kernel_impl.h
+index e4d32f66ed14f..3baf174060a26 100644
+--- a/paddle/phi/kernels/impl/slogdeterminant_kernel_impl.h
++++ b/paddle/phi/kernels/impl/slogdeterminant_kernel_impl.h
+@@ -127,6 +127,25 @@ void SlogDeterminantKernel(const Context& dev_ctx,
+   auto input_dim = common::vectorize(x.dims());
+   auto input_dim_size = input_dim.size();
+ 
++  // shape [*, M, M], check whether it contains 0 in '*'.
++  if (input_dim.size() > 2) {
++    bool size_0 = false;
++    std::vector<int> tmp_dim_vec(input_dim.begin(), input_dim.end() - 2);
++    for (size_t i = 0; i < tmp_dim_vec.size(); ++i) {
++      if (tmp_dim_vec[i] == 0) {
++        size_0 = true;
++        break;
++      }
++    }
++    if (size_0) {
++      tmp_dim_vec.insert(tmp_dim_vec.begin(),
++                         2);  // make the output dims as same as numpy
++      out->Resize(common::make_ddim(tmp_dim_vec));
++      dev_ctx.template Alloc<T>(out);
++      return;
++    }
++  }
++
+   auto batch_count = detail::GetBatchCount(x.dims());
+   VLOG(2) << "input dim:" << x.dims();
+   PADDLE_ENFORCE_GE(

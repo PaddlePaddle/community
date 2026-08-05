@@ -1,0 +1,34 @@
+diff --git a/test/legacy_test/test_determinant_op.py b/test/legacy_test/test_determinant_op.py
+index 8e0e1ccc10019..2c3afdd34fe7f 100644
+--- a/test/legacy_test/test_determinant_op.py
++++ b/test/legacy_test/test_determinant_op.py
+@@ -136,6 +136,14 @@ def init_data(self):
+         self.target = np.linalg.det(self.case)
+ 
+ 
++class TestDeterminantOp_ZeroSize2(TestDeterminantOp):
++    def init_data(self):
++        np.random.seed(0)
++        self.case = np.random.rand(0, 0, 0)
++        self.inputs = {'Input': self.case}
++        self.target = np.linalg.det(self.case)
++
++
+ class TestDeterminantAPI(unittest.TestCase):
+     def setUp(self):
+         np.random.seed(0)
+@@ -324,6 +332,14 @@ def init_data(self):
+         self.target = np.array(np.linalg.slogdet(self.case))
+ 
+ 
++class TestSlogDeterminantOp_ZeroSize2(TestSlogDeterminantOp):
++    def init_data(self):
++        np.random.seed(0)
++        self.case = np.random.rand(0, 0, 0).astype('float64')
++        self.inputs = {'Input': self.case}
++        self.target = np.array(np.linalg.slogdet(self.case))
++
++
+ class TestSlogDeterminantAPI(unittest.TestCase):
+     def setUp(self):
+         np.random.seed(0)
