@@ -1,0 +1,89 @@
+diff --git a/python/paddle/__init__.py b/python/paddle/__init__.py
+index 9111fe8eda5af17c0377cf53e67a212c9630dea4..a138b8d52324f1dd99ddc9526270e25cf529fbbb 100644
+--- a/python/paddle/__init__.py
++++ b/python/paddle/__init__.py
+@@ -579,6 +579,7 @@ from .tensor.search import (
+     kthvalue,
+     masked_select,
+     mode,
++    msort,
+     nonzero,
+     searchsorted,
+     sort,
+@@ -879,6 +880,7 @@ __all__ = [
+     'summary',
+     'flops',
+     'sort',
++    'msort',
+     'searchsorted',
+     'bucketize',
+     'split',
+diff --git a/python/paddle/tensor/__init__.py b/python/paddle/tensor/__init__.py
+index 75d2882a04006fbf085bc95d08f2687db5b7c015..3f0495ac94fffc7bdcc95a557c40f57900136351 100644
+--- a/python/paddle/tensor/__init__.py
++++ b/python/paddle/tensor/__init__.py
+@@ -459,6 +459,7 @@ from .search import (  # noqa: F401
+     kthvalue,
+     masked_select,
+     mode,
++    msort,
+     nonzero,
+     searchsorted,
+     sort,
+@@ -726,6 +727,7 @@ tensor_method_func = [
+     'index_select',
+     'nonzero',
+     'sort',
++    'msort',
+     'index_sample',
+     'mean',
+     'std',
+diff --git a/python/paddle/tensor/search.py b/python/paddle/tensor/search.py
+index 3837d7595f8cc7a33554e33616e29859a0f76891..6b91b36f40fa3a493f8babed6d8f759880bb2381 100755
+--- a/python/paddle/tensor/search.py
++++ b/python/paddle/tensor/search.py
+@@ -676,6 +676,44 @@ def sort(
+         return out
+ 
+ 
++def msort(input: Tensor) -> Tensor:
++    """
++
++    Sorts the input along the given axis = 0, and returns the sorted output tensor. The sort algorithm is ascending.
++
++    Args:
++        input (Tensor): An input N-D Tensor with type float32, float64, int16,
++            int32, int64, uint8.
++
++    Returns:
++        Tensor, sorted tensor(with the same shape and data type as ``input``).
++
++    Examples:
++
++        .. code-block:: python
++
++            >>> import paddle
++
++            >>> x = paddle.to_tensor([[[5,8,9,5],
++            ...                        [0,0,1,7],
++            ...                        [6,9,2,4]],
++            ...                       [[5,2,4,2],
++            ...                        [4,7,7,9],
++            ...                        [1,7,0,6]]],
++            ...                      dtype='float32')
++            >>> out1 = paddle.msort(input=x)
++            >>> print(out1.numpy())
++            [[[5. 2. 4. 2.]
++              [0. 0. 1. 7.]
++              [1. 7. 0. 4.]]
++             [[5. 8. 9. 5.]
++              [4. 7. 7. 9.]
++              [6. 9. 2. 6.]]]
++    """
++
++    return sort(input, axis=0)
++
++
+ def mode(
+     x: Tensor, axis: int = -1, keepdim: bool = False, name: str | None = None
+ ) -> tuple[Tensor, Tensor]:
