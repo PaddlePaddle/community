@@ -1,0 +1,138 @@
+diff --git a/test/legacy_test/test_api_compatibility.py b/test/legacy_test/test_api_compatibility.py
+index b6ab0ea..0cff240 100644
+--- a/test/legacy_test/test_api_compatibility.py
++++ b/test/legacy_test/test_api_compatibility.py
+@@ -239,6 +239,89 @@ class TestAtanAPI(unittest.TestCase):
+                 np.testing.assert_allclose(out, ref_out, rtol=1e-6)
+ 
+ 
++class TestAtan2API_Compatibility(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(123)
++        paddle.enable_static()
++        self.shape = [5, 6]
++        self.dtype = 'float32'
++        self.init_data()
++
++    def init_data(self):
++        self.np_x = np.random.randn(*self.shape).astype(self.dtype)
++        self.np_y = np.random.randn(*self.shape).astype(self.dtype)
++
++    def test_dygraph_Compatibility(self):
++        paddle.disable_static()
++        x = paddle.to_tensor(self.np_x)
++        y = paddle.to_tensor(self.np_y)
++        paddle_dygraph_out = []
++
++        # Position args
++        out1 = paddle.atan2(x, y)
++        paddle_dygraph_out.append(out1)
++
++        # Paddle keyword args
++        out2 = paddle.atan2(x=x, y=y)
++        paddle_dygraph_out.append(out2)
++
++        # Torch keyword args
++        out3 = paddle.atan2(input=x, other=y)
++        paddle_dygraph_out.append(out3)
++
++        # Test out parameter
++        out4 = paddle.empty([])
++        paddle.atan2(x, y, out=out4)
++        paddle_dygraph_out.append(out4)
++
++        # Numpy reference output
++        ref_out = np.arctan2(self.np_x, self.np_y)
++
++        # Verify all outputs
++        for out in paddle_dygraph_out:
++            np.testing.assert_allclose(ref_out, out.numpy(), rtol=1e-6)
++        paddle.enable_static()
++
++    def test_static_Compatibility(self):
++        paddle.enable_static()
++        main = paddle.static.Program()
++        startup = paddle.static.Program()
++        with paddle.base.program_guard(main, startup):
++            x = paddle.static.data(name="x", shape=self.shape, dtype=self.dtype)
++            y = paddle.static.data(name="y", shape=self.shape, dtype=self.dtype)
++
++            # Position args
++            out1 = paddle.atan2(x, y)
++            # Paddle keyword args
++            out2 = paddle.atan2(x=x, y=y)
++            # Torch keyword args
++            out3 = paddle.atan2(input=x, other=y)
++
++            exe = paddle.base.Executor(paddle.CPUPlace())
++            fetches = exe.run(
++                main,
++                feed={"x": self.np_x, "y": self.np_y},
++                fetch_list=[out1, out2, out3],
++            )
++            ref_out = np.arctan2(self.np_x, self.np_y)
++            for out in fetches:
++                np.testing.assert_allclose(out, ref_out, rtol=1e-6)
++
++    def test_tensor_method(self):
++        np_x = np.array([[-1.5, 0.25, 2.0], [3.5, -0.75, 1.25]])
++        np_y = np.array([[0.5, -2.0, 1.5], [-1.0, 4.0, 0.75]])
++        paddle.disable_static()
++        try:
++            x = paddle.to_tensor(np_x)
++            y = paddle.to_tensor(np_y)
++            ref_out = np.arctan2(np_x, np_y)
++
++            np.testing.assert_allclose(x.atan2(y).numpy(), ref_out)
++            np.testing.assert_allclose(x.atan2(other=y).numpy(), ref_out)
++        finally:
++            paddle.enable_static()
++
++
+ # Edit by AI Agent
+ # Test fmax compatibility
+ class TestFmaxAPI(unittest.TestCase):
+diff --git a/test/legacy_test/test_atan2_op.py b/test/legacy_test/test_atan2_op.py
+index 2dcb9b4..78c3cf9 100644
+--- a/test/legacy_test/test_atan2_op.py
++++ b/test/legacy_test/test_atan2_op.py
+@@ -238,6 +238,39 @@ class TestAtan2Broadcasting(unittest.TestCase):
+ 
+         np.testing.assert_allclose(out_ref, result, rtol=1e-05)
+ 
++    def test_dygraph_broadcast_gradient_values(self):
++        np_x = np.array([[-1.5], [2.0]], dtype='float64')
++        np_y = np.array([[0.5, 1.25, -2.0]], dtype='float64')
++        np_dout = np.array(
++            [[1.0, -0.5, 2.0], [0.25, 3.0, -1.5]], dtype='float64'
++        )
++
++        paddle.disable_static()
++        try:
++            x = paddle.to_tensor(np_x, stop_gradient=False)
++            y = paddle.to_tensor(np_y, stop_gradient=False)
++            out = paddle.atan2(x, y)
++            out.backward(paddle.to_tensor(np_dout))
++
++            denominator = np_x**2 + np_y**2
++            expected_x_grad = np.sum(
++                np_dout * np_y / denominator, axis=1, keepdims=True
++            )
++            expected_y_grad = np.sum(
++                -np_dout * np_x / denominator, axis=0, keepdims=True
++            )
++
++            self.assertEqual(tuple(x.grad.shape), np_x.shape)
++            self.assertEqual(tuple(y.grad.shape), np_y.shape)
++            np.testing.assert_allclose(
++                x.grad.numpy(), expected_x_grad, rtol=1e-12, atol=1e-12
++            )
++            np.testing.assert_allclose(
++                y.grad.numpy(), expected_y_grad, rtol=1e-12, atol=1e-12
++            )
++        finally:
++            paddle.enable_static()
++
+     def test_api_with_dygraph_empty_tensor_input(self):
+         self._test_with_shapes([(100,), (100, 100)])
+         self._test_with_shapes([(), (5, 17, 6)])

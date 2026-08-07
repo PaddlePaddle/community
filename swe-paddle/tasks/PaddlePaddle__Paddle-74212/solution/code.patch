@@ -1,0 +1,24 @@
+diff --git a/paddle/phi/kernels/cpu/multiplex_kernel.cc b/paddle/phi/kernels/cpu/multiplex_kernel.cc
+index 6e38a255a1..f91879dd45 100644
+--- a/paddle/phi/kernels/cpu/multiplex_kernel.cc
++++ b/paddle/phi/kernels/cpu/multiplex_kernel.cc
+@@ -26,6 +26,7 @@ void MultiplexKernel(const Context& dev_ctx,
+                      const DenseTensor& ids,
+                      DenseTensor* out) {
+   dev_ctx.template Alloc<T>(out);
++  if (out->numel() == 0) return;
+   for (size_t i = 0; i < ins.size(); ++i) {
+     PADDLE_ENFORCE_GT(
+         ins[i]->numel(),
+diff --git a/paddle/phi/kernels/gpu/multiplex_kernel.cu b/paddle/phi/kernels/gpu/multiplex_kernel.cu
+index 33fa3a74c5..b66cc4836b 100644
+--- a/paddle/phi/kernels/gpu/multiplex_kernel.cu
++++ b/paddle/phi/kernels/gpu/multiplex_kernel.cu
+@@ -27,6 +27,7 @@ void MultiplexKernel(const Context& dev_ctx,
+                      const DenseTensor& ids,
+                      DenseTensor* out) {
+   dev_ctx.template Alloc<T>(out);
++  if (out->numel() == 0) return;
+   for (size_t i = 0; i < ins.size(); ++i) {
+     PADDLE_ENFORCE_GT(
+         ins[i]->numel(),

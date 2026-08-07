@@ -1,0 +1,22 @@
+diff --git a/python/paddle/nn/layer/common.py b/python/paddle/nn/layer/common.py
+index c6bca2efa78a7674f68c6a7becd962e554a63e63..77fcb44437986b09489a419739f03e45e92826f7 100644
+--- a/python/paddle/nn/layer/common.py
++++ b/python/paddle/nn/layer/common.py
+@@ -489,6 +489,8 @@ class UpsamplingNearest2D(Layer):
+         self, size=None, scale_factor=None, data_format='NCHW', name=None
+     ):
+         super().__init__()
++        if isinstance(size, int):
++            size = [size, size]
+         self.size = size
+         self.scale_factor = scale_factor
+         self.data_format = data_format
+@@ -575,6 +577,8 @@ class UpsamplingBilinear2D(Layer):
+         self, size=None, scale_factor=None, data_format='NCHW', name=None
+     ):
+         super().__init__()
++        if isinstance(size, int):
++            size = [size, size]
+         self.size = size
+         self.scale_factor = scale_factor
+         self.data_format = data_format

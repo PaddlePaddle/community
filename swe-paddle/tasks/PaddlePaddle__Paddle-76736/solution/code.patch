@@ -1,0 +1,530 @@
+diff --git a/paddle/phi/infermeta/binary.cc b/paddle/phi/infermeta/binary.cc
+index 3522c419c37c65..65e78362be09e6 100644
+--- a/paddle/phi/infermeta/binary.cc
++++ b/paddle/phi/infermeta/binary.cc
+@@ -191,32 +191,9 @@ void ArrayReadInferMeta(const MetaTensor& array,
+ }
+ 
+ void Atan2InferMeta(const MetaTensor& x, const MetaTensor& y, MetaTensor* out) {
+-  const auto& x_dims = x.dims();
+-  const auto& y_dims = y.dims();
+-
+-  PADDLE_ENFORCE_EQ(
+-      x_dims.size(),
+-      y_dims.size(),
+-      common::errors::InvalidArgument("The rank (%d) of X shall be same as "
+-                                      "rank (%d) of Y.",
+-                                      x_dims.size(),
+-                                      y_dims.size()));
+-
+-  if (x_dims.size() > 0)
+-    PADDLE_ENFORCE_LE(x_dims[0],
+-                      y_dims[0],
+-                      common::errors::InvalidArgument(
+-                          "The count (%d) of elements of X shall not "
+-                          "greater than count (%d) of elements of Y.",
+-                          x_dims[0],
+-                          y_dims[0]));
+-
+-  out->share_meta(x);
+-  if (x.dtype() == DataType::INT32 || x.dtype() == DataType::INT64 ||
+-      y.dtype() == DataType::INT32 || y.dtype() == DataType::INT64) {
++  ElementwiseInferMeta(x, y, out);
++  if (out->dtype() == DataType::INT32 || out->dtype() == DataType::INT64) {
+     out->set_dtype(DataType::FLOAT64);
+-  } else {
+-    out->set_dtype(x.dtype());
+   }
+ }
+ 
+diff --git a/paddle/phi/kernels/funcs/eigen/broadcast.cc b/paddle/phi/kernels/funcs/eigen/broadcast.cc
+index 4c453706007615..d383b9c60b77cb 100644
+--- a/paddle/phi/kernels/funcs/eigen/broadcast.cc
++++ b/paddle/phi/kernels/funcs/eigen/broadcast.cc
+@@ -71,7 +71,8 @@ struct EigenBroadcastGrad<Eigen::DefaultDevice, T, Rank> {
+   template struct FUNCTOR<Eigen::DefaultDevice, T, 5>; \
+   template struct FUNCTOR<Eigen::DefaultDevice, T, 6>; \
+   template struct FUNCTOR<Eigen::DefaultDevice, T, 7>; \
+-  template struct FUNCTOR<Eigen::DefaultDevice, T, 8>
++  template struct FUNCTOR<Eigen::DefaultDevice, T, 8>; \
++  template struct FUNCTOR<Eigen::DefaultDevice, T, 9>
+ INSTANTIATION(EigenBroadcast, bool);
+ INSTANTIATION(EigenBroadcast, dtype::float16);
+ INSTANTIATION(EigenBroadcast, dtype::bfloat16);
+diff --git a/paddle/phi/kernels/funcs/eigen/broadcast.cu b/paddle/phi/kernels/funcs/eigen/broadcast.cu
+index 08a1e41d759a0c..e98ed973e9290e 100644
+--- a/paddle/phi/kernels/funcs/eigen/broadcast.cu
++++ b/paddle/phi/kernels/funcs/eigen/broadcast.cu
+@@ -70,7 +70,8 @@ struct EigenBroadcastGrad<Eigen::GpuDevice, T, Rank> {
+   template struct FUNCTOR<Eigen::GpuDevice, T, 5>; \
+   template struct FUNCTOR<Eigen::GpuDevice, T, 6>; \
+   template struct FUNCTOR<Eigen::GpuDevice, T, 7>; \
+-  template struct FUNCTOR<Eigen::GpuDevice, T, 8>
++  template struct FUNCTOR<Eigen::GpuDevice, T, 8>; \
++  template struct FUNCTOR<Eigen::GpuDevice, T, 9>
+ INSTANTIATION(EigenBroadcast, bool);
+ INSTANTIATION(EigenBroadcast, dtype::float16);
+ INSTANTIATION(EigenBroadcast, dtype::bfloat16);
+diff --git a/paddle/phi/kernels/impl/atan2_grad_kernel_impl.h b/paddle/phi/kernels/impl/atan2_grad_kernel_impl.h
+index f5773eb8057caa..dcd338ff2be992 100644
+--- a/paddle/phi/kernels/impl/atan2_grad_kernel_impl.h
++++ b/paddle/phi/kernels/impl/atan2_grad_kernel_impl.h
+@@ -15,9 +15,12 @@
+ #pragma once
+ 
+ #include "paddle/phi/core/dense_tensor.h"
++#include "paddle/phi/core/tensor_utils.h"
+ #include "paddle/phi/kernels/atan2_grad_kernel.h"
++#include "paddle/phi/kernels/broadcast_tensors_kernel.h"
+ #include "paddle/phi/kernels/full_kernel.h"
+ #include "paddle/phi/kernels/funcs/for_range.h"
++#include "paddle/phi/kernels/reduce_sum_kernel.h"
+ 
+ namespace phi {
+ 
+@@ -84,34 +87,119 @@ void Atan2GradKernel(const Context& dev_ctx,
+                      const DenseTensor& out_grad,
+                      DenseTensor* x_grad,
+                      DenseTensor* y_grad) {
+-  auto numel = x.numel();
+-  auto x_data = x.data<T>();
+-  auto y_data = y.data<T>();
+-  auto out_grad_data = out_grad.data<T>();
+-
+   if (out_grad.numel() == 0) {
+-    dev_ctx.template Alloc<T>(x_grad);
+-    dev_ctx.template Alloc<T>(y_grad);
+-    if (x_grad && x_grad->numel() != 0) {
+-      Full<T, Context>(dev_ctx, x_grad->dims(), 0, x_grad);
++    if (x_grad) {
++      dev_ctx.template Alloc<T>(x_grad);
++      if (x_grad->numel() != 0) {
++        phi::Full<T, Context>(dev_ctx,
++                              phi::IntArray(common::vectorize(x_grad->dims())),
++                              0,
++                              x_grad);
++      }
+     }
+-    if (y_grad && y_grad->numel() != 0) {
+-      Full<T, Context>(dev_ctx, y_grad->dims(), 0, y_grad);
++    if (y_grad) {
++      dev_ctx.template Alloc<T>(y_grad);
++      if (y_grad->numel() != 0) {
++        phi::Full<T, Context>(dev_ctx,
++                              phi::IntArray(common::vectorize(y_grad->dims())),
++                              0,
++                              y_grad);
++      }
+     }
+     return;
+   }
+ 
+-  auto* x_grad_data =
+-      x_grad ? dev_ctx.template Alloc<T>(x_grad, size_t(x.numel() * sizeof(T)))
+-             : nullptr;
+-  auto* y_grad_data =
+-      y_grad ? dev_ctx.template Alloc<T>(y_grad, size_t(y.numel() * sizeof(T)))
+-             : nullptr;
+-
+-  funcs::ForRange<Context> for_range(dev_ctx, numel);
+-  phi::Atan2GradFunctor<T> functor(
+-      x_data, y_data, out_grad_data, x_grad_data, y_grad_data, numel);
+-  for_range(functor);
++  if (x.dims() == y.dims() && x.dims() == out_grad.dims()) {
++    auto numel = x.numel();
++    auto x_data = x.data<T>();
++    auto y_data = y.data<T>();
++    auto out_grad_data = out_grad.data<T>();
++
++    auto* x_grad_data = x_grad ? dev_ctx.template Alloc<T>(
++                                     x_grad, size_t(x.numel() * sizeof(T)))
++                               : nullptr;
++    auto* y_grad_data = y_grad ? dev_ctx.template Alloc<T>(
++                                     y_grad, size_t(y.numel() * sizeof(T)))
++                               : nullptr;
++
++    phi::funcs::ForRange<Context> for_range(dev_ctx, numel);
++    phi::Atan2GradFunctor<T> functor(
++        x_data, y_data, out_grad_data, x_grad_data, y_grad_data, numel);
++    for_range(functor);
++  } else {
++    DenseTensor b_x, b_y;
++    b_x.Resize(out_grad.dims());
++    b_y.Resize(out_grad.dims());
++
++    std::vector<const DenseTensor*> inputs = {&x, &y};
++    std::vector<DenseTensor*> outputs = {&b_x, &b_y};
++    phi::BroadcastTensorsKernel<T, Context>(dev_ctx, inputs, outputs);
++
++    DenseTensor dx_b, dy_b;
++    T* dx_b_data = nullptr;
++    T* dy_b_data = nullptr;
++    std::vector<int64_t> x_axes, y_axes;
++
++    if (x_grad) {
++      int in_rank = x.dims().size();
++      int out_rank = out_grad.dims().size();
++      int diff = out_rank - in_rank;
++      for (int i = 0; i < diff; ++i) x_axes.push_back(i);
++      for (int i = 0; i < in_rank; ++i) {
++        if (x.dims()[i] == 1 && out_grad.dims()[i + diff] > 1) {
++          x_axes.push_back(i + diff);
++        }
++      }
++      if (x_axes.empty()) {
++        dev_ctx.template Alloc<T>(x_grad);
++        dx_b_data = x_grad->data<T>();
++      } else {
++        dx_b.Resize(out_grad.dims());
++        dx_b_data = dev_ctx.template Alloc<T>(&dx_b);
++      }
++    }
++
++    if (y_grad) {
++      int in_rank = y.dims().size();
++      int out_rank = out_grad.dims().size();
++      int diff = out_rank - in_rank;
++      for (int i = 0; i < diff; ++i) y_axes.push_back(i);
++      for (int i = 0; i < in_rank; ++i) {
++        if (y.dims()[i] == 1 && out_grad.dims()[i + diff] > 1) {
++          y_axes.push_back(i + diff);
++        }
++      }
++      if (y_axes.empty()) {
++        dev_ctx.template Alloc<T>(y_grad);
++        dy_b_data = y_grad->data<T>();
++      } else {
++        dy_b.Resize(out_grad.dims());
++        dy_b_data = dev_ctx.template Alloc<T>(&dy_b);
++      }
++    }
++
++    auto numel = out_grad.numel();
++    phi::funcs::ForRange<Context> for_range(dev_ctx, numel);
++    phi::Atan2GradFunctor<T> functor(b_x.data<T>(),
++                                     b_y.data<T>(),
++                                     out_grad.data<T>(),
++                                     dx_b_data,
++                                     dy_b_data,
++                                     numel);
++    for_range(functor);
++
++    if (x_grad && !x_axes.empty()) {
++      phi::SumKernel<T, Context>(
++          dev_ctx, dx_b, phi::IntArray(x_axes), x_grad->dtype(), false, x_grad);
++      x_grad->Resize(x.dims());
++    }
++
++    if (y_grad && !y_axes.empty()) {
++      phi::SumKernel<T, Context>(
++          dev_ctx, dy_b, phi::IntArray(y_axes), y_grad->dtype(), false, y_grad);
++      y_grad->Resize(y.dims());
++    }
++  }
+ }
+ 
+ }  // namespace phi
+diff --git a/paddle/phi/kernels/impl/atan2_kernel_impl.h b/paddle/phi/kernels/impl/atan2_kernel_impl.h
+index 382011c1b6bf43..a2fbc3c9e51bfd 100644
+--- a/paddle/phi/kernels/impl/atan2_kernel_impl.h
++++ b/paddle/phi/kernels/impl/atan2_kernel_impl.h
+@@ -18,6 +18,7 @@
+ #include "paddle/phi/core/device_context.h"
+ #include "paddle/phi/kernels/atan2_kernel.h"
+ #include "paddle/phi/kernels/broadcast_tensors_kernel.h"
++#include "paddle/phi/kernels/funcs/common_shape.h"
+ #include "paddle/phi/kernels/funcs/for_range.h"
+ 
+ namespace phi {
+@@ -55,6 +56,38 @@ struct Atan2Functor {
+   int64_t numel_;
+ };
+ 
++template <>
++struct Atan2Functor<int32_t> {
++  Atan2Functor(const int32_t* x1, const int32_t* x2, double* out, int64_t numel)
++      : x1_(x1), x2_(x2), out_(out), numel_(numel) {}
++
++  HOSTDEVICE void operator()(int64_t idx) const {
++    out_[idx] =
++        ::atan2(static_cast<double>(x1_[idx]), static_cast<double>(x2_[idx]));
++  }
++
++  const int32_t* x1_;
++  const int32_t* x2_;
++  double* out_;
++  int64_t numel_;
++};
++
++template <>
++struct Atan2Functor<int64_t> {
++  Atan2Functor(const int64_t* x1, const int64_t* x2, double* out, int64_t numel)
++      : x1_(x1), x2_(x2), out_(out), numel_(numel) {}
++
++  HOSTDEVICE void operator()(int64_t idx) const {
++    out_[idx] =
++        ::atan2(static_cast<double>(x1_[idx]), static_cast<double>(x2_[idx]));
++  }
++
++  const int64_t* x1_;
++  const int64_t* x2_;
++  double* out_;
++  int64_t numel_;
++};
++
+ template <>
+ struct Atan2Functor<double> {
+   Atan2Functor(const double* x1, const double* x2, double* out, int64_t numel)
+@@ -75,19 +108,35 @@ void Atan2Kernel(const Context& dev_ctx,
+                  const DenseTensor& x,
+                  const DenseTensor& y,
+                  DenseTensor* out) {
+-  if (x.numel() == 0 || y.numel() == 0) {
+-    dev_ctx.template Alloc<typename Atan2Out<T>::type>(out);
+-    return;
+-  }
++  dev_ctx.template Alloc<typename Atan2Out<T>::type>(out);
++  if (out->numel() == 0) return;
+ 
+-  const auto numel = out->numel();
+-  const auto* x_data = x.data<T>();
+-  const auto* y_data = y.data<T>();
++  if (x.dims() == y.dims()) {
++    const auto numel = out->numel();
++    const auto* x_data = x.data<T>();
++    const auto* y_data = y.data<T>();
+ 
+-  auto* out_data = dev_ctx.template Alloc<typename Atan2Out<T>::type>(out);
+-  funcs::ForRange<Context> for_range(dev_ctx, numel);
+-  phi::Atan2Functor<T> functor(x_data, y_data, out_data, numel);
+-  for_range(functor);
++    auto* out_data = out->data<typename Atan2Out<T>::type>();
++    phi::funcs::ForRange<Context> for_range(dev_ctx, numel);
++    phi::Atan2Functor<T> functor(x_data, y_data, out_data, numel);
++    for_range(functor);
++  } else {
++    DenseTensor b_x, b_y;
++    // Calculate broadcasted dims
++    b_x.Resize(out->dims());
++    b_y.Resize(out->dims());
++    std::vector<const DenseTensor*> inputs = {&x, &y};
++    std::vector<DenseTensor*> outputs = {&b_x, &b_y};
++    phi::BroadcastTensorsKernel<T, Context>(dev_ctx, inputs, outputs);
++
++    const auto numel = out->numel();
++    const auto* x_data = b_x.data<T>();
++    const auto* y_data = b_y.data<T>();
++    auto* out_data = out->data<typename Atan2Out<T>::type>();
++    phi::funcs::ForRange<Context> for_range(dev_ctx, numel);
++    phi::Atan2Functor<T> functor(x_data, y_data, out_data, numel);
++    for_range(functor);
++  }
+ }
+ 
+ }  // namespace phi
+diff --git a/paddle/phi/kernels/impl/broadcast_tensors_kernel_impl.h b/paddle/phi/kernels/impl/broadcast_tensors_kernel_impl.h
+index 6ec3ae89670468..cc5ef1f7fcec6b 100644
+--- a/paddle/phi/kernels/impl/broadcast_tensors_kernel_impl.h
++++ b/paddle/phi/kernels/impl/broadcast_tensors_kernel_impl.h
+@@ -114,10 +114,13 @@ void BroadcastTensorsKernel(const Context& dev_ctx,
+         SWITCH_OUT_RANK_CASE(4)
+         SWITCH_OUT_RANK_CASE(5)
+         SWITCH_OUT_RANK_CASE(6)
++        SWITCH_OUT_RANK_CASE(7)
++        SWITCH_OUT_RANK_CASE(8)
++        SWITCH_OUT_RANK_CASE(9)
+       default: {
+         PADDLE_THROW(common::errors::InvalidArgument(
+             "Target tensor rank out of range. "
+-            "Maximum supported rank for broadcast is: 6"));
++            "Maximum supported rank for broadcast is: 9"));
+       }
+     }
+   }
+diff --git a/paddle/phi/ops/yaml/python_api_info.yaml b/paddle/phi/ops/yaml/python_api_info.yaml
+index 277d3ada573d5a..87181605c3f75c 100644
+--- a/paddle/phi/ops/yaml/python_api_info.yaml
++++ b/paddle/phi/ops/yaml/python_api_info.yaml
+@@ -80,6 +80,11 @@
+   args_alias :
+     use_default_mapping : True
+ 
++- op : atan2
++  name : [paddle.atan2, paddle.Tensor.atan2]
++  args_alias :
++    use_default_mapping : True
++
+ - op : atanh
+   name : [paddle.atanh, paddle.Tensor.atanh]
+   args_alias :
+diff --git a/python/paddle/_paddle_docs.py b/python/paddle/_paddle_docs.py
+index 9bc7e656ee77bb..7f48e3f18c0cb7 100644
+--- a/python/paddle/_paddle_docs.py
++++ b/python/paddle/_paddle_docs.py
+@@ -774,6 +774,69 @@ def atanh(
+ """,
+ )
+ 
++add_doc_and_signature(
++    "atan2",
++    r"""Element-wise arctangent of x/y with consideration of the quadrant.
++
++    Equation:
++        .. math::
++
++            atan2(x,y)=\left\{\begin{matrix}
++            & tan^{-1}(\frac{x}{y}) & y > 0 \\
++            & tan^{-1}(\frac{x}{y}) + \pi & x>=0, y < 0 \\
++            & tan^{-1}(\frac{x}{y}) - \pi & x<0, y < 0 \\
++            & +\frac{\pi}{2} & x>0, y = 0 \\
++            & -\frac{\pi}{2} & x<0, y = 0 \\
++            &\text{undefined} & x=0, y = 0
++            \end{matrix}\right.
++
++    .. note::
++        Alias Support: The parameter name ``input`` can be used as an alias for ``x``, and the parameter name ``other`` can be used as an alias for ``y``.
++        For example, ``atan2(input=tensor_x, other=tensor_y)`` is equivalent to ``atan2(x=tensor_x, y=tensor_y)``.
++
++    Args:
++        x (Tensor): An N-D Tensor, the data type is int32, int64, float16, float32, float64.
++            Alias: ``input``.
++        y (Tensor): An N-D Tensor, must have the same type as `x`.
++            Alias: ``other``.
++        name (str|None, optional): Name for the operation (optional, default is None). For more information, please refer to :ref:`api_guide_Name`.
++        out (Tensor|None, optional): The output Tensor. If set, the result will be stored in this Tensor. Default is None.
++
++    Returns:
++        out (Tensor): An N-D Tensor, the shape and data type is the same with input (The output data type is float64 when the input data type is int).
++
++    Examples:
++        .. code-block:: python
++
++            >>> import paddle
++
++            >>> x = paddle.to_tensor([-1, +1, +1, -1]).astype('float32')
++            >>> x
++            Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True,
++            [-1,  1,  1, -1])
++
++            >>> y = paddle.to_tensor([-1, -1, +1, +1]).astype('float32')
++            >>> y
++            Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True,
++            [-1,  -1,  1, 1])
++
++            >>> out = paddle.atan2(x, y)
++            >>> out
++            Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True,
++            [-2.35619450,  2.35619450,  0.78539819, -0.78539819])
++
++""",
++    """
++def atan2(
++    x: Tensor,
++    y: Tensor,
++    name: str | None = None,
++    *,
++    out: Tensor | None = None,
++) -> Tensor
++""",
++)
++
+ add_doc_and_signature(
+     "log2",
+     r"""
+diff --git a/python/paddle/tensor/math.py b/python/paddle/tensor/math.py
+index 0744cc97bf4dfc..f6a9864bd31e34 100644
+--- a/python/paddle/tensor/math.py
++++ b/python/paddle/tensor/math.py
+@@ -31,6 +31,7 @@
+     amin,
+     angle,
+     any,
++    atan2,
+     baddbmm,
+     baddbmm_,
+     bitwise_left_shift,
+@@ -4425,84 +4426,6 @@ def negative(x: Tensor, name: str | None = None) -> Tensor:
+     return -x
+ 
+ 
+-def atan2(x: Tensor, y: Tensor, name: str | None = None) -> Tensor:
+-    r"""
+-    Element-wise arctangent of x/y with consideration of the quadrant.
+-
+-    Equation:
+-        .. math::
+-
+-            atan2(x,y)=\left\{\begin{matrix}
+-            & tan^{-1}(\frac{x}{y}) & y > 0 \\
+-            & tan^{-1}(\frac{x}{y}) + \pi & x>=0, y < 0 \\
+-            & tan^{-1}(\frac{x}{y}) - \pi & x<0, y < 0 \\
+-            & +\frac{\pi}{2} & x>0, y = 0 \\
+-            & -\frac{\pi}{2} & x<0, y = 0 \\
+-            &\text{undefined} & x=0, y = 0
+-            \end{matrix}\right.
+-
+-    Args:
+-        x (Tensor): An N-D Tensor, the data type is int32, int64, float16, float32, float64.
+-        y (Tensor): An N-D Tensor, must have the same type as `x`.
+-        name (str|None, optional): Name for the operation (optional, default is None). For more information, please refer to :ref:`api_guide_Name`.
+-
+-    Returns:
+-        out (Tensor): An N-D Tensor, the shape and data type is the same with input (The output data type is float64 when the input data type is int).
+-
+-    Examples:
+-        .. code-block:: pycon
+-
+-            >>> import paddle
+-
+-            >>> x = paddle.to_tensor([-1, +1, +1, -1]).astype('float32')
+-            >>> x
+-            Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True,
+-            [-1.,  1.,  1., -1.])
+-
+-            >>> y = paddle.to_tensor([-1, -1, +1, +1]).astype('float32')
+-            >>> y
+-            Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True,
+-            [-1., -1.,  1.,  1.])
+-
+-            >>> out = paddle.atan2(x, y)
+-            >>> out
+-            Tensor(shape=[4], dtype=float32, place=Place(cpu), stop_gradient=True,
+-            [-2.35619450,  2.35619450,  0.78539819, -0.78539819])
+-
+-    """
+-
+-    x_shape = list(x.shape)
+-    y_shape = list(y.shape)
+-    if in_dynamic_or_pir_mode():
+-        broadcast_x = x
+-        broadcast_y = y
+-        if x_shape != y_shape:
+-            broadcast_shape = paddle.broadcast_shape(x_shape, y_shape)
+-            broadcast_x = paddle.broadcast_to(broadcast_x, broadcast_shape)
+-            broadcast_y = paddle.broadcast_to(broadcast_y, broadcast_shape)
+-
+-        return _C_ops.atan2(broadcast_x, broadcast_y)
+-    else:
+-        check_variable_and_dtype(
+-            x,
+-            'x',
+-            ['int32', 'int64', 'float16', 'float32', 'float64'],
+-            'atan2',
+-        )
+-        check_variable_and_dtype(
+-            y,
+-            'y',
+-            ['int32', 'int64', 'float16', 'float32', 'float64'],
+-            'atan2',
+-        )
+-
+-        helper = LayerHelper('atan2', **locals())
+-        inputs = {'X1': x, 'X2': y}
+-        out = helper.create_variable_for_type_inference(dtype=x.dtype)
+-        helper.append_op(type='atan2', inputs=inputs, outputs={'Out': out})
+-        return out
+-
+-
+ def logit(
+     x: Tensor, eps: float | None = None, name: str | None = None
+ ) -> Tensor:

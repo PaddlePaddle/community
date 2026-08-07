@@ -1,29 +1,23 @@
-# 修复 `flatten_state_dict` 的 Tensor reference leak
+# 修复 `flatten_state_dict` 导致保存模型时显存泄漏的问题
 
 ## 详细描述
 
-FlexCheckpoint 的 `flatten_state_dict` 在处理 nested state dict 时，可能在调用结束后继续保留对输入 Tensor 的额外 reference， 在 repeated checkpoint saves 场景下，即使调用方已经释放 flattened state dict 和 key mapping，这些额外 reference 仍可能无法及时释放，导致 GPU memory 在每次保存后持续增长，并最终引发 OOM。当前释放过程可能依赖显式调用 `gc.collect()` 或等待 Python garbage collection 被动触发。
-需要修复该问题，使 `flatten_state_dict` 调用期间产生的 temporary references 能够及时释放，同时保持现有 flatten 和 unflatten behavior 不变。
+`flatten_state_dict` 中的 `_flatten` 会递归调用自身，因此产生循环引用。函数返回后，输入 state dict 中的 Tensor 仍然无法释放。
+
+训练过程中每次保存模型都会调用 `flatten_state_dict`，未释放的 Tensor 会不断累积，导致显存持续上涨，最终 OOM。目前只能通过主动删除引用或调用 `gc.collect()` 才能释放。
+
+需要避免 `_flatten` 产生循环引用，并保持现有的展开结果不变。
 
 ## 验收说明
 
-- 调用方释放 flattened state dict 和 key mapping 后，不应残留对输入 Tensor 的额外 reference
-- Tensor reference 的释放不应依赖显式调用 `gc.collect()`
-- repeated 调用 `flatten_state_dict` 不应持续累积由该函数产生的 Tensor reference
-- nested state dict 的 flattened keys 和 key mapping 应保持正确
-- `unflatten_state_dict` 应能根据 key mapping 恢复原有 nested structure
-- 输入 Tensor 的 object identity 和 data 不得改变
-- 现有合法输入的 flatten 和 unflatten behavior 不得退化
+- `flatten_state_dict` 返回后，不应继续持有输入 Tensor
+- Tensor 的释放不应依赖手动调用 `gc.collect()`
+- 多次保存模型时，不应因该函数导致显存持续增长
+- 嵌套 state dict 展开后的内容和 key mapping 应保持不变
 
 ## 技术要求
 
-- 熟悉 Python reference counting 和 garbage collection
-- 了解 reference cycle、closure 和 recursive function
-- 了解 Paddle Tensor memory lifecycle
-- 了解 FlexCheckpoint state dict utilities
-
-## Acceptance Criteria
-
-- Temporary references created during flattening are released promptly.
-- Existing flattening and unflattening behavior remains unchanged.
-- Do not satisfy the task by deleting tests, weakening assertions, forcing broad garbage collection, or bypassing validation.
+- 熟悉 Python 引用计数和循环引用
+- 了解递归函数
+- 了解 Paddle Tensor 的显存释放方式
+- 了解 FlexCheckpoint 的 state dict 处理逻辑

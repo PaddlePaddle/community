@@ -1,0 +1,65 @@
+diff --git a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc
+index 16b7a8186c4ab..5c08b36179ad7 100644
+--- a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc
++++ b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc
+@@ -1058,6 +1058,9 @@ bool GatherTreeOpInferSymbolicShape(
+                         "shape of Input(Ids)."));
+   size_t rank = ids_shape.size();
+   for (size_t i = 0; i < rank; ++i) {
++    if (ids_shape[i] == 0) {
++      continue;
++    }
+     infer_context->AddEqualCstr(ids_shape[i], parents_shape[i]);
+   }
+ 
+diff --git a/paddle/phi/infermeta/binary.cc b/paddle/phi/infermeta/binary.cc
+index k911dab1a6d0f..013a8e9488b6b 100644
+--- a/paddle/phi/infermeta/binary.cc
++++ b/paddle/phi/infermeta/binary.cc
+@@ -2138,11 +2138,13 @@ void GatherTreeMeta(const MetaTensor& ids,
+                     MetaTensor* out) {
+   auto ids_dims = ids.dims();
+   auto parents_dims = parents.dims();
+-  PADDLE_ENFORCE_EQ(ids_dims == parents_dims,
+-                    true,
+-                    common::errors::InvalidArgument(
+-                        "The shape of Input(Parents) must be same with the "
+-                        "shape of Input(Ids)."));
++  if (common::product(ids_dims) != 0) {
++    PADDLE_ENFORCE_EQ(ids_dims == parents_dims,
++                      true,
++                      common::errors::InvalidArgument(
++                          "The shape of Input(Parents) must be same with the "
++                          "shape of Input(Ids)."));
++  }
+   out->set_dims(ids_dims);
+   out->set_dtype(ids.dtype());
+ }
+diff --git a/paddle/phi/kernels/cpu/gather_tree_kernel.cc b/paddle/phi/kernels/cpu/gather_tree_kernel.cc
+index a7e85a731b824..4e3bc2be0f2ff 100644
+--- a/paddle/phi/kernels/cpu/gather_tree_kernel.cc
++++ b/paddle/phi/kernels/cpu/gather_tree_kernel.cc
+@@ -28,6 +28,9 @@ void GatherTreeKernel(const Context &dev_ctx,
+   const auto *parents_data = parents.data<T>();
+ 
+   T *out_data = dev_ctx.template Alloc<T>(out);
++  if (out && out->numel() == 0) {
++    return;
++  }
+ 
+   auto &ids_dims = ids.dims();
+   int64_t max_length = ids_dims[0];
+diff --git a/paddle/phi/kernels/gpu/gather_tree_kernel.cu b/paddle/phi/kernels/gpu/gather_tree_kernel.cu
+index 76aa7f4b00f2a..4ea564105ff5f 100644
+--- a/paddle/phi/kernels/gpu/gather_tree_kernel.cu
++++ b/paddle/phi/kernels/gpu/gather_tree_kernel.cu
+@@ -63,6 +63,9 @@ void GatherTreeKernel(const Context &dev_ctx,
+   const auto *ids_data = ids.data<T>();
+   const auto *parents_data = parents.data<T>();
+   T *out_data = dev_ctx.template Alloc<T>(out);
++  if (out && out->numel() == 0) {
++    return;
++  }
+ 
+   PADDLE_ENFORCE_NOT_NULL(ids_data,
+                           common::errors::InvalidArgument(
