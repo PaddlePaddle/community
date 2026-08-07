@@ -14,9 +14,11 @@
 
 Paddle 原有 `paddle.nn.functional.log_softmax` 缺少 PyTorch 风格的 `input`、`dim` 和 `out` 调用形式，也未在 `paddle`、Tensor、`paddle.special` 与 `paddle.compat.nn.functional` 等兼容入口统一暴露该能力。该 PR 在保持原有 `x`、`axis`、数值、梯度和静态图行为的同时，补齐这些公开调用入口及参数兼容语义。
 
+需要注意，各入口在省略维度时保留不同的默认行为：标准 `paddle.nn.functional.log_softmax` 使用 Paddle 原有的 `axis=-1`；`paddle.log_softmax`、`Tensor.log_softmax`、`paddle.special.log_softmax` 和 `paddle.compat.nn.functional.log_softmax` 使用兼容实现的 `dim=None` 规则，其中输入 rank 为 0、1 或 3 时取 `dim=0`，其他 rank 取 `dim=1`。因此，五个入口只在显式指定等价 `axis`/`dim` 时要求数值一致，不能把省略维度时的结果一致作为要求。
+
 ## 3. 为什么适合作为 SWE-Paddle 样本
 
-- **真实性**：问题来自已合入的 Paddle API Compatibility 工作，目标是让真实用户可以按 PyTorch 常见签名调用 `log_softmax`，并使 Paddle 的多条公开访问路径保持一致。
+- **真实性**：问题来自已合入的 Paddle API Compatibility 工作，目标是让真实用户可以按 PyTorch 常见签名调用 `log_softmax`，并使 Paddle 的多条公开访问路径在显式指定等价维度时保持一致。
 - **代表性**：样本覆盖 Python API 参数别名、顶层与子模块导出、Tensor method 注册、严格 compat wrapper、动态图 / 静态图 / PIR 分支、dtype 转换以及 `out` 写入语义，是 Paddle Python API 兼容改造的典型任务。
 - **边界清楚**：`paddle.nn.functional.log_softmax` 需要保留位置参数及 `x`、`axis`、`name` 调用，同时新增 `input`、`dim`，并在动态图 / PIR 路径支持仅关键字 `out`；兼容入口采用 PyTorch 风格参数，并应拒绝不属于该入口的 `x`、`axis`、`name`。`dim=None` 的默认维度、dtype 转换、别名冲突报错和输出 Tensor 写入均有明确测试。算子数学定义、支持 dtype、梯度和已有静态图行为不应改变。
 - **非平凡性**：修复不是单一签名重命名；它需要统一五条公开 API 路径，正确处理成对别名及冲突、Tensor method 绑定、默认维度规则、dtype 和 `out`，同时避免破坏原有 Paddle 参数名和底层 `log_softmax` 算子行为。
