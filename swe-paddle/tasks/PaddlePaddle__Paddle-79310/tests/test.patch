@@ -1,0 +1,240 @@
+diff --git a/test/swe_paddle/test_pr79310_sparse_initializer.py b/test/swe_paddle/test_pr79310_sparse_initializer.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..e6c84f70a42c8fa2114c31cccc5cd9866a010263
+--- /dev/null
++++ b/test/swe_paddle/test_pr79310_sparse_initializer.py
+@@ -0,0 +1,234 @@
++import ast
++import copy
++import math
++import types
++from contextlib import nullcontext
++from pathlib import Path
++
++import pytest
++
++
++TARGET = Path("python/paddle/nn/init.py")
++
++
++def _extract_function(name, namespace):
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    node = next(
++        copy.deepcopy(item)
++        for item in tree.body
++        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
++        and item.name == name
++    )
++    future = ast.ImportFrom(
++        module="__future__", names=[ast.alias(name="annotations")], level=0
++    )
++    module = ast.Module(body=[future, node], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(TARGET), "exec"), namespace)
++    return namespace[name]
++
++
++class _Initializer:
++    def __init__(self, calls, result, args, kwargs):
++        self._calls = calls
++        self._result = result
++        self._args = args
++        self._kwargs = kwargs
++
++    def __call__(self, tensor):
++        self._calls.append((tensor, self._args, self._kwargs))
++        return self._result
++
++
++def _initializer_factory(calls, result):
++    def factory(*args, **kwargs):
++        return _Initializer(calls, result, args, kwargs)
++
++    return factory
++
++
++def _initializer_namespace(*, dygraph, initializer_result, calls):
++    factory = _initializer_factory(calls, initializer_result)
++    return {
++        "KaimingUniform": factory,
++        "KaimingNormal": factory,
++        "XavierUniform": factory,
++        "XavierNormal": factory,
++        "Uniform": factory,
++        "Normal": factory,
++        "TruncatedNormal": factory,
++        "Constant": factory,
++        "Dirac": factory,
++        "Orthogonal": factory,
++        "in_dygraph_mode": lambda: dygraph,
++    }
++
++
++class _Tensor:
++    def __init__(self, rows, cols):
++        self.shape = (rows, cols)
++        self.dtype = "float32"
++        self.values = [
++            [float(row * cols + col + 1) for col in range(cols)]
++            for row in range(rows)
++        ]
++
++    def ndimension(self):
++        return len(self.shape)
++
++    def __setitem__(self, key, value):
++        row_indices, col_idx = key
++        for row_idx in row_indices:
++            self.values[int(row_idx)][col_idx] = value
++
++
++class _Non2DTensor:
++    shape = (2, 3, 4)
++
++    def ndimension(self):
++        return 3
++
++
++class _PaddleDouble:
++    def __init__(self):
++        self.randperm_calls = []
++
++    def no_grad(self):
++        return nullcontext()
++
++    def randperm(self, rows):
++        self.randperm_calls.append(rows)
++        # Deterministic indices keep the test non-flaky while the checkout's
++        # real sparse_ body still performs per-column slicing and assignment.
++        return list(reversed(range(rows)))
++
++
++class _SharedEyeTensor:
++    def __init__(self, shared_targets):
++        self._shared_targets = shared_targets
++
++    def _share_underline_tensor_to(self, target):
++        self._shared_targets.append(target)
++
++
++def _load_sparse_function():
++    paddle = _PaddleDouble()
++    normal_calls = []
++
++    def normal_stub(tensor, *, mean, std):
++        normal_calls.append((tensor, mean, std))
++        return tensor
++
++    function = _extract_function(
++        "sparse_",
++        {
++            "math": math,
++            "paddle": paddle,
++            "normal_": normal_stub,
++        },
++    )
++    return function, paddle, normal_calls
++
++
++def test_existing_normal_non_dygraph_path_keeps_initializer_return_value():
++    marker = object()
++    tensor = object()
++    calls = []
++    function = _extract_function(
++        "normal_",
++        _initializer_namespace(
++            dygraph=False, initializer_result=marker, calls=calls
++        ),
++    )
++
++    result = function(tensor, mean=1.5, std=0.25)
++
++    assert result is marker
++    assert len(calls) == 1
++    assert calls[0][0] is tensor
++    assert calls[0][2] == {"mean": 1.5, "std": 0.25}
++
++
++def test_dygraph_inplace_initializer_helpers_return_input_tensor():
++    cases = [
++        ("kaiming_uniform_", (), {}),
++        ("kaiming_normal_", (), {}),
++        ("xavier_uniform_", (), {}),
++        ("xavier_normal_", (), {}),
++        ("uniform_", (), {}),
++        ("normal_", (), {}),
++        ("trunc_normal_", (), {}),
++        ("constant_", (), {"val": 3.0}),
++        ("ones_", (), {}),
++        ("zeros_", (), {}),
++        ("dirac_", (), {}),
++        ("orthogonal_", (), {}),
++    ]
++
++    for name, args, kwargs in cases:
++        marker = object()
++        tensor = object()
++        calls = []
++        function = _extract_function(
++            name,
++            _initializer_namespace(
++                dygraph=True, initializer_result=marker, calls=calls
++            ),
++        )
++
++        result = function(tensor, *args, **kwargs)
++
++        assert result is tensor, name
++        assert len(calls) == 1, name
++        assert calls[0][0] is tensor, name
++
++
++def test_eye_dygraph_returns_input_tensor_after_inplace_share():
++    shared_targets = []
++    created = []
++
++    def eye(rows, cols, dtype):
++        created.append((rows, cols, dtype))
++        return _SharedEyeTensor(shared_targets)
++
++    paddle = types.SimpleNamespace(eye=eye)
++    function = _extract_function(
++        "eye_",
++        {
++            "paddle": paddle,
++            "in_dygraph_mode": lambda: True,
++            "in_pir_mode": lambda: False,
++        },
++    )
++    tensor = _Tensor(2, 3)
++
++    result = function(tensor)
++
++    assert result is tensor
++    assert created == [(2, 3, "float32")]
++    assert shared_targets == [tensor]
++
++
++def test_sparse_initializer_zeros_ceil_fraction_in_every_column():
++    function, paddle, normal_calls = _load_sparse_function()
++    tensor = _Tensor(rows=5, cols=3)
++
++    result = function(tensor, sparsity=0.4, std=0.2)
++
++    assert result is tensor
++    assert normal_calls == [(tensor, 0, 0.2)]
++    assert paddle.randperm_calls == [5, 5, 5]
++    for col_idx in range(3):
++        column = [tensor.values[row_idx][col_idx] for row_idx in range(5)]
++        assert column.count(0) == math.ceil(0.4 * 5)
++        assert all(value > 0 for value in column if value != 0)
++
++
++def test_sparse_initializer_rejects_non_2d_tensor():
++    function, paddle, normal_calls = _load_sparse_function()
++
++    with pytest.raises(ValueError, match="Only tensors with 2 dimensions"):
++        function(_Non2DTensor(), sparsity=0.5)
++
++    assert paddle.randperm_calls == []
++    assert normal_calls == []

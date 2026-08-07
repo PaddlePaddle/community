@@ -1,0 +1,99 @@
+diff --git a/test/swe_paddle/test_pr79167_initial_seed_alias.py b/test/swe_paddle/test_pr79167_initial_seed_alias.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..9e48192ece74b820f57d42bb281eb89b322f753a
+--- /dev/null
++++ b/test/swe_paddle/test_pr79167_initial_seed_alias.py
+@@ -0,0 +1,93 @@
++import ast
++import copy
++import sys
++from pathlib import Path
++from types import ModuleType
++
++
++TARGET = Path("python/paddle/__init__.py")
++
++
++def _callable(name, result):
++    def function(*args, **kwargs):
++        return result
++
++    function.__name__ = name
++    return function
++
++
++def _load_checkout_public_namespace():
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    selected = []
++    for node in tree.body:
++        if (
++            isinstance(node, ast.ImportFrom)
++            and node.level == 1
++            and node.module in {"framework.random", "random"}
++        ):
++            selected.append(copy.deepcopy(node))
++            continue
++        if isinstance(node, ast.Assign):
++            target_names = {
++                target.id
++                for target in node.targets
++                if isinstance(target, ast.Name)
++            }
++            if target_names & {"manual_seed", "__all__"}:
++                selected.append(copy.deepcopy(node))
++
++    package_name = "_swe_paddle_pr79167"
++    package = ModuleType(package_name)
++    package.__path__ = []
++    framework_package = ModuleType(f"{package_name}.framework")
++    framework_package.__path__ = []
++    framework_random = ModuleType(f"{package_name}.framework.random")
++    random_module = ModuleType(f"{package_name}.random")
++
++    framework_random.Generator = object()
++    framework_random.get_cuda_rng_state = _callable("get_cuda_rng_state", [])
++    framework_random.get_rng_state = _callable("get_rng_state", [])
++    framework_random.seed = _callable("seed", "seed-result")
++    framework_random.set_cuda_rng_state = _callable("set_cuda_rng_state", None)
++    framework_random.set_rng_state = _callable("set_rng_state", None)
++    random_module.initial_seed = _callable("initial_seed", 2026)
++
++    module_names = {
++        package_name: package,
++        f"{package_name}.framework": framework_package,
++        f"{package_name}.framework.random": framework_random,
++        f"{package_name}.random": random_module,
++    }
++    previous = {name: sys.modules.get(name) for name in module_names}
++    sys.modules.update(module_names)
++    namespace = {"__name__": package_name, "__package__": package_name}
++    try:
++        module = ast.Module(body=selected, type_ignores=[])
++        ast.fix_missing_locations(module)
++        exec(compile(module, str(TARGET), "exec"), namespace)
++    finally:
++        for name, old_value in previous.items():
++            if old_value is None:
++                sys.modules.pop(name, None)
++            else:
++                sys.modules[name] = old_value
++    return namespace, framework_random, random_module
++
++
++def test_existing_seed_exports_remain_unchanged():
++    namespace, framework_random, _ = _load_checkout_public_namespace()
++    assert namespace["seed"] is framework_random.seed
++    assert namespace["manual_seed"] is framework_random.seed
++    assert namespace["seed"](123) == "seed-result"
++    assert {"seed", "manual_seed"}.issubset(namespace["__all__"])
++
++
++def test_initial_seed_is_exported_at_top_level():
++    namespace, _, random_module = _load_checkout_public_namespace()
++    assert namespace["initial_seed"] is random_module.initial_seed
++    assert namespace["initial_seed"]() == 2026
++
++
++def test_initial_seed_is_in_public_all():
++    namespace, _, _ = _load_checkout_public_namespace()
++    assert "initial_seed" in namespace["__all__"]

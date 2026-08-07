@@ -1,0 +1,146 @@
+diff --git a/test/swe_paddle/test_pr79161_set_rng_state_alias.py b/test/swe_paddle/test_pr79161_set_rng_state_alias.py
+new file mode 100644
+index 0000000..11ceea9
+--- /dev/null
++++ b/test/swe_paddle/test_pr79161_set_rng_state_alias.py
+@@ -0,0 +1,140 @@
++import ast
++import copy
++import functools
++from pathlib import Path
++from types import SimpleNamespace
++
++import pytest
++
++
++TARGET = Path("python/paddle/framework/random.py")
++
++
++class _CPUPlace:
++    pass
++
++
++class _CUDAPlace:
++    pass
++
++
++class _XPUPlace:
++    pass
++
++
++class _CustomPlace:
++    pass
++
++
++class _Generator:
++    def __init__(self):
++        self.states = []
++
++    def set_state(self, state):
++        self.states.append(state)
++
++
++def _param_one_alias(names):
++    canonical, alias = names
++
++    def decorator(function):
++        @functools.wraps(function)
++        def wrapper(*args, **kwargs):
++            if alias in kwargs:
++                if canonical in kwargs:
++                    raise ValueError(
++                        f"Cannot specify both '{canonical}' and its alias '{alias}'."
++                    )
++                kwargs[canonical] = kwargs.pop(alias)
++            return function(*args, **kwargs)
++
++        return wrapper
++
++    return decorator
++
++
++class _StripAnnotations(ast.NodeTransformer):
++    def visit_arg(self, node):
++        node.annotation = None
++        return node
++
++    def visit_FunctionDef(self, node):
++        self.generic_visit(node)
++        node.returns = None
++        return node
++
++
++def _load_checkout_function():
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    function = next(
++        node
++        for node in tree.body
++        if isinstance(node, ast.FunctionDef) and node.name == "set_rng_state"
++    )
++    function = _StripAnnotations().visit(copy.deepcopy(function))
++    ast.fix_missing_locations(function)
++
++    generator = _Generator()
++    converted_devices = []
++
++    def convert_to_place(device):
++        converted_devices.append(device)
++        return _CPUPlace()
++
++    core = SimpleNamespace(
++        CPUPlace=_CPUPlace,
++        default_cpu_generator=lambda: generator,
++        get_cuda_device_count=lambda: 0,
++        get_xpu_device_count=lambda: 0,
++        get_all_custom_device_type=lambda: [],
++        get_custom_device_count=lambda _device_type: 0,
++    )
++    paddle = SimpleNamespace(
++        CPUPlace=_CPUPlace,
++        CUDAPlace=_CUDAPlace,
++        XPUPlace=_XPUPlace,
++        CustomPlace=_CustomPlace,
++        framework=SimpleNamespace(
++            _current_expected_place_=lambda: _CPUPlace()
++        ),
++        device=SimpleNamespace(_convert_to_place=convert_to_place),
++    )
++    namespace = {
++        "core": core,
++        "paddle": paddle,
++        "param_one_alias": _param_one_alias,
++    }
++    module = ast.Module(body=[function], type_ignores=[])
++    exec(compile(module, str(TARGET), "exec"), namespace)
++    return namespace["set_rng_state"], generator, converted_devices
++
++
++def test_existing_state_list_calls_remain_valid():
++    function, generator, converted_devices = _load_checkout_function()
++    positional_state = object()
++    keyword_state = object()
++
++    function([positional_state])
++    function(state_list=[keyword_state], device="cpu")
++
++    assert generator.states == [positional_state, keyword_state]
++    assert converted_devices == ["cpu"]
++
++
++def test_new_state_alias_sets_the_same_generator_state():
++    function, generator, converted_devices = _load_checkout_function()
++    aliased_state = object()
++
++    function(new_state=[aliased_state], device="cpu")
++
++    assert generator.states == [aliased_state]
++    assert converted_devices == ["cpu"]
++
++
++def test_state_list_and_new_state_conflict_is_rejected():
++    function, generator, _ = _load_checkout_function()
++
++    with pytest.raises(ValueError, match="Cannot specify both"):
++        function(state_list=[object()], new_state=[object()])
++
++    assert generator.states == []

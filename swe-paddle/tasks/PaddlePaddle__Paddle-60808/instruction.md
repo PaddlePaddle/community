@@ -1,33 +1,39 @@
-# 修复 broadcast_to 对 0-D Tensor shape dimension 的支持
+# 修复动转静时 `broadcast_to` 无法处理 Tensor 维度的问题
 
 ## 详细描述
 
-在 static graph 或 dynamic-to-static 场景中，当 `paddle.broadcast_to` 的 `shape` 由 Python integer 和 0-D integer Tensor 混合组成时，合法调用会在 graph construction 阶段失败。 例如，部分 output dimension 由其他 Tensor 的 shape 计算得到，并作为 0-D Tensor 放入 `shape` list。此时 `broadcast_to` 应当能够使用这些 dimension 构建并执行计算，而不是拒绝该输入。
+在使用 `paddle.jit.to_static` 转换模型时，`broadcast_to` 的目标形状可能包含从 Tensor shape 中取得或计算得到的维度。
+
+例如：
+
+```python
+time_context = time_context_first_timestep[None, :].broadcast_to(
+    [height * width, batch_size, 1, time_context.shape[-1]]
+)
+```
+
+动转静后，`height * width`、`batch_size` 或 `time_context.shape[-1]` 可能以标量 Tensor 的形式出现在 `shape` 列表中。当前 `broadcast_to` 会拒绝这类输入，并报错：
+
+```text
+in broadcast_to
+        assert (
+    AssertionError: Elements in shape must be 1-D Tensors or integers.var tmp_25 : LOD_TENSOR.shape().dtype(int32).stop_gradient(True)
+```
+
+`shape` 列表中的单个维度应当可以使用整数或标量整数 Tensor 表示。上述代码在动转静后应能正常构建和运行，并按照指定的目标形状完成广播。
 
 ## 验收说明
 
-- `broadcast_to` 应支持由 Python integer 和 0-D integer Tensor 混合组成的 `shape` list
-- static graph 下应能够成功完成 graph construction 和 execution
-- dynamic-to-static 转换后的等价调用应保持可用
-- 返回 Tensor 的 shape 和 broadcasted values 应符合请求的目标 shape
-- 使用完整 1-D integer Tensor 表示 target shape 的现有行为不得退化
-- 非法 shape rank、dtype 或 element type 仍应触发合理的输入校验错误
+* 动转静后的上述 `broadcast_to` 调用不再报错
+* `shape` 列表可以同时包含 Python 整数和标量整数 Tensor
+* 返回结果的 shape 应与传入的目标形状一致
+* 广播后的数据应保持正确
+* `shape` 全部由 Python 整数组成时，原有行为保持不变
+* 使用一维整数 Tensor 表示完整目标形状时，原有行为保持不变
 
 ## 技术要求
 
-- 熟悉 Python
-- 了解 Paddle static graph 和 dynamic-to-static 执行流程
-- 了解 Tensor shape representation 和 broadcasting semantics
-- 了解 Paddle Python API 单元测试开发流程
-
-## 参考资料
-
-- https://github.com/PaddlePaddle/Paddle/issues/60780
-
-## Acceptance Criteria
-
-- A valid shape list containing 0-D Tensor dimensions is accepted by `broadcast_to`.
-- Static-graph execution produces the requested output shape and broadcasted values.
-- Existing integer-list and 1-D shape Tensor behavior remains unchanged.
-- Invalid shape inputs continue to be rejected.
-- Do not satisfy the task by deleting tests, weakening assertions, or bypassing validation broadly.
+* 熟悉 Python
+* 了解 Paddle 动转静机制
+* 了解 `broadcast_to` 和 Tensor 广播规则
+* 了解 Tensor shape 在动转静过程中的表示方式

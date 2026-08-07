@@ -16,7 +16,7 @@ This directory converts Paddle PR #53534 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 static graph 中 `to_tensor` 在 NumPy 1.24+ array-construction semantics 下无法处理包含 Tensor/Variable 的 nested sequence，并改进 unsupported input type 的错误反馈。
+Fix `to_tensor` in static graph mode so that it can handle nested sequences containing tensors or variables under NumPy 1.24+ array-construction semantics, and improve error messages for unsupported input types.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
