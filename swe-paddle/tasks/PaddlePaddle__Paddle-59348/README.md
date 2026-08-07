@@ -28,7 +28,7 @@ This directory converts Paddle PR #59348 into a SWE-Paddle community task candid
 
 ## Files
 
-- `proposal.md`: proposal (include if not yet on master).
+- `proposal.md`: approved proposal (do not modify in this package PR; merge proposal first).
 - `instruction.md`: self-contained problem statement for the coding agent.
 - `solution/code.patch`: gold production patch relative to base.
 - `tests/test.patch`: test patch exposing the target behavior.
