@@ -1,0 +1,83 @@
+diff --git a/python/paddle/__init__.py b/python/paddle/__init__.py
+index a138b8d52324f1dd99ddc9526270e25cf529fbbb..4ebc15fdc9753cc7b70071b143974f5140b81239 100644
+--- a/python/paddle/__init__.py
++++ b/python/paddle/__init__.py
+@@ -328,6 +328,7 @@ from .tensor.manipulation import (
+     masked_scatter_,
+     moveaxis,
+     put_along_axis,
++    ravel,
+     repeat_interleave,
+     reshape,
+     reshape_,
+@@ -1094,6 +1095,7 @@ __all__ = [
+     'std',
+     'flatten',
+     'flatten_',
++    'ravel',
+     'asin',
+     'multiply',
+     'multiply_',
+diff --git a/python/paddle/tensor/__init__.py b/python/paddle/tensor/__init__.py
+index 3f0495ac94fffc7bdcc95a557c40f57900136351..32425a36ee145d5851b81a782ff30bec5b9a3d5e 100644
+--- a/python/paddle/tensor/__init__.py
++++ b/python/paddle/tensor/__init__.py
+@@ -193,6 +193,7 @@ from .manipulation import (  # noqa: F401
+     moveaxis,
+     put_along_axis,
+     put_along_axis_,
++    ravel,
+     repeat_interleave,
+     reshape,
+     reshape_,
+diff --git a/python/paddle/tensor/manipulation.py b/python/paddle/tensor/manipulation.py
+index 9904dd9b1ee64d89e732f329eb871e5bd85a8954..857554b5dd1f2a005437b8548f5027ef9e79204d 100644
+--- a/python/paddle/tensor/manipulation.py
++++ b/python/paddle/tensor/manipulation.py
+@@ -1992,6 +1992,46 @@ def flatten(
+         return out
+ 
+ 
++def ravel(input: Tensor) -> Tensor:
++    """
++    Return a contiguous flattened tensor. A copy is made only if needed.
++    Note:
++        The output Tensor will share data with origin Tensor and doesn't have a Tensor copy in ``dygraph`` mode.
++        If you want to use the Tensor copy version, please use `Tensor.clone` like ``ravel_clone_x = x.ravel().clone()``.
++        For example:
++
++        .. code-block:: text
++            Case 1:
++              Given
++                X.shape = (3, 100, 100, 4)
++
++              We get:
++                Out.shape = (3 * 100 * 100 * 4)
++    Args:
++        x (Tensor): A tensor of number of dimensions >= axis. A tensor with data type float16, float32,
++                      float64, int8, int32, int64, uint8.
++
++    Returns:
++        Tensor: A tensor with the contents of the input tensor, whose input axes are flattened by indicated :attr:`start_axis` and :attr:`stop_axis`, and data type is the same as input :attr:`x`.
++
++    Examples:
++
++        .. code-block:: python
++
++            >>> import paddle
++
++            >>> image_shape=(2, 3, 4, 4)
++
++            >>> x = paddle.arange(end=image_shape[0] * image_shape[1] * image_shape[2] * image_shape[3])
++            >>> img = paddle.reshape(x, image_shape)
++
++            >>> out = paddle.ravel(img)
++            >>> print(out.shape)
++            [96]
++    """
++    return flatten(input)
++
++
+ @inplace_apis_in_dygraph_only
+ def flatten_(
+     x: Tensor, start_axis: int = 0, stop_axis: int = -1, name: str | None = None
