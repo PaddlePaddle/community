@@ -4,7 +4,7 @@
 
 Paddle 目前没有 `paddle.nn.functional.dropout1d`。对于 `[C, L]` 或 `[N, C, L]` 形状的输入，用户无法直接按通道执行 dropout。
 
-新增该接口后，训练时以概率 `p` 将整个通道置零，而不是随机对通道中的单个元素置零。输出 shape 应与输入保持一致；`training=False` 时不执行 dropout。
+普通 dropout 会对输入中的各个元素分别随机置零，而 `dropout1d` 会按通道进行 dropout：训练时，每个通道都以概率 `p` 被随机整体置零，同一通道内的所有元素会同时置零。输出 shape 应与输入保持一致；`training=False` 时不执行 dropout。
 
 该接口只支持二维和三维输入，`p` 必须在 `[0, 1]` 范围内。`inplace` 参数暂时不生效，传入 `inplace=True` 时应给出警告，并按非 `inplace` 方式返回结果。
 
