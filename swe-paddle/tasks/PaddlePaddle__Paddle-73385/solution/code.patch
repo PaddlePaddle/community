@@ -1,0 +1,44 @@
+diff --git a/paddle/phi/kernels/cpu/eigvals_kernel.cc b/paddle/phi/kernels/cpu/eigvals_kernel.cc
+index a8bdcf4c77..f645244364 100644
+--- a/paddle/phi/kernels/cpu/eigvals_kernel.cc
++++ b/paddle/phi/kernels/cpu/eigvals_kernel.cc
+@@ -206,6 +206,9 @@ void EigvalsKernel(const Context& dev_ctx,
+                    const DenseTensor& x,
+                    DenseTensor* out) {
+   dev_ctx.template Alloc<PaddleCType<T>>(out);
++  if (out && out->numel() == 0) {
++    return;
++  }
+ 
+   std::vector<DenseTensor> x_matrices;
+   SpiltBatchSquareMatrix(x, /*->*/ &x_matrices);
+diff --git a/paddle/phi/kernels/cpu/svdvals_kernel.cc b/paddle/phi/kernels/cpu/svdvals_kernel.cc
+index 34e5d3aa83..79a2963060 100644
+--- a/paddle/phi/kernels/cpu/svdvals_kernel.cc
++++ b/paddle/phi/kernels/cpu/svdvals_kernel.cc
+@@ -90,6 +90,10 @@ template <typename T, typename Context>
+ void SvdvalsKernel(const Context& dev_ctx,
+                    const DenseTensor& X,
+                    DenseTensor* S) {
++  if (S && S->numel() == 0) {
++    dev_ctx.template Alloc<phi::dtype::Real<T>>(S);
++    return;
++  }
+   auto x_dims = X.dims();
+   int rows = static_cast<int>(x_dims[x_dims.size() - 2]);
+   int cols = static_cast<int>(x_dims[x_dims.size() - 1]);
+diff --git a/paddle/phi/kernels/impl/svdvals_grad_kernel_impl.h b/paddle/phi/kernels/impl/svdvals_grad_kernel_impl.h
+index c88fe76b1a..d0fd6e7dec 100644
+--- a/paddle/phi/kernels/impl/svdvals_grad_kernel_impl.h
++++ b/paddle/phi/kernels/impl/svdvals_grad_kernel_impl.h
+@@ -34,6 +34,10 @@ void SvdvalsGradKernel(const Context& dev_ctx,
+                        const DenseTensor& x,
+                        const DenseTensor& s_grad,
+                        DenseTensor* x_grad) {
++  if (x_grad && x_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(x_grad);
++    return;
++  }
+   auto x_dims = x.dims();
+   int rows = static_cast<int>(x_dims[x_dims.size() - 2]);
+   int cols = static_cast<int>(x_dims[x_dims.size() - 1]);
