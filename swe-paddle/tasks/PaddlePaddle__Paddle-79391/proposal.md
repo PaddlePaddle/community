@@ -46,8 +46,8 @@ Paddle 原有 `paddle.enable_compat()` 主要通过 Torch import proxy 把 `impo
 - Dockerfile 或镜像地址：无公开地址。
 - Paddle 来源：Paddle source build。该 PR 的代码改动为纯 Python；目标 verifier 可以复用与 base 兼容的 native 构建并替换 Python 源码，不要求为本任务重新编译 C++、CUDA 或其他 native 扩展。
 - 如果使用 wheel，请填写 wheel URL、Python 版本和平台标签：不适用。
-- 已验证构建环境：当前场内开发容器为 Linux x86_64，使用 Python 3.9.18 和 CMake 3.18.0。
-- 硬件：目标 verifier 使用 CPU 即可；当前场内环境可见 NVIDIA Tesla V100-SXM2-32GB GPU，但本任务的目标测试不依赖 GPU。
+- 已验证构建环境：当前场内开发容器为 Linux x86_64，使用 Python 3.10.13 和 CMake 3.18.0，CUDA 12.6，cudnn 8.9.0
+- 硬件：目标 verifier 使用 CPU 即可；当前厂内环境可见 NVIDIA Tesla V100-SXM2-32GB GPU，但本任务的目标测试不依赖 GPU。
 - patch 类型：纯 Python。
 
 ## 7. 风险与注意事项
