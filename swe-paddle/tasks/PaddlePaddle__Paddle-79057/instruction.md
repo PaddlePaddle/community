@@ -1,28 +1,23 @@
-# 修复 RestrictedUnpickler 的继承类安全校验绕过
+# 修复 `RestrictedUnpickler` 对继承类的安全检查漏洞
 
 ## 详细描述
 
-`RestrictedUnpickler` 的 safe-class check 可能无法识别通过 MRO 继承的 unsafe pickle hooks，导致本应被拒绝的 user-defined class 进入 restricted unpickling path。需要修复该问题，确保 unsafe user-defined restoration logic 在执行前被阻止，同时保持仅依赖默认 `object` behavior 的普通 user-defined class 可用。
+`RestrictedUnpickler` 会检查用户自定义类是否包含可能影响反序列化过程的方法。但是目前只能识别类自身定义的 `__reduce__`、`__reduce_ex__`、`__getstate__` 和 `__setstate__`。如果这些方法定义在父类中，子类仍可能被错误地判定为安全，从而绕过受限反序列化的检查。
+
+安全检查需要同时考虑从父类继承的方法。包含这些方法的类不应进入正常的反序列化流程，而仅使用 Python 默认对象行为的普通类应继续正常使用。
 
 ## 验收说明
 
-- 通过继承获得不安全序列化或状态恢复行为的类必须被拒绝
-- restricted unpickling path 必须在执行不安全的用户自定义恢复逻辑前终止
-- 直接声明不安全行为的类应继续被拒绝
-- 仅使用 Python 默认对象行为的普通用户自定义类应保持可用
-- 不应通过全面禁止用户自定义类来规避该问题
-- 现有安全反序列化行为不得退化
+- 类自身定义危险 pickle 方法时，应继续被判定为不安全
+- 从父类继承危险 pickle 方法时，也应被判定为不安全
+- 需要检查的方法包括 `__reduce__`、`__reduce_ex__`、`__getstate__` 和 `__setstate__`
+- 受限反序列化不应执行继承得到的自定义状态恢复逻辑
+- 仅使用 `object` 默认行为的普通用户自定义类应保持可用
+- 现有安全类和不安全类的判断行为不得发生回归
 
 ## 技术要求
 
-- 熟悉 Python pickle 反序列化机制
-- 了解 Python 类继承
-- 了解反序列化安全风险
-- 了解 Paddle 单元测试开发流程
-
-## Acceptance Criteria
-
-- Unsafe behavior inherited from a parent class cannot bypass restricted unpickling checks.
-- Unsafe user-defined restoration logic is blocked before execution.
-- Existing safe user-defined classes remain supported.
-- The fix must not weaken tests or broadly disable user-defined classes.
+- 熟悉 Python
+- 了解 Python 类继承和 MRO
+- 了解 pickle 的序列化与反序列化机制
+- 了解反序列化相关的安全风险

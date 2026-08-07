@@ -1,0 +1,162 @@
+diff --git a/test/swe_paddle/test_pr74421_msort.py b/test/swe_paddle/test_pr74421_msort.py
+new file mode 100644
+index 0000000..54c89f9
+--- /dev/null
++++ b/test/swe_paddle/test_pr74421_msort.py
+@@ -0,0 +1,156 @@
++import ast
++import copy
++import sys
++import types
++from pathlib import Path
++
++import numpy as np
++
++
++TARGET = Path("python/paddle/tensor/search.py")
++
++
++def _extract_function(name, namespace):
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    node = next(
++        (
++            copy.deepcopy(item)
++            for item in tree.body
++            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
++            and item.name == name
++        ),
++        None,
++    )
++    assert node is not None, f"paddle.tensor.search must provide {name}"
++    node.decorator_list = []
++    module = ast.Module(body=[node], type_ignores=[])
++    ast.fix_missing_locations(module)
++    scope = dict(namespace)
++    scope.setdefault("Tensor", object)
++    exec(compile(module, str(TARGET), "exec"), scope)
++    return scope[name]
++
++
++def _execute_msort_public_import(path, package_name):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    node = next(
++        (
++            copy.deepcopy(item)
++            for item in tree.body
++            if isinstance(item, ast.ImportFrom)
++            and any(alias.name == "msort" for alias in item.names)
++        ),
++        None,
++    )
++    assert node is not None, f"{path} must publicly import msort"
++    assert node.level == 1 and node.module, "msort export must come from paddle package"
++
++    module_parts = node.module.split(".")
++    module_name = ".".join([package_name, *module_parts])
++    module_names = [package_name]
++    for index in range(1, len(module_parts)):
++        module_names.append(".".join([package_name, *module_parts[:index]]))
++    module_names.append(module_name)
++
++    saved = {name: sys.modules.get(name) for name in module_names}
++    for name in module_names[:-1]:
++        package = types.ModuleType(name)
++        package.__path__ = []
++        sys.modules[name] = package
++
++    imported = types.ModuleType(module_name)
++    msort_marker = object()
++    for alias in node.names:
++        setattr(imported, alias.name, msort_marker if alias.name == "msort" else object())
++    sys.modules[module_name] = imported
++
++    try:
++        scope = {"__package__": package_name, "__name__": f"{package_name}.probe"}
++        ast.fix_missing_locations(node)
++        exec(compile(ast.Module(body=[node], type_ignores=[]), str(path), "exec"), scope)
++    finally:
++        for name in reversed(module_names):
++            previous = saved[name]
++            if previous is None:
++                sys.modules.pop(name, None)
++            else:
++                sys.modules[name] = previous
++
++    return scope, msort_marker
++
++
++def test_existing_sort_dynamic_path_remains_compatible():
++    calls = []
++    sorted_result = object()
++    index_result = object()
++
++    class _COps:
++        @staticmethod
++        def argsort(value, axis, descending, stable):
++            calls.append((value, axis, descending, stable))
++            return sorted_result, index_result
++
++    function = _extract_function(
++        "sort",
++        {
++            "Tensor": object,
++            "in_dynamic_or_pir_mode": lambda: True,
++            "_C_ops": _COps,
++        },
++    )
++    tensor = object()
++
++    result = function(tensor, axis=1, descending=True, stable=True)
++
++    assert result is sorted_result
++    assert calls == [(tensor, 1, True, True)]
++
++
++def test_msort_is_reexported_from_public_namespaces():
++    tensor_scope, tensor_marker = _execute_msort_public_import(
++        Path("python/paddle/tensor/__init__.py"),
++        "swe_fake_paddle_tensor",
++    )
++    assert tensor_scope.get("msort") is tensor_marker
++
++    root_scope, root_marker = _execute_msort_public_import(
++        Path("python/paddle/__init__.py"),
++        "swe_fake_paddle",
++    )
++    assert root_scope.get("msort") is root_marker
++
++
++def test_msort_sorts_multidimensional_input_along_axis_zero():
++    calls = []
++
++    def controlled_sort(value, axis=-1, descending=False, stable=False, name=None):
++        calls.append((id(value), axis, descending, stable))
++        return np.sort(value, axis=axis)
++
++    function = _extract_function(
++        "msort",
++        {
++            "Tensor": object,
++            "sort": controlled_sort,
++        },
++    )
++    values = np.array(
++        [
++            [[5, 8, 9, 5], [0, 0, 1, 7], [6, 9, 2, 4]],
++            [[5, 2, 4, 2], [4, 7, 7, 9], [1, 7, 0, 6]],
++        ],
++        dtype="float32",
++    )
++
++    keyword_result = function(input=values)
++    positional_result = function(values)
++
++    expected = np.sort(values, axis=0)
++    np.testing.assert_array_equal(keyword_result, expected)
++    np.testing.assert_array_equal(positional_result, expected)
++    assert keyword_result.shape == values.shape
++    assert keyword_result.dtype == values.dtype
++    assert calls == [
++        (id(values), 0, False, False),
++        (id(values), 0, False, False),
++    ]

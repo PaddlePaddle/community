@@ -1,21 +1,50 @@
-# 修复 persistent workers 场景下提前结束 epoch 后的 DataLoader 崩溃
+# 修复 `persistent_workers=True` 时提前结束迭代而导致 DataLoader 崩溃
 
 ## 详细描述
 
-当 `paddle.io.DataLoader` 同时启用多个 workers 和 `persistent_workers=True` 时，用户可能只消费一个 epoch 的前几个 batches，然后通过 `break` 提前结束该 epoch。随后复用同一个 DataLoader 进入下一个 epoch。
+`paddle.io.DataLoader` 开启多进程加载和 `persistent_workers=True` 后，如果在遍历过程中使用 break 退出，再次迭代同一个 DataLoader 时报错。
 
-在该工作流中，DataLoader 可能在恢复 batch 的 nested structure 时抛出 `IndexError: pop from empty list`，导致训练或 benchmark 在后续 epoch 中断。该问题通常与 background prefetch 同时发生，并可能在多次 epoch reuse 后出现。
+例如：
+
+```python
+loader = paddle.io.DataLoader(
+    dataset,
+    batch_size=16,
+    num_workers=4,
+    persistent_workers=True,
+)
+
+for epoch in range(3):
+    for i, batch in enumerate(loader):
+        if i > 10:
+            break
+```
+
+运行到后续 epoch 时，报错信息如下：
+
+```text
+Traceback (most recent call last):
+  File "test_dataloader.py", line 51, in <module>
+    for i, (image, label) in enumerate(loader()):
+  File "/usr/local/lib/python3.8/dist-packages/paddle/fluid/dataloader/dataloader_iter.py", line 746, in __next__
+    data = _restore_batch(data, self._structure_infos.pop(0))
+IndexError: pop from empty list
+```
+
+相同代码在 `persistent_workers=False` 时可以正常运行。
+
+DataLoader 应支持在提前结束当前 epoch 后继续复用，后续迭代返回的 batch 结构和数据也应保持正确。
 
 ## 验收说明
 
-- 启用 `persistent_workers=True` 时，提前结束一个 epoch 后应能够继续复用同一个 DataLoader
-- 后续 epoch 返回的 nested batch structure 和数据内容应保持正确
-- 多次提前结束并重新开始 iteration 时，不应出现 `IndexError` 或其他 structure restoration 错误
-- `persistent_workers=False` 以及完整消费 epoch 的现有行为不得退化
+* 开启 `persistent_workers=True` 时，可以在一个 epoch 中途结束迭代，并在下一个 epoch 继续使用同一个 DataLoader
+* 提前结束并重新开始迭代时，不应出现 `IndexError: pop from empty list`
+* 后续迭代返回的 batch 结构和数据应保持正确
+* 完整迭代一个 epoch 的现有行为保持不变
+* `persistent_workers=False` 时的现有行为保持不变
 
 ## 技术要求
 
-- 熟悉 Python threading 和 multiprocessing
-- 了解 Paddle DataLoader worker lifecycle、prefetch 和 iterator reset
-- 了解 producer/consumer synchronization 与 FIFO semantics
-- 了解 Paddle Python 单元测试开发流程
+* 熟悉 Python
+* 了解 Paddle DataLoader 的多进程数据加载
+* 了解 persistent workers 和 DataLoader iterator 的重置流程

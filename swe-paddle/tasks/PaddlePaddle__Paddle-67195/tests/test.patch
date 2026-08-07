@@ -1,0 +1,189 @@
+diff --git a/test/legacy_test/test_pp_nan_checker_before_send.py b/test/legacy_test/test_pp_nan_checker_before_send.py
+new file mode 100644
+index 00000000000000..e1ee9edc99820b
+--- /dev/null
++++ b/test/legacy_test/test_pp_nan_checker_before_send.py
+@@ -0,0 +1,183 @@
++# Copyright (c) 2024 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import ast
++import copy
++import os
++import types
++from contextlib import contextmanager
++from pathlib import Path
++
++import pytest
++
++
++_REPO_ROOT = Path(__file__).resolve().parents[2]
++_SOURCE_PATH = (
++    _REPO_ROOT
++    / 'python'
++    / 'paddle'
++    / 'distributed'
++    / 'fleet'
++    / 'meta_parallel'
++    / 'pp_utils'
++    / 'p2p_communication.py'
++)
++
++
++class _Tensor:
++    def __init__(self, name, finite):
++        self.name = name
++        self.finite = finite
++
++
++class _BoolScalar:
++    def __init__(self, value):
++        self.value = value
++
++    def item(self):
++        return self.value
++
++
++class _FiniteResult:
++    def __init__(self, value):
++        self.value = value
++
++    def all(self):
++        return _BoolScalar(self.value)
++
++
++class _Group:
++    backend = 'controlled'
++
++
++def _strtobool(value):
++    return str(value).lower() in {'1', 'true', 'yes', 'on'}
++
++
++def _load_checkout_function():
++    source = _SOURCE_PATH.read_text(encoding='utf-8')
++    tree = ast.parse(source, filename=str(_SOURCE_PATH))
++
++    target = None
++    for node in tree.body:
++        if (
++            isinstance(node, ast.FunctionDef)
++            and node.name == 'batch_send_recv_on_calc_stream'
++        ):
++            target = copy.deepcopy(node)
++            break
++
++    assert target is not None
++
++    events = []
++    checked = []
++
++    def send_op(tensor, group, peer, nranks, rank_id):
++        events.append(('send', tensor.name))
++
++    def recv_op(tensor, group, peer, nranks, rank_id):
++        events.append(('recv', tensor.name))
++
++    class _Paddle:
++        @staticmethod
++        def isfinite(tensor):
++            checked.append(tensor.name)
++            return _FiniteResult(tensor.finite)
++
++        distributed = types.SimpleNamespace(get_rank=lambda: 0)
++
++    @contextmanager
++    def coalescing_manager(group, tasks):
++        yield
++
++    namespace = {
++        'os': os,
++        'strtobool': _strtobool,
++        'paddle': _Paddle,
++        '_send_on_calc_stream': send_op,
++        '_recv_on_calc_stream': recv_op,
++        '_warn_cur_rank_not_in_group': lambda group: False,
++        '_get_global_group': lambda: _Group(),
++        '_coalescing_manager': coalescing_manager,
++    }
++
++    module = ast.Module(body=[target], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(_SOURCE_PATH), 'exec'), namespace, namespace)
++
++    return (
++        namespace['batch_send_recv_on_calc_stream'],
++        send_op,
++        recv_op,
++        events,
++        checked,
++    )
++
++
++def _operation(op, tensor):
++    return types.SimpleNamespace(
++        op=op,
++        tensor=tensor,
++        peer=1,
++        group=_Group(),
++        nranks=1,
++        rank_id=0,
++    )
++
++
++@pytest.fixture(autouse=True)
++def _enable_checker(monkeypatch):
++    monkeypatch.setenv('FLAGS_pp_check_naninf', '1')
++
++
++def test_finite_send_and_receive_only_behavior():
++    function, send_op, recv_op, events, checked = _load_checkout_function()
++
++    function(
++        [
++            _operation(send_op, _Tensor('finite-send', True)),
++            _operation(recv_op, _Tensor('receive-buffer', False)),
++        ]
++    )
++
++    assert checked == ['finite-send']
++    assert events == [
++        ('send', 'finite-send'),
++        ('recv', 'receive-buffer'),
++    ]
++
++
++def test_invalid_send_is_rejected_before_communication():
++    function, send_op, _, events, checked = _load_checkout_function()
++
++    with pytest.raises(ValueError, match='inf or nan values at rank 0'):
++        function([_operation(send_op, _Tensor('invalid-send', False))])
++
++    assert checked == ['invalid-send']
++    assert events == []
++
++
++def test_mixed_batch_is_not_launched_when_outgoing_tensor_is_invalid():
++    function, send_op, recv_op, events, checked = _load_checkout_function()
++
++    operations = [
++        _operation(recv_op, _Tensor('receive-buffer', True)),
++        _operation(send_op, _Tensor('invalid-send', False)),
++    ]
++
++    with pytest.raises(ValueError, match='inf or nan values at rank 0'):
++        function(operations)
++
++    assert checked == ['invalid-send']
++    assert events == []

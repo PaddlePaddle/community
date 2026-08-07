@@ -17,7 +17,7 @@ This directory converts Paddle PR #78440 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 `paddle.cdist` 处理 0-size Tensor 时的 batch shape 计算和 `stop_gradient` propagation 问题。
+Fix the batch-shape calculation and `stop_gradient` propagation issues in `paddle.cdist` when handling zero-size tensors.
 
 ## Why This Is a Good Candidate
 

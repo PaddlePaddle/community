@@ -16,7 +16,7 @@ This directory converts Paddle PR #50086 into a SWE-Paddle community task candid
 
 ## Summary
 
-修复 `ConditionalBlock` 重复执行时复用已经失效的 child scope，导致 new executor 使用无效 execution scope 的问题。
+Fixed an issue where `ConditionalBlock` reused an invalidated child scope during repeated execution, causing the new executor to use an invalid execution scope.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
