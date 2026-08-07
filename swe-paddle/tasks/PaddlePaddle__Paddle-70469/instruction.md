@@ -1,24 +1,25 @@
-# `fused_dropout_add` 的结果可能与等价 `dropout + add` 不一致
+# 修复 `fused_dropout_add` 的精度问题
 
 ## 详细描述
 
-`paddle.incubate.nn.functional.fused_dropout_add` 在部分有效输入和执行场景中，可能产生与等价 `dropout + add` 组合不一致的数值结果。该差异会影响依赖数值一致性的 training 和 inference 流程。
+`paddle.incubate.nn.functional.fused_dropout_add` 当前存在精度问题，计算结果与先执行 `dropout`、再执行加法得到的结果不一致。
 
-在 optimized implementation 中已知的 precision issue 得到彻底解决前，应暂时避开受影响的 fused execution path，并保证该 API 保持等价 `dropout + add` 的 functional semantics。
+在该问题解决前，`fused_dropout_add` 应使用普通的 `dropout + add` 计算，避免继续调用存在问题的 fused 实现。
 
-当调用采用上述 compatibility behavior 时，应通过 warning 告知用户当前存在已知的 precision limitation。同一 module lifecycle 内不应重复发出相同 warning。
+调用该接口时需要给出提示，说明当前会回退到普通实现。同一次程序运行中，该提示只需要出现一次。
 
-## 验收标准
+## 验收说明
 
-- training 和 inference 场景均应保持等价 `dropout + add` 的 functional semantics
-- `p`、`training` 和 `mode` 参数应继续生效
-- 包括 `p == 0` 在内的现有有效参数组合应继续受支持，且结果不得退化
-- 应向用户发出说明 temporary precision limitation 的 warning
-- 同一 loaded module 中，相同 warning 最多发出一次
+- `fused_dropout_add` 的结果应与使用相同参数执行 `dropout + add` 一致
+- `p`、`training` 和 `mode` 参数应正常生效
+- 训练和推理场景都应使用正确的计算结果
+- 调用接口时应提示当前会回退到普通实现
+- 同一次程序运行中，该提示不应重复出现
+- `p=0` 等现有合法调用方式应保持正常
 
 ## 技术要求
 
 - 熟悉 Python
-- 了解 Paddle functional API 和 dropout semantics
-- 了解 fused operator dispatch 与 fallback behavior
-- 了解 warning lifecycle 和 Paddle 单元测试开发流程
+- 了解 Paddle 的 `dropout` 和 `fused_dropout_add`
+- 了解训练和推理模式下的 dropout 行为
+- 了解 Python warning 的使用方式

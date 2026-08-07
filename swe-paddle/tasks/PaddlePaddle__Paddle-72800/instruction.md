@@ -2,7 +2,7 @@
 
 ## 详细描述
 
-当 `paddle.cummin(x, axis)` 或 `paddle.cummax(x, axis)` 的输入 `x` 为 0-size Tensor 时，当前 CPU/GPU kernel 实现会直接进入后续计算逻辑，导致 kernel 内部对空数据执行计算或产生其他错误。
+当 `paddle.cummin(x, axis)` 或 `paddle.cummax(x, axis)` 的输入 `x` 为 0-size Tensor 时，导致 kernel 对空数据执行计算，产生 Segmentation fault 错误。
 
 典型表现包括：
 
@@ -31,8 +31,8 @@ out, indices = paddle.cummin(x, axis=-1)
 上述调用中 `x` 的 shape 为 `[20, 0]` 或 `[10, 0]`，输出 shape 也为相应的 0-size shape。按照 numpy 的语义，0-size Tensor 的累积最小/最大值计算应正常返回正确 shape 的空 Tensor。
 
 需要在 CPU/GPU kernel 层添加 0-size 早期返回处理：
-- 在 `ScanWithIndicesKernel`（cummin/cummax 前向）中，检查输出 `out->numel() == 0` 并直接返回
-- 在 `CummaxGradKernel` 和 `CumminGradKernel`（反向）中，检查梯度 `x_grad->numel() == 0` 并直接返回
+- 在 cummin/cummax 前向中，检查输出并直接返回
+- 在 cummin/cummax 反向中，检查梯度并直接返回
 
 ## 验收说明
 
