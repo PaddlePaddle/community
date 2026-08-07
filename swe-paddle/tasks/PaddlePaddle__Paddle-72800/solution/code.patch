@@ -1,0 +1,58 @@
+diff --git a/paddle/phi/kernels/cpu/cum_maxmin_kernel.cc b/paddle/phi/kernels/cpu/cum_maxmin_kernel.cc
+index f126a986947d1..49f58069c27e0 100644
+--- a/paddle/phi/kernels/cpu/cum_maxmin_kernel.cc
++++ b/paddle/phi/kernels/cpu/cum_maxmin_kernel.cc
+@@ -114,6 +114,11 @@ void ScanWithIndicesKernel(const Context& dev_ctx,
+                            int axis,
+                            DenseTensor* out,
+                            DenseTensor* indices) {
++  if (out && out->numel() == 0) {
++    dev_ctx.template Alloc<T1>(out);
++    dev_ctx.template Alloc<T2>(indices);
++    return;
++  }
+   dev_ctx.template Alloc<T1>(out);
+   dev_ctx.template Alloc<T2>(indices);
+ 
+diff --git a/paddle/phi/kernels/gpu/cum_maxmin_grad_kernel.cu b/paddle/phi/kernels/gpu/cum_maxmin_grad_kernel.cu
+index d7341e55e2349..3571789da9897 100644
+--- a/paddle/phi/kernels/gpu/cum_maxmin_grad_kernel.cu
++++ b/paddle/phi/kernels/gpu/cum_maxmin_grad_kernel.cu
+@@ -30,6 +30,10 @@ void CummaxGradKernel(const Context& dev_ctx,
+                       int axis,
+                       DataType dtype,
+                       DenseTensor* x_grad) {
++  if (x_grad && x_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(x_grad);
++    return;
++  }
+   dev_ctx.template Alloc<T>(x_grad);
+   phi::funcs::SetConstant<Context, T> functor;
+   functor(dev_ctx, x_grad, static_cast<T>(0));
+@@ -54,6 +58,10 @@ void CumminGradKernel(const Context& dev_ctx,
+                       int axis,
+                       DataType dtype,
+                       DenseTensor* x_grad) {
++  if (x_grad && x_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(x_grad);
++    return;
++  }
+   dev_ctx.template Alloc<T>(x_grad);
+   phi::funcs::SetConstant<Context, T> functor;
+   functor(dev_ctx, x_grad, static_cast<T>(0));
+diff --git a/paddle/phi/kernels/gpu/cum_maxmin_kernel.cu b/paddle/phi/kernels/gpu/cum_maxmin_kernel.cu
+index db5972453f5d5..1c37f2d60f81e 100644
+--- a/paddle/phi/kernels/gpu/cum_maxmin_kernel.cu
++++ b/paddle/phi/kernels/gpu/cum_maxmin_kernel.cu
+@@ -226,6 +226,11 @@ void ScanWithIndicesKernel(const Context& dev_ctx,
+                            T1 init,
+                            DenseTensor* out,
+                            DenseTensor* indices) {
++  if (out && out->numel() == 0) {
++    dev_ctx.template Alloc<T1>(out);
++    dev_ctx.template Alloc<T2>(indices);
++    return;
++  }
+   dev_ctx.template Alloc<T1>(out);
+   dev_ctx.template Alloc<T2>(indices);
+   // For 0D Tensor
