@@ -1,20 +1,34 @@
-# 修复 static graph 中 to_tensor 的 NumPy 兼容性
+# 修复 NumPy 1.24 下 `paddle.jit.to_static` 中 `paddle.to_tensor` 报错的问题
 
 ## 详细描述
+升级到 NumPy 1.24 后，在 `paddle.jit.to_static` 中使用 `paddle.to_tensor` 转换包含 Tensor 的 list 或 tuple 时报错。
 
-在 static graph 中，`to_tensor` 接收包含 Tensor/Variable 的 list 或 tuple 时，较新 NumPy 版本可能在构造 array 阶段直接报错，而不是返回 object array。这会导致原本可转换的 nested sequence 无法生成 Tensor。
+例如：
+```python
+def func(x):
+    a = paddle.to_tensor([1])
+    b = paddle.to_tensor([2.1], dtype="int64")
+    return paddle.to_tensor([a, b, [1]], dtype="float32")
 
-对于 dict 等不支持的输入类型，当前流程也可能在较晚阶段产生不清晰或不稳定的异常。
+out = paddle.jit.to_static(func)(x)
+```
+
+这类输入在旧版本 NumPy 中可以正常处理，但在 NumPy 1.24 中，list 转换为 NumPy array 时就直接失败了。
+
+包含 Tensor、Variable 或嵌套 list/tuple 的输入要能够正常转换。转换结果的数值、`dtype` 和 `stop_gradient` 也要和原有行为一致。已有的 Variable 在指定不同 `dtype` 时也要正确完成类型转换。对于 dict 等不支持的输入，要返回清楚的错误信息。
 
 ## 验收说明
 
-- 包含 Tensor/Variable 的 nested sequence 在 NumPy 1.24+ semantics 下应正常转换
-- 转换结果应保留预期 value、dtype 和 `stop_gradient`
-- 普通 numeric sequence、已有 Variable 和显式 dtype conversion 的行为不得退化
-- unsupported input type 应给出明确且稳定的错误信息
+* NumPy 1.24 下，包含 Tensor 或 Variable 的 list/tuple 可以正常转换
+* 嵌套 list/tuple 的转换结果正确
+* 转换结果的数值、`dtype` 和 `stop_gradient` 符合预期
+* 已有 Variable 在指定不同 `dtype` 时可以正常转换
+* 普通数值、NumPy array 和标量输入的现有行为保持不变
+* dict 等不支持的输入应给出明确的错误信息
 
 ## 技术要求
 
-- 熟悉 Python 和 NumPy
-- 了解 Paddle static graph 与 Tensor/Variable
-- 了解 dtype conversion 和 nested sequence handling
+* 熟悉 Python 和 NumPy
+* 了解 `paddle.to_tensor`
+* 了解 `paddle.jit.to_static`
+* 了解 Paddle 中 Tensor、Variable 和 `dtype` 的处理

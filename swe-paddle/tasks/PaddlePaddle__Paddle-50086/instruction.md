@@ -1,17 +1,23 @@
-# 修复 ConditionalBlock 重复执行时的 scope lifecycle
+# 修复 `ConditionalBlock` 复用失效 `Scope` 的问题
 
 ## 详细描述
 
-`ConditionalBlock` 可能在同一个 operator instance 上重复执行。外层 executor 的生命周期变化可能使上一次执行使用的 child scope 不再有效，但后续执行仍可能继续使用旧 scope，从而访问失效的 execution state。
+启用 `FLAGS_control_flow_use_new_executor` 后，`ConditionalBlock` 会缓存子块执行时使用的 `Scope`。
+
+外层执行器可能已经释放这个 `Scope`。再次运行同一个 `ConditionalBlock` 时，如果继续使用之前缓存的对象，会访问到已经失效的 `Scope`，导致执行异常。
+
+`ConditionalBlock` 再次运行时应使用仍然有效的 `Scope`，不能复用已经被释放的对象。
 
 ## 验收说明
 
-- 每次需要执行 sub-block 时都应获得当前有效且独立的 child scope
-- 外层 scope 的 children 被清理或替换后，不得继续使用此前的失效 scope
-- 首次执行以及 legacy executor 下的现有行为不得退化
+* 重复运行同一个 `ConditionalBlock` 时，不应使用已经失效的 `Scope`
+* 外层 `Scope` 被释放后，再次运行 `ConditionalBlock` 不应报错
+* 首次运行 `ConditionalBlock` 的行为保持不变
+* `ConditionalBlock` 原有的计算结果保持不变
 
 ## 技术要求
 
-- 熟悉 C++
-- 了解 Paddle control-flow operator 和 Scope lifecycle
-- 了解 pointer ownership、cached runtime state 和 executor reuse
+* 熟悉 C++
+* 了解 Paddle 的 `ConditionalBlock`
+* 了解 `Scope` 的创建和生命周期
+* 了解 `InterpreterCore`

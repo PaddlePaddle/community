@@ -1,0 +1,145 @@
+diff --git a/test/swe_paddle/test_pr79275_flex_attention_masks.py b/test/swe_paddle/test_pr79275_flex_attention_masks.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..67ae99283ffc433008dc49cf06f489db3e3c988d
+--- /dev/null
++++ b/test/swe_paddle/test_pr79275_flex_attention_masks.py
+@@ -0,0 +1,139 @@
++import ast
++import builtins
++import copy
++from pathlib import Path
++import types
++
++import pytest
++
++
++ROOT = Path(__file__).resolve().parents[2]
++ATTENTION_INIT = ROOT / "python/paddle/nn/attention/__init__.py"
++FLEX_ATTENTION = ROOT / "python/paddle/nn/attention/flex_attention.py"
++
++
++class _BoolTensor:
++    def __init__(self, value, creation_calls=None):
++        self.value = bool(value)
++        self.creation_calls = creation_calls if creation_calls is not None else []
++
++    def new_zeros(self, shape, dtype):
++        self.creation_calls.append(("zeros", shape, dtype))
++        return _BoolTensor(False, self.creation_calls)
++
++    def new_ones(self, shape, dtype):
++        self.creation_calls.append(("ones", shape, dtype))
++        return _BoolTensor(True, self.creation_calls)
++
++    def __or__(self, other):
++        return _BoolTensor(self.value or other.value, self.creation_calls)
++
++    def __and__(self, other):
++        return _BoolTensor(self.value and other.value, self.creation_calls)
++
++
++class _Mask:
++    def __init__(self, value):
++        self.value = value
++        self.calls = []
++
++    def __call__(self, b, h, q_idx, kv_idx):
++        self.calls.append((b, h, q_idx, kv_idx))
++        return _BoolTensor(self.value, b.creation_calls)
++
++
++def _load_attention_public_namespace():
++    sdpa_backend = object()
++    sdpa_kernel = object()
++    current_backends = object()
++    sdpa_module = types.SimpleNamespace(
++        SDPBackend=sdpa_backend,
++        _cur_sdpa_kernel_backends=current_backends,
++        sdpa_kernel=sdpa_kernel,
++    )
++    flex_module = types.SimpleNamespace()
++    package_module = types.SimpleNamespace(flex_attention=flex_module)
++
++    real_import = builtins.__import__
++
++    def controlled_import(name, globals=None, locals=None, fromlist=(), level=0):
++        if level == 1 and name == "sdpa":
++            return sdpa_module
++        if level == 1 and name == "" and "flex_attention" in fromlist:
++            return package_module
++        return real_import(name, globals, locals, fromlist, level)
++
++    builtins_dict = dict(vars(builtins))
++    builtins_dict["__import__"] = controlled_import
++    namespace = {
++        "__name__": "paddle.nn.attention",
++        "__package__": "paddle.nn.attention",
++        "__builtins__": builtins_dict,
++    }
++    exec(compile(ATTENTION_INIT.read_text(encoding="utf-8"), str(ATTENTION_INIT), "exec"), namespace)
++    return namespace, sdpa_backend, sdpa_kernel
++
++
++def _load_flex_functions():
++    assert FLEX_ATTENTION.exists(), (
++        "paddle.nn.attention.flex_attention must provide the mask-combination APIs"
++    )
++    tree = ast.parse(FLEX_ATTENTION.read_text(encoding="utf-8"), filename=str(FLEX_ATTENTION))
++    nodes = {
++        node.name: copy.deepcopy(node)
++        for node in tree.body
++        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
++        and node.name in {"or_masks", "and_masks"}
++    }
++    assert set(nodes) == {"or_masks", "and_masks"}
++    namespace = {"MaskModSignature": object, "Tensor": object}
++    module = ast.Module(body=[nodes["or_masks"], nodes["and_masks"]], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(FLEX_ATTENTION), "exec"), namespace)
++    return namespace["or_masks"], namespace["and_masks"]
++
++
++def test_existing_attention_exports_remain_available():
++    namespace, sdpa_backend, sdpa_kernel = _load_attention_public_namespace()
++    assert namespace["SDPBackend"] is sdpa_backend
++    assert namespace["sdpa_kernel"] is sdpa_kernel
++    assert namespace["__all__"] == ["SDPBackend", "sdpa_kernel"]
++
++
++def test_or_and_masks_combine_results_and_forward_arguments():
++    or_masks, and_masks = _load_flex_functions()
++    b = _BoolTensor(False)
++    h, q_idx, kv_idx = object(), object(), object()
++    args = (b, h, q_idx, kv_idx)
++
++    or_parts = [_Mask(False), _Mask(True), _Mask(False)]
++    and_parts = [_Mask(True), _Mask(True), _Mask(False)]
++
++    assert or_masks(*or_parts)(*args).value is True
++    assert and_masks(*and_parts)(*args).value is False
++    assert all(mask.calls == [args] for mask in or_parts + and_parts)
++    assert ("zeros", (), "bool") in b.creation_calls
++    assert ("ones", (), "bool") in b.creation_calls
++
++
++def test_single_and_empty_mask_combinations_have_identity_behavior():
++    or_masks, and_masks = _load_flex_functions()
++    b = _BoolTensor(False)
++    args = (b, object(), object(), object())
++
++    true_mask = _Mask(True)
++    false_mask = _Mask(False)
++    assert or_masks(true_mask)(*args).value is True
++    assert and_masks(false_mask)(*args).value is False
++    assert or_masks()(*args).value is False
++    assert and_masks()(*args).value is True
++
++
++def test_non_callable_mask_inputs_are_rejected():
++    or_masks, and_masks = _load_flex_functions()
++    valid = _Mask(True)
++
++    with pytest.raises(RuntimeError, match="callable"):
++        or_masks(valid, 1)
++    with pytest.raises(RuntimeError, match="callable"):
++        and_masks(None, valid)

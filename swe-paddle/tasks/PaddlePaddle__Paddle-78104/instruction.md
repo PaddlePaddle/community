@@ -1,12 +1,8 @@
-# 修复 device context 对 Tensor place 的解析
+# 修复 `paddle.cuda.device` 无法正确处理 `tensor.place` 的问题
 
 ## 详细描述
 
-在动态图模式下，Tensor 的 `place` 属性可以直接传入 `paddle.device.device` 或 `paddle.cuda.device`，用于在 Tensor 所在设备上创建上下文。
-
-在部分场景中，`tensor.place` 返回的是 `Place` 基类对象，而不是具体的设备类型对象。现有设备解析逻辑可能无法正确处理这类输入，导致设备上下文使用错误的设备。该问题在 Tensor 位于非默认 CUDA 设备时尤为明显，设备编号可能无法得到正确保留。
-
-需要修复设备上下文对 `tensor.place` 的处理，确保上下文使用 Tensor 实际所在的设备。
+`tensor.place` 返回的是基类 `paddle.base.libpaddle.Place`，而不是具体子类（如 `CUDAPlace`）。 当前 `_convert_to_place` 通过 `type(place) is core.Place` 判断类型，导致基类 `Place` 被误识别为需要重新初始化的对象，从而每次都会被解析为默认设备 `gpu:0`。
 
 ## 验收说明
 

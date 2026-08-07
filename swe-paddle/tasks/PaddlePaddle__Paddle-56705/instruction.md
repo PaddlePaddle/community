@@ -1,21 +1,22 @@
-# 修复 model-parallel layers 中的内存泄漏
+# 修复模型并行层重复创建 `PyLayer` 导致的内存泄漏
 
 ## 详细描述
 
-在动态图模式下，模型并行相关操作被反复调用时可能产生额外的内存占用，并随着调用次数增加而不断累积。
+模型并行的 `identity` 和 `all-reduce` 在动态图模式下使用 `paddle.autograd.PyLayer` 实现。
 
-该问题会影响长时间运行的模型并行任务。请修复这一内存泄漏，同时保持相关操作原有的功能和执行行为不变。
+反复调用这两个操作时，会不断创建新的 `PyLayer` 类。长时间训练过程中，这些类对象会持续累积并造成内存泄漏。
+
+需要避免重复调用带来的 `PyLayer` 类累积，同时保持 `identity` 和 `all-reduce` 原有的前向、反向和通信行为。
 
 ## 验收说明
 
-- 重复调用 model-parallel `identity` 时，不应产生与调用次数持续相关的额外对象累积
-- 重复调用 model-parallel `all-reduce` 时，不应产生与调用次数持续相关的额外对象累积
-- `identity` 和 `all-reduce` 的前向行为不得发生变化
-- `identity` 和 `all-reduce` 的反向传播及通信行为不得发生变化
-- 静态图模式下的现有行为不得退化
+* 重复调用模型并行 `identity` 或 `all-reduce` 时，不应持续创建新的 `PyLayer` 类
+* `identity` 原有的前向结果和反向通信行为保持不变
+* `all-reduce` 原有的前向结果和反向通信行为保持不变
+* 现有进程组和通信参数的用法保持不变
 
 ## 技术要求
 
-- 熟悉 Python
-- 熟悉 Paddle dynamic graph 和 autograd
-- 了解 model-parallel process group、`identity` 和 `all-reduce` 的执行语义
+* 熟悉 Python
+* 熟悉 Paddle 动态图和 `paddle.autograd.PyLayer`
+* 了解模型并行中的 `identity` 和 `all-reduce`
