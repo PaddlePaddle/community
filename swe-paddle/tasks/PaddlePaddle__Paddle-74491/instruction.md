@@ -2,9 +2,9 @@
 
 ## 详细描述
 
-Paddle 目前通过 `stop_gradient` 控制 Tensor 是否参与梯度计算，但还不支持 `requires_grad` 属性。
+Paddle 目前通过 `stop_gradient` 控制 Tensor 是否参与梯度计算。为了提升 API 兼容性和用户体验，还需要提供语义对应的 `requires_grad` 属性。
 
-需要为动态图 Tensor、静态图 Variable 和 PIR Value 增加 `requires_grad`。该属性与 `stop_gradient` 的含义相反：
+需要为动态图 Tensor、传统静态图 Variable，以及 PIR 静态图中的 `paddle.pir.Value` 增加 `requires_grad`。其中，`paddle.pir.Value` 是 PIR 计算图中表示算子输入和输出数据的对象，可以理解为 PIR 静态图中的 Tensor-like 符号对象。
 
 - `requires_grad=True` 时，`stop_gradient=False`
 - `requires_grad=False` 时，`stop_gradient=True`
