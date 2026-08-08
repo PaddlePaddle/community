@@ -1,0 +1,80 @@
+diff --git a/test/legacy_test/test_eigvals_op.py b/test/legacy_test/test_eigvals_op.py
+index 7021cea382..313333424b 100644
+--- a/test/legacy_test/test_eigvals_op.py
++++ b/test/legacy_test/test_eigvals_op.py
+@@ -169,6 +169,31 @@ class TestEigvalsOpBatch3(TestEigvalsOp):
+         self.input_dims = (6, 2, 9, 6, 6)
+ 
+ 
++class TestEigvalsOp_ZeroSize(TestEigvalsOp):
++    def set_input_dims(self):
++        self.input_dims = (6, 0, 2, 2)
++
++
++class TestEigvalsOp_ZeroSize2(TestEigvalsOp):
++    def set_input_dims(self):
++        self.input_dims = (6, 2, 0, 0)
++
++    def verify_output(self, outs):
++        actual_outs = np.sort(np.array(outs[0]))
++        expect_outs = np.sort(np.array(self.outputs['Out']))
++        self.assertTrue(
++            actual_outs.shape == expect_outs.shape,
++            "Output shape has diff.\n"
++            "Expect shape "
++            + str(expect_outs.shape)
++            + "\n"
++            + "But Got"
++            + str(actual_outs.shape)
++            + " in class "
++            + self.__class__.__name__,
++        )
++
++
+ class TestEigvalsAPI(unittest.TestCase):
+     def setUp(self):
+         np.random.seed(0)
+diff --git a/test/legacy_test/test_svdvals_op.py b/test/legacy_test/test_svdvals_op.py
+index 274ae7b794..ccd68c63aa 100644
+--- a/test/legacy_test/test_svdvals_op.py
++++ b/test/legacy_test/test_svdvals_op.py
+@@ -148,14 +148,32 @@ class TestSvdvalsAPI(unittest.TestCase):
+                 x_invalid_shape = paddle.to_tensor(x_np_invalid_shape)
+                 paddle.linalg.svdvals(x_invalid_shape)
+ 
+-            def test_empty_tensor():
+-                """Test empty tensor"""
+-                x_np_empty = np.empty([0, 10], dtype='float32')
+-                x_empty = paddle.to_tensor(x_np_empty)
+-                paddle.linalg.svdvals(x_empty)
+-
+             self.assertRaises(ValueError, test_invalid_shape)
+-            self.assertRaises(ValueError, test_empty_tensor)
++
++
++class TestSvdvalsOp_ZeroSize(OpTest):
++    def setUp(self):
++        self.op_type = "svdvals"
++        self.python_api = paddle.linalg.svdvals
++        self.init_data()
++
++    def init_shape(self):
++        self._input_shape = (1, 0)
++
++    def init_data(self):
++        self.init_shape()
++        self._input_data = np.random.random(self._input_shape).astype("float64")
++        self._output_data = np.linalg.svd(
++            self._input_data, compute_uv=False, hermitian=False
++        )
++        self.inputs = {'x': self._input_data}
++        self.outputs = {'s': self._output_data}
++
++    def test_check_output(self):
++        self.check_output(check_pir=True)
++
++    def test_check_grad(self):
++        self.check_grad(['x'], ['s'], numeric_grad_delta=0.001, check_pir=True)
+ 
+ 
+ if __name__ == "__main__":
