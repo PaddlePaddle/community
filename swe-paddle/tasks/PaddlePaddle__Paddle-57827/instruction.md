@@ -2,7 +2,7 @@
 
 ## 详细描述
 
-动转静 / build strategy 场景中可能用到 `fused_elemwise_add_activation` 融合算子。当前在 PIR 路径下该融合算子支持不完整，相关用例无法在 PIR 下正确运行。
+动转静 / build strategy 场景中可能用到 `fused_elemwise_add_activation` 融合算子。当前 PIR 路径对该融合算子的处理存在问题，相关用例无法正常运行。
 
 需要达成的目标：
 
