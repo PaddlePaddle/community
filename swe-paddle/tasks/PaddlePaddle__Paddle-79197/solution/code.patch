@@ -1,0 +1,312 @@
+diff --git a/python/paddle/optimizer/lr.py b/python/paddle/optimizer/lr.py
+index 385bf9e4dd6a49a5c8b36cf95f05c6a87537358f..09f161a2169b5333338b513793a54913a0b426a2 100644
+--- a/python/paddle/optimizer/lr.py
++++ b/python/paddle/optimizer/lr.py
+@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, TypedDict
+ 
+ import numpy
+ import numpy.typing as npt
+-from typing_extensions import NotRequired
++from typing_extensions import NotRequired, overload
+ 
+ import paddle
+ from paddle import Tensor
+@@ -32,6 +32,10 @@ from paddle.base.framework import (
+     in_dygraph_mode,
+ )
+ from paddle.base.layer_helper import LayerHelper
++from paddle.utils.decorator_utils import (
++    lr_scheduler_decorator,
++    param_one_alias,
++)
+ 
+ if TYPE_CHECKING:
+     from collections.abc import Sequence
+@@ -144,6 +148,23 @@ class LRScheduler:
+     last_epoch: int
+     verbose: bool
+ 
++    @overload
++    def __init__(
++        self,
++        learning_rate: float = 0.1,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @overload
++    def __init__(
++        self,
++        optimizer: paddle.optimizer.Optimizer,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @lr_scheduler_decorator()
+     def __init__(
+         self,
+         learning_rate: float = 0.1,
+@@ -152,7 +173,7 @@ class LRScheduler:
+     ) -> None:
+         if not isinstance(learning_rate, (float, int)):
+             raise TypeError(
+-                f"The type of learning rate must be float, but received {type(learning_rate)}"
++                f"The type of param learning_rate or optimizer must be int, float or paddle.optimizer.Optimizer, but received {type(learning_rate)}"
+             )
+         if learning_rate < 0:
+             raise ValueError(f"Invalid learning rate: {learning_rate}")
+@@ -1089,6 +1110,25 @@ class ExponentialDecay(LRScheduler):
+ 
+     gamma: float
+ 
++    @overload
++    def __init__(
++        self,
++        learning_rate: float,
++        gamma: float,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @overload
++    def __init__(
++        self,
++        optimizer: paddle.optimizer.Optimizer,
++        gamma: float,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @lr_scheduler_decorator()
+     def __init__(
+         self,
+         learning_rate: float,
+@@ -1196,6 +1236,7 @@ class MultiStepDecay(LRScheduler):
+     milestones: Sequence[int]
+     gamma: float
+ 
++    @overload
+     def __init__(
+         self,
+         learning_rate: float,
+@@ -1203,7 +1244,27 @@ class MultiStepDecay(LRScheduler):
+         gamma: float = 0.1,
+         last_epoch: int = -1,
+         verbose: bool = False,
+-    ):
++    ) -> None: ...
++
++    @overload
++    def __init__(
++        self,
++        optimizer: paddle.optimizer.Optimizer,
++        milestones: Sequence[int],
++        gamma: float = 0.1,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @lr_scheduler_decorator()
++    def __init__(
++        self,
++        learning_rate: float,
++        milestones: Sequence[int],
++        gamma: float = 0.1,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None:
+         if not isinstance(milestones, (tuple, list)):
+             raise TypeError(
+                 f"The type of 'milestones' in 'MultiStepDecay' must be 'tuple, list', but received {type(milestones)}."
+@@ -1317,6 +1378,27 @@ class StepDecay(LRScheduler):
+     step_size: int
+     gamma: float
+ 
++    @overload
++    def __init__(
++        self,
++        learning_rate: float,
++        step_size: int,
++        gamma: float = 0.1,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @overload
++    def __init__(
++        self,
++        optimizer: paddle.optimizer.Optimizer,
++        step_size: int,
++        gamma: float = 0.1,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @lr_scheduler_decorator()
+     def __init__(
+         self,
+         learning_rate: float,
+@@ -1548,6 +1630,38 @@ class ReduceOnPlateau(LRScheduler):
+     min_lr: float
+     epsilon: float
+ 
++    @overload
++    def __init__(
++        self,
++        learning_rate: float,
++        mode: Literal["min", "max"] = 'min',
++        factor: float = 0.1,
++        patience: int = 10,
++        threshold: float = 1e-4,
++        threshold_mode: Literal["rel", "abs"] = 'rel',
++        cooldown: int = 0,
++        min_lr: float = 0,
++        epsilon: float = 1e-8,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @overload
++    def __init__(
++        self,
++        optimizer: paddle.optimizer.Optimizer,
++        mode: Literal["min", "max"] = 'min',
++        factor: float = 0.1,
++        patience: int = 10,
++        threshold: float = 1e-4,
++        threshold_mode: Literal["rel", "abs"] = 'rel',
++        cooldown: int = 0,
++        min_lr: float = 0,
++        eps: float = 1e-8,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @lr_scheduler_decorator()
++    @param_one_alias(["epsilon", "eps"])
+     def __init__(
+         self,
+         learning_rate: float,
+@@ -1580,7 +1694,7 @@ class ReduceOnPlateau(LRScheduler):
+         self.threshold_mode = threshold_mode
+         if not isinstance(learning_rate, (float, int)):
+             raise TypeError(
+-                f"The type of 'learning_rate' in 'ReduceOnPlateau' must be 'float', but received {type(learning_rate)}."
++                f"The type of param learning_rate or optimizer must be int, float or paddle.optimizer.Optimizer, but received {type(learning_rate)}"
+             )
+ 
+         self.patience = patience
+@@ -1777,6 +1891,27 @@ class CosineAnnealingDecay(LRScheduler):
+     eta_min: float
+     last_epoch: int
+ 
++    @overload
++    def __init__(
++        self,
++        learning_rate: float,
++        T_max: int,
++        eta_min: float = 0,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @overload
++    def __init__(
++        self,
++        optimizer: paddle.optimizer.Optimizer,
++        T_max: int,
++        eta_min: float = 0,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @lr_scheduler_decorator()
+     def __init__(
+         self,
+         learning_rate: float,
+@@ -2573,6 +2708,7 @@ class CosineAnnealingWarmRestarts(LRScheduler):
+     eta_min: float
+     T_cur: int
+ 
++    @overload
+     def __init__(
+         self,
+         learning_rate: float,
+@@ -2581,7 +2717,29 @@ class CosineAnnealingWarmRestarts(LRScheduler):
+         eta_min: float = 0,
+         last_epoch: int = -1,
+         verbose: bool = False,
+-    ):
++    ) -> None: ...
++
++    @overload
++    def __init__(
++        self,
++        optimizer: paddle.optimizer.Optimizer,
++        T_0: int,
++        T_mult: int = 1,
++        eta_min: float = 0,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None: ...
++
++    @lr_scheduler_decorator()
++    def __init__(
++        self,
++        learning_rate: float,
++        T_0: int,
++        T_mult: int = 1,
++        eta_min: float = 0,
++        last_epoch: int = -1,
++        verbose: bool = False,
++    ) -> None:
+         if T_0 <= 0 or not isinstance(T_0, int):
+             raise ValueError(f"Expected positive integer T_0, but got {T_0}")
+         if T_mult < 1 or not isinstance(T_mult, int):
+diff --git a/python/paddle/utils/decorator_utils.py b/python/paddle/utils/decorator_utils.py
+index 563d148645df81a87fc1e1f5332da8945dd74167..eb2d273ed2b7343cab73e18886c566c5b7d06993 100644
+--- a/python/paddle/utils/decorator_utils.py
++++ b/python/paddle/utils/decorator_utils.py
+@@ -1189,6 +1189,44 @@ def batch_sampler_decorator() -> Callable[
+     return decorator
+ 
+ 
++def lr_scheduler_decorator() -> Callable[
++    [Callable[_InputT, _RetT]], Callable[_InputT, _RetT]
++]:
++    """
++    Usage Example:
++    PyTorch: __init__(self, optimizer, last_epoch) -> None:
++    Paddle: __init__(self, learning_rate, last_epoch, verbose) -> None:
++    """
++
++    def decorator(func: Callable[_InputT, _RetT]) -> Callable[_InputT, _RetT]:
++        @functools.wraps(func)
++        def wrapper(*args: _InputT.args, **kwargs: _InputT.kwargs) -> _RetT:
++            opt = None
++            if "optimizer" in kwargs:
++                if "learning_rate" not in kwargs:
++                    opt = kwargs.pop("optimizer")
++                    kwargs["learning_rate"] = opt.get_lr()
++                else:
++                    raise ValueError(
++                        "Cannot specify both 'learning_rate' and 'optimizer'."
++                    )
++            elif len(args) > 1 and isinstance(
++                args[1], paddle.optimizer.Optimizer
++            ):
++                opt = args[1]
++                args_list = list(args)
++                args_list[1] = opt.get_lr()
++                args = tuple(args_list)
++            func(*args, **kwargs)
++            if opt is not None:
++                opt.set_lr_scheduler(args[0])
++
++        wrapper.__signature__ = inspect.signature(func)
++        return wrapper
++
++    return decorator
++
++
+ def fill_diagonal_inplace_decorator() -> Callable[
+     [Callable[_InputT, _RetT]], Callable[_InputT, _RetT]
+ ]:
