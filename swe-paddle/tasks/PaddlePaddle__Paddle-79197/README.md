@@ -16,14 +16,14 @@ This directory converts Paddle PR #79197 into a SWE-Paddle community task candid
 
 ## Summary
 
-让常用 learning-rate scheduler 可以直接接收已有 optimizer，并自动与该 optimizer 建立关联，同时保持原有 `learning_rate` 调用方式不变。
+Allow commonly used learning-rate schedulers to accept an existing optimizer directly and automatically associate themselves with that optimizer, while preserving the existing `learning_rate` calling convention.
 
 ## Why This Is A Good SWE-Paddle Candidate
 
-- 问题来自用户迁移训练代码时常见的 scheduler 调用方式差异，触发条件和期望结果清楚。
-- 修改覆盖多个 scheduler 的统一入口和参数处理逻辑，不能靠单点特判完成。
-- 来源 PR 提供了位置参数、关键字参数、学习率变化和 optimizer 关联关系的真实测试。
-- 测试可在 CPU 环境运行，不需要外部数据集、网络或分布式设备。
+* The issue reflects a common scheduler API mismatch encountered when migrating training code, with clear trigger conditions and expected behavior.
+* The change covers shared argument-handling logic used by multiple schedulers and cannot be solved through a one-off special case.
+* The source PR provides real tests covering positional and keyword arguments, learning-rate updates, and the association between schedulers and optimizers.
+* The tests run on CPU without external datasets, network access, or distributed devices.
 
 ## Files
 
