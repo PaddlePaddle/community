@@ -1,8 +1,8 @@
-# 修复 PIR 下 SelectedRows 相关 len 路径并开放对应 PIR 覆盖测试
+# 修复 PIR 下 SelectedRows 相关 len 路径并开放对应 `fuse elewise add act` 覆盖测试
 
 ## 详细描述
 
-在 PIR executor 路径下，对 `SelectedRows` 相关变量执行 `len` / shape 等访问时可能失败或行为不正确；同时部分 fuse elewise add activation 相关用例尚未在 PIR 覆盖门禁中打开。
+在 PIR executor 路径下，对 `SelectedRows` 相关变量执行 `len` / shape 等访问时可能失败或行为不正确；导致 fuse elewise add activation 相关用例尚未在 PIR 覆盖门禁中打开。
 
 需要达成的目标：
 
