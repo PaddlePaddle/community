@@ -1,18 +1,44 @@
 # PaddlePaddle__Paddle-78048
 
-Source PR: https://github.com/PaddlePaddle/Paddle/pull/78048
+This directory converts Paddle PR #78048 into a SWE-Paddle community task candidate.
 
-This task covers parameter-alias compatibility for `paddle.hsplit`, `paddle.dsplit`, and `paddle.vsplit`.
+## Source
 
-- Base: `3f270c40db7776481d69176ee09222b3437d92bb`
-- Gold: `e9f4d5fd4a0893b99b358b100383799ed52a0e7e`
-- Production file: `python/paddle/tensor/manipulation.py`
-- Upstream test file: `test/legacy_test/test_api_compatibility.py`
+| Field       | Value                                                        |
+| ----------- | ------------------------------------------------------------ |
+| Repo        | `PaddlePaddle/Paddle`                                        |
+| PR          | [78048](https://github.com/PaddlePaddle/Paddle/pull/78048)   |
+| PR title    | `[API Compatibility No.62、73、234] Add parameter alias support for dsplit、hsplit、vsplit - part` |
+| Base commit | `3f270c40db7776481d69176ee09222b3437d92bb`                   |
+| Merged at   | `2026-03-05T10:11:27+08:00`                                  |
+| Task type   | `feature_enhancement`                                        |
+| Resource    | CPU                                                          |
 
-The task is Python-only and does not require rebuilding Paddle.
+## Summary
 
-The F2P oracle uses the real tests added by the source PR:
+Allow `paddle.hsplit`, `paddle.dsplit`, and `paddle.vsplit` to accept commonly used parameter aliases while preserving their existing positional and Paddle-native keyword forms.
 
-- `TestHsplitAPI::test_dygraph_Compatibility`
-- `TestDsplitAPI::test_dygraph_Compatibility`
-- `TestVsplitAPI::test_dygraph_Compatibility`
+## Why This Is A Good SWE-Paddle Candidate
+
+- The task comes from a real API compatibility gap with clear trigger conditions and expected results.
+- The change covers three related public APIs through shared parameter-handling behavior rather than isolated special cases.
+- The source PR provides real Tensor-based tests for the original names, the new aliases, Tensor methods, and NumPy reference results.
+- The tests run deterministically on CPU without external datasets, network access, or distributed devices.
+
+## Files
+
+- `proposal.md`: candidate proposal for maintainer triage.
+- `instruction.md`: self-contained problem statement for the coding agent.
+- `solution/code.patch`: gold patch from the merged PR.
+- `tests/test.patch`: test patch exposing the target behavior.
+- `tests/test.sh`: minimal target test command.
+- `environment/README.md`: environment notes for reproduction.
+- `README.md`: task overview and verification entrypoint.
+
+## Verification
+
+```bash
+bash tests/test.sh
+```
+
+Expected behavior: applying `tests/test.patch` to `base_commit` should fail on the unsupported parameter aliases; applying both `tests/test.patch` and `solution/code.patch` should pass the target tests.
