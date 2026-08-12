@@ -8,7 +8,6 @@
 
 - 在 PIR 路径下支持 `sequence_mask`，使开启 PIR executor 后相关用例可运行。
 - 输出 mask 的形状与数值语义应与既有非 PIR 行为一致（在任务覆盖范围内）。
-- 不要求一次迁移全部其他 sequence 算子。
 
 ## 问题复现（示意）
 
