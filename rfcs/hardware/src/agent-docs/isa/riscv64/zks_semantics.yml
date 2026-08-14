@@ -1,0 +1,53 @@
+# RISC-V64 Zks Extension Semantics
+semantics:
+  sm3p0:
+    description: "sm3p0 rd, rs1"
+    operations:
+      - type: crypto
+        op: Sm3P0
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sm3p1:
+    description: "sm3p1 rd, rs1"
+    operations:
+      - type: crypto
+        op: Sm3P1
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sm4ed:
+    description: "sm4ed rd, rs1, rs2, bs"
+    operations:
+      - type: crypto
+        op: Sm4Ed
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+        src3:
+          field_imm:
+            field: imm
+            width: 2
+            signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sm4ks:
+    description: "sm4ks rd, rs1, rs2, bs"
+    operations:
+      - type: crypto
+        op: Sm4Ks
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+        src3:
+          field_imm:
+            field: imm
+            width: 2
+            signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false

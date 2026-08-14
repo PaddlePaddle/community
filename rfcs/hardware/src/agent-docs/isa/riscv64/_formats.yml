@@ -1,0 +1,482 @@
+# RISC-V 指令格式模板
+
+formats:
+  - name: R-type
+    variables:
+      - name: rs2
+        bits: [24, 20]
+      - name: rs1
+        bits: [19, 15]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: I-type
+    variables:
+      - name: imm
+        bits: [31, 20]
+      - name: rs1
+        bits: [19, 15]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: S-type
+    variables:
+      - name: imm_hi
+        bits: [31, 25]
+      - name: rs2
+        bits: [24, 20]
+      - name: rs1
+        bits: [19, 15]
+      - name: imm_lo
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: B-type
+    variables:
+      - name: imm_12
+        bits: [31, 31]
+      - name: imm_10_5
+        bits: [30, 25]
+      - name: rs2
+        bits: [24, 20]
+      - name: rs1
+        bits: [19, 15]
+      - name: imm_4_1
+        bits: [11, 8]
+      - name: imm_11
+        bits: [7, 7]
+    bit_length: 32
+
+  - name: U-type
+    variables:
+      - name: imm_31_12
+        bits: [31, 12]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: J-type
+    variables:
+      - name: imm_20
+        bits: [31, 31]
+      - name: imm_10_1
+        bits: [30, 21]
+      - name: imm_11
+        bits: [20, 20]
+      - name: imm_19_12
+        bits: [19, 12]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: R4-type
+    variables:
+      - name: rs3
+        bits: [31, 27]
+      - name: rs2
+        bits: [24, 20]
+      - name: rs1
+        bits: [19, 15]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 32
+
+  # === C-extension (compressed) formats ===
+
+  - name: C-rd-rs2
+    variables:
+      - name: rd
+        bits: [9, 7]
+        offset: 8
+      - name: rs2
+        bits: [4, 2]
+        offset: 8
+    bit_length: 16
+
+  - name: C-rd
+    variables:
+      - name: rd
+        bits: [9, 7]
+        offset: 8
+    bit_length: 16
+
+  - name: C-rd-imm6
+    variables:
+      - name: imm
+        bits: [[12, 12], [6, 2]]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 16
+
+  - name: C-rd-imm6-compressed
+    variables:
+      - name: imm
+        bits: [[12, 12], [6, 2]]
+      - name: rd
+        bits: [9, 7]
+        offset: 8
+    bit_length: 16
+
+  - name: C-rd-only
+    variables:
+      - name: rd
+        bits: [11, 7]
+    bit_length: 16
+
+  - name: C-mem-ld64
+    variables:
+      - name: imm
+        bits: [[6, 5], [12, 10]]
+      - name: rd
+        bits: [4, 2]
+        offset: 8
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+    bit_length: 16
+
+  - name: C-mem-sd64
+    variables:
+      - name: imm
+        bits: [[6, 5], [12, 10]]
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+      - name: rs2
+        bits: [4, 2]
+        offset: 8
+    bit_length: 16
+
+  - name: C-mem-h
+    variables:
+      - name: imm
+        bits: [5, 5]
+      - name: rd
+        bits: [4, 2]
+        offset: 8
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+    bit_length: 16
+
+  - name: C-branch
+    variables:
+      - name: imm
+        bits: [[12, 12], [6, 5], [2, 2], [11, 10], [4, 3]]
+      - name: rd
+        bits: [9, 7]
+        offset: 8
+    bit_length: 16
+
+  - name: C-mem-ldsp
+    variables:
+      - name: imm
+        bits: [[4, 2], [12, 12], [6, 5]]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 16
+
+  - name: C-cr
+    variables:
+      - name: rd
+        bits: [11, 7]
+      - name: rs2
+        bits: [6, 2]
+    bit_length: 16
+
+  - name: C-mem-sdsp
+    variables:
+      - name: imm
+        bits: [[9, 7], [12, 10]]
+      - name: rs2
+        bits: [6, 2]
+    bit_length: 16
+
+  - name: C-addi4spn
+    variables:
+      - name: imm
+        bits: [[10, 7], [12, 11], [5, 5], [6, 6]]
+      - name: rd
+        bits: [4, 2]
+        offset: 8
+    bit_length: 16
+
+  - name: C-lw
+    variables:
+      - name: imm
+        bits: [[5, 5], [12, 12], [11, 11], [10, 10], [6, 6]]
+      - name: rd
+        bits: [4, 2]
+        offset: 8
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+    bit_length: 16
+
+  - name: C-sw
+    variables:
+      - name: imm
+        bits: [[5, 5], [12, 12], [11, 11], [10, 10], [6, 6]]
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+      - name: rs2
+        bits: [4, 2]
+        offset: 8
+    bit_length: 16
+
+  - name: C-lbu
+    variables:
+      - name: imm
+        bits: [[5, 5], [6, 6]]
+      - name: rd
+        bits: [4, 2]
+        offset: 8
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+    bit_length: 16
+
+  - name: C-sb
+    variables:
+      - name: imm
+        bits: [[5, 5], [6, 6]]
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+      - name: rs2
+        bits: [4, 2]
+        offset: 8
+    bit_length: 16
+
+  - name: C-sh
+    variables:
+      - name: imm
+        bits: [5, 5]
+      - name: rs1
+        bits: [9, 7]
+        offset: 8
+      - name: rs2
+        bits: [4, 2]
+        offset: 8
+    bit_length: 16
+
+  - name: C-addi16sp
+    variables:
+      - name: imm
+        bits: [[12, 12], [4, 4], [3, 3], [5, 5], [2, 2], [6, 6]]
+    bit_length: 16
+
+  - name: C-j
+    variables:
+      - name: imm
+        bits: [[12, 12], [8, 8], [10, 9], [6, 6], [7, 7], [2, 2], [11, 11], [5, 3]]
+    bit_length: 16
+
+  - name: C-lwsp
+    variables:
+      - name: imm
+        bits: [[3, 3], [2, 2], [12, 12], [6, 6], [5, 5], [4, 4]]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 16
+
+  - name: C-swsp
+    variables:
+      - name: imm
+        bits: [[8, 8], [7, 7], [12, 12], [11, 11], [10, 10], [9, 9]]
+      - name: rs2
+        bits: [6, 2]
+    bit_length: 16
+
+  # === Zcmp (Compressed Push/Pop) formats ===
+  #
+  #  bits[15:13]=101 (FUNCT3=5), bits[1:0]=10 (C2)
+  #  cm.push:   bits[12:8]=11000
+  #  cm.pop:    bits[12:8]=11010
+  #  cm.popret: bits[12:8]=11110
+  #  cm.popretz:bits[12:8]=11100
+
+  - name: C-Zcmp-push
+    variables:
+      - name: rlist
+        bits: [7, 4]
+      - name: spimm
+        bits: [3, 2]
+    bit_length: 16
+
+  - name: C-Zcmp-pop
+    variables:
+      - name: rlist
+        bits: [7, 4]
+      - name: spimm
+        bits: [3, 2]
+    bit_length: 16
+
+  - name: C-Zcmp-popret
+    variables:
+      - name: rlist
+        bits: [7, 4]
+      - name: spimm
+        bits: [3, 2]
+    bit_length: 16
+
+  - name: C-Zcmp-popretz
+    variables:
+      - name: rlist
+        bits: [7, 4]
+      - name: spimm
+        bits: [3, 2]
+    bit_length: 16
+
+  - name: C-Zcmp-mv
+    variables:
+      - name: r1s
+        bits: [9, 7]
+      - name: r2s
+        bits: [4, 2]
+    bit_length: 16
+
+  # === Zcmt (Compressed Table Jump) formats ===
+  # bits[15:13]=101, bits[12:10]=000, bits[1:0]=10
+  # cm.jt and cm.jalt share the same encoding distinguished by index range
+
+  - name: C-Zcmt-jt
+    variables:
+      - name: index
+        bits: [11, 4]
+    bit_length: 16
+
+  - name: C-Zcmt-jalt
+    variables:
+      - name: index
+        bits: [11, 4]
+    bit_length: 16
+
+  # === V-extension formats ===
+
+  - name: V-type
+    variables:
+      - name: vd
+        bits: [11, 7]
+      - name: vs1
+        bits: [19, 15]
+      - name: vs2
+        bits: [24, 20]
+    bit_length: 32
+
+  - name: V-type-vx
+    variables:
+      - name: rs1
+        bits: [19, 15]
+      - name: vd
+        bits: [11, 7]
+      - name: vs2
+        bits: [24, 20]
+    bit_length: 32
+
+  - name: V-type-vi
+    variables:
+      - name: imm
+        bits: [19, 15]
+      - name: vd
+        bits: [11, 7]
+      - name: vs2
+        bits: [24, 20]
+    bit_length: 32
+
+  - name: V-type-mem
+    variables:
+      - name: rs1
+        bits: [19, 15]
+      - name: vd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: V-type-v
+    variables:
+      - name: vd
+        bits: [11, 7]
+      - name: vs2
+        bits: [24, 20]
+    bit_length: 32
+
+  - name: V-type-mv-i
+    variables:
+      - name: imm
+        bits: [19, 15]
+      - name: vd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: V-type-id
+    variables:
+      - name: vd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: V-type-vf
+    variables:
+      - name: rs1
+        bits: [19, 15]
+      - name: vd
+        bits: [11, 7]
+      - name: vs2
+        bits: [24, 20]
+    bit_length: 32
+
+  - name: V-type-mv-f
+    variables:
+      - name: rs1
+        bits: [19, 15]
+      - name: vd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: V-type-mv-v
+    variables:
+      - name: vd
+        bits: [11, 7]
+      - name: vs1
+        bits: [19, 15]
+    bit_length: 32
+
+  - name: V-type-mem-vs2
+    variables:
+      - name: vs2
+        bits: [24, 20]
+      - name: rs1
+        bits: [19, 15]
+    bit_length: 32
+
+  - name: V-type-rd-vs2
+    variables:
+      - name: rd
+        bits: [11, 7]
+      - name: vs2
+        bits: [24, 20]
+    bit_length: 32
+
+  - name: R-type-unary
+    variables:
+      - name: rs1
+        bits: [19, 15]
+      - name: rd
+        bits: [11, 7]
+    bit_length: 32
+
+  - name: Fence-type
+    variables:
+      - name: succ
+        bits: [23, 20]
+      - name: pred
+        bits: [19, 15]
+    bit_length: 32
+
+  - name: Cache-mgmt
+    variables:
+      - name: rs1
+        bits: [19, 15]
+    bit_length: 32

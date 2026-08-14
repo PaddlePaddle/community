@@ -1,0 +1,4370 @@
+groups:
+- name: lsx
+  description: LoongArch LSX (128-bit SIMD) Instructions
+instructions:
+- name: VADD.B
+  group: lsx
+  encoding:
+    match: 01110000000010100???????????????
+  assembly: vadd.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VADD.H
+  group: lsx
+  encoding:
+    match: 01110000000010101???????????????
+  assembly: vadd.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VADD.W
+  group: lsx
+  encoding:
+    match: 01110000000010110???????????????
+  assembly: vadd.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VADD.D
+  group: lsx
+  encoding:
+    match: 01110000000010111???????????????
+  assembly: vadd.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUB.B
+  group: lsx
+  encoding:
+    match: 01110000000011000???????????????
+  assembly: vsub.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUB.H
+  group: lsx
+  encoding:
+    match: 01110000000011001???????????????
+  assembly: vsub.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUB.W
+  group: lsx
+  encoding:
+    match: 01110000000011010???????????????
+  assembly: vsub.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUB.D
+  group: lsx
+  encoding:
+    match: 01110000000011011???????????????
+  assembly: vsub.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VAND.V
+  group: lsx
+  encoding:
+    match: 01110001001001100???????????????
+  assembly: vand.v $v.d, $v.j, $v.k
+  format: DJK
+- name: VOR.V
+  group: lsx
+  encoding:
+    match: 01110001001001101???????????????
+  assembly: vor.v $v.d, $v.j, $v.k
+  format: DJK
+- name: VXOR.V
+  group: lsx
+  encoding:
+    match: 01110001001001110???????????????
+  assembly: vxor.v $v.d, $v.j, $v.k
+  format: DJK
+- name: VNOR.V
+  group: lsx
+  encoding:
+    match: 01110001001001111???????????????
+  assembly: vnor.v $v.d, $v.j, $v.k
+  format: DJK
+- name: VREPLGR2VR.B
+  group: lsx
+  encoding:
+    match: 0111001010011111000000??????????
+  assembly: vreplgr2vr.b $v.d, $r.j
+  format: DJ
+- name: VREPLGR2VR.H
+  group: lsx
+  encoding:
+    match: 0111001010011111000001??????????
+  assembly: vreplgr2vr.h $v.d, $r.j
+  format: DJ
+- name: VREPLGR2VR.W
+  group: lsx
+  encoding:
+    match: 0111001010011111000010??????????
+  assembly: vreplgr2vr.w $v.d, $r.j
+  format: DJ
+- name: VREPLGR2VR.D
+  group: lsx
+  encoding:
+    match: 0111001010011111000011??????????
+  assembly: vreplgr2vr.d $v.d, $r.j
+  format: DJ
+- name: VLD
+  group: lsx
+  encoding:
+    match: 0010110000??????????????????????
+  assembly: vld $v.d, $r.j, $imm
+  format: DJI12
+- name: VST
+  group: lsx
+  encoding:
+    match: 0010110001??????????????????????
+  assembly: vst $v.d, $r.j, $imm
+  format: DJI12
+- name: VSEQ_B
+  group: lsx
+  encoding:
+    match: 01110000000000000???????????????
+  assembly: vseq.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSEQ_H
+  group: lsx
+  encoding:
+    match: 01110000000000001???????????????
+  assembly: vseq.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSEQ_W
+  group: lsx
+  encoding:
+    match: 01110000000000010???????????????
+  assembly: vseq.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSEQ_D
+  group: lsx
+  encoding:
+    match: 01110000000000011???????????????
+  assembly: vseq.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VNEG_B
+  group: lsx
+  encoding:
+    match: 0111001010011100001100??????????
+  assembly: vneg.b $v.d, $v.j
+  format: DJ
+- name: VNEG_H
+  group: lsx
+  encoding:
+    match: 0111001010011100001101??????????
+  assembly: vneg.h $v.d, $v.j
+  format: DJ
+- name: VNEG_W
+  group: lsx
+  encoding:
+    match: 0111001010011100001110??????????
+  assembly: vneg.w $v.d, $v.j
+  format: DJ
+- name: VNEG_D
+  group: lsx
+  encoding:
+    match: 0111001010011100001111??????????
+  assembly: vneg.d $v.d, $v.j
+  format: DJ
+- name: VMAX_B
+  group: lsx
+  encoding:
+    match: 01110000011100000???????????????
+  assembly: vmax.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMAX_H
+  group: lsx
+  encoding:
+    match: 01110000011100001???????????????
+  assembly: vmax.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMAX_W
+  group: lsx
+  encoding:
+    match: 01110000011100010???????????????
+  assembly: vmax.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMAX_D
+  group: lsx
+  encoding:
+    match: 01110000011100011???????????????
+  assembly: vmax.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_B
+  group: lsx
+  encoding:
+    match: 01110000011100100???????????????
+  assembly: vmin.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_H
+  group: lsx
+  encoding:
+    match: 01110000011100101???????????????
+  assembly: vmin.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_W
+  group: lsx
+  encoding:
+    match: 01110000011100110???????????????
+  assembly: vmin.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_D
+  group: lsx
+  encoding:
+    match: 01110000011100111???????????????
+  assembly: vmin.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLL_B
+  group: lsx
+  encoding:
+    match: 01110000111010000???????????????
+  assembly: vsll.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLL_H
+  group: lsx
+  encoding:
+    match: 01110000111010001???????????????
+  assembly: vsll.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLL_W
+  group: lsx
+  encoding:
+    match: 01110000111010010???????????????
+  assembly: vsll.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLL_D
+  group: lsx
+  encoding:
+    match: 01110000111010011???????????????
+  assembly: vsll.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRL_B
+  group: lsx
+  encoding:
+    match: 01110000111010100???????????????
+  assembly: vsrl.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRL_H
+  group: lsx
+  encoding:
+    match: 01110000111010101???????????????
+  assembly: vsrl.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRL_W
+  group: lsx
+  encoding:
+    match: 01110000111010110???????????????
+  assembly: vsrl.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRL_D
+  group: lsx
+  encoding:
+    match: 01110000111010111???????????????
+  assembly: vsrl.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRA_B
+  group: lsx
+  encoding:
+    match: 01110000111011000???????????????
+  assembly: vsra.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRA_H
+  group: lsx
+  encoding:
+    match: 01110000111011001???????????????
+  assembly: vsra.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRA_W
+  group: lsx
+  encoding:
+    match: 01110000111011010???????????????
+  assembly: vsra.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRA_D
+  group: lsx
+  encoding:
+    match: 01110000111011011???????????????
+  assembly: vsra.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VCLO_B
+  group: lsx
+  encoding:
+    match: 0111001010011100000000??????????
+  assembly: vclo_b $v.d, $v.j
+  format: DJ
+- name: VCLO_D
+  group: lsx
+  encoding:
+    match: 0111001010011100000011??????????
+  assembly: vclo_d $v.d, $v.j
+  format: DJ
+- name: VCLO_H
+  group: lsx
+  encoding:
+    match: 0111001010011100000001??????????
+  assembly: vclo_h $v.d, $v.j
+  format: DJ
+- name: VCLO_W
+  group: lsx
+  encoding:
+    match: 0111001010011100000010??????????
+  assembly: vclo_w $v.d, $v.j
+  format: DJ
+- name: VCLZ_B
+  group: lsx
+  encoding:
+    match: 0111001010011100000100??????????
+  assembly: vclz_b $v.d, $v.j
+  format: DJ
+- name: VCLZ_D
+  group: lsx
+  encoding:
+    match: 0111001010011100000111??????????
+  assembly: vclz_d $v.d, $v.j
+  format: DJ
+- name: VCLZ_H
+  group: lsx
+  encoding:
+    match: 0111001010011100000101??????????
+  assembly: vclz_h $v.d, $v.j
+  format: DJ
+- name: VCLZ_W
+  group: lsx
+  encoding:
+    match: 0111001010011100000110??????????
+  assembly: vclz_w $v.d, $v.j
+  format: DJ
+- name: VPCNT_B
+  group: lsx
+  encoding:
+    match: 0111001010011100001000??????????
+  assembly: vpcnt_b $v.d, $v.j
+  format: DJ
+- name: VPCNT_D
+  group: lsx
+  encoding:
+    match: 0111001010011100001011??????????
+  assembly: vpcnt_d $v.d, $v.j
+  format: DJ
+- name: VPCNT_H
+  group: lsx
+  encoding:
+    match: 0111001010011100001001??????????
+  assembly: vpcnt_h $v.d, $v.j
+  format: DJ
+- name: VPCNT_W
+  group: lsx
+  encoding:
+    match: 0111001010011100001010??????????
+  assembly: vpcnt_w $v.d, $v.j
+  format: DJ
+- name: VABSD_B
+  group: lsx
+  encoding:
+    match: 01110000011000000???????????????
+  assembly: vabsd_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VABSD_BU
+  group: lsx
+  encoding:
+    match: 01110000011000100???????????????
+  assembly: vabsd_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VABSD_D
+  group: lsx
+  encoding:
+    match: 01110000011000011???????????????
+  assembly: vabsd_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VABSD_DU
+  group: lsx
+  encoding:
+    match: 01110000011000111???????????????
+  assembly: vabsd_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VABSD_H
+  group: lsx
+  encoding:
+    match: 01110000011000001???????????????
+  assembly: vabsd_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VABSD_HU
+  group: lsx
+  encoding:
+    match: 01110000011000101???????????????
+  assembly: vabsd_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VABSD_W
+  group: lsx
+  encoding:
+    match: 01110000011000010???????????????
+  assembly: vabsd_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VABSD_WU
+  group: lsx
+  encoding:
+    match: 01110000011000110???????????????
+  assembly: vabsd_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDA_B
+  group: lsx
+  encoding:
+    match: 01110000010111000???????????????
+  assembly: vadda_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDA_D
+  group: lsx
+  encoding:
+    match: 01110000010111011???????????????
+  assembly: vadda_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDA_H
+  group: lsx
+  encoding:
+    match: 01110000010111001???????????????
+  assembly: vadda_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDA_W
+  group: lsx
+  encoding:
+    match: 01110000010111010???????????????
+  assembly: vadda_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VANDN_V
+  group: lsx
+  encoding:
+    match: 01110001001010000???????????????
+  assembly: vandn_v $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_B
+  group: lsx
+  encoding:
+    match: 01110000011010000???????????????
+  assembly: vavgr_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_BU
+  group: lsx
+  encoding:
+    match: 01110000011010100???????????????
+  assembly: vavgr_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_D
+  group: lsx
+  encoding:
+    match: 01110000011010011???????????????
+  assembly: vavgr_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_DU
+  group: lsx
+  encoding:
+    match: 01110000011010111???????????????
+  assembly: vavgr_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_H
+  group: lsx
+  encoding:
+    match: 01110000011010001???????????????
+  assembly: vavgr_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_HU
+  group: lsx
+  encoding:
+    match: 01110000011010101???????????????
+  assembly: vavgr_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_W
+  group: lsx
+  encoding:
+    match: 01110000011010010???????????????
+  assembly: vavgr_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVGR_WU
+  group: lsx
+  encoding:
+    match: 01110000011010110???????????????
+  assembly: vavgr_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_B
+  group: lsx
+  encoding:
+    match: 01110000011001000???????????????
+  assembly: vavg_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_BU
+  group: lsx
+  encoding:
+    match: 01110000011001100???????????????
+  assembly: vavg_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_D
+  group: lsx
+  encoding:
+    match: 01110000011001011???????????????
+  assembly: vavg_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_DU
+  group: lsx
+  encoding:
+    match: 01110000011001111???????????????
+  assembly: vavg_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_H
+  group: lsx
+  encoding:
+    match: 01110000011001001???????????????
+  assembly: vavg_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_HU
+  group: lsx
+  encoding:
+    match: 01110000011001101???????????????
+  assembly: vavg_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_W
+  group: lsx
+  encoding:
+    match: 01110000011001010???????????????
+  assembly: vavg_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VAVG_WU
+  group: lsx
+  encoding:
+    match: 01110000011001110???????????????
+  assembly: vavg_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_B
+  group: lsx
+  encoding:
+    match: 01110000111000000???????????????
+  assembly: vdiv_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_BU
+  group: lsx
+  encoding:
+    match: 01110000111001000???????????????
+  assembly: vdiv_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_D
+  group: lsx
+  encoding:
+    match: 01110000111000011???????????????
+  assembly: vdiv_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_DU
+  group: lsx
+  encoding:
+    match: 01110000111001011???????????????
+  assembly: vdiv_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_H
+  group: lsx
+  encoding:
+    match: 01110000111000001???????????????
+  assembly: vdiv_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_HU
+  group: lsx
+  encoding:
+    match: 01110000111001001???????????????
+  assembly: vdiv_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_W
+  group: lsx
+  encoding:
+    match: 01110000111000010???????????????
+  assembly: vdiv_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VDIV_WU
+  group: lsx
+  encoding:
+    match: 01110000111001010???????????????
+  assembly: vdiv_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMAX_BU
+  group: lsx
+  encoding:
+    match: 01110000011101000???????????????
+  assembly: vmax_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMAX_DU
+  group: lsx
+  encoding:
+    match: 01110000011101011???????????????
+  assembly: vmax_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMAX_HU
+  group: lsx
+  encoding:
+    match: 01110000011101001???????????????
+  assembly: vmax_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMAX_WU
+  group: lsx
+  encoding:
+    match: 01110000011101010???????????????
+  assembly: vmax_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_BU
+  group: lsx
+  encoding:
+    match: 01110000011101100???????????????
+  assembly: vmin_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_DU
+  group: lsx
+  encoding:
+    match: 01110000011101111???????????????
+  assembly: vmin_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_HU
+  group: lsx
+  encoding:
+    match: 01110000011101101???????????????
+  assembly: vmin_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMIN_WU
+  group: lsx
+  encoding:
+    match: 01110000011101110???????????????
+  assembly: vmin_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_B
+  group: lsx
+  encoding:
+    match: 01110000111000100???????????????
+  assembly: vmod_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_BU
+  group: lsx
+  encoding:
+    match: 01110000111001100???????????????
+  assembly: vmod_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_D
+  group: lsx
+  encoding:
+    match: 01110000111000111???????????????
+  assembly: vmod_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_DU
+  group: lsx
+  encoding:
+    match: 01110000111001111???????????????
+  assembly: vmod_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_H
+  group: lsx
+  encoding:
+    match: 01110000111000101???????????????
+  assembly: vmod_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_HU
+  group: lsx
+  encoding:
+    match: 01110000111001101???????????????
+  assembly: vmod_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_W
+  group: lsx
+  encoding:
+    match: 01110000111000110???????????????
+  assembly: vmod_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMOD_WU
+  group: lsx
+  encoding:
+    match: 01110000111001110???????????????
+  assembly: vmod_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_B
+  group: lsx
+  encoding:
+    match: 01110000100001100???????????????
+  assembly: vmuh_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_BU
+  group: lsx
+  encoding:
+    match: 01110000100010000???????????????
+  assembly: vmuh_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_D
+  group: lsx
+  encoding:
+    match: 01110000100001111???????????????
+  assembly: vmuh_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_DU
+  group: lsx
+  encoding:
+    match: 01110000100010011???????????????
+  assembly: vmuh_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_H
+  group: lsx
+  encoding:
+    match: 01110000100001101???????????????
+  assembly: vmuh_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_HU
+  group: lsx
+  encoding:
+    match: 01110000100010001???????????????
+  assembly: vmuh_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_W
+  group: lsx
+  encoding:
+    match: 01110000100001110???????????????
+  assembly: vmuh_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUH_WU
+  group: lsx
+  encoding:
+    match: 01110000100010010???????????????
+  assembly: vmuh_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUL_B
+  group: lsx
+  encoding:
+    match: 01110000100001000???????????????
+  assembly: vmul_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUL_D
+  group: lsx
+  encoding:
+    match: 01110000100001011???????????????
+  assembly: vmul_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUL_H
+  group: lsx
+  encoding:
+    match: 01110000100001001???????????????
+  assembly: vmul_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMUL_W
+  group: lsx
+  encoding:
+    match: 01110000100001010???????????????
+  assembly: vmul_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VORN_V
+  group: lsx
+  encoding:
+    match: 01110001001010001???????????????
+  assembly: vorn_v $v.d, $v.j, $v.k
+  format: DJK
+- name: VROTR_B
+  group: lsx
+  encoding:
+    match: 01110000111011100???????????????
+  assembly: vrotr_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VROTR_D
+  group: lsx
+  encoding:
+    match: 01110000111011111???????????????
+  assembly: vrotr_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VROTR_H
+  group: lsx
+  encoding:
+    match: 01110000111011101???????????????
+  assembly: vrotr_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VROTR_W
+  group: lsx
+  encoding:
+    match: 01110000111011110???????????????
+  assembly: vrotr_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_B
+  group: lsx
+  encoding:
+    match: 01110000010001100???????????????
+  assembly: vsadd_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_BU
+  group: lsx
+  encoding:
+    match: 01110000010010100???????????????
+  assembly: vsadd_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_D
+  group: lsx
+  encoding:
+    match: 01110000010001111???????????????
+  assembly: vsadd_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_DU
+  group: lsx
+  encoding:
+    match: 01110000010010111???????????????
+  assembly: vsadd_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_H
+  group: lsx
+  encoding:
+    match: 01110000010001101???????????????
+  assembly: vsadd_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_HU
+  group: lsx
+  encoding:
+    match: 01110000010010101???????????????
+  assembly: vsadd_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_W
+  group: lsx
+  encoding:
+    match: 01110000010001110???????????????
+  assembly: vsadd_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSADD_WU
+  group: lsx
+  encoding:
+    match: 01110000010010110???????????????
+  assembly: vsadd_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_B
+  group: lsx
+  encoding:
+    match: 01110000000000100???????????????
+  assembly: vsle_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_BU
+  group: lsx
+  encoding:
+    match: 01110000000001000???????????????
+  assembly: vsle_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_D
+  group: lsx
+  encoding:
+    match: 01110000000000111???????????????
+  assembly: vsle_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_DU
+  group: lsx
+  encoding:
+    match: 01110000000001011???????????????
+  assembly: vsle_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_H
+  group: lsx
+  encoding:
+    match: 01110000000000101???????????????
+  assembly: vsle_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_HU
+  group: lsx
+  encoding:
+    match: 01110000000001001???????????????
+  assembly: vsle_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_W
+  group: lsx
+  encoding:
+    match: 01110000000000110???????????????
+  assembly: vsle_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLE_WU
+  group: lsx
+  encoding:
+    match: 01110000000001010???????????????
+  assembly: vsle_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_B
+  group: lsx
+  encoding:
+    match: 01110000000001100???????????????
+  assembly: vslt_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_BU
+  group: lsx
+  encoding:
+    match: 01110000000010000???????????????
+  assembly: vslt_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_D
+  group: lsx
+  encoding:
+    match: 01110000000001111???????????????
+  assembly: vslt_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_DU
+  group: lsx
+  encoding:
+    match: 01110000000010011???????????????
+  assembly: vslt_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_H
+  group: lsx
+  encoding:
+    match: 01110000000001101???????????????
+  assembly: vslt_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_HU
+  group: lsx
+  encoding:
+    match: 01110000000010001???????????????
+  assembly: vslt_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_W
+  group: lsx
+  encoding:
+    match: 01110000000001110???????????????
+  assembly: vslt_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSLT_WU
+  group: lsx
+  encoding:
+    match: 01110000000010010???????????????
+  assembly: vslt_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_B
+  group: lsx
+  encoding:
+    match: 01110000010010000???????????????
+  assembly: vssub_b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_BU
+  group: lsx
+  encoding:
+    match: 01110000010011000???????????????
+  assembly: vssub_bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_D
+  group: lsx
+  encoding:
+    match: 01110000010010011???????????????
+  assembly: vssub_d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_DU
+  group: lsx
+  encoding:
+    match: 01110000010011011???????????????
+  assembly: vssub_du $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_H
+  group: lsx
+  encoding:
+    match: 01110000010010001???????????????
+  assembly: vssub_h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_HU
+  group: lsx
+  encoding:
+    match: 01110000010011001???????????????
+  assembly: vssub_hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_W
+  group: lsx
+  encoding:
+    match: 01110000010010010???????????????
+  assembly: vssub_w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSUB_WU
+  group: lsx
+  encoding:
+    match: 01110000010011010???????????????
+  assembly: vssub_wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VLDI
+  group: lsx
+  encoding:
+    match: 01110011111000??????????????????
+    variables:
+      imm:
+      - 17
+      - 5
+  assembly: vldi $v.d, {imm}
+  format: D
+- name: VADDI_BU
+  group: lsx
+  encoding:
+    match: 01110010100010100???????????????
+  assembly: vaddi.bu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VADDI_HU
+  group: lsx
+  encoding:
+    match: 01110010100010101???????????????
+  assembly: vaddi.hu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VADDI_WU
+  group: lsx
+  encoding:
+    match: 01110010100010110???????????????
+  assembly: vaddi.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VADDI_DU
+  group: lsx
+  encoding:
+    match: 01110010100010111???????????????
+  assembly: vaddi.du $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSETALLNEZ_B
+  group: lsx
+  encoding:
+    match: 0111001010011100101100?????00???
+  assembly: vsetallnez.b $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETALLNEZ_D
+  group: lsx
+  encoding:
+    match: 0111001010011100101111?????00???
+  assembly: vsetallnez.d $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETALLNEZ_H
+  group: lsx
+  encoding:
+    match: 0111001010011100101101?????00???
+  assembly: vsetallnez.h $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETALLNEZ_W
+  group: lsx
+  encoding:
+    match: 0111001010011100101110?????00???
+  assembly: vsetallnez.w $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETANYEQZ_B
+  group: lsx
+  encoding:
+    match: 0111001010011100101000?????00???
+  assembly: vsetanyeqz.b $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETANYEQZ_D
+  group: lsx
+  encoding:
+    match: 0111001010011100101011?????00???
+  assembly: vsetanyeqz.d $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETANYEQZ_H
+  group: lsx
+  encoding:
+    match: 0111001010011100101001?????00???
+  assembly: vsetanyeqz.h $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETANYEQZ_W
+  group: lsx
+  encoding:
+    match: 0111001010011100101010?????00???
+  assembly: vsetanyeqz.w $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETEQZ_V
+  group: lsx
+  encoding:
+    match: 0111001010011100100110?????00???
+  assembly: vseteqz.v $fcc.d, $v.j
+  format: DJ-fp
+- name: VSETNEZ_V
+  group: lsx
+  encoding:
+    match: 0111001010011100100111?????00???
+  assembly: vsetnez.v $fcc.d, $v.j
+  format: DJ-fp
+- name: VEXTH_DU_WU
+  group: lsx
+  encoding:
+    match: 0111001010011110111110??????????
+  assembly: vexth.du.wu $v.d, $v.j
+  format: DJ
+- name: VEXTH_D_W
+  group: lsx
+  encoding:
+    match: 0111001010011110111010??????????
+  assembly: vexth.d.w $v.d, $v.j
+  format: DJ
+- name: VEXTH_HU_BU
+  group: lsx
+  encoding:
+    match: 0111001010011110111100??????????
+  assembly: vexth.hu.bu $v.d, $v.j
+  format: DJ
+- name: VEXTH_H_B
+  group: lsx
+  encoding:
+    match: 0111001010011110111000??????????
+  assembly: vexth.h.b $v.d, $v.j
+  format: DJ
+- name: VEXTH_QU_DU
+  group: lsx
+  encoding:
+    match: 0111001010011110111111??????????
+  assembly: vexth.qu.du $v.d, $v.j
+  format: DJ
+- name: VEXTH_Q_D
+  group: lsx
+  encoding:
+    match: 0111001010011110111011??????????
+  assembly: vexth.q.d $v.d, $v.j
+  format: DJ
+- name: VEXTH_WU_HU
+  group: lsx
+  encoding:
+    match: 0111001010011110111101??????????
+  assembly: vexth.wu.hu $v.d, $v.j
+  format: DJ
+- name: VEXTH_W_H
+  group: lsx
+  encoding:
+    match: 0111001010011110111001??????????
+  assembly: vexth.w.h $v.d, $v.j
+  format: DJ
+- name: VEXTL_QU_DU
+  group: lsx
+  encoding:
+    match: 0111001100001101000000??????????
+  assembly: vextl.qu.du $v.d, $v.j
+  format: DJ
+- name: VEXTL_Q_D
+  group: lsx
+  encoding:
+    match: 0111001100001001000000??????????
+  assembly: vextl.q.d $v.d, $v.j
+  format: DJ
+- name: VFCLASS_D
+  group: lsx
+  encoding:
+    match: 0111001010011100110110??????????
+  assembly: vfclass.d $v.d, $v.j
+  format: DJ
+- name: VFCLASS_S
+  group: lsx
+  encoding:
+    match: 0111001010011100110101??????????
+  assembly: vfclass.s $v.d, $v.j
+  format: DJ
+- name: VFCVTH_D_S
+  group: lsx
+  encoding:
+    match: 0111001010011101111101??????????
+  assembly: vfcvth.d.s $v.d, $v.j
+  format: DJ
+- name: VFCVTH_S_H
+  group: lsx
+  encoding:
+    match: 0111001010011101111011??????????
+  assembly: vfcvth.s.h $v.d, $v.j
+  format: DJ
+- name: VFCVTL_D_S
+  group: lsx
+  encoding:
+    match: 0111001010011101111100??????????
+  assembly: vfcvtl.d.s $v.d, $v.j
+  format: DJ
+- name: VFCVTL_S_H
+  group: lsx
+  encoding:
+    match: 0111001010011101111010??????????
+  assembly: vfcvtl.s.h $v.d, $v.j
+  format: DJ
+- name: VFFINTH_D_W
+  group: lsx
+  encoding:
+    match: 0111001010011110000101??????????
+  assembly: vffinth.d.w $v.d, $v.j
+  format: DJ
+- name: VFFINTL_D_W
+  group: lsx
+  encoding:
+    match: 0111001010011110000100??????????
+  assembly: vffintl.d.w $v.d, $v.j
+  format: DJ
+- name: VFFINT_D_L
+  group: lsx
+  encoding:
+    match: 0111001010011110000010??????????
+  assembly: vffint.d.l $v.d, $v.j
+  format: DJ
+- name: VFFINT_D_LU
+  group: lsx
+  encoding:
+    match: 0111001010011110000011??????????
+  assembly: vffint.d.lu $v.d, $v.j
+  format: DJ
+- name: VFFINT_S_W
+  group: lsx
+  encoding:
+    match: 0111001010011110000000??????????
+  assembly: vffint.s.w $v.d, $v.j
+  format: DJ
+- name: VFFINT_S_WU
+  group: lsx
+  encoding:
+    match: 0111001010011110000001??????????
+  assembly: vffint.s.wu $v.d, $v.j
+  format: DJ
+- name: VFLOGB_D
+  group: lsx
+  encoding:
+    match: 0111001010011100110010??????????
+  assembly: vflogb.d $v.d, $v.j
+  format: DJ
+- name: VFLOGB_S
+  group: lsx
+  encoding:
+    match: 0111001010011100110001??????????
+  assembly: vflogb.s $v.d, $v.j
+  format: DJ
+- name: VFRECIPE_D
+  group: lsx
+  encoding:
+    match: 0111001010011101000110??????????
+  assembly: vfrecipe.d $v.d, $v.j
+  format: DJ
+- name: VFRECIPE_S
+  group: lsx
+  encoding:
+    match: 0111001010011101000101??????????
+  assembly: vfrecipe.s $v.d, $v.j
+  format: DJ
+- name: VFRECIP_D
+  group: lsx
+  encoding:
+    match: 0111001010011100111110??????????
+  assembly: vfrecip.d $v.d, $v.j
+  format: DJ
+- name: VFRECIP_S
+  group: lsx
+  encoding:
+    match: 0111001010011100111101??????????
+  assembly: vfrecip.s $v.d, $v.j
+  format: DJ
+- name: VFRINTRM_D
+  group: lsx
+  encoding:
+    match: 0111001010011101010010??????????
+  assembly: vfrintrm.d $v.d, $v.j
+  format: DJ
+- name: VFRINTRM_S
+  group: lsx
+  encoding:
+    match: 0111001010011101010001??????????
+  assembly: vfrintrm.s $v.d, $v.j
+  format: DJ
+- name: VFRINTRNE_D
+  group: lsx
+  encoding:
+    match: 0111001010011101011110??????????
+  assembly: vfrintrne.d $v.d, $v.j
+  format: DJ
+- name: VFRINTRNE_S
+  group: lsx
+  encoding:
+    match: 0111001010011101011101??????????
+  assembly: vfrintrne.s $v.d, $v.j
+  format: DJ
+- name: VFRINTRP_D
+  group: lsx
+  encoding:
+    match: 0111001010011101010110??????????
+  assembly: vfrintrp.d $v.d, $v.j
+  format: DJ
+- name: VFRINTRP_S
+  group: lsx
+  encoding:
+    match: 0111001010011101010101??????????
+  assembly: vfrintrp.s $v.d, $v.j
+  format: DJ
+- name: VFRINTRZ_D
+  group: lsx
+  encoding:
+    match: 0111001010011101011010??????????
+  assembly: vfrintrz.d $v.d, $v.j
+  format: DJ
+- name: VFRINTRZ_S
+  group: lsx
+  encoding:
+    match: 0111001010011101011001??????????
+  assembly: vfrintrz.s $v.d, $v.j
+  format: DJ
+- name: VFRINT_D
+  group: lsx
+  encoding:
+    match: 0111001010011101001110??????????
+  assembly: vfrint.d $v.d, $v.j
+  format: DJ
+- name: VFRINT_S
+  group: lsx
+  encoding:
+    match: 0111001010011101001101??????????
+  assembly: vfrint.s $v.d, $v.j
+  format: DJ
+- name: VFRSQRTE_D
+  group: lsx
+  encoding:
+    match: 0111001010011101001010??????????
+  assembly: vfrsqrte.d $v.d, $v.j
+  format: DJ
+- name: VFRSQRTE_S
+  group: lsx
+  encoding:
+    match: 0111001010011101001001??????????
+  assembly: vfrsqrte.s $v.d, $v.j
+  format: DJ
+- name: VFRSQRT_D
+  group: lsx
+  encoding:
+    match: 0111001010011101000010??????????
+  assembly: vfrsqrt.d $v.d, $v.j
+  format: DJ
+- name: VFRSQRT_S
+  group: lsx
+  encoding:
+    match: 0111001010011101000001??????????
+  assembly: vfrsqrt.s $v.d, $v.j
+  format: DJ
+- name: VFSQRT_D
+  group: lsx
+  encoding:
+    match: 0111001010011100111010??????????
+  assembly: vfsqrt.d $v.d, $v.j
+  format: DJ
+- name: VFSQRT_S
+  group: lsx
+  encoding:
+    match: 0111001010011100111001??????????
+  assembly: vfsqrt.s $v.d, $v.j
+  format: DJ
+- name: VFTINTH_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100001??????????
+  assembly: vftinth.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTL_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100000??????????
+  assembly: vftintl.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRMH_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100011??????????
+  assembly: vftintrmh.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRML_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100010??????????
+  assembly: vftintrml.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRM_L_D
+  group: lsx
+  encoding:
+    match: 0111001010011110001111??????????
+  assembly: vftintrm.l.d $v.d, $v.j
+  format: DJ
+- name: VFTINTRM_W_S
+  group: lsx
+  encoding:
+    match: 0111001010011110001110??????????
+  assembly: vftintrm.w.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRNEH_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110101001??????????
+  assembly: vftintrneh.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRNEL_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110101000??????????
+  assembly: vftintrnel.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRNE_L_D
+  group: lsx
+  encoding:
+    match: 0111001010011110010101??????????
+  assembly: vftintrne.l.d $v.d, $v.j
+  format: DJ
+- name: VFTINTRNE_W_S
+  group: lsx
+  encoding:
+    match: 0111001010011110010100??????????
+  assembly: vftintrne.w.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRPH_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100101??????????
+  assembly: vftintrph.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRPL_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100100??????????
+  assembly: vftintrpl.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRP_L_D
+  group: lsx
+  encoding:
+    match: 0111001010011110010001??????????
+  assembly: vftintrp.l.d $v.d, $v.j
+  format: DJ
+- name: VFTINTRP_W_S
+  group: lsx
+  encoding:
+    match: 0111001010011110010000??????????
+  assembly: vftintrp.w.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRZH_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100111??????????
+  assembly: vftintrzh.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRZL_L_S
+  group: lsx
+  encoding:
+    match: 0111001010011110100110??????????
+  assembly: vftintrzl.l.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRZ_LU_D
+  group: lsx
+  encoding:
+    match: 0111001010011110011101??????????
+  assembly: vftintrz.lu.d $v.d, $v.j
+  format: DJ
+- name: VFTINTRZ_L_D
+  group: lsx
+  encoding:
+    match: 0111001010011110010011??????????
+  assembly: vftintrz.l.d $v.d, $v.j
+  format: DJ
+- name: VFTINTRZ_WU_S
+  group: lsx
+  encoding:
+    match: 0111001010011110011100??????????
+  assembly: vftintrz.wu.s $v.d, $v.j
+  format: DJ
+- name: VFTINTRZ_W_S
+  group: lsx
+  encoding:
+    match: 0111001010011110010010??????????
+  assembly: vftintrz.w.s $v.d, $v.j
+  format: DJ
+- name: VFTINT_LU_D
+  group: lsx
+  encoding:
+    match: 0111001010011110010111??????????
+  assembly: vftint.lu.d $v.d, $v.j
+  format: DJ
+- name: VFTINT_L_D
+  group: lsx
+  encoding:
+    match: 0111001010011110001101??????????
+  assembly: vftint.l.d $v.d, $v.j
+  format: DJ
+- name: VFTINT_WU_S
+  group: lsx
+  encoding:
+    match: 0111001010011110010110??????????
+  assembly: vftint.wu.s $v.d, $v.j
+  format: DJ
+- name: VFTINT_W_S
+  group: lsx
+  encoding:
+    match: 0111001010011110001100??????????
+  assembly: vftint.w.s $v.d, $v.j
+  format: DJ
+- name: VMSKGEZ_B
+  group: lsx
+  encoding:
+    match: 0111001010011100010100??????????
+  assembly: vmskgez.b $v.d, $v.j
+  format: DJ
+- name: VMSKLTZ_B
+  group: lsx
+  encoding:
+    match: 0111001010011100010000??????????
+  assembly: vmskltz.b $v.d, $v.j
+  format: DJ
+- name: VMSKLTZ_D
+  group: lsx
+  encoding:
+    match: 0111001010011100010011??????????
+  assembly: vmskltz.d $v.d, $v.j
+  format: DJ
+- name: VMSKLTZ_H
+  group: lsx
+  encoding:
+    match: 0111001010011100010001??????????
+  assembly: vmskltz.h $v.d, $v.j
+  format: DJ
+- name: VMSKLTZ_W
+  group: lsx
+  encoding:
+    match: 0111001010011100010010??????????
+  assembly: vmskltz.w $v.d, $v.j
+  format: DJ
+- name: VMSKNZ_B
+  group: lsx
+  encoding:
+    match: 0111001010011100011000??????????
+  assembly: vmsknz.b $v.d, $v.j
+  format: DJ
+- name: VBITSEL_V
+  group: lsx
+  encoding:
+    match: 000011010001????????????????????
+  assembly: vbitsel.v $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFMADD_D
+  group: lsx
+  encoding:
+    match: 000010010010????????????????????
+  assembly: vfmadd.d $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFMADD_S
+  group: lsx
+  encoding:
+    match: 000010010001????????????????????
+  assembly: vfmadd.s $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFMSUB_D
+  group: lsx
+  encoding:
+    match: 000010010110????????????????????
+  assembly: vfmsub.d $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFMSUB_S
+  group: lsx
+  encoding:
+    match: 000010010101????????????????????
+  assembly: vfmsub.s $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFNMADD_D
+  group: lsx
+  encoding:
+    match: 000010011010????????????????????
+  assembly: vfnmadd.d $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFNMADD_S
+  group: lsx
+  encoding:
+    match: 000010011001????????????????????
+  assembly: vfnmadd.s $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFNMSUB_D
+  group: lsx
+  encoding:
+    match: 000010011110????????????????????
+  assembly: vfnmsub.d $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VFNMSUB_S
+  group: lsx
+  encoding:
+    match: 000010011101????????????????????
+  assembly: vfnmsub.s $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VSHUF_B
+  group: lsx
+  encoding:
+    match: 000011010101????????????????????
+  assembly: vshuf.b $v.d, $v.j, $v.k, $v.a
+  format: DJKA
+- name: VADDWEV_D_W
+  group: lsx
+  encoding:
+    match: 01110000000111110???????????????
+  assembly: vaddwev.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_D_WU
+  group: lsx
+  encoding:
+    match: 01110000001011110???????????????
+  assembly: vaddwev.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_D_WU_W
+  group: lsx
+  encoding:
+    match: 01110000001111110???????????????
+  assembly: vaddwev.d.wu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_H_B
+  group: lsx
+  encoding:
+    match: 01110000000111100???????????????
+  assembly: vaddwev.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_H_BU
+  group: lsx
+  encoding:
+    match: 01110000001011100???????????????
+  assembly: vaddwev.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_H_BU_B
+  group: lsx
+  encoding:
+    match: 01110000001111100???????????????
+  assembly: vaddwev.h.bu.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_Q_D
+  group: lsx
+  encoding:
+    match: 01110000000111111???????????????
+  assembly: vaddwev.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000001011111???????????????
+  assembly: vaddwev.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_Q_DU_D
+  group: lsx
+  encoding:
+    match: 01110000001111111???????????????
+  assembly: vaddwev.q.du.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_W_H
+  group: lsx
+  encoding:
+    match: 01110000000111101???????????????
+  assembly: vaddwev.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_W_HU
+  group: lsx
+  encoding:
+    match: 01110000001011101???????????????
+  assembly: vaddwev.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWEV_W_HU_H
+  group: lsx
+  encoding:
+    match: 01110000001111101???????????????
+  assembly: vaddwev.w.hu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_D_W
+  group: lsx
+  encoding:
+    match: 01110000001000110???????????????
+  assembly: vaddwod.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_D_WU
+  group: lsx
+  encoding:
+    match: 01110000001100110???????????????
+  assembly: vaddwod.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_D_WU_W
+  group: lsx
+  encoding:
+    match: 01110000010000010???????????????
+  assembly: vaddwod.d.wu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_H_B
+  group: lsx
+  encoding:
+    match: 01110000001000100???????????????
+  assembly: vaddwod.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_H_BU
+  group: lsx
+  encoding:
+    match: 01110000001100100???????????????
+  assembly: vaddwod.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_H_BU_B
+  group: lsx
+  encoding:
+    match: 01110000010000000???????????????
+  assembly: vaddwod.h.bu.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_Q_D
+  group: lsx
+  encoding:
+    match: 01110000001000111???????????????
+  assembly: vaddwod.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000001100111???????????????
+  assembly: vaddwod.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_Q_DU_D
+  group: lsx
+  encoding:
+    match: 01110000010000011???????????????
+  assembly: vaddwod.q.du.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_W_H
+  group: lsx
+  encoding:
+    match: 01110000001000101???????????????
+  assembly: vaddwod.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_W_HU
+  group: lsx
+  encoding:
+    match: 01110000001100101???????????????
+  assembly: vaddwod.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VADDWOD_W_HU_H
+  group: lsx
+  encoding:
+    match: 01110000010000001???????????????
+  assembly: vaddwod.w.hu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VADD_Q
+  group: lsx
+  encoding:
+    match: 01110001001011010???????????????
+  assembly: vadd.q $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITCLR_B
+  group: lsx
+  encoding:
+    match: 01110001000011000???????????????
+  assembly: vbitclr.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITCLR_D
+  group: lsx
+  encoding:
+    match: 01110001000011011???????????????
+  assembly: vbitclr.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITCLR_H
+  group: lsx
+  encoding:
+    match: 01110001000011001???????????????
+  assembly: vbitclr.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITCLR_W
+  group: lsx
+  encoding:
+    match: 01110001000011010???????????????
+  assembly: vbitclr.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITREV_B
+  group: lsx
+  encoding:
+    match: 01110001000100000???????????????
+  assembly: vbitrev.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITREV_D
+  group: lsx
+  encoding:
+    match: 01110001000100011???????????????
+  assembly: vbitrev.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITREV_H
+  group: lsx
+  encoding:
+    match: 01110001000100001???????????????
+  assembly: vbitrev.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITREV_W
+  group: lsx
+  encoding:
+    match: 01110001000100010???????????????
+  assembly: vbitrev.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITSET_B
+  group: lsx
+  encoding:
+    match: 01110001000011100???????????????
+  assembly: vbitset.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITSET_D
+  group: lsx
+  encoding:
+    match: 01110001000011111???????????????
+  assembly: vbitset.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITSET_H
+  group: lsx
+  encoding:
+    match: 01110001000011101???????????????
+  assembly: vbitset.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VBITSET_W
+  group: lsx
+  encoding:
+    match: 01110001000011110???????????????
+  assembly: vbitset.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VFADD_D
+  group: lsx
+  encoding:
+    match: 01110001001100010???????????????
+  assembly: vfadd.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFADD_S
+  group: lsx
+  encoding:
+    match: 01110001001100001???????????????
+  assembly: vfadd.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CAF_D
+  group: lsx
+  encoding:
+    match: 00001100011000000???????????????
+  assembly: vfcmp.caf.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CAF_S
+  group: lsx
+  encoding:
+    match: 00001100010100000???????????????
+  assembly: vfcmp.caf.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CEQ_D
+  group: lsx
+  encoding:
+    match: 00001100011000100???????????????
+  assembly: vfcmp.ceq.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CEQ_S
+  group: lsx
+  encoding:
+    match: 00001100010100100???????????????
+  assembly: vfcmp.ceq.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CLE_D
+  group: lsx
+  encoding:
+    match: 00001100011000110???????????????
+  assembly: vfcmp.cle.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CLE_S
+  group: lsx
+  encoding:
+    match: 00001100010100110???????????????
+  assembly: vfcmp.cle.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CLT_D
+  group: lsx
+  encoding:
+    match: 00001100011000010???????????????
+  assembly: vfcmp.clt.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CLT_S
+  group: lsx
+  encoding:
+    match: 00001100010100010???????????????
+  assembly: vfcmp.clt.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CNE_D
+  group: lsx
+  encoding:
+    match: 00001100011010000???????????????
+  assembly: vfcmp.cne.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CNE_S
+  group: lsx
+  encoding:
+    match: 00001100010110000???????????????
+  assembly: vfcmp.cne.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_COR_D
+  group: lsx
+  encoding:
+    match: 00001100011010100???????????????
+  assembly: vfcmp.cor.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_COR_S
+  group: lsx
+  encoding:
+    match: 00001100010110100???????????????
+  assembly: vfcmp.cor.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CUEQ_D
+  group: lsx
+  encoding:
+    match: 00001100011001100???????????????
+  assembly: vfcmp.cueq.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CUEQ_S
+  group: lsx
+  encoding:
+    match: 00001100010101100???????????????
+  assembly: vfcmp.cueq.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CULE_D
+  group: lsx
+  encoding:
+    match: 00001100011001110???????????????
+  assembly: vfcmp.cule.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CULE_S
+  group: lsx
+  encoding:
+    match: 00001100010101110???????????????
+  assembly: vfcmp.cule.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CULT_D
+  group: lsx
+  encoding:
+    match: 00001100011001010???????????????
+  assembly: vfcmp.cult.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CULT_S
+  group: lsx
+  encoding:
+    match: 00001100010101010???????????????
+  assembly: vfcmp.cult.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CUNE_D
+  group: lsx
+  encoding:
+    match: 00001100011011000???????????????
+  assembly: vfcmp.cune.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CUNE_S
+  group: lsx
+  encoding:
+    match: 00001100010111000???????????????
+  assembly: vfcmp.cune.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CUN_D
+  group: lsx
+  encoding:
+    match: 00001100011001000???????????????
+  assembly: vfcmp.cun.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_CUN_S
+  group: lsx
+  encoding:
+    match: 00001100010101000???????????????
+  assembly: vfcmp.cun.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SAF_D
+  group: lsx
+  encoding:
+    match: 00001100011000001???????????????
+  assembly: vfcmp.saf.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SAF_S
+  group: lsx
+  encoding:
+    match: 00001100010100001???????????????
+  assembly: vfcmp.saf.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SEQ_D
+  group: lsx
+  encoding:
+    match: 00001100011000101???????????????
+  assembly: vfcmp.seq.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SEQ_S
+  group: lsx
+  encoding:
+    match: 00001100010100101???????????????
+  assembly: vfcmp.seq.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SLE_D
+  group: lsx
+  encoding:
+    match: 00001100011000111???????????????
+  assembly: vfcmp.sle.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SLE_S
+  group: lsx
+  encoding:
+    match: 00001100010100111???????????????
+  assembly: vfcmp.sle.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SLT_D
+  group: lsx
+  encoding:
+    match: 00001100011000011???????????????
+  assembly: vfcmp.slt.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SLT_S
+  group: lsx
+  encoding:
+    match: 00001100010100011???????????????
+  assembly: vfcmp.slt.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SNE_D
+  group: lsx
+  encoding:
+    match: 00001100011010001???????????????
+  assembly: vfcmp.sne.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SNE_S
+  group: lsx
+  encoding:
+    match: 00001100010110001???????????????
+  assembly: vfcmp.sne.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SOR_D
+  group: lsx
+  encoding:
+    match: 00001100011010101???????????????
+  assembly: vfcmp.sor.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SOR_S
+  group: lsx
+  encoding:
+    match: 00001100010110101???????????????
+  assembly: vfcmp.sor.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SUEQ_D
+  group: lsx
+  encoding:
+    match: 00001100011001101???????????????
+  assembly: vfcmp.sueq.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SUEQ_S
+  group: lsx
+  encoding:
+    match: 00001100010101101???????????????
+  assembly: vfcmp.sueq.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SULE_D
+  group: lsx
+  encoding:
+    match: 00001100011001111???????????????
+  assembly: vfcmp.sule.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SULE_S
+  group: lsx
+  encoding:
+    match: 00001100010101111???????????????
+  assembly: vfcmp.sule.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SULT_D
+  group: lsx
+  encoding:
+    match: 00001100011001011???????????????
+  assembly: vfcmp.sult.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SULT_S
+  group: lsx
+  encoding:
+    match: 00001100010101011???????????????
+  assembly: vfcmp.sult.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SUNE_D
+  group: lsx
+  encoding:
+    match: 00001100011011001???????????????
+  assembly: vfcmp.sune.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SUNE_S
+  group: lsx
+  encoding:
+    match: 00001100010111001???????????????
+  assembly: vfcmp.sune.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SUN_D
+  group: lsx
+  encoding:
+    match: 00001100011001001???????????????
+  assembly: vfcmp.sun.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCMP_SUN_S
+  group: lsx
+  encoding:
+    match: 00001100010101001???????????????
+  assembly: vfcmp.sun.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCVT_H_S
+  group: lsx
+  encoding:
+    match: 01110001010001100???????????????
+  assembly: vfcvt.h.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFCVT_S_D
+  group: lsx
+  encoding:
+    match: 01110001010001101???????????????
+  assembly: vfcvt.s.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFDIV_D
+  group: lsx
+  encoding:
+    match: 01110001001110110???????????????
+  assembly: vfdiv.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFDIV_S
+  group: lsx
+  encoding:
+    match: 01110001001110101???????????????
+  assembly: vfdiv.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFFINT_S_L
+  group: lsx
+  encoding:
+    match: 01110001010010000???????????????
+  assembly: vffint.s.l $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMAXA_D
+  group: lsx
+  encoding:
+    match: 01110001010000010???????????????
+  assembly: vfmaxa.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMAXA_S
+  group: lsx
+  encoding:
+    match: 01110001010000001???????????????
+  assembly: vfmaxa.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMAX_D
+  group: lsx
+  encoding:
+    match: 01110001001111010???????????????
+  assembly: vfmax.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMAX_S
+  group: lsx
+  encoding:
+    match: 01110001001111001???????????????
+  assembly: vfmax.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMINA_D
+  group: lsx
+  encoding:
+    match: 01110001010000110???????????????
+  assembly: vfmina.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMINA_S
+  group: lsx
+  encoding:
+    match: 01110001010000101???????????????
+  assembly: vfmina.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMIN_D
+  group: lsx
+  encoding:
+    match: 01110001001111110???????????????
+  assembly: vfmin.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMIN_S
+  group: lsx
+  encoding:
+    match: 01110001001111101???????????????
+  assembly: vfmin.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMUL_D
+  group: lsx
+  encoding:
+    match: 01110001001110010???????????????
+  assembly: vfmul.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFMUL_S
+  group: lsx
+  encoding:
+    match: 01110001001110001???????????????
+  assembly: vfmul.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFRSTP_B
+  group: lsx
+  encoding:
+    match: 01110001001010110???????????????
+  assembly: vfrstp.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VFRSTP_H
+  group: lsx
+  encoding:
+    match: 01110001001010111???????????????
+  assembly: vfrstp.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VFSUB_D
+  group: lsx
+  encoding:
+    match: 01110001001100110???????????????
+  assembly: vfsub.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFSUB_S
+  group: lsx
+  encoding:
+    match: 01110001001100101???????????????
+  assembly: vfsub.s $v.d, $v.j, $v.k
+  format: DJK
+- name: VFTINTRM_W_D
+  group: lsx
+  encoding:
+    match: 01110001010010100???????????????
+  assembly: vftintrm.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFTINTRNE_W_D
+  group: lsx
+  encoding:
+    match: 01110001010010111???????????????
+  assembly: vftintrne.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFTINTRP_W_D
+  group: lsx
+  encoding:
+    match: 01110001010010101???????????????
+  assembly: vftintrp.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFTINTRZ_W_D
+  group: lsx
+  encoding:
+    match: 01110001010010110???????????????
+  assembly: vftintrz.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VFTINT_W_D
+  group: lsx
+  encoding:
+    match: 01110001010010011???????????????
+  assembly: vftint.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_DU_WU
+  group: lsx
+  encoding:
+    match: 01110000010110010???????????????
+  assembly: vhaddw.du.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_D_W
+  group: lsx
+  encoding:
+    match: 01110000010101010???????????????
+  assembly: vhaddw.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_HU_BU
+  group: lsx
+  encoding:
+    match: 01110000010110000???????????????
+  assembly: vhaddw.hu.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_H_B
+  group: lsx
+  encoding:
+    match: 01110000010101000???????????????
+  assembly: vhaddw.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_QU_DU
+  group: lsx
+  encoding:
+    match: 01110000010110011???????????????
+  assembly: vhaddw.qu.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_Q_D
+  group: lsx
+  encoding:
+    match: 01110000010101011???????????????
+  assembly: vhaddw.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_WU_HU
+  group: lsx
+  encoding:
+    match: 01110000010110001???????????????
+  assembly: vhaddw.wu.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VHADDW_W_H
+  group: lsx
+  encoding:
+    match: 01110000010101001???????????????
+  assembly: vhaddw.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_DU_WU
+  group: lsx
+  encoding:
+    match: 01110000010110110???????????????
+  assembly: vhsubw.du.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_D_W
+  group: lsx
+  encoding:
+    match: 01110000010101110???????????????
+  assembly: vhsubw.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_HU_BU
+  group: lsx
+  encoding:
+    match: 01110000010110100???????????????
+  assembly: vhsubw.hu.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_H_B
+  group: lsx
+  encoding:
+    match: 01110000010101100???????????????
+  assembly: vhsubw.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_QU_DU
+  group: lsx
+  encoding:
+    match: 01110000010110111???????????????
+  assembly: vhsubw.qu.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_Q_D
+  group: lsx
+  encoding:
+    match: 01110000010101111???????????????
+  assembly: vhsubw.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_WU_HU
+  group: lsx
+  encoding:
+    match: 01110000010110101???????????????
+  assembly: vhsubw.wu.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VHSUBW_W_H
+  group: lsx
+  encoding:
+    match: 01110000010101101???????????????
+  assembly: vhsubw.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVH_B
+  group: lsx
+  encoding:
+    match: 01110001000111000???????????????
+  assembly: vilvh.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVH_D
+  group: lsx
+  encoding:
+    match: 01110001000111011???????????????
+  assembly: vilvh.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVH_H
+  group: lsx
+  encoding:
+    match: 01110001000111001???????????????
+  assembly: vilvh.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVH_W
+  group: lsx
+  encoding:
+    match: 01110001000111010???????????????
+  assembly: vilvh.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVL_B
+  group: lsx
+  encoding:
+    match: 01110001000110100???????????????
+  assembly: vilvl.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVL_D
+  group: lsx
+  encoding:
+    match: 01110001000110111???????????????
+  assembly: vilvl.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVL_H
+  group: lsx
+  encoding:
+    match: 01110001000110101???????????????
+  assembly: vilvl.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VILVL_W
+  group: lsx
+  encoding:
+    match: 01110001000110110???????????????
+  assembly: vilvl.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VLDX
+  group: lsx
+  encoding:
+    match: 00111000010000000???????????????
+  assembly: vldx $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_D_W
+  group: lsx
+  encoding:
+    match: 01110000101011010???????????????
+  assembly: vmaddwev.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_D_WU
+  group: lsx
+  encoding:
+    match: 01110000101101010???????????????
+  assembly: vmaddwev.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_D_WU_W
+  group: lsx
+  encoding:
+    match: 01110000101111010???????????????
+  assembly: vmaddwev.d.wu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_H_B
+  group: lsx
+  encoding:
+    match: 01110000101011000???????????????
+  assembly: vmaddwev.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_H_BU
+  group: lsx
+  encoding:
+    match: 01110000101101000???????????????
+  assembly: vmaddwev.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_H_BU_B
+  group: lsx
+  encoding:
+    match: 01110000101111000???????????????
+  assembly: vmaddwev.h.bu.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_Q_D
+  group: lsx
+  encoding:
+    match: 01110000101011011???????????????
+  assembly: vmaddwev.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000101101011???????????????
+  assembly: vmaddwev.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_Q_DU_D
+  group: lsx
+  encoding:
+    match: 01110000101111011???????????????
+  assembly: vmaddwev.q.du.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_W_H
+  group: lsx
+  encoding:
+    match: 01110000101011001???????????????
+  assembly: vmaddwev.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_W_HU
+  group: lsx
+  encoding:
+    match: 01110000101101001???????????????
+  assembly: vmaddwev.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWEV_W_HU_H
+  group: lsx
+  encoding:
+    match: 01110000101111001???????????????
+  assembly: vmaddwev.w.hu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_D_W
+  group: lsx
+  encoding:
+    match: 01110000101011110???????????????
+  assembly: vmaddwod.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_D_WU
+  group: lsx
+  encoding:
+    match: 01110000101101110???????????????
+  assembly: vmaddwod.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_D_WU_W
+  group: lsx
+  encoding:
+    match: 01110000101111110???????????????
+  assembly: vmaddwod.d.wu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_H_B
+  group: lsx
+  encoding:
+    match: 01110000101011100???????????????
+  assembly: vmaddwod.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_H_BU
+  group: lsx
+  encoding:
+    match: 01110000101101100???????????????
+  assembly: vmaddwod.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_H_BU_B
+  group: lsx
+  encoding:
+    match: 01110000101111100???????????????
+  assembly: vmaddwod.h.bu.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_Q_D
+  group: lsx
+  encoding:
+    match: 01110000101011111???????????????
+  assembly: vmaddwod.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000101101111???????????????
+  assembly: vmaddwod.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_Q_DU_D
+  group: lsx
+  encoding:
+    match: 01110000101111111???????????????
+  assembly: vmaddwod.q.du.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_W_H
+  group: lsx
+  encoding:
+    match: 01110000101011101???????????????
+  assembly: vmaddwod.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_W_HU
+  group: lsx
+  encoding:
+    match: 01110000101101101???????????????
+  assembly: vmaddwod.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADDWOD_W_HU_H
+  group: lsx
+  encoding:
+    match: 01110000101111101???????????????
+  assembly: vmaddwod.w.hu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADD_B
+  group: lsx
+  encoding:
+    match: 01110000101010000???????????????
+  assembly: vmadd.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADD_D
+  group: lsx
+  encoding:
+    match: 01110000101010011???????????????
+  assembly: vmadd.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADD_H
+  group: lsx
+  encoding:
+    match: 01110000101010001???????????????
+  assembly: vmadd.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMADD_W
+  group: lsx
+  encoding:
+    match: 01110000101010010???????????????
+  assembly: vmadd.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMSUB_B
+  group: lsx
+  encoding:
+    match: 01110000101010100???????????????
+  assembly: vmsub.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMSUB_D
+  group: lsx
+  encoding:
+    match: 01110000101010111???????????????
+  assembly: vmsub.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMSUB_H
+  group: lsx
+  encoding:
+    match: 01110000101010101???????????????
+  assembly: vmsub.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMSUB_W
+  group: lsx
+  encoding:
+    match: 01110000101010110???????????????
+  assembly: vmsub.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_D_W
+  group: lsx
+  encoding:
+    match: 01110000100100010???????????????
+  assembly: vmulwev.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_D_WU
+  group: lsx
+  encoding:
+    match: 01110000100110010???????????????
+  assembly: vmulwev.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_D_WU_W
+  group: lsx
+  encoding:
+    match: 01110000101000010???????????????
+  assembly: vmulwev.d.wu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_H_B
+  group: lsx
+  encoding:
+    match: 01110000100100000???????????????
+  assembly: vmulwev.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_H_BU
+  group: lsx
+  encoding:
+    match: 01110000100110000???????????????
+  assembly: vmulwev.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_H_BU_B
+  group: lsx
+  encoding:
+    match: 01110000101000000???????????????
+  assembly: vmulwev.h.bu.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_Q_D
+  group: lsx
+  encoding:
+    match: 01110000100100011???????????????
+  assembly: vmulwev.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000100110011???????????????
+  assembly: vmulwev.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_Q_DU_D
+  group: lsx
+  encoding:
+    match: 01110000101000011???????????????
+  assembly: vmulwev.q.du.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_W_H
+  group: lsx
+  encoding:
+    match: 01110000100100001???????????????
+  assembly: vmulwev.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_W_HU
+  group: lsx
+  encoding:
+    match: 01110000100110001???????????????
+  assembly: vmulwev.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWEV_W_HU_H
+  group: lsx
+  encoding:
+    match: 01110000101000001???????????????
+  assembly: vmulwev.w.hu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_D_W
+  group: lsx
+  encoding:
+    match: 01110000100100110???????????????
+  assembly: vmulwod.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_D_WU
+  group: lsx
+  encoding:
+    match: 01110000100110110???????????????
+  assembly: vmulwod.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_D_WU_W
+  group: lsx
+  encoding:
+    match: 01110000101000110???????????????
+  assembly: vmulwod.d.wu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_H_B
+  group: lsx
+  encoding:
+    match: 01110000100100100???????????????
+  assembly: vmulwod.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_H_BU
+  group: lsx
+  encoding:
+    match: 01110000100110100???????????????
+  assembly: vmulwod.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_H_BU_B
+  group: lsx
+  encoding:
+    match: 01110000101000100???????????????
+  assembly: vmulwod.h.bu.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_Q_D
+  group: lsx
+  encoding:
+    match: 01110000100100111???????????????
+  assembly: vmulwod.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000100110111???????????????
+  assembly: vmulwod.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_Q_DU_D
+  group: lsx
+  encoding:
+    match: 01110000101000111???????????????
+  assembly: vmulwod.q.du.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_W_H
+  group: lsx
+  encoding:
+    match: 01110000100100101???????????????
+  assembly: vmulwod.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_W_HU
+  group: lsx
+  encoding:
+    match: 01110000100110101???????????????
+  assembly: vmulwod.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VMULWOD_W_HU_H
+  group: lsx
+  encoding:
+    match: 01110000101000101???????????????
+  assembly: vmulwod.w.hu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKEV_B
+  group: lsx
+  encoding:
+    match: 01110001000101100???????????????
+  assembly: vpackev.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKEV_D
+  group: lsx
+  encoding:
+    match: 01110001000101111???????????????
+  assembly: vpackev.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKEV_H
+  group: lsx
+  encoding:
+    match: 01110001000101101???????????????
+  assembly: vpackev.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKEV_W
+  group: lsx
+  encoding:
+    match: 01110001000101110???????????????
+  assembly: vpackev.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKOD_B
+  group: lsx
+  encoding:
+    match: 01110001000110000???????????????
+  assembly: vpackod.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKOD_D
+  group: lsx
+  encoding:
+    match: 01110001000110011???????????????
+  assembly: vpackod.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKOD_H
+  group: lsx
+  encoding:
+    match: 01110001000110001???????????????
+  assembly: vpackod.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VPACKOD_W
+  group: lsx
+  encoding:
+    match: 01110001000110010???????????????
+  assembly: vpackod.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKEV_B
+  group: lsx
+  encoding:
+    match: 01110001000111100???????????????
+  assembly: vpickev.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKEV_D
+  group: lsx
+  encoding:
+    match: 01110001000111111???????????????
+  assembly: vpickev.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKEV_H
+  group: lsx
+  encoding:
+    match: 01110001000111101???????????????
+  assembly: vpickev.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKEV_W
+  group: lsx
+  encoding:
+    match: 01110001000111110???????????????
+  assembly: vpickev.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKOD_B
+  group: lsx
+  encoding:
+    match: 01110001001000000???????????????
+  assembly: vpickod.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKOD_D
+  group: lsx
+  encoding:
+    match: 01110001001000011???????????????
+  assembly: vpickod.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKOD_H
+  group: lsx
+  encoding:
+    match: 01110001001000001???????????????
+  assembly: vpickod.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VPICKOD_W
+  group: lsx
+  encoding:
+    match: 01110001001000010???????????????
+  assembly: vpickod.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VREPLVE_B
+  group: lsx
+  encoding:
+    match: 01110001001000100???????????????
+  assembly: vreplve.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VREPLVE_D
+  group: lsx
+  encoding:
+    match: 01110001001000111???????????????
+  assembly: vreplve.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VREPLVE_H
+  group: lsx
+  encoding:
+    match: 01110001001000101???????????????
+  assembly: vreplve.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VREPLVE_W
+  group: lsx
+  encoding:
+    match: 01110001001000110???????????????
+  assembly: vreplve.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSHUF_D
+  group: lsx
+  encoding:
+    match: 01110001011110111???????????????
+  assembly: vshuf.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSHUF_H
+  group: lsx
+  encoding:
+    match: 01110001011110101???????????????
+  assembly: vshuf.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSHUF_W
+  group: lsx
+  encoding:
+    match: 01110001011110110???????????????
+  assembly: vshuf.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSIGNCOV_B
+  group: lsx
+  encoding:
+    match: 01110001001011100???????????????
+  assembly: vsigncov.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSIGNCOV_D
+  group: lsx
+  encoding:
+    match: 01110001001011111???????????????
+  assembly: vsigncov.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSIGNCOV_H
+  group: lsx
+  encoding:
+    match: 01110001001011101???????????????
+  assembly: vsigncov.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSIGNCOV_W
+  group: lsx
+  encoding:
+    match: 01110001001011110???????????????
+  assembly: vsigncov.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRAN_B_H
+  group: lsx
+  encoding:
+    match: 01110000111101101???????????????
+  assembly: vsran.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRAN_H_W
+  group: lsx
+  encoding:
+    match: 01110000111101110???????????????
+  assembly: vsran.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRAN_W_D
+  group: lsx
+  encoding:
+    match: 01110000111101111???????????????
+  assembly: vsran.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRARN_B_H
+  group: lsx
+  encoding:
+    match: 01110000111110101???????????????
+  assembly: vsrarn.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRARN_H_W
+  group: lsx
+  encoding:
+    match: 01110000111110110???????????????
+  assembly: vsrarn.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRARN_W_D
+  group: lsx
+  encoding:
+    match: 01110000111110111???????????????
+  assembly: vsrarn.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRAR_B
+  group: lsx
+  encoding:
+    match: 01110000111100100???????????????
+  assembly: vsrar.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRAR_D
+  group: lsx
+  encoding:
+    match: 01110000111100111???????????????
+  assembly: vsrar.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRAR_H
+  group: lsx
+  encoding:
+    match: 01110000111100101???????????????
+  assembly: vsrar.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRAR_W
+  group: lsx
+  encoding:
+    match: 01110000111100110???????????????
+  assembly: vsrar.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLN_B_H
+  group: lsx
+  encoding:
+    match: 01110000111101001???????????????
+  assembly: vsrln.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLN_H_W
+  group: lsx
+  encoding:
+    match: 01110000111101010???????????????
+  assembly: vsrln.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLN_W_D
+  group: lsx
+  encoding:
+    match: 01110000111101011???????????????
+  assembly: vsrln.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLRN_B_H
+  group: lsx
+  encoding:
+    match: 01110000111110001???????????????
+  assembly: vsrlrn.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLRN_H_W
+  group: lsx
+  encoding:
+    match: 01110000111110010???????????????
+  assembly: vsrlrn.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLRN_W_D
+  group: lsx
+  encoding:
+    match: 01110000111110011???????????????
+  assembly: vsrlrn.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLR_B
+  group: lsx
+  encoding:
+    match: 01110000111100000???????????????
+  assembly: vsrlr.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLR_D
+  group: lsx
+  encoding:
+    match: 01110000111100011???????????????
+  assembly: vsrlr.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLR_H
+  group: lsx
+  encoding:
+    match: 01110000111100001???????????????
+  assembly: vsrlr.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSRLR_W
+  group: lsx
+  encoding:
+    match: 01110000111100010???????????????
+  assembly: vsrlr.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRAN_BU_H
+  group: lsx
+  encoding:
+    match: 01110001000001101???????????????
+  assembly: vssran.bu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRAN_B_H
+  group: lsx
+  encoding:
+    match: 01110000111111101???????????????
+  assembly: vssran.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRAN_HU_W
+  group: lsx
+  encoding:
+    match: 01110001000001110???????????????
+  assembly: vssran.hu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRAN_H_W
+  group: lsx
+  encoding:
+    match: 01110000111111110???????????????
+  assembly: vssran.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRAN_WU_D
+  group: lsx
+  encoding:
+    match: 01110001000001111???????????????
+  assembly: vssran.wu.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRAN_W_D
+  group: lsx
+  encoding:
+    match: 01110000111111111???????????????
+  assembly: vssran.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRARN_BU_H
+  group: lsx
+  encoding:
+    match: 01110001000010101???????????????
+  assembly: vssrarn.bu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRARN_B_H
+  group: lsx
+  encoding:
+    match: 01110001000000101???????????????
+  assembly: vssrarn.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRARN_HU_W
+  group: lsx
+  encoding:
+    match: 01110001000010110???????????????
+  assembly: vssrarn.hu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRARN_H_W
+  group: lsx
+  encoding:
+    match: 01110001000000110???????????????
+  assembly: vssrarn.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRARN_WU_D
+  group: lsx
+  encoding:
+    match: 01110001000010111???????????????
+  assembly: vssrarn.wu.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRARN_W_D
+  group: lsx
+  encoding:
+    match: 01110001000000111???????????????
+  assembly: vssrarn.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLN_BU_H
+  group: lsx
+  encoding:
+    match: 01110001000001001???????????????
+  assembly: vssrln.bu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLN_B_H
+  group: lsx
+  encoding:
+    match: 01110000111111001???????????????
+  assembly: vssrln.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLN_HU_W
+  group: lsx
+  encoding:
+    match: 01110001000001010???????????????
+  assembly: vssrln.hu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLN_H_W
+  group: lsx
+  encoding:
+    match: 01110000111111010???????????????
+  assembly: vssrln.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLN_WU_D
+  group: lsx
+  encoding:
+    match: 01110001000001011???????????????
+  assembly: vssrln.wu.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLN_W_D
+  group: lsx
+  encoding:
+    match: 01110000111111011???????????????
+  assembly: vssrln.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLRN_BU_H
+  group: lsx
+  encoding:
+    match: 01110001000010001???????????????
+  assembly: vssrlrn.bu.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLRN_B_H
+  group: lsx
+  encoding:
+    match: 01110001000000001???????????????
+  assembly: vssrlrn.b.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLRN_HU_W
+  group: lsx
+  encoding:
+    match: 01110001000010010???????????????
+  assembly: vssrlrn.hu.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLRN_H_W
+  group: lsx
+  encoding:
+    match: 01110001000000010???????????????
+  assembly: vssrlrn.h.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLRN_WU_D
+  group: lsx
+  encoding:
+    match: 01110001000010011???????????????
+  assembly: vssrlrn.wu.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSSRLRN_W_D
+  group: lsx
+  encoding:
+    match: 01110001000000011???????????????
+  assembly: vssrlrn.w.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSTX
+  group: lsx
+  encoding:
+    match: 00111000010001000???????????????
+  assembly: vstx $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_D_W
+  group: lsx
+  encoding:
+    match: 01110000001000010???????????????
+  assembly: vsubwev.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_D_WU
+  group: lsx
+  encoding:
+    match: 01110000001100010???????????????
+  assembly: vsubwev.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_H_B
+  group: lsx
+  encoding:
+    match: 01110000001000000???????????????
+  assembly: vsubwev.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_H_BU
+  group: lsx
+  encoding:
+    match: 01110000001100000???????????????
+  assembly: vsubwev.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_Q_D
+  group: lsx
+  encoding:
+    match: 01110000001000011???????????????
+  assembly: vsubwev.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000001100011???????????????
+  assembly: vsubwev.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_W_H
+  group: lsx
+  encoding:
+    match: 01110000001000001???????????????
+  assembly: vsubwev.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWEV_W_HU
+  group: lsx
+  encoding:
+    match: 01110000001100001???????????????
+  assembly: vsubwev.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_D_W
+  group: lsx
+  encoding:
+    match: 01110000001001010???????????????
+  assembly: vsubwod.d.w $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_D_WU
+  group: lsx
+  encoding:
+    match: 01110000001101010???????????????
+  assembly: vsubwod.d.wu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_H_B
+  group: lsx
+  encoding:
+    match: 01110000001001000???????????????
+  assembly: vsubwod.h.b $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_H_BU
+  group: lsx
+  encoding:
+    match: 01110000001101000???????????????
+  assembly: vsubwod.h.bu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_Q_D
+  group: lsx
+  encoding:
+    match: 01110000001001011???????????????
+  assembly: vsubwod.q.d $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_Q_DU
+  group: lsx
+  encoding:
+    match: 01110000001101011???????????????
+  assembly: vsubwod.q.du $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_W_H
+  group: lsx
+  encoding:
+    match: 01110000001001001???????????????
+  assembly: vsubwod.w.h $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUBWOD_W_HU
+  group: lsx
+  encoding:
+    match: 01110000001101001???????????????
+  assembly: vsubwod.w.hu $v.d, $v.j, $v.k
+  format: DJK
+- name: VSUB_Q
+  group: lsx
+  encoding:
+    match: 01110001001011011???????????????
+  assembly: vsub.q $v.d, $v.j, $v.k
+  format: DJK
+- name: VLDREPL_W
+  group: lsx
+  encoding:
+    match: 001100000010????????????????????
+    variables:
+      imm:
+      - 19
+      - 10
+  assembly: vldrepl.w $v.d, $r.j, {imm}
+  format: DJ
+- name: VLDREPL_H
+  group: lsx
+  encoding:
+    match: 00110000010?????????????????????
+    variables:
+      imm:
+      - 20
+      - 10
+  assembly: vldrepl.h $v.d, $r.j, {imm}
+  format: DJ
+- name: VLDREPL_B
+  group: lsx
+  encoding:
+    match: 0011000010??????????????????????
+  assembly: vldrepl.b $v.d, $r.j, {imm}
+  format: DJI12
+- name: VMAXI_B
+  group: lsx
+  encoding:
+    match: 01110010100100000???????????????
+  assembly: vmaxi.b $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMAXI_D
+  group: lsx
+  encoding:
+    match: 01110010100100011???????????????
+  assembly: vmaxi.d $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMAXI_H
+  group: lsx
+  encoding:
+    match: 01110010100100001???????????????
+  assembly: vmaxi.h $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMAXI_W
+  group: lsx
+  encoding:
+    match: 01110010100100010???????????????
+  assembly: vmaxi.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_B
+  group: lsx
+  encoding:
+    match: 01110010100100100???????????????
+  assembly: vmini.b $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_D
+  group: lsx
+  encoding:
+    match: 01110010100100111???????????????
+  assembly: vmini.d $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_H
+  group: lsx
+  encoding:
+    match: 01110010100100101???????????????
+  assembly: vmini.h $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_W
+  group: lsx
+  encoding:
+    match: 01110010100100110???????????????
+  assembly: vmini.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSEQI_B
+  group: lsx
+  encoding:
+    match: 01110010100000000???????????????
+  assembly: vseqi.b $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSEQI_D
+  group: lsx
+  encoding:
+    match: 01110010100000011???????????????
+  assembly: vseqi.d $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSEQI_H
+  group: lsx
+  encoding:
+    match: 01110010100000001???????????????
+  assembly: vseqi.h $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSEQI_W
+  group: lsx
+  encoding:
+    match: 01110010100000010???????????????
+  assembly: vseqi.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_B
+  group: lsx
+  encoding:
+    match: 01110010100000100???????????????
+  assembly: vslei.b $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_D
+  group: lsx
+  encoding:
+    match: 01110010100000111???????????????
+  assembly: vslei.d $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_H
+  group: lsx
+  encoding:
+    match: 01110010100000101???????????????
+  assembly: vslei.h $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_W
+  group: lsx
+  encoding:
+    match: 01110010100000110???????????????
+  assembly: vslei.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_B
+  group: lsx
+  encoding:
+    match: 01110010100001100???????????????
+  assembly: vslti.b $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_D
+  group: lsx
+  encoding:
+    match: 01110010100001111???????????????
+  assembly: vslti.d $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_H
+  group: lsx
+  encoding:
+    match: 01110010100001101???????????????
+  assembly: vslti.h $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_W
+  group: lsx
+  encoding:
+    match: 01110010100001110???????????????
+  assembly: vslti.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VLDREPL_D
+  group: lsx
+  encoding:
+    match: 0011000000010???????????????????
+    variables:
+      imm:
+      - 18
+      - 10
+  assembly: vldrepl.d $v.d, $r.j, {imm}
+  format: DJ
+- name: VINSGR2VR_D
+  group: lsx
+  encoding:
+    match: 011100101110101111110???????????
+    variables:
+      imm:
+      - 10
+      - 10
+  assembly: vinsgr2vr.d $v.d, $v.j, {imm}
+  format: DJ
+- name: VPICKVE2GR_D
+  group: lsx
+  encoding:
+    match: 011100101110111111110???????????
+    variables:
+      imm:
+      - 10
+      - 10
+  assembly: vpickve2gr.d $v.d, $v.j, {imm}
+  format: DJ
+- name: VPICKVE2GR_DU
+  group: lsx
+  encoding:
+    match: 011100101111001111110???????????
+    variables:
+      imm:
+      - 10
+      - 10
+  assembly: vpickve2gr.du $v.d, $v.j, {imm}
+  format: DJ
+- name: VREPLVEI_D
+  group: lsx
+  encoding:
+    match: 011100101111011111110???????????
+    variables:
+      imm:
+      - 10
+      - 10
+  assembly: vreplvei.d $v.d, $v.j, {imm}
+  format: DJ
+- name: VINSGR2VR_W
+  group: lsx
+  encoding:
+    match: 01110010111010111110????????????
+  assembly: vinsgr2vr.w $v.d, $v.j, {imm}
+  format: DJI2
+- name: VPICKVE2GR_W
+  group: lsx
+  encoding:
+    match: 01110010111011111110????????????
+  assembly: vpickve2gr.w $v.d, $v.j, {imm}
+  format: DJI2
+- name: VPICKVE2GR_WU
+  group: lsx
+  encoding:
+    match: 01110010111100111110????????????
+  assembly: vpickve2gr.wu $v.d, $v.j, {imm}
+  format: DJI2
+- name: VREPLVEI_W
+  group: lsx
+  encoding:
+    match: 01110010111101111110????????????
+  assembly: vreplvei.w $v.d, $v.j, {imm}
+  format: DJI2
+- name: VBITCLRI_B
+  group: lsx
+  encoding:
+    match: 0111001100010000001?????????????
+  assembly: vbitclri.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VBITREVI_B
+  group: lsx
+  encoding:
+    match: 0111001100011000001?????????????
+  assembly: vbitrevi.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VBITSETI_B
+  group: lsx
+  encoding:
+    match: 0111001100010100001?????????????
+  assembly: vbitseti.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VINSGR2VR_H
+  group: lsx
+  encoding:
+    match: 0111001011101011110?????????????
+  assembly: vinsgr2vr.h $v.d, $v.j, {imm}
+  format: DJI3
+- name: VPICKVE2GR_H
+  group: lsx
+  encoding:
+    match: 0111001011101111110?????????????
+  assembly: vpickve2gr.h $v.d, $v.j, {imm}
+  format: DJI3
+- name: VPICKVE2GR_HU
+  group: lsx
+  encoding:
+    match: 0111001011110011110?????????????
+  assembly: vpickve2gr.hu $v.d, $v.j, {imm}
+  format: DJI3
+- name: VREPLVEI_H
+  group: lsx
+  encoding:
+    match: 0111001011110111110?????????????
+  assembly: vreplvei.h $v.d, $v.j, {imm}
+  format: DJI3
+- name: VROTRI_B
+  group: lsx
+  encoding:
+    match: 0111001010100000001?????????????
+  assembly: vrotri.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSAT_B
+  group: lsx
+  encoding:
+    match: 0111001100100100001?????????????
+  assembly: vsat.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSAT_BU
+  group: lsx
+  encoding:
+    match: 0111001100101000001?????????????
+  assembly: vsat.bu $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSLLI_B
+  group: lsx
+  encoding:
+    match: 0111001100101100001?????????????
+  assembly: vslli.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSLLWIL_HU_BU
+  group: lsx
+  encoding:
+    match: 0111001100001100001?????????????
+  assembly: vsllwil.hu.bu $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSLLWIL_H_B
+  group: lsx
+  encoding:
+    match: 0111001100001000001?????????????
+  assembly: vsllwil.h.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSRAI_B
+  group: lsx
+  encoding:
+    match: 0111001100110100001?????????????
+  assembly: vsrai.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSRARI_B
+  group: lsx
+  encoding:
+    match: 0111001010101000001?????????????
+  assembly: vsrari.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSRLI_B
+  group: lsx
+  encoding:
+    match: 0111001100110000001?????????????
+  assembly: vsrli.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VSRLRI_B
+  group: lsx
+  encoding:
+    match: 0111001010100100001?????????????
+  assembly: vsrlri.b $v.d, $v.j, {imm}
+  format: DJI3
+- name: VBITCLRI_H
+  group: lsx
+  encoding:
+    match: 011100110001000001??????????????
+  assembly: vbitclri.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VBITREVI_H
+  group: lsx
+  encoding:
+    match: 011100110001100001??????????????
+  assembly: vbitrevi.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VBITSETI_H
+  group: lsx
+  encoding:
+    match: 011100110001010001??????????????
+  assembly: vbitseti.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VINSGR2VR_B
+  group: lsx
+  encoding:
+    match: 011100101110101110??????????????
+  assembly: vinsgr2vr.b $v.d, $v.j, {imm}
+  format: DJI4
+- name: VPICKVE2GR_B
+  group: lsx
+  encoding:
+    match: 011100101110111110??????????????
+  assembly: vpickve2gr.b $v.d, $v.j, {imm}
+  format: DJI4
+- name: VPICKVE2GR_BU
+  group: lsx
+  encoding:
+    match: 011100101111001110??????????????
+  assembly: vpickve2gr.bu $v.d, $v.j, {imm}
+  format: DJI4
+- name: VREPLVEI_B
+  group: lsx
+  encoding:
+    match: 011100101111011110??????????????
+  assembly: vreplvei.b $v.d, $v.j, {imm}
+  format: DJI4
+- name: VROTRI_H
+  group: lsx
+  encoding:
+    match: 011100101010000001??????????????
+  assembly: vrotri.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSAT_H
+  group: lsx
+  encoding:
+    match: 011100110010010001??????????????
+  assembly: vsat.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSAT_HU
+  group: lsx
+  encoding:
+    match: 011100110010100001??????????????
+  assembly: vsat.hu $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSLLI_H
+  group: lsx
+  encoding:
+    match: 011100110010110001??????????????
+  assembly: vslli.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSLLWIL_WU_HU
+  group: lsx
+  encoding:
+    match: 011100110000110001??????????????
+  assembly: vsllwil.wu.hu $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSLLWIL_W_H
+  group: lsx
+  encoding:
+    match: 011100110000100001??????????????
+  assembly: vsllwil.w.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRAI_H
+  group: lsx
+  encoding:
+    match: 011100110011010001??????????????
+  assembly: vsrai.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRANI_B_H
+  group: lsx
+  encoding:
+    match: 011100110101100001??????????????
+  assembly: vsrani.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRARI_H
+  group: lsx
+  encoding:
+    match: 011100101010100001??????????????
+  assembly: vsrari.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRARNI_B_H
+  group: lsx
+  encoding:
+    match: 011100110101110001??????????????
+  assembly: vsrarni.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRLI_H
+  group: lsx
+  encoding:
+    match: 011100110011000001??????????????
+  assembly: vsrli.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRLNI_B_H
+  group: lsx
+  encoding:
+    match: 011100110100000001??????????????
+  assembly: vsrlni.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRLRI_H
+  group: lsx
+  encoding:
+    match: 011100101010010001??????????????
+  assembly: vsrlri.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSRLRNI_B_H
+  group: lsx
+  encoding:
+    match: 011100110100010001??????????????
+  assembly: vsrlrni.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRANI_BU_H
+  group: lsx
+  encoding:
+    match: 011100110110010001??????????????
+  assembly: vssrani.bu.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRANI_B_H
+  group: lsx
+  encoding:
+    match: 011100110110000001??????????????
+  assembly: vssrani.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRARNI_BU_H
+  group: lsx
+  encoding:
+    match: 011100110110110001??????????????
+  assembly: vssrarni.bu.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRARNI_B_H
+  group: lsx
+  encoding:
+    match: 011100110110100001??????????????
+  assembly: vssrarni.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRLNI_BU_H
+  group: lsx
+  encoding:
+    match: 011100110100110001??????????????
+  assembly: vssrlni.bu.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRLNI_B_H
+  group: lsx
+  encoding:
+    match: 011100110100100001??????????????
+  assembly: vssrlni.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRLRNI_BU_H
+  group: lsx
+  encoding:
+    match: 011100110101010001??????????????
+  assembly: vssrlrni.bu.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VSSRLRNI_B_H
+  group: lsx
+  encoding:
+    match: 011100110101000001??????????????
+  assembly: vssrlrni.b.h $v.d, $v.j, {imm}
+  format: DJI4
+- name: VBITCLRI_W
+  group: lsx
+  encoding:
+    match: 01110011000100001???????????????
+  assembly: vbitclri.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VBITREVI_W
+  group: lsx
+  encoding:
+    match: 01110011000110001???????????????
+  assembly: vbitrevi.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VBITSETI_W
+  group: lsx
+  encoding:
+    match: 01110011000101001???????????????
+  assembly: vbitseti.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VBSLL_V
+  group: lsx
+  encoding:
+    match: 01110010100011100???????????????
+  assembly: vbsll.v $v.d, $v.j, {imm}
+  format: DJI5
+- name: VBSRL_V
+  group: lsx
+  encoding:
+    match: 01110010100011101???????????????
+  assembly: vbsrl.v $v.d, $v.j, {imm}
+  format: DJI5
+- name: VFRSTPI_B
+  group: lsx
+  encoding:
+    match: 01110010100110100???????????????
+  assembly: vfrstpi.b $v.d, $v.j, {imm}
+  format: DJI5
+- name: VFRSTPI_H
+  group: lsx
+  encoding:
+    match: 01110010100110101???????????????
+  assembly: vfrstpi.h $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMAXI_BU
+  group: lsx
+  encoding:
+    match: 01110010100101000???????????????
+  assembly: vmaxi.bu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMAXI_DU
+  group: lsx
+  encoding:
+    match: 01110010100101011???????????????
+  assembly: vmaxi.du $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMAXI_HU
+  group: lsx
+  encoding:
+    match: 01110010100101001???????????????
+  assembly: vmaxi.hu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMAXI_WU
+  group: lsx
+  encoding:
+    match: 01110010100101010???????????????
+  assembly: vmaxi.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_BU
+  group: lsx
+  encoding:
+    match: 01110010100101100???????????????
+  assembly: vmini.bu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_DU
+  group: lsx
+  encoding:
+    match: 01110010100101111???????????????
+  assembly: vmini.du $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_HU
+  group: lsx
+  encoding:
+    match: 01110010100101101???????????????
+  assembly: vmini.hu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VMINI_WU
+  group: lsx
+  encoding:
+    match: 01110010100101110???????????????
+  assembly: vmini.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VROTRI_W
+  group: lsx
+  encoding:
+    match: 01110010101000001???????????????
+  assembly: vrotri.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSAT_W
+  group: lsx
+  encoding:
+    match: 01110011001001001???????????????
+  assembly: vsat.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSAT_WU
+  group: lsx
+  encoding:
+    match: 01110011001010001???????????????
+  assembly: vsat.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_BU
+  group: lsx
+  encoding:
+    match: 01110010100001000???????????????
+  assembly: vslei.bu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_DU
+  group: lsx
+  encoding:
+    match: 01110010100001011???????????????
+  assembly: vslei.du $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_HU
+  group: lsx
+  encoding:
+    match: 01110010100001001???????????????
+  assembly: vslei.hu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLEI_WU
+  group: lsx
+  encoding:
+    match: 01110010100001010???????????????
+  assembly: vslei.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLLI_W
+  group: lsx
+  encoding:
+    match: 01110011001011001???????????????
+  assembly: vslli.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLLWIL_DU_WU
+  group: lsx
+  encoding:
+    match: 01110011000011001???????????????
+  assembly: vsllwil.du.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLLWIL_D_W
+  group: lsx
+  encoding:
+    match: 01110011000010001???????????????
+  assembly: vsllwil.d.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_BU
+  group: lsx
+  encoding:
+    match: 01110010100010000???????????????
+  assembly: vslti.bu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_DU
+  group: lsx
+  encoding:
+    match: 01110010100010011???????????????
+  assembly: vslti.du $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_HU
+  group: lsx
+  encoding:
+    match: 01110010100010001???????????????
+  assembly: vslti.hu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSLTI_WU
+  group: lsx
+  encoding:
+    match: 01110010100010010???????????????
+  assembly: vslti.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRAI_W
+  group: lsx
+  encoding:
+    match: 01110011001101001???????????????
+  assembly: vsrai.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRANI_H_W
+  group: lsx
+  encoding:
+    match: 01110011010110001???????????????
+  assembly: vsrani.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRARI_W
+  group: lsx
+  encoding:
+    match: 01110010101010001???????????????
+  assembly: vsrari.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRARNI_H_W
+  group: lsx
+  encoding:
+    match: 01110011010111001???????????????
+  assembly: vsrarni.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRLI_W
+  group: lsx
+  encoding:
+    match: 01110011001100001???????????????
+  assembly: vsrli.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRLNI_H_W
+  group: lsx
+  encoding:
+    match: 01110011010000001???????????????
+  assembly: vsrlni.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRLRI_W
+  group: lsx
+  encoding:
+    match: 01110010101001001???????????????
+  assembly: vsrlri.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSRLRNI_H_W
+  group: lsx
+  encoding:
+    match: 01110011010001001???????????????
+  assembly: vsrlrni.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRANI_HU_W
+  group: lsx
+  encoding:
+    match: 01110011011001001???????????????
+  assembly: vssrani.hu.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRANI_H_W
+  group: lsx
+  encoding:
+    match: 01110011011000001???????????????
+  assembly: vssrani.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRARNI_HU_W
+  group: lsx
+  encoding:
+    match: 01110011011011001???????????????
+  assembly: vssrarni.hu.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRARNI_H_W
+  group: lsx
+  encoding:
+    match: 01110011011010001???????????????
+  assembly: vssrarni.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRLNI_HU_W
+  group: lsx
+  encoding:
+    match: 01110011010011001???????????????
+  assembly: vssrlni.hu.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRLNI_H_W
+  group: lsx
+  encoding:
+    match: 01110011010010001???????????????
+  assembly: vssrlni.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRLRNI_HU_W
+  group: lsx
+  encoding:
+    match: 01110011010101001???????????????
+  assembly: vssrlrni.hu.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSSRLRNI_H_W
+  group: lsx
+  encoding:
+    match: 01110011010100001???????????????
+  assembly: vssrlrni.h.w $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSUBI_BU
+  group: lsx
+  encoding:
+    match: 01110010100011000???????????????
+  assembly: vsubi.bu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSUBI_DU
+  group: lsx
+  encoding:
+    match: 01110010100011011???????????????
+  assembly: vsubi.du $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSUBI_HU
+  group: lsx
+  encoding:
+    match: 01110010100011001???????????????
+  assembly: vsubi.hu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VSUBI_WU
+  group: lsx
+  encoding:
+    match: 01110010100011010???????????????
+  assembly: vsubi.wu $v.d, $v.j, {imm}
+  format: DJI5
+- name: VBITCLRI_D
+  group: lsx
+  encoding:
+    match: 0111001100010001????????????????
+  assembly: vbitclri.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VBITREVI_D
+  group: lsx
+  encoding:
+    match: 0111001100011001????????????????
+  assembly: vbitrevi.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VBITSETI_D
+  group: lsx
+  encoding:
+    match: 0111001100010101????????????????
+  assembly: vbitseti.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VROTRI_D
+  group: lsx
+  encoding:
+    match: 0111001010100001????????????????
+  assembly: vrotri.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSAT_D
+  group: lsx
+  encoding:
+    match: 0111001100100101????????????????
+  assembly: vsat.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSAT_DU
+  group: lsx
+  encoding:
+    match: 0111001100101001????????????????
+  assembly: vsat.du $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSLLI_D
+  group: lsx
+  encoding:
+    match: 0111001100101101????????????????
+  assembly: vslli.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRAI_D
+  group: lsx
+  encoding:
+    match: 0111001100110101????????????????
+  assembly: vsrai.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRANI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101011001????????????????
+  assembly: vsrani.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRARI_D
+  group: lsx
+  encoding:
+    match: 0111001010101001????????????????
+  assembly: vsrari.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRARNI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101011101????????????????
+  assembly: vsrarni.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRLI_D
+  group: lsx
+  encoding:
+    match: 0111001100110001????????????????
+  assembly: vsrli.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRLNI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101000001????????????????
+  assembly: vsrlni.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRLRI_D
+  group: lsx
+  encoding:
+    match: 0111001010100101????????????????
+  assembly: vsrlri.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRLRNI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101000101????????????????
+  assembly: vsrlrni.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRANI_WU_D
+  group: lsx
+  encoding:
+    match: 0111001101100101????????????????
+  assembly: vssrani.wu.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRANI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101100001????????????????
+  assembly: vssrani.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRARNI_WU_D
+  group: lsx
+  encoding:
+    match: 0111001101101101????????????????
+  assembly: vssrarni.wu.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRARNI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101101001????????????????
+  assembly: vssrarni.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRLNI_WU_D
+  group: lsx
+  encoding:
+    match: 0111001101001101????????????????
+  assembly: vssrlni.wu.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRLNI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101001001????????????????
+  assembly: vssrlni.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRLRNI_WU_D
+  group: lsx
+  encoding:
+    match: 0111001101010101????????????????
+  assembly: vssrlrni.wu.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSSRLRNI_W_D
+  group: lsx
+  encoding:
+    match: 0111001101010001????????????????
+  assembly: vssrlrni.w.d $v.d, $v.j, {imm}
+  format: DJI6
+- name: VSRANI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110101101?????????????????
+  assembly: vsrani.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSRARNI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110101111?????????????????
+  assembly: vsrarni.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSRLNI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110100001?????????????????
+  assembly: vsrlni.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSRLRNI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110100011?????????????????
+  assembly: vsrlrni.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRANI_DU_Q
+  group: lsx
+  encoding:
+    match: 011100110110011?????????????????
+  assembly: vssrani.du.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRANI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110110001?????????????????
+  assembly: vssrani.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRARNI_DU_Q
+  group: lsx
+  encoding:
+    match: 011100110110111?????????????????
+  assembly: vssrarni.du.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRARNI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110110101?????????????????
+  assembly: vssrarni.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRLNI_DU_Q
+  group: lsx
+  encoding:
+    match: 011100110100111?????????????????
+  assembly: vssrlni.du.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRLNI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110100101?????????????????
+  assembly: vssrlni.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRLRNI_DU_Q
+  group: lsx
+  encoding:
+    match: 011100110101011?????????????????
+  assembly: vssrlrni.du.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VSSRLRNI_D_Q
+  group: lsx
+  encoding:
+    match: 011100110101001?????????????????
+  assembly: vssrlrni.d.q $v.d, $v.j, {imm}
+  format: DJI7
+- name: VANDI_B
+  group: lsx
+  encoding:
+    match: 01110011110100??????????????????
+  assembly: vandi.b $v.d, $v.j, {imm}
+  format: DJI8
+- name: VBITSELI_B
+  group: lsx
+  encoding:
+    match: 01110011110001??????????????????
+  assembly: vbitseli.b $v.d, $v.j, {imm}
+  format: DJI8
+- name: VEXTRINS_B
+  group: lsx
+  encoding:
+    match: 01110011100011??????????????????
+  assembly: vextrins.b $v.d, $v.j, {imm}
+  format: DJI8
+- name: VEXTRINS_D
+  group: lsx
+  encoding:
+    match: 01110011100000??????????????????
+  assembly: vextrins.d $v.d, $v.j, {imm}
+  format: DJI8
+- name: VEXTRINS_H
+  group: lsx
+  encoding:
+    match: 01110011100010??????????????????
+  assembly: vextrins.h $v.d, $v.j, {imm}
+  format: DJI8
+- name: VEXTRINS_W
+  group: lsx
+  encoding:
+    match: 01110011100001??????????????????
+  assembly: vextrins.w $v.d, $v.j, {imm}
+  format: DJI8
+- name: VNORI_B
+  group: lsx
+  encoding:
+    match: 01110011110111??????????????????
+  assembly: vnori.b $v.d, $v.j, {imm}
+  format: DJI8
+- name: VORI_B
+  group: lsx
+  encoding:
+    match: 01110011110101??????????????????
+  assembly: vori.b $v.d, $v.j, {imm}
+  format: DJI8
+- name: VPERMI_W
+  group: lsx
+  encoding:
+    match: 01110011111001??????????????????
+  assembly: vpermi.w $v.d, $v.j, {imm}
+  format: DJI8
+- name: VSHUF4I_B
+  group: lsx
+  encoding:
+    match: 01110011100100??????????????????
+  assembly: vshuf4i.b $v.d, $v.j, {imm}
+  format: DJI8
+- name: VSHUF4I_D
+  group: lsx
+  encoding:
+    match: 01110011100111??????????????????
+  assembly: vshuf4i.d $v.d, $v.j, {imm}
+  format: DJI8
+- name: VSHUF4I_H
+  group: lsx
+  encoding:
+    match: 01110011100101??????????????????
+  assembly: vshuf4i.h $v.d, $v.j, {imm}
+  format: DJI8
+- name: VSHUF4I_W
+  group: lsx
+  encoding:
+    match: 01110011100110??????????????????
+  assembly: vshuf4i.w $v.d, $v.j, {imm}
+  format: DJI8
+- name: VXORI_B
+  group: lsx
+  encoding:
+    match: 01110011110110??????????????????
+  assembly: vxori.b $v.d, $v.j, {imm}
+  format: DJI8
+- name: VSTELM_D
+  group: lsx
+  encoding:
+    match: 0011000100010???????????????????
+    variables:
+      k:
+      - 18
+      - 18
+      imm:
+      - 17
+      - 10
+  assembly: vstelm.d $v.d, $r.j, {k}, {imm}
+  format: DJI10
+- name: VSTELM_W
+  group: lsx
+  encoding:
+    match: 001100010010????????????????????
+    variables:
+      k:
+      - 19
+      - 18
+      imm:
+      - 17
+      - 10
+  assembly: vstelm.w $v.d, $r.j, {k}, {imm}
+  format: DJI10
+- name: VSTELM_H
+  group: lsx
+  encoding:
+    match: 00110001010?????????????????????
+    variables:
+      k:
+      - 20
+      - 18
+      imm:
+      - 17
+      - 10
+  assembly: vstelm.h $v.d, $r.j, {k}, {imm}
+  format: DJI10
+- name: VSTELM_B
+  group: lsx
+  encoding:
+    match: 0011000110??????????????????????
+    variables:
+      k:
+      - 21
+      - 18
+      imm:
+      - 17
+      - 10
+  assembly: vstelm.b $v.d, $r.j, {k}, {imm}
+  format: DJI10
+- name: VMEPATMSK_V
+  group: lsx
+  encoding:
+    match: 01110010100110111???????????????
+    variables:
+      imm:
+      - 14
+      - 5
+  assembly: vmepatmsk.v $v.d, {imm}
+  format: D
