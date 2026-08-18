@@ -22,7 +22,7 @@ dilation * (kernel_size - 1) + 1
 - CPU 和 CUDA 的前向结果、输出形状及反向梯度符合空洞最大池化语义。
 - `return_mask=True` 时结果和索引均正确，`ceil_mode`、padding、stride 与
   dilation 组合时形状推导正确。
-- 动态图、静态图及算子元信息中的参数传递保持一致。
+- 动态图和静态图下的行为及输出形状保持一致
 - 默认 `dilation=1` 时不得改变已有最大池化行为。
 - XPU 暂不要求实现非默认 dilation；不支持时应给出明确错误，不得静默产生
   错误结果。
@@ -31,5 +31,5 @@ dilation * (kernel_size - 1) + 1
 ## 技术要求
 
 - 熟悉 Python、C++ 和 CUDA
-- 了解 Paddle 算子 YAML、InferMeta 和 kernel 注册流程
-- 了解最大池化前向、反向及索引语义
+- 了解 Paddle CPU/CUDA kernel 开发机制
+- 了解池化、空洞算子的形状推导、计算方法
