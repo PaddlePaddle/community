@@ -1,0 +1,304 @@
+diff --git a/test/legacy_test/test_imperative_layers.py b/test/legacy_test/test_imperative_layers.py
+index 71d6993..7b088d3 100644
+--- a/test/legacy_test/test_imperative_layers.py
++++ b/test/legacy_test/test_imperative_layers.py
+@@ -304,19 +304,28 @@ class TestLayerPrint(unittest.TestCase):
+             str(module), 'AvgPool3D(kernel_size=2, stride=2, padding=0)'
+         )
+ 
+-        module = nn.MaxPool1D(kernel_size=2, stride=2, padding=0)
++        module = nn.MaxPool1D(
++            kernel_size=2, stride=2, padding=0, dilation=1
++        )
+         self.assertEqual(
+-            str(module), 'MaxPool1D(kernel_size=2, stride=2, padding=0)'
++            str(module),
++            'MaxPool1D(kernel_size=2, stride=2, padding=0, dilation=1)',
+         )
+ 
+-        module = nn.MaxPool2D(kernel_size=2, stride=2, padding=0)
++        module = nn.MaxPool2D(
++            kernel_size=2, stride=2, padding=0, dilation=1
++        )
+         self.assertEqual(
+-            str(module), 'MaxPool2D(kernel_size=2, stride=2, padding=0)'
++            str(module),
++            'MaxPool2D(kernel_size=2, stride=2, padding=0, dilation=1)',
+         )
+ 
+-        module = nn.MaxPool3D(kernel_size=2, stride=2, padding=0)
++        module = nn.MaxPool3D(
++            kernel_size=2, stride=2, padding=0, dilation=1
++        )
+         self.assertEqual(
+-            str(module), 'MaxPool3D(kernel_size=2, stride=2, padding=0)'
++            str(module),
++            'MaxPool3D(kernel_size=2, stride=2, padding=0, dilation=1)',
+         )
+ 
+         module = nn.AdaptiveAvgPool1D(output_size=16)
+@@ -394,7 +403,7 @@ class TestLayerPrint(unittest.TestCase):
+             nn.Tanh(name="Tanh"),
+             module1,
+             nn.Conv3D(4, 6, (3, 3, 3)),
+-            nn.MaxPool3D(kernel_size=2, stride=2, padding=0),
++            nn.MaxPool3D(kernel_size=2, stride=2, padding=0, dilation=1),
+             nn.GELU(True),
+         )
+         self.assertEqual(
+@@ -406,7 +415,7 @@ class TestLayerPrint(unittest.TestCase):
+             '(3): Sequential(\n    (conv1): Conv2D(1, 20, kernel_size=[5, 5], data_format=NCHW)\n    (relu1): ReLU()\n'
+             '    (conv2): Conv2D(20, 64, kernel_size=[5, 5], data_format=NCHW)\n    (relu2): ReLU()\n  )\n  '
+             '(4): Conv3D(4, 6, kernel_size=[3, 3, 3], data_format=NCDHW)\n  '
+-            '(5): MaxPool3D(kernel_size=2, stride=2, padding=0)\n  '
++            '(5): MaxPool3D(kernel_size=2, stride=2, padding=0, dilation=1)\n  '
+             '(6): GELU(approximate=True)\n)',
+         )
+ 
+diff --git a/test/legacy_test/test_max_pool_dilation_contract.py b/test/legacy_test/test_max_pool_dilation_contract.py
+new file mode 100644
+index 0000000..4231cd1
+--- /dev/null
++++ b/test/legacy_test/test_max_pool_dilation_contract.py
+@@ -0,0 +1,201 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import unittest
++
++import numpy as np
++
++import paddle
++import paddle.nn.functional as F
++
++
++class TestMaxPoolDilationContract(unittest.TestCase):
++    def setUp(self):
++        paddle.disable_static()
++
++    def _check_functional_forward_and_backward(self, dimensions):
++        spatial_shape = [7] if dimensions == 1 else [5] * dimensions
++        shape = [1, 1, *spatial_shape]
++        input_np = np.arange(np.prod(shape), dtype="float32").reshape(shape)
++        x = paddle.to_tensor(input_np, stop_gradient=False)
++        pool = getattr(F, f"max_pool{dimensions}d")
++
++        out = pool(x, kernel_size=2, stride=1, dilation=2)
++        slices = (slice(None), slice(None), *([slice(2, None)] * dimensions))
++        expected = input_np[slices]
++        np.testing.assert_allclose(out.numpy(), expected)
++
++        out.sum().backward()
++        expected_grad = np.zeros_like(input_np)
++        expected_grad[slices] = 1
++        np.testing.assert_allclose(x.grad.numpy(), expected_grad)
++
++    def _check_layer_forward(self, dimensions):
++        spatial_shape = [7] if dimensions == 1 else [5] * dimensions
++        shape = [1, 1, *spatial_shape]
++        input_np = np.arange(np.prod(shape), dtype="float32").reshape(shape)
++        layer = getattr(paddle.nn, f"MaxPool{dimensions}D")(
++            kernel_size=2, stride=1, dilation=2
++        )
++        out = layer(paddle.to_tensor(input_np))
++        slices = (slice(None), slice(None), *([slice(2, None)] * dimensions))
++        np.testing.assert_allclose(out.numpy(), input_np[slices])
++
++    def _check_existing_positional_calls(self, dimensions):
++        shape = [1, 1, *([5] * dimensions)]
++        input_np = np.arange(np.prod(shape), dtype="float32").reshape(shape)
++        x = paddle.to_tensor(input_np)
++        functional = getattr(F, f"max_pool{dimensions}d")
++        layer_type = getattr(paddle.nn, f"MaxPool{dimensions}D")
++
++        functional_out, functional_mask = functional(
++            x, 2, 1, 0, True, False
++        )
++        layer_out, layer_mask = layer_type(2, 1, 0, True, False)(x)
++        slices = (slice(None), slice(None), *([slice(1, None)] * dimensions))
++        expected = input_np[slices]
++
++        np.testing.assert_allclose(functional_out.numpy(), expected)
++        np.testing.assert_allclose(layer_out.numpy(), expected)
++        np.testing.assert_array_equal(
++            functional_mask.numpy(), layer_mask.numpy()
++        )
++
++    def _check_compatibility_trap(self, dimensions):
++        shape = [1, 1, *([5] * dimensions)]
++        input_np = np.arange(np.prod(shape), dtype="float32").reshape(shape)
++        x = paddle.to_tensor(input_np)
++        functional = getattr(F, f"max_pool{dimensions}d")
++        layer_type = getattr(paddle.nn, f"MaxPool{dimensions}D")
++
++        paddle_functional = functional(x, 2, 1, 0, True, False, 2)
++        compatible_functional = functional(x, 2, 1, 0, 2, False, True)
++        alias_functional = functional(
++            input=x,
++            kernel_size=2,
++            stride=1,
++            padding=0,
++            dilation=2,
++            return_indices=True,
++        )
++
++        paddle_layer = layer_type(2, 1, 0, True, False, 2)(x)
++        compatible_layer = layer_type(2, 1, 0, 2, True, False)(x)
++        alias_layer = layer_type(
++            2, stride=1, padding=0, dilation=2, return_indices=True
++        )(x)
++
++        results = [
++            paddle_functional,
++            compatible_functional,
++            alias_functional,
++            paddle_layer,
++            compatible_layer,
++            alias_layer,
++        ]
++        slices = (slice(None), slice(None), *([slice(2, None)] * dimensions))
++        expected = input_np[slices]
++        expected_out, expected_mask = results[0]
++
++        np.testing.assert_allclose(expected_out.numpy(), expected)
++        for out, mask in results[1:]:
++            np.testing.assert_allclose(out.numpy(), expected)
++            np.testing.assert_array_equal(
++                mask.numpy(), expected_mask.numpy()
++            )
++
++    def test_functional_1d_forward_and_backward(self):
++        self._check_functional_forward_and_backward(1)
++
++    def test_functional_2d_forward_and_backward(self):
++        self._check_functional_forward_and_backward(2)
++
++    def test_functional_3d_forward_and_backward(self):
++        self._check_functional_forward_and_backward(3)
++
++    def test_layer_1d_forward(self):
++        self._check_layer_forward(1)
++
++    def test_layer_2d_forward(self):
++        self._check_layer_forward(2)
++
++    def test_layer_3d_forward(self):
++        self._check_layer_forward(3)
++
++    def test_asymmetric_dilation_2d(self):
++        input_np = np.arange(30, dtype="float32").reshape([1, 1, 5, 6])
++        x = paddle.to_tensor(input_np)
++        out = F.max_pool2d(
++            x, kernel_size=2, stride=1, dilation=[1, 2]
++        )
++        np.testing.assert_allclose(out.numpy(), input_np[:, :, 1:, 2:])
++
++    def test_static_2d_forward(self):
++        input_np = np.arange(25, dtype="float32").reshape([1, 1, 5, 5])
++        paddle.enable_static()
++        try:
++            main = paddle.static.Program()
++            startup = paddle.static.Program()
++            with paddle.static.program_guard(main, startup):
++                x = paddle.static.data(
++                    name="x", shape=input_np.shape, dtype="float32"
++                )
++                out = F.max_pool2d(
++                    x, kernel_size=2, stride=1, dilation=2
++                )
++
++            executor = paddle.static.Executor(paddle.CPUPlace())
++            executor.run(startup)
++            (result,) = executor.run(
++                main, feed={"x": input_np}, fetch_list=[out]
++            )
++            np.testing.assert_allclose(result, input_np[:, :, 2:, 2:])
++        finally:
++            paddle.disable_static()
++
++    def test_return_mask_and_ceil_mode(self):
++        x = paddle.arange(36, dtype="float32").reshape([1, 1, 6, 6])
++        out, mask = F.max_pool2d(
++            x,
++            kernel_size=2,
++            stride=2,
++            padding=1,
++            dilation=2,
++            return_mask=True,
++            ceil_mode=True,
++        )
++        self.assertEqual(out.shape, mask.shape)
++        self.assertEqual(list(out.shape), [1, 1, 4, 4])
++
++    def test_existing_positional_calls_1d(self):
++        self._check_existing_positional_calls(1)
++
++    def test_existing_positional_calls_2d(self):
++        self._check_existing_positional_calls(2)
++
++    def test_existing_positional_calls_3d(self):
++        self._check_existing_positional_calls(3)
++
++    def test_compatibility_trap_1d(self):
++        self._check_compatibility_trap(1)
++
++    def test_compatibility_trap_2d(self):
++        self._check_compatibility_trap(2)
++
++    def test_compatibility_trap_3d(self):
++        self._check_compatibility_trap(3)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/test/legacy_test/test_pool_max_op.py b/test/legacy_test/test_pool_max_op.py
+index b03e6eb..42a85a2 100644
+--- a/test/legacy_test/test_pool_max_op.py
++++ b/test/legacy_test/test_pool_max_op.py
+@@ -147,8 +147,16 @@ def max_pool3d_with_index_wrapper(
+     adaptive=False,
+     ceil_mode=False,
+ ):
++    dilations = [1, 1, 1]
+     return paddle._C_ops.max_pool3d_with_index(
+-        x, kernel_size, strides, paddings, global_pooling, adaptive, ceil_mode
++        x,
++        kernel_size,
++        strides,
++        paddings,
++        dilations,
++        global_pooling,
++        adaptive,
++        ceil_mode,
+     )
+ 
+ 
+@@ -348,8 +356,16 @@ def max_pool2d_with_index_wrapper(
+     adaptive=False,
+     ceil_mode=False,
+ ):
++    dilations = [1, 1]
+     return paddle._C_ops.max_pool2d_with_index(
+-        x, kernel_size, strides, paddings, global_pooling, adaptive, ceil_mode
++        x,
++        kernel_size,
++        strides,
++        paddings,
++        dilations,
++        global_pooling,
++        adaptive,
++        ceil_mode,
+     )
+ 
+ 
