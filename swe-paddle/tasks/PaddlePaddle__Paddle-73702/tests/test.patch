@@ -1,0 +1,28 @@
+diff --git a/test/legacy_test/test_gather_nd_op.py b/test/legacy_test/test_gather_nd_op.py
+index 914b460c36..b1d5ccaed9 100644
+--- a/test/legacy_test/test_gather_nd_op.py
++++ b/test/legacy_test/test_gather_nd_op.py
+@@ -721,6 +721,23 @@ class TestGatherNdAPI2(unittest.TestCase):
+         paddle.enable_static()
+ 
+ 
++class TestGatherNdOp_ZeroSize(OpTest):
++    def setUp(self):
++        self.op_type = "gather_nd"
++        self.python_api = paddle.gather_nd
++        self.public_python_api = paddle.gather_nd
++        xnp = np.random.random([10, 20])
++        index = np.random.random([0]).astype("int32")
++        output = xnp[tuple(index.T)]
++
++        self.inputs = {'X': xnp, 'Index': index}
++        self.outputs = {'Out': output}
++        self.__class__.no_need_check_grad = True
++
++    def test_check_output(self):
++        self.check_output(check_pir=True)
++
++
+ if __name__ == "__main__":
+     paddle.enable_static()
+     unittest.main()
