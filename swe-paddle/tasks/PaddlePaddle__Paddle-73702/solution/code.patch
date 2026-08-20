@@ -1,0 +1,192 @@
+diff --git a/paddle/phi/kernels/cpu/gather_nd_kernel.cc b/paddle/phi/kernels/cpu/gather_nd_kernel.cc
+index 44cc22966c60ab..39f5b3c3a17cec 100644
+--- a/paddle/phi/kernels/cpu/gather_nd_kernel.cc
++++ b/paddle/phi/kernels/cpu/gather_nd_kernel.cc
+@@ -17,6 +17,7 @@
+ #include "paddle/phi/backends/cpu/cpu_context.h"
+ #include "paddle/phi/core/kernel_registry.h"
+ #include "paddle/phi/kernels/funcs/gather.h"
++#include "paddle/phi/kernels/tile_kernel.h"
+ 
+ namespace phi {
+ 
+@@ -27,6 +28,21 @@ void GatherNdKernel(const Context &dev_ctx,
+                     DenseTensor *out) {
+   dev_ctx.template Alloc<T>(out);
+   if (x.numel() == 0 || out->numel() == 0) return;
++  // The result dims is
++  //   Index.shape[:-1] + X.shape[Index.shape[-1]:]
++  // If the last dimension of index is 0, set it to 1 and tile x.
++  auto index_dims = index.dims();
++  std::vector<int64_t> out_dims;
++  if (index_dims[index_dims.size() - 1] == 0) {
++    for (int i = 0; i < index_dims.size() - 1; ++i) {
++      out_dims.emplace_back(index_dims[i]);
++    }
++    for (int i = 0; i < x.dims().size(); ++i) {
++      out_dims.emplace_back(1);
++    }
++    phi::TileKernel<T, Context>(dev_ctx, x, phi::IntArray(out_dims), out);
++    return;
++  }
+   if (index.dims()[0] == 0 && index.numel() == 0) return;
+   auto index_type = index.dtype();
+   bool index_type_match =
+diff --git a/paddle/phi/kernels/cpu/tile_kernel.cc b/paddle/phi/kernels/cpu/tile_kernel.cc
+index 30eb1d5cd6c47b..01645f3db1cd56 100644
+--- a/paddle/phi/kernels/cpu/tile_kernel.cc
++++ b/paddle/phi/kernels/cpu/tile_kernel.cc
+@@ -27,6 +27,9 @@ PD_REGISTER_KERNEL(tile,
+                    double,
+                    int,
+                    int64_t,
++                   int8_t,
++                   int16_t,
++                   uint8_t,
+                    phi::dtype::float16,
+                    phi::dtype::complex<float>,
+                    phi::dtype::complex<double>) {}
+diff --git a/paddle/phi/kernels/cpu/tile_grad_kernel.cc b/paddle/phi/kernels/cpu/tile_grad_kernel.cc
+index ed6bc49ed8..cda32f1a3c 100644
+--- a/paddle/phi/kernels/cpu/tile_grad_kernel.cc
++++ b/paddle/phi/kernels/cpu/tile_grad_kernel.cc
+@@ -26,6 +26,9 @@ PD_REGISTER_KERNEL(tile_grad,
+                    float,
+                    double,
+                    int,
++                   int64_t,
++                   int8_t,
++                   int16_t,
++                   uint8_t,
+                    phi::dtype::complex<float>,
+-                   phi::dtype::complex<double>,
+-                   int64_t) {}
++                   phi::dtype::complex<double>) {}
+diff --git a/paddle/phi/kernels/funcs/eigen/broadcast.cu b/paddle/phi/kernels/funcs/eigen/broadcast.cu
+index fe16588c9b..e883faa550 100644
+--- a/paddle/phi/kernels/funcs/eigen/broadcast.cu
++++ b/paddle/phi/kernels/funcs/eigen/broadcast.cu
+@@ -14,8 +14,9 @@ limitations under the License. */
+ #include "paddle/phi/common/bfloat16.h"
+ #include "paddle/phi/common/complex.h"
+ #include "paddle/phi/common/float16.h"
++#include "paddle/phi/common/float8_e4m3fn.h"
++#include "paddle/phi/common/float8_e5m2.h"
+ #include "paddle/phi/kernels/funcs/eigen/eigen_function.h"
+-
+ namespace phi {
+ namespace funcs {
+ 
+@@ -93,6 +94,11 @@ INSTANTIATION(EigenBroadcastGrad, dtype::complex<float>);
+ INSTANTIATION(EigenBroadcastGrad, dtype::complex<double>);
+ INSTANTIATION(EigenBroadcastGrad, int);
+ INSTANTIATION(EigenBroadcastGrad, int64_t);
++INSTANTIATION(EigenBroadcastGrad, int8_t);
++INSTANTIATION(EigenBroadcastGrad, uint8_t);
++INSTANTIATION(EigenBroadcastGrad, int16_t);
++INSTANTIATION(EigenBroadcastGrad, phi::dtype::float8_e4m3fn);
++INSTANTIATION(EigenBroadcastGrad, phi::dtype::float8_e5m2);
+ template struct EigenBroadcastGrad<Eigen::GpuDevice, float, 0>;
+ template struct EigenBroadcastGrad<Eigen::GpuDevice, dtype::float16, 0>;
+ template struct EigenBroadcastGrad<Eigen::GpuDevice, double, 0>;
+diff --git a/paddle/phi/kernels/gpu/gather_nd_kernel.cu b/paddle/phi/kernels/gpu/gather_nd_kernel.cu
+index dd18f192e275d5..2fc8cb0c3b754c 100644
+--- a/paddle/phi/kernels/gpu/gather_nd_kernel.cu
++++ b/paddle/phi/kernels/gpu/gather_nd_kernel.cu
+@@ -18,6 +18,7 @@
+ #include "paddle/phi/common/bfloat16.h"
+ #include "paddle/phi/core/kernel_registry.h"
+ #include "paddle/phi/kernels/funcs/gather.cu.h"
++#include "paddle/phi/kernels/tile_kernel.h"
+ 
+ namespace phi {
+ 
+@@ -28,6 +29,21 @@ void GatherNdKernel(const Context &dev_ctx,
+                     DenseTensor *out) {
+   dev_ctx.template Alloc<T>(out);
+   if (x.numel() == 0 || out->numel() == 0) return;
++  // The result dims is
++  //   Index.shape[:-1] + X.shape[Index.shape[-1]:]
++  // If the last dimension of index is 0, set it to 1 and tile x.
++  auto index_dims = index.dims();
++  std::vector<int64_t> out_dims;
++  if (index_dims[index_dims.size() - 1] == 0) {
++    for (int i = 0; i < index_dims.size() - 1; ++i) {
++      out_dims.emplace_back(index_dims[i]);
++    }
++    for (int i = 0; i < x.dims().size(); ++i) {
++      out_dims.emplace_back(1);
++    }
++    phi::TileKernel<T, Context>(dev_ctx, x, phi::IntArray(out_dims), out);
++    return;
++  }
+   if (index.dims()[0] == 0 && index.numel() == 0) return;
+   const auto &index_type = index.dtype();
+   bool index_type_match =
+diff --git a/paddle/phi/kernels/gpu/tile_kernel.cu b/paddle/phi/kernels/gpu/tile_kernel.cu
+index fa378da418c4e6..d1b9fd6a37220c 100644
+--- a/paddle/phi/kernels/gpu/tile_kernel.cu
++++ b/paddle/phi/kernels/gpu/tile_kernel.cu
+@@ -107,6 +107,9 @@ PD_REGISTER_KERNEL(tile,
+                    double,
+                    int,
+                    int64_t,
++                   int8_t,
++                   int16_t,
++                   uint8_t,
+                    phi::dtype::float16,
+                    phi::dtype::bfloat16,
+                    phi::dtype::float8_e4m3fn,
+diff --git a/paddle/phi/kernels/gpu/tile_grad_kernel.cu b/paddle/phi/kernels/gpu/tile_grad_kernel.cu
+index 7817d42d03..6e89d88dff 100644
+--- a/paddle/phi/kernels/gpu/tile_grad_kernel.cu
++++ b/paddle/phi/kernels/gpu/tile_grad_kernel.cu
+@@ -27,7 +27,12 @@ PD_REGISTER_KERNEL(tile_grad,
+                    double,
+                    int,
+                    int64_t,
++                   int8_t,
++                   int16_t,
++                   uint8_t,
+                    phi::dtype::float16,
++                   phi::dtype::bfloat16,
++                   phi::dtype::float8_e4m3fn,
++                   phi::dtype::float8_e5m2,
+                    phi::dtype::complex<float>,
+-                   phi::dtype::complex<double>,
+-                   phi::dtype::bfloat16) {}
++                   phi::dtype::complex<double>) {}
+diff --git a/paddle/phi/kernels/xpu/gather_nd_kernel.cc b/paddle/phi/kernels/xpu/gather_nd_kernel.cc
+index 82740ae4819218..ec2261c3ed3ea1 100644
+--- a/paddle/phi/kernels/xpu/gather_nd_kernel.cc
++++ b/paddle/phi/kernels/xpu/gather_nd_kernel.cc
+@@ -16,6 +16,7 @@
+ 
+ #include "paddle/phi/backends/xpu/enforce_xpu.h"
+ #include "paddle/phi/core/kernel_registry.h"
++#include "paddle/phi/kernels/tile_kernel.h"
+ 
+ namespace phi {
+ 
+@@ -28,6 +29,21 @@ void GatherNdKernel(const Context &dev_ctx,
+   dev_ctx.template Alloc<T>(out);
+ 
+   if (x.numel() == 0 || out->numel() == 0) return;
++  // The result dims is
++  //   Index.shape[:-1] + X.shape[Index.shape[-1]:]
++  // If the last dimension of index is 0, set it to 1 and tile x.
++  auto index_dims = index.dims();
++  std::vector<int64_t> out_dims;
++  if (index_dims[index_dims.size() - 1] == 0) {
++    for (int i = 0; i < index_dims.size() - 1; ++i) {
++      out_dims.emplace_back(index_dims[i]);
++    }
++    for (int i = 0; i < x.dims().size(); ++i) {
++      out_dims.emplace_back(1);
++    }
++    phi::TileKernel<T, Context>(dev_ctx, x, phi::IntArray(out_dims), out);
++    return;
++  }
+   if (index.dims()[0] == 0 && index.numel() == 0) return;
+ 
+   if (index.numel() == 0) {
