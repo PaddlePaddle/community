@@ -1,0 +1,208 @@
+diff --git a/test/legacy_test/test_api_compatibility.py b/test/legacy_test/test_api_compatibility.py
+index d3f0eb4a448932a04ef6d2bd7b2d55cd731e199f..e6e8fb3b294b287b6392c612996f2325016a1849 100644
+--- a/test/legacy_test/test_api_compatibility.py
++++ b/test/legacy_test/test_api_compatibility.py
+@@ -2997,5 +2997,203 @@ class TestCloneAPI(unittest.TestCase):
+                 np.testing.assert_allclose(out, self.np_x)
+ 
+ 
++class TestHsplitAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(2025)
++        self.shape2d = [7, 8]
++        self.dtype = 'float32'
++        self.init_data()
++
++    def init_data(self):
++        self.np_x_2d = np.random.rand(*self.shape2d).astype(self.dtype)
++
++    def test_dygraph_Compatibility(self):
++        paddle.disable_static()
++        x_2d = paddle.to_tensor(self.np_x_2d)
++
++        out1 = paddle.hsplit(x_2d, 2)
++        out2 = paddle.hsplit(x=x_2d, num_or_indices=2)
++        out3 = paddle.hsplit(input=x_2d, indices=2)
++        out4 = paddle.hsplit(input=x_2d, sections=2)
++        out5 = paddle.hsplit(x_2d, num_or_indices=2)
++        out6 = x_2d.hsplit(2)
++        out7 = x_2d.hsplit(num_or_indices=2)
++
++        ref_out = np.array_split(self.np_x_2d, 2, axis=1)
++        for out in [out1, out2, out3, out4, out5, out6, out7]:
++            self.assertEqual(len(out), 2)
++            np.testing.assert_allclose(ref_out[0], out[0].numpy())
++            np.testing.assert_allclose(ref_out[1], out[1].numpy())
++
++        paddle.enable_static()
++
++    def test_static_Compatibility(self):
++        paddle.enable_static()
++        main = paddle.static.Program()
++        startup = paddle.static.Program()
++        with paddle.base.program_guard(main, startup):
++            x_2d = paddle.static.data(
++                name="x_2d", shape=self.shape2d, dtype=self.dtype
++            )
++
++            out1 = paddle.hsplit(x_2d, 2)
++            out2 = paddle.hsplit(x=x_2d, num_or_indices=2)
++            out3 = paddle.hsplit(input=x_2d, indices=2)
++            out4 = paddle.hsplit(input=x_2d, sections=2)
++
++            exe = paddle.base.Executor()
++            fetches = exe.run(
++                main,
++                feed={"x_2d": self.np_x_2d},
++                fetch_list=[
++                    out1[0],
++                    out1[1],
++                    out2[0],
++                    out2[1],
++                    out3[0],
++                    out3[1],
++                    out4[0],
++                    out4[1],
++                ],
++            )
++
++            ref_out = np.array_split(self.np_x_2d, 2, axis=1)
++            for i in range(0, 8, 2):
++                np.testing.assert_allclose(fetches[i], ref_out[0])
++                np.testing.assert_allclose(fetches[i + 1], ref_out[1])
++
++
++class TestDsplitAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(2025)
++        self.shape3d = [7, 6, 8]
++        self.dtype = 'float32'
++        self.init_data()
++
++    def init_data(self):
++        self.np_x_3d = np.random.rand(*self.shape3d).astype(self.dtype)
++
++    def test_dygraph_Compatibility(self):
++        paddle.disable_static()
++        x_3d = paddle.to_tensor(self.np_x_3d)
++
++        out1 = paddle.dsplit(x_3d, 2)
++        out2 = paddle.dsplit(x=x_3d, num_or_indices=2)
++        out3 = paddle.dsplit(input=x_3d, indices=2)
++        out4 = paddle.dsplit(input=x_3d, sections=2)
++        out5 = paddle.dsplit(x_3d, num_or_indices=2)
++        out6 = x_3d.dsplit(2)
++        out7 = x_3d.dsplit(num_or_indices=2)
++
++        ref_out = np.array_split(self.np_x_3d, 2, axis=2)
++        for out in [out1, out2, out3, out4, out5, out6, out7]:
++            self.assertEqual(len(out), 2)
++            np.testing.assert_allclose(ref_out[0], out[0].numpy())
++            np.testing.assert_allclose(ref_out[1], out[1].numpy())
++
++        paddle.enable_static()
++
++    def test_static_Compatibility(self):
++        paddle.enable_static()
++        main = paddle.static.Program()
++        startup = paddle.static.Program()
++        with paddle.base.program_guard(main, startup):
++            x_3d = paddle.static.data(
++                name="x_3d", shape=self.shape3d, dtype=self.dtype
++            )
++
++            out1 = paddle.dsplit(x_3d, 2)
++            out2 = paddle.dsplit(x=x_3d, num_or_indices=2)
++            out3 = paddle.dsplit(input=x_3d, indices=2)
++            out4 = paddle.dsplit(input=x_3d, sections=2)
++
++            exe = paddle.base.Executor()
++            fetches = exe.run(
++                main,
++                feed={"x_3d": self.np_x_3d},
++                fetch_list=[
++                    out1[0],
++                    out1[1],
++                    out2[0],
++                    out2[1],
++                    out3[0],
++                    out3[1],
++                    out4[0],
++                    out4[1],
++                ],
++            )
++
++            ref_out = np.array_split(self.np_x_3d, 2, axis=2)
++            for i in range(0, 8, 2):
++                np.testing.assert_allclose(fetches[i], ref_out[0])
++                np.testing.assert_allclose(fetches[i + 1], ref_out[1])
++
++
++class TestVsplitAPI(unittest.TestCase):
++    def setUp(self):
++        np.random.seed(2025)
++        self.shape2d = [8, 6]
++        self.dtype = 'float32'
++        self.init_data()
++
++    def init_data(self):
++        self.np_x_2d = np.random.rand(*self.shape2d).astype(self.dtype)
++
++    def test_dygraph_Compatibility(self):
++        paddle.disable_static()
++        x_2d = paddle.to_tensor(self.np_x_2d)
++
++        out1 = paddle.vsplit(x_2d, 2)
++        out2 = paddle.vsplit(x=x_2d, num_or_indices=2)
++        out3 = paddle.vsplit(input=x_2d, indices=2)
++        out4 = paddle.vsplit(input=x_2d, sections=2)
++        out5 = paddle.vsplit(x_2d, num_or_indices=2)
++        out6 = x_2d.vsplit(2)
++        out7 = x_2d.vsplit(num_or_indices=2)
++
++        ref_out = np.array_split(self.np_x_2d, 2, axis=0)
++        for out in [out1, out2, out3, out4, out5, out6, out7]:
++            self.assertEqual(len(out), 2)
++            np.testing.assert_allclose(ref_out[0], out[0].numpy())
++            np.testing.assert_allclose(ref_out[1], out[1].numpy())
++
++        paddle.enable_static()
++
++    def test_static_Compatibility(self):
++        paddle.enable_static()
++        main = paddle.static.Program()
++        startup = paddle.static.Program()
++        with paddle.base.program_guard(main, startup):
++            x_2d = paddle.static.data(
++                name="x_2d", shape=self.shape2d, dtype=self.dtype
++            )
++
++            out1 = paddle.vsplit(x_2d, 2)
++            out2 = paddle.vsplit(x=x_2d, num_or_indices=2)
++            out3 = paddle.vsplit(input=x_2d, indices=2)
++            out4 = paddle.vsplit(input=x_2d, sections=2)
++
++            exe = paddle.base.Executor()
++            fetches = exe.run(
++                main,
++                feed={"x_2d": self.np_x_2d},
++                fetch_list=[
++                    out1[0],
++                    out1[1],
++                    out2[0],
++                    out2[1],
++                    out3[0],
++                    out3[1],
++                    out4[0],
++                    out4[1],
++                ],
++            )
++
++            ref_out = np.array_split(self.np_x_2d, 2, axis=0)
++            for i in range(0, 8, 2):
++                np.testing.assert_allclose(fetches[i], ref_out[0])
++                np.testing.assert_allclose(fetches[i + 1], ref_out[1])
++
++
+ if __name__ == '__main__':
+     unittest.main()
