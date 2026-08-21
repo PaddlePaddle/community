@@ -1,0 +1,46 @@
+diff --git a/test/legacy_test/test_add_n_op.py b/test/legacy_test/test_add_n_op.py
+index ceb89af53dc55c..2b8d8a9b2e5a1 100644
+--- a/test/legacy_test/test_add_n_op.py
++++ b/test/legacy_test/test_add_n_op.py
+@@ -119,5 +119,41 @@ def test_add_n_zerosize(self):
+             np.testing.assert_allclose(x_g_np_32[i].shape, [0, 256])
+ 
+ 
++class TestAddnOpZeroSizeAndNonZeroSize(unittest.TestCase):
++    def _run_dygraph(self, func):
++        paddle.disable_static()
++        try:
++            return func()
++        finally:
++            paddle.enable_static()
++
++    def test_add_n_zero_size_and_non_zero_size(self):
++        def run():
++            x0 = paddle.to_tensor([], dtype='float32')
++            x1 = paddle.to_tensor([1], dtype='float32')
++            with self.assertRaises(ValueError):
++                paddle.add_n([x0, x1])
++
++        self._run_dygraph(run)
++
++    def test_add_n_compatible_zero_size_tensors(self):
++        def run():
++            x0 = paddle.to_tensor([], dtype='float32')
++            x1 = paddle.to_tensor([], dtype='float32')
++            out = paddle.add_n([x0, x1])
++            self.assertEqual(list(out.shape), [0])
++
++        self._run_dygraph(run)
++
++    def test_add_n_compatible_ordinary_tensors(self):
++        def run():
++            x0 = paddle.to_tensor([1, 2], dtype='float32')
++            x1 = paddle.to_tensor([3, 4], dtype='float32')
++            out = paddle.add_n([x0, x1])
++            np.testing.assert_allclose(out.numpy(), np.array([4, 6], dtype='float32'))
++
++        self._run_dygraph(run)
++
++
+ if __name__ == "__main__":
+     unittest.main()
