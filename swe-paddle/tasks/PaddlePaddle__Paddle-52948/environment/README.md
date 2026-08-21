@@ -27,6 +27,22 @@ SWE-Paddle task candidate for PaddlePaddle/Paddle PR #52948 + follow-up #53572.
 4. Apply `solution/code.patch`.
 5. Run `bash tests/test.sh` again; all target cases should **pass**.
 
+## Exact Base / Gold Functional Matrix
+
+| Case | Path | Must call `register_hook`? | Base + `test.patch` | Base + `test.patch` + `code.patch` |
+| --- | --- | --- | --- | --- |
+| `test_register_hook_in_static_mode` | static graph (`net(x, True)`) | Yes | F2P fail/error | Pass |
+| `test_register_hook_in_dy2static_mode` | dy2static (`jit_net(..., True)`) | Yes (hook path) | F2P fail/error | Pass |
+| `test/dygraph_to_static/test_tensor_hook.py` cases | dy2static vs dygraph | Yes | F2P fail/error | Pass |
+| Existing dygraph hook cases in `test_tensor_register_hook.py` | dygraph | Yes (already) | P2P pass | P2P pass |
+
+Notes:
+
+- Static / dy2static F2P cases must pass `hook=True` (or otherwise enter a
+  branch that actually executes `register_hook`). Calling `net(x)` with the
+  default `hook=False` does **not** exercise the target API.
+- Keep the existing dygraph cases as P2P guardrails; do not delete or weaken them.
+
 ## Minimal Test Command
 
 ```bash
