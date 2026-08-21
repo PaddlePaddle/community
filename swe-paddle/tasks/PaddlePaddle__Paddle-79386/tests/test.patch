@@ -1,0 +1,35 @@
+diff --git a/test/legacy_test/test_iinfo_and_finfo.py b/test/legacy_test/test_iinfo_and_finfo.py
+index 5e8e3bcfe2d..eb3868f8d1 100644
+--- a/test/legacy_test/test_iinfo_and_finfo.py
++++ b/test/legacy_test/test_iinfo_and_finfo.py
+@@ -204,5 +204,28 @@ class TestIInfoAndFInfoAPI(unittest.TestCase):
+                     )
+-
+-
++
++
++class TestIInfoUInt64Boundary(unittest.TestCase):
++    def test_uint64_max_preserves_unsigned_boundary(self):
++        xinfo = paddle.iinfo(paddle.uint64)
++
++        self.assertIsInstance(xinfo.max, int)
++        self.assertEqual(xinfo.max, 18446744073709551615)
++
++    def test_int64_signed_boundaries_remain_unchanged(self):
++        xinfo = paddle.iinfo(paddle.int64)
++
++        self.assertEqual(xinfo.min, -9223372036854775808)
++        self.assertEqual(xinfo.max, 9223372036854775807)
++
++    def test_neighboring_unsigned_metadata_remains_unchanged(self):
++        uint32_info = paddle.iinfo(paddle.uint32)
++        uint64_info = paddle.iinfo(paddle.uint64)
++
++        self.assertEqual(uint32_info.max, 4294967295)
++        self.assertEqual(uint64_info.min, 0)
++        self.assertEqual(uint64_info.bits, 64)
++        self.assertEqual(uint64_info.dtype, np.iinfo(np.uint64).dtype)
++
++
+ if __name__ == '__main__':
+     unittest.main()
