@@ -1,0 +1,1127 @@
+diff --git a/python/paddle/nn/functional/pooling.py b/python/paddle/nn/functional/pooling.py
+index 5480448b32..af1a14111a 100755
+--- a/python/paddle/nn/functional/pooling.py
++++ b/python/paddle/nn/functional/pooling.py
+@@ -26,6 +26,7 @@ from paddle.base.framework import (
+ )
+ from paddle.utils.decorator_utils import (
+     lp_pool_function_decorator,
++    maxpool_decorator,
+     param_one_alias,
+     param_two_alias,
+ )
+@@ -573,14 +574,15 @@ def avg_pool3d(
+         )
+ 
+ 
++@maxpool_decorator()
+ def max_pool1d(
+     x: Tensor,
+     kernel_size: Size1,
+     stride: Size1 | None = None,
+     padding: _PaddingSizeMode | Size1 | Size2 = 0,
+-    dilation: Size1 = 1,
+     return_mask: bool = False,
+     ceil_mode: bool = False,
++    dilation: Size1 = 1,
+     name: str | None = None,
+ ) -> Tensor:
+     """
+@@ -602,11 +604,11 @@ def max_pool1d(
+             4. A list[int] or tuple(int) whose length is 2. It has the form [pad_before, pad_after].
+             5. A list or tuple of pairs of integers. It has the form [[pad_before, pad_after], [pad_before, pad_after], ...]. Note that, the batch dimension and channel dimension should be [0,0] or (0,0).
+             The default value is 0.
+-        dilation (int|list|tuple): The dilation size. If dilation size is a tuple or list,
+-            it must contain an integer. Default: 1.
+         return_mask (bool): Whether return the max indices along with the outputs. default is `False`.
+         ceil_mode (bool): Whether to use the ceil function to calculate output height and width. False is the default.
+             If it is set to False, the floor function will be used. Default False.
++        dilation (int|list|tuple): The dilation size. If dilation size is a tuple or list,
++            it must contain an integer. Default: 1.
+         name(str|None, optional): For detailed information, please refer
+                              to :ref:`api_guide_Name`. Usually name is no need to set and
+                              None by default.
+@@ -1164,14 +1166,15 @@ def max_unpool3d(
+     return unpool_out
+ 
+ 
++@maxpool_decorator()
+ def max_pool2d(
+     x: Tensor,
+     kernel_size: Size2,
+     stride: Size2 | None = None,
+     padding: _PaddingSizeMode | Size2 | Size4 = 0,
+-    dilation: Size2 = 1,
+     return_mask: bool = False,
+     ceil_mode: bool = False,
++    dilation: Size2 = 1,
+     data_format: DataLayout2D = 'NCHW',
+     name: str | None = None,
+ ) -> Tensor:
+@@ -1198,11 +1201,12 @@ def max_pool2d(
+             4. A list[int] or tuple(int) whose length is 4. [pad_height_top, pad_height_bottom, pad_width_left, pad_width_right] whose value means the padding size of each side.
+             5. A list or tuple of pairs of integers. It has the form [[pad_before, pad_after], [pad_before, pad_after], ...]. Note that, the batch dimension and channel dimension should be [0,0] or (0,0).
+             The default value is 0.
++        return_mask (bool): Whether to return the max indices along with the outputs. Default False, only support `"NCHW"` data format
++            Alias: ``return_indices``.
++        ceil_mode (bool): when True, will use `ceil` instead of `floor` to compute the output shape
+         dilation (int|list|tuple): The dilation size. If dilation size is a tuple or list,
+             it must contain two integers, (dilation_Height, dilation_Width).
+             Otherwise, the dilation size will be a square of an int. Default: 1.
+-        ceil_mode (bool): when True, will use `ceil` instead of `floor` to compute the output shape
+-        return_mask (bool): Whether to return the max indices along with the outputs. Default False, only support `"NCHW"` data format
+         data_format (string): The data format of the input and output data. An optional string from: `"NCHW"`, `"NHWC"`.
+                         The default is `"NCHW"`. When it is `"NCHW"`, the data is stored in the order of:
+                         `[batch_size, input_channels, input_height, input_width]`.
+@@ -1358,14 +1362,15 @@ def max_pool2d(
+             return pool_out
+ 
+ 
++@maxpool_decorator()
+ def max_pool3d(
+     x: Tensor,
+     kernel_size: Size3,
+     stride: Size3 | None = None,
+     padding: _PaddingSizeMode | Size3 | Size6 = 0,
+-    dilation: Size3 = 1,
+     return_mask: bool = False,
+     ceil_mode: bool = False,
++    dilation: Size3 = 1,
+     data_format: DataLayout3D = 'NCDHW',
+     name: str | None = None,
+ ) -> Tensor:
+@@ -1390,11 +1395,12 @@ def max_pool3d(
+             4. A list[int] or tuple(int) whose length is 6. [pad_depth_front, pad_depth_back, pad_height_top, pad_height_bottom, pad_width_left, pad_width_right] whose value means the padding size of each side.
+             5. A list or tuple of pairs of integers. It has the form [[pad_before, pad_after], [pad_before, pad_after], ...]. Note that, the batch dimension and channel dimension should be [0,0] or (0,0).
+             The default value is 0.
++        return_mask (bool): Whether to return the max indices along with the outputs. Default False. Only support "NDCHW" data_format.
++            Alias: ``return_indices``.
++        ceil_mode (bool): ${ceil_mode_comment}
+         dilation (int|list|tuple): The dilation size. If dilation size is a tuple or list,
+             it must contain three integers, (dilation_Depth, dilation_Height, dilation_Width).
+             Otherwise, the dilation size will be a cube of an int. Default: 1.
+-        ceil_mode (bool): ${ceil_mode_comment}
+-        return_mask (bool): Whether to return the max indices along with the outputs. Default False. Only support "NDCHW" data_format.
+         data_format (string): The data format of the input and output data. An optional string from: `"NCDHW"`, `"NDHWC"`.
+                         The default is `"NCDHW"`. When it is `"NCDHW"`, the data is stored in the order of:
+                         `[batch_size, input_channels, input_depth, input_height, input_width]`.
+diff --git a/python/paddle/nn/layer/pooling.py b/python/paddle/nn/layer/pooling.py
+index 9065c2fa85..0d0efbcf0c 100755
+--- a/python/paddle/nn/layer/pooling.py
++++ b/python/paddle/nn/layer/pooling.py
+@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
+ 
+ from paddle.utils.decorator_utils import (
+     lp_pool_layer_decorator,
++    maxpool_layer_decorator,
+     param_one_alias,
+ )
+ 
+@@ -629,11 +630,11 @@ class MaxPool1D(Layer):
+             4. A list[int] or tuple(int) whose length is 2, It has the form [pad_before, pad_after].
+             5. A list or tuple of pairs of integers. It has the form [[pad_before, pad_after], [pad_before, pad_after], ...]. Note that, the batch dimension and channel dimension should be [0,0] or(0,0).
+             The default value is 0.
+-        dilation(int|list|tuple, optional): The dilation size. If dilation size is a tuple or list,
+-            it must contain an integer. Default: 1.
+         return_mask(bool, optional): Whether return the max indices along with the outputs. default is `False`.
+         ceil_mode(bool, optional): Whether to use the ceil function to calculate output height and width.
+             False is the default. If it is set to False, the floor function will be used. Default False.
++        dilation(int|list|tuple, optional): The dilation size. If dilation size is a tuple or list,
++            it must contain an integer. Default: 1.
+         name(str|None, optional): For detailed information, please refer to :ref:`api_guide_Name`.
+             Usually name is no need to set and None by default.
+     Returns:
+@@ -674,40 +675,41 @@ class MaxPool1D(Layer):
+     kernel_size: Size1
+     stride: Size1 | None
+     padding: _PaddingSizeMode | Size1 | Size2
+-    dilation: Size1
+     return_mask: bool
+     ceil_mode: bool
++    dilation: Size1
+     name: str | None
+ 
++    @maxpool_layer_decorator()
+     def __init__(
+         self,
+         kernel_size: Size1,
+         stride: Size1 | None = None,
+         padding: _PaddingSizeMode | Size1 | Size2 = 0,
+-        dilation: Size1 = 1,
+         return_mask: bool = False,
+         ceil_mode: bool = False,
++        dilation: Size1 = 1,
+         name: str | None = None,
+     ) -> None:
+         super().__init__()
+         self.kernel_size = kernel_size
+         self.stride = stride
+         self.padding = padding
+-        self.dilation = dilation
+         self.ceil_mode = ceil_mode
+         self.return_mask = return_mask
++        self.dilation = dilation
+         self.name = name
+ 
+     def forward(self, input: Tensor) -> Tensor:
+         out = F.max_pool1d(
+-            input,
+-            self.kernel_size,
+-            self.stride,
+-            self.padding,
+-            self.dilation,
+-            self.return_mask,
+-            self.ceil_mode,
+-            self.name,
++            x=input,
++            kernel_size=self.kernel_size,
++            stride=self.stride,
++            padding=self.padding,
++            return_mask=self.return_mask,
++            ceil_mode=self.ceil_mode,
++            dilation=self.dilation,
++            name=self.name,
+         )
+         return out
+ 
+@@ -753,11 +755,11 @@ class MaxPool2D(Layer):
+             4. A list[int] or tuple(int) whose length is \4. [pad_height_top, pad_height_bottom, pad_width_left, pad_width_right] whose value means the padding size of each side.
+             5. A list or tuple of pairs of integers. It has the form [[pad_before, pad_after], [pad_before, pad_after], ...]. Note that, the batch dimension and channel dimension should be [0,0] or (0,0).
+             The default value is 0.
++        return_mask(bool, optional): Whether to return the max indices along with the outputs.
++        ceil_mode(bool, optional): when True, will use `ceil` instead of `floor` to compute the output shape
+         dilation(int|list|tuple, optional): The dilation size. If dilation is a tuple or list, it must
+             contain two integers, (dilation_Height, dilation_Width). Otherwise, the dilation size
+             will be a square of an int. Default 1.
+-        ceil_mode(bool, optional): when True, will use `ceil` instead of `floor` to compute the output shape
+-        return_mask(bool, optional): Whether to return the max indices along with the outputs.
+         data_format(str, optional): The data format of the input and output data. An optional string from: `"NCHW"`, `"NHWC"`.
+             The default is `"NCHW"`. When it is `"NCHW"`, the data is stored in the order of:
+             `[batch_size, input_channels, input_height, input_width]`.
+@@ -804,20 +806,21 @@ class MaxPool2D(Layer):
+     kernel_size: Size2
+     stride: Size2 | None
+     padding: _PaddingSizeMode | Size2 | Size4
+-    dilation: Size2
+     return_mask: bool
+     ceil_mode: bool
++    dilation: Size2
+     data_format: DataLayout2D
+     name: str | None
+ 
++    @maxpool_layer_decorator()
+     def __init__(
+         self,
+         kernel_size: Size2,
+         stride: Size2 | None = None,
+         padding: _PaddingSizeMode | Size2 | Size4 = 0,
+-        dilation: Size2 = 1,
+         return_mask: bool = False,
+         ceil_mode: bool = False,
++        dilation: Size2 = 1,
+         data_format: DataLayout2D = 'NCHW',
+         name: str | None = None,
+     ) -> None:
+@@ -825,21 +828,21 @@ class MaxPool2D(Layer):
+         self.ksize = kernel_size
+         self.stride = stride
+         self.padding = padding
+-        self.dilation = dilation
+         self.return_mask = return_mask
+         self.ceil_mode = ceil_mode
++        self.dilation = dilation
+         self.data_format = data_format
+         self.name = name
+ 
+     def forward(self, x: Tensor) -> Tensor:
+         return F.max_pool2d(
+-            x,
++            x=x,
+             kernel_size=self.ksize,
+             stride=self.stride,
+             padding=self.padding,
+-            dilation=self.dilation,
+             return_mask=self.return_mask,
+             ceil_mode=self.ceil_mode,
++            dilation=self.dilation,
+             data_format=self.data_format,
+             name=self.name,
+         )
+@@ -873,13 +876,11 @@ class MaxPool3D(Layer):
+             4. A list[int] or tuple(int) whose length is \6. [pad_depth_front, pad_depth_back, pad_height_top, pad_height_bottom, pad_width_left, pad_width_right] whose value means the padding size of each side.
+             5. A list or tuple of pairs of integers. It has the form [[pad_before, pad_after], [pad_before, pad_after], ...]. Note that, the batch dimension and channel dimension should be [0,0] or (0,0).
+             The default value is 0.
++        return_mask(bool, optional): Whether to return the max indices along with the outputs.
++        ceil_mode(bool, optional): ${ceil_mode_comment}
+         dilation(int|list|tuple, optional): The dilation size. If dilation is a tuple or list, it must
+             contain three integers, (dilation_Depth, dilation_Height, dilation_Width). Otherwise, the dilation size
+             will be a cube of an int. Default 1.
+-            Note: dilation is only supported on CPU currently. When dilation is not 1,
+-            return_mask must be True.
+-        ceil_mode(bool, optional): ${ceil_mode_comment}
+-        return_mask(bool, optional): Whether to return the max indices along with the outputs.
+         data_format(str, optional): The data format of the input and output data. An optional string from: `"NCDHW"`,
+             `"NDHWC"`. The default is `"NCDHW"`. When it is `"NCDHW"`, the data is stored in the order of:
+             `[batch_size, input_channels, input_depth, input_height, input_width]`.
+@@ -927,20 +928,21 @@ class MaxPool3D(Layer):
+     kernel_size: Size3
+     stride: Size3 | None
+     padding: _PaddingSizeMode | Size3 | Size6
+-    dilation: Size3
+     return_mask: bool
+     ceil_mode: bool
++    dilation: Size3
+     data_format: DataLayout3D
+     name: str | None
+ 
++    @maxpool_layer_decorator()
+     def __init__(
+         self,
+         kernel_size: Size3,
+         stride: Size3 | None = None,
+         padding: _PaddingSizeMode | Size3 | Size6 = 0,
+-        dilation: Size3 = 1,
+         return_mask: bool = False,
+         ceil_mode: bool = False,
++        dilation: Size3 = 1,
+         data_format: DataLayout3D = 'NCDHW',
+         name: str | None = None,
+     ) -> None:
+@@ -948,21 +950,21 @@ class MaxPool3D(Layer):
+         self.ksize = kernel_size
+         self.stride = stride
+         self.padding = padding
+-        self.dilation = dilation
+         self.return_mask = return_mask
+         self.ceil_mode = ceil_mode
++        self.dilation = dilation
+         self.data_format = data_format
+         self.name = name
+ 
+     def forward(self, x: Tensor) -> Tensor:
+         return F.max_pool3d(
+-            x,
++            x=x,
+             kernel_size=self.ksize,
+             stride=self.stride,
+             padding=self.padding,
+-            dilation=self.dilation,
+             return_mask=self.return_mask,
+             ceil_mode=self.ceil_mode,
++            dilation=self.dilation,
+             data_format=self.data_format,
+             name=self.name,
+         )
+diff --git a/python/paddle/utils/decorator_utils.py b/python/paddle/utils/decorator_utils.py
+index a0ea6726e4..155541c6d1 100644
+--- a/python/paddle/utils/decorator_utils.py
++++ b/python/paddle/utils/decorator_utils.py
+@@ -927,6 +927,67 @@ def index_add_decorator() -> Callable[
+     return decorator
+ 
+ 
++def maxpool_decorator() -> Callable[
++    [Callable[_InputT, _RetT]], Callable[_InputT, _RetT]
++]:
++    def decorator(func: Callable[_InputT, _RetT]) -> Callable[_InputT, _RetT]:
++        @functools.wraps(func)
++        def wrapper(*args, **kwargs) -> _RetT:
++            if "input" in kwargs:
++                kwargs["x"] = kwargs.pop("input")
++            if "return_indices" in kwargs:
++                kwargs["return_mask"] = kwargs.pop("return_indices")
++
++            if len(args) >= 5 and not isinstance(args[4], bool):
++                kwargs["x"] = args[0]
++                kwargs["kernel_size"] = args[1]
++                kwargs["stride"] = args[2]
++                kwargs["padding"] = args[3]
++                kwargs["dilation"] = args[4]
++                # The order of `ceil_mode` and `return_indices` is different from nn.MaxPool in PyTorch
++                if len(args) > 5:
++                    kwargs["ceil_mode"] = args[5]
++                if len(args) > 6:
++                    kwargs["return_mask"] = args[6]
++                args = ()
++
++            return func(*args, **kwargs)
++
++        wrapper.__signature__ = inspect.signature(func)
++        return wrapper
++
++    return decorator
++
++
++def maxpool_layer_decorator() -> Callable[
++    [Callable[_InputT, _RetT]], Callable[_InputT, _RetT]
++]:
++    def decorator(func: Callable[_InputT, _RetT]) -> Callable[_InputT, _RetT]:
++        @functools.wraps(func)
++        def wrapper(*args, **kwargs) -> _RetT:
++            if "return_indices" in kwargs:
++                kwargs["return_mask"] = kwargs.pop("return_indices")
++
++            if len(args) >= 5 and not isinstance(args[4], bool):
++                kwargs["kernel_size"] = args[1]
++                kwargs["stride"] = args[2]
++                kwargs["padding"] = args[3]
++                kwargs["dilation"] = args[4]
++                # The order of `ceil_mode` and `return_indices` is different from F.max_pool in PyTorch
++                if len(args) > 5:
++                    kwargs["return_mask"] = args[5]
++                if len(args) > 6:
++                    kwargs["ceil_mode"] = args[6]
++                args = (args[0],)
++
++            return func(*args, **kwargs)
++
++        wrapper.__signature__ = inspect.signature(func)
++        return wrapper
++
++    return decorator
++
++
+ def use_first_signature(
+     func: Callable[_InputT, _RetT],
+ ) -> Callable[_InputT, _RetT]:
+diff --git a/test/legacy_test/test_max_pool_dilation.py b/test/legacy_test/test_max_pool_dilation.py
+index 635c777621..782ef7412d 100644
+--- a/test/legacy_test/test_max_pool_dilation.py
++++ b/test/legacy_test/test_max_pool_dilation.py
+@@ -246,8 +246,8 @@ class TestMaxPool1DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+ 
+         # Verify output shape
+@@ -257,6 +257,46 @@ class TestMaxPool1DDilation(unittest.TestCase):
+         self.assertEqual(list(result.shape), expected_shape)
+         self.assertEqual(list(mask.shape), expected_shape)
+ 
++    def test_max_pool1d_dilation_using_paddle_pos_args(self):
++        """Test F.max_pool1d using paddle positional arguments."""
++        input_np = np.random.random([2, 3, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        # Test with dilation=2
++        result, mask = F.max_pool1d(
++            input_tensor,
++            3,
++            2,
++            1,
++            True,  # return_mask
++            False,  # ceil_mode
++            2,
++        )
++
++        expected_shape = [2, 3, 15]
++        self.assertEqual(list(result.shape), expected_shape)
++        self.assertEqual(list(mask.shape), expected_shape)
++
++    def test_max_pool1d_dilation_using_torch_pos_args(self):
++        """Test F.max_pool1d using torch-like positional arguments."""
++        input_np = np.random.random([2, 3, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        # Test with dilation=2
++        result, mask = F.max_pool1d(
++            input_tensor,
++            3,
++            2,
++            1,
++            2,
++            False,  # ceil_mode
++            True,  # return_indices
++        )
++
++        expected_shape = [2, 3, 15]
++        self.assertEqual(list(result.shape), expected_shape)
++        self.assertEqual(list(mask.shape), expected_shape)
++
+     def test_max_pool1d_dilation_layer(self):
+         """Test nn.MaxPool1D with dilation parameter."""
+         input_np = np.random.random([2, 3, 32]).astype("float32")
+@@ -266,8 +306,8 @@ class TestMaxPool1DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+         result, mask = pool_layer(input_tensor)
+ 
+@@ -285,8 +325,8 @@ class TestMaxPool1DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=1,
+             return_mask=True,
++            dilation=1,
+         )
+ 
+         # Without specifying dilation (should default to 1)
+@@ -320,8 +360,8 @@ class TestMaxPool1DDilation(unittest.TestCase):
+             kernel_size=ksize,
+             stride=stride,
+             padding=padding,
+-            dilation=dilation,
+             return_mask=True,
++            dilation=dilation,
+         )
+ 
+         # Compare with numpy reference implementation
+@@ -357,8 +397,8 @@ class TestMaxPool1DDilation(unittest.TestCase):
+                 kernel_size=config["ksize"],
+                 stride=config["stride"],
+                 padding=config["padding"],
+-                dilation=config["dilation"],
+                 return_mask=True,
++                dilation=config["dilation"],
+             )
+ 
+             expected, _ = max_pool1d_dilation_forward_naive(
+@@ -394,8 +434,8 @@ class TestMaxPool2DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+ 
+         # Verify output shape
+@@ -405,6 +445,46 @@ class TestMaxPool2DDilation(unittest.TestCase):
+         self.assertEqual(list(result.shape), expected_shape)
+         self.assertEqual(list(mask.shape), expected_shape)
+ 
++    def test_max_pool2d_dilation_using_paddle_pos_args(self):
++        """Test F.max_pool2d using paddle positional arguments."""
++        input_np = np.random.random([2, 3, 32, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        # Test with dilation=2
++        result, mask = F.max_pool2d(
++            input_tensor,
++            3,
++            2,
++            1,
++            True,  # return_mask
++            False,  # ceil_mode
++            2,
++        )
++
++        expected_shape = [2, 3, 15, 15]
++        self.assertEqual(list(result.shape), expected_shape)
++        self.assertEqual(list(mask.shape), expected_shape)
++
++    def test_max_pool2d_dilation_using_torch_pos_args(self):
++        """Test F.max_pool2d using torch-like positional arguments."""
++        input_np = np.random.random([2, 3, 32, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        # Test with dilation=2
++        result, mask = F.max_pool2d(
++            input_tensor,
++            3,
++            2,
++            1,
++            2,
++            False,  # ceil_mode
++            True,  # return_indices
++        )
++
++        expected_shape = [2, 3, 15, 15]
++        self.assertEqual(list(result.shape), expected_shape)
++        self.assertEqual(list(mask.shape), expected_shape)
++
+     def test_max_pool2d_dilation_layer(self):
+         """Test nn.MaxPool2D with dilation parameter."""
+         input_np = np.random.random([2, 3, 32, 32]).astype("float32")
+@@ -414,8 +494,8 @@ class TestMaxPool2DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+         result, mask = pool_layer(input_tensor)
+ 
+@@ -433,8 +513,8 @@ class TestMaxPool2DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=(2, 3),
+             return_mask=True,
++            dilation=(2, 3),
+         )
+ 
+         # effective_kh = 2 * (3 - 1) + 1 = 5
+@@ -455,8 +535,8 @@ class TestMaxPool2DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=1,
+             return_mask=True,
++            dilation=1,
+         )
+ 
+         # Without specifying dilation
+@@ -484,8 +564,8 @@ class TestMaxPool2DDilation(unittest.TestCase):
+             kernel_size=2,
+             stride=1,
+             padding=0,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+ 
+         # With dilation=2 and kernel=2x2, the effective kernel covers:
+@@ -536,8 +616,8 @@ class TestMaxPool2DDilation(unittest.TestCase):
+                 kernel_size=config["ksize"],
+                 stride=config["stride"],
+                 padding=config["padding"],
+-                dilation=config["dilation"],
+                 return_mask=True,
++                dilation=config["dilation"],
+             )
+ 
+             expected, _ = max_pool2d_dilation_forward_naive(
+@@ -573,8 +653,8 @@ class TestMaxPool3DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+ 
+         # effective_ksize = 2 * (3 - 1) + 1 = 5
+@@ -583,6 +663,44 @@ class TestMaxPool3DDilation(unittest.TestCase):
+         expected_shape = [2, 3, 3, 7, 7]
+         self.assertEqual(list(result.shape), expected_shape)
+ 
++    def test_max_pool3d_dilation_using_paddle_pos_args(self):
++        """Test F.max_pool3d using paddle positional arguments."""
++        input_np = np.random.random([2, 3, 8, 16, 16]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        # Test with dilation=2
++        result, mask = F.max_pool3d(
++            input_tensor,
++            3,
++            2,
++            1,
++            True,  # return_mask
++            False,  # ceil_mode
++            2,
++        )
++
++        expected_shape = [2, 3, 3, 7, 7]
++        self.assertEqual(list(result.shape), expected_shape)
++
++    def test_max_pool3d_dilation_using_torch_pos_args(self):
++        """Test F.max_pool3d using torch-like positional arguments."""
++        input_np = np.random.random([2, 3, 8, 16, 16]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        # Test with dilation=2
++        result, mask = F.max_pool3d(
++            input_tensor,
++            3,
++            2,
++            1,
++            2,
++            False,  # ceil_mode
++            True,  # return_indices
++        )
++
++        expected_shape = [2, 3, 3, 7, 7]
++        self.assertEqual(list(result.shape), expected_shape)
++
+     def test_max_pool3d_dilation_layer(self):
+         """Test nn.MaxPool3D with dilation parameter."""
+         input_np = np.random.random([2, 3, 8, 16, 16]).astype("float32")
+@@ -592,8 +710,8 @@ class TestMaxPool3DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+         result, mask = pool_layer(input_tensor)
+ 
+@@ -611,8 +729,8 @@ class TestMaxPool3DDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=1,
+             return_mask=True,
++            dilation=1,
+         )
+ 
+         # Without specifying dilation
+@@ -646,8 +764,8 @@ class TestMaxPool3DDilation(unittest.TestCase):
+             kernel_size=ksize,
+             stride=stride,
+             padding=padding,
+-            dilation=dilation,
+             return_mask=True,
++            dilation=dilation,
+         )
+ 
+         # Compare with numpy reference
+@@ -692,8 +810,8 @@ class TestMaxPool3DDilation(unittest.TestCase):
+                 kernel_size=config["ksize"],
+                 stride=config["stride"],
+                 padding=config["padding"],
+-                dilation=config["dilation"],
+                 return_mask=True,
++                dilation=config["dilation"],
+             )
+ 
+             expected, _ = max_pool3d_dilation_forward_naive(
+@@ -726,8 +844,8 @@ class TestMaxPoolDilationValidation(unittest.TestCase):
+                 kernel_size=3,
+                 stride=2,
+                 padding=1,
+-                dilation=-1,
+                 return_mask=True,
++                dilation=-1,
+             )
+ 
+     def test_dilation_one_no_return_mask(self):
+@@ -741,8 +859,8 @@ class TestMaxPoolDilationValidation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=1,
+             return_mask=False,
++            dilation=1,
+         )
+ 
+         expected_shape = [2, 3, 16, 16]
+@@ -759,10 +877,10 @@ class TestMaxPoolDilationValidation(unittest.TestCase):
+                 kernel_size=2,
+                 stride=2,
+                 padding=0,
+-                dilation=2,
++                return_mask=False,
+                 ceil_mode=False,
++                dilation=2,
+                 data_format='NHWC',
+-                return_mask=False,
+             )
+ 
+     def test_dilation_channel_last_3d(self):
+@@ -778,9 +896,9 @@ class TestMaxPoolDilationValidation(unittest.TestCase):
+                 kernel_size=2,
+                 stride=2,
+                 padding=1,
++                return_mask=False,
+                 dilation=2,
+                 data_format='NDHWC',
+-                return_mask=False,
+             )
+ 
+ 
+@@ -799,8 +917,8 @@ class TestMaxPoolDilationGradient(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+ 
+         # Backward
+@@ -823,8 +941,8 @@ class TestMaxPoolDilationGradient(unittest.TestCase):
+             kernel_size=2,
+             stride=2,
+             padding=0,
+-            dilation=2,
+             return_mask=True,
++            dilation=2,
+         )
+ 
+         # Backward
+@@ -876,7 +994,7 @@ class TestMaxPool1DLayerDilation(unittest.TestCase):
+     def test_maxpool1d_layer_dilation_basic(self):
+         """Test MaxPool1D layer with dilation parameter."""
+         pool = paddle.nn.MaxPool1D(
+-            kernel_size=3, stride=2, padding=1, dilation=2, return_mask=True
++            kernel_size=3, stride=2, padding=1, return_mask=True, dilation=2
+         )
+         input_np = np.random.random([2, 3, 32]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -894,7 +1012,7 @@ class TestMaxPool1DLayerDilation(unittest.TestCase):
+         input_np = np.random.random([1, 2, 16]).astype("float32")
+ 
+         pool = paddle.nn.MaxPool1D(
+-            kernel_size=3, stride=2, padding=1, dilation=2, return_mask=True
++            kernel_size=3, stride=2, padding=1, return_mask=True, dilation=2
+         )
+         input_tensor = paddle.to_tensor(input_np)
+         result, _ = pool(input_tensor)
+@@ -927,8 +1045,8 @@ class TestMaxPool1DLayerDilation(unittest.TestCase):
+                 kernel_size=config["ksize"],
+                 stride=config["stride"],
+                 padding=config["padding"],
+-                dilation=config["dilation"],
+                 return_mask=True,
++                dilation=config["dilation"],
+             )
+             input_np = np.random.random([2, 3, 32]).astype("float32")
+             input_tensor = paddle.to_tensor(input_np)
+@@ -952,7 +1070,7 @@ class TestMaxPool1DLayerDilation(unittest.TestCase):
+     def test_maxpool1d_layer_dilation_gradient(self):
+         """Test MaxPool1D layer gradient with dilation."""
+         pool = paddle.nn.MaxPool1D(
+-            kernel_size=3, stride=2, padding=1, dilation=2, return_mask=True
++            kernel_size=3, stride=2, padding=1, return_mask=True, dilation=2
+         )
+         input_np = np.random.random([2, 3, 16]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -971,9 +1089,9 @@ class TestMaxPool1DLayerDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=0,
+-            dilation=2,
+-            ceil_mode=True,
+             return_mask=True,
++            ceil_mode=True,
++            dilation=2,
+         )
+         input_np = np.random.random([2, 3, 32]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -996,6 +1114,68 @@ class TestMaxPool1DLayerDilation(unittest.TestCase):
+             err_msg="MaxPool1D layer dilation with ceil_mode mismatch",
+         )
+ 
++    def test_maxpool1d_layer_dilation_using_paddle_pos_args(self):
++        """Test MaxPool1D layer using paddle positional arguments."""
++        pool = paddle.nn.MaxPool1D(
++            3,
++            2,
++            0,
++            True,  # return_mask
++            True,  # ceil_mode
++            2,
++        )
++        input_np = np.random.random([2, 3, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        result, mask = pool(input_tensor)
++
++        expected, _ = max_pool1d_dilation_forward_naive(
++            input_np,
++            ksize=3,
++            strides=2,
++            paddings=0,
++            dilations=2,
++            ceil_mode=True,
++        )
++
++        np.testing.assert_allclose(
++            result.numpy(),
++            expected,
++            rtol=1e-05,
++            err_msg="MaxPool1D layer using torch positional arguments mismatch",
++        )
++
++    def test_maxpool1d_layer_dilation_using_torch_pos_args(self):
++        """Test MaxPool1D layer using torch-like positional arguments."""
++        pool = paddle.nn.MaxPool1D(
++            3,
++            2,
++            0,
++            2,
++            True,  # return_indices
++            True,  # ceil_mode
++        )
++        input_np = np.random.random([2, 3, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        result, mask = pool(input_tensor)
++
++        expected, _ = max_pool1d_dilation_forward_naive(
++            input_np,
++            ksize=3,
++            strides=2,
++            paddings=0,
++            dilations=2,
++            ceil_mode=True,
++        )
++
++        np.testing.assert_allclose(
++            result.numpy(),
++            expected,
++            rtol=1e-05,
++            err_msg="MaxPool1D layer using torch positional arguments mismatch",
++        )
++
+ 
+ class TestMaxPool2DLayerDilation(unittest.TestCase):
+     """Test paddle.nn.MaxPool2D layer with dilation parameter."""
+@@ -1006,7 +1186,7 @@ class TestMaxPool2DLayerDilation(unittest.TestCase):
+     def test_maxpool2d_layer_dilation_basic(self):
+         """Test MaxPool2D layer with dilation parameter."""
+         pool = paddle.nn.MaxPool2D(
+-            kernel_size=3, stride=2, padding=1, dilation=2, return_mask=True
++            kernel_size=3, stride=2, padding=1, return_mask=True, dilation=2
+         )
+         input_np = np.random.random([2, 3, 32, 32]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1024,7 +1204,7 @@ class TestMaxPool2DLayerDilation(unittest.TestCase):
+         input_np = np.random.random([1, 2, 16, 16]).astype("float32")
+ 
+         pool = paddle.nn.MaxPool2D(
+-            kernel_size=3, stride=2, padding=1, dilation=2, return_mask=True
++            kernel_size=3, stride=2, padding=1, return_mask=True, dilation=2
+         )
+         input_tensor = paddle.to_tensor(input_np)
+         result, _ = pool(input_tensor)
+@@ -1050,8 +1230,8 @@ class TestMaxPool2DLayerDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=1,
+-            dilation=(2, 3),
+             return_mask=True,
++            dilation=(2, 3),
+         )
+         input_np = np.random.random([2, 3, 32, 32]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1091,8 +1271,8 @@ class TestMaxPool2DLayerDilation(unittest.TestCase):
+                 kernel_size=config["ksize"],
+                 stride=config["stride"],
+                 padding=config["padding"],
+-                dilation=config["dilation"],
+                 return_mask=True,
++                dilation=config["dilation"],
+             )
+             input_np = np.random.random([2, 3, 24, 24]).astype("float32")
+             input_tensor = paddle.to_tensor(input_np)
+@@ -1121,7 +1301,7 @@ class TestMaxPool2DLayerDilation(unittest.TestCase):
+     def test_maxpool2d_layer_dilation_gradient(self):
+         """Test MaxPool2D layer gradient with dilation."""
+         pool = paddle.nn.MaxPool2D(
+-            kernel_size=3, stride=2, padding=1, dilation=2, return_mask=True
++            kernel_size=3, stride=2, padding=1, return_mask=True, dilation=2
+         )
+         input_np = np.random.random([2, 3, 16, 16]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1140,9 +1320,9 @@ class TestMaxPool2DLayerDilation(unittest.TestCase):
+             kernel_size=3,
+             stride=2,
+             padding=0,
+-            dilation=2,
+-            ceil_mode=True,
+             return_mask=True,
++            ceil_mode=True,
++            dilation=2,
+         )
+         input_np = np.random.random([2, 3, 32, 32]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1165,6 +1345,68 @@ class TestMaxPool2DLayerDilation(unittest.TestCase):
+             err_msg="MaxPool2D layer dilation with ceil_mode mismatch",
+         )
+ 
++    def test_maxpool2d_layer_dilation_using_paddle_pos_args(self):
++        """Test MaxPool2D layer using paddle positional arguments."""
++        pool = paddle.nn.MaxPool2D(
++            3,
++            2,
++            0,
++            True,  # return_mask
++            True,  # ceil_mode
++            2,
++        )
++        input_np = np.random.random([2, 3, 32, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        result, mask = pool(input_tensor)
++
++        expected, _ = max_pool2d_dilation_forward_naive(
++            input_np,
++            ksize=[3, 3],
++            strides=[2, 2],
++            paddings=[0, 0],
++            dilations=[2, 2],
++            ceil_mode=True,
++        )
++
++        np.testing.assert_allclose(
++            result.numpy(),
++            expected,
++            rtol=1e-05,
++            err_msg="MaxPool2D layer using paddle positional arguments mismatch",
++        )
++
++    def test_maxpool2d_layer_dilation_using_torch_pos_args(self):
++        """Test MaxPool2D layer using torch-like positional arguments."""
++        pool = paddle.nn.MaxPool2D(
++            3,
++            2,
++            0,
++            2,
++            True,  # return_indices
++            True,  # ceil_mode
++        )
++        input_np = np.random.random([2, 3, 32, 32]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        result, mask = pool(input_tensor)
++
++        expected, _ = max_pool2d_dilation_forward_naive(
++            input_np,
++            ksize=[3, 3],
++            strides=[2, 2],
++            paddings=[0, 0],
++            dilations=[2, 2],
++            ceil_mode=True,
++        )
++
++        np.testing.assert_allclose(
++            result.numpy(),
++            expected,
++            rtol=1e-05,
++            err_msg="MaxPool2D layer using torch-like positional arguments mismatch",
++        )
++
+ 
+ class TestMaxPool3DLayerDilation(unittest.TestCase):
+     """Test paddle.nn.MaxPool3D layer with dilation parameter."""
+@@ -1175,7 +1417,7 @@ class TestMaxPool3DLayerDilation(unittest.TestCase):
+     def test_maxpool3d_layer_dilation_basic(self):
+         """Test MaxPool3D layer with dilation parameter."""
+         pool = paddle.nn.MaxPool3D(
+-            kernel_size=2, stride=2, padding=0, dilation=2, return_mask=True
++            kernel_size=2, stride=2, padding=0, return_mask=True, dilation=2
+         )
+         input_np = np.random.random([2, 3, 8, 16, 16]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1194,7 +1436,7 @@ class TestMaxPool3DLayerDilation(unittest.TestCase):
+         input_np = np.random.random([1, 2, 8, 8, 8]).astype("float32")
+ 
+         pool = paddle.nn.MaxPool3D(
+-            kernel_size=2, stride=1, padding=0, dilation=2, return_mask=True
++            kernel_size=2, stride=1, padding=0, return_mask=True, dilation=2
+         )
+         input_tensor = paddle.to_tensor(input_np)
+         result, _ = pool(input_tensor)
+@@ -1220,8 +1462,8 @@ class TestMaxPool3DLayerDilation(unittest.TestCase):
+             kernel_size=2,
+             stride=2,
+             padding=0,
+-            dilation=(2, 2, 3),
+             return_mask=True,
++            dilation=(2, 2, 3),
+         )
+         input_np = np.random.random([1, 2, 10, 12, 14]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1255,8 +1497,8 @@ class TestMaxPool3DLayerDilation(unittest.TestCase):
+                 kernel_size=config["ksize"],
+                 stride=config["stride"],
+                 padding=config["padding"],
+-                dilation=config["dilation"],
+                 return_mask=True,
++                dilation=config["dilation"],
+             )
+             input_np = np.random.random([1, 2, 10, 12, 12]).astype("float32")
+             input_tensor = paddle.to_tensor(input_np)
+@@ -1285,7 +1527,7 @@ class TestMaxPool3DLayerDilation(unittest.TestCase):
+     def test_maxpool3d_layer_dilation_gradient(self):
+         """Test MaxPool3D layer gradient with dilation."""
+         pool = paddle.nn.MaxPool3D(
+-            kernel_size=2, stride=2, padding=0, dilation=2, return_mask=True
++            kernel_size=2, stride=2, padding=0, return_mask=True, dilation=2
+         )
+         input_np = np.random.random([2, 3, 8, 8, 8]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1304,9 +1546,9 @@ class TestMaxPool3DLayerDilation(unittest.TestCase):
+             kernel_size=2,
+             stride=2,
+             padding=0,
+-            dilation=2,
+-            ceil_mode=True,
+             return_mask=True,
++            ceil_mode=True,
++            dilation=2,
+         )
+         input_np = np.random.random([1, 2, 8, 10, 10]).astype("float32")
+         input_tensor = paddle.to_tensor(input_np)
+@@ -1329,6 +1571,68 @@ class TestMaxPool3DLayerDilation(unittest.TestCase):
+             err_msg="MaxPool3D layer dilation with ceil_mode mismatch",
+         )
+ 
++    def test_maxpool3d_layer_dilation_using_paddle_pos_args(self):
++        """Test MaxPool3D layer using paddle positional arguments."""
++        pool = paddle.nn.MaxPool3D(
++            2,
++            2,
++            0,
++            True,  # return_mask
++            True,  # ceil_mode
++            2,
++        )
++        input_np = np.random.random([1, 2, 8, 10, 10]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        result, mask = pool(input_tensor)
++
++        expected, _ = max_pool3d_dilation_forward_naive(
++            input_np,
++            ksize=[2, 2, 2],
++            strides=[2, 2, 2],
++            paddings=[0, 0, 0],
++            dilations=[2, 2, 2],
++            ceil_mode=True,
++        )
++
++        np.testing.assert_allclose(
++            result.numpy(),
++            expected,
++            rtol=1e-05,
++            err_msg="MaxPool3D layer using paddle positional arguments mismatch",
++        )
++
++    def test_maxpool3d_layer_dilation_using_torch_pos_args(self):
++        """Test MaxPool3D layer using torch-like positional arguments."""
++        pool = paddle.nn.MaxPool3D(
++            2,
++            2,
++            0,
++            2,
++            True,  # return_indices
++            True,  # ceil_mode
++        )
++        input_np = np.random.random([1, 2, 8, 10, 10]).astype("float32")
++        input_tensor = paddle.to_tensor(input_np)
++
++        result, mask = pool(input_tensor)
++
++        expected, _ = max_pool3d_dilation_forward_naive(
++            input_np,
++            ksize=[2, 2, 2],
++            strides=[2, 2, 2],
++            paddings=[0, 0, 0],
++            dilations=[2, 2, 2],
++            ceil_mode=True,
++        )
++
++        np.testing.assert_allclose(
++            result.numpy(),
++            expected,
++            rtol=1e-05,
++            err_msg="MaxPool3D layer using torch-like positional arguments mismatch",
++        )
++
+ 
+ # ===================== OpTest for max_pool2d_with_index with dilation =====================
+ 

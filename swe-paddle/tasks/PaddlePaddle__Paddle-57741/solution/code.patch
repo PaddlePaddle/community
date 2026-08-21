@@ -1,0 +1,73 @@
+diff --git a/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py b/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py
+--- a/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py
++++ b/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py
+@@ -101,6 +101,7 @@
+     'fused_bn_add_activation_',
+     'fused_feedforward',
+     'fused_scale_bias_relu_conv_bnstats',
++    'memcpy',
+     'print',
+     'recv_v2',
+     'rnn_',
+diff --git a/paddle/fluid/pir/dialect/operator/ir/ops.yaml b/paddle/fluid/pir/dialect/operator/ir/ops.yaml
+--- a/paddle/fluid/pir/dialect/operator/ir/ops.yaml
++++ b/paddle/fluid/pir/dialect/operator/ir/ops.yaml
+@@ -81,6 +81,16 @@
+   args : (Tensor[] x)
+   output : Tensor(out)
+ 
++- op : memcpy
++  args : (Tensor x, int dst_place_type)
++  output : Tensor(out)
++  infer_meta:
++    func: UnchangedInferMeta
++    param: [x]
++  kernel:
++    func : memcpy
++    param: [x, dst_place_type]
++
+ - op : print
+   args : (Tensor in, int first_n, str message, int summarize, bool print_tensor_name = true, bool print_tensor_type = true, bool print_tensor_shape = true, bool print_tensor_layout = true, bool print_tensor_lod = true, str print_phase = "BOTH", bool is_forward = true)
+   output : Tensor(out)
+diff --git a/paddle/fluid/pir/transforms/pd_op_to_kernel_pass.cc b/paddle/fluid/pir/transforms/pd_op_to_kernel_pass.cc
+--- a/paddle/fluid/pir/transforms/pd_op_to_kernel_pass.cc
++++ b/paddle/fluid/pir/transforms/pd_op_to_kernel_pass.cc
+@@ -678,6 +678,22 @@
+ 
+   phi::KernelKey res(kernel_backend, kernel_layout, kernel_data_type);
+ 
++  // kernel backend infered incorrectly from memcpy op operands,
++  // case that place from (not GPU) to GPU.
++  // We handle this special case by following code to fix up the problem.
++  // This could be further improved if we had another method.
++  if (!platform::is_gpu_place(place)) {
++    if (op->isa<paddle::dialect::MemcpyOp>()) {
++      VLOG(6) << "MemcpyOp need a special handle";
++      int dst_place_type = op->attribute("dst_place_type")
++                               .dyn_cast<pir::Int32Attribute>()
++                               .data();
++      if (dst_place_type == 1) {
++        res.set_backend(phi::Backend::GPU);
++      }
++    }
++  }
++
+   if (op->isa<paddle::dialect::LoadCombineOp>()) {
+     res.set_dtype(phi::DataType::FLOAT32);
+     VLOG(8) << "LoadCombineOp's kernel data type must be FLOAT32";
+diff --git a/paddle/phi/api/yaml/op_compat.yaml b/paddle/phi/api/yaml/op_compat.yaml
+--- a/paddle/phi/api/yaml/op_compat.yaml
++++ b/paddle/phi/api/yaml/op_compat.yaml
+@@ -3275,6 +3275,12 @@
+   attrs:
+     pivot : pivots
+ 
++- op: memcpy
++  inputs:
++    x: X
++  outputs:
++    out: Out
++
+ - op: memcpy_d2h
+   inputs :
+     x : X

@@ -1,0 +1,143 @@
+diff --git a/paddle/phi/kernels/cpu/cross_entropy_grad_kernel.cc b/paddle/phi/kernels/cpu/cross_entropy_grad_kernel.cc
+index 7f755227cb7a3..f9b3daee2571a 100644
+--- a/paddle/phi/kernels/cpu/cross_entropy_grad_kernel.cc
++++ b/paddle/phi/kernels/cpu/cross_entropy_grad_kernel.cc
+@@ -34,6 +34,11 @@ void CrossEntropyWithSoftmaxGradCPUKernel(const CPUContext& dev_ctx,
+                                           int ignore_index,
+                                           int axis,
+                                           DenseTensor* logits_grad) {
++  if (logits_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(logits_grad);
++    return;
++  }
++
+   const DenseTensor* out_grad = &loss_grad;
+   DenseTensor* logit_grad = logits_grad;
+ 
+diff --git a/paddle/phi/kernels/cpu/cross_entropy_kernel.cc b/paddle/phi/kernels/cpu/cross_entropy_kernel.cc
+index fa2728257f883..e170f642f8792 100644
+--- a/paddle/phi/kernels/cpu/cross_entropy_kernel.cc
++++ b/paddle/phi/kernels/cpu/cross_entropy_kernel.cc
+@@ -17,6 +17,7 @@ limitations under the License. */
+ #include "paddle/phi/backends/cpu/cpu_context.h"
+ #include "paddle/phi/core/kernel_registry.h"
+ #include "paddle/phi/core/tensor_utils.h"
++#include "paddle/phi/kernels/full_kernel.h"
+ #include "paddle/phi/kernels/funcs/axis_utils.h"
+ #include "paddle/phi/kernels/funcs/cross_entropy.h"
+ #include "paddle/phi/kernels/funcs/math_function.h"
+@@ -79,6 +80,19 @@ void CrossEntropyWithSoftmaxKernel(const Context& dev_ctx,
+                                    int axis,
+                                    DenseTensor* softmax,
+                                    DenseTensor* loss) {
++  if (softmax->numel() == 0) {
++    // When soft_label is False, the axis column cannot be 0. Other dimensions
++    // are the same, so the numel of softmax and loss are both 0.
++    dev_ctx.template Alloc<T>(softmax);
++    dev_ctx.template Alloc<T>(loss);
++
++    // When soft_label is True, the axis column is 1.
++    if (soft_label) {
++      phi::Full<T, Context>(
++          dev_ctx, phi::IntArray(common::vectorize(loss->dims())), 0, loss);
++    }
++    return;
++  }
+   // do not with softmax op, and input is softmax
+   if (!use_softmax) {
+     CrossEntropy<T>(
+diff --git a/paddle/phi/kernels/gpu/cross_entropy_grad_kernel.cu b/paddle/phi/kernels/gpu/cross_entropy_grad_kernel.cu
+index ea3be7c95480e..fed6a9778092a 100644
+--- a/paddle/phi/kernels/gpu/cross_entropy_grad_kernel.cu
++++ b/paddle/phi/kernels/gpu/cross_entropy_grad_kernel.cu
+@@ -241,6 +241,10 @@ void CrossEntropyWithSoftmaxGradKernel(const Context& dev_ctx,
+                                        int ignore_index,
+                                        int axis,
+                                        DenseTensor* logits_grad) {
++  if (logits_grad->numel() == 0) {
++    dev_ctx.template Alloc<T>(logits_grad);
++    return;
++  }
+   auto dtype = label.dtype();
+   if (soft_label) {
+     PADDLE_ENFORCE_EQ(
+diff --git a/paddle/phi/kernels/gpu/cross_entropy_kernel.cu b/paddle/phi/kernels/gpu/cross_entropy_kernel.cu
+index 790e701b2e57f..7a1be5e4b8d04 100644
+--- a/paddle/phi/kernels/gpu/cross_entropy_kernel.cu
++++ b/paddle/phi/kernels/gpu/cross_entropy_kernel.cu
+@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
+ limitations under the License. */
+ 
+ #include "paddle/phi/kernels/cross_entropy_kernel.h"
++#include "paddle/phi/kernels/full_kernel.h"
+ 
+ #include "glog/logging.h"
+ 
+@@ -1402,6 +1403,20 @@ void CrossEntropyWithSoftmaxKernel(const Context& dev_ctx,
+                                    int axis,
+                                    DenseTensor* softmax,
+                                    DenseTensor* loss) {
++  if (softmax->numel() == 0) {
++    // When soft_label is False, the axis column cannot be 0. Other dimensions
++    // are the same, so the numel of softmax and loss are both 0.
++    dev_ctx.template Alloc<T>(softmax);
++    dev_ctx.template Alloc<T>(loss);
++
++    // When soft_label is True, the axis column is 1.
++    if (soft_label) {
++      phi::Full<T, Context>(
++          dev_ctx, phi::IntArray(common::vectorize(loss->dims())), 0, loss);
++    }
++    return;
++  }
++
+   auto dtype = label.dtype();
+   if (soft_label) {
+     PADDLE_ENFORCE_EQ(
+diff --git a/paddle/phi/kernels/xpu/cross_entropy_grad_kernel.cc b/paddle/phi/kernels/xpu/cross_entropy_grad_kernel.cc
+index a4572fea4187c..e660f64b876bc 100644
+--- a/paddle/phi/kernels/xpu/cross_entropy_grad_kernel.cc
++++ b/paddle/phi/kernels/xpu/cross_entropy_grad_kernel.cc
+@@ -33,6 +33,9 @@ void CrossEntropyWithSoftmaxGradKernel(const Context& dev_ctx,
+                                        DenseTensor* logit_grad) {
+   using XPUType = typename XPUTypeTrait<T>::Type;
+   dev_ctx.template Alloc<T>(logit_grad);
++  if (logit_grad->numel() == 0) {
++    return;
++  }
+ 
+   const int rank = logit_grad->dims().size();
+   const int axis = phi::funcs::CanonicalAxis(axis_in, rank);
+diff --git a/paddle/phi/kernels/xpu/cross_entropy_kernel.cc b/paddle/phi/kernels/xpu/cross_entropy_kernel.cc
+index a574100165aac..a6be20843ed61 100644
+--- a/paddle/phi/kernels/xpu/cross_entropy_kernel.cc
++++ b/paddle/phi/kernels/xpu/cross_entropy_kernel.cc
+@@ -16,6 +16,7 @@ limitations under the License. */
+ 
+ #include "paddle/phi/backends/xpu/enforce_xpu.h"
+ #include "paddle/phi/core/kernel_registry.h"
++#include "paddle/phi/kernels/full_kernel.h"
+ #include "paddle/phi/kernels/funcs/axis_utils.h"
+ 
+ namespace phi {
+@@ -31,6 +32,20 @@ void CrossEntropyWithSoftmaxKernel(const Context& dev_ctx,
+                                    int axis_in,
+                                    DenseTensor* softmax,
+                                    DenseTensor* loss) {
++  if (softmax->numel() == 0) {
++    // When soft_label is False, the axis column cannot be 0. Other dimensions
++    // are the same, so the numel of softmax and loss are both 0.
++    dev_ctx.template Alloc<T>(softmax);
++    dev_ctx.template Alloc<T>(loss);
++
++    // When soft_label is True, the axis column is 1.
++    if (soft_label) {
++      phi::Full<T, Context>(
++          dev_ctx, phi::IntArray(common::vectorize(loss->dims())), 0, loss);
++    }
++    return;
++  }
++
+   using XPUType = typename XPUTypeTrait<T>::Type;
+   const int rank = logits.dims().size();
+   const int axis = phi::funcs::CanonicalAxis(axis_in, rank);
