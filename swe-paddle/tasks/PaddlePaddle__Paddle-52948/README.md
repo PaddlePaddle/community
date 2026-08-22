@@ -44,6 +44,7 @@ This directory converts Paddle PR #52948 and follow-up PR #53572 into one SWE-Pa
 bash tests/test.sh
 ```
 
-Expected behavior: with `tests/test.patch` applied on `base_commit`, the static / dy2static `register_hook` cases should fail/error. After also applying `solution/code.patch`, the target tests should pass. Existing dygraph `register_hook` cases in the same module should remain pass-to-pass.
-
-Follow-up fix: static case must call `net(x, True)` so `register_hook` is actually executed (default `hook=False` does not exercise the target API).
+Expected behavior: with `tests/test.patch` applied on `base_commit`, the static /
+dy2static `register_hook` cases should fail/error. After also applying
+`solution/code.patch`, the target tests should pass. Existing dygraph
+`register_hook` cases in the same module should remain pass-to-pass.
