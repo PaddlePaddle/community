@@ -1,0 +1,133 @@
+diff --git a/test/swe_paddle/test_pr74491_requires_grad.py b/test/swe_paddle/test_pr74491_requires_grad.py
+new file mode 100644
+index 0000000..25b888c
+--- /dev/null
++++ b/test/swe_paddle/test_pr74491_requires_grad.py
+@@ -0,0 +1,127 @@
++import ast
++import copy
++from pathlib import Path
++
++import pytest
++
++
++MODE_FILES = {
++    "dynamic": Path("python/paddle/base/dygraph/math_op_patch.py"),
++    "static": Path("python/paddle/base/layers/math_op_patch.py"),
++    "pir": Path("python/paddle/pir/math_op_patch.py"),
++}
++
++
++def _walk_functions(tree, name):
++    return [
++        node
++        for node in ast.walk(tree)
++        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
++        and node.name == name
++    ]
++
++
++def _compile_function(path, name):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    matches = _walk_functions(tree, name)
++    assert matches, f"{path} must provide {name}"
++    node = copy.deepcopy(matches[0])
++    node.decorator_list = []
++    node.name = f"_swe_{name}"
++    module = ast.Module(body=[node], type_ignores=[])
++    ast.fix_missing_locations(module)
++    namespace = {"Tensor": object}
++    exec(compile(module, str(path), "exec"), namespace)
++    return namespace[node.name]
++
++
++def _requires_grad_property(path):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    candidates = _walk_functions(tree, "requires_grad")
++
++    getter = None
++    setter = None
++    for node in candidates:
++        for decorator in node.decorator_list:
++            if isinstance(decorator, ast.Name) and decorator.id == "property":
++                getter = node
++            if (
++                isinstance(decorator, ast.Attribute)
++                and decorator.attr == "setter"
++                and isinstance(decorator.value, ast.Name)
++                and decorator.value.id == "requires_grad"
++            ):
++                setter = node
++
++    assert getter is not None and setter is not None, (
++        f"{path} must expose a readable and writable requires_grad property"
++    )
++
++    getter = copy.deepcopy(getter)
++    setter = copy.deepcopy(setter)
++    getter.name = "_swe_requires_grad_getter"
++    setter.name = "_swe_requires_grad_setter"
++    getter.decorator_list = []
++    setter.decorator_list = []
++
++    module = ast.Module(body=[getter, setter], type_ignores=[])
++    ast.fix_missing_locations(module)
++    namespace = {"Tensor": object}
++    exec(compile(module, str(path), "exec"), namespace)
++    return property(
++        namespace[getter.name],
++        namespace[setter.name],
++    )
++
++
++def test_existing_dim_metadata_behavior_remains_compatible():
++    class FakeTensor:
++        shape = [2, 3, 4, 5]
++
++    for path in MODE_FILES.values():
++        dim = _compile_function(path, "dim")
++        assert dim(FakeTensor()) == 4
++
++
++def test_requires_grad_tracks_stop_gradient_across_tensor_modes():
++    for mode, path in MODE_FILES.items():
++        descriptor = _requires_grad_property(path)
++
++        class FakeTensor:
++            requires_grad = descriptor
++
++            def __init__(self, stop_gradient):
++                self.stop_gradient = stop_gradient
++
++        tensor = FakeTensor(True)
++        assert tensor.requires_grad is False, mode
++
++        tensor.requires_grad = True
++        assert tensor.requires_grad is True, mode
++        assert tensor.stop_gradient is False, mode
++
++        tensor.requires_grad = False
++        assert tensor.requires_grad is False, mode
++        assert tensor.stop_gradient is True, mode
++
++        tensor.stop_gradient = False
++        assert tensor.requires_grad is True, mode
++
++
++def test_requires_grad_rejects_non_boolean_assignments():
++    invalid_values = ["true", 1, 0, None, [], {}]
++
++    for mode, path in MODE_FILES.items():
++        descriptor = _requires_grad_property(path)
++
++        class FakeTensor:
++            requires_grad = descriptor
++
++            def __init__(self):
++                self.stop_gradient = True
++
++        tensor = FakeTensor()
++        for value in invalid_values:
++            with pytest.raises(TypeError, match="requires_grad must be bool"):
++                tensor.requires_grad = value
++            assert tensor.stop_gradient is True, mode
