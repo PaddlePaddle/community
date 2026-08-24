@@ -2,11 +2,11 @@
 
 ## 详细描述
 
-当 `paddle.linalg.svd_lowrank(x)` 的输入 `x` 中存在大小为 `0` 的 dimension，即 `m` 和 `n` 中有一项为 0 时，当前实现在动态图模式下会因为参数校验和中间断言失败而报错。
+当 `paddle.linalg.svd_lowrank(x)` 的输入 `x` 中存在大小为 `0` 的 dimension，即 `m` 和 `n` 中有一项为 0 时，当前实现在动态图模式下会报错。
 
 典型表现包括：
 
-- 参数校验阶段，当 `min(m, n) == 0` 时，`q >= 0 and q <= min(m, n)` 条件不满足，抛出 `ValueError`
+- 参数校验阶段，当 `min(m, n) == 0` 时，条件不满足，抛出 `ValueError`
 - 中间计算阶段的 assert 检查在 0-size 维度上失败
 
 例如：
