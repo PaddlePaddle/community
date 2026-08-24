@@ -1,0 +1,467 @@
+diff --git a/paddle/fluid/prim/api/composite_backward/composite_backward_api.h b/paddle/fluid/prim/api/composite_backward/composite_backward_api.h
+index 04b59680a7..d4d9528c98 100644
+--- a/paddle/fluid/prim/api/composite_backward/composite_backward_api.h
++++ b/paddle/fluid/prim/api/composite_backward/composite_backward_api.h
+@@ -1768,6 +1768,7 @@ void batch_norm_grad(const Tensor& x,
+ template <typename T>
+ void instance_norm_grad(const Tensor& x,
+                         const paddle::optional<Tensor>& scale,
++                        const paddle::optional<Tensor>& bias UNUSED,
+                         const Tensor& saved_mean,
+                         const Tensor& saved_variance,
+                         const Tensor& y_grad,
+diff --git a/paddle/fluid/primitive/decomp_rule/decomp_vjp/details.h b/paddle/fluid/primitive/decomp_rule/decomp_vjp/details.h
+index b807d162c7..8933af0271 100644
+--- a/paddle/fluid/primitive/decomp_rule/decomp_vjp/details.h
++++ b/paddle/fluid/primitive/decomp_rule/decomp_vjp/details.h
+@@ -1728,6 +1728,7 @@ void gather_nd_grad(const Tensor& x,
+ template <typename T>
+ void instance_norm_grad(const Tensor& x,
+                         const paddle::optional<Tensor>& scale,
++                        const paddle::optional<Tensor>& bias,
+                         const Tensor& saved_mean,
+                         const Tensor& saved_variance,
+                         const Tensor& y_grad,
+diff --git a/paddle/phi/infermeta/backward.cc b/paddle/phi/infermeta/backward.cc
+index 5cb7ba4b63..41cb89cd69 100644
+--- a/paddle/phi/infermeta/backward.cc
++++ b/paddle/phi/infermeta/backward.cc
+@@ -921,6 +921,7 @@ void GumbelSoftmaxGradInferMeta(const MetaTensor& out,
+ 
+ void InstanceNormGradInferMeta(const MetaTensor& x,
+                                const MetaTensor& scale,
++                               const MetaTensor& bias,
+                                const MetaTensor& saved_mean,
+                                const MetaTensor& saved_variance,
+                                const MetaTensor& y_grad,
+@@ -939,10 +940,18 @@ void InstanceNormGradInferMeta(const MetaTensor& x,
+   x_grad->set_dtype(x.dtype());
+   x_grad->set_layout(x.layout());
+   if (scale_grad) {
+-    scale_grad->set_dims({C});
++    if (C == 0) {
++      scale_grad->set_dims({scale.dims()[0]});
++    } else {
++      scale_grad->set_dims({C});
++    }
+   }
+   if (bias_grad) {
+-    bias_grad->set_dims({C});
++    if (C == 0) {
++      bias_grad->set_dims({bias.dims()[0]});
++    } else {
++      bias_grad->set_dims({C});
++    }
+   }
+ }
+ void InstanceNormDoubleGradInferMeta(const MetaTensor& x,
+diff --git a/paddle/phi/infermeta/backward.h b/paddle/phi/infermeta/backward.h
+index f72169dc2c..826643e6de 100644
+--- a/paddle/phi/infermeta/backward.h
++++ b/paddle/phi/infermeta/backward.h
+@@ -345,6 +345,7 @@ void GumbelSoftmaxGradInferMeta(const MetaTensor& out,
+ 
+ void InstanceNormGradInferMeta(const MetaTensor& x,
+                                const MetaTensor& scale,
++                               const MetaTensor& bias,
+                                const MetaTensor& saved_mean,
+                                const MetaTensor& saved_variance,
+                                const MetaTensor& y_grad,
+diff --git a/paddle/phi/infermeta/spmd_rules/instance_norm.cc b/paddle/phi/infermeta/spmd_rules/instance_norm.cc
+index 472d8ea1bb..aeede37d4e 100644
+--- a/paddle/phi/infermeta/spmd_rules/instance_norm.cc
++++ b/paddle/phi/infermeta/spmd_rules/instance_norm.cc
+@@ -131,6 +131,7 @@ SpmdInfo InstanceNormInferSpmd(const DistMetaTensor& x,
+ 
+ SpmdInfo InstanceNormGradInferSpmd(const DistMetaTensor& x,
+                                    const DistMetaTensor& scale,
++                                   const DistMetaTensor& bias UNUSED,
+                                    const DistMetaTensor& saved_mean,
+                                    const DistMetaTensor& saved_variance,
+                                    const DistMetaTensor& y_grad,
+diff --git a/paddle/phi/infermeta/spmd_rules/instance_norm.h b/paddle/phi/infermeta/spmd_rules/instance_norm.h
+index da204af836..af602cbb9c 100644
+--- a/paddle/phi/infermeta/spmd_rules/instance_norm.h
++++ b/paddle/phi/infermeta/spmd_rules/instance_norm.h
+@@ -27,6 +27,7 @@ SpmdInfo InstanceNormInferSpmd(const DistMetaTensor& x,
+ 
+ SpmdInfo InstanceNormGradInferSpmd(const DistMetaTensor& x,
+                                    const DistMetaTensor& scale,
++                                   const DistMetaTensor& bias,
+                                    const DistMetaTensor& saved_mean,
+                                    const DistMetaTensor& saved_variance,
+                                    const DistMetaTensor& y_grad,
+diff --git a/paddle/phi/infermeta/ternary.cc b/paddle/phi/infermeta/ternary.cc
+index 1ab4c3f7e5..2581cfe813 100644
+--- a/paddle/phi/infermeta/ternary.cc
++++ b/paddle/phi/infermeta/ternary.cc
+@@ -826,13 +826,6 @@ void InstanceNormInferMeta(const MetaTensor& x,
+                     common::errors::InvalidArgument(
+                         "The y in InstanceNormInferMeta can't be nullptr."));
+   const auto x_dims = x.dims();
+-  PADDLE_ENFORCE_NE(common::product(x_dims),
+-                    0,
+-                    common::errors::PreconditionNotMet(
+-                        "The Input variable X has not "
+-                        "been initialized. You may need to confirm "
+-                        "if you put exe.run(startup_program) "
+-                        "after optimizer.minimize function."));
+   PADDLE_ENFORCE_GE(
+       x_dims.size(),
+       2,
+@@ -867,13 +860,16 @@ void InstanceNormInferMeta(const MetaTensor& x,
+             scale_dim.size()));
+     bool check = config.is_runtime || contain_unknown_dim(scale_dim);
+     if (check) {
+-      PADDLE_ENFORCE_EQ(scale_dim[0],
+-                        C,
+-                        common::errors::InvalidArgument(
+-                            "ShapeError: the shape of scale must equal to [%d]"
+-                            "But received: the shape of scale is [%d]",
+-                            C,
+-                            scale_dim[0]));
++      if (C != 0) {
++        PADDLE_ENFORCE_EQ(
++            scale_dim[0],
++            C,
++            common::errors::InvalidArgument(
++                "ShapeError: the shape of scale must equal to [%d]"
++                "But received: the shape of scale is [%d]",
++                C,
++                scale_dim[0]));
++      }
+     }
+   }
+   if (bias) {
+@@ -889,13 +885,15 @@ void InstanceNormInferMeta(const MetaTensor& x,
+             bias_dim.size()));
+     bool check = config.is_runtime || !contain_unknown_dim(bias_dim);
+     if (check) {
+-      PADDLE_ENFORCE_EQ(bias_dim[0],
+-                        C,
+-                        common::errors::InvalidArgument(
+-                            "ShapeError: the shape of bias must equal to [%d]"
+-                            "But received: the shape of bias is [%d]",
+-                            C,
+-                            bias_dim[0]));
++      if (C != 0) {
++        PADDLE_ENFORCE_EQ(bias_dim[0],
++                          C,
++                          common::errors::InvalidArgument(
++                              "ShapeError: the shape of bias must equal to [%d]"
++                              "But received: the shape of bias is [%d]",
++                              C,
++                              bias_dim[0]));
++      }
+     }
+   }
+   y->set_dims(x_dims);
+diff --git a/paddle/phi/kernels/cpu/instance_norm_grad_kernel.cc b/paddle/phi/kernels/cpu/instance_norm_grad_kernel.cc
+index b53482c9d8..fea2a26dfa 100644
+--- a/paddle/phi/kernels/cpu/instance_norm_grad_kernel.cc
++++ b/paddle/phi/kernels/cpu/instance_norm_grad_kernel.cc
+@@ -44,6 +44,7 @@ template <typename T, typename Context>
+ void InstanceNormGradKernel(const Context& dev_ctx,
+                             const DenseTensor& x,
+                             const paddle::optional<DenseTensor>& scale,
++                            const paddle::optional<DenseTensor>& bias UNUSED,
+                             const DenseTensor& saved_mean,
+                             const DenseTensor& saved_variance,
+                             const DenseTensor& d_y,
+@@ -51,6 +52,19 @@ void InstanceNormGradKernel(const Context& dev_ctx,
+                             DenseTensor* d_x,
+                             DenseTensor* d_scale,
+                             DenseTensor* d_bias) {
++  phi::funcs::SetConstant<CPUContext, T> set_constant;
++  dev_ctx.template Alloc<T>(d_x);
++  if (x.numel() == 0) {
++    if (d_scale) {
++      dev_ctx.template Alloc<T>(d_scale);
++      set_constant(dev_ctx, d_scale, static_cast<T>(0));
++    }
++    if (d_bias) {
++      dev_ctx.template Alloc<T>(d_bias);
++      set_constant(dev_ctx, d_bias, static_cast<T>(0));
++    }
++    return;
++  }
+   const auto* scale_ptr = scale.get_ptr();
+ 
+   const auto& x_dims = x.dims();
+@@ -60,7 +74,6 @@ void InstanceNormGradKernel(const Context& dev_ctx,
+   const int NxC = N * C;
+   const int sample_size = static_cast<int>(x.numel() / N / C);
+ 
+-  dev_ctx.template Alloc<T>(d_x);
+   auto* place = dev_ctx.eigen_device();
+ 
+   Eigen::DSizes<int, 2> rshape(NxC, sample_size);
+@@ -83,8 +96,6 @@ void InstanceNormGradKernel(const Context& dev_ctx,
+   NxC_shape.set(0, NxC);
+ #endif
+ 
+-  phi::funcs::SetConstant<CPUContext, T> set_constant;
+-
+   DenseTensor scale_data;
+   if (!scale_ptr) {
+     scale_data.Resize({C});
+diff --git a/paddle/phi/kernels/cpu/instance_norm_kernel.cc b/paddle/phi/kernels/cpu/instance_norm_kernel.cc
+index 56af2dc5f2..21a740d41f 100644
+--- a/paddle/phi/kernels/cpu/instance_norm_kernel.cc
++++ b/paddle/phi/kernels/cpu/instance_norm_kernel.cc
+@@ -38,6 +38,22 @@ void InstanceNormKernel(const Context& dev_ctx,
+                         DenseTensor* y,
+                         DenseTensor* saved_mean,
+                         DenseTensor* saved_variance) {
++  phi::funcs::SetConstant<CPUContext, T> set_constant;
++  if (x.numel() == 0) {
++    dev_ctx.template Alloc<T>(y);
++    set_constant(dev_ctx, y, static_cast<T>(0));
++
++    if (saved_mean) {
++      dev_ctx.template Alloc<T>(saved_mean);
++      set_constant(dev_ctx, saved_mean, static_cast<T>(0));
++    }
++    if (saved_variance) {
++      dev_ctx.template Alloc<T>(saved_variance);
++      set_constant(dev_ctx, saved_variance, static_cast<T>(0));
++    }
++    return;
++  }
++
+   const auto& x_dims = x.dims();
+   T epsilon = static_cast<T>(epsilon_f);
+   const int N = static_cast<int>(x_dims[0]);
+@@ -63,7 +79,6 @@ void InstanceNormKernel(const Context& dev_ctx,
+   Eigen::IndexList<Eigen::type2index<1>> rdims;
+ #endif
+ 
+-  phi::funcs::SetConstant<CPUContext, T> set_constant;
+   DenseTensor saved_mean_tmp, saved_variance_tmp;
+   if (saved_mean) {
+     dev_ctx.template Alloc<T>(saved_mean);
+diff --git a/paddle/phi/kernels/gpu/instance_norm_grad_kernel.cu b/paddle/phi/kernels/gpu/instance_norm_grad_kernel.cu
+index 17e985385d..0b9b73efc4 100644
+--- a/paddle/phi/kernels/gpu/instance_norm_grad_kernel.cu
++++ b/paddle/phi/kernels/gpu/instance_norm_grad_kernel.cu
+@@ -305,6 +305,7 @@ template <typename T, typename Context>
+ void InstanceNormGradKernel(const Context &dev_ctx,
+                             const DenseTensor &x,
+                             const paddle::optional<DenseTensor> &scale,
++                            const paddle::optional<DenseTensor> &bias UNUSED,
+                             const DenseTensor &saved_mean,
+                             const DenseTensor &saved_variance,
+                             const DenseTensor &d_y,
+@@ -326,11 +327,25 @@ void InstanceNormGradKernel(const Context &dev_ctx,
+   x_tmp.ShareDataWith(x).Resize({1, NxC, H, W, D});
+   d_y_tmp.ShareDataWith(d_y).Resize({1, NxC, H, W, D});
+ 
++  phi::funcs::SetConstant<GPUContext, AccT> set_constant;
++
+   dev_ctx.template Alloc<T>(d_x);
++  if (x.numel() == 0) {
++    if (d_scale) {
++      dev_ctx.template Alloc<AccT>(d_scale);
++      set_constant(dev_ctx, d_scale, static_cast<AccT>(0));
++    }
++    if (d_bias) {
++      dev_ctx.template Alloc<AccT>(d_bias);
++      set_constant(dev_ctx, d_bias, static_cast<AccT>(0));
++    }
++    return;
++  }
+   if (d_scale && d_bias) {
+     dev_ctx.template Alloc<AccT>(d_scale);
+     dev_ctx.template Alloc<AccT>(d_bias);
+   }
++
+   if (scale_ptr) {
+     PADDLE_ENFORCE_EQ(
+         scale_ptr->dims().size(),
+@@ -354,8 +369,6 @@ void InstanceNormGradKernel(const Context &dev_ctx,
+                           scale_ptr->dims()));
+   }
+ 
+-  phi::funcs::SetConstant<GPUContext, AccT> set_constant;
+-
+   const int n = x.numel();
+   const int block = 512;
+   int max_threads = dev_ctx.GetMaxPhysicalThreadCount();
+diff --git a/paddle/phi/kernels/gpu/instance_norm_kernel.cu b/paddle/phi/kernels/gpu/instance_norm_kernel.cu
+index 672a351a1c..87cb873c29 100644
+--- a/paddle/phi/kernels/gpu/instance_norm_kernel.cu
++++ b/paddle/phi/kernels/gpu/instance_norm_kernel.cu
+@@ -60,6 +60,20 @@ void InstanceNormKernel(const Context &dev_ctx,
+   DenseTensor x_tmp;
+   x_tmp.ShareDataWith(x).Resize({1, NxC, H, W, D});
+   dev_ctx.template Alloc<T>(y);
++  phi::funcs::SetConstant<GPUContext, BatchNormParamType<T>> functor;
++  phi::funcs::SetConstant<GPUContext, T> functor_y;
++  if (x.numel() == 0) {
++    functor_y(dev_ctx, y, static_cast<T>(0));
++    if (saved_mean) {
++      dev_ctx.template Alloc<BatchNormParamType<T>>(saved_mean);
++      functor(dev_ctx, saved_mean, static_cast<BatchNormParamType<T>>(0));
++    }
++    if (saved_variance) {
++      dev_ctx.template Alloc<BatchNormParamType<T>>(saved_variance);
++      functor(dev_ctx, saved_variance, static_cast<BatchNormParamType<T>>(0));
++    }
++    return;
++  }
+ 
+ #ifdef PADDLE_WITH_HIP
+   miopenTensorDescriptor_t data_desc_;
+@@ -144,7 +158,6 @@ void InstanceNormKernel(const Context &dev_ctx,
+   auto handle = dev_ctx.cudnn_handle();
+ 
+   DenseTensor saved_mean_tmp, saved_variance_tmp;
+-  phi::funcs::SetConstant<GPUContext, BatchNormParamType<T>> functor;
+ 
+   if (saved_mean) {
+     dev_ctx.template Alloc<BatchNormParamType<T>>(saved_mean);
+diff --git a/paddle/phi/kernels/instance_norm_grad_kernel.h b/paddle/phi/kernels/instance_norm_grad_kernel.h
+index 2a661a3fd3..67171f99fb 100644
+--- a/paddle/phi/kernels/instance_norm_grad_kernel.h
++++ b/paddle/phi/kernels/instance_norm_grad_kernel.h
+@@ -22,6 +22,7 @@ template <typename T, typename Context>
+ void InstanceNormGradKernel(const Context& dev_ctx,
+                             const DenseTensor& x,
+                             const paddle::optional<DenseTensor>& scale,
++                            const paddle::optional<DenseTensor>& bias UNUSED,
+                             const DenseTensor& saved_mean,
+                             const DenseTensor& saved_variance,
+                             const DenseTensor& y_grad,
+diff --git a/paddle/phi/kernels/xpu/instance_norm_grad_kernel.cc b/paddle/phi/kernels/xpu/instance_norm_grad_kernel.cc
+index f8954fd60d..e54f3d206f 100644
+--- a/paddle/phi/kernels/xpu/instance_norm_grad_kernel.cc
++++ b/paddle/phi/kernels/xpu/instance_norm_grad_kernel.cc
+@@ -15,6 +15,7 @@
+ #include "paddle/phi/kernels/instance_norm_grad_kernel.h"
+ #include "paddle/phi/backends/xpu/enforce_xpu.h"
+ #include "paddle/phi/core/kernel_registry.h"
++#include "paddle/phi/kernels/full_kernel.h"
+ #include "paddle/phi/kernels/funcs/norm_utils.h"
+ 
+ namespace phi {
+@@ -23,6 +24,7 @@ template <typename T, typename Context>
+ void InstanceNormGradKernel(const Context& dev_ctx,
+                             const DenseTensor& x,
+                             const paddle::optional<DenseTensor>& scale,
++                            const paddle::optional<DenseTensor>& bias UNUSED,
+                             const DenseTensor& saved_mean,
+                             const DenseTensor& saved_variance,
+                             const DenseTensor& d_y,
+@@ -44,6 +46,23 @@ void InstanceNormGradKernel(const Context& dev_ctx,
+           x_dims.size()));
+ 
+   dev_ctx.template Alloc<T>(d_x);
++  if (x.numel() == 0) {
++    if (d_scale) {
++      phi::Full<float, Context>(
++          dev_ctx,
++          phi::IntArray(common::vectorize(d_scale->dims())),
++          0.f,
++          d_scale);
++    }
++    if (d_bias) {
++      phi::Full<float, Context>(
++          dev_ctx,
++          phi::IntArray(common::vectorize(d_bias->dims())),
++          0.f,
++          d_bias);
++    }
++    return;
++  }
+   T* d_scale_data = nullptr;
+   T* d_bias_data = nullptr;
+   if (d_scale && d_bias) {
+diff --git a/paddle/phi/kernels/xpu/instance_norm_kernel.cc b/paddle/phi/kernels/xpu/instance_norm_kernel.cc
+index 3423abfb00..27db4b05d2 100644
+--- a/paddle/phi/kernels/xpu/instance_norm_kernel.cc
++++ b/paddle/phi/kernels/xpu/instance_norm_kernel.cc
+@@ -15,8 +15,8 @@
+ #include "paddle/phi/kernels/instance_norm_kernel.h"
+ #include "paddle/phi/backends/xpu/enforce_xpu.h"
+ #include "paddle/phi/core/kernel_registry.h"
++#include "paddle/phi/kernels/full_kernel.h"
+ #include "paddle/phi/kernels/funcs/math_function.h"
+-
+ namespace phi {
+ 
+ template <typename T, typename Context>
+@@ -38,6 +38,27 @@ void InstanceNormKernel(const Context& dev_ctx,
+   dev_ctx.template Alloc<T>(y);
+   dev_ctx.template Alloc<float>(saved_mean);
+   dev_ctx.template Alloc<float>(saved_var);
++  if (x.numel() == 0) {
++    if (y) {
++      phi::Full<T, Context>(
++          dev_ctx, phi::IntArray(common::vectorize(y->dims())), 0, y);
++    }
++    if (saved_mean) {
++      phi::Full<float, Context>(
++          dev_ctx,
++          phi::IntArray(common::vectorize(saved_mean->dims())),
++          0.f,
++          saved_mean);
++    }
++    if (saved_var) {
++      phi::Full<float, Context>(
++          dev_ctx,
++          phi::IntArray(common::vectorize(saved_var->dims())),
++          0.f,
++          saved_var);
++    }
++    return;
++  }
+ 
+   xpu::ctx_guard RAII_GUARD(dev_ctx.x_context());
+ 
+diff --git a/paddle/phi/ops/yaml/backward.yaml b/paddle/phi/ops/yaml/backward.yaml
+index 439f39d005..b281548199 100644
+--- a/paddle/phi/ops/yaml/backward.yaml
++++ b/paddle/phi/ops/yaml/backward.yaml
+@@ -1805,7 +1805,7 @@
+   no_need_buffer : x
+ 
+ - backward_op : instance_norm_double_grad
+-  forward : instance_norm_grad(Tensor x, Tensor scale, Tensor saved_mean, Tensor saved_variance, Tensor grad_y, float epsilon) -> Tensor(grad_x), Tensor(grad_scale), Tensor(grad_bias)
++  forward : instance_norm_grad(Tensor x, Tensor scale, Tensor bias, Tensor saved_mean, Tensor saved_variance, Tensor grad_y, float epsilon) -> Tensor(grad_x), Tensor(grad_scale), Tensor(grad_bias)
+   args : (Tensor x, Tensor scale, Tensor saved_mean, Tensor saved_variance, Tensor grad_y, Tensor grad_x_grad, Tensor grad_scale_grad, Tensor grad_bias_grad, float epsilon)
+   output : Tensor(x_grad), Tensor(scale_grad), Tensor(grad_y_grad)
+   infer_meta :
+@@ -1817,7 +1817,7 @@
+ 
+ - backward_op : instance_norm_grad
+   forward : instance_norm(Tensor x, Tensor scale, Tensor bias, float epsilon) -> Tensor(y), Tensor(saved_mean), Tensor(saved_variance)
+-  args : (Tensor x, Tensor scale, Tensor saved_mean, Tensor saved_variance, Tensor y_grad, float epsilon=1e-5)
++  args : (Tensor x, Tensor scale, Tensor bias, Tensor saved_mean, Tensor saved_variance, Tensor y_grad, float epsilon=1e-5)
+   output : Tensor(x_grad), Tensor(scale_grad), Tensor(bias_grad)
+   infer_meta :
+     func : InstanceNormGradInferMeta
+@@ -1825,9 +1825,9 @@
+   kernel :
+     func : instance_norm_grad
+     data_type : x
+-  optional : scale
++  optional : scale, bias
+   backward : instance_norm_double_grad
+-  composite: instance_norm_grad(x, scale, saved_mean, saved_variance, y_grad, epsilon, x_grad, scale_grad, bias_grad)
++  composite: instance_norm_grad(x, scale, bias, saved_mean, saved_variance, y_grad, epsilon, x_grad, scale_grad, bias_grad)
+ 
+ - backward_op : inverse_grad
+   forward : inverse(Tensor x) -> Tensor(out)
+diff --git a/test/cpp/auto_parallel/spmd_rule_test.cc b/test/cpp/auto_parallel/spmd_rule_test.cc
+index 0733ee41d1..6466cdb25f 100644
+--- a/test/cpp/auto_parallel/spmd_rule_test.cc
++++ b/test/cpp/auto_parallel/spmd_rule_test.cc
+@@ -377,7 +377,7 @@ TEST(InstanceNorm, Ctor) {
+       common::make_ddim(mean_and_variance_shape), mean_and_variance_dist_attr);
+   phi::distributed::SpmdInfo backward_info =
+       phi::distributed::InstanceNormGradInferSpmd(
+-          x, scale, saved_mean, saved_variance, y_grad, epsilon);
++          x, scale, bias, saved_mean, saved_variance, y_grad, epsilon);
+   input_size = 5;
+   output_size = 3;
+   EXPECT_EQ(backward_info.first.size(), input_size);

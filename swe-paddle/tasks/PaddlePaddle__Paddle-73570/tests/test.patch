@@ -1,0 +1,112 @@
+diff --git a/test/legacy_test/test_diag_v2.py b/test/legacy_test/test_diag_v2.py
+index 598887c4cc279..a8680fba7044e 100644
+--- a/test/legacy_test/test_diag_v2.py
++++ b/test/legacy_test/test_diag_v2.py
+@@ -400,6 +400,44 @@ def init_config(self):
+         self.out = np.diag(self.x, self.offset)
+ 
+ 
++class TestDiagV2Op_ZeroSize(OpTest):
++    def setUp(self):
++        self.op_type = "diag_v2"
++        self.python_api = paddle.diag
++        self.public_python_api = paddle.diag
++
++        self.init_dtype()
++        self.init_attrs()
++        self.init_input_output()
++        self.set_input_output()
++
++    def init_dtype(self):
++        self.dtype = np.float64
++
++    def init_attrs(self):
++        self.offset = 1
++        self.padding_value = 0.0
++
++    def init_input_output(self):
++        self.x = np.random.rand(10, 0).astype(self.dtype)
++        self.out = np.diag(self.x, self.offset)
++
++    def set_input_output(self):
++        self.attrs = {
++            'offset': self.offset,
++            'padding_value': self.padding_value,
++        }
++
++        self.inputs = {'X': self.x}
++        self.outputs = {'Out': self.out}
++
++    def test_check_output(self):
++        self.check_output(check_pir=True)
++
++    def test_check_grad(self):
++        self.check_grad(['X'], 'Out', check_pir=True)
++
++
+ if __name__ == "__main__":
+     paddle.enable_static()
+     unittest.main()
+diff --git a/test/legacy_test/test_masked_fill.py b/test/legacy_test/test_masked_fill.py
+index 4606ef02843a9..8c3d919fda4da 100644
+--- a/test/legacy_test/test_masked_fill.py
++++ b/test/legacy_test/test_masked_fill.py
+@@ -145,6 +145,7 @@ def setUp(self):
+         self.dtype = "float32"
+ 
+     def test_backward(self):
++        paddle.disable_static()
+         expected_np = np.array(
+             [[2, 1, 1], [2, 1, 1], [2, 1, 1], [2, 1, 1]]
+         ).astype('float32')
+@@ -358,6 +359,50 @@ def init(self):
+         self.scalar_value = False
+ 
+ 
++class TestMaskedFillAPI_ZeroSize(unittest.TestCase):
++    def setUp(self):
++        self.init()
++
++        self.x_np = np.random.random(self.x_shape).astype(self.dtype)
++        self.mask_np = np.array(
++            np.random.randint(2, size=self.mask_shape), dtype="bool"
++        )
++
++        self.value_np = np.random.randn(1).astype(self.dtype)
++        self.out_np = np_masked_fill(self.x_np, self.mask_np, self.value_np)
++
++    def init(self):
++        self.x_shape = (0, 3)
++        self.mask_shape = self.x_shape
++        self.dtype = "float32"
++        self.scalar_value = False
++
++    def test_dygraph(self):
++        paddle.disable_static()
++        x = paddle.to_tensor(self.x_np, dtype=self.dtype)
++        x.stop_gradient = False
++        mask = paddle.to_tensor(self.mask_np).astype('bool')
++        if self.scalar_value:
++            value = self.value_np[0]
++        else:
++            value = paddle.to_tensor(self.value_np, dtype=self.dtype)
++        result = paddle.masked_fill(x, mask, value)
++        np.testing.assert_allclose(self.out_np, result.numpy(), rtol=1e-05)
++
++        paddle.sum(result).backward()
++        np.testing.assert_allclose(x.grad.shape, x.shape)
++        np.testing.assert_allclose(x.grad.numpy(), np.zeros(x.shape))
++
++
++class TestMaskedFillAPI_ZeroSize2(TestMaskedFillAPI_ZeroSize):
++    # x_grad shape [2, 3], filled with 0.
++    def init(self):
++        self.x_shape = (1, 3)
++        self.mask_shape = (0, 3)
++        self.dtype = "float32"
++        self.scalar_value = False
++
++
+ if __name__ == '__main__':
+     paddle.enable_static()
+     unittest.main()

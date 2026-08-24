@@ -1,0 +1,190 @@
+diff --git a/test/swe_paddle/test_pr78570_optimizer_step_closure.py b/test/swe_paddle/test_pr78570_optimizer_step_closure.py
+new file mode 100644
+--- /dev/null
++++ b/test/swe_paddle/test_pr78570_optimizer_step_closure.py
+@@ -0,0 +1,185 @@
++import ast
++import copy
++from collections import defaultdict
++from contextlib import contextmanager
++from pathlib import Path
++from types import SimpleNamespace
++
++import pytest
++
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++CASES = [
++    ("Optimizer", REPO_ROOT / "python/paddle/optimizer/optimizer.py"),
++    ("Adam", REPO_ROOT / "python/paddle/optimizer/adam.py"),
++    ("AdamW", REPO_ROOT / "python/paddle/optimizer/adamw.py"),
++]
++
++
++class _GradState:
++    enabled = False
++
++
++class _ImperativeBase:
++    @staticmethod
++    @contextmanager
++    def enable_grad():
++        previous = _GradState.enabled
++        _GradState.enabled = True
++        try:
++            yield
++        finally:
++            _GradState.enabled = previous
++
++
++class _Grad:
++    pass
++
++
++class _Param:
++    def __init__(self, grad):
++        self.stop_gradient = False
++        self.main_grad = None
++        self.grad = grad
++
++    def _grad_ivar(self):
++        return self.grad
++
++
++class _FakeOptimizer:
++    def __init__(self, param):
++        self._parameter_list = [param]
++        self._param_groups = [param]
++        self.regularization = None
++        self.enable_tensor_fusion = False
++        self.optimize_calls = []
++        self.declarative_calls = 0
++
++    def _apply_optimize(self, *args, **kwargs):
++        self.optimize_calls.append(kwargs.get("params_grads"))
++        return ["optimize"]
++
++    def _declarative_step(self):
++        self.declarative_calls += 1
++
++
++def _strip_annotations(function):
++    for arg in (
++        list(function.args.posonlyargs)
++        + list(function.args.args)
++        + list(function.args.kwonlyargs)
++    ):
++        arg.annotation = None
++    if function.args.vararg is not None:
++        function.args.vararg.annotation = None
++    if function.args.kwarg is not None:
++        function.args.kwarg.annotation = None
++    function.returns = None
++
++
++def _load_checkout_step(class_name, path):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    class_node = next(
++        node
++        for node in tree.body
++        if isinstance(node, ast.ClassDef) and node.name == class_name
++    )
++    step_node = next(
++        node
++        for node in class_node.body
++        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
++        and node.name == "step"
++    )
++    step_node = copy.deepcopy(step_node)
++    step_node.decorator_list = []
++    _strip_annotations(step_node)
++    module = ast.Module(body=[step_node], type_ignores=[])
++    ast.fix_missing_locations(module)
++
++    in_to_static_mode = lambda: False
++    paddle = SimpleNamespace(
++        base=SimpleNamespace(
++            dygraph=SimpleNamespace(
++                base=SimpleNamespace(in_to_static_mode=in_to_static_mode)
++            )
++        )
++    )
++    framework = SimpleNamespace(in_dygraph_mode=lambda: True)
++    namespace = {
++        "defaultdict": defaultdict,
++        "imperative_base": _ImperativeBase,
++        "framework": framework,
++        "in_dygraph_mode": lambda: True,
++        "paddle": paddle,
++    }
++    exec(compile(module, str(path), "exec"), namespace)
++    return namespace["step"]
++
++
++def _flatten_params_grads(record):
++    if isinstance(record, dict):
++        return list(record.get("params", []))
++    return list(record or [])
++
++
++@pytest.mark.parametrize("class_name,path", CASES)
++def test_p2p_step_without_closure_keeps_existing_update_path(class_name, path):
++    step = _load_checkout_step(class_name, path)
++    existing_grad = _Grad()
++    param = _Param(existing_grad)
++    optimizer = _FakeOptimizer(param)
++
++    result = step(optimizer)
++
++    assert result is None
++    assert optimizer.declarative_calls == 0
++    assert len(optimizer.optimize_calls) == 1
++    assert _flatten_params_grads(optimizer.optimize_calls[0]) == [
++        (param, existing_grad)
++    ]
++    assert _GradState.enabled is False
++
++
++@pytest.mark.parametrize("class_name,path", CASES)
++def test_f2p_optimizer_steps_accept_closure_and_return_loss(class_name, path):
++    step = _load_checkout_step(class_name, path)
++    param = _Param(_Grad())
++    optimizer = _FakeOptimizer(param)
++    loss = object()
++    calls = []
++
++    def closure():
++        calls.append("closure")
++        return loss
++
++    result = step(optimizer, closure)
++
++    assert calls == ["closure"]
++    assert result is loss
++    assert len(optimizer.optimize_calls) == 1
++
++
++@pytest.mark.parametrize("class_name,path", CASES)
++def test_f2p_closure_runs_with_grad_enabled_and_supplies_update_grad(
++    class_name, path
++):
++    step = _load_checkout_step(class_name, path)
++    old_grad = _Grad()
++    closure_grad = _Grad()
++    param = _Param(old_grad)
++    optimizer = _FakeOptimizer(param)
++    loss = object()
++
++    def closure():
++        assert _GradState.enabled is True
++        param.grad = closure_grad
++        return loss
++
++    result = step(optimizer, closure)
++
++    assert result is loss
++    assert _GradState.enabled is False
++    assert len(optimizer.optimize_calls) == 1
++    assert _flatten_params_grads(optimizer.optimize_calls[0]) == [
++        (param, closure_grad)
++    ]
