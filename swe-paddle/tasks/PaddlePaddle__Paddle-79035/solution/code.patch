@@ -1,0 +1,63 @@
+diff --git a/python/paddle/optim/__init__.py b/python/paddle/optim/__init__.py
+index de2c898e9d3e78229fcc0f50be64f5927eb8d0ed..8df8547f4981879ef34253c24a67e2f2c42a0035 100644
+--- a/python/paddle/optim/__init__.py
++++ b/python/paddle/optim/__init__.py
+@@ -12,6 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
++from . import lr_scheduler  # noqa: F401
+ from .adadelta import Adadelta
+ from .adagrad import Adagrad
+ from .adam import Adam
+diff --git a/python/paddle/optim/lr_scheduler.py b/python/paddle/optim/lr_scheduler.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..957ac076df00d6477f2e05a80a39c0fc749fbd6b
+--- /dev/null
++++ b/python/paddle/optim/lr_scheduler.py
+@@ -0,0 +1,45 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++from paddle.optimizer.lr import (
++    CosineAnnealingDecay as CosineAnnealingLR,
++    CosineAnnealingWarmRestarts as CosineAnnealingWarmRestarts,
++    CyclicLR as CyclicLR,
++    ExponentialDecay as ExponentialLR,
++    LambdaDecay as LambdaLR,
++    LinearLR as LinearLR,
++    LRScheduler as LRScheduler,
++    MultiplicativeDecay as MultiplicativeLR,
++    MultiStepDecay as MultiStepLR,
++    OneCycleLR as OneCycleLR,
++    PiecewiseDecay as ConstantLR,
++    ReduceOnPlateau as ReduceLROnPlateau,
++    StepDecay as StepLR,
++)
++
++__all__ = [
++    "LambdaLR",
++    "MultiplicativeLR",
++    "StepLR",
++    "MultiStepLR",
++    "ConstantLR",
++    "LinearLR",
++    "ExponentialLR",
++    "CosineAnnealingLR",
++    "ReduceLROnPlateau",
++    "CyclicLR",
++    "CosineAnnealingWarmRestarts",
++    "OneCycleLR",
++    "LRScheduler",
++]
