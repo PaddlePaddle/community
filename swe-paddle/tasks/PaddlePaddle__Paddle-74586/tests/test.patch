@@ -1,0 +1,180 @@
+diff --git a/test/swe_paddle/test_pr74586_scatter_add.py b/test/swe_paddle/test_pr74586_scatter_add.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..c08c0ef7ffef990e371d95c1d41a56eee1c5b9c2
+--- /dev/null
++++ b/test/swe_paddle/test_pr74586_scatter_add.py
+@@ -0,0 +1,174 @@
++import ast
++import copy
++import sys
++import types
++from pathlib import Path
++
++import numpy as np
++
++
++TARGET = Path("python/paddle/tensor/manipulation.py")
++
++
++def _extract_function(name, namespace):
++    tree = ast.parse(TARGET.read_text(encoding="utf-8"), filename=str(TARGET))
++    node = next(
++        (
++            copy.deepcopy(item)
++            for item in tree.body
++            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
++            and item.name == name
++        ),
++        None,
++    )
++    assert node is not None, f"paddle.tensor.manipulation must provide {name}"
++    node.decorator_list = []
++    module = ast.Module(body=[node], type_ignores=[])
++    ast.fix_missing_locations(module)
++    scope = dict(namespace)
++    scope.setdefault("Tensor", object)
++    exec(compile(module, str(TARGET), "exec"), scope)
++    return scope[name]
++
++
++def _execute_public_import(path, package_name):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    node = next(
++        (
++            copy.deepcopy(item)
++            for item in tree.body
++            if isinstance(item, ast.ImportFrom)
++            and any(alias.name == "scatter_add" for alias in item.names)
++        ),
++        None,
++    )
++    assert node is not None, f"{path} must publicly import scatter_add"
++    assert node.level == 1 and node.module
++
++    module_parts = node.module.split(".")
++    module_name = ".".join([package_name, *module_parts])
++    module_names = [package_name]
++    for index in range(1, len(module_parts)):
++        module_names.append(".".join([package_name, *module_parts[:index]]))
++    module_names.append(module_name)
++
++    saved = {name: sys.modules.get(name) for name in module_names}
++    for name in module_names[:-1]:
++        package = types.ModuleType(name)
++        package.__path__ = []
++        sys.modules[name] = package
++
++    imported = types.ModuleType(module_name)
++    marker = object()
++    for alias in node.names:
++        setattr(
++            imported,
++            alias.name,
++            marker if alias.name == "scatter_add" else object(),
++        )
++    sys.modules[module_name] = imported
++
++    try:
++        scope = {"__package__": package_name, "__name__": f"{package_name}.probe"}
++        ast.fix_missing_locations(node)
++        exec(
++            compile(ast.Module(body=[node], type_ignores=[]), str(path), "exec"),
++            scope,
++        )
++    finally:
++        for name in reversed(module_names):
++            previous = saved[name]
++            if previous is None:
++                sys.modules.pop(name, None)
++            else:
++                sys.modules[name] = previous
++
++    return scope, marker
++
++
++def test_existing_index_add_dynamic_path_remains_compatible():
++    calls = []
++    result_marker = object()
++
++    class _COps:
++        @staticmethod
++        def index_add(x, index, value, axis):
++            calls.append((x, index, value, axis))
++            return result_marker
++
++    function = _extract_function(
++        "index_add",
++        {
++            "Tensor": object,
++            "in_dynamic_or_pir_mode": lambda: True,
++            "_C_ops": _COps,
++        },
++    )
++    x = object()
++    index = object()
++    value = object()
++
++    result = function(x, index, 1, value)
++
++    assert result is result_marker
++    assert calls == [(x, index, value, 1)]
++
++
++def test_scatter_add_accumulates_repeated_indices_along_requested_dim():
++    calls = []
++
++    def controlled_put_along_axis(
++        arr,
++        indices,
++        values,
++        axis,
++        reduce="assign",
++        include_self=True,
++        broadcast=True,
++    ):
++        calls.append((axis, reduce, include_self, broadcast))
++        assert reduce == "add"
++        assert include_self is True
++        assert broadcast is False
++        result = np.array(arr, copy=True)
++        for source_position in np.ndindex(indices.shape):
++            target_position = list(source_position)
++            target_position[axis] = int(indices[source_position])
++            result[tuple(target_position)] += values[source_position]
++        return result
++
++    function = _extract_function(
++        "scatter_add",
++        {
++            "Tensor": object,
++            "put_along_axis": controlled_put_along_axis,
++        },
++    )
++
++    input_value = np.array([[10, 20, 30], [40, 50, 60]], dtype="int64")
++    index = np.array([[0, 1, 1], [0, 1, 1]], dtype="int64")
++    src = np.array([[1, 2, 3], [4, 5, 6]], dtype="int64")
++
++    result = function(input_value, 1, index, src)
++
++    expected = np.array([[11, 25, 30], [44, 61, 60]], dtype="int64")
++    np.testing.assert_array_equal(result, expected)
++    np.testing.assert_array_equal(
++        input_value,
++        np.array([[10, 20, 30], [40, 50, 60]], dtype="int64"),
++    )
++    assert calls == [(1, "add", True, False)]
++
++
++def test_scatter_add_is_reexported_from_public_namespaces():
++    tensor_scope, tensor_marker = _execute_public_import(
++        Path("python/paddle/tensor/__init__.py"),
++        "swe_fake_paddle_tensor",
++    )
++    assert tensor_scope.get("scatter_add") is tensor_marker
++
++    root_scope, root_marker = _execute_public_import(
++        Path("python/paddle/__init__.py"),
++        "swe_fake_paddle",
++    )
++    assert root_scope.get("scatter_add") is root_marker
