@@ -6,7 +6,7 @@
 
 当 `paddle.squeeze(x, axis)` 的 `axis` 参数是一个 0-size Tensor 时，当前实现会对输入无法正确处理、调用报错。
 
-按照 API semantics 和 PyTorch 的参考行为，当 `axis` 为空 tensor 时，应该不进行任何 squeeze 操作，直接返回原始输入 `x`。
+按照 API semantics 和 PyTorch 的参考行为，当 `axis` 为空 Tensor 时，不应改变输入的 shape 和数据，输出应与输入保持一致。
 
 例如：
 
