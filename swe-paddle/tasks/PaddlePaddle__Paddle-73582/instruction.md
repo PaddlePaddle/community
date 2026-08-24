@@ -54,4 +54,3 @@ out = paddle.full(
 - 熟悉 Python 和 Paddle 动态图 API 开发
 - 了解 Tensor 的 size 属性和 0-size Tensor 的概念
 - 了解 squeeze 和 full API 的实现逻辑
-- 不需要修改 C++ kernel，仅需修改 Python 层代码
