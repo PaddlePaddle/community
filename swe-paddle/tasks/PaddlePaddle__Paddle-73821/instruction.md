@@ -28,7 +28,7 @@ out = paddle.nn.functional.pad(
     value=0.5,
     pad_from_left_axis=True,
 )
-# 期望: out shape 为 [0, 22]，值由 pad_value 填充
+# 期望: out shape 为 [1, 21]，值由 pad_value 填充
 out.sum().backward()
 # 期望: x.grad shape 为 [0, 16]，值为 1
 ```
@@ -53,5 +53,4 @@ out.sum().backward()
 - 了解 Tensor shape、0-size Tensor 和 kernel 执行路径
 - 了解 pad 算子的前向和反向语义
 - 了解 Paddle CPU/GPU/XPU kernel 的实现模式
-- 了解 `phi::Full` kernel 的使用
 - 需要从源码编译 Paddle 以验证修改
