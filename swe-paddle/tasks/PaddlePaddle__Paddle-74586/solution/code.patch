@@ -1,0 +1,92 @@
+diff --git a/python/paddle/__init__.py b/python/paddle/__init__.py
+index 3ebe1ebb0fdddcba22c6435fc85ea93ad2d3cc21..ef49fc73690d71db7a13bb333f9bbb1f2d4b83bf 100644
+--- a/python/paddle/__init__.py
++++ b/python/paddle/__init__.py
+@@ -368,6 +368,7 @@ from .tensor.manipulation import (
+     row_stack,
+     scatter,
+     scatter_,
++    scatter_add,
+     scatter_nd,
+     scatter_nd_add,
+     scatter_reduce,
+@@ -1262,6 +1263,7 @@ __all__ = [
+     'take_along_axis',
+     'scatter_reduce',
+     'put_along_axis',
++    'scatter_add',
+     'select_scatter',
+     'multigammaln',
+     'multigammaln_',
+diff --git a/python/paddle/tensor/__init__.py b/python/paddle/tensor/__init__.py
+index 61d2d9913846cad681072cca2a38ff770f8bf0b8..6b7f497615d8045126243e80f8130565ad2093b6 100644
+--- a/python/paddle/tensor/__init__.py
++++ b/python/paddle/tensor/__init__.py
+@@ -205,6 +205,7 @@ from .manipulation import (  # noqa: F401
+     row_stack,
+     scatter,
+     scatter_,
++    scatter_add,
+     scatter_nd,
+     scatter_nd_add,
+     scatter_reduce,
+@@ -822,6 +823,7 @@ tensor_method_func = [
+     'take_along_axis',
+     'scatter_reduce',
+     'put_along_axis',
++    'scatter_add',
+     'select_scatter',
+     'put_along_axis_',
+     'bernoulli_',
+diff --git a/python/paddle/tensor/manipulation.py b/python/paddle/tensor/manipulation.py
+index 9497ab0f7568fc2a151f344ddb1e8dbf9c97942e..403f48d17c23343f4b2ddf95d3e543b7db48d8f3 100644
+--- a/python/paddle/tensor/manipulation.py
++++ b/python/paddle/tensor/manipulation.py
+@@ -6866,6 +6866,47 @@ def infer_broadcast_shape(
+     return broadcast_shape
+ 
+ 
++def scatter_add(
++    input: Tensor,
++    dim: int,
++    index: Tensor,
++    src: Tensor,
++) -> Tensor:
++    """
++    Scatter the values of the source tensor to the target tensor according to the given indices, and perform a add operation along the designated axis.
++
++    Args:
++        input (Tensor) : The Input Tensor. Supported data types are bfloat16, float16, float32, float64,
++            int32, int64, uint8.
++        dim (int) : The axis to scatter 1d slices along.
++        index (Tensor) : Indices to scatter along each 1d slice of input. This must match the dimension of input,
++             Supported data type are int32 and int64.
++        src (Tensor) : The value element(s) to scatter. The data types should be same as input.
++
++    Returns:
++        Tensor, The indexed element, same dtype with input
++
++    Examples:
++        .. code-block:: python
++
++            >>> import paddle
++
++            >>> x = paddle.to_tensor([[10, 20, 30], [40, 50, 60]])
++            >>> indices = paddle.zeros((2,3)).astype("int32")
++            >>> values = paddle.to_tensor([[1, 2, 3],[4, 5, 6]]).astype(x.dtype)
++            >>> result = paddle.scatter_add(x, 0, indices, values)
++            >>> print(result)
++            Tensor(shape=[2, 3], dtype=int64, place=Place(cpu), stop_gradient=True,
++            [[15, 27, 39],
++             [40, 50, 60]])
++
++    """
++
++    return put_along_axis(
++        input, index, src, dim, 'add', include_self=True, broadcast=False
++    )
++
++
+ @ParamAliasDecorator({"arr": ["input"], "axis": ["dim"]})
+ def take_along_axis(
+     arr: Tensor, indices: Tensor, axis: int, broadcast: bool = True
