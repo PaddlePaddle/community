@@ -44,7 +44,7 @@ out = paddle.nn.functional.conv3d(x, filter, padding=1)
 ## 验收说明
 
 - 当输入为 0-size Tensor 时，`paddle.nn.functional.conv1d/conv2d/conv3d` 应正常完成，返回正确 shape 的全零 Tensor
-- 输出的 shape 应与输入一致
+- 输出 shape 应按照卷积参数正确推导
 - 非 0-size Tensor 输入下的 conv1d/conv2d/conv3d 行为不得退化
 - 梯度计算也应正常工作（0-size Tensor 的梯度也为全零 Tensor）
 
