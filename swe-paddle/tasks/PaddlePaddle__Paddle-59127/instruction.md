@@ -12,7 +12,7 @@
 - 新增 `paddle.column_stack(x, name=None)`:将 1-D 输入先转成 2-D 列向量(`[N, 1]`)再沿 axis=1 拼接
 - 新增 `paddle.row_stack(x, name=None)`:等价于 `vstack`
 - 输入 `x` 为 Tensor 的 list/tuple,所有 Tensor 必须同 dtype;支持的数据类型:float16, float32, float64, int8, int32, int64, bfloat16
-- 在 `paddle` 顶层命名空间、`paddle.tensor` 命名空间导出,并绑定为 tensor 方法
+- 在 `paddle` 顶层命名空间、`paddle.tensor` 命名空间导出
 
 ## 验收说明
 
