@@ -15,7 +15,7 @@
 - 新增 `paddle.dsplit(x, num_or_indices, name=None)`:沿 `axis=2` 切分(即 `tensor_split(x, num_or_indices, axis=2)`)
 - 在 `paddle` 顶层命名空间、`paddle.tensor` 命名空间导出,并绑定为 tensor 方法
 - 数据类型:bool, bfloat16, float16, float32, float64, uint8, int32, int64
-- 既有 `vsplit` 行为保持不变(基于新实现重构)
+- 既有 `vsplit` 行为保持不变
 
 ## 验收说明
 
