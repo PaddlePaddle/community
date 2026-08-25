@@ -49,4 +49,6 @@ A source rebuild is mandatory. The gold patch changes build-time API metadata an
 
 ## Test Curation
 
-The gold patch preserves all nine non-test sections from the merged commit without editing implementation hunks. The test patch intentionally excludes unrelated `asinh`/`atan` additions from `test_activation_op.py` and excludes the whitespace-only merged hunk in `test_atan2_op.py`. It retains the merged `atan2` compatibility class and adds deterministic public tests for Tensor methods and numerical broadcast gradients.
+The gold patch preserves all nine non-test sections from the merged commit, with one deliberate deviation in `paddle/phi/kernels/impl/atan2_grad_kernel_impl.h`: before the broadcast-gradient reduction it runs `SumInferMeta` on the gradient tensor, so `SumKernel` receives an output whose rank already matches the reduced result. This mirrors the in-tree `ReduceAsKernel` pattern. Without it the merged code aborts on CPU with `Input dimension size should be equal to 2, but received dimension size is 1` whenever a gradient is reduced along an inner broadcast axis, for example `x` of shape `[2, 1]` against `y` of shape `[1, 3]`; the base commit handles that case correctly because it broadcasts in Python before calling the operator.
+
+The test patch intentionally excludes unrelated `asinh`/`atan` additions from `test_activation_op.py` and excludes the whitespace-only merged hunk in `test_atan2_op.py`. It retains the merged `atan2` compatibility class and adds deterministic public tests for Tensor methods and numerical broadcast gradients.

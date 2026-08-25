@@ -49,7 +49,7 @@ The verifier should use its normal Paddle source-build procedure and ensure that
 
 ## Verification Status and Risks
 
-During package authoring, commit ancestry, patch boundaries, patch fidelity, Python syntax, shell syntax, and clean application against exact base file contents were checked. The nine fixed source files are also compared with their squash-commit versions during structural validation.
+During package authoring, commit ancestry, patch boundaries, patch fidelity, Python syntax, shell syntax, and clean application against exact base file contents were checked. The nine fixed source files are also compared with their squash-commit versions during structural validation. `paddle/phi/kernels/impl/atan2_grad_kernel_impl.h` intentionally differs from the squash commit by the `SumInferMeta` call documented in the package README; without it the broadcast-gradient node fails on CPU, so the difference must not be reverted.
 
 A Linux Paddle source configure/build and behavioral base/fixed pytest run were not executed in the community repository workspace because it does not contain a trustworthy Paddle source build for the pinned revision. Those steps remain pending for the SWE-Paddle Run/Test/Fix verifier and must not be inferred from structural checks.
 
