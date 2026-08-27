@@ -40,9 +40,10 @@ From the Paddle repository root, with this task directory available as `$TASK_DI
 git checkout 35b36cca24a780061268d20d6abe512e758837e6
 git submodule update --init --recursive
 git apply "$TASK_DIR/tests/test.patch"
+PYTHON_BIN=python bash "$TASK_DIR/tests/test.sh"
 ```
 
-At this state the new test module is present, but the API and compiled operator do not exist. Running the target tests should fail during import, API lookup, graph construction, or execution. The existing reduction P2P tests should remain usable with the base build.
+At this state the new test module is present, but the API and compiled operator do not exist. The wrapper must first pass the four existing amin/amax P2P nodes, then fail while the F2P targets import, create, or execute the missing operation.
 
 Then apply the implementation and rebuild:
 
@@ -51,23 +52,37 @@ git apply "$TASK_DIR/solution/code.patch"
 # Re-run CMake if needed, then rebuild and reinstall Paddle.
 cmake --build build --parallel
 python -m pip install --no-deps --force-reinstall build/python/dist/*.whl
-bash "$TASK_DIR/tests/test.sh"
+PYTHON_BIN=python bash "$TASK_DIR/tests/test.sh"
 ```
+
+After the rebuild, all P2P nodes and all F2P targets must pass.
 
 If the build system produces a wheel tagged for a different Python ABI, install and run tests with the matching interpreter. Do not rename the wheel to bypass ABI checks.
 
 ## Exact target tests
 
-`tests/test.sh` runs:
+`tests/test.sh` sets `PYTHONPATH` per suite and runs, in order:
 
-```bash
-python -m pytest test/legacy_test/test_aminmax_op.py -q
-python -m pytest \
-  test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py::AminmaxOpInferSymbolicShapeTest \
-  -q
-```
+1. Four P2P nodes from `test/legacy_test/test_max_min_amax_amin_op.py`:
+   - `TestAmaxAPI_Compatibility::test_dygraph_Compatibility`
+   - `TestAminAPI_Compatibility::test_dygraph_Compatibility`
+   - `TestAmaxAminOutAPI::test_amax_out_in_dygraph`
+   - `TestAmaxAminOutAPI::test_amin_out_in_dygraph`
+2. F2P legacy target: `test/legacy_test/test_aminmax_op.py`.
+3. F2P symbolic-shape target: `test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py::AminmaxOpInferSymbolicShapeTest`.
 
-Expected post-fix results are passing forward, gradient, API compatibility, static/dynamic, output-tensor, dynamic-shape, and symbolic-shape cases. Stable pre-existing tests for `min`, `max`, `amin`, and `amax` can be added by the verifier as P2P regression guards.
+For the legacy suites, `PYTHONPATH` includes `test/legacy_test` and `test` so `op_test`, `utils`, and `white_list` imports resolve. For the symbolic-shape suite, `PYTHONPATH` includes `test/ir/pir/cinn` and `test/ir/pir/cinn/symbolic`, with the CINN/PIR directory first because it and `test/legacy_test` both contain a module named `utils.py`.
+
+The wrapper runs both F2P suites even when the first one fails, so the Base run records both F2P roles before exiting nonzero.
+
+Expected post-fix results are passing forward, gradient, API compatibility, static/dynamic, output-tensor, dynamic-shape, and symbolic-shape cases, with all four amin/amax P2P nodes passing before and after the fix.
+
+## Local validation note
+
+- `test/legacy_test/test_max_min_amax_amin_op.py` is byte-for-byte unchanged between the base and gold revisions.
+- With an installed compatible CPU runtime and the exact base test sources, the four selected P2P nodes passed (`4 passed`).
+- With the legacy `PYTHONPATH` configured by `tests/test.sh`, `test_aminmax_op.py` collected successfully and then failed at `AttributeError: module 'paddle' has no attribute 'aminmax'`, which is the expected base-like signal on a runtime without the gold patch.
+- With the CINN/PIR `PYTHONPATH` configured by `tests/test.sh`, `AminmaxOpInferSymbolicShapeTest` collected successfully.
 
 ## Limitations
 
