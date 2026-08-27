@@ -23,7 +23,7 @@ In static mode, a Tensor condition contributes an executable assertion to the pr
 ## Test Classification
 
 - **F2P:** the seven `TestAssertAPI` cases added to `test/legacy_test/test_api_compatibility_part2.py` cover truthy and falsy Python conditions, truthy and falsy Tensor conditions, the default message, compatible calling forms, and static-graph execution.
-- **P2P:** all pre-existing tests in `test/legacy_test/test_api_compatibility_part2.py` remain the regression baseline and should pass before and after the solution.
+- **P2P:** `test/legacy_test/test_assert_close.py::TestAssertClose` guards `paddle.testing.assert_close`, which lives in the same comparison module and package export list that the solution patch edits, and passes before and after the solution.
 
 ## Artifact Map
 
@@ -31,11 +31,11 @@ In static mode, a Tensor condition contributes an executable assertion to the pr
 - `instruction.md`: self-contained observable public API requirements.
 - `solution/code.patch`: exact base-to-gold diff for the three production files.
 - `tests/test.patch`: exact base-to-gold diff for the legacy unittest file.
-- `tests/test.sh`: strict direct-Python unittest wrapper.
+- `tests/test.sh`: narrowed pytest wrapper with explicit P2P and F2P selections.
 - `environment/README.md`: revisions, runtime assumptions, patch order, and verification guidance.
 
 ## Verification Summary
 
 - Both patches are exported from the exact base-to-gold Git diff with the required production/test boundary.
 - Packaging checks cover patch whitespace, shell syntax, isolated test-first application order, byte-for-byte gold equivalence, and Python syntax.
-- Runtime execution is best-effort when the exact base build is unavailable. The target class was verified fail-before/pass-after with a loadable runtime from ancestor commit `56be465924264e1251cf127dbff56d17a7554d01`, 91 commits before the base; full-file P2P limitations are recorded in `environment/README.md`.
+- The target class was verified fail-before/pass-after and the P2P selection verified passing in both states, with the pass-after run performed on a runtime built from the exact base commit. Per-runtime results and why the wrapper selects a class instead of the whole compatibility file are recorded in `environment/README.md`.
