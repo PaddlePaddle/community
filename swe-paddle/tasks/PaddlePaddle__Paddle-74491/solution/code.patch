@@ -1,0 +1,159 @@
+diff --git a/python/paddle/base/dygraph/math_op_patch.py b/python/paddle/base/dygraph/math_op_patch.py
+index 6aa14dc8013470b2695374e8ab31302e8aa8c0a1..1571b7e0de27e65dbb51e81748d6aabc61deeaac 100644
+--- a/python/paddle/base/dygraph/math_op_patch.py
++++ b/python/paddle/base/dygraph/math_op_patch.py
+@@ -286,6 +286,40 @@ def monkey_patch_math_tensor():
+         out = _C_ops.transpose(var, perm)
+         return out
+ 
++    @property
++    def requires_grad(self: Tensor) -> bool:
++        """
++        Whether this Tensor requires gradient computation.
++
++        This is a convenience property that returns the opposite of stop_gradient.
++        Setting requires_grad=True is equivalent to setting stop_gradient=False.
++
++        Examples:
++            .. code-block:: python
++
++                >>> import paddle
++                >>> x = paddle.randn([2, 3])
++                >>> print(x.requires_grad)  # False by default
++                >>>
++                >>> x.requires_grad = False
++                >>> print(x.stop_gradient)  # True
++        """
++        return not self.stop_gradient
++
++    @requires_grad.setter
++    def requires_grad(self: Tensor, value: bool) -> None:
++        """
++        Set whether this Tensor requires gradient computation.
++
++        Args:
++            value (bool): True to enable gradient computation, False to disable.
++        """
++        if not isinstance(value, bool):
++            raise TypeError(
++                f"requires_grad must be bool, but got {type(value)}"
++            )
++        self.stop_gradient = not value
++
+     eager_methods = [
+         ('__neg__', _neg_),
+         ('__abs__', _abs_),
+@@ -305,6 +339,7 @@ def monkey_patch_math_tensor():
+         ('size', _size_),
+         ('T', _T_),
+         ('mT', _mT_),
++        ("requires_grad", requires_grad),
+         # for logical compare
+         ('__array_ufunc__', None),
+     ]
+diff --git a/python/paddle/base/layers/math_op_patch.py b/python/paddle/base/layers/math_op_patch.py
+index 5e22912256b0f2f50acc36b68085077f7fec4a1a..8239d53c535e7770f98f074085df886e6bb46a44 100644
+--- a/python/paddle/base/layers/math_op_patch.py
++++ b/python/paddle/base/layers/math_op_patch.py
+@@ -564,6 +564,40 @@ def monkey_patch_variable():
+         """
+         return len(self.shape)
+ 
++    @property
++    def requires_grad(self) -> bool:
++        """
++        Whether this Tensor requires gradient computation.
++
++        This is a convenience property that returns the opposite of stop_gradient.
++        Setting requires_grad=True is equivalent to setting stop_gradient=False.
++
++        Examples:
++            .. code-block:: python
++
++                >>> import paddle
++                >>> x = paddle.randn([2, 3])
++                >>> print(x.requires_grad)  # False by default
++                >>>
++                >>> x.requires_grad = False
++                >>> print(x.stop_gradient)  # True
++        """
++        return not self.stop_gradient
++
++    @requires_grad.setter
++    def requires_grad(self, value: bool) -> None:
++        """
++        Set whether this Tensor requires gradient computation.
++
++        Args:
++            value (bool): True to enable gradient computation, False to disable.
++        """
++        if not isinstance(value, bool):
++            raise TypeError(
++                f"requires_grad must be bool, but got {type(value)}"
++            )
++        self.stop_gradient = not value
++
+     def _scalar_add_(var, value):
+         return _scalar_op_(var, 1.0, value)
+ 
+@@ -814,6 +848,7 @@ def monkey_patch_variable():
+         ('dim', dim),
+         ('ndimension', ndimension),
+         ('ndim', _ndim),
++        ("requires_grad", requires_grad),
+         (
+             '__add__',
+             _binary_creator_('__add__', 'elementwise_add', False, _scalar_add_),
+diff --git a/python/paddle/pir/math_op_patch.py b/python/paddle/pir/math_op_patch.py
+index f51cfd916428a134004a3a6f0abc6cb65124afe3..b114c100ff284f4e6f9078aeda3b4a8abc3c9c15 100644
+--- a/python/paddle/pir/math_op_patch.py
++++ b/python/paddle/pir/math_op_patch.py
+@@ -633,6 +633,40 @@ def monkey_patch_value():
+ 
+         return _C_ops.transpose(self, perm)
+ 
++    @property
++    def requires_grad(self) -> bool:
++        """
++        Whether this Tensor requires gradient computation.
++
++        This is a convenience property that returns the opposite of stop_gradient.
++        Setting requires_grad=True is equivalent to setting stop_gradient=False.
++
++        Examples:
++            .. code-block:: python
++
++                >>> import paddle
++                >>> x = paddle.randn([2, 3])
++                >>> print(x.requires_grad)  # False by default
++                >>>
++                >>> x.requires_grad = False
++                >>> print(x.stop_gradient)  # True
++        """
++        return not self.stop_gradient
++
++    @requires_grad.setter
++    def requires_grad(self, value: bool) -> None:
++        """
++        Set whether this Tensor requires gradient computation.
++
++        Args:
++            value (bool): True to enable gradient computation, False to disable.
++        """
++        if not isinstance(value, bool):
++            raise TypeError(
++                f"requires_grad must be bool, but got {type(value)}"
++            )
++        self.stop_gradient = not value
++
+     def _int_(self):
+         error_msg = """\
+             int(Tensor) is not supported in static graph mode. Because it's value is not available during the static mode.
+@@ -1182,6 +1216,7 @@ def monkey_patch_value():
+         ('size', _size_),
+         ('T', _T_),
+         ('mT', _mT_),
++        ("requires_grad", requires_grad),
+         ('clone', clone),
+         ('clear_gradient', clear_gradient),
+         ('append', append),

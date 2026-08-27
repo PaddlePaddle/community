@@ -1,5 +1,4 @@
 diff --git a/python/paddle/fluid/tests/unittests/test_tensor_register_hook.py b/python/paddle/fluid/tests/unittests/test_tensor_register_hook.py
-index 1111111..2222222 100644
 --- a/python/paddle/fluid/tests/unittests/test_tensor_register_hook.py
 +++ b/python/paddle/fluid/tests/unittests/test_tensor_register_hook.py
 @@ -45,9 +45,10 @@
@@ -15,17 +14,18 @@ index 1111111..2222222 100644
  
          ret2 = self.linear2(ret1)
          out = paddle.mean(ret2, axis=-1)
-@@ -512,8 +513,7 @@
+@@ -512,8 +513,8 @@
                  )
  
                  net = SimpleNetForStatic(self.in_size, self.out_size)
 -                with self.assertRaises(AssertionError):
 -                    out = net(x)
-+                out = net(x)
++                # Must enable hook so static path actually executes register_hook.
++                out = net(x, True)
  
          paddle.disable_static()
  
-@@ -527,9 +527,17 @@
+@@ -527,9 +528,17 @@
              'float32'
          )
          data_t = paddle.to_tensor(data)
@@ -48,7 +48,6 @@ index 1111111..2222222 100644
  HOOK_INIT_VALUE = 10
 diff --git a/test/dygraph_to_static/test_tensor_hook.py b/test/dygraph_to_static/test_tensor_hook.py
 new file mode 100644
-index 0000000..1111111
 --- /dev/null
 +++ b/test/dygraph_to_static/test_tensor_hook.py
 @@ -0,0 +1,167 @@

@@ -1,0 +1,191 @@
+diff --git a/test/swe_paddle/test_pr74444_dropout1d.py b/test/swe_paddle/test_pr74444_dropout1d.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..cb7cd4bac6f34fa33b9aa89019279dbc7bc678d7
+--- /dev/null
++++ b/test/swe_paddle/test_pr74444_dropout1d.py
+@@ -0,0 +1,185 @@
++import ast
++import copy
++import sys
++import types
++import warnings
++from pathlib import Path
++
++import pytest
++
++
++COMMON = Path("python/paddle/nn/functional/common.py")
++FUNCTIONAL_INIT = Path("python/paddle/nn/functional/__init__.py")
++
++
++def _extract_function(name, namespace):
++    tree = ast.parse(COMMON.read_text(encoding="utf-8"), filename=str(COMMON))
++    node = next(
++        (
++            copy.deepcopy(item)
++            for item in tree.body
++            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
++            and item.name == name
++        ),
++        None,
++    )
++    assert node is not None, f"paddle.nn.functional.common must provide {name}"
++    node.decorator_list = []
++    module = ast.Module(body=[node], type_ignores=[])
++    ast.fix_missing_locations(module)
++    scope = dict(namespace)
++    scope.setdefault("Tensor", object)
++    scope.setdefault("DataLayout2D", str)
++    exec(compile(module, str(COMMON), "exec"), scope)
++    return scope[name]
++
++
++def _execute_dropout1d_public_import():
++    tree = ast.parse(
++        FUNCTIONAL_INIT.read_text(encoding="utf-8"), filename=str(FUNCTIONAL_INIT)
++    )
++    node = next(
++        (
++            copy.deepcopy(item)
++            for item in tree.body
++            if isinstance(item, ast.ImportFrom)
++            and any(alias.name == "dropout1d" for alias in item.names)
++        ),
++        None,
++    )
++    assert node is not None, "paddle.nn.functional must publicly export dropout1d"
++    assert node.level == 1 and node.module
++
++    package_name = "swe_fake_functional"
++    module_name = f"{package_name}.{node.module}"
++    saved_package = sys.modules.get(package_name)
++    saved_module = sys.modules.get(module_name)
++
++    package = types.ModuleType(package_name)
++    package.__path__ = []
++    imported = types.ModuleType(module_name)
++    marker = object()
++    for alias in node.names:
++        setattr(imported, alias.name, marker if alias.name == "dropout1d" else object())
++
++    sys.modules[package_name] = package
++    sys.modules[module_name] = imported
++    try:
++        scope = {"__package__": package_name, "__name__": f"{package_name}.probe"}
++        ast.fix_missing_locations(node)
++        exec(
++            compile(ast.Module(body=[node], type_ignores=[]), str(FUNCTIONAL_INIT), "exec"),
++            scope,
++        )
++    finally:
++        if saved_module is None:
++            sys.modules.pop(module_name, None)
++        else:
++            sys.modules[module_name] = saved_module
++        if saved_package is None:
++            sys.modules.pop(package_name, None)
++        else:
++            sys.modules[package_name] = saved_package
++
++    return scope, marker
++
++
++class _Tensor:
++    def __init__(self, shape, history=()):
++        self.shape = tuple(shape)
++        self.ndim = len(self.shape)
++        self.history = tuple(history)
++
++    def unsqueeze(self, axis):
++        shape = list(self.shape)
++        shape.insert(axis, 1)
++        return _Tensor(shape, self.history + (("unsqueeze", axis),))
++
++    def squeeze(self, axis):
++        shape = list(self.shape)
++        assert shape[axis] == 1
++        shape.pop(axis)
++        return _Tensor(shape, self.history + (("squeeze", axis),))
++
++
++def test_existing_dropout2d_channel_axis_behavior_remains_compatible():
++    calls = []
++    marker = object()
++
++    def controlled_dropout(x, p=0.5, axis=None, training=True, mode=None, name=None):
++        calls.append((x.shape, p, axis, training, mode, name))
++        return marker
++
++    function = _extract_function(
++        "dropout2d",
++        {
++            "Tensor": _Tensor,
++            "DataLayout2D": str,
++            "dropout": controlled_dropout,
++        },
++    )
++
++    x = _Tensor((2, 3, 4, 5))
++    assert function(x, p=0.25, training=False, data_format="NCHW", name="keep") is marker
++    assert calls[-1] == ((2, 3, 4, 5), 0.25, [0, 1], False, "upscale_in_train", "keep")
++
++    assert function(x, p=0.4, training=True, data_format="NHWC") is marker
++    assert calls[-1] == ((2, 3, 4, 5), 0.4, [0, 3], True, "upscale_in_train", None)
++
++
++def test_dropout1d_is_public_and_preserves_2d_3d_channel_semantics():
++    scope, marker = _execute_dropout1d_public_import()
++    assert scope.get("dropout1d") is marker
++
++    calls = []
++
++    def controlled_dropout(x, p=0.5, axis=None, training=True):
++        calls.append((x.shape, p, axis, training, x.history))
++        return x
++
++    paddle = types.SimpleNamespace(Tensor=_Tensor)
++    function = _extract_function(
++        "dropout1d",
++        {
++            "paddle": paddle,
++            "dropout": controlled_dropout,
++            "warnings": warnings,
++        },
++    )
++
++    two_d = _Tensor((3, 8))
++    two_d_result = function(two_d, p=0.25, training=False)
++    assert two_d_result.shape == (3, 8)
++    assert calls[-1][:4] == ((1, 3, 8), 0.25, 1, False)
++    assert calls[-1][4] == (("unsqueeze", 0),)
++    assert two_d_result.history == (("unsqueeze", 0), ("squeeze", 0))
++
++    three_d = _Tensor((2, 3, 8))
++    three_d_result = function(three_d, p=0.4, training=True)
++    assert three_d_result is three_d
++    assert calls[-1] == ((2, 3, 8), 0.4, 1, True, ())
++
++
++def test_dropout1d_rejects_invalid_inputs_and_warns_for_inplace():
++    paddle = types.SimpleNamespace(Tensor=_Tensor)
++    function = _extract_function(
++        "dropout1d",
++        {
++            "paddle": paddle,
++            "dropout": lambda x, **kwargs: x,
++            "warnings": warnings,
++        },
++    )
++
++    with pytest.raises(ValueError, match=r"\[0, 1\]"):
++        function(_Tensor((2, 3, 4)), p=1.5)
++
++    with pytest.raises(RuntimeError, match="2D or 3D"):
++        function(_Tensor((4,)), p=0.5)
++
++    with pytest.raises(RuntimeError, match="2D or 3D"):
++        function(_Tensor((1, 2, 3, 4)), p=0.5)
++
++    with pytest.warns(UserWarning, match="not supported"):
++        result = function(_Tensor((2, 3, 4)), inplace=True)
++    assert result.shape == (2, 3, 4)

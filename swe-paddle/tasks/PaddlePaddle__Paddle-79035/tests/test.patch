@@ -1,0 +1,134 @@
+diff --git a/test/swe_paddle/test_pr79035_lr_scheduler_alias.py b/test/swe_paddle/test_pr79035_lr_scheduler_alias.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..1d51c4c73f8e278b05338b259e4db53bf12d6ff8
+--- /dev/null
++++ b/test/swe_paddle/test_pr79035_lr_scheduler_alias.py
+@@ -0,0 +1,128 @@
++import ast
++import importlib
++import importlib.util
++import sys
++import types
++import uuid
++from contextlib import contextmanager
++from pathlib import Path
++
++import pytest
++
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++OPTIM_DIR = REPO_ROOT / "python" / "paddle" / "optim"
++ALIAS_FILE = OPTIM_DIR / "lr_scheduler.py"
++OPTIM_INIT = OPTIM_DIR / "__init__.py"
++
++ALIAS_TO_CANONICAL = {
++    "LambdaLR": "LambdaDecay",
++    "MultiplicativeLR": "MultiplicativeDecay",
++    "StepLR": "StepDecay",
++    "MultiStepLR": "MultiStepDecay",
++    "ConstantLR": "PiecewiseDecay",
++    "LinearLR": "LinearLR",
++    "ExponentialLR": "ExponentialDecay",
++    "CosineAnnealingLR": "CosineAnnealingDecay",
++    "ReduceLROnPlateau": "ReduceOnPlateau",
++    "CyclicLR": "CyclicLR",
++    "CosineAnnealingWarmRestarts": "CosineAnnealingWarmRestarts",
++    "OneCycleLR": "OneCycleLR",
++    "LRScheduler": "LRScheduler",
++}
++
++
++def test_p2p_legacy_step_decay_keeps_initial_learning_rate():
++    from paddle.optimizer.lr import StepDecay
++
++    scheduler = StepDecay(learning_rate=1.0, step_size=2, gamma=0.5)
++    assert scheduler.get_lr() == pytest.approx(1.0)
++
++
++def _load_checkout_alias_module():
++    if not ALIAS_FILE.is_file():
++        pytest.fail(
++            "paddle.optim.lr_scheduler is unavailable in this checkout; "
++            "the compatibility namespace cannot be imported"
++        )
++
++    module_name = f"_swe_pr79035_lr_scheduler_{uuid.uuid4().hex}"
++    spec = importlib.util.spec_from_file_location(module_name, ALIAS_FILE)
++    assert spec is not None and spec.loader is not None
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def test_f2p_lr_scheduler_aliases_match_existing_schedulers():
++    canonical = importlib.import_module("paddle.optimizer.lr")
++    compat = _load_checkout_alias_module()
++
++    assert set(compat.__all__) == set(ALIAS_TO_CANONICAL)
++    for alias_name, canonical_name in ALIAS_TO_CANONICAL.items():
++        assert getattr(compat, alias_name) is getattr(canonical, canonical_name)
++
++
++def _stub_preexisting_relative_imports(package_name, tree):
++    """Stub only sibling modules that are unrelated to the target namespace."""
++    for node in tree.body:
++        if not isinstance(node, ast.ImportFrom) or node.level != 1:
++            continue
++
++        if node.module is None:
++            module_names = [alias.name for alias in node.names]
++        else:
++            module_names = [node.module]
++
++        for module_name in module_names:
++            if not module_name or module_name == "lr_scheduler":
++                continue
++
++            full_name = f"{package_name}.{module_name}"
++            stub = sys.modules.get(full_name)
++            if stub is None:
++                stub = types.ModuleType(full_name)
++                sys.modules[full_name] = stub
++
++            if node.module == module_name:
++                for alias in node.names:
++                    if alias.name != "*" and not hasattr(stub, alias.name):
++                        setattr(stub, alias.name, object())
++
++
++@contextmanager
++def _load_checkout_optim_package():
++    package_name = f"_swe_pr79035_optim_{uuid.uuid4().hex}"
++    source = OPTIM_INIT.read_text(encoding="utf-8")
++    tree = ast.parse(source, filename=str(OPTIM_INIT))
++    spec = importlib.util.spec_from_file_location(
++        package_name,
++        OPTIM_INIT,
++        submodule_search_locations=[str(OPTIM_DIR)],
++    )
++    assert spec is not None and spec.loader is not None
++    package = importlib.util.module_from_spec(spec)
++    sys.modules[package_name] = package
++
++    # Execute the checkout package initializer itself, but isolate unrelated
++    # historical optimizer implementations from the installed wheel. The target
++    # lr_scheduler module is deliberately not stubbed and must be loaded from
++    # the checkout package path when the initializer imports it.
++    _stub_preexisting_relative_imports(package_name, tree)
++
++    try:
++        spec.loader.exec_module(package)
++        yield package
++    finally:
++        for key in list(sys.modules):
++            if key == package_name or key.startswith(package_name + "."):
++                sys.modules.pop(key, None)
++
++
++def test_f2p_paddle_optim_initialization_exposes_lr_scheduler_namespace():
++    canonical = importlib.import_module("paddle.optimizer.lr")
++    with _load_checkout_optim_package() as optim_package:
++        assert hasattr(optim_package, "lr_scheduler"), (
++            "importing paddle.optim should expose the lr_scheduler compatibility namespace"
++        )
++        assert optim_package.lr_scheduler.StepLR is canonical.StepDecay

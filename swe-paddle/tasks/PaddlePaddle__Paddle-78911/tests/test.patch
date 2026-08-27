@@ -1,8 +1,8 @@
-diff --git a/test/legacy_test/test_recompute_context.py b/test/legacy_test/test_recompute_context.py
+diff --git a/test/legacy_test/test_recompute_context_detection.py b/test/legacy_test/test_recompute_context_detection.py
 new file mode 100644
 index 0000000..18d7357
 --- /dev/null
-+++ b/test/legacy_test/test_recompute_context.py
++++ b/test/legacy_test/test_recompute_context_detection.py
 @@ -0,0 +1,70 @@
 +# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
 +#

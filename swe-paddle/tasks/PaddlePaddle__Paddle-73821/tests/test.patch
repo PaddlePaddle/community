@@ -1,0 +1,155 @@
+diff --git a/test/legacy_test/test_pad3d_op.py b/test/legacy_test/test_pad3d_op.py
+index c6402fab17..0579f33e61 100644
+--- a/test/legacy_test/test_pad3d_op.py
++++ b/test/legacy_test/test_pad3d_op.py
+@@ -1196,8 +1196,9 @@ class TestPad3dOpError(unittest.TestCase):
+             self.assertRaises(Exception, test_reflect_1)
+             self.assertRaises(Exception, test_reflect_2)
+             self.assertRaises(Exception, test_reflect_3)
+-            self.assertRaises(Exception, test_circular_1)
+-            self.assertRaises(Exception, test_replicate_1)
++            # comment out because pad3d support 0-size now.
++            # self.assertRaises(Exception, test_circular_1)
++            # self.assertRaises(Exception, test_replicate_1)
+         paddle.enable_static()
+ 
+ 
+@@ -1261,5 +1262,57 @@ class TestPadDataformatError(unittest.TestCase):
+         self.assertRaises(AssertionError, test_ncdhw)
+ 
+ 
++class TestPad3dOp_ZeroSize_Circular(unittest.TestCase):
++    """F2P test: pad3d with circular mode on 0-size tensor should work after fix."""
++
++    def test_circular_0size(self):
++        paddle.disable_static()
++        for place in get_places():
++            with paddle.base.dygraph.guard(place):
++                input_shape = (1, 2, 0, 4, 5)
++                data = np.random.rand(*input_shape).astype(np.float32)
++                x = paddle.to_tensor(data)
++                # pad order for NCDHW: [W_left, W_right, H_top, H_bottom, D_front, D_back]
++                y = F.pad(
++                    x,
++                    pad=[1, 1, 1, 1, 2, 3],
++                    mode='circular',
++                    data_format="NCDHW",
++                )
++                # Expected shape:
++                # D (dim 2): 0 + 2 + 3 = 5
++                # H (dim 3): 4 + 1 + 1 = 6
++                # W (dim 4): 5 + 1 + 1 = 7
++                expected_shape = [1, 2, 5, 6, 7]
++                self.assertEqual(list(y.shape), expected_shape)
++        paddle.enable_static()
++
++
++class TestPad3dOp_ZeroSize_Replicate(unittest.TestCase):
++    """F2P test: pad3d with replicate mode on 0-size tensor should work after fix."""
++
++    def test_replicate_0size(self):
++        paddle.disable_static()
++        for place in get_places():
++            with paddle.base.dygraph.guard(place):
++                input_shape = (1, 2, 0, 4, 5)
++                data = np.random.rand(*input_shape).astype(np.float32)
++                x = paddle.to_tensor(data)
++                # pad order for NCDHW: [W_left, W_right, H_top, H_bottom, D_front, D_back]
++                y = F.pad(
++                    x,
++                    pad=[1, 1, 1, 1, 2, 3],
++                    mode='replicate',
++                    data_format="NCDHW",
++                )
++                # Expected shape:
++                # D (dim 2): 0 + 2 + 3 = 5
++                # H (dim 3): 4 + 1 + 1 = 6
++                # W (dim 4): 5 + 1 + 1 = 7
++                expected_shape = [1, 2, 5, 6, 7]
++                self.assertEqual(list(y.shape), expected_shape)
++        paddle.enable_static()
++
++
+ if __name__ == '__main__':
+     unittest.main()
+diff --git a/test/legacy_test/test_pad_op.py b/test/legacy_test/test_pad_op.py
+index 1c000d7ac7..05b9efe14b 100644
+--- a/test/legacy_test/test_pad_op.py
++++ b/test/legacy_test/test_pad_op.py
+@@ -17,7 +17,7 @@ import sys
+ import unittest
+ 
+ import numpy as np
+-from op_test import OpTest, convert_float_to_uint16
++from op_test import OpTest, convert_float_to_uint16, get_places
+ 
+ sys.path.append("../deprecated/legacy_test")
+ from test_attribute_var import UnittestBase
+@@ -561,6 +561,53 @@ class TestPadOrder3(TestPadOrder):
+         self.pad_value = 0.5
+ 
+ 
++class TestPadOp_ZeroSize(unittest.TestCase):
++    def init_case(self):
++        self.shape = [0, 16]
++        self.paddings = [(0, 1), (2, 3)]
++        self.paddings_empty_tensor = False
++        self.pad_value = 0.5
++
++    def test_dygraph(self):
++        self.init_case()
++        for place in get_places():
++            paddle.disable_static(place)
++            x_np = np.random.random(self.shape).astype('float32')
++            paddings_np = self.paddings.copy()
++            x = paddle.to_tensor(x_np)
++            x.stop_gradient = False
++            paddings = list(np.array(self.paddings).flatten())
++            if self.paddings_empty_tensor:
++                paddings = paddle.to_tensor(paddings)
++                # output the same as x
++                out_np = x_np
++            else:
++                out_np = np.pad(
++                    x_np,
++                    paddings_np,
++                    mode="constant",
++                    constant_values=self.pad_value,
++                )
++            out = paddle.nn.functional.pad(
++                x,
++                paddings,
++                mode='constant',
++                value=self.pad_value,
++                pad_from_left_axis=True,
++            )
++            np.testing.assert_array_equal(out, out_np)
++            out.sum().backward()
++            np.testing.assert_allclose(x.grad.numpy(), np.ones(self.shape))
++
++
++class TestPadOp_ZeroSize2(TestPadOp_ZeroSize):
++    def init_case(self):
++        self.shape = [4, 6, 6]
++        self.paddings = []
++        self.paddings_empty_tensor = True
++        self.pad_value = 0.5
++
++
+ if __name__ == "__main__":
+     # paddle.enable_static()
+     unittest.main()
+diff --git a/test/xpu/test_pad3d_op_xpu.py b/test/xpu/test_pad3d_op_xpu.py
+index 4e98f554e1..59dd708f06 100644
+--- a/test/xpu/test_pad3d_op_xpu.py
++++ b/test/xpu/test_pad3d_op_xpu.py
+@@ -836,7 +836,8 @@ class XPUTestPad3dOp(XPUOpTestWrapper):
+                 self.assertRaises(Exception, test_reflect_1)
+                 self.assertRaises(Exception, test_reflect_2)
+                 self.assertRaises(Exception, test_reflect_3)
+-                self.assertRaises(Exception, test_replicate_1)
++                # comment out because pad3d support 0-size now.
++                # self.assertRaises(Exception, test_replicate_1)
+             paddle.enable_static()
+ 
+     class TestPadDataformatError(unittest.TestCase):
