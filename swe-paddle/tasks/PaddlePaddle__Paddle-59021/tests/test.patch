@@ -1,0 +1,21 @@
+diff --git a/test/legacy_test/CMakeLists.txt b/test/legacy_test/CMakeLists.txt
+--- a/test/legacy_test/CMakeLists.txt
++++ b/test/legacy_test/CMakeLists.txt
+@@ -1338,11 +1338,16 @@
+     FLAGS_new_executor_static_build=true)
+ endforeach()
+ 
+-set(PIR_COVERAGE_TESTS test_fused_feedforward_pass)
++set(PIR_COVERAGE_TESTS test_fused_feedforward_pass
++                       test_fuse_elewise_add_act_pass)
+ if(NOT WITH_GPU)
+   list(REMOVE_ITEM PIR_COVERAGE_TESTS test_fused_feedforward_pass)
+ endif()
+ 
++if(APPLE)
++  list(REMOVE_ITEM PIR_COVERAGE_TESTS test_fuse_elewise_add_act_pass)
++endif()
++
+ foreach(PIR_COVERAGE_TEST ${PIR_COVERAGE_TESTS})
+   py_test_modules(${PIR_COVERAGE_TEST}_pir MODULES ${PIR_COVERAGE_TEST} ENVS
+                   FLAGS_enable_pir_in_executor=true)

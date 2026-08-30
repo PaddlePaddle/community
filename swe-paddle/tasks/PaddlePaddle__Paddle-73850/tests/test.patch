@@ -1,0 +1,21 @@
+diff --git a/test/legacy_test/test_triangular_solve_op.py b/test/legacy_test/test_triangular_solve_op.py
+index 0475eaf944..b1e194a813 100644
+--- a/test/legacy_test/test_triangular_solve_op.py
++++ b/test/legacy_test/test_triangular_solve_op.py
+@@ -840,5 +840,16 @@ class TestTriangularSolveOpError(unittest.TestCase):
+             )
+ 
+ 
++class TestTriangularSolveOp_ZeroSize(TestTriangularSolveOp):
++    def config(self):
++        self.__class__.exist_fp64_check_grad = True
++        self.x_shape = [0, 2, 2]
++        self.y_shape = [0, 2, 1]
++        self.upper = False
++        self.transpose = False
++        self.unitriangular = False
++        self.dtype = "float32"
++
++
+ if __name__ == "__main__":
+     unittest.main()

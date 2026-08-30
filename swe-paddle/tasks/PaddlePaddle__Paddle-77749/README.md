@@ -25,7 +25,7 @@ The task adds `paddle.nn.utils.rnn.pad_sequence` and `paddle.nn.utils.rnn.unpad_
 ## Test Classification
 
 - **F2P:** all 21 cases in the new `test/legacy_test/test_rnn_utils.py` file. They cannot import the new module on the exact base and pass after the solution.
-- **P2P:** the exact gold test patch adds no independent P2P cases because the entire target file is new. Existing Paddle utility and Tensor behavior remains an external regression expectation.
+- **P2P:** `test/legacy_test/test_rnn_cell_api.py::TestRnnUtil::test_case`, an untouched RNN utility regression guard for `paddle.utils.map_structure` / `paddle.utils.assert_same_structure`. The gold diff does not modify that file, and the node passes on both the exact base and gold revisions.
 
 ## Artifact Map
 
@@ -33,11 +33,11 @@ The task adds `paddle.nn.utils.rnn.pad_sequence` and `paddle.nn.utils.rnn.unpad_
 - `instruction.md`: self-contained observable requirements for the public APIs.
 - `solution/code.patch`: exact base-to-gold diff for the two production files.
 - `tests/test.patch`: exact base-to-gold diff adding the unittest file.
-- `tests/test.sh`: strict direct-Python unittest wrapper.
+- `tests/test.sh`: wrapper that runs the existing RNN utility P2P node before the new F2P API test file.
 - `environment/README.md`: revisions, runtime assumptions, patch order, and verification guidance.
 
 ## Verification Summary
 
 - Both patches are exported from the exact base-to-gold Git diff with the requested production/test boundary.
 - Packaging checks cover patch whitespace, shell syntax, isolated test-first application order, byte-for-byte gold equivalence, and Python syntax.
-- Runtime execution is performed with isolated exact-source overlays when the exact historical native build is unavailable; the runtime commit and results are recorded in `environment/README.md`.
+- The selected `TestRnnUtil` P2P node is byte-for-byte unchanged between the base and gold revisions and passed repeated runs on both isolated overlays; the base target failed at the `paddle.nn.utils.rnn` import and the gold target ran all 21 cases with `OK`. Runtime details are recorded in `environment/README.md`.
