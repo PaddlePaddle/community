@@ -32,7 +32,7 @@
 ## 5. 验证思路
 
 - 目标测试命令：`bash tests/test.sh`
-- 目标测试文件：`test/legacy_test/test_recompute_context.py`
+- 目标测试文件：`test/legacy_test/test_recompute_context_detection.py`
 - 修复前预期：前向上下文及梯度回归用例通过；反向重计算上下文用例失败。
 - 修复后预期：前向、反向重计算、上下文清理和梯度用例全部通过。
 - P2P：验证 recompute 梯度结果及执行结束后的上下文清理。

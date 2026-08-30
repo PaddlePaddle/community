@@ -82,7 +82,7 @@ index f5773eb8057caa..dcd338ff2be992 100644
  
  namespace phi {
  
-@@ -84,34 +87,119 @@ void Atan2GradKernel(const Context& dev_ctx,
+@@ -84,34 +87,125 @@ void Atan2GradKernel(const Context& dev_ctx,
                       const DenseTensor& out_grad,
                       DenseTensor* x_grad,
                       DenseTensor* y_grad) {
@@ -210,12 +210,18 @@ index f5773eb8057caa..dcd338ff2be992 100644
 +    for_range(functor);
 +
 +    if (x_grad && !x_axes.empty()) {
++      phi::MetaTensor meta_x_grad(x_grad);
++      phi::SumInferMeta(
++          dx_b, phi::IntArray(x_axes), x_grad->dtype(), false, &meta_x_grad);
 +      phi::SumKernel<T, Context>(
 +          dev_ctx, dx_b, phi::IntArray(x_axes), x_grad->dtype(), false, x_grad);
 +      x_grad->Resize(x.dims());
 +    }
 +
 +    if (y_grad && !y_axes.empty()) {
++      phi::MetaTensor meta_y_grad(y_grad);
++      phi::SumInferMeta(
++          dy_b, phi::IntArray(y_axes), y_grad->dtype(), false, &meta_y_grad);
 +      phi::SumKernel<T, Context>(
 +          dev_ctx, dy_b, phi::IntArray(y_axes), y_grad->dtype(), false, y_grad);
 +      y_grad->Resize(y.dims());

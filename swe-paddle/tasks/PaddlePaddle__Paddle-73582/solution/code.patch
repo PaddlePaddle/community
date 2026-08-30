@@ -1,0 +1,35 @@
+diff --git a/python/paddle/tensor/manipulation.py b/python/paddle/tensor/manipulation.py
+index b57098cddc..bebeb087f3 100644
+--- a/python/paddle/tensor/manipulation.py
++++ b/python/paddle/tensor/manipulation.py
+@@ -3336,6 +3336,9 @@ def squeeze(
+         axis = [axis]
+     elif isinstance(axis, tuple):
+         axis = list(axis)
++    elif isinstance(axis, (paddle.Tensor, Variable)):
++        if axis.size == 0:
++            return x
+ 
+     input = x
+     axes = axis
+diff --git a/python/paddle/utils/layers_utils.py b/python/paddle/utils/layers_utils.py
+index 767f4afe80..9f97b00ca3 100644
+--- a/python/paddle/utils/layers_utils.py
++++ b/python/paddle/utils/layers_utils.py
+@@ -483,7 +483,15 @@ def convert_shape_to_list(shape):
+     Convert shape(list, tuple, variable) to list in imperative mode
+     """
+     if isinstance(shape, (list, tuple)):
+-        shape = [x.item(0) if isinstance(x, Variable) else x for x in shape]
++        shape_out = []
++        for x in shape:
++            if isinstance(x, Variable):
++                # skip item if size = 0
++                if x.size > 0:
++                    shape_out.append(x.item(0))
++            else:
++                shape_out.append(x)
++        shape = shape_out
+     else:
+         if in_dygraph_mode():
+             shape = shape.astype(int).tolist()

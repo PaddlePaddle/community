@@ -1,0 +1,245 @@
+diff --git a/paddle/fluid/pybind/eager_method.cc b/paddle/fluid/pybind/eager_method.cc
+--- a/paddle/fluid/pybind/eager_method.cc
++++ b/paddle/fluid/pybind/eager_method.cc
+@@ -1754,6 +1754,30 @@
+   EAGER_CATCH_AND_THROW_RETURN_NULL
+ }
+ 
++static PyObject* tensor_apply(TensorObject* self,
++                              PyObject* args,
++                              PyObject* kwargs) {
++  EAGER_TRY
++  PyObject* apply_func = PyTuple_GET_ITEM(args, 0);
++  PyTensorHook func = PyTensorHook(apply_func);
++  paddle::Tensor out = func(self->tensor);
++  return ToPyObject(out);
++  EAGER_CATCH_AND_THROW_RETURN_NULL
++}
++
++static PyObject* tensor_apply_(TensorObject* self,
++                               PyObject* args,
++                               PyObject* kwargs) {
++  EAGER_TRY
++  PyObject* apply_func = PyTuple_GET_ITEM(args, 0);
++  PyTensorHook func = PyTensorHook(apply_func);
++  paddle::Tensor out = func(self->tensor);
++  self->tensor.set_impl(out.impl());
++  Py_INCREF(self);
++  return reinterpret_cast<PyObject*>(self);
++  EAGER_CATCH_AND_THROW_RETURN_NULL
++}
++
+ static PyObject* tensor_register_grad_hook(TensorObject* self,
+                                            PyObject* args,
+                                            PyObject* kwargs) {
+@@ -3167,6 +3191,14 @@
+      (PyCFunction)(void (*)())tensor__setitem_dygraph,
+      METH_VARARGS | METH_KEYWORDS,
+      nullptr},
++    {"_apply",
++     (PyCFunction)(void (*)())tensor_apply,
++     METH_VARARGS | METH_KEYWORDS,
++     nullptr},
++    {"_apply_",
++     (PyCFunction)(void (*)())tensor_apply_,
++     METH_VARARGS | METH_KEYWORDS,
++     nullptr},
+     {"_register_grad_hook",
+      (PyCFunction)(void (*)())tensor_register_grad_hook,
+      METH_VARARGS | METH_KEYWORDS,
+diff --git a/paddle/fluid/pybind/pir.cc b/paddle/fluid/pybind/pir.cc
+--- a/paddle/fluid/pybind/pir.cc
++++ b/paddle/fluid/pybind/pir.cc
+@@ -60,7 +60,7 @@
+ #include "paddle/fluid/pir/transforms/inplace_pass.h"
+ #include "paddle/fluid/pir/transforms/replace_fetch_with_shadow_output_pass.h"
+ #include "paddle/fluid/pir/transforms/shape_optimization_pass.h"
+-
++#include "paddle/fluid/pybind/eager_utils.h"
+ #include "paddle/phi/core/enforce.h"
+ #include "paddle/pir/core/attribute.h"
+ #include "paddle/pir/core/block.h"
+@@ -581,6 +581,38 @@
+   }
+ }
+ 
++pir::OpResult apply(Value self, py::object func) {
++  py::gil_scoped_acquire gil;
++  auto stop_gradient = self.attribute<BoolAttribute>(kAttrStopGradients);
++  if (stop_gradient && !stop_gradient.data()) {
++    PADDLE_THROW(phi::errors::Unavailable(
++        "Cannot apply function on a tensor that required gradient."));
++  }
++  PyObject *py_func = func.release().ptr();
++  Py_INCREF(py_func);
++  PyObject *res = nullptr;
++  try {
++    py::object obj = py::cast(self);
++    PyObject *tmp_self = obj.release().ptr();
++    Py_INCREF(tmp_self);
++    res = PyObject_CallFunctionObjArgs(py_func, tmp_self, nullptr);
++    Py_DECREF(tmp_self);
++  } catch (std::exception &e) {
++    PADDLE_THROW(phi::errors::Unavailable(
++        "Apply function of Tensor raises an exception: %s.", e.what()));
++  } catch (...) {
++    PADDLE_THROW(phi::errors::Fatal(
++        "Apply function of Tensor raises an unknown exception."));
++  }
++  if (res == Py_None) {
++    return self.dyn_cast<OpResult>();
++  }
++  auto out = CastPyArg2Value(res, "", 0);
++  Py_DECREF(py_func);
++  Py_DECREF(res);
++  return out.dyn_cast<OpResult>();
++}
++
+ void BindValue(py::module *m) {
+   py::class_<Value> value(*m, "Value", R"DOC(
+     Value class represents the SSA value in the IR system. It is a directed edge
+@@ -738,6 +770,7 @@
+              print_stream << ")";
+              return print_stream.str();
+            })
++      .def("apply", &apply)
+       .def("is_same", &Value::operator==)
+       .def("hash", [](Value self) { return std::hash<pir::Value>{}(self); })
+       .def("__repr__", &Value2String);
+diff --git a/python/paddle/base/dygraph/tensor_patch_methods.py b/python/paddle/base/dygraph/tensor_patch_methods.py
+--- a/python/paddle/base/dygraph/tensor_patch_methods.py
++++ b/python/paddle/base/dygraph/tensor_patch_methods.py
+@@ -384,6 +384,104 @@
+         return np.array(self.grad)
+ 
+     @framework.dygraph_only
++    def apply_(self, func):
++        """
++        Inplace apply the python function to the tensor.
++
++        Returns:
++            None
++
++        Examples:
++            .. code-block:: python
++
++                >>> import paddle
++
++                >>> x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("cpu", "float64")
++                >>> f = lambda x: 3*x+2
++                >>> x.apply_(f)
++                >>> print(x)
++                Tensor(shape=[3, 3], dtype=float64, place=Place(cpu), stop_gradient=True,
++                       [[2.90000004, 3.50000000, 2.30000000],
++                        [4.69999993, 4.69999993, 4.09999996],
++                        [3.20000002, 4.40000004, 2.60000001]])
++
++
++                >>> x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("cpu", "float16")
++                >>> x.apply_(f)
++
++
++                >>> x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("cpu", "bfloat16")
++                >>> x.apply_(f)
++
++
++                >>> if paddle.is_compiled_with_cuda():
++                >>>     x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("gpu", "float32")
++                >>>     x.apply_(f)
++        """
++        if not self.stop_gradient:
++            raise RuntimeError(
++                "Cannot apply function on a tensor that required gradient."
++            )
++        return self._apply_(func)
++
++    def apply(self, func):
++        """
++        Apply the python function to the tensor.
++
++        Returns:
++            None
++
++        Examples:
++            .. code-block:: python
++
++                >>> import paddle
++
++                >>> x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("cpu", "float64")
++                >>> f = lambda x: 3*x+2
++                >>> y = x.apply(f)
++                >>> print(y)
++                Tensor(shape=[3, 3], dtype=float64, place=Place(cpu), stop_gradient=True,
++                       [[2.90000004, 3.50000000, 2.30000000],
++                        [4.69999993, 4.69999993, 4.09999996],
++                        [3.20000002, 4.40000004, 2.60000001]])
++
++
++                >>> x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("cpu", "float16")
++                >>> y = x.apply(f)
++
++
++                >>> x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("cpu", "bfloat16")
++                >>> y = x.apply(f)
++
++
++                >>> if paddle.is_compiled_with_cuda():
++                >>>     x = paddle.to_tensor([[0.3, 0.5, 0.1],
++                >>>        [0.9, 0.9, 0.7],
++                >>>        [0.4, 0.8, 0.2]]).to("gpu", "float32")
++                >>>     y = x.apply(f)
++
++        """
++        if not self.stop_gradient:
++            raise RuntimeError(
++                "Cannot apply function on a tensor that required gradient."
++            )
++        return self._apply(func)
++
++    @framework.dygraph_only
+     def register_hook(self, hook):
+         """
+         Registers a backward hook for current Tensor.
+@@ -1142,6 +1240,8 @@
+         ("clear_grad", clear_grad),
+         ("inplace_version", inplace_version),
+         ("gradient", gradient),
++        ("apply_", apply_),
++        ("apply", apply),
+         ("register_hook", register_hook),
+         ("__str__", __str__),
+         ("__repr__", __str__),
+diff --git a/python/paddle/base/framework.py b/python/paddle/base/framework.py
+--- a/python/paddle/base/framework.py
++++ b/python/paddle/base/framework.py
+@@ -1855,6 +1855,16 @@
+             skip_vars_in_backward_input=[self],
+         )
+ 
++    def apply(self, func):
++        if not self.stop_gradient:
++            raise RuntimeError(
++                "Cannot apply function on a tensor that required gradient."
++            )
++        try:
++            return func(self)
++        except:
++            raise ValueError(f"The PyFunc {func.__name__} could not be applied")
++
+     def __str__(self):
+         return self._to_readable_code()
+ 

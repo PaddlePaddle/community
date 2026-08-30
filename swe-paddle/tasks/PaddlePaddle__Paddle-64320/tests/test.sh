@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-python -m pytest test/legacy_test/test_sparse_mask_as_op.py -q
+# P2P tests (pass-to-pass)
+python -m pytest test/legacy_test/test_sparse_utils_op.py -q -k "not test_with_pir_api"
+
+# F2P tests (fail-to-pass)
+python -m pytest test/legacy_test/test_sparse_mask_as_op.py -q -k "not test_with_pir_api"

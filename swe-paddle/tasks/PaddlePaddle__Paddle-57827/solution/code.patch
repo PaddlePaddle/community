@@ -1,0 +1,432 @@
+diff --git a/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.cc b/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.cc
+--- a/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.cc
++++ b/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.cc
+@@ -769,6 +769,13 @@
+               attribute.dyn_cast<pir::DoubleAttribute>().data());  // NOLINT
+         }
+         attr_map[name] = vec_double;
++      } else if (array_list[0].isa<pir::StrAttribute>()) {
++        std::vector<std::string> vec_string;
++        for (auto attribute : array_list) {
++          vec_string.push_back(
++              attribute.dyn_cast<pir::StrAttribute>().AsString());  // NOLINT
++        }
++        attr_map[name] = vec_string;
+       } else {
+         std::stringstream ss;
+         val.Print(ss);
+diff --git a/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.h b/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.h
+--- a/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.h
++++ b/paddle/fluid/framework/new_executor/pir_adaptor/pir_adaptor_util.h
+@@ -370,6 +370,25 @@
+         }
+       }
+       ctx->EmplaceBackAttr(vec_res);
++
++    } else if (attr_type_name == "pir::ArrayAttribute<pir::StrAttribute>") {
++      auto array_list = attr_map[t].dyn_cast<pir::ArrayAttribute>().AsVector();
++
++      std::vector<std::string> vec_res;
++      if (array_list.size() > 0) {
++        PADDLE_ENFORCE_EQ(
++            array_list[0].isa<pir::StrAttribute>(),
++            true,
++            phi::errors::PreconditionNotMet(
++                "Element in array list MUST be pir::StrAttribute "));
++
++        for (size_t i = 0; i < array_list.size(); ++i) {
++          vec_res.push_back(
++              array_list[i].dyn_cast<pir::StrAttribute>().AsString());
++        }
++      }
++      ctx->EmplaceBackAttr(vec_res);
++
+     } else if (attr_type_name == "paddle::dialect::PlaceAttribute") {
+       ctx->EmplaceBackAttr(
+           attr_map[t].dyn_cast<paddle::dialect::PlaceAttribute>().data());
+diff --git a/paddle/fluid/ir_adaptor/translator/op_translator.cc b/paddle/fluid/ir_adaptor/translator/op_translator.cc
+--- a/paddle/fluid/ir_adaptor/translator/op_translator.cc
++++ b/paddle/fluid/ir_adaptor/translator/op_translator.cc
+@@ -1606,8 +1606,8 @@
+                << "[" << op_desc.Type() << "]" << grad_var_name << " "
+                << idx_in_op << " " << idx_in_vec;
+ 
+-      VarDesc* var_desc =
+-          op_desc.Block()->FindVarRecursive(var_name.substr(0, 1));
++      VarDesc* var_desc = op_desc.Block()->FindVarRecursive(
++          op_desc.Input(var_name.substr(0, 1))[0]);
+       IR_ENFORCE(var_desc != nullptr,
+                  "[op:%s] Input %s should not be null",
+                  op_desc.Type(),
+@@ -2433,6 +2433,35 @@
+   }
+ };
+ 
++struct FusedElemwiseAddActivationOpTranscriber : public OpTranscriber {
++  void HandleNonexistentAttribute(pir::IrContext* ctx,
++                                  pir::AttributeMap* attribute_map,
++                                  const OpAttributeInfo& info) override {
++    if (info.name == "scale") {
++      (*attribute_map)[info.name] = pir::FloatAttribute::get(ctx, 0.0);
++    } else if (info.name == "axis") {
++      (*attribute_map)[info.name] = pir::Int32Attribute::get(ctx, -1);
++    } else if (info.name == "save_intermediate_out") {
++      (*attribute_map)[info.name] = pir::BoolAttribute::get(ctx, false);
++    }
++  }
++};
++
++struct FusedElemwiseAddActivationGradOpTranscriber
++    : public FusedElemwiseAddActivationOpTranscriber {
++  pir::OpInfo LoopkUpOpInfo(pir::IrContext* ctx,
++                            const OpDesc& op_desc) override {
++    const auto inter_out_grad = op_desc.Output("IntermediateOut@GRAD");
++    if (inter_out_grad.size() > 0) {
++      IR_THROW(
++          "pd_op.fused_elemwise_add_activation_grad doesn't have "
++          "Intermediate_out_grad output");
++    }
++
++    return OpTranscriber::LoopkUpOpInfo(ctx, op_desc);
++  }
++};
++
+ OpTranslator::OpTranslator() {
+   pir::IrContext* ctx = pir::IrContext::Instance();
+   ctx->GetOrRegisterDialect<paddle::dialect::OperatorDialect>();
+@@ -2448,6 +2477,10 @@
+   special_handlers["fetch_v2"] = FetchOpTranscriber();
+   special_handlers["fill_constant"] = FillConstantTranscriber();
+   special_handlers["fused_feedforward"] = FusedFeedForwardOpTranscriber();
++  special_handlers["fused_elemwise_add_activation"] =
++      FusedElemwiseAddActivationOpTranscriber();
++  special_handlers["fused_elemwise_add_activation_grad"] =
++      FusedElemwiseAddActivationGradOpTranscriber();
+   special_handlers["grad_add"] = GradAddOpTranscriber();
+   special_handlers["increment"] = IncrementOpTranscriber();
+   special_handlers["lookup_table_v2"] = EmbeddingOpTranscriber();
+diff --git a/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py b/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py
+--- a/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py
++++ b/paddle/fluid/pir/dialect/op_generator/ops_api_gen.py
+@@ -107,6 +107,7 @@
+     'embedding_grad_sparse',
+     'fused_batch_norm_act_',
+     'fused_bn_add_activation_',
++    'fused_elemwise_add_activation',
+     'fused_scale_bias_relu_conv_bn',
+     'fused_scale_bias_add_relu',
+     'memcpy',
+diff --git a/paddle/fluid/pir/dialect/operator/ir/ops.yaml b/paddle/fluid/pir/dialect/operator/ir/ops.yaml
+--- a/paddle/fluid/pir/dialect/operator/ir/ops.yaml
++++ b/paddle/fluid/pir/dialect/operator/ir/ops.yaml
+@@ -181,6 +181,16 @@
+   optional: cache_kv, ln_scale, ln_bias, qkv_bias, src_mask, out_linear_bias, ln_scale_2, ln_bias_2, ln_mean_2, ln_var_2, bias_dropout_residual_out, cache_kv_out
+   backward: fused_attention_grad
+ 
++- op: fused_elemwise_add_activation
++  args: (Tensor x, Tensor y, str[] functor_list, float scale=0.0, int axis=-1, bool save_intermediate_out=false)
++  output: Tensor(out), Tensor(intermediate_out)
++  kernel:
++    func: fused_elemwise_add_activation
++  infer_meta:
++    func : FusedElemwiseAddActivationInferMeta
++  backward: fused_elemwise_add_activation_grad
++  intermediate: intermediate_out
++
+ - op: fused_feedforward
+   args: (Tensor x, Tensor dropout1_seed, Tensor dropout2_seed, Tensor linear1_weight, Tensor linear1_bias, Tensor linear2_weight, Tensor linear2_bias, Tensor ln1_scale, Tensor ln1_bias, Tensor ln2_scale, Tensor ln2_bias, bool pre_layer_norm, float ln1_epsilon, float ln2_epsilon, str act_method, float dropout1_prob, float dropout2_prob, str dropout1_implementation, str dropout2_implementation, bool is_test, bool dropout1_fix_seed, bool dropout2_fix_seed, int dropout1_seed_val, int dropout2_seed_val, bool add_residual, int ring_id)
+   output: Tensor(out), Tensor(dropout1_mask), Tensor(dropout2_mask), Tensor(ln1_mean), Tensor(ln1_variance), Tensor(ln2_mean), Tensor(ln2_variance), Tensor(linear1_out), Tensor(ln1_out), Tensor(dropout1_out), Tensor(dropout2_out)
+diff --git a/paddle/fluid/pir/dialect/operator/ir/ops_backward.yaml b/paddle/fluid/pir/dialect/operator/ir/ops_backward.yaml
+--- a/paddle/fluid/pir/dialect/operator/ir/ops_backward.yaml
++++ b/paddle/fluid/pir/dialect/operator/ir/ops_backward.yaml
+@@ -17,3 +17,13 @@
+   kernel:
+     func: fused_feedforward_grad
+   optional: linear1_bias, linear2_bias, ln1_scale, ln1_bias, ln1_out, ln1_mean, ln1_variance, ln2_scale, ln2_bias, ln2_mean, ln2_variance, dropout2_out, ln1_scale_grad, ln1_bias_grad, ln2_scale_grad, ln2_bias_grad,  linear2_bias_grad
++
++- backward_op: fused_elemwise_add_activation_grad
++  forward: fused_elemwise_add_activation(Tensor x, Tensor y, str[] functor_list, float scale=0.0, int axis=-1, bool save_intermediate_out=false) -> Tensor(out), Tensor(intermediate_out)
++  args: (Tensor x, Tensor y, Tensor out, Tensor intermediate_out, Tensor out_grad, str[] functor_list, float scale=0.0, int axis=-1, bool save_intermediate_out=false)
++  output: Tensor(x_grad), Tensor(y_grad)
++  infer_meta:
++    func: FusedElemwiseAddActivationGradInferMeta
++  kernel:
++    func: fused_elemwise_add_activation_grad
++  optional : x, intermediate_out
+diff --git a/paddle/fluid/pir/dialect/operator/utils/utils.cc b/paddle/fluid/pir/dialect/operator/utils/utils.cc
+--- a/paddle/fluid/pir/dialect/operator/utils/utils.cc
++++ b/paddle/fluid/pir/dialect/operator/utils/utils.cc
+@@ -25,6 +25,8 @@
+     "pd_op.c_broadcast_",
+     "pd_op.c_sync_calc_stream_",
+     "pd_op.c_sync_comm_stream_",
++    "pd_op.fused_elemwise_add_activation",
++    "pd_op.fused_elemwise_add_activation_grad",
+     "pd_op.fused_gemm_epilogue",
+     "pd_op.fused_gemm_epilogue_grad",
+     "pd_op.dpsgd",
+diff --git a/paddle/phi/api/yaml/op_compat.yaml b/paddle/phi/api/yaml/op_compat.yaml
+--- a/paddle/phi/api/yaml/op_compat.yaml
++++ b/paddle/phi/api/yaml/op_compat.yaml
+@@ -3317,6 +3317,13 @@
+   outputs:
+     {out: Out}
+ 
++- op: fused_elemwise_add_activation
++  backward: fused_elemwise_add_activation_grad
++  inputs :
++    {x: X, y: Y}
++  outputs :
++    {out : Out, intermediate_out : IntermediateOut}
++
+ - op: fusion_squared_mat_sub
+   inputs :
+     x : X
+diff --git a/paddle/phi/infermeta/fusion.cc b/paddle/phi/infermeta/fusion.cc
+--- a/paddle/phi/infermeta/fusion.cc
++++ b/paddle/phi/infermeta/fusion.cc
+@@ -13,6 +13,7 @@
+ limitations under the License. */
+ 
+ #include "paddle/phi/infermeta/fusion.h"
++#include <unordered_set>
+ #include <vector>
+ #include "paddle/phi/common/layout.h"
+ #include "paddle/phi/common/scalar.h"
+@@ -892,6 +893,203 @@
+   out->share_lod(x);
+ }
+ 
++static bool IsUnaryCompound(const std::vector<std::string>& functor_list) {
++  PADDLE_ENFORCE_EQ(
++      functor_list.size(),
++      2,
++      phi::errors::InvalidArgument(
++          "Invalid functor list size %d, which should be equal to %d.",
++          functor_list.size(),
++          2));
++  static std::unordered_set<std::string> binary_fun = {"elementwise_add",
++                                                       "elementwise_mul",
++                                                       "elementwise_add_grad",
++                                                       "elementwise_mul_grad"};
++  return binary_fun.count(functor_list[1]) != 0;
++}
++
++static bool InputXCanBeAbsent(const std::vector<std::string>& functor_list) {
++  PADDLE_ENFORCE_EQ(
++      functor_list.size(),
++      2,
++      phi::errors::InvalidArgument(
++          "Invalid functor list size %d, which should be equal to %d.",
++          functor_list.size(),
++          2));
++  static std::unordered_set<std::string> binary_fun = {"elementwise_add_grad"};
++  return binary_fun.count(functor_list[0]) != 0 ||
++         binary_fun.count(functor_list[1]) != 0;
++}
++
++static bool IsBcastY(const phi::DDim& x_dim, const phi::DDim& y_dim) {
++  bool bcast_y = x_dim.size() >= y_dim.size();
++  if (x_dim.size() == y_dim.size()) {
++    for (int i = 0; i < x_dim.size(); ++i) {
++      if (x_dim[i] < y_dim[i]) {
++        bcast_y = false;
++        break;
++      }
++    }
++  }
++  return bcast_y;
++}
++
++void FusedElemwiseAddActivationInferMeta(
++    const MetaTensor& x,
++    const MetaTensor& y,
++    const std::vector<std::string>& functor_list,
++    float scale,
++    int axis,
++    bool save_intermediate_out,
++    MetaTensor* out,
++    MetaTensor* intermediate_out) {
++  PADDLE_ENFORCE_NOT_NULL(
++      x,
++      errors::NotFound(
++          "Input(X) of FusedElemwiseAddActivationOp op should not be null."));
++  PADDLE_ENFORCE_NOT_NULL(
++      y,
++      errors::NotFound(
++          "Input(Y) of FusedElemwiseAddActivationOp op should not be null."));
++  PADDLE_ENFORCE_NOT_NULL(out,
++                          phi::errors::InvalidArgument(
++                              "Output(Out) of FusedElemwiseAddActivationOp op "
++                              "should not be null."));
++
++  auto x_dim = x.dims();
++  auto y_dim = y.dims();
++
++  // Whether the shape of Y is a continuous subsequence of X,
++  // For more information please refer to the op's introduction.
++  bool bcast_y = IsBcastY(x_dim, y_dim);
++
++  auto out_dim = bcast_y ? x_dim : y_dim;
++  auto out_lod = bcast_y ? x : y;
++  auto out_dtype = bcast_y ? x.dtype() : y.dtype();
++
++  PADDLE_ENFORCE_NOT_NULL(
++      intermediate_out,
++      errors::NotFound(
++          "Output(IntermediateOut) of FusedElemwiseAddActivationOp "
++          "should not be null."));
++
++  if (IsUnaryCompound(functor_list)) {
++    // for Unary(Binary(X, Y)), the shape and lod of out and
++    // intermediate_out are the same.
++    intermediate_out->set_dims(out_dim);
++    // set the lod of intermediate_out
++    intermediate_out->share_lod(out_lod);
++  } else {
++    // for Binary(X, Unary(Y)), the shape and lod of Y and
++    // intermediate_out are the same.
++    intermediate_out->set_dims(y_dim);
++    // set the lod of intermediate_out
++    intermediate_out->share_lod(y);
++  }
++  out->set_dims(out_dim);
++  out->share_lod(out_lod);
++  out->set_dtype(out_dtype);
++
++  bool elemntwise_add_detected = false;
++  for (auto names : functor_list) {
++    if (names == "elementwise_add") {
++      elemntwise_add_detected = true;
++      break;
++    }
++  }
++  PADDLE_ENFORCE_EQ(
++      elemntwise_add_detected,
++      true,
++      phi::errors::InvalidArgument(
++          "When the FusedElemwiseAddActivationOp Is used in fused pass, the "
++          "elementwise_add Op must be"
++          "detected and used, Please check the fuse pass pattern"));
++}
++
++void FusedElemwiseAddActivationGradInferMeta(
++    const MetaTensor& x,
++    const MetaTensor& y,
++    const MetaTensor& out,
++    const MetaTensor& intermediate_out,
++    const MetaTensor& out_grad,
++    const std::vector<std::string>& functor_list,
++    float scale,
++    int axis,
++    bool save_intermediate_out,
++    MetaTensor* x_grad,
++    MetaTensor* y_grad) {
++  PADDLE_ENFORCE_NOT_NULL(
++      out_grad,
++      phi::errors::InvalidArgument("Input(Out@Grad) should not be null."));
++
++  if (save_intermediate_out) {
++    PADDLE_ENFORCE_NOT_NULL(intermediate_out,
++                            phi::errors::InvalidArgument(
++                                "Input(IntermediateOut) should not be null."));
++  } else {
++    if (!InputXCanBeAbsent(functor_list)) {
++      PADDLE_ENFORCE_NOT_NULL(
++          x, phi::errors::InvalidArgument("Input(X) should not be null."));
++    }
++  }
++
++  if (x_grad) {
++    if (x) {
++      x_grad->set_dtype(x.dtype());
++      x_grad->set_dims(x.dims());
++      x_grad->share_lod(x);
++    } else {
++      // Currently, only when Binary is elementwise_add or elementwise_sub,
++      // the "X" could be absent.
++      PADDLE_ENFORCE_EQ(
++          InputXCanBeAbsent(functor_list),
++          true,
++          phi::errors::InvalidArgument(
++              "Only when BinaryFunctor is elementwise_add, the 'X' "
++              "could be absent."));
++
++      // Node: If "X" is absence, the shape of Y should be a continuous
++      // subsequence of X, otherwise, we could not infer the shape of dx.
++      x_grad->set_dtype(out.dtype());
++      x_grad->set_dims(out_grad.dims());
++      x_grad->share_lod(out_grad);
++    }
++  }
++
++  if (y_grad) {
++    PADDLE_ENFORCE_NOT_NULL(
++        y, phi::errors::InvalidArgument("Input(Y) should not be null."));
++    y_grad->set_dims(y.dims());
++    y_grad->share_lod(y);
++    y_grad->set_dtype(y.dtype());
++  }
++
++  // if (intermediate_out_grad) {
++  //   // For Unary(Binary(X, Y)), IntermediateOut should not be empty.
++  //   if (IsUnaryCompound(functor_list)) {
++  //     intermediate_out_grad->set_dims(out_grad.dims());
++  //     intermediate_out_grad->share_lod(out_grad);
++  //   } else {
++  //     intermediate_out_grad->set_dims(y.dims());
++  //     intermediate_out_grad->share_lod(y);
++  //   }
++  // }
++  bool elemntwise_add_grad_detected = false;
++  for (auto names : functor_list) {
++    if (names == "elementwise_add_grad") {
++      elemntwise_add_grad_detected = true;
++      break;
++    }
++  }
++  PADDLE_ENFORCE_EQ(
++      elemntwise_add_grad_detected,
++      true,
++      phi::errors::InvalidArgument(
++          "When the FusedElemwiseAddActivationOpGrad Is used in fused pass, "
++          "the elementwise_add_grad Op must be"
++          "detected and used, Please check the fuse pass pattern"));
++}
++
+ void FusedFeedForwardGradInferMeta(const MetaTensor& out_grad,
+                                    const MetaTensor& x,
+                                    const MetaTensor& linear1_weight,
+diff --git a/paddle/phi/infermeta/fusion.h b/paddle/phi/infermeta/fusion.h
+--- a/paddle/phi/infermeta/fusion.h
++++ b/paddle/phi/infermeta/fusion.h
+@@ -243,6 +243,29 @@
+                                  MetaTensor* fmha_out_grad,
+                                  MetaTensor* out_linear_out_grad);
+ 
++void FusedElemwiseAddActivationInferMeta(
++    const MetaTensor& x,
++    const MetaTensor& y,
++    const std::vector<std::string>& functor_list,
++    float scale,
++    int axis,
++    bool save_intermediate_out,
++    MetaTensor* out,
++    MetaTensor* intermediate_out);
++
++void FusedElemwiseAddActivationGradInferMeta(
++    const MetaTensor& x,
++    const MetaTensor& y,
++    const MetaTensor& out,
++    const MetaTensor& intermediate_out,
++    const MetaTensor& out_grad,
++    const std::vector<std::string>& functor_list,
++    float scale,
++    int axis,
++    bool save_intermediate_out,
++    MetaTensor* x_grad,
++    MetaTensor* y_grad);
++
+ void FusedFeedForwardInferMeta(const MetaTensor& x,
+                                const MetaTensor& dropout1_seed,
+                                const MetaTensor& dropout2_seed,

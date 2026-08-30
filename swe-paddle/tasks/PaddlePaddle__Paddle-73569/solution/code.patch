@@ -1,0 +1,28 @@
+diff --git a/paddle/phi/kernels/impl/matmul_grad_kernel_impl.h b/paddle/phi/kernels/impl/matmul_grad_kernel_impl.h
+index 5b02a5e88a2829..a08f2fe7d95910 100644
+--- a/paddle/phi/kernels/impl/matmul_grad_kernel_impl.h
++++ b/paddle/phi/kernels/impl/matmul_grad_kernel_impl.h
+@@ -241,6 +241,9 @@ void MatmulGradKernel(const Context& dev_ctx,
+         dev_ctx, phi::IntArray(common::vectorize(x.dims())), 0, dx);
+     return;
+   }
++  if (!transpose_x && transpose_y && y.dims().size() < 2) {
++    transpose_y = false;
++  }
+   // get dims
+   std::vector<std::int64_t> x_dims = common::vectorize(x.dims());
+   std::vector<std::int64_t> y_dims = common::vectorize(y.dims());
+diff --git a/paddle/phi/kernels/xpu/matmul_grad_kernel.cc b/paddle/phi/kernels/xpu/matmul_grad_kernel.cc
+index 33fcab2308ec41..349a72277e7aa0 100644
+--- a/paddle/phi/kernels/xpu/matmul_grad_kernel.cc
++++ b/paddle/phi/kernels/xpu/matmul_grad_kernel.cc
+@@ -37,6 +37,9 @@ void MatmulGradKernel(const Context& dev_ctx,
+     dev_ctx.template Alloc<T>(dy);
+   }
+ 
++  if (!transpose_x && transpose_y && y.dims().size() < 2) {
++    transpose_y = false;
++  }
+   const XPUType* dout_ptr = reinterpret_cast<const XPUType*>(dout.data<T>());
+   const XPUType* x_ptr = reinterpret_cast<const XPUType*>(x.data<T>());
+   const XPUType* y_ptr = reinterpret_cast<const XPUType*>(y.data<T>());
