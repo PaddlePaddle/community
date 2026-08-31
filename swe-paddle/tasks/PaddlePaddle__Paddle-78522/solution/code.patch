@@ -1,0 +1,89 @@
+diff --git a/python/paddle/distributed/launch/main.py b/python/paddle/distributed/launch/main.py
+index e9d1cf13d29c9179d134c2bbba748d7f293e9aea..acee01eaa2907959412bcf65d3310c98feee99cb 100644
+--- a/python/paddle/distributed/launch/main.py
++++ b/python/paddle/distributed/launch/main.py
+@@ -16,6 +16,7 @@ from __future__ import annotations
+ 
+ import paddle
+ from paddle.distributed.launch.context import Context
++from paddle.distributed.utils import launch_utils
+ 
+ ctx = None
+ 
+@@ -1227,7 +1228,7 @@ def launch() -> None:
+             auto_tuner.add_cfg(cur_cfg)
+ 
+             # per task launch interval
+-            self_pid = str(os.getpid())
++            self_pid = os.getpid()
+             if paddle.device.is_compiled_with_custom_device('npu'):
+                 processes = os.popen(
+                     "fuser -v /dev/davinci* |awk '{for(i=1;i<=NF;i++) print $i;}'"
+@@ -1240,10 +1241,8 @@ def launch() -> None:
+                 processes = os.popen(
+                     "fuser -v /dev/nvidia* |awk '{for(i=1;i<=NF;i++) print $i;}'"
+                 ).readlines()
+-            for process in processes:
+-                pid = str(process.strip())
+-                if pid != self_pid:
+-                    os.system("kill -9 " + pid)
++            pids_to_kill = launch_utils.filter_pids(processes, self_pid)
++            launch_utils.terminate_processes(pids_to_kill)
+             time.sleep(3)
+             end_time = time.time()
+ 
+diff --git a/python/paddle/distributed/utils/launch_utils.py b/python/paddle/distributed/utils/launch_utils.py
+index 7d3f13d4e85f43dc72fd111f96319a7f7a6c5d78..79a782ff542949dc30faa144fadc72a6d9da4698 100644
+--- a/python/paddle/distributed/utils/launch_utils.py
++++ b/python/paddle/distributed/utils/launch_utils.py
+@@ -14,11 +14,13 @@
+ 
+ import copy
+ import os
++import platform
+ import signal
+ import socket
+ import subprocess
+ import sys
+ import time
++from collections.abc import Sequence
+ from contextlib import closing
+ 
+ from paddle.distributed.fleet.launch_utils import get_backend_by_compile_flag
+@@ -552,3 +554,36 @@ def _print_arguments(args):
+     for arg, value in sorted(vars(args).items()):
+         print(f"{arg}: {value}")
+     print("------------------------------------------------")
++
++
++def filter_pids(processes: Sequence[str], self_pid: int) -> list[int]:
++    """Filter valid PIDs from a list of strings, excluding the current self_pid."""
++    pids_to_kill = []
++    for process in processes:
++        pid_str = process.strip()
++        if not pid_str.isdigit():
++            continue
++        pid_int = int(pid_str)
++        if pid_int == self_pid:
++            continue
++        pids_to_kill.append(pid_int)
++    return pids_to_kill
++
++
++def terminate_processes(processes: Sequence[int]) -> bool:
++    """
++    Terminate a list of processes by their PIDs.
++    Returns True if all processes were successfully terminated (or already dead).
++    Returns False if any process failed to terminate due to permissions.
++    """
++    sig = signal.SIGKILL if platform.system() != "Windows" else signal.SIGTERM
++    success = True
++    for pid in processes:
++        try:
++            os.kill(pid, sig)
++        except ProcessLookupError:
++            # Target already exited.
++            pass
++        except PermissionError:
++            success = False
++    return success
