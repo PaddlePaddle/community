@@ -17,3 +17,108 @@ diff --git a/test/dygraph_to_static/test_tensor_memcpy_on_cpu.py b/test/dygraph_
      def test_tensor_cpu_on_default_cpu(self):
          paddle.base.framework._set_expected_place(paddle.CPUPlace())
          dygraph_x1_place, dygraph_place, dygraph_res = self._run(
+@@ -67,9 +69,12 @@
+         x2 = tensor_copy_to_cuda(x1)
+         return x1.place, x2.place, x2.numpy()
+ 
++    @unittest.skipIf(
++        not paddle.base.is_compiled_with_cuda(),
++        "requires CUDA build",
++    )
++    @compare_with_new_ir(False)
+     def test_tensor_cuda_on_default_cpu(self):
+-        if not paddle.base.is_compiled_with_cuda():
+-            return
+ 
+         """
+         Note(liudongxue01): If the following asserts fail to run,
+@@ -96,9 +101,11 @@
+         x2 = tensor_copy_to_cuda_with_warning(x1, device_id=1, blocking=False)
+         return x1.place, x2.place, x2.numpy()
+ 
++    @unittest.skipIf(
++        not paddle.base.is_compiled_with_cuda(),
++        "requires CUDA build",
++    )
+     def test_with_warning_on_cpu(self):
+-        if not paddle.base.is_compiled_with_cuda():
+-            return
+ 
+         paddle.base.framework._set_expected_place(paddle.CPUPlace())
+ 
+diff --git a/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py b/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py
+--- a/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py
++++ b/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py
+@@ -16,6 +16,7 @@
+ import unittest
+ 
+ import numpy as np
++from dygraph_to_static_util import test_and_compare_with_new_ir as compare_with_new_ir
+ 
+ import paddle
+ 
+@@ -48,13 +49,15 @@
+         x2 = tensor_copy_to_cpu(x1)
+         return x1.place, x2.place, x2.numpy()
+ 
++    @unittest.skipIf(
++        not paddle.base.is_compiled_with_cuda(),
++        "requires CUDA build",
++    )
++    @compare_with_new_ir(False)
+     def test_tensor_cpu_on_default_gpu(self):
+-        if paddle.base.is_compiled_with_cuda():
+-            place = paddle.CUDAPlace(
+-                int(os.environ.get('FLAGS_selected_gpus', 0))
+-            )
+-        else:
+-            return
++        place = paddle.CUDAPlace(
++            int(os.environ.get('FLAGS_selected_gpus', 0))
++        )
+         paddle.base.framework._set_expected_place(place)
+         dygraph_x1_place, dygraph_place, dygraph_res = self._run(
+             to_static=False
+@@ -74,13 +77,15 @@
+         x2 = tensor_copy_to_cuda(x1)
+         return x1.place, x2.place, x2.numpy()
+ 
++    @unittest.skipIf(
++        not paddle.base.is_compiled_with_cuda(),
++        "requires CUDA build",
++    )
++    @compare_with_new_ir(False)
+     def test_tensor_cuda_on_default_gpu(self):
+-        if paddle.base.is_compiled_with_cuda():
+-            place = paddle.CUDAPlace(
+-                int(os.environ.get('FLAGS_selected_gpus', 0))
+-            )
+-        else:
+-            return
++        place = paddle.CUDAPlace(
++            int(os.environ.get('FLAGS_selected_gpus', 0))
++        )
+         paddle.base.framework._set_expected_place(place)
+         dygraph_x1_place, dygraph_place, dygraph_res = self._run(
+             to_static=False
+@@ -100,13 +105,14 @@
+         x2 = tensor_copy_to_cuda_with_warning(x1, device_id=1, blocking=False)
+         return x1.place, x2.place, x2.numpy()
+ 
++    @unittest.skipIf(
++        not paddle.base.is_compiled_with_cuda(),
++        "requires CUDA build",
++    )
+     def test_with_warning_on_gpu(self):
+-        if paddle.base.is_compiled_with_cuda():
+-            place = paddle.CUDAPlace(
+-                int(os.environ.get('FLAGS_selected_gpus', 0))
+-            )
+-        else:
+-            return
++        place = paddle.CUDAPlace(
++            int(os.environ.get('FLAGS_selected_gpus', 0))
++        )
+         paddle.base.framework._set_expected_place(place)
+ 
+         x1 = paddle.ones([1, 2, 3])
