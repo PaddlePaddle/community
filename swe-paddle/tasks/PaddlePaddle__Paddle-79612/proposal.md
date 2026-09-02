@@ -32,13 +32,13 @@
 
 - 目标测试文件 / 命令：
   - 建议把纯 Python 逻辑测试集中到 `minimal_nd_slice` 所在模块对应的单测文件，覆盖 shape `(2, 10, 12)` 下的 cross axis、exact boundary、last element 等 case。
-  - 端到端测试应覆盖两卡 save/load reshard，并分别经过 broadcast、send_recv、grouped_send_recv 三条路径。
+  - 端到端测试应覆盖两卡 save/load reshard，并经过 Auto Parallel 测试体系实际收集执行。也就是说，最终 test patch 必须把该端到端用例注册进 `test/auto_parallel/hybrid_strategy/testslist.csv` 以及对应的 `CMakeLists.txt`；这是上游 review 明确提出的要求，属于 acceptance evidence 的一部分，不是可选的基础设施补充。
   - 最终任务包里的最小测试命令可以拆成两段，一段是确定性的本地 helper 单测，一段是 Linux + 两卡的分布式验收命令。
 - 修复前预期：在 `base_commit` 上应用测试补丁后，1D、2D 或落在同一前缀内的简单区间可能仍然通过，但 rank >= 3 的跨轴区间会暴露错误。典型表现是 `minimal_nd_slice` 结果没有在高阶轴分歧后把低阶轴扩满，随后出现 reshard offset 计算被污染、切出的数据块内容错误，或 load 阶段拿到与目标 shard 不一致的 shape。
 - 修复后预期：`minimal_nd_slice` 能稳定返回符合最小包围语义的 N 维 slice，高维跨轴区间不再错误收缩低阶轴；在两卡 save/load reshard 场景下，broadcast、send_recv、grouped_send_recv 三条路径都能得到正确数据和 shape。
 - F2P 候选：
   - 针对 `minimal_nd_slice` 的纯 Python 窄测试，重点覆盖 shape `(2, 10, 12)` 上的高维 cross axis、exact boundary、last element case。
-  - 针对两卡 save/load 的端到端分布式测试，验证同一组 case 在 broadcast、send_recv、grouped_send_recv 下都能复现问题。
+  - 针对两卡 save/load 的端到端分布式测试，至少选择一种有代表性的通信方式作为核心 F2P，用来稳定暴露高维 cross axis 下的数据/shape 失配；如果运行时成本过高，剩余通信方式可作为补充 F2P / integration coverage 保留，用于对齐上游 parity，但不应被表述为 P2P。
 - P2P 候选：
   - 现有 1D、2D range 测试。
   - 现有“区间完全落在同一前缀内”的切片测试。
@@ -54,12 +54,14 @@
 - 硬件：至少 2 张 GPU，用于 save/load reshard 的多卡验收。
 - patch 类型：纯 Python。
 - 最小测试命令：后续建议提供一组本地确定性 helper 测试命令，以及一组 Linux + 两卡分布式验收命令。
+- Auto Parallel 测试注册要求：最终任务包中的端到端测试除提供命令外，还必须同步登记到 `test/auto_parallel/hybrid_strategy/testslist.csv` 和对应 `CMakeLists.txt`，确保 CI 会真实收集并执行该用例。
 - 是否有 oracle 日志：无。
 
 说明：
 
 - 这个任务的 production patch 是纯 Python，但不能因此把验收误判成 `cpu_only`。真正的业务路径涉及分布式 checkpoint reshard，需要 Linux + 两卡环境提供最终 acceptance evidence。
 - 同时，为了降低 verifier 定位成本，建议保留一组确定性的本地 helper 单测，先把 `minimal_nd_slice` 的索引逻辑单独钉住，再用多卡端到端测试证明下游数据搬运路径也恢复正确。
+- 如果三种通信方式的全量端到端覆盖导致运行成本过高，可以选一条代表性路径作为核心 F2P，把其余路径作为补充 F2P / integration coverage；但无论如何，完整任务材料都应保留“上游最终需要覆盖并注册哪些通信方式”的 parity 记录。
 
 ## 7. 风险自查
 
