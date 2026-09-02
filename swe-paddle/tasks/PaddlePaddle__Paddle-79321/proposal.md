@@ -17,7 +17,7 @@
 
 - **真实性**：该任务来自 Paddle 主仓已合入的 API Compatibility PR，目标是补齐公开 API 的用户可见返回值语义。
 - **代表性**：它覆盖神经网络 `Layer` 状态字典加载、序列化兼容和 PyTorch 风格返回对象，是框架 API 兼容任务中的典型轻量样本。
-- **边界清楚**：目标只涉及 `set_state_dict` 的返回对象；参数加载、strict 检查、权重赋值和已有 `load_state_dict` 行为不应被改动。
+- **边界清楚**：目标只涉及 `set_state_dict` 的返回对象；参数加载及现有参数语义不应被改动。
 - **非平凡性**：修复不能简单改变返回类型而破坏旧代码的 tuple 解包兼容性，需要同时满足向后兼容和命名字段访问。
 - **验证成本低**：生产修改为 Python 代码，目标测试使用 CPU 即可，不依赖 GPU、分布式、多进程、外部服务或 C++ 重编译。
 
@@ -32,7 +32,7 @@
 
 - 目标测试命令：`bash tests/test.sh`
 - 目标测试文件：`test/legacy_test/test_state_dict_convert.py`
-- F2P nodeid：建议新增 `test/legacy_test/test_state_dict_convert.py::TestLoadStateDict::test_missing_keys_and_unexpected_keys_attr`
+- F2P nodeid：建议新增 `test/legacy_test/test_state_dict_convert.py::TestStateDictReturn::test_missing_keys_and_unexpected_keys_attr`
 - P2P 候选：同文件中已有 `test_missing_keys_and_unexpected_keys` 等依赖 tuple 解包的状态字典回归用例。
 - 修复前预期：P2P 通过；新增 F2P 用例在 `base_commit` + `tests/test.patch` 上失败，因为 `set_state_dict` 返回普通 tuple，不能通过 `result.missing_keys` / `result.unexpected_keys` 访问。
 - 修复后预期：继续应用 `solution/code.patch` 后，返回值既可按二元组解包，也可通过命名字段访问；F2P 与 P2P 均通过。
