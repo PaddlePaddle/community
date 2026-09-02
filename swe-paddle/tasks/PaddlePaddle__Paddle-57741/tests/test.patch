@@ -5,7 +5,7 @@ diff --git a/test/dygraph_to_static/test_tensor_memcpy_on_cpu.py b/test/dygraph_
  import unittest
  
  import numpy as np
-+from dygraph_to_static_util import test_and_compare_with_new_ir
++from dygraph_to_static_util import test_and_compare_with_new_ir as compare_with_new_ir
  
  import paddle
  
@@ -13,53 +13,7 @@ diff --git a/test/dygraph_to_static/test_tensor_memcpy_on_cpu.py b/test/dygraph_
          x2 = tensor_copy_to_cpu(x1)
          return x1.place, x2.place, x2.numpy()
  
-+    @test_and_compare_with_new_ir(False)
++    @compare_with_new_ir(False)
      def test_tensor_cpu_on_default_cpu(self):
          paddle.base.framework._set_expected_place(paddle.CPUPlace())
          dygraph_x1_place, dygraph_place, dygraph_res = self._run(
-@@ -67,6 +69,7 @@
-         x2 = tensor_copy_to_cuda(x1)
-         return x1.place, x2.place, x2.numpy()
- 
-+    @test_and_compare_with_new_ir(False)
-     def test_tensor_cuda_on_default_cpu(self):
-         if not paddle.base.is_compiled_with_cuda():
-             return
-diff --git a/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py b/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py
---- a/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py
-+++ b/test/dygraph_to_static/test_tensor_memcpy_on_gpu.py
-@@ -16,6 +16,7 @@
- import unittest
- 
- import numpy as np
-+from dygraph_to_static_util import test_and_compare_with_new_ir
- 
- import paddle
- 
-@@ -48,6 +49,7 @@
-         x2 = tensor_copy_to_cpu(x1)
-         return x1.place, x2.place, x2.numpy()
- 
-+    @test_and_compare_with_new_ir(False)
-     def test_tensor_cpu_on_default_gpu(self):
-         if paddle.base.is_compiled_with_cuda():
-             place = paddle.CUDAPlace(
-@@ -74,6 +76,7 @@
-         x2 = tensor_copy_to_cuda(x1)
-         return x1.place, x2.place, x2.numpy()
- 
-+    @test_and_compare_with_new_ir(False)
-     def test_tensor_cuda_on_default_gpu(self):
-         if paddle.base.is_compiled_with_cuda():
-             place = paddle.CUDAPlace(
-diff --git a/test/white_list/new_ir_op_test_white_list b/test/white_list/new_ir_op_test_white_list
---- a/test/white_list/new_ir_op_test_white_list
-+++ b/test/white_list/new_ir_op_test_white_list
-@@ -136,6 +136,7 @@
- test_matrix_power_op
- test_maxout_op
- test_mean_op
-+test_memcpy_op
- test_mode_op
- test_multi_dot_op
- test_multiplex_op
