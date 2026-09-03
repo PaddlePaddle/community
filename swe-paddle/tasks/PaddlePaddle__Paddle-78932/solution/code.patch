@@ -1,0 +1,92 @@
+diff --git a/python/paddle/io/dataloader/dataset.py b/python/paddle/io/dataloader/dataset.py
+index e7519ae2cfe0401b029d2f91a904915a2894afa0..2a8ecb8c1bb0659ec90d46697ed05f9483a91d96 100755
+--- a/python/paddle/io/dataloader/dataset.py
++++ b/python/paddle/io/dataloader/dataset.py
+@@ -25,9 +25,10 @@ from typing import (
+     TypeVar,
+ )
+ 
+-from typing_extensions import Never, TypeVarTuple, Unpack
++from typing_extensions import Never, TypeVarTuple, Unpack, overload
+ 
+ import paddle
++from paddle.utils.decorator_utils import variadic_tensor_decorator
+ 
+ from ... import framework
+ 
+@@ -319,6 +320,13 @@ class TensorDataset(Dataset["Tensor"]):
+ 
+     tensors: Sequence[Tensor]
+ 
++    @overload
++    def __init__(self, tensors: Sequence[Tensor]) -> None: ...
++
++    @overload
++    def __init__(self, *tensors: Tensor) -> None: ...
++
++    @variadic_tensor_decorator('tensors', 1)
+     def __init__(self, tensors: Sequence[Tensor]) -> None:
+         if not framework.in_dynamic_mode():
+             raise RuntimeError(
+diff --git a/python/paddle/utils/data/__init__.py b/python/paddle/utils/data/__init__.py
+index 34502b82e20c8dc0235e3a842d10649824dbd2af..49358baf5bf1033accb2530f613049304dd8c810 100644
+--- a/python/paddle/utils/data/__init__.py
++++ b/python/paddle/utils/data/__init__.py
+@@ -22,6 +22,7 @@ from .dataset import (
+     Dataset,
+     IterableDataset,
+     Subset,
++    TensorDataset,
+     random_split,
+ )
+ from .sampler import (
+@@ -44,4 +45,5 @@ __all__ = [
+     'RandomSampler',
+     'Sampler',
+     'SequentialSampler',
++    'TensorDataset',
+ ]
+diff --git a/python/paddle/utils/data/dataset.py b/python/paddle/utils/data/dataset.py
+index f4a5f8a70c43162fa3886f33d187d0bca68eebe6..469280a61bb22f9601eec3b26670e9e0087d9787 100644
+--- a/python/paddle/utils/data/dataset.py
++++ b/python/paddle/utils/data/dataset.py
+@@ -18,5 +18,6 @@ from paddle.io import (
+     Dataset as Dataset,
+     IterableDataset as IterableDataset,
+     Subset as Subset,
++    TensorDataset as TensorDataset,
+     random_split as random_split,
+ )
+diff --git a/python/paddle/utils/decorator_utils.py b/python/paddle/utils/decorator_utils.py
+index b7f55e0cf05f66d7c02d073a76e0918803c3a6d7..bda544574049e16960c50709466ea0ff17ad8a55 100644
+--- a/python/paddle/utils/decorator_utils.py
++++ b/python/paddle/utils/decorator_utils.py
+@@ -1001,6 +1001,7 @@ def use_first_signature(
+ 
+ def variadic_tensor_decorator(
+     param_name: str,
++    param_pos: int = 0,
+ ) -> Callable[[Callable[_InputT, _RetT]], Callable[_InputT, _RetT]]:
+     """
+     Decorator to handle variadic tensor arguments.
+@@ -1018,14 +1019,14 @@ def variadic_tensor_decorator(
+         def wrapper(*args: _InputT.args, **kwargs: _InputT.kwargs) -> _RetT:
+             # PyTorch usage: variadic tensor arguments
+             if len(args) >= 1 and isinstance(
+-                args[0], (paddle.Tensor, paddle.pir.Value)
++                args[param_pos], (paddle.Tensor, paddle.pir.Value)
+             ):
+-                kwargs[param_name] = list(args)
+-                args = ()
++                kwargs[param_name] = list(args[param_pos:])
++                args = args[:param_pos]
+             # Paddle usage: list/tuple argument
+-            elif len(args) >= 1 and isinstance(args[0], (list, tuple)):
+-                kwargs[param_name] = args[0]
+-                args = ()
++            elif len(args) >= 1 and isinstance(args[param_pos], (list, tuple)):
++                kwargs[param_name] = args[param_pos]
++                args = args[:param_pos]
+             return func(*args, **kwargs)
+ 
+         wrapper.__signature__ = inspect.signature(func)

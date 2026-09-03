@@ -1,0 +1,293 @@
+diff --git a/test/swe_test/test_auto_tuner_resume.py b/test/swe_test/test_auto_tuner_resume.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..e13801bf9b3a5e5c451c831bace1f55912aea092
+--- /dev/null
++++ b/test/swe_test/test_auto_tuner_resume.py
+@@ -0,0 +1,287 @@
++import csv
++import importlib.util
++import json
++import logging
++import sys
++import types
++import uuid
++from pathlib import Path
++
++import pytest
++
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++TUNER_SOURCE = (
++    REPO_ROOT / "python/paddle/distributed/auto_tuner/tuner.py"
++)
++LAUNCH_SOURCE = REPO_ROOT / "python/paddle/distributed/launch/main.py"
++
++
++def _package(name):
++    module = types.ModuleType(name)
++    module.__path__ = []
++    sys.modules[name] = module
++    return module
++
++
++def _module(name):
++    module = types.ModuleType(name)
++    sys.modules[name] = module
++    return module
++
++
++def _load_checkout_module(name, source):
++    spec = importlib.util.spec_from_file_location(name, source)
++    module = importlib.util.module_from_spec(spec)
++    sys.modules[name] = module
++    spec.loader.exec_module(module)
++    return module
++
++
++def _load_tuner(task_cfg):
++    root = f"_swe_pr60417_{uuid.uuid4().hex}"
++    _package(root)
++    _package(f"{root}.distributed")
++    _package(f"{root}.distributed.auto_tuner")
++
++    utils = _module(f"{root}.distributed.auto_tuner.utils")
++    utils.default_candidates = lambda cfg: cfg.get("candidates", [])
++    utils.gbs_default_candidates = lambda cfg: cfg.get("candidates", [])
++
++    search = _module(f"{root}.distributed.auto_tuner.search")
++
++    class GridSearch:
++        def __init__(self, tuner_cfg):
++            self.all_tasks = [dict(task_cfg)]
++            self.idx = 0
++
++        def search_once(self, history_cfgs):
++            if self.idx >= len(self.all_tasks):
++                return None
++            result = dict(self.all_tasks[self.idx])
++            self.idx += 1
++            return result
++
++    search.GridSearch = GridSearch
++    search.DpEstimationSearch = GridSearch
++    search.GBSSearch = GridSearch
++    search.CustomizeSearch = GridSearch
++
++    tuner = _load_checkout_module(
++        f"{root}.distributed.auto_tuner.tuner", TUNER_SOURCE
++    )
++    return root, tuner
++
++
++def _base_config():
++    return {
++        "mp_degree": 1,
++        "sharding_degree": 1,
++        "pp_degree": 1,
++        "dp_degree": 1,
++        "sharding_stage": 1,
++        "micro_batch_size": 2,
++        "vpp_degree": 1,
++        "use_recompute": False,
++        "recompute_granularity": "full",
++        "num_gpus": 1,
++        "nodes": 1,
++        "global_batch_size": 8,
++        "sharding_overlap": False,
++    }
++
++
++def _tuner_config():
++    return {
++        "task_limit": 10,
++        "search_algo": {"name": "grid"},
++        "metric_cfg": {
++            "name": "step_time",
++            "OptimizationDirection": "Minimize",
++        },
++        "model_cfg": {"global_batch_size": 8},
++        "run_best": False,
++    }
++
++
++def _write_history(path, rows):
++    with path.open("w", newline="", encoding="utf-8") as stream:
++        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
++        writer.writeheader()
++        writer.writerows(rows)
++
++
++def test_existing_search_and_history_flow_is_unchanged():
++    task = _base_config()
++    _, tuner_module = _load_tuner(task)
++    tuner = tuner_module.AutoTuner(_tuner_config())
++
++    found = tuner.search_once()
++    tuner.add_cfg(found)
++
++    assert found == task
++    assert tuner.history_cfgs == [task]
++    assert tuner.search_once() is None
++
++
++def test_resume_history_loads_values_and_preserves_a_copy(tmp_path):
++    task = _base_config()
++    _, tuner_module = _load_tuner(task)
++    tuner = tuner_module.AutoTuner(_tuner_config())
++    history = tmp_path / "training.history.csv"
++    row = {
++        **task,
++        "step_time": 1.25,
++        "max_mem_usage": "",
++        "error_info": "",
++    }
++    _write_history(history, [row])
++
++    tuner.resume_form_history(history)
++
++    assert len(tuner.resume_cfgs) == 1
++    resumed = tuner.resume_cfgs[0]
++    assert resumed["micro_batch_size"] == 2
++    assert resumed["use_recompute"] is False
++    assert resumed["step_time"] == pytest.approx(1.25)
++    assert resumed["max_mem_usage"] is None
++    assert resumed["time"] == pytest.approx(1.25)
++    copied = tmp_path / "training_copy.csv"
++    assert copied.exists()
++    with copied.open(newline="", encoding="utf-8") as stream:
++        assert list(csv.DictReader(stream))[0]["step_time"] == "1.25"
++
++
++def test_resume_lookup_returns_first_matching_configuration():
++    task = _base_config()
++    _, tuner_module = _load_tuner(task)
++    tuner = tuner_module.AutoTuner(_tuner_config())
++    tuner.resume_cfgs = [
++        {**task, "marker": "first", "step_time": 1.25},
++        {**task, "marker": "second", "step_time": 1.10},
++    ]
++
++    matched = tuner.get_cfg_from_resume(dict(task))
++    different = tuner.get_cfg_from_resume({**task, "mp_degree": 2})
++
++    assert matched["marker"] == "first"
++    assert different is None
++
++
++def test_launch_reuses_history_without_starting_training(tmp_path):
++    task = _base_config()
++    history_row = {
++        **task,
++        "acc_steps": 4,
++        "step_time": 1.25,
++        "max_mem_usage": 1024,
++        "error_info": "",
++    }
++    history = tmp_path / "resume.csv"
++    _write_history(history, [history_row])
++    config = _tuner_config()
++    config["resume_csv_file_path"] = str(history)
++    config_path = tmp_path / "tuner.json"
++    config_path.write_text(json.dumps(config), encoding="utf-8")
++    training_script = tmp_path / "train.py"
++    training_script.write_text("raise AssertionError('must not run')\n")
++
++    root, tuner_module = _load_tuner(task)
++    _package(f"{root}.distributed.launch")
++
++    class Logger:
++        def info(self, *args, **kwargs):
++            pass
++
++        def warning(self, *args, **kwargs):
++            pass
++
++    class FakeContext:
++        def __init__(self):
++            self.args = types.SimpleNamespace(
++                auto_tuner_json=str(config_path),
++                training_script=str(training_script),
++                training_script_args=[],
++                devices="0",
++                nnodes="1",
++                log_dir=str(tmp_path / "logs"),
++                max_restart=0,
++                master=None,
++                job_id="test",
++            )
++            self.logger = Logger()
++
++        def is_legacy_mode(self):
++            return False
++
++        def is_auto_tuner_mode(self):
++            return True
++
++        def set_envs(self, envs):
++            self.envs = envs
++
++    context_module = _module(f"{root}.distributed.launch.context")
++    context_module.Context = FakeContext
++
++    recorder_instances = []
++    recorder_module = _module(
++        f"{root}.distributed.auto_tuner.recorder"
++    )
++
++    class HistoryRecorder:
++        def __init__(self, *args, **kwargs):
++            self.history = []
++            self.store_calls = []
++            recorder_instances.append(self)
++
++        def add_cfg(self, **cfg):
++            self.history.append(dict(cfg))
++
++        def get_best(self, **kwargs):
++            return min(self.history, key=lambda cfg: cfg["time"]), False
++
++        def store_history(self, path):
++            self.store_calls.append(path)
++
++        def clean_history(self):
++            self.history.clear()
++
++    recorder_module.HistoryRecorder = HistoryRecorder
++    sys.modules[f"{root}.distributed.auto_tuner.tuner"] = tuner_module
++
++    utils = sys.modules[f"{root}.distributed.auto_tuner.utils"]
++    utils.add_overlap_performance = lambda *args, **kwargs: None
++    utils.find_error_from_log = lambda *args, **kwargs: []
++    utils.gen_new_args = lambda args, cfg, tuner_cfg, **kwargs: list(args)
++    utils.gen_new_ctx = lambda ctx, cfg, tuner_cfg: ctx
++    utils.read_log = lambda *args, **kwargs: (None, None, 0)
++    utils.read_step_time_log = lambda *args, **kwargs: None
++
++    controller_calls = []
++    controllers = _module(f"{root}.distributed.launch.controllers")
++
++    def init_controller(ctx):
++        controller_calls.append(ctx)
++        raise AssertionError("a resumed task must not start a controller")
++
++    controllers.init = init_controller
++
++    launch_module = _load_checkout_module(
++        f"{root}.distributed.launch.main", LAUNCH_SOURCE
++    )
++
++    try:
++        with pytest.raises(SystemExit):
++            launch_module.launch()
++    finally:
++        logger = logging.getLogger("auto_tuner")
++        for handler in list(logger.handlers):
++            handler.close()
++            logger.removeHandler(handler)
++
++    assert controller_calls == []
++    assert len(recorder_instances) == 1
++    assert recorder_instances[0].history[0]["step_time"] == pytest.approx(
++        1.25
++    )
++    assert recorder_instances[0].history[0]["job_id"] == 1

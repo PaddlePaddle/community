@@ -1,0 +1,25 @@
+diff --git a/test/legacy_test/test_state_dict_convert.py b/test/legacy_test/test_state_dict_convert.py
+index 14cf6734a895f7..ec4fecf0f8ef40 100644
+--- a/test/legacy_test/test_state_dict_convert.py
++++ b/test/legacy_test/test_state_dict_convert.py
+@@ -109,6 +109,20 @@ def test_missing_keys_and_unexpected_keys(self):
+         self.assertEqual(len(unexpected_keys), 1)
+         self.assertEqual(unexpected_keys[0], "unexpected_keys")
+ 
++    def test_missing_keys_and_unexpected_keys_attr(self):
++        model1 = MyModel2()
++        tmp_dict = {}
++        tmp_dict["unexpected_keys"] = paddle.to_tensor([1])
++        result = model1.set_state_dict(tmp_dict)
++        self.assertIsInstance(result, tuple)
++        self.assertEqual(result.missing_keys, ["linear.weight", "linear.bias"])
++        self.assertEqual(result.unexpected_keys, ["unexpected_keys"])
++        self.assertIs(result[0], result.missing_keys)
++        self.assertIs(result[1], result.unexpected_keys)
++        missing_keys, unexpected_keys = result
++        self.assertIs(missing_keys, result.missing_keys)
++        self.assertIs(unexpected_keys, result.unexpected_keys)
++
+ 
+ class TestStateKeepVars(unittest.TestCase):
+     def test_true(self):
