@@ -1,0 +1,105 @@
+diff --git a/python/paddle/pir/math_op_patch.py b/python/paddle/pir/math_op_patch.py
+index 6f0acfaedb..8de1bff7f6 100644
+--- a/python/paddle/pir/math_op_patch.py
++++ b/python/paddle/pir/math_op_patch.py
+@@ -261,14 +261,16 @@ def monkey_patch_opresult():
+                             break
+                     else:
+                         # when break is not triggered, enter the else branch
+-                        other_var_opresult = paddle.fill_constant(
+-                            self.shape,
+-                            lhs_dtype,
+-                            other_var,
++                        other_var_opresult = (
++                            paddle.tensor.creation.fill_constant(
++                                self.shape,
++                                lhs_dtype,
++                                other_var,
++                            )
+                         )
+                 else:
+                     # add fill_op to current_block
+-                    other_var_opresult = paddle.fill_constant(
++                    other_var_opresult = paddle.tensor.creation.fill_constant(
+                         [],
+                         lhs_dtype,
+                         other_var,
+@@ -390,6 +392,34 @@ def monkey_patch_opresult():
+             '__matmul__',
+             _binary_creator_('__matmul__', paddle.tensor.matmul, False, None),
+         ),
++        #  for logical compare
++        # TODO(gouzil): Open after deleting c++ logic
++        # (
++        #     '__eq__',
++        #     _binary_creator_('__eq__', paddle.tensor.equal, False, None),
++        # ),
++        (
++            '__ne__',
++            _binary_creator_('__ne__', paddle.tensor.not_equal, False, None),
++        ),
++        (
++            '__lt__',
++            _binary_creator_('__lt__', paddle.tensor.less_than, False, None),
++        ),
++        (
++            '__le__',
++            _binary_creator_('__le__', paddle.tensor.less_equal, False, None),
++        ),
++        (
++            '__gt__',
++            _binary_creator_('__gt__', paddle.tensor.greater_than, False, None),
++        ),
++        (
++            '__ge__',
++            _binary_creator_(
++                '__ge__', paddle.tensor.greater_equal, False, None
++            ),
++        ),
+     ]
+ 
+     global _already_patch_opresult
+@@ -409,6 +439,12 @@ def monkey_patch_opresult():
+             if method_impl:
+                 setattr(OpResult, method_name, method_impl)
+ 
++        # Bit operation symbol
++        for magic_method, origin_method in paddle.tensor.magic_method_func:
++            impl = getattr(paddle.tensor, origin_method, None)
++            if impl:
++                setattr(OpResult, magic_method, impl)
++
+         # Handling __getitem__
+         from ..base.variable_index import _getitem_static
+ 
+diff --git a/python/paddle/tensor/logic.py b/python/paddle/tensor/logic.py
+index 0c9bafb8b5..865b2a62d4 100755
+--- a/python/paddle/tensor/logic.py
++++ b/python/paddle/tensor/logic.py
+@@ -1213,7 +1213,7 @@ def bitwise_or(x, y, out=None, name=None):
+             Tensor(shape=[3], dtype=int64, place=Place(cpu), stop_gradient=True,
+             [-1, -1, -3])
+     """
+-    if in_dynamic_mode() and out is None:
++    if in_dynamic_or_pir_mode() and out is None:
+         return _C_ops.bitwise_or(x, y)
+ 
+     return _bitwise_op(
+@@ -1272,7 +1272,7 @@ def bitwise_xor(x, y, out=None, name=None):
+             Tensor(shape=[3], dtype=int64, place=Place(cpu), stop_gradient=True,
+             [-1, -3, -4])
+     """
+-    if in_dynamic_mode() and out is None:
++    if in_dynamic_or_pir_mode() and out is None:
+         return _C_ops.bitwise_xor(x, y)
+     return _bitwise_op(
+         op_name="bitwise_xor", x=x, y=y, name=name, out=out, binary_op=True
+@@ -1328,7 +1328,7 @@ def bitwise_not(x, out=None, name=None):
+             Tensor(shape=[3], dtype=int64, place=Place(cpu), stop_gradient=True,
+             [ 4,  0, -2])
+     """
+-    if in_dynamic_mode() and out is None:
++    if in_dynamic_or_pir_mode() and out is None:
+         return _C_ops.bitwise_not(x)
+ 
+     return _bitwise_op(
