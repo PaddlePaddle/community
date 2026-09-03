@@ -37,7 +37,7 @@ DataLoader 缺少按实际读取耗时自动选择 worker 数量的能力，用�
 - 修复后预期：P2P、两个启用场景以及完整上游测试文件全部通过。
 - P2P 候选：`TestAutoTune::test_dataloader_disable_autotune`。
 - F2P 候选：`TestAutoTune::test_dataloader_use_autotune` 和 `TestAutoTune::test_distributer_batch_sampler_autotune`。
-- 测试来源：`tests/test.patch` 与 PR 合入时新增的测试文件 diff 完全一致，不改写上游断言。
+- 测试来源：`tests/test.patch` 基于 PR 合入时新增的测试覆盖做最小 benchmark 适配：将 Gold-only `set_autotune_config` 的导入延迟到两个 F2P 测试体内，并使 P2P 不依赖该新增 API，从而保证 Base 可收集完整角色节点；其余测试逻辑与上游覆盖保持一致。
 
 ## 6. 环境与资源
 

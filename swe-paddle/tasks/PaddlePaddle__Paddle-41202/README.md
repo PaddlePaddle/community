@@ -30,7 +30,7 @@ Allow DataLoader to sample a small portion of a dataset and automatically select
 - `proposal.md`: candidate proposal for maintainer triage.
 - `instruction.md`: self-contained problem statement for the coding agent.
 - `solution/code.patch`: gold production patch from the merged PR.
-- `tests/test.patch`: exact upstream test patch from the merged PR.
+- `tests/test.patch`: benchmark regression test adapted from the merged PR test coverage so Base can collect the P2P/F2P roles before Gold-only API lookup occurs.
 - `tests/test.sh`: minimal target test command.
 - `environment/README.md`: environment notes for reproduction.
 - `README.md`: task overview and verification entrypoint.
@@ -41,4 +41,4 @@ Allow DataLoader to sample a small portion of a dataset and automatically select
 bash tests/test.sh
 ```
 
-Expected behavior: applying `tests/test.patch` to `base_commit` should keep the disabled-mode P2P valid while the enabled auto-tune scenarios fail; applying both `tests/test.patch` and `solution/code.patch` should make the complete upstream test file pass.
+Expected behavior: applying `tests/test.patch` to `base_commit` should allow all three role candidates to be collected, keep the disabled-mode P2P valid, and make the two enabled auto-tune scenarios fail when they look up the Gold-only API. Applying both `tests/test.patch` and `solution/code.patch` should make all three tests pass.
