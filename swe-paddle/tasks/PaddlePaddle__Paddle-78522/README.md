@@ -22,7 +22,7 @@ This directory converts Paddle PR #78522 into a SWE-Paddle community task candid
 
 - 真实来源于已合入的分布式启动改进，行为边界集中在任务间进程清理。
 - upstream test 使用 mock 验证 PID 过滤、调用顺序和异常语义，无需 GPU、网络或真实子进程竞态。
-- Base 缺少目标清理契约，upstream test 可稳定形成 F2P；已有 launch utility 测试用于保护 P2P。
+- Base 缺少目标清理契约，upstream test 可稳定形成 3 个 F2P；`tests/test.sh` 同时执行 Base 已存在的 `TestCoverage::test_find_free_ports` 作为独立 P2P。
 
 ## Files
 
@@ -40,4 +40,4 @@ This directory converts Paddle PR #78522 into a SWE-Paddle community task candid
 bash tests/test.sh
 ```
 
-Expected behavior: applying `tests/test.patch` to `base_commit` should fail on the target behavior; applying both `tests/test.patch` and `solution/code.patch` should pass the target tests.
+Expected behavior: on Base, the existing launch P2P passes while the three cleanup F2Ps fail; after applying `solution/code.patch`, the P2P remains green and all three F2Ps pass.
