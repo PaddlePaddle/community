@@ -1,18 +1,19 @@
 diff --git a/test/legacy_test/test_multi_dot_op.py b/test/legacy_test/test_multi_dot_op.py
-index 308b9c1cc0..bb1061a1d8 100644
+index 308b9c1cc0..4d91416f8d 100644
 --- a/test/legacy_test/test_multi_dot_op.py
 +++ b/test/legacy_test/test_multi_dot_op.py
-@@ -31,14 +31,19 @@ class TestMultiDotOp(OpTest):
+@@ -31,14 +31,20 @@ class TestMultiDotOp(OpTest):
          self.op_type = "multi_dot"
          self.python_api = paddle.linalg.multi_dot
          self.dtype = self.get_dtype()
 +        self.init_shape()
          self.get_inputs_and_outputs()
- 
++        self.__class__.exist_fp64_check_grad = True
++
 +    def init_shape(self):
 +        self.A_shape = (2, 8)
 +        self.B_shape = (8, 4)
-+
+ 
      def get_dtype(self):
          return "float64"
  
@@ -24,7 +25,7 @@ index 308b9c1cc0..bb1061a1d8 100644
          self.inputs = {'X': [('x0', self.A), ('x1', self.B)]}
          self.outputs = {'Out': multi_dot([self.A, self.B])}
  
-@@ -55,6 +60,21 @@ class TestMultiDotFP16Op(TestMultiDotOp):
+@@ -55,6 +61,21 @@ class TestMultiDotFP16Op(TestMultiDotOp):
          return "float16"
  
  
