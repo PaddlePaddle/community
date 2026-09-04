@@ -31,7 +31,7 @@ Allow `paddle.load()` to restore model data containing ordinary configuration ob
 - `proposal.md`: candidate proposal for maintainer triage.
 - `instruction.md`: self-contained problem statement for the coding agent.
 - `solution/code.patch`: production-only Gold patch.
-- `tests/test.patch`: exact test-file patch from the merged PR.
+- `tests/test.patch`: benchmark regression tests adapted from the merged PR test coverage so Base can collect the complete P2P/F2P role set.
 - `tests/test.sh`: minimal target test command.
 - `environment/README.md`: environment notes for reproduction.
 - `README.md`: task overview and verification entrypoint.
