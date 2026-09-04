@@ -1,0 +1,29 @@
+# RISC-V Zacas semantics
+semantics:
+  amocas_w:
+    description: "amocas.w rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Cas
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 4
+        compare: $x.rd
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amocas_d:
+    description: "amocas.d rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Cas
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 8
+        compare: $x.rd
+    implicit_pc_read: false
+    implicit_pc_write: false

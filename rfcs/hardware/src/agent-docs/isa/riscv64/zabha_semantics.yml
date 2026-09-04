@@ -1,0 +1,237 @@
+# RISC-V Zabha semantics (byte and halfword AMOs)
+semantics:
+  # Byte AMOs
+  amoswap_b:
+    description: "amoswap.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Swap
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoadd_b:
+    description: "amoadd.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Add
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoand_b:
+    description: "amoand.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: And
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoor_b:
+    description: "amoor.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Or
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoxor_b:
+    description: "amoxor.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Xor
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomin_b:
+    description: "amomin.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Min
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomax_b:
+    description: "amomax.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Max
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amominu_b:
+    description: "amominu.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Minu
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomaxu_b:
+    description: "amomaxu.b rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Maxu
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  # Halfword AMOs
+  amoswap_h:
+    description: "amoswap.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Swap
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoadd_h:
+    description: "amoadd.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Add
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoand_h:
+    description: "amoand.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: And
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoor_h:
+    description: "amoor.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Or
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoxor_h:
+    description: "amoxor.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Xor
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomin_h:
+    description: "amomin.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Min
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomax_h:
+    description: "amomax.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Max
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amominu_h:
+    description: "amominu.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Minu
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomaxu_h:
+    description: "amomaxu.h rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Maxu
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false

@@ -1,0 +1,33 @@
+semantics:
+  cbo_clean:
+    description: cbo.clean hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  cbo_flush:
+    description: cbo.flush hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  cbo_inval:
+    description: cbo.inval hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
