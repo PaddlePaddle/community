@@ -26,7 +26,21 @@ fi
 # The symbolic-shape suite needs a different utils.py. Keep the CINN/PIR
 # directory ahead of the legacy test directory because both modules are named
 # utils.py.
+#
+# It also needs the same FLAGS environment that upstream's CTest registration
+# uses. check_infer_results reads the op attribute `sym_shape_str`, which is
+# attached by the shape optimization pass that CheckInferSymbolicIfNeed adds,
+# and that function returns early unless FLAGS_prim_forward,
+# FLAGS_prim_backward and FLAGS_check_infer_symbolic are all set
+# (FLAGS_prim_all sets the two prim flags). Without them the node raises
+# KeyError: 'sym_shape_str' on the gold build as well. The flags below mirror
+# test/ir/pir/cinn/symbolic/CMakeLists.txt.
 if ! PYTHONPATH="$repo_root/test/ir/pir/cinn:$repo_root/test/ir/pir/cinn/symbolic${PYTHONPATH:+:$PYTHONPATH}" \
+  FLAGS_check_infer_symbolic=1 \
+  FLAGS_enable_pir_api=1 \
+  FLAGS_prim_enable_dynamic=true \
+  FLAGS_prim_all=True \
+  FLAGS_cinn_new_group_scheduler=1 \
   "$PYTHON_BIN" -m pytest \
   test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py::AminmaxOpInferSymbolicShapeTest \
   -q; then
