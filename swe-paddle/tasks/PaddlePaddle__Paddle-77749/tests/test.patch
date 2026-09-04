@@ -1,9 +1,9 @@
 diff --git a/test/legacy_test/test_rnn_utils.py b/test/legacy_test/test_rnn_utils.py
 new file mode 100644
-index 0000000000..395d1038aa
+index 0000000000..b7d8ee1051
 --- /dev/null
 +++ b/test/legacy_test/test_rnn_utils.py
-@@ -0,0 +1,270 @@
+@@ -0,0 +1,287 @@
 +# Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,24 @@ index 0000000000..395d1038aa
 +import numpy as np
 +
 +import paddle
-+from paddle.nn.utils.rnn import pad_sequence, unpad_sequence
++
++# The target APIs are resolved inside these thin wrappers instead of at module
++# import time, so this file still imports when ``paddle.nn.utils.rnn`` is
++# absent and every case below is collected and fails inside its own body.
++
++
++def pad_sequence(*args, **kwargs):
++    """Call ``paddle.nn.utils.rnn.pad_sequence``, imported on first use."""
++    from paddle.nn.utils.rnn import pad_sequence as _pad_sequence
++
++    return _pad_sequence(*args, **kwargs)
++
++
++def unpad_sequence(*args, **kwargs):
++    """Call ``paddle.nn.utils.rnn.unpad_sequence``, imported on first use."""
++    from paddle.nn.utils.rnn import unpad_sequence as _unpad_sequence
++
++    return _unpad_sequence(*args, **kwargs)
 +
 +
 +class TestPadSequence(unittest.TestCase):
