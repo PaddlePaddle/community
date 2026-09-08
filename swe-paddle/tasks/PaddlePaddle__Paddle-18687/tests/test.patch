@@ -1,0 +1,194 @@
+diff --git a/test/swe_paddle/test_pr18687_launch_ps.py b/test/swe_paddle/test_pr18687_launch_ps.py
+new file mode 100644
+--- /dev/null
++++ b/test/swe_paddle/test_pr18687_launch_ps.py
+@@ -0,0 +1,189 @@
++import ast
++from argparse import ArgumentParser, REMAINDER
++import importlib.util
++import os
++from pathlib import Path
++import subprocess
++import sys
++import types
++
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++
++
++def _load_launch_ps():
++    path = REPO_ROOT / "python/paddle/distributed/launch_ps.py"
++    if not path.exists():
++        raise ModuleNotFoundError("parameter-server launcher module is missing")
++    spec = importlib.util.spec_from_file_location("swe_pr18687_launch_ps", path)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def _load_existing_collective_parser():
++    path = REPO_ROOT / "python/paddle/distributed/launch.py"
++    tree = ast.parse(path.read_text(), filename=str(path))
++    function = next(
++        node
++        for node in tree.body
++        if isinstance(node, ast.FunctionDef)
++        and node.name in {"_parse_args", "parse_args"}
++    )
++    namespace = {
++        "ArgumentParser": ArgumentParser,
++        "REMAINDER": REMAINDER,
++        "os": os,
++        "sys": sys,
++    }
++    module = ast.Module(body=[function], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(path), "exec"), namespace)
++    return namespace[function.name]
++
++
++def test_p2p_existing_collective_parser_forwards_training_arguments():
++    parse_args = _load_existing_collective_parser()
++    previous = sys.argv
++    candidates = [
++        ["launch.py", "train.py", "--epochs", "2"],
++        [
++            "launch.py",
++            "--selected_gpus",
++            "0",
++            "train.py",
++            "--epochs",
++            "2",
++        ],
++    ]
++    parsed = None
++    try:
++        for argv in candidates:
++            sys.argv = argv
++            try:
++                parsed = parse_args()
++                break
++            except SystemExit:
++                continue
++    finally:
++        sys.argv = previous
++    assert parsed is not None
++    assert parsed.training_script == "train.py"
++    assert parsed.training_script_args == ["--epochs", "2"]
++
++
++def test_f2p_parameter_server_parser_accepts_counts_and_script_arguments():
++    module = _load_launch_ps()
++    previous = sys.argv
++    sys.argv = [
++        "launch_ps.py",
++        "--worker_num",
++        "3",
++        "--server_num",
++        "2",
++        "--start_port",
++        "7000",
++        "train.py",
++        "--epochs",
++        "4",
++    ]
++    try:
++        parsed = module.parse_args()
++    finally:
++        sys.argv = previous
++    assert parsed.worker_num == 3
++    assert parsed.server_num == 2
++    assert parsed.start_port == 7000
++    assert parsed.training_script == "train.py"
++    assert parsed.training_script_args == ["--epochs", "4"]
++
++
++class _FakeProcess:
++    def __init__(self, returncode=0):
++        self.returncode = returncode
++        self.waited = False
++
++    def wait(self):
++        self.waited = True
++
++
++def test_f2p_server_and_worker_roles_receive_consistent_environment():
++    module = _load_launch_ps()
++    calls = []
++
++    def popen(command, env, **kwargs):
++        process = _FakeProcess()
++        calls.append((list(command), dict(env), process))
++        return process
++
++    module.subprocess = types.SimpleNamespace(
++        Popen=popen,
++        CalledProcessError=subprocess.CalledProcessError,
++    )
++    args = types.SimpleNamespace(
++        worker_num=3,
++        server_num=2,
++        start_port=7000,
++        training_script="train.py",
++        training_script_args=["--batch-size", "8"],
++        log_dir=None,
++    )
++    old_http = os.environ.get("http_proxy")
++    old_https = os.environ.get("https_proxy")
++    os.environ["http_proxy"] = "http://proxy.invalid"
++    os.environ["https_proxy"] = "http://proxy.invalid"
++    try:
++        module.start_procs(args)
++    finally:
++        if old_http is None:
++            os.environ.pop("http_proxy", None)
++        else:
++            os.environ["http_proxy"] = old_http
++        if old_https is None:
++            os.environ.pop("https_proxy", None)
++        else:
++            os.environ["https_proxy"] = old_https
++
++    assert len(calls) == 5
++    assert [env["TRAINING_ROLE"] for _, env, _ in calls] == [
++        "PSERVER",
++        "PSERVER",
++        "TRAINER",
++        "TRAINER",
++        "TRAINER",
++    ]
++    assert [env["CURRENT_ID"] for _, env, _ in calls] == ["0", "1", "0", "1", "2"]
++    assert {env["ENDPOINTS"] for _, env, _ in calls} == {
++        "127.0.0.1:7000,127.0.0.1:7001"
++    }
++    assert {env["TRAINER_NUM"] for _, env, _ in calls} == {"3"}
++    assert all("http_proxy" not in env and "https_proxy" not in env for _, env, _ in calls)
++    assert all(
++        command == [sys.executable, "-u", "train.py", "--batch-size", "8"]
++        for command, _, _ in calls
++    )
++    assert all(process.waited for _, _, process in calls)
++
++
++def test_f2p_failed_child_process_is_reported_to_the_launcher():
++    module = _load_launch_ps()
++    process = _FakeProcess(returncode=7)
++    module.subprocess = types.SimpleNamespace(
++        Popen=lambda *args, **kwargs: process,
++        CalledProcessError=subprocess.CalledProcessError,
++    )
++    args = types.SimpleNamespace(
++        worker_num=0,
++        server_num=1,
++        start_port=7100,
++        training_script="train.py",
++        training_script_args=[],
++        log_dir=None,
++    )
++    try:
++        module.start_procs(args)
++    except subprocess.CalledProcessError as error:
++        assert error.returncode == 7
++        assert error.cmd == [sys.executable, "-u", "train.py"]
++    else:
++        raise AssertionError("failed child process was not reported")
