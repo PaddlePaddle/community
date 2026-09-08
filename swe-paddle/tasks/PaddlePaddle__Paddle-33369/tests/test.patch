@@ -1,0 +1,183 @@
+diff --git a/test/swe_paddle/test_pr33369_elastic_fault_tolerance.py b/test/swe_paddle/test_pr33369_elastic_fault_tolerance.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..2d23cde85475cfe79ce491e0025f3265bc6a5d1e
+--- /dev/null
++++ b/test/swe_paddle/test_pr33369_elastic_fault_tolerance.py
+@@ -0,0 +1,177 @@
++import ast
++import importlib.util
++from pathlib import Path
++from types import SimpleNamespace
++
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++ELASTIC = REPO_ROOT / "python/paddle/distributed/fleet/elastic.py"
++LAUNCH = REPO_ROOT / "python/paddle/distributed/fleet/launch.py"
++
++
++def _load_function(path, name, namespace):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    node = next(
++        item
++        for item in tree.body
++        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
++        and item.name == name
++    )
++    module = ast.Module(body=[node], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(path), "exec"), namespace)
++    return namespace[name]
++
++
++def _load_elastic_module():
++    if not ELASTIC.exists():
++        raise AssertionError(
++            "collective launch has no elastic fault-tolerance manager"
++        )
++    spec = importlib.util.spec_from_file_location(
++        "swe_pr33369_elastic", ELASTIC
++    )
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def test_parameter_server_mode_is_preserved():
++    class DistributeMode:
++        COLLECTIVE = "collective"
++        PS = "ps"
++        PS_HETER = "ps-heter"
++
++    which_distributed_mode = _load_function(
++        LAUNCH,
++        "which_distributed_mode",
++        {"DistributeMode": DistributeMode},
++    )
++    assert (
++        which_distributed_mode(SimpleNamespace(run_mode="ps"))
++        == DistributeMode.PS
++    )
++
++
++def test_failed_training_requests_an_elastic_restart():
++    module = _load_elastic_module()
++    events = []
++
++    class Launcher:
++        def watch(self):
++            return 7
++
++        def stop(self):
++            events.append("stop")
++
++    manager = object.__new__(module.ElasticManager)
++    manager.stopped = False
++    manager.launcher = Launcher()
++    manager.elastic_level = 1
++    manager.exit = lambda completed=False: events.append(
++        ("exit", completed)
++    )
++
++    assert manager.watch() == module.ElasticStatus.RESTART
++    assert events == ["stop", ("exit", False)]
++
++
++def test_membership_change_holds_the_current_training_group():
++    module = _load_elastic_module()
++    events = []
++
++    class Launcher:
++        def watch(self):
++            return None
++
++        def stop(self):
++            events.append("stop")
++
++    manager = object.__new__(module.ElasticManager)
++    manager.stopped = False
++    manager.launcher = Launcher()
++    manager._completed = lambda: False
++    manager._match = lambda: False
++
++    assert manager.watch() == module.ElasticStatus.HOLD
++    assert events == ["stop"]
++
++
++def test_collective_launch_is_managed_by_the_elastic_lifecycle():
++    events = []
++
++    class DistributeMode:
++        COLLECTIVE = "collective"
++        PS = "ps"
++
++    class ElasticStatus:
++        COMPLETED = "completed"
++        HOLD = "hold"
++        EXIT = "exit"
++        ERROR = "error"
++        RESTART = "restart"
++
++    class Manager:
++        def __init__(self, args):
++            events.append("manager")
++            self.sigint = 0
++            self.signal_handler = lambda *args: None
++
++        def wait(self):
++            events.append("wait")
++
++        def run(self, launcher):
++            events.append(("run", launcher))
++
++        def watch(self):
++            events.append("watch")
++            return ElasticStatus.COMPLETED
++
++    class FakeSignal:
++        SIGTERM = 15
++        SIGABRT = 6
++        SIGINT = 2
++
++        @staticmethod
++        def signal(sig, handler):
++            events.append(("signal", sig))
++
++    class FakeSys:
++        @staticmethod
++        def exit(code):
++            events.append(("exit", code))
++
++    collective_launcher = object()
++    namespace = {
++        "_parse_args": lambda: SimpleNamespace(),
++        "get_logger": lambda: object(),
++        "_print_arguments": lambda args: None,
++        "which_distributed_mode": lambda args: DistributeMode.COLLECTIVE,
++        "DistributeMode": DistributeMode,
++        "launch_ps": lambda *args: events.append("ps"),
++        "launch_collective": lambda *args: events.append(
++            "unmanaged_collective"
++        ),
++        "ElasticManager": Manager,
++        "signal": FakeSignal,
++        "ElasticStatus": ElasticStatus,
++        "CollectiveLauncher": collective_launcher,
++        "sys": FakeSys,
++        "ELASTIC_EXIT_CODE": 101,
++    }
++    launch = _load_function(LAUNCH, "launch", namespace)
++    launch()
++
++    assert "unmanaged_collective" not in events
++    assert events[:4] == [
++        "manager",
++        ("signal", FakeSignal.SIGTERM),
++        ("signal", FakeSignal.SIGABRT),
++        ("signal", FakeSignal.SIGINT),
++    ]
++    assert events[4:] == [
++        "wait",
++        ("run", collective_launcher),
++        "watch",
++        ("exit", 0),
++    ]
