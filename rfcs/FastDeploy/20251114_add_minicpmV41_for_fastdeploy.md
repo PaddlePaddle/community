@@ -1,525 +1,276 @@
-# **项目：在 FastDeploy 中原生支持 MiniCPM4.1-8B**
+# FastDeploy 新增 MiniCPM4.1-8B 模型
 
-**目标**: 实现一个高性能、功能完整的 MiniCPM4.1-8B 推理后端，支持其 InfLLM-V2 稀疏注意力、混合推理模式等核心特性，并集成 FastDeploy 现有的低bit量化能力。
+| 任务名称 | 【Hackathon 10th Spring No.50】为 FastDeploy 新增 MiniCPM4.1-8B 模型 |
+|------|------|
+| 提交作者 | cloudforge1 |
+| 提交时间 | 2026-04-14 |
+| 版本号 | V3.0 |
+| 文件名 | 20251114_add_minicpmV41_for_fastdeploy.md |
 
-**核心技术路径**:
+# 一、概述
 
-1. **复用**: 最大化复用 FastDeploy 现有的 attention backend 和量化组件。
-2. **开发**: 实现 InfLLM-V2 动态稀疏注意力的高性能 CUDA 算子。
-3. **集成**: 在 Python 层构建完整的 MiniCPM4.1-8B 模型结构，并适配 FastDeploy 现有的 WINT2/WINT4/WINT8 量化框架。
+## 1、相关背景
 
-## **核心策略**: 并行推进算子开发与模型集成，以3周时间实现核心功能，通过充分复用现有基础设施快速交付。
+MiniCPM4.1-8B 是 OpenBMB 发布的高性能紧凑型语言模型（8B 参数），采用 Grouped Query Attention (GQA) + μP (Maximal Update Parametrization) + LongRoPE 三大核心技术。该模型在 MMLU、HumanEval、GSM8K 等基准测试中表现优异，具备 65,536 token 上下文窗口。
 
----
+FastDeploy 作为飞桨高性能推理部署引擎，已有成熟的 GQA 注意力后端和量化框架。MiniCPM4.1-8B 的特殊之处在于 μP 三点缩放，需要在嵌入层、残差连接和 LM head 三处精确实现缩放因子。
 
-### **Phase 1: [快速集成] FastDeploy低bit整数量化支持 (1-2天)**
+## 2、功能目标
 
-**目标**: 利用FastDeploy现有的WINT2/WINT4/WINT8量化基础设施，为MiniCPM4.1-8B快速启用低bit整数量化推理能力。
+1. 实现 MiniCPM4.1-8B 模型组网代码，提交至 `FastDeploy/fastdeploy/model_executor/models/` 目录
+2. 适配 FastDeploy 现有的低bit量化推理能力（WINT4/WINT8/FP8）
+3. 提交模型使用说明文档
+4. 支持 LongRoPE 位置编码（需适配 `rotary_embedding.py`）
 
-**现状评估**:
-- ✅ **FastDeploy已完整支持**: WINT2/WINT4/WINT8量化
-- ✅ **CUDA算子**: 高性能weight_only_linear实现
-- ✅ **配置系统**: WINT2Config/WINT4Config/WINT8Config
-- ✅ **MiniCPM已有基础**: 已实现QuantizedMiniCPM41MLP和QuantizedMiniCPM41Attention
+## 3、意义
 
-**任务 1.1: 扩展MiniCPM4.1-8B量化配置支持**
+- 丰富 FastDeploy 可部署模型的覆盖范围，支持 OpenBMB MiniCPM 系列
+- 为 8B 参数量级模型提供高效推理部署方案，适配消费级单卡 GPU 场景
+- μP 缩放的正确实现为后续支持更多 μP 模型（如 CerebrasGPT）奠定基础
 
-- **目标**: 完善MiniCPM4.1-8B的量化配置解析和模型注册
-- **修改文件**: `fastdeploy/model_executor/layers/quantization/__init__.py`
+# 二、飞桨现状
+
+## 1、已有基础设施
+
+| 组件 | 文件 | 复用方式 |
+|------|------|---------|
+| GQA 注意力 | `layers/attention/attention.py` | 直接复用（`num_key_value_heads=2`） |
+| QKV 并行线性层 | `layers/linear.py` (`QKVParallelLinear`) | 直接复用 |
+| Merged 列并行 | `layers/linear.py` (`MergedColumnParallelLinear`) | 直接复用（gate+up 融合） |
+| 行并行线性层 | `layers/linear.py` (`RowParallelLinear`) | 直接复用 |
+| RMSNorm | `layers/normalization.py` | 直接复用 |
+| 词表并行嵌入 | `layers/embeddings.py` (`VocabParallelEmbedding`) | 直接复用 |
+| 并行 LM Head | `layers/lm_head.py` (`ParallelLMHead`) | 直接复用 |
+| 旋转位置编码 | `layers/rotary_embedding.py` | 需扩展 LongRoPE 支持 |
+| WINT 量化框架 | `layers/quantization/weight_only.py` | 直接复用 |
+| 模型注册机制 | `models/__init__.py` (`ModelRegistry`) | 直接复用 |
+| 权重映射 | `model_base.py` (`WeightsMapper`) | 直接复用 |
+
+## 2、缺失组件
+
+| 组件 | 说明 | 措施 |
+|------|------|------|
+| μP 缩放逻辑 | 嵌入/残差/LM head 三处缩放 | 在模型文件中实现 |
+| LongRoPE 支持 | `rotary_embedding.py` 尚未处理 `longrope` 类型 | 扩展现有 RoPE 层 |
+| 词表掩码 | `ori_vocab_size` 之外的 token 应被 mask 为 `-inf` | 在 `compute_logits` 中实现 |
+
+# 三、业内方案调研
+
+## 1、vLLM
+
+vLLM 在 `vllm/model_executor/models/minicpm.py` 中实现了 MiniCPM 系列支持：
+- 使用标准 GQA 注意力（非 MLA）
+- μP 三点缩放参考实现：`scale_emb`（嵌入）、`scale_depth/√num_layers`（残差）、`1/(hidden_size/dim_model_base)`（lm_head）
+- 注册为 `MiniCPMForCausalLM`
+
+## 2、HuggingFace Transformers
+
+`transformers/models/minicpm/modeling_minicpm.py` 提供原生实现：
+- μP 缩放写入 `config.json`（`scale_emb=12`, `scale_depth=1.4`, `dim_model_base=256`）
+- LongRoPE 通过 `rope_scaling` 配置项支持
+- GQA: `num_attention_heads=32`, `num_key_value_heads=2`
+
+## 3、对比分析
+
+| 方案 | 优点 | 缺点 |
+|------|------|------|
+| vLLM | μP 实现清晰、张量并行完整 | Triton 内核对飞桨不适用 |
+| HuggingFace | 原生配置加载 | 不支持 PaddlePaddle 后端 |
+| **FastDeploy（本方案）** | 复用 GQA/量化框架、μP 精确移植 | 需新建模型文件 + LongRoPE 扩展 |
+
+# 四、设计思路与实现方案
+
+## 1、主体设计思路
+
+采用 **Qwen2 + μP 扩展** 策略：模型结构与 Qwen2 高度同构（GQA + SiLU MLP + RMSNorm），在此基础上添加 μP 三点缩放。模型文件继承 `ModelForCasualLM`，通过 `@ModelRegistry.register_model_class()` 自动注册为 `MiniCPMForCausalLM`。
+
+## 2、关键技术点
+
+### 2.1 μP (Maximal Update Parametrization) 三点缩放
+
+μP 确保模型在不同宽度间迁移时梯度和激活尺度保持稳定。MiniCPM4.1-8B 在三处应用缩放：
+
+**Site 1 — 嵌入缩放 (×scale_emb)**
+```python
+# MiniCPM4Model.forward()
+hidden_states = self.embed_tokens(input_ids)
+hidden_states = hidden_states * self.config.scale_emb  # ×12
+```
+将嵌入向量放大 12 倍，补偿初始化时的缩小。
+
+**Site 2 — 残差缩放 (×scale_depth/√num_hidden_layers)**
+```python
+# MiniCPM4DecoderLayer.forward()
+scale = self.config.scale_depth / math.sqrt(self.config.num_hidden_layers)
+# scale = 1.4 / √32 ≈ 0.2475
+
+# 注意力残差
+attn_output = self.self_attn(hidden_states, forward_meta)
+hidden_states = residual + attn_output * scale
+
+# MLP 残差
+mlp_output = self.mlp(hidden_states, forward_meta)
+hidden_states = residual + mlp_output * scale
+```
+每层的注意力和 MLP 输出均乘以 `scale_depth/√num_layers`，独立应用于两个子层。
+
+**Site 3 — LM head 缩放 (÷ hidden_size/dim_model_base)**
+```python
+# MiniCPM4ForCausalLM.compute_logits()
+lm_head_scale = self.config.hidden_size / self.config.dim_model_base
+# = 4096 / 256 = 16.0
+
+logits = hidden_states @ lm_head_weight.T
+logits = logits / lm_head_scale  # ÷16
+```
+在 logit 计算后除以宽度比，防止大模型宽度下 logit 爆炸。
+
+**关键验证**：三个缩放点的值和位置已与 [vLLM 参考实现](https://github.com/vllm-project/vllm/blob/main/vllm/model_executor/models/minicpm.py) 逐行对比确认。
+
+### 2.2 GQA 注意力
+
+MiniCPM4.1-8B 使用标准 Grouped Query Attention：
+- `num_attention_heads = 32`（Q heads）
+- `num_key_value_heads = 2`（KV heads，每个服务 16 个 Q head）
+- `head_dim = hidden_size / num_attention_heads = 128`
+
+直接复用 FastDeploy 的 `QKVParallelLinear` + `Attention` 层，无需自定义注意力后端：
 
 ```python
-def parse_minicpm41_quant_config(args, model_config):
-    """解析MiniCPM4.1-8B量化配置"""
-    if args.quantization in ["wint2", "wint4", "wint8"]:
-        # 使用FastDeploy内置INT量化配置
-        from .weight_only import WINT2Config, WINT4Config, WINT8Config
-
-        config_map = {
-            "wint2": WINT2Config,
-            "wint4": WINT4Config,
-            "wint8": WINT8Config
-        }
-
-        quant_config = config_map[args.quantization].from_config({
-            "is_quantized": True,
-            "group_size": getattr(args, "group_size", 128)
-        })
-
-        return quant_config
+class MiniCPM4Attention(nn.Layer):
+    def __init__(self, fd_config, layer_id, prefix=""):
+        self.qkv_proj = QKVParallelLinear(fd_config, prefix=f"{prefix}.qkv_proj", with_bias=False)
+        self.o_proj = RowParallelLinear(fd_config, prefix=f"{prefix}.o_proj", ...)
+        self.attn = Attention(fd_config, layer_id=layer_id, prefix=prefix)
 ```
 
-**任务 1.2: 完善MiniCPM4.1-8B量化层支持**
+### 2.3 LongRoPE 位置编码
 
-- **目标**: 完善现有量化实现，确保WINT2/WINT4/WINT8全面支持
-- **修改文件**: `fastdeploy/model_executor/models/minicpm41_quant.py`
+MiniCPM4.1-8B 使用 `longrope` 类型的位置编码，通过 `long_factor` 和 `short_factor` 数组按维度缩放频率：
+
+```json
+"rope_scaling": {
+    "rope_type": "longrope",
+    "long_factor": [0.998, 1.033, ..., 63.009],
+    "short_factor": [0.998, 1.033, ..., 63.009],
+    "original_max_position_embeddings": 65536
+}
+```
+
+需在 `rotary_embedding.py` 中新增 `longrope` 分支，将 factor 数组乘入 inverse frequency 向量。
+
+### 2.4 词表掩码
+
+MiniCPM4.1-8B 的 `vocab_size=73448`，模型配置含 `ori_vocab_size`（原始词表大小）。在 `compute_logits` 中对超出 `ori_vocab_size` 的 token 应用 `-inf` 掩码，防止生成 padding token：
 
 ```python
-# 扩展支持的量化类型 (第71行)
-supported_quant_types = ["w4afp8", "w4a8", "wint8", "wint4", "wint2", "fp8"]
-
-# 扩展量化层自动选择 (第130行和第196行)
-if self.quant_config and self.quant_config.quant_type in ["w4afp8", "w4a8", "wint8", "wint4", "wint2"]:
-    # 使用量化线性层
-    linear_class = QuantizedRowParallelLinear  # 复用FastDeploy现有实现
+logits[:, self.config.ori_vocab_size:] = float("-inf")
 ```
 
-**任务 1.3: 模型注册和配置更新**
-
-- **目标**: 将MiniCPM4.1-8B添加到FastDeploy模型注册表，明确支持的量化类型
-- **修改文件**: `fastdeploy/model_executor/models/__init__.py`
-
-```python
-# 注册MiniCPM4.1-8B支持
-ModelRegistry.register_model(
-    model_name="MiniCPM4.1-8B",
-    model_class=MiniCPM41ForCausalLM,
-    supported_quantizations=["wint2", "wint4", "wint8", "w4afp8", "w4a8", "fp8"]
-)
-```
-
-**任务 1.4: 测试用例和验证**
-
-- **目标**: 验证WINT2/WINT4/WINT8量化在MiniCPM4.1-8B上的正确性
-- **创建文件**: `tests/models/test_minicpm41_int_quant.py`
-
-```python
-def test_minicpm41_wint_quantization():
-    """测试MiniCPM4.1-8B INT量化功能"""
-    for quant_type in ["wint2", "wint4", "wint8"]:
-        config = FDConfig(
-            model="openbmb/MiniCPM4.1-8B",
-            quantization=quant_type
-        )
-        model = MiniCPM41ForCausalLM(config)
-        assert hasattr(model, 'quant_config')
-        assert model.quant_config.quant_type == quant_type
-
-        # 验证量化层正确初始化
-        for layer in model.layers:
-            assert hasattr(layer, 'mlp')
-            assert hasattr(layer, 'self_attn')
-```
-
-**预期成果**:
-- ✅ **WINT8**: 50%压缩率，<1%精度损失，1.5x推理加速
-- ✅ **WINT4**: 75%压缩率，<2-3%精度损失，2x推理加速
-- ✅ **WINT2**: 87.5%压缩率，<5%精度损失，2.5x推理加速
-
-**工作量**: 仅需1-2天的配置和测试工作，基于FastDeploy成熟的INT量化基础设施。
-
----
-
-### **Phase 2: [核心开发] 实现 InfLLM-V2 注意力后端架构 (1-1.5 周)**
-
-按照FastDeploy现有的attention backend管理方式实现InfLLM-V2，而不是作为独立的算子。
-
-**任务 2.1: 实现 InfLLM-V2 注意力后端类**
-
-- **目标**: 继承FastDeploy的AttentionBackend基类，实现InfLLM-V2特有的稀疏注意力
-- **创建文件**: `fastdeploy/model_executor/layers/attention/infllmv2_attention_backend.py`
-- **技术架构**:
-  ```python
-  from fastdeploy.model_executor.layers.attention.base_attention_backend import AttentionBackend
-  from fastdeploy.model_executor.layers.attention.attention_metadata import AttentionMetadata
-  from dataclasses import dataclass
-
-  @dataclass
-  class InfLLMV2AttentionMetadata(AttentionMetadata):
-      """InfLLM-V2特有的注意力元数据"""
-      kernel_select_mask: Optional[paddle.Tensor] = None
-      topk_indices: Optional[paddle.Tensor] = None
-      kernel_size: int = 32
-      kernel_stride: int = 16
-      topk: int = 64
-      dense_len: int = 8192
-      block_size: int = 64
-
-  class InfLLMV2AttentionBackend(AttentionBackend):
-      """InfLLM-V2稀疏注意力后端"""
-
-      def __init__(self, fd_config, kv_num_heads, num_heads, head_dim, **kwargs):
-          super().__init__()
-          self.fd_config = fd_config
-          self.kv_num_heads = kv_num_heads
-          self.num_heads = num_heads
-          self.head_dim = head_dim
-          # InfLLM-V2特有参数
-          self.kernel_size = getattr(fd_config, 'kernel_size', 32)
-          self.kernel_stride = getattr(fd_config, 'kernel_stride', 16)
-          self.topk = getattr(fd_config, 'topk', 64)
-          self.dense_len = getattr(fd_config, 'dense_len', 8192)
-
-      def init_attention_metadata(self, forward_meta: ForwardMeta):
-          """初始化InfLLM-V2特有的元数据"""
-          forward_meta.attn_metadata = InfLLMV2AttentionMetadata(
-              kernel_size=self.kernel_size,
-              kernel_stride=self.kernel_stride,
-              topk=self.topk,
-              dense_len=self.dense_len
-          )
-
-      def forward_decode(self, q, k, v, qkv, compressed_kv, k_pe, layer, forward_meta):
-          """Decode模式前向传播 - 适用于逐token生成"""
-          return self._infllmv2_forward(q, k, v, forward_meta, mode="decode")
-
-      def _infllmv2_forward(self, q, k, v, forward_meta, mode):
-          """核心InfLLM-V2前向传播逻辑"""
-          # 调用底层CUDA算子实现
-          from fastdeploy import custom_ops
-          return custom_ops.infllmv2_attention_forward(
-              q, k, v, forward_meta.attn_metadata,
-              kernel_size=self.kernel_size,
-              kernel_stride=self.kernel_stride,
-              topk=self.topk,
-              mode=mode
-          )
-  ```
-
-**任务 2.2: 实现 InfLLM-V2 CUDA 核心算子**
-
-- **目标**: 实现底层CUDA算子，被后端类调用
-- **创建文件**: `custom_ops/gpu_ops/infllmv2_attention/infllmv2_impl.cuh`
-- **技术要点**:
-  ```cpp
-  template <paddle::DataType D>
-  __global__ void InfLLMV2AttentionKernel(
-      const paddle::Tensor& query,                    // [bs, seq_len, num_heads, head_dim]
-      const paddle::Tensor& key_cache,                // 分块KV缓存
-      const paddle::Tensor& value_cache,
-      const paddle::Tensor& kernel_select_mask,       // 动态核选择掩码
-      const paddle::Tensor& topk_indices,             // TopK相关块索引
-      const int kernel_size,
-      const int kernel_stride,
-      const int topk,
-      const int dense_len,
-      const std::string& mode,                        // "decode"
-      paddle::Tensor& output                         // 输出注意力结果
-  ) {
-      // 1. 动态核选择算法
-      // 2. 块级稀疏注意力计算
-      // 3. 根据mode选择不同的计算策略
-      // 目标：在长上下文下优化计算效率
-  }
-  ```
-
-**任务 2.3: 注册 InfLLM-V2 后端到 FastDeploy 架构**
-
-1. **添加后端枚举**:
-   - 编辑 `fastdeploy/model_executor/layers/attention/attention_selecter.py`
-   - 在 `_Backend` 枚举中添加 `INFLLMV2_ATTN = enum.auto()`
-
-2. **实现平台映射**:
-   - 编辑各平台的 `get_attention_backend_cls()` 方法
-   - 添加 InfLLM-V2 后端的映射关系
-
-3. **暴露CUDA算子**:
-   ```cpp
-   // 在 custom_ops/gpu_ops/infllmv2_attention/infllmv2.cu 中注册
-   PD_BUILD_STATIC_OP(infllmv2_attention_forward)
-       .Inputs({
-           paddle::Tensor("query"),
-           paddle::Tensor("key_cache"),
-           paddle::Tensor("value_cache"),
-           paddle::Tensor("metadata")
-       })
-       .Outputs({ "Out" })
-       .Attrs({
-           paddle::CustomOpAttr("kernel_size", paddle::DataType::INT32),
-           paddle::CustomOpAttr("kernel_stride", paddle::DataType::INT32),
-           paddle::CustomOpAttr("topk", paddle::DataType::INT32),
-           paddle::CustomOpAttr("mode", paddle::DataType::STRING)
-       })
-       .SetKernelFn(PD_KERNEL(InfLLMV2AttentionForwardKernel));
-   ```
-
-4. **更新配置系统**:
-   - 在 `fastdeploy/config.py` 中添加 `FD_ATTENTION_BACKEND="INFLLMV2_ATTN"` 支持
-   - 在 `fastdeploy/envs.py` 中注册环境变量
-
-**里程碑**: 完成并编译通过后，拥有了一个完整的InfLLM-V2注意力后端，可通过 `FD_ATTENTION_BACKEND=INFLLMV2_ATTN` 环境变量启用。
-
----
-
-### **Phase 3: 混合推理模式支持 (0.5 周)**
-
-**任务 3.1: 混合推理模式支持**
-
-- **目标**: 支持MiniCPM4.1-8B的混合推理模式（thinking tokens）
-- **创建文件**: `fastdeploy/model_executor/models/minicpm41/hybrid_reasoning.py`
-- **技术要点**:
-  ```python
-  class HybridReasoningMode:
-      def __init__(self, fd_config):
-          self.reasoning_tokens = getattr(fd_config, 'reasoning_tokens', "thinking")
-          self.max_thinking_length = getattr(fd_config, 'max_thinking_length', 512)
-
-      def process_thinking_tokens(self, input_ids, logits):
-          # 处理thinking tokens的特殊逻辑
-          # 支持推理过程的多轮思考
-  ```
-
----
-
-### **Phase 4: 构建 Python 接口与模型集成 (1.5 周)**
-
-**任务 4.1: 集成 InfLLM-V2 后端到模型架构 (0.5 周)**
-
-- **文件**: `fastdeploy/model_executor/layers/attention/__init__.py` (添加后端导出)
-- **重点**: 确保 InfLLM-V2 后端能被模型正确加载和使用
-- **测试**: 验证 `FD_ATTENTION_BACKEND=INFLLMV2_ATTN` 环境变量生效
-
-**任务 4.2: 实现核心 MiniCPM4.1-8B 模型 (1 周)**
-
-- **文件**: `fastdeploy/model_executor/models/minicpm41/minicpm41.py`
-- **核心逻辑**:
-  - 复用现有 ModelForCausalLM 架构
-  - 自动检测并应用 InfLLM-V2 后端 (通过 `FD_ATTENTION_BACKEND=INFLLMV2_ATTN`)
-  - 集成 FastDeploy WINT2/WINT4/WINT8 量化支持
-  - 支持混合推理模式
-
-```python
-# fastdeploy/model_executor/models/minicpm41/minicpm41.py 核心框架
-class MiniCPM41ForCausalLM(ModelForCausalLM):
-    def __init__(self, fd_config):
-        super().__init__(fd_config)
-        # 自动检测InfLLM-V2配置
-        if hasattr(fd_config, 'use_infllmv2') and fd_config.use_infllmv2:
-            # 确保使用InfLLM-V2后端
-            os.environ['FD_ATTENTION_BACKEND'] = 'INFLLMV2_ATTN'
-
-        # 初始化模型特有组件
-        self._init_hybrid_reasoning(fd_config)
-```
-
-**任务 4.3: 快速量化集成 (0.5 周)**
-
-```python
-# 复用FastDeploy现有量化框架，全面支持WINT量化
-def quantize_model(self, quant_config):
-    if quant_config.quant_type in ["wint2", "wint4", "wint8"]:
-        # 直接使用FastDeploy内置的WINT量化实现
-        self.quant_config = quant_config
-    else:
-        # 复用现有 W4A8, W4AFP8, FP8 实现
-        super().quantize_model(quant_config)
-```
-
----
-
-### **Phase 5: 性能优化与测试 (1.5 周)**
-
-**任务 5.1: 核心功能快速验证 (0.5 周)**
-
-- 基础模型加载和推理测试
-- InfLLM-V2 稀疏注意力功能验证
-- FastDeploy WINT2/WINT4/WINT8 量化功能验证
-
-**任务 5.2: 性能优化 (0.5 周)**
-
-- 专注核心瓶颈优化
-- KV缓存优化
-- 算子融合（SiLU+GLU等）
-
-**任务 5.3: 集成测试与文档 (0.5 周)**
-
-- 端到端测试
-- 基础文档编写
-- 部署指南
-
-**任务 5.4: 核心测试用例**
-
-```python
-# tests/models/test_minicpm41.py - 精简版核心测试
-def test_minicpm41_basic_functionality():
-    """基础功能测试"""
-    config = FDConfig(model="openbmb/MiniCPM4.1-8B")
-    model = MiniCPM41ForCausalLM(config)
-    # 基础推理验证
-
-def test_infllmv2_core_features():
-    """InfLLM-V2核心特性验证"""
-    # 长上下文基础验证
-    # 稀疏注意力功能确认
-
-def test_wint_quantization():
-    """FastDeploy WINT量化基础测试"""
-    for quant_type in ["wint2", "wint4", "wint8"]:
-        config = FDConfig(model="openbmb/MiniCPM4.1-8B", quantization=quant_type)
-        model = MiniCPM41ForCausalLM(config)
-        # 验证量化功能正确性
-```
-
-**任务 5.5: 快速性能基准**
-
-- 基础延迟和吞吐量测试
-- 关键性能指标验证
-- 与官方实现对比
-
-**任务 5.6: 核心文档**
-
-- **文件**: `docs/get_started/minicpm41.md`
-- 重点：快速部署指南和核心API文档
-
-```markdown
-# MiniCPM4.1-8B 部署指南
-
-## 环境配置
-```bash
-# 启用 InfLLM-V2 稀疏注意力
-export FD_ATTENTION_BACKEND=INFLLMV2_ATTN
-
-# 启用 WINT 量化 (可选: wint2, wint4, wint8)
-export FD_QUANT_TYPE=WINT4
-```
-
-## 基础使用
-```python
-from fastdeploy import FDConfig, MiniCPM41ForCausalLM
-
-# WINT4 量化示例
-config = FDConfig(
-    model="openbmb/MiniCPM4.1-8B",
-    quantization="wint4",
-    use_infllmv2=True
-)
-
-model = MiniCPM41ForCausalLM(config)
-
-# WINT8 量化示例
-config_wint8 = FDConfig(
-    model="openbmb/MiniCPM4.1-8B",
-    quantization="wint8"
-)
-
-model_wint8 = MiniCPM41ForCausalLM(config_wint8)
-
-# WINT2 极致压缩示例
-config_wint2 = FDConfig(
-    model="openbmb/MiniCPM4.1-8B",
-    quantization="wint2"
-)
-
-model_wint2 = MiniCPM41ForCausalLM(config_wint2)
-```
-
-## **四、交付内容清单**
-
-### **4.1 代码交付**
-
-1. **模型实现文件**
-   ```
-   fastdeploy/model_executor/models/minicpm41/
-   ├── __init__.py
-   ├── minicpm41.py
-   └── config_minicpm41.py
-   ```
-
-2. **Attention后端**
-   ```
-   fastdeploy/model_executor/layers/attention/
-   ├── infllmv2_attention_backend.py     # 核心后端实现
-   └── __init__.py                      # 后端导出
-   ```
-
-3. **自定义算子**
-   ```
-   custom_ops/gpu_ops/
-   └── infllmv2_attention/              # InfLLM-V2 CUDA算子
-       ├── infllmv2_impl.cuh
-       └── infllmv2.cu
-   ```
-
-4. **量化配置文件**
-   ```
-   fastdeploy/model_executor/models/minicpm41_quant.py    # 量化模型实现
-   tests/models/test_minicpm41_int_quant.py              # WINT量化测试
-   ```
-
-### **4.2 配置与注册**
-
-- 在 `fastdeploy/model_executor/layers/attention/attention_selecter.py` 中注册 `INFLLMV2_ATTN` 枚举
-- 更新各平台 `get_attention_backend_cls()` 方法支持 InfLLM-V2 后端
-- 模型注册到FastDeploy模型库，支持 ["wint2", "wint4", "wint8", "w4afp8", "w4a8", "fp8"]
-- 更新`supported_models.md`
-- 添加默认配置模板
-
-### **4.3 测试套件**
+### 2.5 模型结构
 
 ```
-tests/models/test_minicpm41.py
-tests/models/test_minicpm41_int_quant.py              # WINT量化专项测试
-tests/integration/test_minicpm41_e2e.py
-benchmarks/minicpm41_performance.py
+MiniCPM4ForCausalLM (registered as "MiniCPMForCausalLM")
+├── minicpm4: MiniCPM4Model
+│   ├── embed_tokens: VocabParallelEmbedding (vocab=73448, dim=4096)
+│   ├── layers[0..31]: MiniCPM4DecoderLayer ×32
+│   │   ├── self_attn: MiniCPM4Attention
+│   │   │   ├── qkv_proj: QKVParallelLinear (no bias, GQA 32:2)
+│   │   │   ├── o_proj: RowParallelLinear
+│   │   │   └── attn: Attention (neox RoPE)
+│   │   ├── mlp: MiniCPM4MLP
+│   │   │   ├── up_gate_proj: MergedColumnParallelLinear (SiLU, 16384×2)
+│   │   │   └── down_proj: RowParallelLinear
+│   │   ├── input_layernorm: RMSNorm
+│   │   └── post_attention_layernorm: RMSNorm
+│   └── norm: RMSNorm (final)
+└── lm_head: ParallelLMHead (tie_word_embeddings=False)
 ```
 
-### **4.4 文档**
+### 2.6 权重映射
 
-- 部署指南：`docs/get_started/minicpm41.md`
-- WINT量化使用指南：`docs/quantization/minicpm41_quant.md`
-- API文档
-- 最佳实践指南
-- 性能基准报告
+从 HuggingFace `openbmb/MiniCPM4.1-8B` 到 FastDeploy 的参数名映射：
 
-### **5.2 量化效果**
-- **WINT2压缩**: 87.5%参数压缩，精度损失<5%，推理速度提升2.5x
-- **WINT4压缩**: 75%参数压缩，精度损失<2-3%，推理速度提升2x
-- **WINT8压缩**: 50%参数压缩，精度损失<1%，推理速度提升1.5x
-- **W4A8量化**: 75%内存节省，推理速度提升2x
-- **FP8量化**: 87.5%内存节省，推理速度提升3x
+| HuggingFace | FastDeploy | 变换 |
+|-------------|-----------|------|
+| `model.layers.{i}.self_attn.q_proj` | `minicpm4.layers.{i}.self_attn.qkv_proj` | QKV 堆叠 (shard: `q`) |
+| `model.layers.{i}.self_attn.k_proj` | `minicpm4.layers.{i}.self_attn.qkv_proj` | QKV 堆叠 (shard: `k`) |
+| `model.layers.{i}.self_attn.v_proj` | `minicpm4.layers.{i}.self_attn.qkv_proj` | QKV 堆叠 (shard: `v`) |
+| `model.layers.{i}.mlp.gate_proj` | `minicpm4.layers.{i}.mlp.up_gate_proj` | gate+up 融合 (shard: 0) |
+| `model.layers.{i}.mlp.up_proj` | `minicpm4.layers.{i}.mlp.up_gate_proj` | gate+up 融合 (shard: 1) |
+| `model.` (前缀) | `minicpm4.` (前缀) | 前缀替换 |
 
-### **5.3 混合推理**
-- **推理速度**: 3x解码加速
-- **复杂任务**: 提升复杂推理任务的准确率
+直通加载（无变换）：`o_proj`, `down_proj`, `input_layernorm`, `post_attention_layernorm`, `norm`, `embed_tokens`, `lm_head`
 
-## **六、风险评估与缓解策略**
+使用 `WeightsMapper` 实现前缀重命名，`stacked_params_mapping` 实现 QKV 和 gate/up 融合。
 
-### **6.1 技术风险**
+### 2.7 张量并行
 
-**风险1**: 多硬件平台适配问题
-**缓解**: 优先支持NVIDIA GPU，再扩展到其他平台
+| 参数 | 切分方式 | 说明 |
+|------|---------|------|
+| `qkv_proj` | Column split | Q/K/V 按 head 切分 |
+| `o_proj` | Row split | 输出拼接 |
+| `up_gate_proj` | Column split | gate 和 up 各自按列切分 |
+| `down_proj` | Row split | 输出拼接 |
+| `embed_tokens` | Vocab split | 按词表切分 |
+| `lm_head` | Vocab split | 按词表切分 |
 
-### **6.2 时间风险**
+### 2.8 文件结构
 
-**缓解策略**:
-- 并行开发多个算子
-- 充分利用现有FastDeploy基础设施
-- 建立MVP（最小可行产品）版本
+| 路径 | 说明 | 行数 |
+|------|------|------|
+| `fastdeploy/model_executor/models/minicpm4.py` | 模型组网代码 | ~516 |
+| `tests/model_executor/test_minicpm4.py` | 24 个 pytest 单元测试 | ~514 |
+| `docs/best_practices/MiniCPM4-8B.md` | 使用说明文档 | ~104 |
+| `docs/supported_models.md` | 更新支持模型列表 | +1 |
 
-## **七、3周精简实施计划**
+# 五、测试和验收的考量
 
-### **Week 1: 基础搭建与WINT量化集成**
-- **Days 1-1**: FastDeploy WINT2/WINT4/WINT8量化集成配置
-- **Days 2-3**: 项目设置与配置（目录结构、FDConfig更新）
-- **Days 4-5**: InfLLM-V2 稀疏注意力核心算子开发（优先级最高）
-- **Days 6-7**: InfLLM-V2 CUDA算子完善和基础测试
+## 1、单元测试（CPU，无 GPU 依赖）
+- 24 个 pytest 测试覆盖 MLP/Attention/DecoderLayer/Model/CausalLM 各层
+- 使用 `monkeypatch.setattr` 替换重基础设施（注意力后端、并行线性层等），8 个 stub 类
+- 验证 μP 三点缩放值（×12 嵌入、÷16 lm_head、残差缩放）
+- 验证权重映射、QKV 堆叠、gate/up 融合、张量并行切分
+- **结果**：24/24 PASSED，2.16 秒（A800-SXM4-80GB）
 
-### **Week 2: 模型集成与开发**
-- **Days 1-2**: 混合推理模式支持实现
-- **Days 3-5**: MiniCPM4.1-8B 核心模型实现
-- **Days 6-7**: WINT量化功能集成和测试
+## 2、集成测试（GPU，真实模型权重）
+- 6 个端到端测试：启动 FastDeploy API Server + 真实推理
+- 验证：健康检查、模型列表、算术推理准确性、无 `<unk>` 泄漏、多轮对话
+- **环境**：NVIDIA A800-SXM4-80GB
 
-### **Week 3: 测试验证与优化**
-- **Days 1-2**: 性能瓶颈分析和优化
-- **Days 3-4**: 端到端集成测试和问题修复
-- **Days 5-7**: 文档编写和部署指南
+## 3、量化精度
+- WINT8/WINT4/FP8 通过标准 FastDeploy 层接入，与 Qwen2/DeepSeek 同源
 
-**总计**: 3周完成核心功能交付，专注于基础推理和量化支持
+# 六、影响面
 
-### **加速策略**
-1. **WINT量化复用**: 充分利用FastDeploy现有的WINT2/WINT4/WINT8量化基础设施，仅需1-2天配置工作
-2. **复用优先**: 最大化复用FastDeploy现有组件，减少开发工作量
-3. **后端架构**: 按照现有attention backend模式实现，确保架构一致性
-4. **MVP策略**: 先实现核心功能，高级特性后续迭代
-5. **聚焦重点**: 优先实现InfLLM-V2稀疏注意力和WINT量化等核心特性
+## 对用户的影响
+- 新增模型选项，无 breaking changes
+- 通过标准 FastDeploy CLI 启动即可使用：`python -m fastdeploy.entrypoints.openai.api_server --model openbmb/MiniCPM4.1-8B`
 
-## **架构优势**
+## 对框架架构的影响
+- 新增一个模型文件 `minicpm4.py`，不修改现有模型代码
+- `rotary_embedding.py` 需新增 LongRoPE 分支（~20 行，向后兼容）
 
-**采用Attention Backend架构的核心优势:**
+## 对性能的影响
+- 不影响现有模型性能
+- μP 缩放为纯乘法运算，开销可忽略
 
-1. **无缝集成**: 完全符合FastDeploy现有的attention管理机制
-2. **配置统一**: 通过 `FD_ATTENTION_BACKEND=INFLLMV2_ATTN` 环境变量统一管理
-3. **平台兼容**: 自动适配各硬件平台(CUDA/XPU/NPU等)
-4. **测试友好**: 集成到现有的后端测试框架
-5. **扩展性强**: 后续可轻松添加新的注意力变体
+# 七、排期规划
 
-此实施方案基于FastDeploy现有架构设计，充分利用FastDeploy成熟的WINT量化基础设施，确保MiniCPM4.1-8B模型能够快速集成到现有框架中。通过1-2天即可完成WINT2/WINT4/WINT8量化支持，为用户提供低bit压缩、高性能的大模型推理解决方案。
+| 阶段 | 任务 | 状态 |
+|------|------|------|
+| Phase 0 | 环境搭建 + 模型配置分析 + vLLM 参考研究 | ✅ 已完成 |
+| Phase 1 | 模型组网（GQA + μP + 权重加载）| ✅ 已完成（516 行） |
+| Phase 2 | 单元测试 | ✅ 已完成（24 tests, 24/24 PASSED） |
+| Phase 3 | 使用说明文档 | ✅ 已完成 |
+| Phase 4 | 集成测试（GPU + 真实权重） | 进行中 |
+| Phase 5 | Code Review + 合入 | 待提交 |
+
+# 附件及参考资料
+
+1. MiniCPM4.1-8B HuggingFace: https://huggingface.co/openbmb/MiniCPM4.1-8B
+2. MiniCPM 技术报告: https://arxiv.org/abs/2404.06395
+3. FastDeploy Qwen2 模型（结构参考）: `fastdeploy/model_executor/models/qwen2.py`
+4. vLLM MiniCPM 实现: `vllm/model_executor/models/minicpm.py`
+5. μP 论文 (Yang et al., 2022): https://arxiv.org/abs/2203.03466
+6. FastDeploy 代码 PR: https://github.com/PaddlePaddle/FastDeploy/pull/7332
