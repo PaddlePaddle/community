@@ -1,0 +1,1061 @@
+groups:
+- name: fp-s
+  description: LoongArch fp-s Instructions
+instructions:
+- name: fadd.s
+  group: fp-s
+  encoding:
+    match: 00000001000000001???????????????
+  assembly: fadd.s
+  semantics:
+    description: fadd.s semantics
+    operations:
+    - type: f_alu
+      op: Add
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fsub.s
+  group: fp-s
+  encoding:
+    match: 00000001000000101???????????????
+  assembly: fsub.s
+  semantics:
+    description: fsub.s semantics
+    operations:
+    - type: f_alu
+      op: Sub
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fmul.s
+  group: fp-s
+  encoding:
+    match: 00000001000001001???????????????
+  assembly: fmul.s
+  semantics:
+    description: fmul.s semantics
+    operations:
+    - type: f_alu
+      op: Mul
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fdiv.s
+  group: fp-s
+  encoding:
+    match: 00000001000001101???????????????
+  assembly: fdiv.s
+  semantics:
+    description: fdiv.s semantics
+    operations:
+    - type: f_alu
+      op: Div
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fmax.s
+  group: fp-s
+  encoding:
+    match: 00000001000010001???????????????
+  assembly: fmax.s
+  semantics:
+    description: fmax.s semantics
+    operations:
+    - type: f_alu
+      op: Max
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fmin.s
+  group: fp-s
+  encoding:
+    match: 00000001000010101???????????????
+  assembly: fmin.s
+  semantics:
+    description: fmin.s semantics
+    operations:
+    - type: f_alu
+      op: Min
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fmaxa.s
+  group: fp-s
+  encoding:
+    match: 00000001000011001???????????????
+  assembly: fmaxa.s
+  semantics:
+    description: fmaxa.s semantics
+    operations:
+    - type: f_alu
+      op: Max
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fmina.s
+  group: fp-s
+  encoding:
+    match: 00000001000011101???????????????
+  assembly: fmina.s
+  semantics:
+    description: fmina.s semantics
+    operations:
+    - type: f_alu
+      op: Min
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fscaleb.s
+  group: fp-s
+  encoding:
+    match: 00000001000100001???????????????
+  assembly: fscaleb.s
+  semantics:
+    description: fscaleb.s semantics
+    operations:
+    - type: f_alu
+      op: ScaleB
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fcopysign.s
+  group: fp-s
+  encoding:
+    match: 00000001000100101???????????????
+  assembly: fcopysign.s
+  semantics:
+    description: fcopysign.s semantics
+    operations:
+    - type: f_alu
+      op: SignInject
+      dest: $f.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK
+- name: fabs.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100000001??????????
+  assembly: fabs.s
+  semantics:
+    description: fabs.s semantics
+    operations:
+    - type: f_alu
+      op: Abs
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: fneg.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100000101??????????
+  assembly: fneg.s
+  semantics:
+    description: fneg.s semantics
+    operations:
+    - type: f_alu
+      op: Neg
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: flogb.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100001001??????????
+  assembly: flogb.s
+  semantics:
+    description: flogb.s semantics
+    operations:
+    - type: f_alu
+      op: LogB
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: fclass.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100001101??????????
+  assembly: fclass.s
+  semantics:
+    description: fclass.s semantics
+    operations:
+    - type: f_alu
+      op: Class
+      dest: $r.d
+      src1: $f.j
+      precision: Single
+      class_layout: loongarch
+  format: DJ
+- name: fsqrt.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100010001??????????
+  assembly: fsqrt.s
+  semantics:
+    description: fsqrt.s semantics
+    operations:
+    - type: f_alu
+      op: Sqrt
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: frecip.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100010101??????????
+  assembly: frecip.s
+  semantics:
+    description: frecip.s semantics
+    operations:
+    - type: f_alu
+      op: Recip
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: frsqrt.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100011001??????????
+  assembly: frsqrt.s
+  semantics:
+    description: frsqrt.s semantics
+    operations:
+    - type: f_alu
+      op: RSqrt
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: frecipe.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100011101??????????
+  assembly: frecipe.s
+  semantics:
+    description: frecipe.s semantics
+    operations:
+    - type: f_alu
+      op: RecipE
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: frsqrte.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100100001??????????
+  assembly: frsqrte.s
+  semantics:
+    description: frsqrte.s semantics
+    operations:
+    - type: f_alu
+      op: RSqrtE
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: fmov.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100100101??????????
+  assembly: fmov.s
+  semantics:
+    description: fmov.s semantics
+    operations:
+    - type: move
+      dest: $f.d
+      src: $f.j
+  format: DJ
+- name: movgr2fr.w
+  group: fp-s
+  encoding:
+    match: 0000000100010100101001??????????
+  assembly: movgr2fr.w
+  semantics:
+    description: movgr2fr.w semantics
+    operations:
+    - type: move
+      dest: $f.d
+      src: $r.j
+  format: DJ
+- name: movgr2frh.w
+  group: fp-s
+  encoding:
+    match: 0000000100010100101011??????????
+  assembly: movgr2frh.w
+  semantics:
+    description: movgr2frh.w semantics (approx)
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $r.j
+      src2: '32'
+    - type: alu
+      op: And
+      dest: $temp:1
+      src1: $f.d
+      src2: '4294967295'
+    - type: alu
+      op: Or
+      dest: $f.d
+      src1: $temp:1
+      src2: $temp:0
+  format: DJ
+- name: movfr2gr.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100101101??????????
+  assembly: movfr2gr.s
+  semantics:
+    description: movfr2gr.s semantics
+    operations:
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:0
+      src: $f.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:0
+  format: DJ
+- name: movfrh2gr.s
+  group: fp-s
+  encoding:
+    match: 0000000100010100101111??????????
+  assembly: movfrh2gr.s
+  semantics:
+    description: movfrh2gr.s semantics
+    operations:
+    - type: alu
+      op: Shr
+      dest: $temp:0
+      src1: $f.j
+      src2: '32'
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:0
+  format: DJ
+- name: ftintrm.w.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010000001??????????
+  assembly: ftintrm.w.s
+  semantics:
+    description: ftintrm.w.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI32
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftintrm.l.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010001001??????????
+  assembly: ftintrm.l.s
+  semantics:
+    description: ftintrm.l.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI64
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftintrp.w.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010010001??????????
+  assembly: ftintrp.w.s
+  semantics:
+    description: ftintrp.w.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI32
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftintrp.l.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010011001??????????
+  assembly: ftintrp.l.s
+  semantics:
+    description: ftintrp.l.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI64
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftintrz.w.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010100001??????????
+  assembly: ftintrz.w.s
+  semantics:
+    description: ftintrz.w.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI32
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftintrz.l.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010101001??????????
+  assembly: ftintrz.l.s
+  semantics:
+    description: ftintrz.l.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI64
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftintrne.w.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010110001??????????
+  assembly: ftintrne.w.s
+  semantics:
+    description: ftintrne.w.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI32
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftintrne.l.s
+  group: fp-s
+  encoding:
+    match: 0000000100011010111001??????????
+  assembly: ftintrne.l.s
+  semantics:
+    description: ftintrne.l.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI64
+      dest: $r.d
+      src: $f.j
+  format: DJ
+- name: ftint.w.s
+  group: fp-s
+  encoding:
+    match: 0000000100011011000001??????????
+  assembly: ftint.w.s
+  semantics:
+    description: ftint.w.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI32
+      dest: $f.d
+      src: $f.j
+  format: DJ
+- name: ftint.l.s
+  group: fp-s
+  encoding:
+    match: 0000000100011011001001??????????
+  assembly: ftint.l.s
+  semantics:
+    description: ftint.l.s semantics
+    operations:
+    - type: f_cvt
+      op: F32ToI64
+      dest: $f.d
+      src: $f.j
+  format: DJ
+- name: ffint.s.w
+  group: fp-s
+  encoding:
+    match: 0000000100011101000100??????????
+  assembly: ffint.s.w
+  semantics:
+    description: ffint.s.w semantics
+    operations:
+    - type: f_cvt
+      op: I32ToF32
+      dest: $f.d
+      src: $f.j
+  format: DJ
+- name: ffint.s.l
+  group: fp-s
+  encoding:
+    match: 0000000100011101000110??????????
+  assembly: ffint.s.l
+  semantics:
+    description: ffint.s.l semantics
+    operations:
+    - type: f_cvt
+      op: I64ToF32
+      dest: $f.d
+      src: $f.j
+  format: DJ
+- name: frint.s
+  group: fp-s
+  encoding:
+    match: 0000000100011110010001??????????
+  assembly: frint.s
+  semantics:
+    description: frint.s semantics
+    operations:
+    - type: f_alu
+      op: Round
+      dest: $f.d
+      src1: $f.j
+      precision: Single
+  format: DJ
+- name: fmadd.s
+  group: fp-s
+  encoding:
+    match: 000010000001????????????????????
+  assembly: fmadd.s
+  semantics:
+    description: fmadd.s semantics (approx)
+    operations:
+    - type: f_alu
+      op: Mul
+      dest: $temp:0
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+    - type: f_alu
+      op: Add
+      dest: $f.d
+      src1: $temp:0
+      src2: $f.a
+      precision: Single
+  format: DJKA
+- name: fmsub.s
+  group: fp-s
+  encoding:
+    match: 000010000101????????????????????
+  assembly: fmsub.s
+  semantics:
+    description: fmsub.s semantics (approx)
+    operations:
+    - type: f_alu
+      op: Mul
+      dest: $temp:0
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+    - type: f_alu
+      op: Sub
+      dest: $f.d
+      src1: $temp:0
+      src2: $f.a
+      precision: Single
+  format: DJKA
+- name: fnmadd.s
+  group: fp-s
+  encoding:
+    match: 000010001001????????????????????
+  assembly: fnmadd.s
+  semantics:
+    description: fnmadd.s semantics (approx)
+    operations:
+    - type: f_alu
+      op: Mul
+      dest: $temp:0
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+    - type: f_alu
+      op: Add
+      dest: $temp:1
+      src1: $temp:0
+      src2: $f.a
+      precision: Single
+    - type: f_alu
+      op: Neg
+      dest: $f.d
+      src1: $temp:1
+      precision: Single
+  format: DJKA
+- name: fnmsub.s
+  group: fp-s
+  encoding:
+    match: 000010001101????????????????????
+  assembly: fnmsub.s
+  semantics:
+    description: fnmsub.s semantics (approx)
+    operations:
+    - type: f_alu
+      op: Mul
+      dest: $temp:0
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+    - type: f_alu
+      op: Sub
+      dest: $temp:1
+      src1: $temp:0
+      src2: $f.a
+      precision: Single
+    - type: f_alu
+      op: Neg
+      dest: $f.d
+      src1: $temp:1
+      precision: Single
+  format: DJKA
+- name: fcmp.caf.s
+  group: fp-s
+  encoding:
+    match: 00001100000100000??????????00???
+  assembly: fcmp.caf.s
+  semantics:
+    description: fcmp.caf.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: 'False'
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.saf.s
+  group: fp-s
+  encoding:
+    match: 00001100000100001??????????00???
+  assembly: fcmp.saf.s
+  semantics:
+    description: fcmp.saf.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: 'False'
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.clt.s
+  group: fp-s
+  encoding:
+    match: 00001100000100010??????????00???
+  assembly: fcmp.clt.s
+  semantics:
+    description: fcmp.clt.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Lt
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.slt.s
+  group: fp-s
+  encoding:
+    match: 00001100000100011??????????00???
+  assembly: fcmp.slt.s
+  semantics:
+    description: fcmp.slt.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Lt
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.ceq.s
+  group: fp-s
+  encoding:
+    match: 00001100000100100??????????00???
+  assembly: fcmp.ceq.s
+  semantics:
+    description: fcmp.ceq.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Eq
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.seq.s
+  group: fp-s
+  encoding:
+    match: 00001100000100101??????????00???
+  assembly: fcmp.seq.s
+  semantics:
+    description: fcmp.seq.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Eq
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cle.s
+  group: fp-s
+  encoding:
+    match: 00001100000100110??????????00???
+  assembly: fcmp.cle.s
+  semantics:
+    description: fcmp.cle.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Le
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sle.s
+  group: fp-s
+  encoding:
+    match: 00001100000100111??????????00???
+  assembly: fcmp.sle.s
+  semantics:
+    description: fcmp.sle.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Le
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cun.s
+  group: fp-s
+  encoding:
+    match: 00001100000101000??????????00???
+  assembly: fcmp.cun.s
+  semantics:
+    description: fcmp.cun.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Un
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sun.s
+  group: fp-s
+  encoding:
+    match: 00001100000101001??????????00???
+  assembly: fcmp.sun.s
+  semantics:
+    description: fcmp.sun.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Un
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cult.s
+  group: fp-s
+  encoding:
+    match: 00001100000101010??????????00???
+  assembly: fcmp.cult.s
+  semantics:
+    description: fcmp.cult.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ult
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sult.s
+  group: fp-s
+  encoding:
+    match: 00001100000101011??????????00???
+  assembly: fcmp.sult.s
+  semantics:
+    description: fcmp.sult.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ult
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cueq.s
+  group: fp-s
+  encoding:
+    match: 00001100000101100??????????00???
+  assembly: fcmp.cueq.s
+  semantics:
+    description: fcmp.cueq.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ueq
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sueq.s
+  group: fp-s
+  encoding:
+    match: 00001100000101101??????????00???
+  assembly: fcmp.sueq.s
+  semantics:
+    description: fcmp.sueq.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ueq
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cule.s
+  group: fp-s
+  encoding:
+    match: 00001100000101110??????????00???
+  assembly: fcmp.cule.s
+  semantics:
+    description: fcmp.cule.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ule
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sule.s
+  group: fp-s
+  encoding:
+    match: 00001100000101111??????????00???
+  assembly: fcmp.sule.s
+  semantics:
+    description: fcmp.sule.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ule
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cne.s
+  group: fp-s
+  encoding:
+    match: 00001100000110000??????????00???
+  assembly: fcmp.cne.s
+  semantics:
+    description: fcmp.cne.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ne
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sne.s
+  group: fp-s
+  encoding:
+    match: 00001100000110001??????????00???
+  assembly: fcmp.sne.s
+  semantics:
+    description: fcmp.sne.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Ne
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cor.s
+  group: fp-s
+  encoding:
+    match: 00001100000110100??????????00???
+  assembly: fcmp.cor.s
+  semantics:
+    description: fcmp.cor.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Or
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sor.s
+  group: fp-s
+  encoding:
+    match: 00001100000110101??????????00???
+  assembly: fcmp.sor.s
+  semantics:
+    description: fcmp.sor.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Or
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fcmp.cune.s
+  group: fp-s
+  encoding:
+    match: 00001100000111000??????????00???
+  assembly: fcmp.cune.s
+  semantics:
+    description: fcmp.cune.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Une
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+  format: DJK-fp
+- name: fcmp.sune.s
+  group: fp-s
+  encoding:
+    match: 00001100000111001??????????00???
+  assembly: fcmp.sune.s
+  semantics:
+    description: fcmp.sune.s Fd, Fj, Fk
+    operations:
+    - type: f_cmp
+      op: Une
+      dest: $fcc.d
+      src1: $f.j
+      src2: $f.k
+      precision: Single
+      signaling: true
+  format: DJK-fp
+- name: fld.s
+  group: fp-s
+  encoding:
+    match: 0010101100??????????????????????
+  assembly: fld.s
+  semantics:
+    description: fld.s semantics
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $f.d
+      addr: $temp:0
+      size: 4
+      signed: false
+  format: DJI12
+- name: fst.s
+  group: fp-s
+  encoding:
+    match: 0010101101??????????????????????
+  assembly: fst.s
+  semantics:
+    description: fst.s semantics
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: store
+      addr: $temp:0
+      src: $f.d
+      size: 4
+  format: DJI12
+- name: fldx.s
+  group: fp-s
+  encoding:
+    match: 00111000001100000???????????????
+  assembly: fldx.s
+  semantics:
+    description: fldx.s semantics
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $r.k
+      src2: '2'
+    - type: alu
+      op: Add
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: load
+      dest: $f.d
+      addr: $temp:1
+      size: 4
+      signed: false
+  format: DJK
+- name: fstx.s
+  group: fp-s
+  encoding:
+    match: 00111000001110000???????????????
+  assembly: fstx.s
+  semantics:
+    description: fstx.s semantics
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $r.k
+      src2: '2'
+    - type: alu
+      op: Add
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: store
+      addr: $temp:1
+      src: $f.d
+      size: 4
+  format: DJK

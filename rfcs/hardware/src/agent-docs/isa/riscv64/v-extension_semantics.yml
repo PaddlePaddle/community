@@ -1,0 +1,2598 @@
+semantics:
+  vsetvli:
+    description: vsetvli rd, rs1, vtype_imm
+    operations:
+    - type: vector_config
+      vtype: $zimm:11
+      avl: $x.rs1
+      vl_dest: $x.rd
+      vtype_dest: $csr:vtype
+  vsetvl:
+    description: vsetvl rd, rs1, rs2 (rs2 contains vtype value)
+    operations:
+    - type: vector_config
+      vtype: $x.rs2
+      avl: $x.rs1
+      vl_dest: $x.rd
+      vtype_dest: $csr:vtype
+  vadd.vv:
+    description: vadd.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+  vsub.vv:
+    description: vsub.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+  vand.vv:
+    description: vand.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: And
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+  vandn.vv:
+    description: vandn.vv vd, vs2, vs1 (~vs2 & vs1)
+    operations:
+    - type: vector_alu
+      op: Andn
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+  vandn.vx:
+    description: vandn.vx vd, vs2, rs1 (vs2 & ~rs1)
+    operations:
+    - type: vector_alu
+      op: Andn
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $x.rs1
+      src2: $v.vs2
+  vor.vv:
+    description: vor.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+  vxor.vv:
+    description: vxor.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Xor
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+  vadd.vx:
+    description: vadd.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+  vsub.vx:
+    description: vsub.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+  vand.vx:
+    description: vand.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: And
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+  vor.vx:
+    description: vor.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+  vxor.vx:
+    description: vxor.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Xor
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+  vle8.v:
+    description: vle8.v vd, (rs1)
+    operations:
+    - type: vector_load
+      elem_width: B
+      dest: $v.vd
+      addr: $x.rs1
+  vle16.v:
+    description: vle16.v vd, (rs1)
+    operations:
+    - type: vector_load
+      elem_width: H
+      dest: $v.vd
+      addr: $x.rs1
+  vle32.v:
+    description: vle32.v vd, (rs1)
+    operations:
+    - type: vector_load
+      elem_width: W
+      dest: $v.vd
+      addr: $x.rs1
+  vle64.v:
+    description: vle64.v vd, (rs1)
+    operations:
+    - type: vector_load
+      elem_width: D
+      dest: $v.vd
+      addr: $x.rs1
+  vsm.v:
+    description: vsm.v vs2, (rs1) (store vector mask to memory)
+    operations:
+    - type: vector_store
+      elem_width: Dynamic
+      src: $v.vd
+      addr: $x.rs1
+      mask_store: true
+  vl1r.v:
+    description: vl1r.v vd, (rs1) (load whole vector register)
+    operations:
+    - type: vector_load
+      elem_width: B
+      dest: $v.vd
+      addr: $x.rs1
+      count: 16
+  vl2r.v:
+    description: vl2r.v vd, (rs1) (load 2 whole vector registers)
+    operations:
+    - type: vector_load
+      elem_width: B
+      dest: $v.vd
+      addr: $x.rs1
+      count: 32
+  vl4r.v:
+    description: vl4r.v vd, (rs1) (load 4 whole vector registers)
+    operations:
+    - type: vector_load
+      elem_width: B
+      dest: $v.vd
+      addr: $x.rs1
+      count: 64
+  vs1r.v:
+    description: vs1r.v vd, (rs1) (store whole vector register)
+    operations:
+    - type: vector_store
+      elem_width: B
+      src: $v.vd
+      addr: $x.rs1
+      count: 16
+  vs2r.v:
+    description: vs2r.v vd, (rs1) (store 2 whole vector registers)
+    operations:
+    - type: vector_store
+      elem_width: B
+      src: $v.vd
+      addr: $x.rs1
+      count: 32
+  vs4r.v:
+    description: vs4r.v vd, (rs1) (store 4 whole vector registers)
+    operations:
+    - type: vector_store
+      elem_width: B
+      src: $v.vd
+      addr: $x.rs1
+      count: 64
+  vse8.v:
+    description: vse8.v vd, (rs1)
+    operations:
+    - type: vector_store
+      elem_width: B
+      src: $v.vd
+      addr: $x.rs1
+  vse16.v:
+    description: vse16.v vd, (rs1)
+    operations:
+    - type: vector_store
+      elem_width: H
+      src: $v.vd
+      addr: $x.rs1
+  vse32.v:
+    description: vse32.v vd, (rs1)
+    operations:
+    - type: vector_store
+      elem_width: W
+      src: $v.vd
+      addr: $x.rs1
+  vse64.v:
+    description: vse64.v vd, (rs1)
+    operations:
+    - type: vector_store
+      elem_width: D
+      src: $v.vd
+      addr: $x.rs1
+  vadd_vi:
+    description: vadd.vi vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vrsub_vi:
+    description: vrsub.vi vd, vs2, imm
+    operations:
+    - type: vector_alu
+      op: RSub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vrsub_vx:
+    description: vrsub.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: RSub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vand_vi:
+    description: vand.vi vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: And
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vor_vi:
+    description: vor.vi vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vxor_vi:
+    description: vxor.vi vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Xor
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsll_vi:
+    description: vsll.vi vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Shl
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsrl_vi:
+    description: vsrl.vi vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Shr
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsra_vi:
+    description: vsra.vi vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Sar
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vminu_vv:
+    description: vminu.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Minu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmin_vv:
+    description: vmin.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmaxu_vv:
+    description: vmaxu.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Maxu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmax_vv:
+    description: vmax.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vminu_vx:
+    description: vminu.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Minu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmin_vx:
+    description: vmin.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmaxu_vx:
+    description: vmaxu.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Maxu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmax_vx:
+    description: vmax.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsll_vv:
+    description: vsll.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Shl
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsll_vx:
+    description: vsll.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Shl
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsrl_vv:
+    description: vsrl.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Shr
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsrl_vx:
+    description: vsrl.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Shr
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsra_vv:
+    description: vsra.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Sar
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsra_vx:
+    description: vsra.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Sar
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmul_vv:
+    description: vmul.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmul_vx:
+    description: vmul.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmulhu_vv:
+    description: vmulhu.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Muhu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmulhu_vx:
+    description: vmulhu.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Muhu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmulhsu_vv:
+    description: vmulhsu.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: MuhSu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmulhsu_vx:
+    description: vmulhsu.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: MuhSu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmulh_vv:
+    description: vmulh.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Muh
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmulh_vx:
+    description: vmulh.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Muh
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vdivu_vv:
+    description: vdivu.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Divu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vdivu_vx:
+    description: vdivu.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Divu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vdiv_vv:
+    description: vdiv.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Div
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vdiv_vx:
+    description: vdiv.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Div
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vremu_vv:
+    description: vremu.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Remu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vremu_vx:
+    description: vremu.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Remu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vrem_vv:
+    description: vrem.vv vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Rem
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vrem_vx:
+    description: vrem.vx vd, vs2, vs1/rs1/imm
+    operations:
+    - type: vector_alu
+      op: Rem
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsetivli:
+    description: vsetivli rd, uimm, vtype_imm
+    operations:
+    - type: vector_config
+      vtype: $zimm:10
+      avl: $imm:5
+      vl_dest: $x.rd
+      vtype_dest: $csr:vtype
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmv.v.x:
+    description: vmv.v.x vd, rs1 (broadcast scalar to vector)
+    operations:
+    - type: vector_broadcast
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmv.s.x:
+    description: vmv.s.x vd, rs1 (move scalar to element 0)
+    operations:
+    - type: vector_insert
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $x.rs1
+      index: 0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmv.f.s:
+    description: vfmv.f.s rd, vs2 (extract float element 0 from vector)
+    operations:
+    - type: vector_extract
+      elem_width: Dynamic
+      dest: $x.rd
+      src: $v.vs2
+      index: 0
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmv.x.s:
+    description: vmv.x.s rd, vs2 (extract element 0 from vector)
+    operations:
+    - type: vector_extract
+      elem_width: Dynamic
+      dest: $x.rd
+      src: $v.vs2
+      index: $imm:5:unsigned
+      signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vcpop_m:
+    description: vcpop.m rd, vs2 (count set mask bits)
+    operations:
+    - type: vector_mask
+      op: MskPop
+      elem_width: Dynamic
+      dest: $x.rd
+      src: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfirst_m:
+    description: vfirst.m rd, vs2 (find first set mask bit, -1 if none)
+    operations:
+    - type: vector_mask
+      op: MskFirst
+      elem_width: Dynamic
+      dest: $x.rd
+      src: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmv_v_i:
+    description: vmv.v.i vd, imm (broadcast immediate to vector)
+    operations:
+    - type: vector_broadcast
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsbf.m:
+    description: vmsbf.m vd, vs2 (mask set before first)
+    operations:
+    - type: vector_mask
+      op: SetBeforeFirst
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsof.m:
+    description: vmsof.m vd, vs2 (mask set only first)
+    operations:
+    - type: vector_mask
+      op: SetOnlyFirst
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  viota.m:
+    description: viota.m vd, vs2 (iota / prefix population count)
+    operations:
+    - type: vector_mask
+      op: Viota
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsif.m:
+    description: vmsif.m vd, vs2 (mask set including first)
+    operations:
+    - type: vector_mask
+      op: SetIncludingFirst
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vid.v:
+    description: vid.v vd (write element indices)
+    operations:
+    - type: vector_alu
+      op: Index
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vd
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmseq.vv:
+    description: vmseq.vv vd, vs2, vs1
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsne.vv:
+    description: vmsne.vv vd, vs2, vs1
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmslt.vv:
+    description: vmslt.vv vd, vs2, vs1
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsne.vi:
+    description: vmsne.vi vd, vs2, imm
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmseq.vi:
+    description: vmseq.vi vd, vs2, imm
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsltu.vv:
+    description: vmsltu.vv vd, vs2, vs1
+    operations:
+    - type: vector_compare
+      op: Ltu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmseq.vx:
+    description: vmseq.vx vd, vs2, rs1
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsne.vx:
+    description: vmsne.vx vd, vs2, rs1
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsgt.vx:
+    description: vmsgt.vx vd, vs2, rs1
+    operations:
+    - type: vector_compare
+      op: Gt
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsgtu.vx:
+    description: vmsgtu.vx vd, vs2, rs1
+    operations:
+    - type: vector_compare
+      op: Gtu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsgt.vi:
+    description: vmsgt.vi vd, vs2, imm
+    operations:
+    - type: vector_compare
+      op: Gt
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmsgtu.vi:
+    description: vmsgtu.vi vd, vs2, imm
+    operations:
+    - type: vector_compare
+      op: Gtu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredsum.vs:
+    description: vredsum.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: Sum
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfredusum.vs:
+    description: vfredusum.vs vd, vs2, vs1 (float reduce sum unordered)
+    operations:
+    - type: vector_reduce
+      op: FSum
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfredosum.vs:
+    description: vfredosum.vs vd, vs2, vs1 (float reduce sum ordered)
+    operations:
+    - type: vector_reduce
+      op: FSum
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredmaxu.vs:
+    description: vredmaxu.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: Maxu
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredminu.vs:
+    description: vredminu.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: Minu
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredmax.vs:
+    description: vredmax.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: Max
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredmin.vs:
+    description: vredmin.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: Min
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredand.vs:
+    description: vredand.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: And
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredor.vs:
+    description: vredor.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: Or
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vredxor.vs:
+    description: vredxor.vs vd, vs2, vs1
+    operations:
+    - type: vector_reduce
+      op: Xor
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vslideup.vx:
+    description: vslideup.vx vd, vs2, rs1
+    operations:
+    - type: vector_slide
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      offset: $x.rs1
+      up: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vslideup.vi:
+    description: vslideup.vi vd, vs2, imm
+    operations:
+    - type: vector_slide
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      offset: $imm:5:unsigned
+      up: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vslidedown.vx:
+    description: vslidedown.vx vd, vs2, rs1
+    operations:
+    - type: vector_slide
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      offset: $x.rs1
+      up: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vslidedown.vi:
+    description: vslidedown.vi vd, vs2, imm
+    operations:
+    - type: vector_slide
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      offset: $imm:5:unsigned
+      up: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vslide1up.vx:
+    description: vslide1up.vx vd, vs2, rs1
+    operations:
+    - type: vector_slide
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      offset: 1
+      up: true
+      fill: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmacc.vv:
+    description: vmacc.vv vd, vs1, vs2
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+      src3: $v.vd
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmacc.vx:
+    description: vmacc.vx vd, rs1, vs2
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      src3: $v.vd
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vnmsac.vv:
+    description: vnmsac.vv vd, vs1, vs2
+    operations:
+    - type: vector_alu
+      op: NMadd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+      src3: $v.vd
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vnmsac.vx:
+    description: vnmsac.vx vd, rs1, vs2
+    operations:
+    - type: vector_alu
+      op: NMadd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      src3: $v.vd
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmadd.vv:
+    description: vmadd.vv vd, vs1, vs2
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vd
+      src3: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmadd.vx:
+    description: vmadd.vx vd, rs1, vs2
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vd
+      src2: $x.rs1
+      src3: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vnmsub.vv:
+    description: vnmsub.vv vd, vs1, vs2
+    operations:
+    - type: vector_alu
+      op: NMadd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vd
+      src3: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vnmsub.vx:
+    description: vnmsub.vx vd, rs1, vs2
+    operations:
+    - type: vector_alu
+      op: NMadd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vd
+      src2: $x.rs1
+      src3: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwaddu.vv:
+    description: vwaddu.vv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwaddu.vx:
+    description: vwaddu.vx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwadd.vv:
+    description: vwadd.vv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwadd.vx:
+    description: vwadd.vx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsubu.vv:
+    description: vwsubu.vv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsubu.vx:
+    description: vwsubu.vx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsub.vv:
+    description: vwsub.vv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsub.vx:
+    description: vwsub.vx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwaddu.wv:
+    description: vwaddu.wv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      wide_src1: true
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwaddu.wx:
+    description: vwaddu.wx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      wide_src1: true
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwadd.wv:
+    description: vwadd.wv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      wide_src1: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwadd.wx:
+    description: vwadd.wx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      wide_src1: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsubu.wv:
+    description: vwsubu.wv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      wide_src1: true
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsubu.wx:
+    description: vwsubu.wx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      wide_src1: true
+      unsigned: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsub.wv:
+    description: vwsub.wv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      wide_src1: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsub.wx:
+    description: vwsub.wx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      wide_src1: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmul.vv:
+    description: vwmul.vv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmul.vx:
+    description: vwmul.vx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmulu.vv:
+    description: vwmulu.vv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmulu.vx:
+    description: vwmulu.vx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmulsu.vv:
+    description: vwmulsu.vv vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: false
+      unsigned1: false
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmulsu.vx:
+    description: vwmulsu.vx vd, vs2, vs1/rs1
+    operations:
+    - type: vector_widen_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      unsigned: false
+      unsigned1: false
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmaccu.vv:
+    description: vwmaccu.vv vd, vs1, vs2
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+      src3: $v.vd
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmaccu.vx:
+    description: vwmaccu.vx vd, rs1, vs2
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      src3: $v.vd
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmacc.vv:
+    description: vwmacc.vv vd, vs1, vs2
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+      src3: $v.vd
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmacc.vx:
+    description: vwmacc.vx vd, rs1, vs2
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      src3: $v.vd
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmaccsu.vv:
+    description: vwmaccsu.vv vd, vs1, vs2
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+      src3: $v.vd
+      unsigned: false
+      unsigned1: false
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmaccsu.vx:
+    description: vwmaccsu.vx vd, rs1, vs2
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      src3: $v.vd
+      unsigned: false
+      unsigned1: false
+      unsigned2: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwmaccus.vx:
+    description: vwmaccus.vx vd, rs1, vs2
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+      src3: $v.vd
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vzext.vf2:
+    description: vzext.vf2 vd, vs2
+    operations:
+    - type: vector_sign_extend
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      unsigned: true
+      narrow_ratio: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vzext.vf4:
+    description: vzext.vf4 vd, vs2
+    operations:
+    - type: vector_sign_extend
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      unsigned: true
+      narrow_ratio: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vzext.vf8:
+    description: vzext.vf8 vd, vs2
+    operations:
+    - type: vector_sign_extend
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      unsigned: true
+      narrow_ratio: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsext.vf2:
+    description: vsext.vf2 vd, vs2
+    operations:
+    - type: vector_sign_extend
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      unsigned: false
+      narrow_ratio: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsext.vf4:
+    description: vsext.vf4 vd, vs2
+    operations:
+    - type: vector_sign_extend
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      unsigned: false
+      narrow_ratio: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsext.vf8:
+    description: vsext.vf8 vd, vs2
+    operations:
+    - type: vector_sign_extend
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      unsigned: false
+      narrow_ratio: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmerge.vvm:
+    description: vmerge.vvm vd, vs2, vs1, v0
+    operations:
+    - type: vector_merge
+      elem_width: Dynamic
+      dest: $v.vd
+      mask: $v.@0
+      src1: $v.vs1
+      src2: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmerge.vxm:
+    description: vmerge.vxm vd, vs2, rs1, v0
+    operations:
+    - type: vector_merge
+      elem_width: Dynamic
+      dest: $v.vd
+      mask: $v.@0
+      src1: $x.rs1
+      src2: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmerge.vim:
+    description: vmerge.vim vd, vs2, imm, v0
+    operations:
+    - type: vector_merge
+      elem_width: Dynamic
+      dest: $v.vd
+      mask: $v.@0
+      src1: $imm:5:signed
+      src2: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmand.mm:
+    description: vmand.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: And
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmnand.mm:
+    description: vmnand.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Nand
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmandn.mm:
+    description: vmandn.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Andn
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmxor.mm:
+    description: vmxor.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Xor
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmor.mm:
+    description: vmor.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmnor.mm:
+    description: vmnor.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Nor
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmorn.mm:
+    description: vmorn.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Orn
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs1
+      src2: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmxnor.mm:
+    description: vmxnor.mm vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Xnor
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsaddu.vv:
+    description: vsaddu.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Saddu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsaddu.vx:
+    description: vsaddu.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Saddu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsaddu.vi:
+    description: vsaddu.vi vd, vs2, imm
+    operations:
+    - type: vector_alu
+      op: Saddu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsadd.vv:
+    description: vsadd.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Sadd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsadd.vx:
+    description: vsadd.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Sadd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsadd.vi:
+    description: vsadd.vi vd, vs2, imm
+    operations:
+    - type: vector_alu
+      op: Sadd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $imm:5:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vssubu.vv:
+    description: vssubu.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Ssubu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vssubu.vx:
+    description: vssubu.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Ssubu
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vssub.vv:
+    description: vssub.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Ssub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vssub.vx:
+    description: vssub.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Ssub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vaaddu.vv:
+    description: vaaddu.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Avgru
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vaaddu.vx:
+    description: vaaddu.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Avgru
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vaadd.vv:
+    description: vaadd.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: AddR
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vaadd.vx:
+    description: vaadd.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: AddR
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vasubu.vv:
+    description: vasubu.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Subru
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vasubu.vx:
+    description: vasubu.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Subru
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vasub.vv:
+    description: vasub.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: Subr
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vasub.vx:
+    description: vasub.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: Subr
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsmul.vv:
+    description: vsmul.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: SMul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vsmul.vx:
+    description: vsmul.vx vd, vs2, rs1
+    operations:
+    - type: vector_alu
+      op: SMul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vnclipu_vv:
+    description: vnclipu.wv vd, vs2, vs1
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vnclipu_vx:
+    description: vnclipu.wx vd, vs2, rs1
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      imm: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vnclipu_vi:
+    description: vnclipu.wi vd, vs2, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      imm: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vnclip_vv:
+    description: vnclip.wv vd, vs2, vs1
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vnclip_vx:
+    description: vnclip.wx vd, vs2, rs1
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      imm: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vnclip_vi:
+    description: vnclip.wi vd, vs2, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      imm: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vnsrl.wi:
+    description: vnsrl.wi vd, vs2, imm (narrowing shift right logical)
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      imm: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vrgather.vv:
+    description: vrgather.vv vd, vs2, vs1 (gather elements using indices)
+    operations:
+    - type: vector_perm
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vbrev.v:
+    description: vbrev.v vd, vs2 (bit reverse each element)
+    operations:
+    - type: vector_alu
+      op: BitRev
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vclz.v:
+    description: vclz.v vd, vs2 (count leading zeros)
+    operations:
+    - type: vector_alu
+      op: Clz
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vctz.v:
+    description: vctz.v vd, vs2 (count trailing zeros)
+    operations:
+    - type: vector_alu
+      op: Ctz
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vcpop.v:
+    description: vcpop.v vd, vs2 (count set bits)
+    operations:
+    - type: vector_alu
+      op: Pcnt
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vwsll.vv:
+    description: vwsll.vv vd, vs2, vs1 (widening shift left)
+    operations:
+    - type: vector_widen_alu
+      op: Shl
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vror.vv:
+    description: vror.vv vd, vs2, vs1 (rotate right by vector)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vadc_vvm:
+    description: vadc.vvm vd, vs2, vs1 (add with carry from v0)
+    operations:
+    - type: vector_alu
+      op: AddCarry
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vadc_vxm:
+    description: vadc.vxm vd, vs2, rs1 (add with scalar and carry from v0)
+    operations:
+    - type: vector_alu
+      op: AddCarry
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmadc_vvm:
+    description: vmadc.vvm vd, vs2, vs1 (add with carry, produce mask)
+    operations:
+    - type: vector_alu
+      op: AddCarryMask
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmadc_vxm:
+    description: vmadc.vxm vd, vs2, rs1 (add with scalar and carry, produce mask)
+    operations:
+    - type: vector_alu
+      op: AddCarryMask
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vror.vx:
+    description: vror.vx vd, vs2, rs1 (rotate right by scalar)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsbc_vvm:
+    description: vsbc.vvm vd, vs2, vs1 (sub with borrow from v0)
+    operations:
+    - type: vector_alu
+      op: SubCarry
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsbc_vxm:
+    description: vsbc.vxm vd, vs2, rs1 (sub with scalar and borrow from v0)
+    operations:
+    - type: vector_alu
+      op: SubCarry
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vcompress_vm:
+    description: vcompress.vm vd, vs2, vs1 (compress under mask)
+    operations:
+    - type: vector_compress
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      mask: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vrgatherei16.vv:
+    description: vrgatherei16.vv vd, vs2, vs1 (gather using 16-bit indices)
+    operations:
+    - type: vector_perm
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vlse8.v:
+    description: vlse8.v vd, (rs1), rs2 (strided byte load)
+    operations:
+    - type: vector_strided_load
+      elem_width: B
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vlse16.v:
+    description: vlse16.v vd, (rs1), rs2 (strided halfword load)
+    operations:
+    - type: vector_strided_load
+      elem_width: H
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vlse32.v:
+    description: vlse32.v vd, (rs1), rs2 (strided word load)
+    operations:
+    - type: vector_strided_load
+      elem_width: W
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vlse64.v:
+    description: vlse64.v vd, (rs1), rs2 (strided doubleword load)
+    operations:
+    - type: vector_strided_load
+      elem_width: D
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsse8.v:
+    description: vsse8.v vd, (rs1), rs2 (strided byte store)
+    operations:
+    - type: vector_strided_store
+      elem_width: B
+      src: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsse16.v:
+    description: vsse16.v vd, (rs1), rs2 (strided halfword store)
+    operations:
+    - type: vector_strided_store
+      elem_width: H
+      src: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsse32.v:
+    description: vsse32.v vd, (rs1), rs2 (strided word store)
+    operations:
+    - type: vector_strided_store
+      elem_width: W
+      src: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsse64.v:
+    description: vsse64.v vd, (rs1), rs2 (strided doubleword store)
+    operations:
+    - type: vector_strided_store
+      elem_width: D
+      src: "$v.vd"
+      addr: "$x.rs1"
+      stride: "$x.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vluxei8.v:
+    description: vluxei8.v vd, (rs1), vs2 (indexed unordered byte load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: B
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vluxei16.v:
+    description: vluxei16.v vd, (rs1), vs2 (indexed unordered halfword load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: H
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vluxei32.v:
+    description: vluxei32.v vd, (rs1), vs2 (indexed unordered word load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: W
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vluxei64.v:
+    description: vluxei64.v vd, (rs1), vs2 (indexed unordered doubleword load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: D
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsuxei8.v:
+    description: vsuxei8.v vd, (rs1), vs2 (indexed unordered byte store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: B
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsuxei16.v:
+    description: vsuxei16.v vd, (rs1), vs2 (indexed unordered halfword store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: H
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsuxei32.v:
+    description: vsuxei32.v vd, (rs1), vs2 (indexed unordered word store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: W
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsuxei64.v:
+    description: vsuxei64.v vd, (rs1), vs2 (indexed unordered doubleword store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: D
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vloxei8.v:
+    description: vloxei8.v vd, (rs1), vs2 (indexed ordered byte load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: B
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vloxei16.v:
+    description: vloxei16.v vd, (rs1), vs2 (indexed ordered halfword load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: H
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vloxei32.v:
+    description: vloxei32.v vd, (rs1), vs2 (indexed ordered word load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: W
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vloxei64.v:
+    description: vloxei64.v vd, (rs1), vs2 (indexed ordered doubleword load)
+    operations:
+    - type: vector_indexed_load
+      elem_width: D
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsoxei8.v:
+    description: vsoxei8.v vd, (rs1), vs2 (indexed ordered byte store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: B
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsoxei16.v:
+    description: vsoxei16.v vd, (rs1), vs2 (indexed ordered halfword store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: H
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsoxei32.v:
+    description: vsoxei32.v vd, (rs1), vs2 (indexed ordered word store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: W
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vsoxei64.v:
+    description: vsoxei64.v vd, (rs1), vs2 (indexed ordered doubleword store)
+    operations:
+    - type: vector_indexed_store
+      elem_width: D
+      src: "$v.vd"
+      addr: "$x.rs1"
+      index: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vlseg2e8.v:
+    description: vlseg2e8.v vd, (rs1) (unit-stride segment load, 2 fields, byte)
+    operations:
+    - type: vector_segment_load
+      elem_width: B
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      nf: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vlseg2e16.v:
+    description: vlseg2e16.v vd, (rs1) (unit-stride segment load, 2 fields, halfword)
+    operations:
+    - type: vector_segment_load
+      elem_width: H
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      nf: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vlseg2e32.v:
+    description: vlseg2e32.v vd, (rs1) (unit-stride segment load, 2 fields, word)
+    operations:
+    - type: vector_segment_load
+      elem_width: W
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      nf: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vlseg2e64.v:
+    description: vlseg2e64.v vd, (rs1) (unit-stride segment load, 2 fields, doubleword)
+    operations:
+    - type: vector_segment_load
+      elem_width: D
+      dest: "$v.vd"
+      addr: "$x.rs1"
+      nf: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmv1r_v:
+    description: vmv1r.v vd, vs2 (whole vector register copy)
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: B
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmv2r_v:
+    description: vmv2r.v vd, vs2 (copy 2 whole vector registers)
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: B
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmv4r_v:
+    description: vmv4r.v vd, vs2 (copy 4 whole vector registers)
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: B
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vmv8r_v:
+    description: vmv8r.v vd, vs2 (copy 8 whole vector registers)
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: B
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false

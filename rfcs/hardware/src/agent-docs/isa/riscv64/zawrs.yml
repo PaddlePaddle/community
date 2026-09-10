@@ -1,0 +1,16 @@
+groups:
+  - name: zawrs
+    description: RISC-V Wait-on-Reservation-Set Extension
+
+instructions:
+  - name: WRS_NTO
+    group: zawrs
+    encoding:
+      match: "000000001101 00000 000 00000 1110011"
+    assembly: "wrs.nto"
+
+  - name: WRS_STO
+    group: zawrs
+    encoding:
+      match: "000000011101 00000 000 00000 1110011"
+    assembly: "wrs.sto"

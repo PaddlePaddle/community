@@ -1,0 +1,1575 @@
+groups:
+- name: base
+  description: LoongArch Base Integer Instructions
+instructions:
+- name: SEXT.H
+  group: base
+  encoding:
+    match: 0000000000000000010110??????????
+  assembly: sext.h $d, $j
+  semantics:
+    description: sext.h rd, rj
+    operations:
+    - type: cast
+      op:
+        Truncate:
+          to: 16
+      dest: $temp:0
+      src: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 16
+          to: 64
+      dest: $r.d
+      src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: SEXT.B
+  group: base
+  encoding:
+    match: 0000000000000000010111??????????
+  assembly: sext.b $d, $j
+  semantics:
+    description: sext.b rd, rj
+    operations:
+    - type: cast
+      op:
+        Truncate:
+          to: 8
+      dest: $temp:0
+      src: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 8
+          to: 64
+      dest: $r.d
+      src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: RDTIMEL.W
+  group: base
+  encoding:
+    match: 0000000000000000011000??????????
+  assembly: rdtimel.w $d, $j
+  format: DJ
+- name: RDTIMEH.W
+  group: base
+  encoding:
+    match: 0000000000000000011001??????????
+  assembly: rdtimeh.w $d, $j
+  format: DJ
+- name: CPUCFG
+  group: base
+  encoding:
+    match: 0000000000000000011011??????????
+  assembly: cpucfg $d, $j
+  format: DJ
+- name: ADD.W
+  group: base
+  encoding:
+    match: 00000000000100000???????????????
+  assembly: add.w $d, $j, $k
+  semantics:
+    description: add.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.k
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $temp:0
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SUB.W
+  group: base
+  encoding:
+    match: 00000000000100010???????????????
+  assembly: sub.w $d, $j, $k
+  semantics:
+    description: sub.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Sub
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.k
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $temp:0
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SLT
+  group: base
+  encoding:
+    match: 00000000000100100???????????????
+  assembly: slt $d, $j, $k
+  semantics:
+    description: slt rd, rj, rk
+    operations:
+    - type: compare
+      op: Lt
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SLTU
+  group: base
+  encoding:
+    match: 00000000000100101???????????????
+  assembly: sltu $d, $j, $k
+  semantics:
+    description: sltu rd, rj, rk
+    operations:
+    - type: compare
+      op: Ltu
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MASKEQZ
+  group: base
+  encoding:
+    match: 00000000000100110???????????????
+  assembly: maskeqz $d, $j, $k
+  format: DJK
+- name: MASKNEZ
+  group: base
+  encoding:
+    match: 00000000000100111???????????????
+  assembly: masknez $d, $j, $k
+  format: DJK
+- name: NOR
+  group: base
+  encoding:
+    match: 00000000000101000???????????????
+  assembly: nor $d, $j, $k
+  semantics:
+    description: nor rd, rj, rk
+    operations:
+    - type: alu
+      op: Nor
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: AND
+  group: base
+  encoding:
+    match: 00000000000101001???????????????
+  assembly: and $d, $j, $k
+  semantics:
+    description: and rd, rj, rk
+    operations:
+    - type: alu
+      op: And
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: OR
+  group: base
+  encoding:
+    match: 00000000000101010???????????????
+  assembly: or $d, $j, $k
+  semantics:
+    description: or rd, rj, rk
+    operations:
+    - type: alu
+      op: Or
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: XOR
+  group: base
+  encoding:
+    match: 00000000000101011???????????????
+  assembly: xor $d, $j, $k
+  semantics:
+    description: xor rd, rj, rk
+    operations:
+    - type: alu
+      op: Xor
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: ORN
+  group: base
+  encoding:
+    match: 00000000000101100???????????????
+  assembly: orn $d, $j, $k
+  semantics:
+    description: orn rd, rj, rk
+    operations:
+    - type: alu
+      op: Orn
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: ANDN
+  group: base
+  encoding:
+    match: 00000000000101101???????????????
+  assembly: andn $d, $j, $k
+  semantics:
+    description: andn rd, rj, rk
+    operations:
+    - type: alu
+      op: Andn
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SLL.W
+  group: base
+  encoding:
+    match: 00000000000101110???????????????
+  assembly: sll.w $d, $j, $k
+  semantics:
+    description: sll.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Shlw
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.k
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $temp:0
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SRL.W
+  group: base
+  encoding:
+    match: 00000000000101111???????????????
+  assembly: srl.w $d, $j, $k
+  semantics:
+    description: srl.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Shrw
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.k
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $temp:0
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SRA.W
+  group: base
+  encoding:
+    match: 00000000000110000???????????????
+  assembly: sra.w $d, $j, $k
+  semantics:
+    description: sra.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Sarw
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.k
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $temp:0
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: ROTR.W
+  group: base
+  encoding:
+    match: 00000000000110110???????????????
+  assembly: rotr.w $d, $j, $k
+  format: DJK
+- name: BREAK
+  group: base
+  encoding:
+    match: 00000000001010100???????????????
+  assembly: break imm
+  semantics:
+    description: break
+    operations:
+    - type: trap
+      exception: Break
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: I15
+- name: DBGCALL
+  group: base
+  encoding:
+    match: 00000000001010101???????????????
+  assembly: dbgcall imm
+  format: I15
+- name: SYSCALL
+  group: base
+  encoding:
+    match: 00000000001010110???????????????
+  assembly: syscall imm
+  semantics:
+    description: syscall
+    operations:
+    - type: syscall
+      number:
+        register:
+          class: r
+          index: 11
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: I15
+- name: SLLI.W
+  group: base
+  encoding:
+    match: 00000000010000001???????????????
+  assembly: slli.w $d, $j, imm
+  format: DJI5
+- name: SRLI.W
+  group: base
+  encoding:
+    match: 00000000010001001???????????????
+  assembly: srli.w $d, $j, imm
+  format: DJI5
+- name: SRAI.W
+  group: base
+  encoding:
+    match: 00000000010010001???????????????
+  assembly: srai.w $d, $j, imm
+  format: DJI5
+- name: ROTRI.W
+  group: base
+  encoding:
+    match: 00000000010011001???????????????
+  assembly: rotri.w $d, $j, imm
+  format: DJI5
+- name: SLTI
+  group: base
+  encoding:
+    match: 0000001000??????????????????????
+  assembly: slti $d, $j, imm
+  semantics:
+    description: slti rd, rj, imm
+    operations:
+    - type: compare
+      op: Lt
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: SLTUI
+  group: base
+  encoding:
+    match: 0000001001??????????????????????
+  assembly: sltui $d, $j, imm
+  semantics:
+    description: sltui rd, rj, imm
+    operations:
+    - type: compare
+      op: Ltu
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: ADDI.W
+  group: base
+  encoding:
+    match: 0000001010??????????????????????
+  assembly: addi.w $d, $j, imm
+  format: DJI12
+- name: ANDI
+  group: base
+  encoding:
+    match: 0000001101??????????????????????
+  assembly: andi $d, $j, imm
+  semantics:
+    description: andi rd, rj, imm
+    operations:
+    - type: alu
+      op: And
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:12:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: ORI
+  group: base
+  encoding:
+    match: 0000001110??????????????????????
+  assembly: ori $d, $j, imm
+  semantics:
+    description: ori rd, rj, imm
+    operations:
+    - type: alu
+      op: Or
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:12:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: XORI
+  group: base
+  encoding:
+    match: 0000001111??????????????????????
+  assembly: xori $d, $j, imm
+  semantics:
+    description: xori rd, rj, imm
+    operations:
+    - type: alu
+      op: Xor
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:12:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: LU12I.W
+  group: base
+  encoding:
+    match: 0001010?????????????????????????
+  assembly: lu12i.w $d, imm
+  semantics:
+    description: lu12i.w rd, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:20:signed
+      src2: 12
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $temp:0
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DI20
+- name: PCADDI
+  group: base
+  encoding:
+    match: 0001100?????????????????????????
+  assembly: pcaddi $d, imm
+  semantics:
+    description: pcaddi rd, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:20:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $pc
+      src2: $temp:0
+    implicit_pc_read: true
+    implicit_pc_write: false
+  format: DI20
+- name: PCALAU12I
+  group: base
+  encoding:
+    match: 0001101?????????????????????????
+  assembly: pcalau12i $d, imm
+  semantics:
+    description: pcalau12i rd, imm
+    operations:
+    - type: alu
+      op: And
+      dest: $temp:0
+      src1: $pc
+      src2: -4096
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:20:signed
+      src2: 12
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $temp:0
+      src2: $temp:1
+    implicit_pc_read: true
+    implicit_pc_write: false
+  format: DI20
+- name: PCADDU12I
+  group: base
+  encoding:
+    match: 0001110?????????????????????????
+  assembly: pcaddu12i $d, imm
+  semantics:
+    description: pcaddu12i rd, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:20:signed
+      src2: 12
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $pc
+      src2: $temp:0
+    implicit_pc_read: true
+    implicit_pc_write: false
+  format: DI20
+- name: PCADDU18I
+  group: base
+  encoding:
+    match: 0001111?????????????????????????
+  assembly: pcaddu18i $d, imm
+  semantics:
+    description: pcaddu18i rd, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:20:signed
+      src2: 18
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $pc
+      src2: $temp:0
+    implicit_pc_read: true
+    implicit_pc_write: false
+  format: DI20
+- name: LDPTR.W
+  group: base
+  encoding:
+    match: 00100100????????????????????????
+  assembly: ldptr.w $d, $j, $imm
+  semantics:
+    description: ldptr.w rd, si14(rj)
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:14:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: load
+      dest: $r.d
+      addr: $temp:1
+      size: 4
+      signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: LDPTR.D
+  group: base
+  encoding:
+    match: 00100110????????????????????????
+  assembly: ldptr.d $d, $j, $imm
+  semantics:
+    description: ldptr.d rd, si14(rj)
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:14:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: load
+      dest: $r.d
+      addr: $temp:1
+      size: 8
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: STPTR.W
+  group: base
+  encoding:
+    match: 00100101????????????????????????
+  assembly: stptr.w $d, $j, $imm
+  semantics:
+    description: stptr.w rd, si14(rj)
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:14:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: store
+      src: $r.d
+      addr: $temp:1
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: STPTR.D
+  group: base
+  encoding:
+    match: 00100111????????????????????????
+  assembly: stptr.d $d, $j, $imm
+  semantics:
+    description: stptr.d rd, si14(rj)
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:14:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: store
+      src: $r.d
+      addr: $temp:1
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI14
+- name: LD.B
+  group: base
+  encoding:
+    match: 0010100000??????????????????????
+  assembly: ld.b $d, $j, imm
+  semantics:
+    description: ld.b rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 1
+      signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: LD.H
+  group: base
+  encoding:
+    match: 0010100001??????????????????????
+  assembly: ld.h $d, $j, imm
+  semantics:
+    description: ld.h rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 2
+      signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: LD.W
+  group: base
+  encoding:
+    match: 0010100010??????????????????????
+  assembly: ld.w $d, $j, imm
+  semantics:
+    description: ld.w rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 4
+      signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: ST.B
+  group: base
+  encoding:
+    match: 0010100100??????????????????????
+  assembly: st.b $d, $j, imm
+  semantics:
+    description: st.b rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: store
+      addr: $temp:0
+      src: $r.d
+      size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: ST.H
+  group: base
+  encoding:
+    match: 0010100101??????????????????????
+  assembly: st.h $d, $j, imm
+  semantics:
+    description: st.h rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: store
+      addr: $temp:0
+      src: $r.d
+      size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: ST.W
+  group: base
+  encoding:
+    match: 0010100110??????????????????????
+  assembly: st.w $d, $j, imm
+  semantics:
+    description: st.w rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: store
+      addr: $temp:0
+      src: $r.d
+      size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: LD.BU
+  group: base
+  encoding:
+    match: 0010101000??????????????????????
+  assembly: ld.bu $d, $j, imm
+  semantics:
+    description: ld.bu rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 1
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: LD.HU
+  group: base
+  encoding:
+    match: 0010101001??????????????????????
+  assembly: ld.hu $d, $j, imm
+  semantics:
+    description: ld.hu rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 2
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: PRELD
+  group: base
+  encoding:
+    match: 0010101011??????????????????????
+    variables:
+      imm_1:
+      - 21
+      - 10
+  assembly: preld $j, imm, imm
+  format: JI21
+- name: LDX.B
+  group: base
+  encoding:
+    match: 00111000000000000???????????????
+  assembly: ldx.b $d, $j, $k
+  format: DJK
+- name: LDX.H
+  group: base
+  encoding:
+    match: 00111000000001000???????????????
+  assembly: ldx.h $d, $j, $k
+  format: DJK
+- name: LDX.W
+  group: base
+  encoding:
+    match: 00111000000010000???????????????
+  assembly: ldx.w $d, $j, $k
+  format: DJK
+- name: STX.B
+  group: base
+  encoding:
+    match: 00111000000100000???????????????
+  assembly: stx.b $d, $j, $k
+  format: DJK
+- name: STX.H
+  group: base
+  encoding:
+    match: 00111000000101000???????????????
+  assembly: stx.h $d, $j, $k
+  format: DJK
+- name: STX.W
+  group: base
+  encoding:
+    match: 00111000000110000???????????????
+  assembly: stx.w $d, $j, $k
+  format: DJK
+- name: LDX.BU
+  group: base
+  encoding:
+    match: 00111000001000000???????????????
+  assembly: ldx.bu $d, $j, $k
+  format: DJK
+- name: LDX.HU
+  group: base
+  encoding:
+    match: 00111000001001000???????????????
+  assembly: ldx.hu $d, $j, $k
+  format: DJK
+- name: PRELDX
+  group: base
+  encoding:
+    match: 00111000001011000???????????????
+  assembly: preldx $j, $k, imm
+  format: DJKImm4
+- name: DBAR
+  group: base
+  encoding:
+    match: 00111000011100100???????????????
+  assembly: dbar imm
+  semantics:
+    description: dbar
+    operations:
+    - type: fence
+      kind: Full
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: I15
+- name: IBAR
+  group: base
+  encoding:
+    match: 00111000011100101???????????????
+  assembly: ibar imm
+  semantics:
+    description: ibar
+    operations:
+    - type: fence
+      kind: Full
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: I15
+- name: BEQZ
+  group: base
+  encoding:
+    match: 010000??????????????????????????
+  assembly: beqz $j, imm_0, imm_1
+  semantics:
+    description: beqz rj, offset
+    operations:
+    - type: compare
+      op: Eq
+      dest: $temp:0
+      src1: $r.j
+      src2: 0
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:21:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: JI21
+- name: BNEZ
+  group: base
+  encoding:
+    match: 010001??????????????????????????
+  assembly: bnez $j, imm_0, imm_1
+  semantics:
+    description: bnez rj, offset
+    operations:
+    - type: compare
+      op: Ne
+      dest: $temp:0
+      src1: $r.j
+      src2: 0
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:21:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: JI21
+- name: JIRL
+  group: base
+  encoding:
+    match: 010011??????????????????????????
+  assembly: jirl $d, $j, imm
+  semantics:
+    description: jirl rd, rj, offset
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:16:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $pc
+      src2: 4
+    - type: indirect_jump
+      target: $temp:1
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: DJI16
+- name: B
+  group: base
+  encoding:
+    match: 010100??????????????????????????
+  assembly: b imm
+  semantics:
+    description: b offset
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $pc
+      src2: $imm:28:signed
+    - type: indirect_jump
+      target: $temp:0
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: I26
+- name: BL
+  group: base
+  encoding:
+    match: 010101??????????????????????????
+  assembly: bl imm
+  semantics:
+    description: bl offset
+    operations:
+    - type: alu
+      op: Add
+      dest: $r.@1
+      src1: $pc
+      src2: 4
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $pc
+      src2: $imm:28:signed
+    - type: indirect_jump
+      target: $temp:0
+      is_call: true
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: I26
+- name: BEQ
+  group: base
+  encoding:
+    match: 010110??????????????????????????
+  assembly: beq $d, $j, imm
+  semantics:
+    description: beq rj, rd, offset
+    operations:
+    - type: compare
+      op: Eq
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.d
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:16:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: DJI16
+- name: BNE
+  group: base
+  encoding:
+    match: 010111??????????????????????????
+  assembly: bne $d, $j, imm
+  semantics:
+    description: bne rj, rd, offset
+    operations:
+    - type: compare
+      op: Ne
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.d
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:16:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: DJI16
+- name: BLT
+  group: base
+  encoding:
+    match: 011000??????????????????????????
+  assembly: blt $d, $j, imm
+  semantics:
+    description: blt rj, rd, offset
+    operations:
+    - type: compare
+      op: Lt
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.d
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:16:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: DJI16
+- name: BGE
+  group: base
+  encoding:
+    match: 011001??????????????????????????
+  assembly: bge $d, $j, imm
+  semantics:
+    description: bge rj, rd, offset
+    operations:
+    - type: compare
+      op: Ge
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.d
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:16:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: DJI16
+- name: BLTU
+  group: base
+  encoding:
+    match: 011010??????????????????????????
+  assembly: bltu $d, $j, imm
+  semantics:
+    description: bltu rj, rd, offset
+    operations:
+    - type: compare
+      op: Ltu
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.d
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:16:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: DJI16
+- name: BGEU
+  group: base
+  encoding:
+    match: 011011??????????????????????????
+  assembly: bgeu $d, $j, imm
+  semantics:
+    description: bgeu rj, rd, offset
+    operations:
+    - type: compare
+      op: Geu
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.d
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:16:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+  format: DJI16
+- name: RDTIME.D
+  group: base
+  encoding:
+    match: 0000000000000000011010??????????
+  assembly: rdtime.d $d, $j
+  format: DJ
+- name: ADD.D
+  group: base
+  encoding:
+    match: 00000000000100001???????????????
+  assembly: add.d $d, $j, $k
+  semantics:
+    description: add.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SUB.D
+  group: base
+  encoding:
+    match: 00000000000100011???????????????
+  assembly: sub.d $d, $j, $k
+  semantics:
+    description: sub.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Sub
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SLL.D
+  group: base
+  encoding:
+    match: 00000000000110001???????????????
+  assembly: sll.d $d, $j, $k
+  semantics:
+    description: sll.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Shl
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SRL.D
+  group: base
+  encoding:
+    match: 00000000000110010???????????????
+  assembly: srl.d $d, $j, $k
+  semantics:
+    description: srl.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Shr
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SRA.D
+  group: base
+  encoding:
+    match: 00000000000110011???????????????
+  assembly: sra.d $d, $j, $k
+  semantics:
+    description: sra.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Sar
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: ROTR.D
+  group: base
+  encoding:
+    match: 00000000000110111???????????????
+  assembly: rotr.d $d, $j, $k
+  semantics:
+    description: rotr.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Ror
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SLLI.D
+  group: base
+  encoding:
+    match: 0000000001000001????????????????
+  assembly: slli.d $d, $j, imm
+  semantics:
+    description: slli.d rd, rj, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:6:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI6
+- name: SRLI.D
+  group: base
+  encoding:
+    match: 0000000001000101????????????????
+  assembly: srli.d $d, $j, imm
+  semantics:
+    description: srli.d rd, rj, imm
+    operations:
+    - type: alu
+      op: Shr
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:6:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI6
+- name: SRAI.D
+  group: base
+  encoding:
+    match: 0000000001001001????????????????
+  assembly: srai.d $d, $j, imm
+  semantics:
+    description: srai.d rd, rj, imm
+    operations:
+    - type: alu
+      op: Sar
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:6:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI6
+- name: ROTRI.D
+  group: base
+  encoding:
+    match: 0000000001001101????????????????
+  assembly: rotri.d $d, $j, imm
+  semantics:
+    description: rotri.d rd, rj, imm
+    operations:
+    - type: alu
+      op: Ror
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:6:unsigned
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI6
+- name: ADDI.D
+  group: base
+  encoding:
+    match: 0000001011??????????????????????
+  assembly: addi.d $d, $j, imm
+  semantics:
+    description: addi.d rd, rj, imm
+    operations:
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $r.j
+      src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: ADDU16I.D
+  group: base
+  encoding:
+    match: 000100??????????????????????????
+  assembly: addu16i.d $d, $j, imm
+  semantics:
+    description: addu16i.d rd, rj, imm (rd = rj + (sign_extend(imm,16) << 16))
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:16:signed
+      src2: 16
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $r.j
+      src2: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI16
+- name: LD.D
+  group: base
+  encoding:
+    match: 0010100011??????????????????????
+  assembly: ld.d $d, $j, imm
+  semantics:
+    description: ld.d rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 8
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: ST.D
+  group: base
+  encoding:
+    match: 0010100111??????????????????????
+  assembly: st.d $d, $j, imm
+  semantics:
+    description: st.d rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: store
+      addr: $temp:0
+      src: $r.d
+      size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: LD.WU
+  group: base
+  encoding:
+    match: 0010101010??????????????????????
+  assembly: ld.wu $d, $j, imm
+  semantics:
+    description: ld.wu rd, imm(rj)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $r.j
+      src2: $imm:12:signed
+    - type: load
+      dest: $r.d
+      addr: $temp:0
+      size: 4
+      signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJI12
+- name: LDX.D
+  group: base
+  encoding:
+    match: 00111000000011000???????????????
+  assembly: ldx.d $d, $j, $k
+  format: DJK
+- name: STX.D
+  group: base
+  encoding:
+    match: 00111000000111000???????????????
+  assembly: stx.d $d, $j, $k
+  format: DJK
+- name: LDX.WU
+  group: base
+  encoding:
+    match: 00111000001010000???????????????
+  assembly: ldx.wu $d, $j, $k
+  format: DJK

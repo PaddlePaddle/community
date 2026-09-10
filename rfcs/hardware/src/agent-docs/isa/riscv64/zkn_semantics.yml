@@ -1,0 +1,121 @@
+# RISC-V64 Zkn Extension Semantics
+semantics:
+  aes64es:
+    description: "aes64es rd, rs1, rs2"
+    operations:
+      - type: crypto
+        op: Aes64Es
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  aes64esm:
+    description: "aes64esm rd, rs1, rs2"
+    operations:
+      - type: crypto
+        op: Aes64Esm
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  aes64ds:
+    description: "aes64ds rd, rs1, rs2"
+    operations:
+      - type: crypto
+        op: Aes64Ds
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  aes64dsm:
+    description: "aes64dsm rd, rs1, rs2"
+    operations:
+      - type: crypto
+        op: Aes64Dsm
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  aes64im:
+    description: "aes64im rd, rs1"
+    operations:
+      - type: crypto
+        op: Aes64Im
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  aes64ks1i:
+    description: "aes64ks1i rd, rs1, rnum"
+    operations:
+      - type: crypto
+        op: Aes64Ks1i
+        dest: $x.rd
+        src1: $x.rs1
+        src2:
+          field_imm:
+            field: rnum
+            width: 4
+            signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  aes64ks2:
+    description: "aes64ks2 rd, rs1, rs2"
+    operations:
+      - type: crypto
+        op: Aes64Ks2
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sha512sum0:
+    description: "sha512sum0 rd, rs1"
+    operations:
+      - type: crypto
+        op: Sha512Sum0
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sha512sum1:
+    description: "sha512sum1 rd, rs1"
+    operations:
+      - type: crypto
+        op: Sha512Sum1
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sha512sig0:
+    description: "sha512sig0 rd, rs1"
+    operations:
+      - type: crypto
+        op: Sha512Sig0
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sha512sig1:
+    description: "sha512sig1 rd, rs1"
+    operations:
+      - type: crypto
+        op: Sha512Sig1
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false

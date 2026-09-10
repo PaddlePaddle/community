@@ -1,0 +1,149 @@
+# RISC-V64 semantics - generated from hardcoded definitions
+semantics:
+  addiw:
+    description: "\"addiw\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  addw:
+    description: "\"addw\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  slliw:
+    description: "\"slliw\" rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Shlw
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sllw:
+    description: "\"sllw\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Shlw
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sraiw:
+    description: "\"sraiw\" rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Sarw
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sraw:
+    description: "\"sraw\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Sarw
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  srliw:
+    description: "\"srliw\" rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Shrw
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  srlw:
+    description: "\"srlw\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Shrw
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  subw:
+    description: "\"subw\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Sub
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+

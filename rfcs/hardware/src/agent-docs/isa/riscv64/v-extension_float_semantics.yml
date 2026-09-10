@@ -1,0 +1,586 @@
+semantics:
+  vfadd.vv:
+    description: vfadd.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FAdd
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfadd.vf:
+    description: vfadd.vf vd, vs2, rs1 (float add, scalar from f-reg)
+    operations:
+    - type: vector_alu
+      op: FAdd
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$f.rs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfsub.vv:
+    description: vfsub.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FSub
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfsub.vf:
+    description: vfsub.vf vd, vs2, rs1 (float sub, scalar from f-reg)
+    operations:
+    - type: vector_alu
+      op: FSub
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$f.rs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmul.vv:
+    description: vfmul.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FMul
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmul.vf:
+    description: vfmul.vf vd, vs2, rs1 (float mul, scalar from f-reg)
+    operations:
+    - type: vector_alu
+      op: FMul
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$f.rs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfdiv.vv:
+    description: vfdiv.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FDiv
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfdiv.vf:
+    description: vfdiv.vf vd, vs2, rs1 (float div, scalar from f-reg)
+    operations:
+    - type: vector_alu
+      op: FDiv
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$f.rs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmin.vv:
+    description: vfmin.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FMin
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmax.vv:
+    description: vfmax.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FMax
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfsgnj.vv:
+    description: vfsgnj.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FSignInject
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfsgnjn.vv:
+    description: vfsgnjn.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FSignInjectNeg
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfsgnjx.vv:
+    description: vfsgnjx.vv vd, vs2, vs1
+    operations:
+    - type: vector_alu
+      op: FSignInjectXor
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmadd.vv:
+    description: vfmadd.vv vd, vs1, vs2 (vd = vs2 * vs1 + vd)
+    operations:
+    - type: vector_alu
+      op: FMadd
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+      src3: "$v.vd"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmsub.vv:
+    description: vfmsub.vv vd, vs1, vs2 (vd = vs2 * vs1 - vd)
+    operations:
+    - type: vector_alu
+      op: FMsub
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+      src3: "$v.vd"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfnmadd.vv:
+    description: vfnmadd.vv vd, vs1, vs2 (vd = -(vs2 * vs1) + vd)
+    operations:
+    - type: vector_alu
+      op: FNmadd
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+      src3: "$v.vd"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfnmsub.vv:
+    description: vfnmsub.vv vd, vs1, vs2 (vd = -(vs2 * vs1) - vd)
+    operations:
+    - type: vector_alu
+      op: FNmsub
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+      src3: "$v.vd"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmacc.vv:
+    description: vfmacc.vv vd, vs1, vs2 (vd = vs2 * vs1 + vd)
+    operations:
+    - type: vector_alu
+      op: FMadd
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+      src2: "$v.vs1"
+      src3: "$v.vd"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwmacc.vv:
+    description: vfwmacc.vv vd, vs1, vs2 (widening fused multiply-add)
+    operations:
+    - type: vector_widen_alu
+      op: Madd
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      src3: $v.vd
+      unsigned: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfsqrt.v:
+    description: vfsqrt.v vd, vs2
+    operations:
+    - type: vector_alu
+      op: FSqrt
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfclass.v:
+    description: vfclass.v vd, vs2
+    operations:
+    - type: vector_alu
+      op: FClass
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfmv.v.f:
+    description: vfmv.v.f vd, rs1 (broadcast float to all elements)
+    operations:
+    - type: vector_broadcast
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$f.rs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmv.v.v:
+    description: vmv.v.v vd, vs1 (vector move)
+    operations:
+    - type: vector_alu
+      op: Move
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs1"
+      src2: "$v.vs1"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwadd.vv:
+    description: vfwadd.vv vd, vs2, vs1 (widening float add)
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwsub.vv:
+    description: vfwsub.vv vd, vs2, vs1 (widening float sub)
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwadd.wv:
+    description: vfwadd.wv vd, vs2, vs1 (widening float add, odd-even)
+    operations:
+    - type: vector_widen_alu
+      op: Add
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      wide_src1: true
+      unsigned: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwsub.wv:
+    description: vfwsub.wv vd, vs2, vs1 (widening float sub, odd-even)
+    operations:
+    - type: vector_widen_alu
+      op: Sub
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      wide_src1: true
+      unsigned: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwmul.vv:
+    description: vfwmul.vv vd, vs2, vs1 (widening float mul)
+    operations:
+    - type: vector_widen_alu
+      op: Mul
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+      unsigned: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwcvt.f.f.v:
+    description: vfwcvt.f.f.v vd, vs2 (widening float convert)
+    operations:
+    - type: vector_cast
+      op: FDynamicToFWideDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      widen: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfncvt.f.f.w:
+    description: vfncvt.f.f.w vd, vs2 (narrowing float convert)
+    operations:
+    - type: vector_cast
+      op: FDynamicToFNarrowDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      narrow: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfncvt.rod.f.f.w:
+    description: vfncvt.rod.f.f.w vd, vs2 (round-to-odd narrowing float convert)
+    operations:
+    - type: vector_cast
+      op: FDynamicToFNarrowDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      rounding_mode: rod
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwcvt.f.x.v:
+    description: vfwcvt.f.x.v vd, vs2 (widening signed int to float)
+    operations:
+    - type: vector_cast
+      op: IDynamicToFDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      widen: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfwcvt.f.xu.v:
+    description: vfwcvt.f.xu.v vd, vs2 (widening unsigned int to float)
+    operations:
+    - type: vector_cast
+      op: UDynamicToFDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      widen: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfncvt.f.x.w:
+    description: vfncvt.f.x.w vd, vs2 (narrowing signed int to float)
+    operations:
+    - type: vector_cast
+      op: IDynamicToFDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      narrow: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfncvt.xu.f.w:
+    description: vfncvt.xu.f.w vd, vs2 (narrowing float to unsigned int)
+    operations:
+    - type: vector_cast
+      op: FDynamicToUDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      narrow: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfncvt.rtz.x.f.w:
+    description: vfncvt.rtz.x.f.w vd, vs2
+    operations:
+    - type: vector_cast
+      op: FDynamicToIDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      narrow: true
+      rounding_mode: rz
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfncvt.rtz.xu.f.w:
+    description: vfncvt.rtz.xu.f.w vd, vs2
+    operations:
+    - type: vector_cast
+      op: FDynamicToUDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      narrow: true
+      rounding_mode: rz
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfrec7.v:
+    description: vfrec7.v vd, vs2 (float reciprocal estimate 7-bit)
+    operations:
+    - type: vector_alu
+      op: FRecip
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfrsqrt7.v:
+    description: vfrsqrt7.v vd, vs2 (float reciprocal sqrt estimate 7-bit)
+    operations:
+    - type: vector_alu
+      op: FRSqrt
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src1: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmfeq.vv:
+    description: vmfeq.vv vd, vs2, vs1 (float equal compare)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmfne.vv:
+    description: vmfne.vv vd, vs2, vs1 (float not-equal compare)
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmflt.vv:
+    description: vmflt.vv vd, vs2, vs1 (float less-than compare)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmfle.vv:
+    description: vmfle.vv vd, vs2, vs1 (float less-or-equal compare)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vmfeq.vf:
+    description: vmfeq.vf vd, vs2, rs1 (float equal compare with scalar)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: Dynamic
+      dest: $v.vd
+      src1: $v.vs2
+      src2: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfredmin.vs:
+    description: vfredmin.vs vd, vs2, vs1 (float reduce min)
+    operations:
+    - type: vector_reduce
+      op: FMin
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  vfredmax.vs:
+    description: vfredmax.vs vd, vs2, vs1 (float reduce max)
+    operations:
+    - type: vector_reduce
+      op: FMax
+      elem_width: Dynamic
+      dest: $v.vd
+      src: $v.vs2
+      init: $v.vs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  # VFCVT family (non-widening/non-narrowing conversions)
+  vfcvt_f_xu_v:
+    description: vfcvt.f.xu.v vd, vs2 (unsigned int to float)
+    operations:
+    - type: vector_cast
+      op: UDynamicToFDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vfcvt_f_x_v:
+    description: vfcvt.f.x.v vd, vs2 (signed int to float)
+    operations:
+    - type: vector_cast
+      op: IDynamicToFDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vfcvt_xu_f_v:
+    description: vfcvt.xu.f.v vd, vs2 (float to unsigned int)
+    operations:
+    - type: vector_cast
+      op: FDynamicToUDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vfcvt_x_f_v:
+    description: vfcvt.x.f.v vd, vs2 (float to signed int)
+    operations:
+    - type: vector_cast
+      op: FDynamicToIDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vfcvt_rtz_xu_f_v:
+    description: vfcvt.rtz.xu.f.v vd, vs2 (float to unsigned int, round to zero)
+    operations:
+    - type: vector_cast
+      op: FDynamicToUDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      rounding_mode: rz
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  vfcvt_rtz_x_f_v:
+    description: vfcvt.rtz.x.f.v vd, vs2 (float to signed int, round to zero)
+    operations:
+    - type: vector_cast
+      op: FDynamicToIDynamic
+      elem_width: Dynamic
+      dest: "$v.vd"
+      src: "$v.vs2"
+      rounding_mode: rz
+    implicit_pc_read: false
+    implicit_pc_write: false

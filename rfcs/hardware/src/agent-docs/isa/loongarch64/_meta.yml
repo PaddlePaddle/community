@@ -1,0 +1,166 @@
+# LoongArch 64位架构元信息
+# 重点：LBT（Binary Translation）扩展支持
+
+architecture:
+  name: "LoongArch"
+  base: "LA64"
+  word_size: 64
+  endianness: little
+  memory_model: release_consistency
+  role: guest
+
+  registers:
+    r:
+      count: 32
+      width: 64
+      zero_index: 0
+      aliases:
+        0: "$zero"
+        1: "$ra"
+        2: "$tp"
+        3: "$sp"
+        4: "$a0"
+        5: "$a1"
+        6: "$a2"
+        7: "$a3"
+        8: "$a4"
+        9: "$a5"
+        10: "$a6"
+        11: "$a7"
+        12: "$t0"
+        13: "$t1"
+        14: "$t2"
+        15: "$t3"
+        16: "$t4"
+        17: "$t5"
+        18: "$t6"
+        19: "$t7"
+        20: "$t8"
+        21: "$x"
+        22: "$fp"
+        23: "$s0"
+        24: "$s1"
+        25: "$s2"
+        26: "$s3"
+        27: "$s4"
+        28: "$s5"
+        29: "$s6"
+        30: "$s7"
+        31: "$s8"
+
+    f:
+      count: 32
+      width: 64
+      vector_width: 256
+      shares_storage_with: "vector_shared"
+      aliases: {}
+
+    v:
+      count: 32
+      width: 128
+      vector_width: 128
+      shares_storage_with: "vector_shared"
+      aliases: {}
+
+    x:
+      count: 32
+      width: 256
+      vector_width: 256
+      shares_storage_with: "vector_shared"
+      aliases: {}
+
+    fcc:
+      count: 8
+      width: 1
+      read_mask: 0x1
+      write_mask: 0x1
+      aliases: {}
+
+    pc:
+      count: 1
+      width: 64
+      aliases: {}
+
+  csrs:
+    fcsr:
+      address: 0x1
+      width: 32
+      description: "Floating-point Control and Status Register"
+      fields:
+        - { name: fflags, bits: [4, 0], description: "Accrued floating-point exception flags" }
+        - { name: frm, bits: [7, 5], description: "Dynamic rounding mode" }
+    fflags:
+      address: 0x1
+      width: 32
+      description: "Floating-point exception flags"
+      fields:
+        - { name: NV, bits: [0, 0], description: "Invalid operation" }
+        - { name: DZ, bits: [1, 1], description: "Divide by zero" }
+        - { name: OF, bits: [2, 2], description: "Overflow" }
+        - { name: UF, bits: [3, 3], description: "Underflow" }
+        - { name: NX, bits: [4, 4], description: "Inexact" }
+    frm:
+      address: 0x2
+      width: 32
+      description: "Floating-point dynamic rounding mode"
+      fields:
+        - { name: RM, bits: [2, 0], description: "Rounding mode: 0=RNE, 1=RTZ, 2=RDN, 3=RUP, 4=RMM" }
+
+  # LBT扩展标志寄存器（用于模拟x86 EFLAGS）
+  lbt_flag_register:
+    name: "LBT_EFLAGS"
+    width: 32
+    fields:
+      - { name: CF, bits: [0, 0], description: "进位标志" }
+      - { name: PF, bits: [2, 2], description: "奇偶标志" }
+      - { name: AF, bits: [4, 4], description: "辅助进位" }
+      - { name: ZF, bits: [6, 6], description: "零标志" }
+      - { name: SF, bits: [7, 7], description: "符号标志" }
+      - { name: OF, bits: [11, 11], description: "溢出标志" }
+
+  memory_model_details:
+    type: "release_consistency"
+    note: "LoongArch默认内存模型，弱于TSO"
+    fence_instructions: [DBAR, IBAR]
+
+  lbt_extensions:
+    description: "Binary Translation辅助指令"
+    instructions:
+      - name: X86MUL_B
+        description: "模拟x86 8位乘法标志"
+      - name: X86MUL_H
+        description: "模拟x86 16位乘法标志"
+      - name: X86MUL_W
+        description: "模拟x86 32位乘法标志"
+      - name: X86MUL_D
+        description: "模拟x86 64位乘法标志"
+      - name: X86DIV_B
+        description: "模拟x86 8位除法"
+      - name: X86DIV_H
+        description: "模拟x86 16位除法"
+      - name: X86DIV_W
+        description: "模拟x86 32位除法"
+      - name: X86DIV_D
+        description: "模拟x86 64位除法"
+      - name: X86BT
+        description: "模拟x86位测试"
+      - name: X86MOV_E
+        description: "模拟x86条件移动/设置"
+      - name: X86FLG
+        description: "读取/写入模拟标志"
+
+  abi:
+    stack_pointer: ["r", 3]
+    return_address: ["r", 1]
+    syscall:
+      number_reg: ["r", 11]
+      arg_regs:
+        - ["r", 4]
+        - ["r", 5]
+        - ["r", 6]
+        - ["r", 7]
+        - ["r", 8]
+        - ["r", 9]
+      return_reg: ["r", 4]
+      exit_syscalls: [93, 94]
+      syscall_abi: "loongarch64"

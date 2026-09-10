@@ -1,0 +1,78 @@
+groups:
+- name: fp-common
+  description: LoongArch Common Floating-Point Instructions
+instructions:
+- name: fcsrwr
+  group: fp-common
+  encoding:
+    match: 0000000100010100110000?????00000
+  assembly: fcsrwr $j
+  semantics:
+    description: fcsrwr rj
+    operations:
+    - type: write_csr
+      name: fcsr
+      src: $r.j
+  format: J
+- name: fcsrrd
+  group: fp-common
+  encoding:
+    match: 000000010001010011001000000?????
+  assembly: fcsrrd $d
+  semantics:
+    description: fcsrrd rd
+    operations:
+    - type: read_csr
+      dest: $r.d
+      name: fcsr
+  format: D
+- name: movfr2fcc
+  group: fp-common
+  encoding:
+    match: 000000010001010011010000????????
+  assembly: movfr2fcc $fcc_d, $f_j
+  semantics:
+    description: movfr2fcc fd, fj
+    operations:
+    - type: move
+      dest: $fcc.d
+      src: $f.j
+  format: U15
+- name: movfcc2fr
+  group: fp-common
+  encoding:
+    match: 000000010001010011010100????????
+  assembly: movfcc2fr $f_d, $fcc_j
+  semantics:
+    description: movfcc2fr fd, fj
+    operations:
+    - type: move
+      dest: $f.d
+      src: $fcc.j
+  format: DJ
+- name: movgr2fcc
+  group: fp-common
+  encoding:
+    match: 0000000100010100110110??????????
+  assembly: movgr2fcc $fcc_d, $r_j
+  semantics:
+    description: movgr2fcc fd, rj
+    operations:
+    - type: move
+      dest: $fcc.d
+      src: $r.j
+  format: U15
+- name: fsel
+  group: fp-common
+  encoding:
+    match: 0000110100000000????????????????
+  assembly: fsel $f_d, $f_j, $f_k, $fcc_ca
+  semantics:
+    description: fsel fd, fj, fk, fcc_ca
+    operations:
+    - type: select
+      dest: $f.d
+      cond: $fcc.ca
+      src_true: $f.k
+      src_false: $f.j
+  format: DJKCa

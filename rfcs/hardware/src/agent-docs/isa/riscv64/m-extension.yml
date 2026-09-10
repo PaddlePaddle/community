@@ -1,0 +1,82 @@
+groups:
+- name: mul_div
+  description: 乘除法指令
+instructions:
+- name: MUL
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 000 ????? 0110011
+  assembly: mul {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MULH
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 001 ????? 0110011
+  assembly: mulh {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MULHSU
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 010 ????? 0110011
+  assembly: mulhsu {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MULHU
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 011 ????? 0110011
+  assembly: mulhu {rd}, {rs1}, {rs2}
+  format: R-type
+- name: DIV
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 100 ????? 0110011
+  assembly: div {rd}, {rs1}, {rs2}
+  format: R-type
+- name: DIVU
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 101 ????? 0110011
+  assembly: divu {rd}, {rs1}, {rs2}
+  format: R-type
+- name: REM
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 110 ????? 0110011
+  assembly: rem {rd}, {rs1}, {rs2}
+  format: R-type
+- name: REMU
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 111 ????? 0110011
+  assembly: remu {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MULW
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 000 ????? 0111011
+  assembly: mulw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: DIVW
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 100 ????? 0111011
+  assembly: divw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: DIVUW
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 101 ????? 0111011
+  assembly: divuw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: REMW
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 110 ????? 0111011
+  assembly: remw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: REMUW
+  group: mul_div
+  encoding:
+    match: 0000001 ????? ????? 111 ????? 0111011
+  assembly: remuw {rd}, {rs1}, {rs2}
+  format: R-type

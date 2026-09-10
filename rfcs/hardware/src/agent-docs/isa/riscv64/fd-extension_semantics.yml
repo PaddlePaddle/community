@@ -1,0 +1,1058 @@
+# RISC-V64 semantics - generated from hardcoded definitions
+semantics:
+  fadd_d:
+    description: "\"fadd_d\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Add
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fadd_s:
+    description: "\"fadd_s\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Add
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_d_l:
+    description: "\"fcvt_d_l\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: I64ToF64
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_d_lu:
+    description: "\"fcvt_d_lu\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: U64ToF64
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_d_s:
+    description: "\"fcvt_d_s\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F32ToF64
+        dest: $f.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+
+  fcvt_d_w:
+    description: "\"fcvt_d_w\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: I32ToF64
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_d_wu:
+    description: "\"fcvt_d_wu\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: U32ToF64
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_l_d:
+    description: "\"fcvt_l_d\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F64ToI64
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_l_s:
+    description: "\"fcvt_l_s\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F32ToI64
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_lu_d:
+    description: "\"fcvt_lu_d\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F64ToU64
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_lu_s:
+    description: "\"fcvt_lu_s\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F32ToU64
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_s_d:
+    description: "\"fcvt_s_d\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F64ToF32
+        dest: $f.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_s_l:
+    description: "\"fcvt_s_l\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: I64ToF32
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_s_lu:
+    description: "\"fcvt_s_lu\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: U64ToF32
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_s_w:
+    description: "\"fcvt_s_w\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: I32ToF32
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_s_wu:
+    description: "\"fcvt_s_wu\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: U32ToF32
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_w_d:
+    description: "\"fcvt_w_d\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F64ToI32
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_w_s:
+    description: "\"fcvt_w_s\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F32ToI32
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_wu_d:
+    description: "\"fcvt_wu_d\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F64ToU32
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fcvt_wu_s:
+    description: "\"fcvt_wu_s\" rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F32ToU32
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fdiv_d:
+    description: "\"fdiv_d\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Div
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fdiv_s:
+    description: "\"fdiv_s\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Div
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmadd_s:
+    description: "fmadd.s rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Madd
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmsub_s:
+    description: "fmsub.s rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Msub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fnmsub_s:
+    description: "fnmsub.s rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Nmsub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fnmadd_s:
+    description: "fnmadd.s rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Nmadd
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmadd_d:
+    description: "fmadd.d rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Madd
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmsub_d:
+    description: "fmsub.d rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Msub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fnmsub_d:
+    description: "fnmsub.d rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Nmsub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fnmadd_d:
+    description: "fnmadd.d rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Nmadd
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  feq_d:
+    description: "\"feq_d\" rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Eq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  feq_s:
+    description: "\"feq_s\" rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Eq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnj_s:
+    description: "fsgnj.s rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInject
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnjn_s:
+    description: "fsgnjn.s rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInjectNeg
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnjx_s:
+    description: "fsgnjx.s rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInjectXor
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnj_d:
+    description: "fsgnj.d rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInject
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnjn_d:
+    description: "fsgnjn.d rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInjectNeg
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnjx_d:
+    description: "fsgnjx.d rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInjectXor
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fclass_s:
+    description: "fclass.s rd, rs1"
+    operations:
+      - type: f_alu
+        op: Class
+        dest: $x.rd
+        src1: $f.rs1
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fclass_d:
+    description: "fclass.d rd, rs1"
+    operations:
+      - type: f_alu
+        op: Class
+        dest: $x.rd
+        src1: $f.rs1
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fld:
+    description: "fld rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $f.rd
+        addr: $temp:0
+        size: 8
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fle_d:
+    description: "\"fle_d\" rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Le
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fle_s:
+    description: "\"fle_s\" rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Le
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  flt_d:
+    description: "\"flt_d\" rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Lt
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  flt_s:
+    description: "\"flt_s\" rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Lt
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  flw:
+    description: "flw rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $f.rd
+        addr: $temp:0
+        size: 4
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fmul_d:
+    description: "\"fmul_d\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Mul
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fmul_s:
+    description: "\"fmul_s\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Mul
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fmv_d_x:
+    description: "fmv.d.x rd, rs1"
+    operations:
+      - type: f_mov
+        dest: $f.rd
+        src: $x.rs1
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fmv_w_x:
+    description: "fmv.w.x rd, rs1"
+    operations:
+      - type: f_mov
+        dest: $f.rd
+        src: $x.rs1
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fmv_x_d:
+    description: "fmv.x.d rd, rs1"
+    operations:
+      - type: f_mov
+        dest: $x.rd
+        src: $f.rs1
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fmv_x_w:
+    description: "fmv.x.w rd, rs1"
+    operations:
+      - type: f_mov
+        dest: $x.rd
+        src: $f.rs1
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fsd:
+    description: "fsd rs2, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: store
+        addr: $temp:0
+        src: $f.rs2
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fsqrt_d:
+    description: "fsqrt.d rd, rs1"
+    operations:
+      - type: f_alu
+        op: Sqrt
+        dest: $f.rd
+        src1: $f.rs1
+        src2: null
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fsqrt_s:
+    description: "fsqrt.s rd, rs1"
+    operations:
+      - type: f_alu
+        op: Sqrt
+        dest: $f.rd
+        src1: $f.rs1
+        src2: null
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fsub_d:
+    description: "\"fsub_d\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Sub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fsub_s:
+    description: "\"fsub_s\" rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Sub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fsw:
+    description: "fsw rs2, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: store
+        addr: $temp:0
+        src: $f.rs2
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmin_s:
+    description: "fmin.s rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Min
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmax_s:
+    description: "fmax.s rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Max
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fminm_s:
+    description: "fminm.s rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: MinM
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmaxm_s:
+    description: "fmaxm.s rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: MaxM
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmin_d:
+    description: "fmin.d rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Min
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmax_d:
+    description: "fmax.d rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Max
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fminm_d:
+    description: "fminm.d rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: MinM
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmaxm_d:
+    description: "fmaxm.d rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: MaxM
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fli_h:
+    description: "fli.h rd, rs1"
+    operations:
+      - type: fp_imm
+        dest: $f.rd
+        index: $imm:5
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fminm_h:
+    description: "fminm.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: MinM
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmaxm_h:
+    description: "fmaxm.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: MaxM
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fround_h:
+    description: "fround.h rd, rs1, rm"
+    operations:
+      - type: f_alu
+        op: Round
+        dest: $f.rd
+        src1: $f.rs1
+        precision: Half
+        rounding_mode: $rm:3
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  froundnx_h:
+    description: "froundnx.h rd, rs1, rm"
+    operations:
+      - type: f_alu
+        op: RoundNx
+        dest: $f.rd
+        src1: $f.rs1
+        precision: Half
+        rounding_mode: $rm:3
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fleq_h:
+    description: "fleq.h rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Leq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fltq_h:
+    description: "fltq.h rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Ltq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fleq_s:
+    description: "fleq.s rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Leq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fltq_s:
+    description: "fltq.s rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Ltq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fleq_d:
+    description: "fleq.d rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Leq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fltq_d:
+    description: "fltq.d rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Ltq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fli_s:
+    description: "fli.s rd, rs1"
+    operations:
+      - type: fp_imm
+        dest: $f.rd
+        index: $imm:5
+        precision: Single
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fli_d:
+    description: "fli.d rd, rs1"
+    operations:
+      - type: fp_imm
+        dest: $f.rd
+        index: $imm:5
+        precision: Double
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fround_s:
+    description: "fround.s rd, rs1, rm"
+    operations:
+      - type: f_alu
+        op: Round
+        dest: $f.rd
+        src1: $f.rs1
+        precision: Single
+        rounding_mode: $rm:3
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  froundnx_s:
+    description: "froundnx.s rd, rs1, rm"
+    operations:
+      - type: f_alu
+        op: RoundNx
+        dest: $f.rd
+        src1: $f.rs1
+        precision: Single
+        rounding_mode: $rm:3
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fround_d:
+    description: "fround.d rd, rs1, rm"
+    operations:
+      - type: f_alu
+        op: Round
+        dest: $f.rd
+        src1: $f.rs1
+        precision: Double
+        rounding_mode: $rm:3
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  froundnx_d:
+    description: "froundnx.d rd, rs1, rm"
+    operations:
+      - type: f_alu
+        op: RoundNx
+        dest: $f.rd
+        src1: $f.rs1
+        precision: Double
+        rounding_mode: $rm:3
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvtmod_w_d:
+    description: "fcvtmod.w.d rd, rs1"
+    operations:
+      - type: f_mod_cvt
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmvh_x_d:
+    description: "fmvh.x.d rd, rs1"
+    operations:
+      - type: alu
+        op: Shr
+        dest: $temp:0
+        src1: $f.rs1
+        src2: 32
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmvp_d_x:
+    description: "fmvp.d.x rd, rs1, rs2"
+    operations:
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:0
+        src: $x.rs1
+      - type: alu
+        op: Shl
+        dest: $temp:1
+        src1: $x.rs2
+        src2: 32
+      - type: alu
+        op: Or
+        dest: $f.rd
+        src1: $temp:0
+        src2: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+

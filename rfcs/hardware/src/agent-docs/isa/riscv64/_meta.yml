@@ -1,0 +1,283 @@
+architecture:
+  name: "RISC-V"
+  base: "RV64IMAFD"
+  word_size: 64
+  endianness: little
+  memory_model: tso
+  user_pc: pc
+  role: guest
+
+  registers:
+    x:
+      count: 32
+      width: 64
+      zero_index: 0
+      aliases:
+        0: zero
+        1: ra
+        2: sp
+        3: gp
+        4: tp
+        5: t0
+        6: t1
+        7: t2
+        8: s0
+        9: s1
+        10: a0
+        11: a1
+        12: a2
+        13: a3
+        14: a4
+        15: a5
+        16: a6
+        17: a7
+        18: s2
+        19: s3
+        20: s4
+        21: s5
+        22: s6
+        23: s7
+        24: s8
+        25: s9
+        26: s10
+        27: s11
+        28: t3
+        29: t4
+        30: t5
+        31: t6
+
+    f:
+      count: 32
+      width: 64
+      aliases:
+        0: ft0
+        1: ft1
+        2: ft2
+        3: ft3
+        4: ft4
+        5: ft5
+        6: ft6
+        7: ft7
+        8: fs0
+        9: fs1
+        10: fa0
+        11: fa1
+        12: fa2
+        13: fa3
+        14: fa4
+        15: fa5
+        16: fa6
+        17: fa7
+        18: fs2
+        19: fs3
+        20: fs4
+        21: fs5
+        22: fs6
+        23: fs7
+        24: fs8
+        25: fs9
+        26: fs10
+        27: fs11
+        28: ft8
+        29: ft9
+        30: ft10
+        31: ft11
+
+    v:
+      count: 32
+      width: 128
+      vector_width: 128
+      aliases: {}
+
+  csrs:
+    fflags:
+      address: 0x001
+      width: 32
+      fields:
+        - { name: NX, bits: [0, 0] }
+        - { name: UF, bits: [1, 1] }
+        - { name: OF, bits: [2, 2] }
+        - { name: DZ, bits: [3, 3] }
+        - { name: NV, bits: [4, 4] }
+    frm:
+      address: 0x002
+      width: 32
+      fields:
+        - { name: RM, bits: [2, 0] }
+    fcsr:
+      address: 0x003
+      width: 32
+      fields:
+        - { name: NX, bits: [0, 0] }
+        - { name: UF, bits: [1, 1] }
+        - { name: OF, bits: [2, 2] }
+        - { name: DZ, bits: [3, 3] }
+        - { name: NV, bits: [4, 4] }
+        - { name: RM, bits: [7, 5] }
+    vl:
+      address: 0xC20
+      width: 64
+      fields: []
+    vtype:
+      address: 0xC21
+      width: 64
+      fields:
+        - { name: vill, bits: [63, 63] }
+        - { name: vma, bits: [7, 7] }
+        - { name: vta, bits: [6, 6] }
+        - { name: vsew, bits: [5, 3] }
+        - { name: vlmul, bits: [2, 0] }
+    vlenb:
+      address: 0xC22
+      width: 64
+      fields: []
+
+    jvt:
+      address: 0x017
+      width: 64
+      fields: []
+
+    cycle:
+      address: 0xC00
+      width: 64
+      fields: []
+    time:
+      address: 0xC01
+      width: 64
+      fields: []
+    instret:
+      address: 0xC02
+      width: 64
+      fields: []
+    hpmcounter3:
+      address: 0xC03
+      width: 64
+      fields: []
+    hpmcounter4:
+      address: 0xC04
+      width: 64
+      fields: []
+    hpmcounter5:
+      address: 0xC05
+      width: 64
+      fields: []
+    hpmcounter6:
+      address: 0xC06
+      width: 64
+      fields: []
+    hpmcounter7:
+      address: 0xC07
+      width: 64
+      fields: []
+    hpmcounter8:
+      address: 0xC08
+      width: 64
+      fields: []
+    hpmcounter9:
+      address: 0xC09
+      width: 64
+      fields: []
+    hpmcounter10:
+      address: 0xC0A
+      width: 64
+      fields: []
+    hpmcounter11:
+      address: 0xC0B
+      width: 64
+      fields: []
+    hpmcounter12:
+      address: 0xC0C
+      width: 64
+      fields: []
+    hpmcounter13:
+      address: 0xC0D
+      width: 64
+      fields: []
+    hpmcounter14:
+      address: 0xC0E
+      width: 64
+      fields: []
+    hpmcounter15:
+      address: 0xC0F
+      width: 64
+      fields: []
+    hpmcounter16:
+      address: 0xC10
+      width: 64
+      fields: []
+    hpmcounter17:
+      address: 0xC11
+      width: 64
+      fields: []
+    hpmcounter18:
+      address: 0xC12
+      width: 64
+      fields: []
+    hpmcounter19:
+      address: 0xC13
+      width: 64
+      fields: []
+    hpmcounter20:
+      address: 0xC14
+      width: 64
+      fields: []
+    hpmcounter21:
+      address: 0xC15
+      width: 64
+      fields: []
+    hpmcounter22:
+      address: 0xC16
+      width: 64
+      fields: []
+    hpmcounter23:
+      address: 0xC17
+      width: 64
+      fields: []
+    hpmcounter24:
+      address: 0xC18
+      width: 64
+      fields: []
+    hpmcounter25:
+      address: 0xC19
+      width: 64
+      fields: []
+    hpmcounter26:
+      address: 0xC1A
+      width: 64
+      fields: []
+    hpmcounter27:
+      address: 0xC1B
+      width: 64
+      fields: []
+    hpmcounter28:
+      address: 0xC1C
+      width: 64
+      fields: []
+    hpmcounter29:
+      address: 0xC1D
+      width: 64
+      fields: []
+    hpmcounter30:
+      address: 0xC1E
+      width: 64
+      fields: []
+    hpmcounter31:
+      address: 0xC1F
+      width: 64
+      fields: []
+
+  abi:
+    stack_pointer: ["x", 2]
+    return_address: ["x", 1]
+    syscall:
+      number_reg: ["x", 17]
+      arg_regs:
+        - ["x", 10]
+        - ["x", 11]
+        - ["x", 12]
+        - ["x", 13]
+        - ["x", 14]
+        - ["x", 15]
+      return_reg: ["x", 10]
+      exit_syscalls: [93, 94]
+      syscall_abi: "riscv64"

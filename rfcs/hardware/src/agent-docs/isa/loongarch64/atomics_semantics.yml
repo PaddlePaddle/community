@@ -1,0 +1,108 @@
+groups:
+  - name: atomics
+    description: LoongArch Atomic Instructions Semantics
+
+semantics:
+  ammax_wu:
+    description: "ammax.wu rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Maxu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: Relaxed
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ammax_du:
+    description: "ammax.du rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Maxu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: Relaxed
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ammin_wu:
+    description: "ammin.wu rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Minu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: Relaxed
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ammin_du:
+    description: "ammin.du rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Minu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: Relaxed
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ammax_db_wu:
+    description: "ammax_db.wu rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Maxu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: SeqCst
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ammax_db_du:
+    description: "ammax_db.du rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Maxu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: SeqCst
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ammin_db_wu:
+    description: "ammin_db.wu rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Minu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: SeqCst
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ammin_db_du:
+    description: "ammin_db.du rd, rj, rk"
+    operations:
+      - type: atomic
+        op: Minu
+        dest: $r.d
+        addr: $r.j
+        src: $r.k
+        ordering: SeqCst
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
