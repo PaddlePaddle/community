@@ -1,0 +1,95 @@
+classDiagram
+    class ECFormerBase {
+        <<abstract>>
+        # Embedding query_embed
+        # GINNodeEmbedding gnn_node
+        # Pooling pool
+        # TransformerEncoder tf_encoder
+        +forward(x, edge_index, edge_attr, batch, ba_edge_index, ba_edge_attr, query_mask)
+        +encode_molecule()*
+        +get_loss()* 
+        +get_metrics()*
+        # _build_pooling()
+        # _build_transformer()
+    }
+    
+    class ECFormerECD {
+        -Linear pred_number_layer
+        -Linear pred_position_layer
+        -Linear pred_height_layer
+        -CrossEntropyLoss loss_fn
+        +__init__(max_peaks=9, num_position_classes=20, num_height_classes=2, loss_weight_height=2.0)
+        +get_loss()
+        +get_metrics()
+    }
+    
+    class ECFormerIR {
+        -Linear pred_number_layer
+        -Linear pred_position_layer
+        -Linear pred_height_layer
+        -CrossEntropyLoss ce_loss
+        -MSELoss mse_loss
+        +__init__(max_peaks=15, num_position_classes=36, num_height_classes=1)
+        +get_loss()
+        +get_metrics()
+    }
+    
+    class GINNodeEmbedding {
+        -AtomEncoder atom_encoder
+        -BondEncoder bond_encoder
+        -BondFloatRBF bond_float_encoder
+        -BondAngleFloatRBF bond_angle_encoder
+        -List~GINConv~ convs
+        +forward(x, edge_index, edge_attr, batch, ba_edge_index, ba_edge_attr)
+        -_forward_enhanced()
+        -_forward_simple()
+    }
+    
+    class GINConv {
+        -Sequential mlp
+        -Parameter eps
+        +forward(x, edge_index, edge_attr)
+        +message(x_j, edge_attr)
+    }
+    
+    class AtomEncoder {
+        -LayerList atom_embedding_list
+        +forward(x)
+    }
+    
+    class BondEncoder {
+        -LayerList bond_embedding_list
+        +forward(edge_attr)
+    }
+    
+    class BondFloatRBF {
+        -List~RBF~ rbf_list
+        -List~Linear~ linear_list
+        +forward(bond_float_features)
+    }
+    
+    class BondAngleFloatRBF {
+        -List~RBF~ rbf_list
+        -List~Linear~ linear_list
+        +forward(bond_angle_float_features)
+    }
+    
+    class RBF {
+        -Tensor centers
+        -Tensor gamma
+        +forward(x)
+    }
+    
+    ECFormerBase <|-- ECFormerECD : 继承
+    ECFormerBase <|-- ECFormerIR : 继承
+    ECFormerBase *-- GINNodeEmbedding : 组合
+    ECFormerBase *-- TransformerEncoder : 组合
+    
+    GINNodeEmbedding *-- AtomEncoder : 组合
+    GINNodeEmbedding *-- BondEncoder : 组合
+    GINNodeEmbedding *-- BondFloatRBF : 组合
+    GINNodeEmbedding *-- BondAngleFloatRBF : 组合
+    GINNodeEmbedding *-- GINConv : 组合
+    
+    BondFloatRBF *-- RBF : 组合
+    BondAngleFloatRBF *-- RBF : 组合
