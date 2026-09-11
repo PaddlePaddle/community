@@ -1,0 +1,469 @@
+diff --git a/python/paddle/fluid/tests/unittests/test_imperative_data_loader_process.py b/python/paddle/fluid/tests/unittests/test_imperative_data_loader_process.py
+index 7fb2cb0090da57ae837d1f774518dd90a41df56c..9b2d71c9f907779bc9b27b51e21056496f8d4dd5 100644
+--- a/python/paddle/fluid/tests/unittests/test_imperative_data_loader_process.py
++++ b/python/paddle/fluid/tests/unittests/test_imperative_data_loader_process.py
+@@ -18,6 +18,7 @@ import multiprocessing
+ import numpy as np
+ import paddle.fluid as fluid
+ from paddle.fluid import core
++from paddle.fluid.reader import _reader_process_loop
+ 
+ if sys.version_info[0] == 2:
+     import Queue as queue
+@@ -66,7 +67,7 @@ class TestDygraphDataLoaderProcess(unittest.TestCase):
+                 batch_generator_creator(self.batch_size, self.batch_num),
+                 places=fluid.CPUPlace())
+             loader._data_queue = queue.Queue(self.batch_num + 1)
+-            loader._reader_process_loop()
++            _reader_process_loop(loader._batch_reader, loader._data_queue)
+             # For clean memory mapped files
+             util_queue = multiprocessing.Queue(self.batch_num + 1)
+             for _ in range(self.batch_num):
+@@ -94,7 +95,7 @@ class TestDygraphDataLoaderProcess(unittest.TestCase):
+             loader._data_queue = queue.Queue(self.batch_num + 1)
+             exception = None
+             try:
+-                loader._reader_process_loop()
++                _reader_process_loop(loader._batch_reader, loader._data_queue)
+             except core.EnforceNotMet as ex:
+                 exception = ex
+             self.assertIsNotNone(exception)
+diff --git a/python/paddle/fluid/tests/unittests/test_multiprocess_dataloader_exception.py b/python/paddle/fluid/tests/unittests/test_multiprocess_dataloader_exception.py
+index 3a8867f6bd29f5bc0e512f9c8b22ecf192253fc7..6fd14b40bc9108b6075a0ac1f40cbefd79b8f0d9 100644
+--- a/python/paddle/fluid/tests/unittests/test_multiprocess_dataloader_exception.py
++++ b/python/paddle/fluid/tests/unittests/test_multiprocess_dataloader_exception.py
+@@ -27,6 +27,7 @@ import paddle.fluid.core as core
+ from paddle.io import Dataset, IterableDataset, BatchSampler, DataLoader
+ from paddle.fluid.dygraph.nn import Linear
+ from paddle.fluid.dygraph.base import to_variable
++from paddle.fluid.dataloader.dataloader_iter import _worker_loop
+ 
+ 
+ class RandomDataset(Dataset):
+@@ -185,9 +186,10 @@ class TestDataLoaderWorkerLoop(unittest.TestCase):
+                 for i in range(10):
+                     indices_queue.put([i, i + 10])
+                 indices_queue.put(None)
+-                loader._worker_loop(
+-                    loader._dataset, 0, indices_queue, loader._data_queue,
+-                    loader._workers_done_event, _collate_fn, _init_fn, 0, 1)
++                _worker_loop(loader._dataset, 0, indices_queue,
++                             loader._data_queue, loader._workers_done_event,
++                             _collate_fn, _init_fn, 0, 1,
++                             loader._use_shared_memory)
+                 self.assertTrue(False)
+         except AssertionError:
+             pass
+@@ -228,9 +230,10 @@ class TestDataLoaderWorkerLoop(unittest.TestCase):
+                     indices_queue.put([i, i + 10])
+                 indices_queue.put(None)
+                 loader._workers_done_event.set()
+-                loader._worker_loop(
+-                    loader._dataset, 0, indices_queue, loader._data_queue,
+-                    loader._workers_done_event, _collate_fn, _init_fn, 0, 1)
++                _worker_loop(loader._dataset, 0, indices_queue,
++                             loader._data_queue, loader._workers_done_event,
++                             _collate_fn, _init_fn, 0, 1,
++                             loader._use_shared_memory)
+                 self.assertTrue(True)
+         except AssertionError:
+             pass
+diff --git a/test/swe_paddle/test_pr27247_dataloader_spawn_pickle.py b/test/swe_paddle/test_pr27247_dataloader_spawn_pickle.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..28ba21e9f3285c5fcc11bdb63af0553b09636a82
+--- /dev/null
++++ b/test/swe_paddle/test_pr27247_dataloader_spawn_pickle.py
+@@ -0,0 +1,393 @@
++import ast
++import copy
++import itertools
++import multiprocessing.reduction
++import queue
++import sys
++import threading
++import types
++from pathlib import Path
++
++
++REPO_ROOT = Path(__file__).resolve().parents[2]
++DATALOADER_ITER = (
++    REPO_ROOT / "python/paddle/fluid/dataloader/dataloader_iter.py"
++)
++READER = REPO_ROOT / "python/paddle/fluid/reader.py"
++
++
++class _Token:
++    pass
++
++
++class _CapturedProcess:
++    created = []
++
++    def __init__(self, target, args=()):
++        self.target = target
++        self.args = args
++        self.daemon = False
++        self.started = False
++        self.pid = 1000 + len(type(self).created)
++        type(self).created.append(self)
++
++    def start(self):
++        self.started = True
++
++
++class _CapturedThread:
++    created = []
++
++    def __init__(self, target):
++        self.target = target
++        self.daemon = False
++        self.started = False
++        type(self).created.append(self)
++
++    def start(self):
++        self.started = True
++
++
++class _FakeCore:
++    def __init__(self):
++        self.process_pids = []
++        self.signal_handler_calls = 0
++        self.removed_tensor_lists = []
++
++    def _set_process_pids(self, owner_id, pids):
++        self.process_pids.append((owner_id, tuple(pids)))
++
++    def _set_process_signal_handler(self):
++        self.signal_handler_calls += 1
++
++    def _convert_to_tensor_list(self, batch):
++        return tuple(batch)
++
++    def _remove_tensor_list_mmap_fds(self, tensor_list):
++        self.removed_tensor_lists.append(tensor_list)
++
++
++class _CleanupRegistrar:
++    registered = []
++
++    @classmethod
++    def register(cls, function):
++        cls.registered.append(function)
++
++
++class _WorkerInfo:
++    def __init__(self, id, num_workers, dataset):
++        self.id = id
++        self.num_workers = num_workers
++        self.dataset = dataset
++
++
++class _Fetcher:
++    def __init__(self, dataset):
++        self.dataset = dataset
++
++    def fetch(self, indices):
++        return [self.dataset[index] for index in indices]
++
++
++class _DatasetKind:
++    ITER = 1
++
++    @staticmethod
++    def create_fetcher(dataset_kind, dataset, collate_fn, auto_collate_batch):
++        return _Fetcher(dataset)
++
++
++class _ParentWatchDog:
++    def is_alive(self):
++        return True
++
++
++class _IterableDatasetStopIteration:
++    def __init__(self, worker_id):
++        self.worker_id = worker_id
++
++
++class _PaddleDouble:
++    class Tensor:
++        pass
++
++
++class _SixDouble:
++    @staticmethod
++    def reraise(exc_type, exc, traceback):
++        raise exc.with_traceback(traceback)
++
++
++class _DoneEvent:
++    def __init__(self):
++        self.done = False
++
++    def is_set(self):
++        return self.done
++
++    def set(self):
++        self.done = True
++
++
++class _InputQueue:
++    def __init__(self, items, done_event):
++        self.items = list(items)
++        self.done_event = done_event
++
++    def get(self, timeout):
++        item = self.items.pop(0)
++        if item is None:
++            self.done_event.set()
++        return item
++
++
++class _OutputQueue:
++    def __init__(self):
++        self.items = []
++
++    def put(self, item):
++        self.items.append(item)
++
++
++class _IteratorHarness:
++    def __init__(self):
++        self._num_workers = 2
++        self._dataset = [1, 2]
++        self._dataset_kind = 0
++        self._collate_fn = None
++        self._worker_init_fn = None
++        self._use_shared_memory = False
++        self._unpicklable_state = threading.Lock()
++
++
++class _ReaderHarness:
++    def __init__(self):
++        self._use_multiprocess = True
++        self._capacity = 2
++        self._batch_reader = ("batch-reader",)
++        self._unpicklable_state = threading.Lock()
++        self._cleared = False
++
++    def _clear_and_remove_data_queue(self):
++        self._cleared = True
++
++    def _reader_thread_loop_for_multiprocess(self):
++        pass
++
++
++def _find_function(path, function_name, class_name=None):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    nodes = tree.body
++    if class_name is not None:
++        owner = next(
++            node
++            for node in nodes
++            if isinstance(node, ast.ClassDef) and node.name == class_name
++        )
++        nodes = owner.body
++    return copy.deepcopy(
++        next(
++            node
++            for node in nodes
++            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
++            and node.name == function_name
++        )
++    )
++
++
++def _build_overlay(path, entry_name, entry_class, target_name, target_class):
++    module_name = f"_swe_pr27247_{path.stem}_{entry_name}_{target_class}"
++    module = types.ModuleType(module_name)
++    module.__file__ = str(path)
++    module.__dict__.update(
++        itertools=itertools,
++        queue=queue,
++        sys=sys,
++        multiprocessing=types.SimpleNamespace(
++            Queue=lambda *args: _Token(),
++            Event=lambda: _Token(),
++            Process=_CapturedProcess,
++        ),
++        threading=types.SimpleNamespace(
++            Event=lambda: _Token(), Thread=_CapturedThread
++        ),
++        core=_FakeCore(),
++        paddle=_PaddleDouble,
++        six=_SixDouble,
++        CleanupFuncRegistrar=_CleanupRegistrar,
++        _cleanup_mmap=lambda: None,
++        WorkerInfo=_WorkerInfo,
++        _DatasetKind=_DatasetKind,
++        ParentWatchDog=_ParentWatchDog,
++        MP_INDICES_CHECK_INTERVAL=0.01,
++        _IterableDatasetStopIteration=_IterableDatasetStopIteration,
++        multiprocess_queue_set=set(),
++        _set_SIGCHLD_handler=lambda: None,
++    )
++    sys.modules[module_name] = module
++
++    entry = _find_function(path, entry_name, entry_class)
++    try:
++        target = _find_function(path, target_name)
++        target_is_module_level = True
++    except StopIteration:
++        target = _find_function(path, target_name, target_class)
++        target_is_module_level = False
++
++    ast.fix_missing_locations(entry)
++    ast.fix_missing_locations(target)
++    exec(
++        compile(
++            ast.Module(body=[target, entry], type_ignores=[]),
++            str(path),
++            "exec",
++        ),
++        module.__dict__,
++    )
++    return module, target_is_module_level
++
++
++def _prepare_iterator():
++    _CapturedProcess.created = []
++    module, target_is_module_level = _build_overlay(
++        DATALOADER_ITER,
++        "_init_workers",
++        "_DataLoaderIterMultiProcess",
++        "_worker_loop",
++        "_DataLoaderIterMultiProcess",
++    )
++    harness = _IteratorHarness()
++    if not target_is_module_level:
++        _IteratorHarness._worker_loop = module._worker_loop
++    module._init_workers(harness)
++    return harness, module
++
++
++def _prepare_reader():
++    _CapturedProcess.created = []
++    _CapturedThread.created = []
++    module, target_is_module_level = _build_overlay(
++        READER,
++        "_start",
++        "DygraphGeneratorLoader",
++        "_reader_process_loop",
++        "DygraphGeneratorLoader",
++    )
++    harness = _ReaderHarness()
++    if not target_is_module_level:
++        _ReaderHarness._reader_process_loop = module._reader_process_loop
++    module._start(harness)
++    return harness, module
++
++
++def _serialize_spawn_payload(process):
++    return bytes(
++        multiprocessing.reduction.ForkingPickler.dumps(
++            (process.target, process.args)
++        )
++    )
++
++
++def test_worker_processes_are_started_and_registered():
++    harness, module = _prepare_iterator()
++
++    assert len(_CapturedProcess.created) == 2
++    assert all(process.started for process in _CapturedProcess.created)
++    assert all(process.daemon for process in _CapturedProcess.created)
++    assert harness._worker_status == [True, True]
++    assert len(harness._indices_queues) == 2
++    assert module.core.process_pids[0][1] == (1000, 1001)
++
++
++def test_reader_process_and_consumer_thread_are_started():
++    harness, module = _prepare_reader()
++
++    assert harness._cleared
++    assert len(_CapturedProcess.created) == 1
++    assert _CapturedProcess.created[0].started
++    assert _CapturedProcess.created[0].daemon
++    assert harness._data_queue in module.multiprocess_queue_set
++    assert len(_CapturedThread.created) == 1
++    assert _CapturedThread.created[0].started
++    assert _CapturedThread.created[0].daemon
++
++
++def test_worker_loop_keeps_batch_handoff_behavior():
++    _CleanupRegistrar.registered = []
++    module, target_is_module_level = _build_overlay(
++        DATALOADER_ITER,
++        "_init_workers",
++        "_DataLoaderIterMultiProcess",
++        "_worker_loop",
++        "_DataLoaderIterMultiProcess",
++    )
++    dataset = [10, 20]
++    done_event = _DoneEvent()
++    indices_queue = _InputQueue([(7, [0, 1]), None], done_event)
++    out_queue = _OutputQueue()
++    initialized = []
++
++    args = (
++        dataset,
++        0,
++        indices_queue,
++        out_queue,
++        done_event,
++        None,
++        lambda worker_id: initialized.append(worker_id),
++        0,
++        1,
++    )
++    if target_is_module_level:
++        module._worker_loop(*(args + (False,)))
++    else:
++        harness = types.SimpleNamespace(_use_shared_memory=False)
++        module._worker_loop(harness, *args)
++
++    assert initialized == [0]
++    assert out_queue.items == [(7, [10, 20])]
++    assert module.core.signal_handler_calls == 1
++    assert len(_CleanupRegistrar.registered) == 1
++
++
++def test_reader_loop_keeps_batch_handoff_behavior():
++    _CleanupRegistrar.registered = []
++    module, target_is_module_level = _build_overlay(
++        READER,
++        "_start",
++        "DygraphGeneratorLoader",
++        "_reader_process_loop",
++        "DygraphGeneratorLoader",
++    )
++    out_queue = _OutputQueue()
++
++    def batch_reader():
++        return [[1, 2], [3, 4]]
++
++    if target_is_module_level:
++        module._reader_process_loop(batch_reader, out_queue)
++    else:
++        harness = types.SimpleNamespace(
++            _batch_reader=batch_reader, _data_queue=out_queue
++        )
++        module._reader_process_loop(harness)
++
++    assert out_queue.items == [(1, 2), (3, 4), None]
++    assert module.core.removed_tensor_lists == [(1, 2), (3, 4)]
++    assert module.core.signal_handler_calls == 1
++    assert len(_CleanupRegistrar.registered) == 1
++
++
++def test_worker_target_can_be_serialized_for_spawn():
++    _prepare_iterator()
++
++    payload = _serialize_spawn_payload(_CapturedProcess.created[0])
++    assert payload
++
++
++def test_reader_target_can_be_serialized_for_spawn():
++    _prepare_reader()
++
++    payload = _serialize_spawn_payload(_CapturedProcess.created[0])
++    assert payload

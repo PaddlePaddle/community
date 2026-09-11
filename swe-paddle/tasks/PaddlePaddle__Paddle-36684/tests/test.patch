@@ -1,0 +1,749 @@
+diff --git a/python/paddle/fluid/tests/unittests/test_fleet_elastic_init.py b/python/paddle/fluid/tests/unittests/test_fleet_elastic_init.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..10028d2d98f67192166908d8d25aa2caf9832d51
+--- /dev/null
++++ b/python/paddle/fluid/tests/unittests/test_fleet_elastic_init.py
+@@ -0,0 +1,48 @@
++#   Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++from __future__ import print_function
++
++import os
++import time
++import unittest
++import argparse
++from warnings import catch_warnings
++
++from paddle.distributed.fleet.elastic import enable_elastic, launch_elastic
++from paddle.distributed.fleet.launch_utils import DistributeMode
++
++
++class TestElasticInit(unittest.TestCase):
++    def setUp(self):
++        class Argument:
++            elastic_server = "127.0.0.1:2379"
++            job_id = "test_job_id_123"
++            np = "2:4"
++
++        self.args = Argument()
++
++    def test_enable_elastic(self):
++        result = enable_elastic(self.args, DistributeMode.COLLECTIVE)
++        self.assertEqual(result, True)
++
++    def test_launch_elastic(self):
++        try:
++            launch_elastic(self.args, DistributeMode.COLLECTIVE)
++        except Exception as e:
++            pass
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/python/paddle/fluid/tests/unittests/test_fleet_elastic_manager.py b/python/paddle/fluid/tests/unittests/test_fleet_elastic_manager.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..ddf87728a819ba7e2553ee5646ecb4718f5a6e25
+--- /dev/null
++++ b/python/paddle/fluid/tests/unittests/test_fleet_elastic_manager.py
+@@ -0,0 +1,306 @@
++#   Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++from __future__ import print_function
++
++import os
++import time
++import unittest
++import argparse
++
++from paddle.distributed.fleet.elastic.manager import ElasticManager
++from paddle.distributed.fleet.elastic.manager import ELASTIC_TIMEOUT
++
++
++class MockLease():
++    def refresh(self):
++        pass
++
++
++class MockEtcdClient:
++    def __init__(self, lease=None):
++        self._lease = lease
++
++    def put(self, key, value, lease=None):
++        pass
++
++    def get(self, key):
++        value = "0"
++        return value, value
++
++    def delete_prefix(self, key):
++        pass
++
++    def get_prefix(self, key_prefix):
++        hosts = ["10.10.10.1:6001", "10.10.10.2:6001"]
++        return hosts
++
++    def add_watch_callback(self, *args, **kwargs):
++        return "host_watch"
++
++    def add_watch_prefix_callback(self, key_prefix, callback, **kwargs):
++        callback(None)
++        return "host_watch"
++
++    def cancel_watch(self, watch_id):
++        pass
++
++    def delete(self, key):
++        pass
++
++    def lease(self, ttl):
++        if self._lease:
++            return self._lease
++        else:
++            return MockLease()
++
++
++class TestElasticManager(unittest.TestCase):
++    def setUp(self):
++        self.etcd_client = MockEtcdClient()
++
++    def test_elastic_manager_init(self):
++        class Argument:
++            elastic_server = "127.0.0.1:2379"
++            job_id = "test_job_id_123"
++            np = "2"
++            gpus = "0"
++            nproc_per_node = 1
++            host = None
++            host_port = None
++            scale = None
++            force = None
++            backend = 'gloo'
++
++        args = Argument()
++
++        class _MockLease():
++            def refresh(self):
++                raise ValueError("valid error, this only for unittest")
++
++        etcd_client = MockEtcdClient(lease=_MockLease())
++        elastic = ElasticManager(args, etcd_client=etcd_client)
++
++    def test_match_faulttolerance(self):
++        class Argument:
++            elastic_server = "127.0.0.1:2379"
++            job_id = "test_job_id_123"
++            np = "2"
++            gpus = "0"
++            nproc_per_node = 1
++            host = None
++            host_port = None
++            scale = None
++            force = None
++            backend = 'gloo'
++
++        args = Argument()
++        elastic = ElasticManager(args, self.etcd_client)
++        hosts = ["10.10.10.1:6001", "10.10.10.2:6001"]
++        os.environ[
++            'PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001"
++        self.assertEqual(elastic._match(hosts), True)
++        hosts = ["10.10.10.1:6001"]
++        os.environ['PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.1:6001"
++        self.assertEqual(elastic._match(hosts), False)
++
++    def test_match_elastic(self):
++        class Argument:
++            elastic_server = "127.0.0.1:2379"
++            job_id = "test_job_id_123"
++            np = "2:4"
++            gpus = "0"
++            nproc_per_node = 1
++            host = None
++            host_port = None
++            scale = None
++            force = None
++            backend = 'gloo'
++
++        os.environ['PADDLE_ELASTIC_TIMEOUT'] = "60"
++        args = Argument()
++        os.environ['FLAGS_START_PORT'] = "6001"
++        os.environ[
++            'DISTRIBUTED_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001,10.10.10.3:6001,10.10.10.4:6001"
++        os.environ[
++            'PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001,10.10.10.3:6001,10.10.10.4:6001"
++        elastic = ElasticManager(args, self.etcd_client)
++        hosts = ["10.10.10.1:6001", "10.10.10.2:6001"]
++        self.assertEqual(elastic._match(hosts), False)
++
++        hosts = [
++            "10.10.10.1:6001", "10.10.10.2:6001", "10.10.10.3:6001",
++            "10.10.10.4:6001"
++        ]
++        self.assertEqual(elastic._match(hosts), True)
++
++        hosts = ["10.10.10.1:6001", "10.10.10.2:6001", "10.10.10.3:6001"]
++        self.assertEqual(elastic._match(hosts), False)
++
++        hosts = ["10.10.10.1:6001"]
++        self.assertEqual(elastic._match(hosts), False)
++
++        os.environ[
++            'DISTRIBUTED_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001"
++        os.environ[
++            'PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001"
++        elastic = ElasticManager(args, self.etcd_client)
++        hosts = ["10.10.10.1:6001", "10.10.10.2:6001"]
++        self.assertEqual(elastic._match(hosts), True)
++
++        # TODO test timeout
++        #time.sleep(60)
++        #self.assertEqual(elastic._match(hosts), True)
++
++    def test_update_hosts_for_faulttolerance(self):
++        class Argument:
++            elastic_server = "127.0.0.1:2379"
++            job_id = "test_job_id_123"
++            np = "0"
++            gpus = "0"
++            nproc_per_node = 1
++            host = None
++            host_port = None
++            scale = None
++            force = None
++            backend = 'gloo'
++
++        args = Argument()
++        os.environ['FLAGS_START_PORT'] = "6001"
++        os.environ['PADDLE_ELASTIC_NP'] = "2"
++        os.environ['PADDLE_TRAINERS'] = "10.10.10.1,10.10.10.2"
++        os.environ[
++            'DISTRIBUTED_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001"
++        os.environ[
++            'PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001"
++        elastic = ElasticManager(args, self.etcd_client)
++        # add 10.10.10.3:6001
++        os.environ['PADDLE_TRAINER_ID'] = "0"
++        elastic.host_port = "10.10.10.1:6001"
++        elastic.hosts = ["10.10.10.1:6001", "10.10.10.2:6001"]
++        elastic._update_hosts()
++        self.assertEqual(os.getenv('PADDLE_TRAINERS'), "10.10.10.1,10.10.10.2")
++
++        # add 10.10.10.3:6001
++        elastic.host_port = "10.10.10.3:6001"
++        elastic.hosts = ["10.10.10.1:6001", "10.10.10.3:6001"]
++        os.environ['PADDLE_TRAINER_ID'] = "1"
++        elastic._update_hosts()
++        self.assertEqual(os.getenv('PADDLE_TRAINERS'), "10.10.10.1,10.10.10.3")
++
++        elastic.host_port = "10.10.10.3:6001"
++        elastic.hosts = ["10.10.10.1:6001", "10.10.10.3:6001"]
++        os.environ['PADDLE_TRAINER_ID'] = "-1"
++        elastic._update_hosts()
++        self.assertEqual(os.getenv('PADDLE_TRAINERS'), "10.10.10.1,10.10.10.3")
++
++    def test_update_hosts_for_elastic(self):
++        #######################
++        #  elastic, scale up  #
++        #######################
++        class Argument:
++            elastic_server = "127.0.0.1:2379"
++            job_id = "test_job_id_123"
++            np = "2:4"
++            gpus = "0"
++            nproc_per_node = 1
++            host = None
++            host_port = None
++            scale = None
++            force = None
++            backend = 'gloo'
++
++        args = Argument()
++
++        os.environ['FLAGS_START_PORT'] = "6001"
++        os.environ['PADDLE_TRAINERS'] = "10.10.10.1,10.10.10.2"
++        os.environ[
++            'DISTRIBUTED_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001"
++        os.environ[
++            'PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.2:6001"
++        elastic = ElasticManager(args, self.etcd_client)
++        # add 10.10.10.3:6001
++        elastic.host_port = "10.10.10.1:6001"
++        elastic.hosts = [
++            "10.10.10.1:6001", "10.10.10.2:6001", "10.10.10.3:6001"
++        ]
++        elastic._update_hosts()
++        #self.assertEqual(elastic.all_host_endpoints,
++        #                 ["10.10.10.1:6001", "10.10.10.2:6001", "10.10.10.3:6001"])
++        self.assertEqual(
++            os.getenv('PADDLE_TRAINERS'), "10.10.10.1,10.10.10.2,10.10.10.3")
++
++        #######################
++        # elastic, scale down #
++        #######################
++        os.environ[
++            'PADDLE_TRAINERS'] = "10.10.10.0,10.10.10.1,10.10.10.2,10.10.10.3"
++        os.environ[
++            'DISTRIBUTED_TRAINER_ENDPOINTS'] = "10.10.10.0:6000,10.10.10.1:6001,10.10.10.2:6001,10.10.10.3:6001"
++        os.environ[
++            'PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.0:6000,10.10.10.1:6001,10.10.10.2:6001,10.10.10.3:6001"
++        elastic = ElasticManager(args, self.etcd_client)
++        # remove 10.10.10.1:6001
++        elastic.host_port = "10.10.10.1:6001"
++        elastic.hosts = [
++            "10.10.10.1:6001", "10.10.10.2:6001", "10.10.10.3:6001"
++        ]
++        elastic._update_hosts()
++        #self.assertEqual(elastic.all_host_endpoints,
++        #                 ["10.10.10.3:6001", "10.10.10.1:6001", "10.10.10.2:6001"])
++        self.assertEqual(
++            os.getenv('PADDLE_TRAINERS'), "10.10.10.3,10.10.10.1,10.10.10.2")
++        self.assertEqual(
++            os.getenv('DISTRIBUTED_TRAINER_ENDPOINTS'),
++            "10.10.10.3:6001,10.10.10.1:6001,10.10.10.2:6001")
++
++        ############
++        os.environ['PADDLE_TRAINERS'] = "10.10.10.1,10.10.10.1"
++        os.environ[
++            'DISTRIBUTED_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.1:6002,10.10.10.1:6003,10.10.10.1:6004"
++        os.environ[
++            'PADDLE_TRAINER_ENDPOINTS'] = "10.10.10.1:6001,10.10.10.1:6002,10.10.10.1:6003,10.10.10.1:6004"
++        elastic = ElasticManager(args, self.etcd_client)
++        # remove 10.10.10.1:6001
++        elastic.host_port = "10.10.10.1:6001"
++        os.environ['PADDLE_TRAINER_ID'] = "-1"
++        elastic.hosts = ["10.10.10.1:6001", "10.10.10.1:6001"]
++        elastic._update_hosts()
++        #self.assertEqual(elastic.all_host_endpoints,
++        #                 ["10.10.10.1:6001", "10.10.10.1:6001"])
++        self.assertEqual(os.getenv('PADDLE_TRAINERS'), "10.10.10.1,10.10.10.1")
++        self.assertEqual(
++            os.getenv('DISTRIBUTED_TRAINER_ENDPOINTS'),
++            "10.10.10.1:6001,10.10.10.1:6001")
++
++    def test_exit(self):
++        class Argument:
++            elastic_server = "127.0.0.1:2379"
++            job_id = "test_job_id_123"
++            np = "2"
++            gpus = "0"
++            nproc_per_node = 1
++            host = None
++            host_port = None
++            scale = None
++            force = None
++            backend = 'gloo'
++
++        args = Argument()
++        elastic = ElasticManager(args, self.etcd_client)
++        elastic.exit()
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/python/paddle/fluid/tests/unittests/test_fleet_launch_elastic.sh b/python/paddle/fluid/tests/unittests/test_fleet_launch_elastic.sh
+index 8b618195f55ea089c9801bb9bdce5c033e884b30..a3e76a564f5b706f499a049e7c801504c56a8573 100644
+--- a/python/paddle/fluid/tests/unittests/test_fleet_launch_elastic.sh
++++ b/python/paddle/fluid/tests/unittests/test_fleet_launch_elastic.sh
+@@ -15,7 +15,7 @@
+ echo "begin test elastic"
+ 
+ unset GREP_OPTIONS
+-rm -rf log
++rm -rf log*
+ 
+ pids=`ps -ef | grep "python -m paddle.distributed.launch elastic_demo.[py]" | awk '{print $2}'`
+ if [ -n "$pids" ]; then
+@@ -28,6 +28,11 @@ fi
+ 
+ python -m pip install --no-cache-dir etcd3 -i https://mirror.baidu.com/pypi/simple
+ 
++
++#############################
++#### test fault tolrance ####
++#############################
++
+ # common env
+ export PADDLE_ELASTIC_NP=2
+ export PADDLE_ELASTIC_SERVER=127.0.0.1:2379
+@@ -137,7 +142,7 @@ export PADDLE_TRAINER_ID=1
+ export PADDLE_TRAINERS_NUM=2
+ 
+ python -m paddle.distributed.launch elastic_demo.py &> log_1.log &
+-p1=$!
++p1_1=$!
+ 
+ for i in {1..10}
+ do
+@@ -184,7 +189,7 @@ export PADDLE_TRAINER_ID=0
+ export PADDLE_TRAINERS_NUM=2
+ 
+ python -m paddle.distributed.launch elastic_demo.py &> log_0.log &
+-p0=$!
++p0_1=$!
+ 
+ for i in {1..10}
+ do
+@@ -205,4 +210,102 @@ check_env
+ echo "All check done"
+ 
+ sleep 3
+-kill $p0 $p1
++kill $p0 $p1 $p0_1 $p1_1
++
++#############################
++#####    test elastic   #####
++#############################
++# common env
++export PADDLE_ELASTIC_NP=2:4
++export PADDLE_ELASTIC_SERVER=127.0.0.1:2379
++export PADDLE_ELASTIC_JOB_ID=elastic-demo-2
++
++# run node 0
++export NVIDIA_VISIBLE_DEVICES=0
++export CUDA_VISIBLE_DEVICES=0
++export DISTRIBUTED_TRAINER_ENDPOINTS=10.10.10.1:8001,10.10.10.2:8001,10.10.10.3:8001
++export PADDLE_TRAINERS=10.10.10.1,10.10.10.2,10.10.10.3
++export TRAINER_PORTS_NUM=1
++export POD_IP=10.10.10.1
++export PADDLE_TRAINER_ID=0
++export PADDLE_TRAINERS_NUM=3
++
++python -m paddle.distributed.launch elastic_demo.py &> log_pe_0.log &
++pe_0=$!
++
++for i in {1..10}
++do
++    if grep -q "INFO:ELASTIC:not ready" log_pe_0.log; then
++        echo "run node 0 ok"
++        break
++    else
++        sleep 10
++    fi
++    if [ $i -eq 10 ]; then
++        echo "run node 0 error"
++        exit -1
++    fi
++done
++
++# run node 1
++export NVIDIA_VISIBLE_DEVICES=1
++export CUDA_VISIBLE_DEVICES=1
++export DISTRIBUTED_TRAINER_ENDPOINTS=10.10.10.1:8001,10.10.10.2:8001,10.10.10.3:8001
++export PADDLE_TRAINERS=10.10.10.1,10.10.10.2,10.10.10.3
++export TRAINER_PORTS_NUM=1
++export POD_IP=10.10.10.2
++export PADDLE_TRAINER_ID=1
++export PADDLE_TRAINERS_NUM=3
++
++python -m paddle.distributed.launch elastic_demo.py &> log_pe_1.log &
++pe_1=$!
++
++for i in {1..10}
++do
++    if grep -q "INFO:ELASTIC:not ready" log_pe_1.log; then
++        echo "run node 1 ok"
++        break
++    else
++        sleep 10
++    fi
++    if [ $i -eq 10 ]; then
++        echo "run node 1 error"
++        exit -1
++    fi
++done
++
++# run node 2
++export NVIDIA_VISIBLE_DEVICES=1
++export CUDA_VISIBLE_DEVICES=1
++export DISTRIBUTED_TRAINER_ENDPOINTS=10.10.10.1:8001,10.10.10.2:8001,10.10.10.3:8001
++export PADDLE_TRAINERS=10.10.10.1,10.10.10.2,10.10.10.3
++export TRAINER_PORTS_NUM=1
++export POD_IP=10.10.10.3
++export PADDLE_TRAINER_ID=2
++export PADDLE_TRAINERS_NUM=3
++
++python -m paddle.distributed.launch elastic_demo.py &> log_pe_2.log &
++pe_2=$!
++
++for i in {1..10}
++do
++    if grep -q "INFO:ELASTIC:ready with hosts" log_pe_2.log; then
++        echo "run node 2 ok"
++        break
++    else
++        sleep 10
++    fi
++    if [ $i -eq 10 ]; then
++        echo "run node 2 error"
++        exit -1
++    fi
++done
++
++lw0="log/workerlog.0"
++
++check_env
++
++echo "All check done"
++
++sleep 3
++kill $pe_0 $pe_1 $pe_2
+diff --git a/test/swe_paddle/test_pr36684_elastic_scale.py b/test/swe_paddle/test_pr36684_elastic_scale.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..c036bc1748cef8e8ae5f5e0e1076fb3f238688d4
+--- /dev/null
++++ b/test/swe_paddle/test_pr36684_elastic_scale.py
+@@ -0,0 +1,230 @@
++import argparse
++import ast
++import copy
++import inspect
++import logging
++import os
++import random
++import signal
++import socket
++import subprocess
++import sys
++import threading
++import time
++import traceback
++import types
++import unittest
++from contextlib import contextmanager
++from pathlib import Path
++from warnings import catch_warnings
++
++import six
++
++
++ROOT = Path(__file__).resolve().parents[2]
++MANAGER_SOURCE = ROOT / "python/paddle/distributed/fleet/elastic/manager.py"
++ELASTIC_INIT_SOURCE = (
++    ROOT / "python/paddle/distributed/fleet/elastic/__init__.py"
++)
++UPSTREAM_MANAGER_TEST = (
++    ROOT
++    / "python/paddle/fluid/tests/unittests/test_fleet_elastic_manager.py"
++)
++UPSTREAM_INIT_TEST = (
++    ROOT / "python/paddle/fluid/tests/unittests/test_fleet_elastic_init.py"
++)
++
++
++class _CloudUtils:
++    @staticmethod
++    def use_paddlecloud():
++        return all(
++            os.getenv(name) is not None
++            for name in (
++                "PADDLE_TRAINERS",
++                "POD_IP",
++                "PADDLE_TRAINER_ID",
++                "TRAINER_PORTS_NUM",
++            )
++        )
++
++
++class _LaunchUtils:
++    @staticmethod
++    def get_device_proc_info(args):
++        count = max(1, int(getattr(args, "nproc_per_node", 1) or 1))
++        return "CPU", list(range(count))
++
++
++class _DistributeMode:
++    COLLECTIVE = "collective"
++
++
++def _selected_nodes(path, class_names=(), function_names=(), constants=()):
++    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
++    selected = []
++    for node in tree.body:
++        if isinstance(node, ast.ClassDef) and node.name in class_names:
++            selected.append(node)
++        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
++            if node.name in function_names:
++                selected.append(node)
++        elif isinstance(node, (ast.Assign, ast.AnnAssign)):
++            names = []
++            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
++            for target in targets:
++                if isinstance(target, ast.Name):
++                    names.append(target.id)
++            if any(name in constants for name in names):
++                selected.append(node)
++    return ast.Module(body=selected, type_ignores=[])
++
++
++def _load_manager():
++    logger = logging.getLogger("SWE_PADDLE_PR36684_ELASTIC")
++    namespace = {
++        "__name__": "swe_paddle_pr36684_manager",
++        "copy": copy,
++        "cloud_utils": _CloudUtils,
++        "launch_utils": _LaunchUtils,
++        "logging": logging,
++        "logger": logger,
++        "os": os,
++        "random": random,
++        "signal": signal,
++        "six": six,
++        "socket": socket,
++        "subprocess": subprocess,
++        "threading": threading,
++        "time": time,
++        "traceback": traceback,
++    }
++    tree = _selected_nodes(
++        MANAGER_SOURCE,
++        class_names=(
++            "ElasticLevel",
++            "ElasticStatus",
++            "LauncherInterface",
++            "ElasticManager",
++        ),
++        constants=("ELASTIC_EXIT_CODE", "ELASTIC_TIMEOUT", "ELASTIC_TTL"),
++    )
++    exec(compile(tree, str(MANAGER_SOURCE), "exec"), namespace)
++    source_manager = namespace["ElasticManager"]
++
++    # The source PR made the etcd client injectable.  For the Base checkout,
++    # adapt only that dependency boundary so the upstream tests reach the
++    # elastic matching behavior instead of requiring a live etcd service.
++    if len(inspect.signature(source_manager.__init__).parameters) == 2:
++
++        class ElasticManagerAdapter(source_manager):
++            def __init__(self, args, etcd_client=None):
++                etcd3 = types.ModuleType("etcd3")
++                etcd3.client = lambda **kwargs: etcd_client
++                previous = sys.modules.get("etcd3")
++                sys.modules["etcd3"] = etcd3
++                try:
++                    super().__init__(args)
++                finally:
++                    if previous is None:
++                        sys.modules.pop("etcd3", None)
++                    else:
++                        sys.modules["etcd3"] = previous
++
++        manager = ElasticManagerAdapter
++    else:
++        manager = source_manager
++    return manager, namespace.get("ELASTIC_TIMEOUT", 120)
++
++
++def _load_enable_elastic():
++    namespace = {
++        "__name__": "swe_paddle_pr36684_elastic_init",
++        "DistributeMode": _DistributeMode,
++        "os": os,
++    }
++    tree = _selected_nodes(
++        ELASTIC_INIT_SOURCE, function_names=("enable_elastic",)
++    )
++    exec(compile(tree, str(ELASTIC_INIT_SOURCE), "exec"), namespace)
++    return namespace["enable_elastic"]
++
++
++def _load_upstream_classes(manager, elastic_timeout, enable_elastic):
++    manager_namespace = {
++        "__name__": "swe_paddle_pr36684_upstream_manager_test",
++        "ElasticManager": manager,
++        "ELASTIC_TIMEOUT": elastic_timeout,
++        "argparse": argparse,
++        "os": os,
++        "time": time,
++        "unittest": unittest,
++    }
++    manager_tree = _selected_nodes(
++        UPSTREAM_MANAGER_TEST,
++        class_names=("MockLease", "MockEtcdClient", "TestElasticManager"),
++    )
++    exec(
++        compile(manager_tree, str(UPSTREAM_MANAGER_TEST), "exec"),
++        manager_namespace,
++    )
++
++    init_namespace = {
++        "__name__": "swe_paddle_pr36684_upstream_init_test",
++        "DistributeMode": _DistributeMode,
++        "argparse": argparse,
++        "catch_warnings": catch_warnings,
++        "enable_elastic": enable_elastic,
++        "launch_elastic": lambda *args, **kwargs: None,
++        "os": os,
++        "time": time,
++        "unittest": unittest,
++    }
++    init_tree = _selected_nodes(
++        UPSTREAM_INIT_TEST, class_names=("TestElasticInit",)
++    )
++    exec(compile(init_tree, str(UPSTREAM_INIT_TEST), "exec"), init_namespace)
++    return manager_namespace["TestElasticManager"], init_namespace[
++        "TestElasticInit"
++    ]
++
++
++MANAGER, ELASTIC_TIMEOUT = _load_manager()
++ENABLE_ELASTIC = _load_enable_elastic()
++UPSTREAM_MANAGER_CASE, UPSTREAM_INIT_CASE = _load_upstream_classes(
++    MANAGER, ELASTIC_TIMEOUT, ENABLE_ELASTIC
++)
++
++
++@contextmanager
++def _isolated_distributed_environment():
++    original = os.environ.copy()
++    for name in list(os.environ):
++        if (
++            name.startswith("PADDLE_")
++            or name.startswith("DISTRIBUTED_")
++            or name in {"FLAGS_START_PORT", "POD_IP", "TRAINER_PORTS_NUM"}
++        ):
++            os.environ.pop(name, None)
++    try:
++        yield
++    finally:
++        os.environ.clear()
++        os.environ.update(original)
++
++
++def _run_upstream(case_class, method_name):
++    with _isolated_distributed_environment():
++        case_class(methodName=method_name).debug()
++
++
++def test_p2p_existing_elastic_enablement_is_preserved():
++    _run_upstream(UPSTREAM_INIT_CASE, "test_enable_elastic")
++
++
++def test_f2p_variable_host_range_is_matched():
++    _run_upstream(UPSTREAM_MANAGER_CASE, "test_match_elastic")
++
++
++def test_f2p_scale_out_and_scale_in_update_training_hosts():
++    _run_upstream(UPSTREAM_MANAGER_CASE, "test_update_hosts_for_elastic")

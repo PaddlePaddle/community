@@ -206,3 +206,61 @@ index d3f0eb4a448932a04ef6d2bd7b2d55cd731e199f..e6e8fb3b294b287b6392c612996f2325
 +
  if __name__ == '__main__':
      unittest.main()
+diff --git a/test/swe_paddle/test_pr78048_p2p.py b/test/swe_paddle/test_pr78048_p2p.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..7e1b4ce24c2abab1fb9911e4ae421d6ff0601751
+--- /dev/null
++++ b/test/swe_paddle/test_pr78048_p2p.py
+@@ -0,0 +1,52 @@
++from __future__ import annotations
++
++import numpy as np
++import paddle
++
++
++def _assert_split_equal(actual, expected):
++    assert len(actual) == len(expected)
++    for out, ref in zip(actual, expected):
++        np.testing.assert_allclose(out.numpy(), ref)
++
++
++def test_p2p_hsplit_original_parameters():
++    paddle.disable_static()
++    try:
++        x_np = np.arange(24, dtype="float32").reshape(4, 6)
++        x = paddle.to_tensor(x_np)
++        expected = np.array_split(x_np, 2, axis=1)
++        _assert_split_equal(paddle.hsplit(x, 2), expected)
++        _assert_split_equal(
++            paddle.hsplit(x=x, num_or_indices=2), expected
++        )
++    finally:
++        paddle.enable_static()
++
++
++def test_p2p_dsplit_original_parameters():
++    paddle.disable_static()
++    try:
++        x_np = np.arange(48, dtype="float32").reshape(2, 4, 6)
++        x = paddle.to_tensor(x_np)
++        expected = np.array_split(x_np, 2, axis=2)
++        _assert_split_equal(paddle.dsplit(x, 2), expected)
++        _assert_split_equal(
++            paddle.dsplit(x=x, num_or_indices=2), expected
++        )
++    finally:
++        paddle.enable_static()
++
++
++def test_p2p_vsplit_original_parameters():
++    paddle.disable_static()
++    try:
++        x_np = np.arange(24, dtype="float32").reshape(6, 4)
++        x = paddle.to_tensor(x_np)
++        expected = np.array_split(x_np, 2, axis=0)
++        _assert_split_equal(paddle.vsplit(x, 2), expected)
++        _assert_split_equal(
++            paddle.vsplit(x=x, num_or_indices=2), expected
++        )
++    finally:
++        paddle.enable_static()

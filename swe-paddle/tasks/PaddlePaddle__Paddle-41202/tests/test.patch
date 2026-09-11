@@ -1,9 +1,9 @@
 diff --git a/python/paddle/fluid/tests/unittests/test_dataloader_autotune.py b/python/paddle/fluid/tests/unittests/test_dataloader_autotune.py
 new file mode 100755
-index 0000000000000000000000000000000000000000..a140bb5c79c93b2de2b65a7c65643b3abe376c0f
+index 0000000000000000000000000000000000000000..f834dc24fead91dac1a2ed1207736d89099840b9
 --- /dev/null
 +++ b/python/paddle/fluid/tests/unittests/test_dataloader_autotune.py
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,78 @@
 +#   Copyright (c) 2022 PaddlePaddle Authors. All Rights Reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,6 @@ index 0000000000000000000000000000000000000000..a140bb5c79c93b2de2b65a7c65643b3a
 +import paddle
 +import paddle.nn as nn
 +from paddle.io import Dataset, DataLoader, BatchSampler, SequenceSampler
-+from paddle.fluid.reader import set_autotune_config
 +import sys
 +
 +
@@ -57,12 +56,13 @@ index 0000000000000000000000000000000000000000..a140bb5c79c93b2de2b65a7c65643b3a
 +        self.dataset = RandomDataset(10)
 +
 +    def test_dataloader_use_autotune(self):
++        from paddle.fluid.reader import set_autotune_config
++
 +        set_autotune_config(True, 1)
 +        loader = DataLoader(
 +            self.dataset, batch_size=self.batch_size, num_workers=0)
 +
 +    def test_dataloader_disable_autotune(self):
-+        set_autotune_config(False)
 +        loader = DataLoader(
 +            self.dataset, batch_size=self.batch_size, num_workers=2)
 +        if (sys.platform == 'darwin' or sys.platform == 'win32'):
@@ -71,6 +71,8 @@ index 0000000000000000000000000000000000000000..a140bb5c79c93b2de2b65a7c65643b3a
 +            self.assertEqual(loader.num_workers, 2)
 +
 +    def test_distributer_batch_sampler_autotune(self):
++        from paddle.fluid.reader import set_autotune_config
++
 +        set_autotune_config(True, 1)
 +        batch_sampler = paddle.io.DistributedBatchSampler(
 +            self.dataset, batch_size=self.batch_size)
