@@ -38,6 +38,10 @@ bash tests/test.sh
 - Historical (2023-04) wheels may be hard to pin exactly; if using a newer
   wheel, confirm `to_static` / static Variable APIs still match the base-era
   contracts exercised by the tests.
+- Do not invoke pytest on `python/paddle/fluid/tests/unittests/...` from the
+  repo root: that nests `python.paddle` and can trigger VarBase double
+  registration against an installed paddle. `tests/test.sh` cds into the
+  unittest directory and loads the file as a flat module.
 - `test_hook_in_init_for_layer` uses random input; prefer fixed seeds when
   deriving stable F2P / P2P node IDs.
 - Gold patch is the **net** of #52948 and #53572 relative to the base commit
