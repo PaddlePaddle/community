@@ -18,8 +18,8 @@ The test selects the legacy static-graph API before importing Paddle because the
 1. Check out the Base commit.
 2. Restore the exact Base blob for `python/paddle/tensor/manipulation.py`.
 3. Apply `tests/test.patch`.
-4. Run the integer-list P2P; it should pass.
-5. Run the two Tensor-shape F2P tests; they should fail on Base.
+4. Run the integer-list and 1-D shape Tensor P2P tests; both should pass on Base.
+5. Run the 0-D Tensor F2P test; it should fail on Base.
 6. Apply `solution/code.patch`.
 7. Verify the target file blob matches the Gold commit.
 8. Run `bash tests/test.sh`; all tests should pass.
@@ -32,9 +32,9 @@ bash tests/test.sh
 
 ## Expected Matrix
 
-| State | P2P | 0-D Tensor F2P | 1-D shape Tensor F2P | Full script |
+| State | Integer-list P2P | 1-D shape Tensor P2P | 0-D Tensor F2P | Full script |
 | --- | ---: | ---: | ---: | ---: |
-| Base + tests | PASS | FAIL | FAIL | FAIL |
+| Base + tests | PASS | PASS | FAIL | FAIL |
 | Base + tests + solution | PASS | PASS | PASS | PASS |
 
 No GPU, distributed runtime, external service, or additional dataset is required.
