@@ -19,8 +19,3 @@
 - 理解 Paddle legacy static graph 与 PIR static graph 的 Program/Block/Value 差异。
 - 理解 LookAhead 的 global step、`k` 周期状态和 inner optimizer 协作关系。
 - 保持 legacy static graph 的兼容行为。
-
-## 参考资料
-
-- https://github.com/PaddlePaddle/Paddle/issues/58067
-- https://github.com/PaddlePaddle/Paddle/pull/60346
