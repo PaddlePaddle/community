@@ -36,9 +36,9 @@
 - 目标测试文件：`test/legacy_test/test_restricted_unpickler.py`
 - 修复前预期：已有白名单数据和危险类拦截测试通过；来源 PR 新增的安全配置类/dataclass 加载测试失败；完整目标测试文件失败。
 - 修复后预期：安全配置类和 dataclass 可以恢复，危险 `__reduce__` 等行为仍被拦截，完整目标测试文件通过。
-- P2P 候选：包含 NumPy 数据的字典正常加载；`os.system` pickle 被拦截；dataclass 嵌套数据保持原值。
+- P2P 候选：包含 NumPy 数据的字典正常加载；`os.system` pickle 被拦截；带危险 `__reduce__` 的对象继续被拒绝。
 - F2P 候选：安全 dataclass 被判定为可加载；安全 dataclass 和普通训练配置对象能够通过 restricted unpickler 恢复。
-- 测试来源：`tests/test.patch` 是来源 PR 对 `test/legacy_test/test_restricted_unpickler.py` 的完整精确 diff。Base 仅使用严格拒绝所有非白名单类的兼容占位来解决新增符号导致的 collection 问题，不提供 Gold 行为。
+- 测试来源：`tests/test.patch` 基于来源 PR 的测试覆盖做 benchmark 适配；Gold-only `_is_safe_class` 不再在模块级导入，而是在相关 F2P 测试执行时延迟导入，使 Base 能完成测试收集，同时保持原有安全行为测试作为 P2P。
 
 ## 6. 环境与资源
 

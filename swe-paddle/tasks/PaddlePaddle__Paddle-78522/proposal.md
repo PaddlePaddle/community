@@ -35,7 +35,7 @@
 - 目标测试文件：`test/legacy_test/test_launch_main_kill.py`
 - 修复前预期：upstream test 中 PID 过滤、进程不存在处理和权限错误处理 3 个节点因目标契约缺失而失败。
 - 修复后预期：上述 3 个 F2P 节点全部通过，完整目标测试文件通过。
-- P2P 候选：`test/legacy_test/test_launch_coverage.py::TestCoverage::test_gpus`，保护已有 launch utility 初始化和集群参数处理行为。
+- P2P：`test/legacy_test/test_launch_coverage.py::TestCoverage::test_find_free_ports`，这是 Base 已存在且 CPU 可稳定运行的 launch utility 回归节点，并由 `tests/test.sh` 实际执行。
 
 ## 6. 环境与资源
 
@@ -44,7 +44,7 @@
 - 是否能提供 Docker：暂无
 - patch 类型：Python-only
 - 环境建议：使用与 checkout 兼容的 Paddle wheel；该任务不需要 source build。
-- 最小测试命令：`bash tests/test.sh`
+- 最小测试命令：`bash tests/test.sh`（实际执行 1 个既有 P2P + 3 个新增 F2P）
 - 是否有 oracle 日志：由 SWE-Paddle verifier 结果另行维护
 
 ## 7. 风险自查
