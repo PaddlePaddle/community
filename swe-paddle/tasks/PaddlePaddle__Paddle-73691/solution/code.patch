@@ -1,5 +1,5 @@
 diff --git a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc
-index 2bb9befe1ce2c6..0491ffb30e52cf 100644
+index 2bb9befe1c..0491ffb30e 100644
 --- a/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc
 +++ b/paddle/fluid/pir/dialect/operator/interface/infer_symbolic_shape/binary_infer_sym.cc
 @@ -414,7 +414,11 @@ bool Conv2dOpInferSymbolicShape(pir::Operation *op,
@@ -29,7 +29,7 @@ index 2bb9befe1ce2c6..0491ffb30e52cf 100644
  
      return symbol::ShapeOrDataDimExprs{
 diff --git a/paddle/phi/infermeta/binary.cc b/paddle/phi/infermeta/binary.cc
-index f3392caa15595f..766528e00b1771 100644
+index f3392caa15..766528e00b 100644
 --- a/paddle/phi/infermeta/binary.cc
 +++ b/paddle/phi/infermeta/binary.cc
 @@ -588,13 +588,6 @@ void ConvInferMeta(const MetaTensor& input,
@@ -78,7 +78,7 @@ index f3392caa15595f..766528e00b1771 100644
  
    out->set_dims(common::make_ddim(output_shape));
 diff --git a/paddle/phi/kernels/gpu/depthwise_conv_grad_kernel.cu b/paddle/phi/kernels/gpu/depthwise_conv_grad_kernel.cu
-index 2c3baea01c1620..02c8625ab8966c 100644
+index 2c3baea01c..02c8625ab8 100644
 --- a/paddle/phi/kernels/gpu/depthwise_conv_grad_kernel.cu
 +++ b/paddle/phi/kernels/gpu/depthwise_conv_grad_kernel.cu
 @@ -18,6 +18,7 @@
@@ -109,7 +109,7 @@ index 2c3baea01c1620..02c8625ab8966c 100644
    bool has_fuse_relu = dev_ctx.HasDnnAttr("fuse_relu_before_depthwise_conv");
    bool fuse_relu =
 diff --git a/paddle/phi/kernels/gpu/depthwise_conv_kernel.cu b/paddle/phi/kernels/gpu/depthwise_conv_kernel.cu
-index deabeca8361178..7c86b6ac596a63 100644
+index deabeca836..7c86b6ac59 100644
 --- a/paddle/phi/kernels/gpu/depthwise_conv_kernel.cu
 +++ b/paddle/phi/kernels/gpu/depthwise_conv_kernel.cu
 @@ -33,6 +33,10 @@ void DepthwiseConvKernel(const Context& dev_ctx,
@@ -124,7 +124,7 @@ index deabeca8361178..7c86b6ac596a63 100644
    dev_ctx.template Alloc<T>(output);
  
 diff --git a/paddle/phi/kernels/gpudnn/conv_grad_kernel.cu b/paddle/phi/kernels/gpudnn/conv_grad_kernel.cu
-index f6a43f198d5fd6..1cb7c205844da6 100644
+index f6a43f198d..1cb7c20584 100644
 --- a/paddle/phi/kernels/gpudnn/conv_grad_kernel.cu
 +++ b/paddle/phi/kernels/gpudnn/conv_grad_kernel.cu
 @@ -31,10 +31,10 @@
@@ -159,7 +159,7 @@ index f6a43f198d5fd6..1cb7c205844da6 100644
      dev_ctx.template Alloc<T>(input_grad);
    }
 diff --git a/paddle/phi/kernels/gpudnn/conv_kernel.cu b/paddle/phi/kernels/gpudnn/conv_kernel.cu
-index 96bc014662c55d..998360dcb8aba9 100644
+index 96bc014662..998360dcb8 100644
 --- a/paddle/phi/kernels/gpudnn/conv_kernel.cu
 +++ b/paddle/phi/kernels/gpudnn/conv_kernel.cu
 @@ -313,6 +313,10 @@ void ConvCudnnKernel(const Context& dev_ctx,
@@ -174,7 +174,7 @@ index 96bc014662c55d..998360dcb8aba9 100644
    std::vector<int> paddings = paddings_t;
    std::vector<int> dilations = dilations_t;
 diff --git a/paddle/phi/kernels/impl/conv_grad_kernel_impl.h b/paddle/phi/kernels/impl/conv_grad_kernel_impl.h
-index 3baf3fd84b0c49..6066720ab07934 100644
+index 3baf3fd84b..6066720ab0 100644
 --- a/paddle/phi/kernels/impl/conv_grad_kernel_impl.h
 +++ b/paddle/phi/kernels/impl/conv_grad_kernel_impl.h
 @@ -15,12 +15,12 @@
@@ -212,7 +212,7 @@ index 3baf3fd84b0c49..6066720ab07934 100644
  
    DenseTensor transformed_input(input.type());
 diff --git a/paddle/phi/kernels/impl/conv_kernel_impl.h b/paddle/phi/kernels/impl/conv_kernel_impl.h
-index e40ba59a2d3a11..1427a3f6cad0a8 100644
+index e40ba59a2d..1427a3f6ca 100644
 --- a/paddle/phi/kernels/impl/conv_kernel_impl.h
 +++ b/paddle/phi/kernels/impl/conv_kernel_impl.h
 @@ -38,6 +38,10 @@ void ConvKernelImpl(const Context& dev_ctx,
@@ -227,7 +227,7 @@ index e40ba59a2d3a11..1427a3f6cad0a8 100644
    // so here use an assignment operation,
    // that avoids modifying the variable in the Scope.
 diff --git a/paddle/phi/kernels/xpu/conv_grad_kernel.cc b/paddle/phi/kernels/xpu/conv_grad_kernel.cc
-index ff5a327ff3fe9b..e54f22a28dce72 100644
+index ff5a327ff3..e54f22a28d 100644
 --- a/paddle/phi/kernels/xpu/conv_grad_kernel.cc
 +++ b/paddle/phi/kernels/xpu/conv_grad_kernel.cc
 @@ -17,6 +17,7 @@
@@ -258,7 +258,7 @@ index ff5a327ff3fe9b..e54f22a28dce72 100644
        data_format == "NDHWC",
        false,
 diff --git a/paddle/phi/kernels/xpu/conv_kernel.cc b/paddle/phi/kernels/xpu/conv_kernel.cc
-index c51dd9b2eeba97..5b70b105dd3c55 100644
+index c51dd9b2ee..5b70b105dd 100644
 --- a/paddle/phi/kernels/xpu/conv_kernel.cc
 +++ b/paddle/phi/kernels/xpu/conv_kernel.cc
 @@ -37,6 +37,10 @@ void ConvKernel(const Context& dev_ctx,

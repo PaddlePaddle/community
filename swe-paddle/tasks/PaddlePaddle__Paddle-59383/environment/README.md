@@ -34,5 +34,10 @@ bash tests/test.sh
 
 - Historical wheels around 2023-12 may be hard to pin exactly; confirm
   `paddle.where` / basic dygraph+static APIs still match the exercised contracts.
+- `tests/test.sh` must put `test/legacy_test` and `test` on `PYTHONPATH` so
+  `op_test` / `white_list` resolve during collection. Without that, the original
+  entry fails before any F2P assertion runs.
+- CUDA / BF16 cases in `test_masked_scatter.py` use `@unittest.skipIf` on
+  CPU-only builds; skips are not passes.
 - Gold is the **net** of #59383 and #60835 relative to the base commit
   (sequential PR diffs on base; not a raw `base..later-merge` tree diff).

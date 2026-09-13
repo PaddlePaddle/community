@@ -1,0 +1,235 @@
+diff --git a/test/swe_paddle/test_pr54435_sort_ip.py b/test/swe_paddle/test_pr54435_sort_ip.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..30d314db63945b7681a2f16ee7a1da60136ffe15
+--- /dev/null
++++ b/test/swe_paddle/test_pr54435_sort_ip.py
+@@ -0,0 +1,228 @@
++import ast
++import copy
++import ipaddress
++import json
++import os
++import random
++import sys
++import threading
++import time
++from argparse import REMAINDER, ArgumentParser
++from pathlib import Path
++from types import SimpleNamespace
++
++try:
++    from distutils.util import strtobool
++except ImportError:  # pragma: no cover - Python versions without distutils
++    from setuptools._distutils.util import strtobool
++
++
++REPO_ROOT = Path(
++    os.environ.get("SWE_PADDLE_SOURCE_ROOT", Path(__file__).resolve().parents[2])
++)
++ARGS_PATH = (
++    REPO_ROOT
++    / "python/paddle/distributed/launch/context/args_envs.py"
++)
++MASTER_PATH = (
++    REPO_ROOT
++    / "python/paddle/distributed/launch/controllers/master.py"
++)
++
++
++def _load_nodes(path, wanted, namespace):
++    source = path.read_text(encoding="utf-8")
++    tree = ast.parse(source, filename=str(path))
++    selected = []
++    for node in tree.body:
++        name = getattr(node, "name", None)
++        if isinstance(node, (ast.Assign, ast.AnnAssign)):
++            names = {
++                target.id
++                for target in (
++                    node.targets if isinstance(node, ast.Assign) else [node.target]
++                )
++                if isinstance(target, ast.Name)
++            }
++            if names & wanted:
++                selected.append(node)
++        elif name in wanted:
++            selected.append(node)
++    exec(
++        compile(ast.Module(selected, type_ignores=[]), str(path), "exec"),
++        namespace,
++    )
++    return namespace
++
++
++def _load_args_module():
++    return _load_nodes(
++        ARGS_PATH,
++        {"env_args_mapping", "parse_args"},
++        {
++            "ArgumentParser": ArgumentParser,
++            "REMAINDER": REMAINDER,
++            "strtobool": strtobool,
++        },
++    )
++
++
++def _load_master_module():
++    return _load_nodes(
++        MASTER_PATH,
++        {"ETCD_PROTOCAL", "_cmp_by_ip", "Master", "HTTPMaster", "ETCDMaster"},
++        {
++            "copy": copy,
++            "ipaddress": ipaddress,
++            "json": json,
++            "random": random,
++            "sys": sys,
++            "threading": threading,
++            "time": time,
++            "KVClient": object,
++            "KVServer": object,
++        },
++    )
++
++
++class _Logger:
++    def info(self, *args, **kwargs):
++        pass
++
++    def debug(self, *args, **kwargs):
++        pass
++
++    def warning(self, *args, **kwargs):
++        pass
++
++    def error(self, *args, **kwargs):
++        pass
++
++
++class _Status:
++    def is_done(self):
++        return False
++
++
++def _ctx(sort_ip):
++    return SimpleNamespace(
++        args=SimpleNamespace(sort_ip=sort_ip, master=None, rank=-1),
++        logger=_Logger(),
++        status=_Status(),
++    )
++
++
++def _peer(ip, port=6000):
++    return json.dumps({"candidate": f"{ip}:{port}"}, sort_keys=True)
++
++
++PEER_10 = _peer("10.0.0.10")
++PEER_2 = _peer("10.0.0.2")
++PEER_1 = _peer("10.0.0.1")
++IP_ORDER = [PEER_1, PEER_2, PEER_10]
++KEY_ORDER = [PEER_10, PEER_2, PEER_1]
++
++
++class _HTTPClient:
++    def wait_server_ready(self, timeout):
++        return True
++
++    def put(self, key, value):
++        return True
++
++    def get_prefix(self, prefix):
++        return {
++            f"{prefix}/node-a/-1": PEER_10,
++            f"{prefix}/node-b/-1": PEER_2,
++            f"{prefix}/node-c/-1": PEER_1,
++        }
++
++
++class _Meta:
++    def __init__(self, key):
++        self.key = key.encode()
++
++
++class _ETCDClient:
++    def delete_prefix(self, prefix):
++        pass
++
++    def put(self, path, value):
++        pass
++
++    def get_prefix(self, prefix):
++        return [
++            (PEER_2.encode(), _Meta(f"{prefix}/node-b/-1")),
++            (PEER_1.encode(), _Meta(f"{prefix}/node-c/-1")),
++            (PEER_10.encode(), _Meta(f"{prefix}/node-a/-1")),
++        ]
++
++
++def _http_master(sort_ip):
++    module = _load_master_module()
++    master = object.__new__(module["HTTPMaster"])
++    master.ctx = _ctx(sort_ip)
++    master.client = _HTTPClient()
++    master.initialized = True
++    master.role = module["Master"].PATICIPANT
++    return master
++
++
++def _etcd_master(sort_ip):
++    module = _load_master_module()
++    master = object.__new__(module["ETCDMaster"])
++    master.ctx = _ctx(sort_ip)
++    master.client = _ETCDClient()
++    return master
++
++
++def test_existing_rank_argument_is_unchanged(monkeypatch):
++    module = _load_args_module()
++    monkeypatch.setattr(sys, "argv", ["launch", "--rank", "2", "train.py"])
++    args, unknown = module["parse_args"]()
++    assert args.rank == 2
++    assert args.training_script == "train.py"
++    assert unknown == []
++
++
++def test_disabled_sort_keeps_existing_key_order():
++    http_values, http_rank = _http_master(False).sync_peers(
++        "/job", "local", PEER_2, 3
++    )
++    etcd_values, etcd_rank = _etcd_master(False).sync_peers(
++        "/job", "local", PEER_2, 3
++    )
++    assert http_values == KEY_ORDER
++    assert etcd_values == KEY_ORDER
++    assert http_rank == 1
++    assert etcd_rank == 1
++
++
++def test_sort_ip_option_and_environment_mapping(monkeypatch):
++    module = _load_args_module()
++    monkeypatch.setattr(
++        sys,
++        "argv",
++        ["launch", "--sort_ip", "true", "train.py"],
++    )
++    args, unknown = module["parse_args"]()
++    assert args.sort_ip is True
++    assert args.training_script == "train.py"
++    assert unknown == []
++    assert module["env_args_mapping"]["PADDLE_SORT_IP"] == "sort_ip"
++
++
++def test_http_master_assigns_rank_by_numeric_ip():
++    values, rank = _http_master(True).sync_peers(
++        "/job", "local", PEER_2, 3
++    )
++    assert values == IP_ORDER
++    assert rank == 1
++
++
++def test_etcd_master_assigns_rank_by_numeric_ip():
++    values, rank = _etcd_master(True).sync_peers(
++        "/job", "local", PEER_2, 3
++    )
++    assert values == IP_ORDER
++    assert rank == 1
+
