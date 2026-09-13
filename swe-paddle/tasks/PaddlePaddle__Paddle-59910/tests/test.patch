@@ -1,0 +1,152 @@
+diff --git a/test/swe_paddle/test_pr59910_normal_pir.py b/test/swe_paddle/test_pr59910_normal_pir.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..5c0d7d262ac569d37f746ffb53d7a57e4cc88bfc
+--- /dev/null
++++ b/test/swe_paddle/test_pr59910_normal_pir.py
+@@ -0,0 +1,146 @@
++import ast
++import copy
++from pathlib import Path
++
++import numpy as np
++
++
++TARGET = Path("python/paddle/distribution/distribution.py")
++
++
++class _FakeVariable:
++    pass
++
++
++class _PirValue:
++    def __init__(self, shape=(), payload=None):
++        self.shape = tuple(shape)
++        self.payload = payload
++
++    def __array__(self, *args, **kwargs):
++        raise TypeError("PIR Value cannot be materialized as a NumPy array")
++
++
++class _LegacyTensor:
++    def __init__(self, dtype):
++        self.dtype = dtype
++        self.shape = ()
++        self.payload = None
++
++
++class _TensorNamespace:
++    def __init__(self, paddle):
++        self._paddle = paddle
++
++    def create_tensor(self, dtype=None):
++        if self._paddle.pir_mode:
++            raise RuntimeError("legacy create_tensor is unavailable in PIR mode")
++        tensor = _LegacyTensor(dtype)
++        self._paddle.legacy_tensors.append(tensor)
++        return tensor
++
++
++class _PirNamespace:
++    Value = _PirValue
++
++
++class _FakePaddle:
++    def __init__(self, *, pir_mode):
++        self.pir_mode = pir_mode
++        self.pir = _PirNamespace()
++        self.tensor = _TensorNamespace(self)
++        self.legacy_tensors = []
++        self.zero_shapes = []
++
++    def zeros(self, shape):
++        shape = tuple(shape)
++        self.zero_shapes.append(shape)
++        return _PirValue(shape=shape)
++
++    def assign(self, value, target):
++        array = np.array(value)
++        target.payload = array.copy()
++        target.shape = tuple(array.shape)
++        return target
++
++
++def _load_checkout_to_tensor(*, pir_mode):
++    source = TARGET.read_text(encoding="utf-8")
++    tree = ast.parse(source, filename=str(TARGET))
++
++    method = None
++    for node in tree.body:
++        if isinstance(node, ast.ClassDef) and node.name == "Distribution":
++            for item in node.body:
++                if isinstance(item, ast.FunctionDef) and item.name == "_to_tensor":
++                    method = copy.deepcopy(item)
++                    break
++            break
++
++    if method is None:
++        raise AssertionError("checkout does not define Distribution._to_tensor")
++
++    method.decorator_list = []
++    module = ast.Module(body=[method], type_ignores=[])
++    ast.fix_missing_locations(module)
++
++    fake_paddle = _FakePaddle(pir_mode=pir_mode)
++    namespace = {
++        "np": np,
++        "paddle": fake_paddle,
++        "Variable": _FakeVariable,
++        "in_pir_mode": lambda: fake_paddle.pir_mode,
++    }
++    exec(compile(module, str(TARGET), "exec"), namespace)
++    return namespace["_to_tensor"], fake_paddle
++
++
++def test_legacy_mode_preserves_numpy_broadcast_conversion():
++    to_tensor, fake_paddle = _load_checkout_to_tensor(pir_mode=False)
++
++    left, right = to_tensor(
++        object(),
++        np.array([1.5], dtype="float32"),
++        np.array([2.5, 3.5], dtype="float32"),
++    )
++
++    assert len(fake_paddle.legacy_tensors) == 2
++    assert fake_paddle.zero_shapes == []
++    assert left.shape == (2,)
++    assert right.shape == (2,)
++    np.testing.assert_allclose(left.payload, [1.5, 1.5])
++    np.testing.assert_allclose(right.payload, [2.5, 3.5])
++
++
++def test_pir_mode_converts_numpy_parameters_without_legacy_tensor_creation():
++    to_tensor, fake_paddle = _load_checkout_to_tensor(pir_mode=True)
++
++    loc, scale = to_tensor(
++        object(),
++        np.array([0.25], dtype="float32"),
++        np.array([1.5], dtype="float32"),
++    )
++
++    assert isinstance(loc, _PirValue)
++    assert isinstance(scale, _PirValue)
++    assert fake_paddle.legacy_tensors == []
++    assert fake_paddle.zero_shapes == [(1,), (1,)]
++    np.testing.assert_allclose(loc.payload, [0.25])
++    np.testing.assert_allclose(scale.payload, [1.5])
++
++
++def test_pir_mode_preserves_broadcasted_parameter_shapes_and_values():
++    to_tensor, fake_paddle = _load_checkout_to_tensor(pir_mode=True)
++
++    loc, scale = to_tensor(
++        object(),
++        np.array([0.0, 1.0], dtype="float32"),
++        np.array([[1.0], [2.0]], dtype="float32"),
++    )
++
++    assert isinstance(loc, _PirValue)
++    assert isinstance(scale, _PirValue)
++    assert fake_paddle.legacy_tensors == []
++    assert fake_paddle.zero_shapes == [(2, 2), (2, 2)]
++    np.testing.assert_allclose(loc.payload, [[0.0, 1.0], [0.0, 1.0]])
++    np.testing.assert_allclose(scale.payload, [[1.0, 1.0], [2.0, 2.0]])
