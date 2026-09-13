@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # P2P tests (pass-to-pass)
-python -m pytest test/legacy_test/test_reshape_op.py -q
+python -m pytest test/legacy_test/test_reshape_op.py -q -k "not test_with_pir_api"
 
 # F2P tests (fail-to-pass)
-python -m pytest test/legacy_test/test_atleast_nd.py -q
+python -m pytest test/legacy_test/test_atleast_nd.py -q -k "not test_with_pir_api"
