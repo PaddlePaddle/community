@@ -12,5 +12,9 @@ PYTHON_BIN="${PYTHON_BIN:-python}"
         test_rnn_cell_api.py::TestRnnUtil::test_case
 )
 
-# F2P (fail-to-pass): all cases in the newly added API test file.
-"${PYTHON_BIN}" test/legacy_test/test_rnn_utils.py
+# F2P (fail-to-pass): all 21 cases in the newly added API test file. They run
+# under pytest so every case is collected and reported as its own node. The
+# target APIs are imported inside the test bodies, so on the base revision the
+# file still imports and each case fails individually instead of aborting
+# collection.
+"${PYTHON_BIN}" -m pytest -q test/legacy_test/test_rnn_utils.py
