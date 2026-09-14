@@ -16,10 +16,12 @@ PYTHONPATH="$repo_root/test/legacy_test:$repo_root/test${PYTHONPATH:+:$PYTHONPAT
 
 # F2P (fail-to-pass): run both target suites even when the first one fails,
 # so Base logs contain the complete role matrix before the wrapper exits 1.
+# Effective F2P: 25 legacy + 1 symbolic-shape. The upstream empty float32
+# gradient placeholder is explicitly skipped and excluded from F2P/P2P counts.
 f2p_status=0
 
 if ! PYTHONPATH="$repo_root/test/legacy_test:$repo_root/test${PYTHONPATH:+:$PYTHONPATH}" \
-  "$PYTHON_BIN" -m pytest test/legacy_test/test_aminmax_op.py -q; then
+  "$PYTHON_BIN" -m pytest test/legacy_test/test_aminmax_op.py -q -rs; then
   f2p_status=1
 fi
 
