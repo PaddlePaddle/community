@@ -69,10 +69,10 @@ index 4c476831f1..075b8a08a5 100644
          super().__init__()
 diff --git a/test/legacy_test/test_aminmax_op.py b/test/legacy_test/test_aminmax_op.py
 new file mode 100644
-index 0000000000..39e56aad43
+index 0000000000..199aeaa5af
 --- /dev/null
 +++ b/test/legacy_test/test_aminmax_op.py
-@@ -0,0 +1,439 @@
+@@ -0,0 +1,437 @@
 +# Copyright (c) 2025 PaddlePaddle Authors. All Rights Reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -190,11 +190,9 @@ index 0000000000..39e56aad43
 +    def init_shape(self):
 +        self.shape = [10, 10]
 +
-+    def test_check_grad(self):
-+        # float32 numerical gradient is unreliable for aminmax:
-+        # small perturbations can flip which element is min/max,
-+        # causing the numerical and analytic gradients to diverge.
-+        pass
++    # Mask the inherited numerical gradient test: the upstream float32
++    # override was empty and must not be collected as a benchmark case.
++    test_check_grad = None
 +
 +
 +class TestAminmaxOpZeroDim(TestAminmaxOp):

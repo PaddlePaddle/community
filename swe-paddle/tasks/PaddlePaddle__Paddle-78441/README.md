@@ -26,7 +26,8 @@ The gold change includes operator schemas and code generation inputs, infermeta,
 
 ## Test Classification
 
-- **F2P:** the 26 cases in the new `test/legacy_test/test_aminmax_op.py` suite plus `test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py::AminmaxOpInferSymbolicShapeTest`, 27 nodes in total. They fail on the base build and pass after applying `solution/code.patch` and rebuilding. The symbolic-shape node only reports the `sym_shape_str` attribute it asserts on when it runs under the upstream FLAGS environment, which `tests/test.sh` now sets; see the verification notes below.
+- **F2P:** 25 effective cases in the new `test/legacy_test/test_aminmax_op.py` suite plus `test/ir/pir/cinn/symbolic/test_infer_sym_shape_unary_op.py::AminmaxOpInferSymbolicShapeTest`, **26 effective nodes** in total. They fail on the base build and pass after applying `solution/code.patch` and rebuilding. The symbolic-shape node only reports the `sym_shape_str` attribute it asserts on when it runs under the upstream FLAGS environment, which `tests/test.sh` sets; see the verification notes below.
+- **Removed placeholder:** `TestAminmaxOpFloat32::test_check_grad` contained only `pass`, with no gradient assertion. The test patch removes the empty method and masks the inherited method with `test_check_grad = None`, so unittest does not collect it. It counts as neither F2P nor P2P. Float32 forward coverage and the existing substantive float64 numerical/explicit gradient checks remain unchanged.
 - **P2P:** four existing amin/amax regression nodes in `test/legacy_test/test_max_min_amax_amin_op.py`:
   - `TestAmaxAPI_Compatibility::test_dygraph_Compatibility`
   - `TestAminAPI_Compatibility::test_dygraph_Compatibility`
@@ -35,18 +36,20 @@ The gold change includes operator schemas and code generation inputs, infermeta,
 
   The gold patch does not modify this file; these nodes must pass on both base and gold builds.
 
+The wrapper collects **30 nodes: 26 effective F2P + 4 P2P**, with no empty or skipped placeholder. Expected gold summaries are `4 passed`, `25 passed`, and `1 passed`.
+
 ## Artifacts
 
 - `proposal.md`: approved candidate proposal and source rationale.
 - `instruction.md`: self-contained task requirements for the coding agent.
 - `environment/README.md`: source-build and reproduction instructions.
 - `solution/code.patch`: exact non-test diff from base to gold commit.
-- `tests/test.patch`: exact test-only diff from base to gold commit.
+- `tests/test.patch`: upstream test-only diff from base to gold, with the empty float32 gradient placeholder removed from collection.
 - `tests/test.sh`: wrapper that sets the required per-suite `PYTHONPATH` and the symbolic-shape FLAGS environment, runs the four amin/amax P2P nodes, then runs the new legacy and symbolic-shape F2P targets.
 
 ## Verification
 
-From the root of a Paddle checkout after applying the patches in the documented order:
+From the Paddle repository root, with this task's wrapper staged at `tests/test.sh`, after applying the patches in the [documented order](environment/README.md):
 
 ```bash
 bash tests/test.sh
