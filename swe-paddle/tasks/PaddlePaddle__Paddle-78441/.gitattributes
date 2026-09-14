@@ -1,3 +1,0 @@
-# Keep patches applicable and the Bash wrapper executable across platforms.
-*.patch text eol=lf
-*.sh text eol=lf
