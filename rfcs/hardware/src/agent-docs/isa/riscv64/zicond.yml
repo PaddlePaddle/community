@@ -1,0 +1,16 @@
+groups:
+- name: zicond
+  description: RISC-V Integer Conditional Operations
+instructions:
+- name: CZERO_EQZ
+  group: zicond
+  encoding:
+    match: 0000111 ????? ????? 101 ????? 0110011
+  assembly: czero.eqz {rd}, {rs1}, {rs2}
+  format: R-type
+- name: CZERO_NEZ
+  group: zicond
+  encoding:
+    match: 0000111 ????? ????? 111 ????? 0110011
+  assembly: czero.nez {rd}, {rs1}, {rs2}
+  format: R-type

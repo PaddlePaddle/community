@@ -1,0 +1,120 @@
+# RISC-V Zicsr Extension Semantics
+
+semantics:
+  csrrw:
+    description: "csrrw rd, csr, rs1"
+    operations:
+      - type: read_csr
+        dest: $temp:0
+        addr: $csr:12
+      - type: write_csr
+        addr: $csr:12
+        src: $x.rs1
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  csrrs:
+    description: "csrrs rd, csr, rs1"
+    operations:
+      - type: read_csr
+        dest: $temp:0
+        addr: $csr:12
+      - type: alu
+        op: Or
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs1
+      - type: write_csr
+        addr: $csr:12
+        src: $temp:1
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  csrrc:
+    description: "csrrc rd, csr, rs1"
+    operations:
+      - type: read_csr
+        dest: $temp:0
+        addr: $csr:12
+      - type: alu
+        op: Not
+        dest: $temp:1
+        src1: $x.rs1
+      - type: alu
+        op: And
+        dest: $temp:2
+        src1: $temp:0
+        src2: $temp:1
+      - type: write_csr
+        addr: $csr:12
+        src: $temp:2
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  csrrwi:
+    description: "csrrwi rd, csr, uimm"
+    operations:
+      - type: read_csr
+        dest: $temp:0
+        addr: $csr:12
+      - type: write_csr
+        addr: $csr:12
+        src: $uimm:5
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  csrrsi:
+    description: "csrrsi rd, csr, uimm"
+    operations:
+      - type: read_csr
+        dest: $temp:0
+        addr: $csr:12
+      - type: alu
+        op: Or
+        dest: $temp:1
+        src1: $temp:0
+        src2: $uimm:5
+      - type: write_csr
+        addr: $csr:12
+        src: $temp:1
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  csrrci:
+    description: "csrrci rd, csr, uimm"
+    operations:
+      - type: read_csr
+        dest: $temp:0
+        addr: $csr:12
+      - type: alu
+        op: Not
+        dest: $temp:1
+        src1: $uimm:5
+      - type: alu
+        op: And
+        dest: $temp:2
+        src1: $temp:0
+        src2: $temp:1
+      - type: write_csr
+        addr: $csr:12
+        src: $temp:2
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false

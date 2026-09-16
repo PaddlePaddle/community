@@ -1,0 +1,126 @@
+groups:
+- name: float_compute
+  description: 半精度浮点运算
+- name: float_compare
+  description: 半精度浮点比较
+instructions:
+- name: FADD_H
+  group: float_compute
+  encoding:
+    match: 0000010 ????? ????? ??? ????? 1010011
+  assembly: fadd.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSUB_H
+  group: float_compute
+  encoding:
+    match: 0000110 ????? ????? ??? ????? 1010011
+  assembly: fsub.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMUL_H
+  group: float_compute
+  encoding:
+    match: 0001010 ????? ????? ??? ????? 1010011
+  assembly: fmul.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FDIV_H
+  group: float_compute
+  encoding:
+    match: 0001110 ????? ????? ??? ????? 1010011
+  assembly: fdiv.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSQRT_H
+  group: float_compute
+  encoding:
+    match: 0101110 00000 ????? ??? ????? 1010011
+  assembly: fsqrt.h {rd}, {rs1}
+  format: R-type-unary
+- name: FMADD_H
+  group: float_compute
+  encoding:
+    match: ????? 10 ????? ????? ??? ????? 1000011
+  assembly: fmadd.h {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FMSUB_H
+  group: float_compute
+  encoding:
+    match: ????? 10 ????? ????? ??? ????? 1000111
+  assembly: fmsub.h {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FNMSUB_H
+  group: float_compute
+  encoding:
+    match: ????? 10 ????? ????? ??? ????? 1001011
+  assembly: fnmsub.h {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FNMADD_H
+  group: float_compute
+  encoding:
+    match: ????? 10 ????? ????? ??? ????? 1001111
+  assembly: fnmadd.h {rd}, {rs1}, {rs2}, {rs3}
+  format: R4-type
+- name: FSGNJ_H
+  group: float_compute
+  encoding:
+    match: 0010010 ????? ????? 000 ????? 1010011
+  assembly: fsgnj.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSGNJN_H
+  group: float_compute
+  encoding:
+    match: 0010010 ????? ????? 001 ????? 1010011
+  assembly: fsgnjn.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FSGNJX_H
+  group: float_compute
+  encoding:
+    match: 0010010 ????? ????? 010 ????? 1010011
+  assembly: fsgnjx.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMIN_H
+  group: float_compute
+  encoding:
+    match: 0010110 ????? ????? 000 ????? 1010011
+  assembly: fmin.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FMAX_H
+  group: float_compute
+  encoding:
+    match: 0010110 ????? ????? 001 ????? 1010011
+  assembly: fmax.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FEQ_H
+  group: float_compare
+  encoding:
+    match: 1010010 ????? ????? 010 ????? 1010011
+  assembly: feq.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLT_H
+  group: float_compare
+  encoding:
+    match: 1010010 ????? ????? 001 ????? 1010011
+  assembly: flt.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FLE_H
+  group: float_compare
+  encoding:
+    match: 1010010 ????? ????? 000 ????? 1010011
+  assembly: fle.h {rd}, {rs1}, {rs2}
+  format: R-type
+- name: FCLASS_H
+  group: float_compute
+  encoding:
+    match: 1110010 00000 ????? 001 ????? 1010011
+  assembly: fclass.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_D_H
+  group: float_convert
+  encoding:
+    match: 0100001 00010 ????? ??? ????? 1010011
+  assembly: fcvt.d.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_H_D
+  group: float_convert
+  encoding:
+    match: 0100010 00001 ????? ??? ????? 1010011
+  assembly: fcvt.h.d {rd}, {rs1}
+  format: R-type-unary

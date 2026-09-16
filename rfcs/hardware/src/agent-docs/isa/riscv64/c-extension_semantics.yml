@@ -1,0 +1,795 @@
+# RISC-V Compressed Instruction Semantics
+semantics:
+  c_addi4spn:
+    description: "c.addi4spn rd, nzuimm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:8:unsigned
+        src2: '2'
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.@2
+        src2: $temp:0
+
+  c_lw:
+    description: "c.lw rd, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:5:unsigned
+        src2: '2'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: load
+        dest: $x.rd
+        addr: $temp:1
+        size: 4
+        signed: true
+
+  c_fld:
+    description: "c.fld rd, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:5:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: load
+        dest: $f.rd
+        addr: $temp:1
+        size: 8
+        signed: false
+
+  c_ld:
+    description: "c.ld rd, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:5:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: load
+        dest: $x.rd
+        addr: $temp:1
+        size: 8
+        signed: false
+
+  c_sw:
+    description: "c.sw rs2, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:5:unsigned
+        src2: '2'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: store
+        addr: $temp:1
+        src: $x.rs2
+        size: 4
+
+  c_fsd:
+    description: "c.fsd rs2, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:5:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: store
+        addr: $temp:1
+        src: $f.rs2
+        size: 8
+
+  c_sd:
+    description: "c.sd rs2, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:5:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: store
+        addr: $temp:1
+        src: $x.rs2
+        size: 8
+
+  c_mop:
+    description: "c.mop rd (HINT/NOP)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+
+  c_lbu:
+    description: "c.lbu rd, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:2:unsigned
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 1
+        signed: false
+
+  c_lhu:
+    description: "c.lhu rd, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:1:unsigned
+        src2: '1'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: load
+        dest: $x.rd
+        addr: $temp:1
+        size: 2
+        signed: false
+
+  c_lh:
+    description: "c.lh rd, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:1:unsigned
+        src2: '1'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: load
+        dest: $x.rd
+        addr: $temp:1
+        size: 2
+        signed: true
+
+  c_sb:
+    description: "c.sb rs2, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:2:unsigned
+      - type: store
+        addr: $temp:0
+        src: $x.rs2
+        size: 1
+
+  c_sh:
+    description: "c.sh rs2, uimm(rs1)"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:1:unsigned
+        src2: '1'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.rs1
+        src2: $temp:0
+      - type: store
+        addr: $temp:1
+        src: $x.rs2
+        size: 2
+
+  c_addi:
+    description: "c.addi rd, imm"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.rd
+        src2: $imm:6:signed
+
+  c_addiw:
+    description: "c.addiw rd, imm"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rd
+        src2: $imm:6:signed
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:1
+
+  c_li:
+    description: "c.li rd, imm"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.@0
+        src2: $imm:6:signed
+
+  c_addi16sp:
+    description: "c.addi16sp imm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:signed
+        src2: '4'
+      - type: alu
+        op: Add
+        dest: $x.@2
+        src1: $x.@2
+        src2: $temp:0
+
+  c_lui:
+    description: "c.lui rd, imm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:signed
+        src2: '12'
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.@0
+        src2: $temp:0
+
+  c_srli:
+    description: "c.srli rd, imm"
+    operations:
+      - type: alu
+        op: Shr
+        dest: $x.rd
+        src1: $x.rd
+        src2: $imm:6:unsigned
+
+  c_srai:
+    description: "c.srai rd, imm"
+    operations:
+      - type: alu
+        op: Sar
+        dest: $x.rd
+        src1: $x.rd
+        src2: $imm:6:unsigned
+
+  c_andi:
+    description: "c.andi rd, imm"
+    operations:
+      - type: alu
+        op: And
+        dest: $x.rd
+        src1: $x.rd
+        src2: $imm:6:signed
+
+  c_sub:
+    description: "c.sub rd, rs2"
+    operations:
+      - type: alu
+        op: Sub
+        dest: $x.rd
+        src1: $x.rd
+        src2: $x.rs2
+
+  c_xor:
+    description: "c.xor rd, rs2"
+    operations:
+      - type: alu
+        op: Xor
+        dest: $x.rd
+        src1: $x.rd
+        src2: $x.rs2
+
+  c_or:
+    description: "c.or rd, rs2"
+    operations:
+      - type: alu
+        op: Or
+        dest: $x.rd
+        src1: $x.rd
+        src2: $x.rs2
+
+  c_and:
+    description: "c.and rd, rs2"
+    operations:
+      - type: alu
+        op: And
+        dest: $x.rd
+        src1: $x.rd
+        src2: $x.rs2
+
+  c_subw:
+    description: "c.subw rd, rs2"
+    operations:
+      - type: alu
+        op: Sub
+        dest: $temp:0
+        src1: $x.rd
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:1
+
+  c_addw:
+    description: "c.addw rd, rs2"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rd
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:1
+
+  c_mul:
+    description: "c.mul rd, rs2"
+    operations:
+      - type: alu
+        op: Mul
+        dest: $x.rd
+        src1: $x.rd
+        src2: $x.rs2
+
+  c_zext_b:
+    description: "c.zext.b rd"
+    operations:
+      - type: alu
+        op: And
+        dest: $x.rd
+        src1: $x.rd
+        src2: '255'
+
+  c_sext_b:
+    description: "c.sext.b rd"
+    operations:
+      - type: cast
+        op:
+          SignExtend:
+            from: 8
+            to: 64
+        dest: $x.rd
+        src: $x.rd
+
+  c_zext_h:
+    description: "c.zext.h rd"
+    operations:
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 16
+            to: 64
+        dest: $x.rd
+        src: $x.rd
+
+  c_sext_h:
+    description: "c.sext.h rd"
+    operations:
+      - type: cast
+        op:
+          SignExtend:
+            from: 16
+            to: 64
+        dest: $x.rd
+        src: $x.rd
+
+  c_not:
+    description: "c.not rd"
+    operations:
+      - type: alu
+        op: Xor
+        dest: $x.rd
+        src1: $x.rd
+        src2: '-1'
+
+  c_zext_w:
+    description: "c.zext.w rd"
+    operations:
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $x.rd
+
+  c_j:
+    description: "c.j offset"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:11:signed
+        src2: '1'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $pc
+        src2: $temp:0
+      - type: branch
+        condition: '1'
+        target: $temp:1
+        is_call: false
+
+  c_beqz:
+    description: "c.beqz rd, offset"
+    operations:
+      - type: compare
+        op: Eq
+        dest: $temp:0
+        src1: $x.rd
+        src2: $x.@0
+      - type: alu
+        op: Shl
+        dest: $temp:1
+        src1: $imm:8:signed
+        src2: '1'
+      - type: alu
+        op: Add
+        dest: $temp:2
+        src1: $pc
+        src2: $temp:1
+      - type: branch
+        condition: $temp:0
+        target: $temp:2
+        is_call: false
+
+  c_bnez:
+    description: "c.bnez rd, offset"
+    operations:
+      - type: compare
+        op: Ne
+        dest: $temp:0
+        src1: $x.rd
+        src2: $x.@0
+      - type: alu
+        op: Shl
+        dest: $temp:1
+        src1: $imm:8:signed
+        src2: '1'
+      - type: alu
+        op: Add
+        dest: $temp:2
+        src1: $pc
+        src2: $temp:1
+      - type: branch
+        condition: $temp:0
+        target: $temp:2
+        is_call: false
+
+  c_slli:
+    description: "c.slli rd, imm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $x.rd
+        src1: $x.rd
+        src2: $imm:6:unsigned
+
+  c_lwsp:
+    description: "c.lwsp rd, uimm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:unsigned
+        src2: '2'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.@2
+        src2: $temp:0
+      - type: load
+        dest: $x.rd
+        addr: $temp:1
+        size: 4
+        signed: true
+
+  c_fldsp:
+    description: "c.fldsp rd, uimm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.@2
+        src2: $temp:0
+      - type: load
+        dest: $f.rd
+        addr: $temp:1
+        size: 8
+        signed: false
+
+  c_ldsp:
+    description: "c.ldsp rd, uimm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.@2
+        src2: $temp:0
+      - type: load
+        dest: $x.rd
+        addr: $temp:1
+        size: 8
+        signed: false
+
+  c_ebreak:
+    description: "c.ebreak"
+    operations:
+      - type: trap
+        exception: "Breakpoint"
+
+  c_jr:
+    description: "c.jr rd"
+    operations:
+      - type: branch
+        condition: '1'
+        target: $x.rd
+        is_call: false
+
+  c_mv:
+    description: "c.mv rd, rs2"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.@0
+        src2: $x.rs2
+
+  c_jalr:
+    description: "c.jalr rd"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.@1
+        src1: $pc
+        src2: '2'
+      - type: branch
+        condition: '1'
+        target: $x.rd
+        is_call: true
+
+  c_add:
+    description: "c.add rd, rs2"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.rd
+        src2: $x.rs2
+
+  c_swsp:
+    description: "c.swsp rs2, uimm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:unsigned
+        src2: '2'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.@2
+        src2: $temp:0
+      - type: store
+        addr: $temp:1
+        src: $x.rs2
+        size: 4
+
+  c_fsdsp:
+    description: "c.fsdsp rs2, uimm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.@2
+        src2: $temp:0
+      - type: store
+        addr: $temp:1
+        src: $f.rs2
+        size: 8
+
+  c_sdsp:
+    description: "c.sdsp rs2, uimm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:6:unsigned
+        src2: '3'
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $x.@2
+        src2: $temp:0
+      - type: store
+        addr: $temp:1
+        src: $x.rs2
+        size: 8
+
+
+  c_ntl_p1:
+    description: ntl.p1 hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  c_ntl_all:
+    description: ntl.all hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  c_ntl_pall:
+    description: ntl.pall hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  c_ntl_s1:
+    description: "c.ntl.s1 (non-temporal locality hint, stream 1)"
+    operations: []
+
+  cm_push:
+    description: "cm.push {rlist}, stack_adjustment"
+    operations:
+      - type: zcmp_push
+        rlist: $rlist:4:unsigned
+        spimm: $spimm:2:unsigned
+
+  cm_pop:
+    description: "cm.pop {rlist}, stack_adjustment"
+    operations:
+      - type: zcmp_pop
+        rlist: $rlist:4:unsigned
+        spimm: $spimm:2:unsigned
+        zero_a0: false
+        ret: false
+
+  cm_popretz:
+    description: "cm.popretz {rlist}, stack_adjustment"
+    operations:
+      - type: zcmp_pop
+        rlist: $rlist:4:unsigned
+        spimm: $spimm:2:unsigned
+        zero_a0: true
+        ret: true
+
+  cm_popret:
+    description: "cm.popret {rlist}, stack_adjustment"
+    operations:
+      - type: zcmp_pop
+        rlist: $rlist:4:unsigned
+        spimm: $spimm:2:unsigned
+        zero_a0: false
+        ret: true
+
+  cm_mvsa01:
+    description: "cm.mvsa01: atomic a0->r1s, a1->r2s"
+    operations:
+      - type: zcmp_mvsa01
+        r1s: $r1s:3:unsigned
+        r2s: $r2s:3:unsigned
+
+  cm_mva01s:
+    description: "cm.mva01s: atomic r1s->a0, r2s->a1"
+    operations:
+      - type: zcmp_mva01s
+        r1s: $r1s:3:unsigned
+        r2s: $r2s:3:unsigned
+
+  cm_jt:
+    description: "cm.jt: table jump via JVT"
+    operations:
+      - type: zcmt_table_jump
+        index: $index:8:unsigned
+        link: false
+
+  cm_jalt:
+    description: "cm.jalt: table jump and link via JVT"
+    operations:
+      - type: zcmt_table_jump
+        index: $index:8:unsigned
+        link: true
+    implicit_pc_read: false
+    implicit_pc_write: false

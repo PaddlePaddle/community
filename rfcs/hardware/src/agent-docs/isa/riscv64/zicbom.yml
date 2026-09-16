@@ -1,0 +1,23 @@
+groups:
+- name: cache_block_mgmt
+  description: Cache Block Management Instructions (Zicbom)
+
+instructions:
+- name: CBO_CLEAN
+  group: cache_block_mgmt
+  encoding:
+    match: 000000000001?????010000000001111
+  assembly: cbo.clean ({rs1})
+  format: Cache-mgmt
+- name: CBO_FLUSH
+  group: cache_block_mgmt
+  encoding:
+    match: 000000000010?????010000000001111
+  assembly: cbo.flush ({rs1})
+  format: Cache-mgmt
+- name: CBO_INVAL
+  group: cache_block_mgmt
+  encoding:
+    match: 000000000000?????010000000001111
+  assembly: cbo.inval ({rs1})
+  format: Cache-mgmt

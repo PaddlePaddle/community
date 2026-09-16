@@ -1,0 +1,160 @@
+# RISC-V Zba Extension Semantics
+
+semantics:
+  sh1add:
+    description: "sh1add rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $x.rs1
+        src2: 1
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $temp:0
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sh2add:
+    description: "sh2add rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $x.rs1
+        src2: 2
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $temp:0
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sh3add:
+    description: "sh3add rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $x.rs1
+        src2: 3
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $temp:0
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sh1add.uw:
+    description: "sh1add.uw rd, rs1, rs2"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 32}}
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op: {ZeroExtend: {from: 32, to: 64}}
+        dest: $temp:1
+        src: $temp:0
+      - type: alu
+        op: Shl
+        dest: $temp:2
+        src1: $temp:1
+        src2: 1
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $temp:2
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sh2add.uw:
+    description: "sh2add.uw rd, rs1, rs2"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 32}}
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op: {ZeroExtend: {from: 32, to: 64}}
+        dest: $temp:1
+        src: $temp:0
+      - type: alu
+        op: Shl
+        dest: $temp:2
+        src1: $temp:1
+        src2: 2
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $temp:2
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sh3add.uw:
+    description: "sh3add.uw rd, rs1, rs2"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 32}}
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op: {ZeroExtend: {from: 32, to: 64}}
+        dest: $temp:1
+        src: $temp:0
+      - type: alu
+        op: Shl
+        dest: $temp:2
+        src1: $temp:1
+        src2: 3
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $temp:2
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  add.uw:
+    description: "add.uw rd, rs1, rs2"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 32}}
+        dest: $temp:0
+        src: $x.rs2
+      - type: cast
+        op: {ZeroExtend: {from: 32, to: 64}}
+        dest: $temp:1
+        src: $temp:0
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  slli.uw:
+    description: "slli.uw rd, rs1, shamt"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 32}}
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op: {ZeroExtend: {from: 32, to: 64}}
+        dest: $temp:1
+        src: $temp:0
+      - type: alu
+        op: Shl
+        dest: $x.rd
+        src1: $temp:1
+        src2: $shamt:5
+    implicit_pc_read: false
+    implicit_pc_write: false

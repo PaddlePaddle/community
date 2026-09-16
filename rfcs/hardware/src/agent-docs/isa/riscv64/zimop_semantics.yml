@@ -1,0 +1,363 @@
+# RISC-V Zimop Extension Semantics
+# Default behavior: write 0 to x[rd]
+
+semantics:
+  mop.r.0:
+    description: "mop.r.0 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.1:
+    description: "mop.r.1 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.2:
+    description: "mop.r.2 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.3:
+    description: "mop.r.3 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.4:
+    description: "mop.r.4 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.5:
+    description: "mop.r.5 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.6:
+    description: "mop.r.6 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.7:
+    description: "mop.r.7 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.8:
+    description: "mop.r.8 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.9:
+    description: "mop.r.9 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.10:
+    description: "mop.r.10 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.11:
+    description: "mop.r.11 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.12:
+    description: "mop.r.12 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.13:
+    description: "mop.r.13 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.14:
+    description: "mop.r.14 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.15:
+    description: "mop.r.15 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.16:
+    description: "mop.r.16 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.17:
+    description: "mop.r.17 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.18:
+    description: "mop.r.18 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.19:
+    description: "mop.r.19 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.20:
+    description: "mop.r.20 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.21:
+    description: "mop.r.21 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.22:
+    description: "mop.r.22 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.23:
+    description: "mop.r.23 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.24:
+    description: "mop.r.24 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.25:
+    description: "mop.r.25 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.26:
+    description: "mop.r.26 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.27:
+    description: "mop.r.27 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.28:
+    description: "mop.r.28 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.29:
+    description: "mop.r.29 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.30:
+    description: "mop.r.30 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.r.31:
+    description: "mop.r.31 rd, rs1 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.0:
+    description: "mop.rr.0 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.1:
+    description: "mop.rr.1 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.2:
+    description: "mop.rr.2 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.3:
+    description: "mop.rr.3 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.4:
+    description: "mop.rr.4 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.5:
+    description: "mop.rr.5 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.6:
+    description: "mop.rr.6 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  mop.rr.7:
+    description: "mop.rr.7 rd, rs1, rs2 (write 0 to rd)"
+    operations:
+      - type: move
+        dest: $x.rd
+        src: $x.0
+    implicit_pc_read: false
+    implicit_pc_write: false

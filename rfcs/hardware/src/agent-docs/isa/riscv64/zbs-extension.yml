@@ -1,0 +1,68 @@
+groups:
+- name: zbs
+  description: 单比特操作指令
+instructions:
+- name: BCLR
+  group: zbs
+  encoding:
+    match: 0100100 ????? ????? 001 ????? 0110011
+  assembly: bclr {rd}, {rs1}, {rs2}
+  format: R-type
+- name: BCLRI
+  group: zbs
+  encoding:
+    match: 0100100 ????? ????? 001 ????? 0010011
+    variables:
+      shamt:
+      - 25
+      - 20
+  assembly: bclri {rd}, {rs1}, {shamt}
+  format: R-type-unary
+- name: BEXT
+  group: zbs
+  encoding:
+    match: 0100100 ????? ????? 101 ????? 0110011
+  assembly: bext {rd}, {rs1}, {rs2}
+  format: R-type
+- name: BEXTI
+  group: zbs
+  encoding:
+    match: 0100100 ????? ????? 101 ????? 0010011
+    variables:
+      shamt:
+      - 25
+      - 20
+  assembly: bexti {rd}, {rs1}, {shamt}
+  format: R-type-unary
+- name: BINV
+  group: zbs
+  encoding:
+    match: 0110100 ????? ????? 001 ????? 0110011
+  assembly: binv {rd}, {rs1}, {rs2}
+  format: R-type
+- name: BINVI
+  group: zbs
+  encoding:
+    match: 0110100 ????? ????? 001 ????? 0010011
+    variables:
+      shamt:
+      - 25
+      - 20
+  assembly: binvi {rd}, {rs1}, {shamt}
+  format: R-type-unary
+- name: BSET
+  group: zbs
+  encoding:
+    match: 0010100 ????? ????? 001 ????? 0110011
+  assembly: bset {rd}, {rs1}, {rs2}
+  format: R-type
+- name: BSETI
+  group: zbs
+  encoding:
+    match: 0010100 ????? ????? 001 ????? 0010011
+    variables:
+      shamt:
+      - 25
+      - 20
+  assembly: bseti {rd}, {rs1}, {shamt}
+  format: R-type-unary

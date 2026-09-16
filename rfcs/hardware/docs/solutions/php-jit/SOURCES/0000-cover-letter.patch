@@ -1,0 +1,29 @@
+From 79f374980eb26eb703091a3409ea6266ad561cbe Mon Sep 17 00:00:00 2001
+From: LoongArch64 Porter <porter@example.com>
+Date: Tue, 9 Jun 2026 11:38:48 +0800
+Subject: [PATCH 0/3] *** SUBJECT HERE ***
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+*** BLURB HERE ***
+
+LoongArch64 Porter (3):
+  LA64 JIT: Fix crashes in ir_get_target_constraints and ir_match_insn
+  LA64 JIT: Stable build with proper ir_match_insn and
+    ir_get_target_constraints
+  LA64 JIT: Working tracing JIT mode! Fix instruction wrapping &
+    assertions
+
+ STATUS-JIT-LA64.md                     |   52 +
+ TODO-JIT-LA64.md                       |   62 ++
+ ext/opcache/jit/ir/ir_loongarch64.dasc | 1274 +++++++++++++++++++++++-
+ ext/opcache/jit/ir/ir_ra.c             |   10 +-
+ ext/opcache/jit/zend_jit.c             |    4 +-
+ 5 files changed, 1349 insertions(+), 53 deletions(-)
+ create mode 100644 STATUS-JIT-LA64.md
+ create mode 100644 TODO-JIT-LA64.md
+
+-- 
+2.52.0
+

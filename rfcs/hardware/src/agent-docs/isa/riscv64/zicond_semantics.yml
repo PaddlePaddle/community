@@ -1,0 +1,26 @@
+groups:
+  - name: zicond
+    description: RISC-V Integer Conditional Operations Semantics
+
+semantics:
+  czero_eqz:
+    description: "czero.eqz rd, rs1, rs2"
+    operations:
+      - type: select
+        dest: $x.rd
+        cond: $x.rs2
+        src_true: $x.rs1
+        src_false: 0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  czero_nez:
+    description: "czero.nez rd, rs1, rs2"
+    operations:
+      - type: select
+        dest: $x.rd
+        cond: $x.rs2
+        src_true: 0
+        src_false: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false

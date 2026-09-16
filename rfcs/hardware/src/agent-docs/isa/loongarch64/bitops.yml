@@ -1,0 +1,667 @@
+groups:
+- name: base
+  description: LoongArch Base Integer Instructions
+instructions:
+- name: CLO.W
+  group: base
+  encoding:
+    match: 0000000000000000000100??????????
+  assembly: clo.w $d, $j
+  semantics:
+    description: clo.w rd, rj (rd = count_leading_ones(rj[31:0]))
+    operations:
+    - type: alu
+      op: Clow
+      dest: $temp:0
+      src1: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: CLZ.W
+  group: base
+  encoding:
+    match: 0000000000000000000101??????????
+  assembly: clz.w $d, $j
+  semantics:
+    description: clz.w rd, rj (rd = count_leading_zeros(rj[31:0]))
+    operations:
+    - type: alu
+      op: Clzw
+      dest: $temp:0
+      src1: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: CTO.W
+  group: base
+  encoding:
+    match: 0000000000000000000110??????????
+  assembly: cto.w $d, $j
+  semantics:
+    description: cto.w rd, rj (rd = count_trailing_ones(rj[31:0]))
+    operations:
+    - type: alu
+      op: Ctow
+      dest: $temp:0
+      src1: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: CTZ.W
+  group: base
+  encoding:
+    match: 0000000000000000000111??????????
+  assembly: ctz.w $d, $j
+  semantics:
+    description: ctz.w rd, rj (rd = count_trailing_zeros(rj[31:0]))
+    operations:
+    - type: alu
+      op: Ctzw
+      dest: $temp:0
+      src1: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVB.2H
+  group: base
+  encoding:
+    match: 0000000000000000001100??????????
+  assembly: revb.2h $d, $j
+  semantics:
+    description: revb.2h rd, rj (reverse bytes in 2 halfwords, zero-extended)
+    operations:
+    - type: alu
+      op: Revb2h
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVBIT.4B
+  group: base
+  encoding:
+    match: 0000000000000000010010??????????
+  assembly: revbit.4b $d, $j
+  semantics:
+    description: revbit.4b rd, rj (reverse bits in 4 bytes, zero-extended)
+    operations:
+    - type: alu
+      op: Revbit4b
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVBIT.W
+  group: base
+  encoding:
+    match: 0000000000000000010100??????????
+  assembly: revbit.w $d, $j
+  semantics:
+    description: revbit.w rd, rj (reverse bits in word, sign-extended)
+    operations:
+    - type: alu
+      op: RevbitW
+      dest: $temp:0
+      src1: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: BYTEPICK.W
+  group: base
+  encoding:
+    match: 000000000000100?????????????????
+  assembly: bytepick.w $d, $j, $k, imm
+  semantics:
+    description: bytepick.w rd, rj, rk, sa2
+    operations:
+    - type: alu
+      op: BytePickW
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJUk6
+- name: CRC.W.B.W
+  group: base
+  encoding:
+    match: 00000000001001000???????????????
+  assembly: crc.w.b.w $d, $j, $k
+  semantics:
+    description: crc.w.b.w rd, rj, rk (CRC32 on byte)
+    operations:
+    - type: alu
+      op: Crc32b
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: CRC.W.H.W
+  group: base
+  encoding:
+    match: 00000000001001001???????????????
+  assembly: crc.w.h.w $d, $j, $k
+  semantics:
+    description: crc.w.h.w rd, rj, rk (CRC32 on halfword)
+    operations:
+    - type: alu
+      op: Crc32h
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: CRC.W.W.W
+  group: base
+  encoding:
+    match: 00000000001001010???????????????
+  assembly: crc.w.w.w $d, $j, $k
+  semantics:
+    description: crc.w.w.w rd, rj, rk (CRC32 on word)
+    operations:
+    - type: alu
+      op: Crc32w
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: CRCC.W.B.W
+  group: base
+  encoding:
+    match: 00000000001001100???????????????
+  assembly: crcc.w.b.w $d, $j, $k
+  semantics:
+    description: crcc.w.b.w rd, rj, rk (CRC32C on byte)
+    operations:
+    - type: alu
+      op: Crc32cb
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: CRCC.W.H.W
+  group: base
+  encoding:
+    match: 00000000001001101???????????????
+  assembly: crcc.w.h.w $d, $j, $k
+  semantics:
+    description: crcc.w.h.w rd, rj, rk (CRC32C on halfword)
+    operations:
+    - type: alu
+      op: Crc32ch
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: CRCC.W.W.W
+  group: base
+  encoding:
+    match: 00000000001001110???????????????
+  assembly: crcc.w.w.w $d, $j, $k
+  semantics:
+    description: crcc.w.w.w rd, rj, rk (CRC32C on word)
+    operations:
+    - type: alu
+      op: Crc32cw
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: BSTRINS.W
+  group: base
+  encoding:
+    match: 00000000011?????0???????????????
+    variables:
+      msbd:
+      - 20
+      - 16
+      lsbd:
+      - 14
+      - 10
+  assembly: bstrins.w $d, $j, msbd, lsbd
+  semantics:
+    description: bstrins.w rd, rj, msbd, lsbd
+    operations:
+    - type: bit_field
+      op: Insert
+      dest: $r.d
+      src: $r.j
+      msb:
+        field_imm:
+          field: msbd
+          width: 5
+          signed: false
+      lsb:
+        field_imm:
+          field: lsbd
+          width: 5
+          signed: false
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $r.d
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: BSTRPICK.W
+  group: base
+  encoding:
+    match: 00000000011?????1???????????????
+    variables:
+      msbd:
+      - 20
+      - 16
+      lsbd:
+      - 14
+      - 10
+  assembly: bstrpick.w $d, $j, msbd, lsbd
+  semantics:
+    description: bstrpick.w rd, rj, msbd, lsbd
+    operations:
+    - type: bit_field
+      op: Pick
+      dest: $r.d
+      src: $r.j
+      msb:
+        field_imm:
+          field: msbd
+          width: 5
+          signed: false
+      lsb:
+        field_imm:
+          field: lsbd
+          width: 5
+          signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: CLO.D
+  group: base
+  encoding:
+    match: 0000000000000000001000??????????
+  assembly: clo.d $d, $j
+  semantics:
+    description: clo.d rd, rj (rd = count_leading_ones(rj[63:0]))
+    operations:
+    - type: alu
+      op: Clo
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: CLZ.D
+  group: base
+  encoding:
+    match: 0000000000000000001001??????????
+  assembly: clz.d $d, $j
+  semantics:
+    description: clz.d rd, rj (rd = count_leading_zeros(rj[63:0]))
+    operations:
+    - type: alu
+      op: Clz
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: CTO.D
+  group: base
+  encoding:
+    match: 0000000000000000001010??????????
+  assembly: cto.d $d, $j
+  semantics:
+    description: cto.d rd, rj (rd = count_trailing_ones(rj[63:0]))
+    operations:
+    - type: alu
+      op: Cto
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: CTZ.D
+  group: base
+  encoding:
+    match: 0000000000000000001011??????????
+  assembly: ctz.d $d, $j
+  semantics:
+    description: ctz.d rd, rj (rd = count_trailing_zeros(rj[63:0]))
+    operations:
+    - type: alu
+      op: Ctz
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVB.4H
+  group: base
+  encoding:
+    match: 0000000000000000001101??????????
+  assembly: revb.4h $d, $j
+  semantics:
+    description: revb.4h rd, rj (reverse bytes in 4 halfwords)
+    operations:
+    - type: alu
+      op: Revb4h
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVB.2W
+  group: base
+  encoding:
+    match: 0000000000000000001110??????????
+  assembly: revb.2w $d, $j
+  semantics:
+    description: revb.2w rd, rj (reverse bytes in 2 words)
+    operations:
+    - type: alu
+      op: Revb2w
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVB.D
+  group: base
+  encoding:
+    match: 0000000000000000001111??????????
+  assembly: revb.d $d, $j
+  semantics:
+    description: revb.d rd, rj (reverse bytes in doubleword)
+    operations:
+    - type: alu
+      op: Rev8
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVH.2W
+  group: base
+  encoding:
+    match: 0000000000000000010000??????????
+  assembly: revh.2w $d, $j
+  semantics:
+    description: revh.2w rd, rj (reverse halfwords in 2 words)
+    operations:
+    - type: alu
+      op: Revh2w
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVH.D
+  group: base
+  encoding:
+    match: 0000000000000000010001??????????
+  assembly: revh.d $d, $j
+  semantics:
+    description: revh.d rd, rj (reverse halfwords in doubleword)
+    operations:
+    - type: alu
+      op: RevhD
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVBIT.8B
+  group: base
+  encoding:
+    match: 0000000000000000010011??????????
+  assembly: revbit.8b $d, $j
+  semantics:
+    description: revbit.8b rd, rj (reverse bits in 8 bytes)
+    operations:
+    - type: alu
+      op: Revb
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: REVBIT.D
+  group: base
+  encoding:
+    match: 0000000000000000010101??????????
+  assembly: revbit.d $d, $j
+  semantics:
+    description: revbit.d rd, rj (reverse bits in doubleword)
+    operations:
+    - type: alu
+      op: RevbitD
+      dest: $r.d
+      src1: $r.j
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: SLADD.WU
+  group: base
+  encoding:
+    match: 000000000000011?????????????????
+  assembly: sladd.wu $d, $j, $k, imm
+  semantics:
+    description: alsl.wu rd, rj, rk, sa2 (rd = (rj << (sa2+1)) + rk, 32-bit zero-extended)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $imm:2
+      src2: 1
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $temp:1
+      src2: $r.k
+    - type: cast
+      op:
+        ZeroExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:2
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJUk6
+- name: BYTEPICK.D
+  group: base
+  encoding:
+    match: 00000000000011??????????????????
+    variables:
+      imm:
+      - 17
+      - 15
+  assembly: bytepick.d $d, $j, $k, imm
+  semantics:
+    description: bytepick.d rd, rj, rk, sa3
+    operations:
+    - type: alu
+      op: BytePick
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: CRC.W.D.W
+  group: base
+  encoding:
+    match: 00000000001001011???????????????
+  assembly: crc.w.d.w $d, $j, $k
+  semantics:
+    description: crc.w.d.w rd, rj, rk (CRC32 on doubleword)
+    operations:
+    - type: alu
+      op: Crc32d
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: CRCC.W.D.W
+  group: base
+  encoding:
+    match: 00000000001001111???????????????
+  assembly: crcc.w.d.w $d, $j, $k
+  semantics:
+    description: crcc.w.d.w rd, rj, rk (CRC32C on doubleword)
+    operations:
+    - type: alu
+      op: Crc32cd
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: SLADD.D
+  group: base
+  encoding:
+    match: 000000000010110?????????????????
+  assembly: sladd.d $d, $j, $k, imm
+  semantics:
+    description: alsl.d rd, rj, rk, sa2 (rd = (rj << (sa2+1)) + rk, 64-bit)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $imm:2
+      src2: 1
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: alu
+      op: Add
+      dest: $r.d
+      src1: $temp:1
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJUk6
+- name: BSTRINS.D
+  group: base
+  encoding:
+    match: 0000000010??????????????????????
+    variables:
+      msbd:
+      - 21
+      - 16
+      lsbd:
+      - 15
+      - 10
+  assembly: bstrins.d $d, $j, msbd, lsbd
+  semantics:
+    description: bstrins.d rd, rj, msbd, lsbd
+    operations:
+    - type: bit_field
+      op: Insert
+      dest: $r.d
+      src: $r.j
+      msb:
+        field_imm:
+          field: msbd
+          width: 6
+          signed: false
+      lsb:
+        field_imm:
+          field: lsbd
+          width: 6
+          signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ
+- name: BSTRPICK.D
+  group: base
+  encoding:
+    match: 0000000011??????????????????????
+    variables:
+      msbd:
+      - 21
+      - 16
+      lsbd:
+      - 15
+      - 10
+  assembly: bstrpick.d $d, $j, msbd, lsbd
+  semantics:
+    description: bstrpick.d rd, rj, msbd, lsbd
+    operations:
+    - type: bit_field
+      op: Pick
+      dest: $r.d
+      src: $r.j
+      msb:
+        field_imm:
+          field: msbd
+          width: 6
+          signed: false
+      lsb:
+        field_imm:
+          field: lsbd
+          width: 6
+          signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJ

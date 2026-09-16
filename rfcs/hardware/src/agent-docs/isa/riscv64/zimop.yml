@@ -1,0 +1,244 @@
+groups:
+- name: zimop
+  description: May-Be-Operations (Zimop)
+instructions:
+- name: MOP_R_0
+  group: zimop
+  encoding:
+    match: 100000011100?????100?????1110011
+  assembly: mop.r.0 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_1
+  group: zimop
+  encoding:
+    match: 100000011101?????100?????1110011
+  assembly: mop.r.1 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_2
+  group: zimop
+  encoding:
+    match: 100000011110?????100?????1110011
+  assembly: mop.r.2 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_3
+  group: zimop
+  encoding:
+    match: 100000011111?????100?????1110011
+  assembly: mop.r.3 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_4
+  group: zimop
+  encoding:
+    match: 100001011100?????100?????1110011
+  assembly: mop.r.4 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_5
+  group: zimop
+  encoding:
+    match: 100001011101?????100?????1110011
+  assembly: mop.r.5 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_6
+  group: zimop
+  encoding:
+    match: 100001011110?????100?????1110011
+  assembly: mop.r.6 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_7
+  group: zimop
+  encoding:
+    match: 100001011111?????100?????1110011
+  assembly: mop.r.7 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_8
+  group: zimop
+  encoding:
+    match: 100010011100?????100?????1110011
+  assembly: mop.r.8 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_9
+  group: zimop
+  encoding:
+    match: 100010011101?????100?????1110011
+  assembly: mop.r.9 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_10
+  group: zimop
+  encoding:
+    match: 100010011110?????100?????1110011
+  assembly: mop.r.10 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_11
+  group: zimop
+  encoding:
+    match: 100010011111?????100?????1110011
+  assembly: mop.r.11 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_12
+  group: zimop
+  encoding:
+    match: 100011011100?????100?????1110011
+  assembly: mop.r.12 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_13
+  group: zimop
+  encoding:
+    match: 100011011101?????100?????1110011
+  assembly: mop.r.13 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_14
+  group: zimop
+  encoding:
+    match: 100011011110?????100?????1110011
+  assembly: mop.r.14 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_15
+  group: zimop
+  encoding:
+    match: 100011011111?????100?????1110011
+  assembly: mop.r.15 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_16
+  group: zimop
+  encoding:
+    match: 110000011100?????100?????1110011
+  assembly: mop.r.16 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_17
+  group: zimop
+  encoding:
+    match: 110000011101?????100?????1110011
+  assembly: mop.r.17 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_18
+  group: zimop
+  encoding:
+    match: 110000011110?????100?????1110011
+  assembly: mop.r.18 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_19
+  group: zimop
+  encoding:
+    match: 110000011111?????100?????1110011
+  assembly: mop.r.19 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_20
+  group: zimop
+  encoding:
+    match: 110001011100?????100?????1110011
+  assembly: mop.r.20 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_21
+  group: zimop
+  encoding:
+    match: 110001011101?????100?????1110011
+  assembly: mop.r.21 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_22
+  group: zimop
+  encoding:
+    match: 110001011110?????100?????1110011
+  assembly: mop.r.22 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_23
+  group: zimop
+  encoding:
+    match: 110001011111?????100?????1110011
+  assembly: mop.r.23 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_24
+  group: zimop
+  encoding:
+    match: 110010011100?????100?????1110011
+  assembly: mop.r.24 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_25
+  group: zimop
+  encoding:
+    match: 110010011101?????100?????1110011
+  assembly: mop.r.25 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_26
+  group: zimop
+  encoding:
+    match: 110010011110?????100?????1110011
+  assembly: mop.r.26 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_27
+  group: zimop
+  encoding:
+    match: 110010011111?????100?????1110011
+  assembly: mop.r.27 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_28
+  group: zimop
+  encoding:
+    match: 110011011100?????100?????1110011
+  assembly: mop.r.28 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_29
+  group: zimop
+  encoding:
+    match: 110011011101?????100?????1110011
+  assembly: mop.r.29 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_30
+  group: zimop
+  encoding:
+    match: 110011011110?????100?????1110011
+  assembly: mop.r.30 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_R_31
+  group: zimop
+  encoding:
+    match: 110011011111?????100?????1110011
+  assembly: mop.r.31 {rd}, {rs1}
+  format: R-type-unary
+- name: MOP_RR_0
+  group: zimop
+  encoding:
+    match: 1000001??????????100?????1110011
+  assembly: mop.rr.0 {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MOP_RR_1
+  group: zimop
+  encoding:
+    match: 1000011??????????100?????1110011
+  assembly: mop.rr.1 {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MOP_RR_2
+  group: zimop
+  encoding:
+    match: 1000101??????????100?????1110011
+  assembly: mop.rr.2 {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MOP_RR_3
+  group: zimop
+  encoding:
+    match: 1000111??????????100?????1110011
+  assembly: mop.rr.3 {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MOP_RR_4
+  group: zimop
+  encoding:
+    match: 1100001??????????100?????1110011
+  assembly: mop.rr.4 {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MOP_RR_5
+  group: zimop
+  encoding:
+    match: 1100011??????????100?????1110011
+  assembly: mop.rr.5 {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MOP_RR_6
+  group: zimop
+  encoding:
+    match: 1100101??????????100?????1110011
+  assembly: mop.rr.6 {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MOP_RR_7
+  group: zimop
+  encoding:
+    match: 1100111??????????100?????1110011
+  assembly: mop.rr.7 {rd}, {rs1}, {rs2}
+  format: R-type

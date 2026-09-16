@@ -1,0 +1,92 @@
+groups:
+- name: float_load_store
+  description: 半精度浮点加载存储
+- name: float_convert
+  description: 半精度浮点转换
+- name: float_move
+  description: 半精度浮点寄存器移动
+instructions:
+- name: FLH
+  group: float_load_store
+  encoding:
+    match: ??????? ????? ????? 001 ????? 0000111
+  assembly: flh {rd}, {imm}({rs1})
+  format: I-type
+- name: FSH
+  group: float_load_store
+  encoding:
+    match: ??????? ????? ????? 001 ????? 0100111
+  assembly: fsh {rs2}, {imm}({rs1})
+  format: S-type
+- name: FMV_H_X
+  group: float_move
+  encoding:
+    match: 1111010 00000 ????? 000 ????? 1010011
+  assembly: fmv.h.x {rd}, {rs1}
+  format: R-type-unary
+- name: FMV_X_H
+  group: float_move
+  encoding:
+    match: 1110010 00000 ????? 000 ????? 1010011
+  assembly: fmv.x.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_S_H
+  group: float_convert
+  encoding:
+    match: 0100000 00010 ????? ??? ????? 1010011
+  assembly: fcvt.s.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_H_S
+  group: float_convert
+  encoding:
+    match: 0100010 00000 ????? ??? ????? 1010011
+  assembly: fcvt.h.s {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_W_H
+  group: float_convert
+  encoding:
+    match: 1100010 00000 ????? ??? ????? 1010011
+  assembly: fcvt.w.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_WU_H
+  group: float_convert
+  encoding:
+    match: 1100010 00001 ????? ??? ????? 1010011
+  assembly: fcvt.wu.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_H_W
+  group: float_convert
+  encoding:
+    match: 1101010 00000 ????? ??? ????? 1010011
+  assembly: fcvt.h.w {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_H_WU
+  group: float_convert
+  encoding:
+    match: 1101010 00001 ????? ??? ????? 1010011
+  assembly: fcvt.h.wu {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_L_H
+  group: float_convert
+  encoding:
+    match: 1100010 00010 ????? ??? ????? 1010011
+  assembly: fcvt.l.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_LU_H
+  group: float_convert
+  encoding:
+    match: 1100010 00011 ????? ??? ????? 1010011
+  assembly: fcvt.lu.h {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_H_L
+  group: float_convert
+  encoding:
+    match: 1101010 00010 ????? ??? ????? 1010011
+  assembly: fcvt.h.l {rd}, {rs1}
+  format: R-type-unary
+- name: FCVT_H_LU
+  group: float_convert
+  encoding:
+    match: 1101010 00011 ????? ??? ????? 1010011
+  assembly: fcvt.h.lu {rd}, {rs1}
+  format: R-type-unary
