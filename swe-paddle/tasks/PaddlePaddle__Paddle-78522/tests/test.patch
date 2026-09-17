@@ -1,9 +1,9 @@
 diff --git a/test/legacy_test/test_launch_main_kill.py b/test/legacy_test/test_launch_main_kill.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..0744d90db4b90b0b1733501a7bb56ad019773090
+index 0000000000000000000000000000000000000000..9a79b9e0fd6d10cac5ded5cfd5c6e70148576eeb
 --- /dev/null
 +++ b/test/legacy_test/test_launch_main_kill.py
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,110 @@
 +# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,62 +18,98 @@ index 0000000000000000000000000000000000000000..0744d90db4b90b0b1733501a7bb56ad0
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
 +
++import ast
++import copy
++import io
 +import platform
 +import signal
++import types
 +import unittest
++from pathlib import Path
 +from unittest import mock
 +
 +from paddle.distributed.utils import launch_utils
 +
 +
++def _run_cleanup(processes, kill):
++    """Run the checkout's actual cleanup block, with process operations mocked."""
++    path = Path("python/paddle/distributed/launch/main.py")
++    tree = ast.parse(path.read_text(), filename=str(path))
++    selected = None
++    for parent in ast.walk(tree):
++        body = getattr(parent, "body", None)
++        if not isinstance(body, list):
++            continue
++        for start, node in enumerate(body):
++            if not isinstance(node, ast.Assign):
++                continue
++            if not any(
++                    isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
++                    and isinstance(call.func.value, ast.Name)
++                    and call.func.value.id == "os" and call.func.attr == "getpid"
++                    for call in ast.walk(node.value)
++            ):
++                continue
++            for end in range(start + 1, len(body)):
++                expression = body[end]
++                if (isinstance(expression, ast.Expr)
++                        and isinstance(expression.value, ast.Call)
++                        and isinstance(expression.value.func, ast.Attribute)
++                        and isinstance(expression.value.func.value, ast.Name)
++                        and expression.value.func.value.id == "time"
++                        and expression.value.func.attr == "sleep"):
++                    selected = body[start:end]
++                    break
++    assert selected, "auto-tuner process cleanup block was not found"
++    shell_commands = []
++    def system(command):
++        shell_commands.append(command)
++        raise AssertionError("process termination must not invoke a shell")
++    fake_os = types.SimpleNamespace(
++        getpid=lambda: 456,
++        popen=lambda command: io.StringIO("\n".join(processes)),
++        kill=kill, system=system,
++    )
++    namespace = {
++        "os": fake_os, "signal": signal, "platform": platform,
++        "logger": mock.Mock(), "launch_utils": launch_utils,
++        "paddle": types.SimpleNamespace(
++            device=types.SimpleNamespace(is_compiled_with_custom_device=lambda name: False),
++            is_compiled_with_xpu=lambda: False,
++        ),
++    }
++    # Resolve checkout imports without prescribing how cleanup is factored.
++    for node in tree.body:
++        if isinstance(node, ast.ImportFrom) and (node.module or "").endswith("launch_utils"):
++            for alias in node.names:
++                if hasattr(launch_utils, alias.name):
++                    namespace[alias.asname or alias.name] = getattr(launch_utils, alias.name)
++    module = ast.Module(body=copy.deepcopy(selected), type_ignores=[])
++    ast.fix_missing_locations(module)
++    with mock.patch("os.kill", kill), mock.patch("os.system", system):
++        exec(compile(module, str(path), "exec"), namespace)
++    assert not shell_commands
++
++
 +class TestLaunchMainProcessCleanup(unittest.TestCase):
 +    def test_filter_pids(self):
-+        processes = [" 123 ", "456", "abc", "", "789"]
-+        self_pid = 456
++        kill = mock.Mock()
++        _run_cleanup([" 123 ", "456", "abc", "", "789"], kill)
++        self.assertEqual([call.args[0] for call in kill.call_args_list], [123, 789])
 +
-+        result = launch_utils.filter_pids(processes, self_pid)
++    def test_terminate_processes_process_lookup(self):
++        kill = mock.Mock(side_effect=[ProcessLookupError(), None])
++        _run_cleanup(["12345", "67890"], kill)
++        self._check_kills(kill)
 +
-+        self.assertEqual(result, [123, 789])
++    def test_terminate_processes_permission_error(self):
++        kill = mock.Mock(side_effect=[PermissionError(), None])
++        _run_cleanup(["12345", "67890"], kill)
++        self._check_kills(kill)
 +
-+    @mock.patch("paddle.distributed.utils.launch_utils.os.kill")
-+    def test_terminate_processes_process_lookup(self, mock_kill):
-+        pids = [12345, 67890]
-+        mock_kill.side_effect = [None, ProcessLookupError()]
-+        expected_sig = (
-+            signal.SIGKILL if platform.system() != "Windows" else signal.SIGTERM
-+        )
-+
-+        result = launch_utils.terminate_processes(pids)
-+
-+        self.assertTrue(result)
-+        self.assertEqual(mock_kill.call_count, 2)
-+        mock_kill.assert_has_calls(
-+            [
-+                mock.call(12345, expected_sig),
-+                mock.call(67890, expected_sig),
-+            ],
-+            any_order=False,
-+        )
-+
-+    @mock.patch("paddle.distributed.utils.launch_utils.os.kill")
-+    def test_terminate_processes_permission_error(self, mock_kill):
-+        pids = [12345, 67890]
-+        mock_kill.side_effect = [ProcessLookupError(), PermissionError()]
-+        expected_sig = (
-+            signal.SIGKILL if platform.system() != "Windows" else signal.SIGTERM
-+        )
-+
-+        result = launch_utils.terminate_processes(pids)
-+
-+        self.assertFalse(result)
-+        self.assertEqual(mock_kill.call_count, 2)
-+        mock_kill.assert_has_calls(
-+            [
-+                mock.call(12345, expected_sig),
-+                mock.call(67890, expected_sig),
-+            ],
-+            any_order=False,
-+        )
++    def _check_kills(self, kill):
++        expected = signal.SIGKILL if platform.system() != "Windows" else signal.SIGTERM
++        self.assertEqual(kill.call_args_list, [mock.call(12345, expected), mock.call(67890, expected)])
 +
 +
 +if __name__ == "__main__":

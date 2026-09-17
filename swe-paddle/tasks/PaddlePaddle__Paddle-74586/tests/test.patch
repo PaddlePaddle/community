@@ -1,9 +1,9 @@
 diff --git a/test/swe_paddle/test_pr74586_scatter_add.py b/test/swe_paddle/test_pr74586_scatter_add.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..c08c0ef7ffef990e371d95c1d41a56eee1c5b9c2
+index 0000000000000000000000000000000000000000..d9f51073c04283cc256101a0acb50dd04bcfdc68
 --- /dev/null
 +++ b/test/swe_paddle/test_pr74586_scatter_add.py
-@@ -0,0 +1,174 @@
+@@ -0,0 +1,189 @@
 +import ast
 +import copy
 +import sys
@@ -29,7 +29,22 @@ index 0000000000000000000000000000000000000000..c08c0ef7ffef990e371d95c1d41a56ee
 +    )
 +    assert node is not None, f"paddle.tensor.manipulation must provide {name}"
 +    node.decorator_list = []
-+    module = ast.Module(body=[node], type_ignores=[])
++    # Include referenced checkout helpers instead of assuming a single function.
++    functions = {item.name: item for item in tree.body if isinstance(item, ast.FunctionDef)}
++    selected = {node.name: node}
++    pending = [node]
++    while pending:
++        current = pending.pop()
++        for reference in ast.walk(current):
++            if (isinstance(reference, ast.Name) and isinstance(reference.ctx, ast.Load)
++                    and reference.id in functions and reference.id not in selected
++                    and reference.id not in namespace):
++                helper = copy.deepcopy(functions[reference.id])
++                helper.decorator_list = []
++                selected[reference.id] = helper
++                pending.append(helper)
++    future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
++    module = ast.Module(body=[future, *selected.values()], type_ignores=[])
 +    ast.fix_missing_locations(module)
 +    scope = dict(namespace)
 +    scope.setdefault("Tensor", object)

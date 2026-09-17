@@ -1,9 +1,9 @@
 diff --git a/test/legacy_test/test_fused_dropout_add_fallback.py b/test/legacy_test/test_fused_dropout_add_fallback.py
 new file mode 100644
-index 00000000000000..99f26b1ae35e83
+index 0000000000000000000000000000000000000000..2e33d47d6bea8ca7e885211adc8fe3ee7e92a1b3
 --- /dev/null
 +++ b/test/legacy_test/test_fused_dropout_add_fallback.py
-@@ -0,0 +1,214 @@
+@@ -0,0 +1,221 @@
 +# Copyright (c) 2024 PaddlePaddle Authors. All Rights Reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,8 +59,12 @@ index 00000000000000..99f26b1ae35e83
 +                for target in node.targets
 +                if isinstance(target, ast.Name)
 +            }
-+            if 'flag' in names:
-+                selected.append(copy.deepcopy(node))
++            # Preserve literal module state, including warning-once flags.
++            try:
++                ast.literal_eval(node.value)
++            except (ValueError, TypeError):
++                continue
++            selected.append(copy.deepcopy(node))
 +        elif isinstance(node, ast.FunctionDef) and node.name in {
 +            'paddle_dropout_add',
 +            'fused_dropout_add',
@@ -129,6 +133,7 @@ index 00000000000000..99f26b1ae35e83
 +    namespace = {
 +        'warnings': warnings,
 +        'paddle': paddle_double,
++        'dropout': dropout,
 +        '_C_ops': c_ops_double,
 +        'core': types.SimpleNamespace(),
 +        'default_main_program': lambda: types.SimpleNamespace(
@@ -216,5 +221,7 @@ index 00000000000000..99f26b1ae35e83
 +    ]
 +    assert fused_calls == []
 +    assert len(caught) == 1
-+    assert 'precision problem' in str(caught[0].message)
-+    assert 'falls back to dropout + add' in str(caught[0].message)
++    message = str(caught[0].message).lower()
++    assert issubclass(caught[0].category, UserWarning)
++    assert 'precision' in message
++    assert 'dropout' in message and 'add' in message

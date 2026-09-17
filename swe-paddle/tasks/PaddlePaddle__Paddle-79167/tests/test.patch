@@ -1,6 +1,6 @@
 diff --git a/test/swe_paddle/test_pr79167_initial_seed_alias.py b/test/swe_paddle/test_pr79167_initial_seed_alias.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..9e48192ece74b820f57d42bb281eb89b322f753a
+index 0000000000000000000000000000000000000000..4ab005687e56a28398e32485c6d942ca9d36ba0a
 --- /dev/null
 +++ b/test/swe_paddle/test_pr79167_initial_seed_alias.py
 @@ -0,0 +1,93 @@
@@ -39,7 +39,7 @@ index 0000000000000000000000000000000000000000..9e48192ece74b820f57d42bb281eb89b
 +                for target in node.targets
 +                if isinstance(target, ast.Name)
 +            }
-+            if target_names & {"manual_seed", "__all__"}:
++            if target_names & {"manual_seed", "initial_seed", "__all__"}:
 +                selected.append(copy.deepcopy(node))
 +
 +    package_name = "_swe_paddle_pr79167"
@@ -66,7 +66,7 @@ index 0000000000000000000000000000000000000000..9e48192ece74b820f57d42bb281eb89b
 +    }
 +    previous = {name: sys.modules.get(name) for name in module_names}
 +    sys.modules.update(module_names)
-+    namespace = {"__name__": package_name, "__package__": package_name}
++    namespace = {"__name__": package_name, "__package__": package_name, "random": random_module}
 +    try:
 +        module = ast.Module(body=selected, type_ignores=[])
 +        ast.fix_missing_locations(module)

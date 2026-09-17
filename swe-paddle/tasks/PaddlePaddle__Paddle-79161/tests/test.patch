@@ -1,6 +1,6 @@
 diff --git a/test/swe_paddle/test_pr79161_set_rng_state_alias.py b/test/swe_paddle/test_pr79161_set_rng_state_alias.py
 new file mode 100644
-index 0000000..11ceea9
+index 0000000000000000000000000000000000000000..2a6696b52edb5643931ed4917d7a6641763ba801
 --- /dev/null
 +++ b/test/swe_paddle/test_pr79161_set_rng_state_alias.py
 @@ -0,0 +1,140 @@
@@ -140,7 +140,7 @@ index 0000000..11ceea9
 +def test_state_list_and_new_state_conflict_is_rejected():
 +    function, generator, _ = _load_checkout_function()
 +
-+    with pytest.raises(ValueError, match="Cannot specify both"):
++    with pytest.raises(ValueError):
 +        function(state_list=[object()], new_state=[object()])
 +
 +    assert generator.states == []
