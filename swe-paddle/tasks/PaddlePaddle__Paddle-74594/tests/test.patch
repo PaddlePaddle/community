@@ -1,6 +1,6 @@
 diff --git a/test/swe_paddle/test_pr74594_broadcast_shapes.py b/test/swe_paddle/test_pr74594_broadcast_shapes.py
 new file mode 100644
-index 0000000..c2d8800
+index 0000000000000000000000000000000000000000..fa4bf873a097db2da55d1e5c44ecc4729ffc17bc
 --- /dev/null
 +++ b/test/swe_paddle/test_pr74594_broadcast_shapes.py
 @@ -0,0 +1,101 @@
@@ -62,7 +62,7 @@ index 0000000..c2d8800
 +    core = SimpleNamespace(broadcast_shape=_broadcast_two)
 +    broadcast_shape = _extract_function("broadcast_shape", {"core": core})
 +    return _extract_function(
-+        "broadcast_shapes", {"broadcast_shape": broadcast_shape}
++        "broadcast_shapes", {"broadcast_shape": broadcast_shape, "core": core}
 +    )
 +
 +

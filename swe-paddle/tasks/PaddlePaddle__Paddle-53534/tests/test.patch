@@ -1,9 +1,9 @@
 diff --git a/test/legacy_test/test_to_tensor_numpy124_contract.py b/test/legacy_test/test_to_tensor_numpy124_contract.py
 new file mode 100644
-index 00000000000000..d84d97523827f0
+index 0000000000000000000000000000000000000000..ef97c46943f40c045a658a9482a1ed8e93543926
 --- /dev/null
 +++ b/test/legacy_test/test_to_tensor_numpy124_contract.py
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,218 @@
 +# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,13 +117,29 @@ index 00000000000000..d84d97523827f0
 +
 +    namespace = {
 +        'Variable': _Variable,
++        'core': types.SimpleNamespace(eager=types.SimpleNamespace(Tensor=type('_EagerTensor', (), {}))),
 +        'np': _Numpy124Proxy(),
 +        'paddle': paddle_double,
 +        'assign': assign,
 +        'convert_dtype': lambda dtype: str(dtype),
 +    }
 +
-+    module = ast.Module(body=[target], type_ignores=[])
++    # Include referenced checkout helpers instead of assuming a single function.
++    functions = {item.name: item for item in tree.body if isinstance(item, ast.FunctionDef)}
++    selected = {target.name: target}
++    pending = [target]
++    while pending:
++        current = pending.pop()
++        for reference in ast.walk(current):
++            if (isinstance(reference, ast.Name) and isinstance(reference.ctx, ast.Load)
++                    and reference.id in functions and reference.id not in selected
++                    and reference.id not in namespace):
++                helper = copy.deepcopy(functions[reference.id])
++                helper.decorator_list = []
++                selected[reference.id] = helper
++                pending.append(helper)
++    future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
++    module = ast.Module(body=[future, *selected.values()], type_ignores=[])
 +    ast.fix_missing_locations(module)
 +    exec(
 +        compile(module, str(_SOURCE_PATH), 'exec'),
@@ -201,8 +217,8 @@ index 00000000000000..d84d97523827f0
 +def test_unsupported_mapping_has_clear_error():
 +    function, _ = _load_checkout_function()
 +
-+    with pytest.raises(
-+        RuntimeError,
-+        match=r"Do not support transform type `<class 'dict'>` to tensor",
-+    ):
++    # The task requires a clear rejection, without prescribing an exception class.
++    with pytest.raises((TypeError, RuntimeError)) as error:
 +        function({1: 1})
++    message = str(error.value).lower()
++    assert any(word in message for word in ("dict", "mapping", "unsupported"))

@@ -1,9 +1,9 @@
 diff --git a/test/swe_paddle/test_pr74444_dropout1d.py b/test/swe_paddle/test_pr74444_dropout1d.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..cb7cd4bac6f34fa33b9aa89019279dbc7bc678d7
+index 0000000000000000000000000000000000000000..5c07d0ad0f72d0bec487fd187b00f824f388fa9d
 --- /dev/null
 +++ b/test/swe_paddle/test_pr74444_dropout1d.py
-@@ -0,0 +1,185 @@
+@@ -0,0 +1,192 @@
 +import ast
 +import copy
 +import sys
@@ -11,6 +11,7 @@ index 0000000000000000000000000000000000000000..cb7cd4bac6f34fa33b9aa89019279dbc
 +import warnings
 +from pathlib import Path
 +
++import numpy as np
 +import pytest
 +
 +
@@ -91,21 +92,35 @@ index 0000000000000000000000000000000000000000..cb7cd4bac6f34fa33b9aa89019279dbc
 +
 +
 +class _Tensor:
-+    def __init__(self, shape, history=()):
-+        self.shape = tuple(shape)
-+        self.ndim = len(self.shape)
-+        self.history = tuple(history)
++    def __init__(self, shape, values=None):
++        self.values = np.ones(shape) if values is None else np.asarray(values)
++        self.shape = self.values.shape
++        self.ndim = self.values.ndim
 +
 +    def unsqueeze(self, axis):
-+        shape = list(self.shape)
-+        shape.insert(axis, 1)
-+        return _Tensor(shape, self.history + (("unsqueeze", axis),))
++        values = np.expand_dims(self.values, axis)
++        return _Tensor(values.shape, values)
 +
 +    def squeeze(self, axis):
-+        shape = list(self.shape)
-+        assert shape[axis] == 1
-+        shape.pop(axis)
-+        return _Tensor(shape, self.history + (("squeeze", axis),))
++        values = np.squeeze(self.values, axis)
++        return _Tensor(values.shape, values)
++
++
++def _controlled_dropout(x, p=0.5, axis=None, training=True,
++                        mode="upscale_in_train", name=None):
++    # Match the public dropout axis semantics while avoiding random outcomes.
++    if not 0 <= p <= 1:
++        raise ValueError("dropout probability must be in [0, 1]")
++    assert mode == "upscale_in_train"
++    if not training or p == 0:
++        return _Tensor(x.shape, x.values.copy())
++    if p == 1:
++        return _Tensor(x.shape, np.zeros(x.shape))
++    axes = range(x.ndim) if axis is None else ([axis] if isinstance(axis, int) else axis)
++    axes = {value % x.ndim for value in axes}
++    mask_shape = tuple(size if index in axes else 1 for index, size in enumerate(x.shape))
++    mask = (np.arange(np.prod(mask_shape)).reshape(mask_shape) % 2).astype(float)
++    return _Tensor(x.shape, x.values * mask / (1 - p))
 +
 +
 +def test_existing_dropout2d_channel_axis_behavior_remains_compatible():
@@ -136,34 +151,26 @@ index 0000000000000000000000000000000000000000..cb7cd4bac6f34fa33b9aa89019279dbc
 +def test_dropout1d_is_public_and_preserves_2d_3d_channel_semantics():
 +    scope, marker = _execute_dropout1d_public_import()
 +    assert scope.get("dropout1d") is marker
-+
-+    calls = []
-+
-+    def controlled_dropout(x, p=0.5, axis=None, training=True):
-+        calls.append((x.shape, p, axis, training, x.history))
-+        return x
-+
-+    paddle = types.SimpleNamespace(Tensor=_Tensor)
 +    function = _extract_function(
 +        "dropout1d",
-+        {
-+            "paddle": paddle,
-+            "dropout": controlled_dropout,
-+            "warnings": warnings,
-+        },
++        {"paddle": types.SimpleNamespace(Tensor=_Tensor),
++         "dropout": _controlled_dropout, "warnings": warnings},
 +    )
-+
-+    two_d = _Tensor((3, 8))
-+    two_d_result = function(two_d, p=0.25, training=False)
-+    assert two_d_result.shape == (3, 8)
-+    assert calls[-1][:4] == ((1, 3, 8), 0.25, 1, False)
-+    assert calls[-1][4] == (("unsqueeze", 0),)
-+    assert two_d_result.history == (("unsqueeze", 0), ("squeeze", 0))
-+
-+    three_d = _Tensor((2, 3, 8))
-+    three_d_result = function(three_d, p=0.4, training=True)
-+    assert three_d_result is three_d
-+    assert calls[-1] == ((2, 3, 8), 0.4, 1, True, ())
++    for shape in ((3, 8), (2, 3, 8)):
++        for training, probability in ((False, 0.5), (True, 0), (True, 1), (True, 0.5)):
++            x = _Tensor(shape)
++            before = x.values.copy()
++            result = function(x, p=probability, training=training)
++            assert result.shape == shape
++            np.testing.assert_array_equal(x.values, before)
++            if not training or probability == 0:
++                np.testing.assert_array_equal(result.values, before)
++            elif probability == 1:
++                np.testing.assert_array_equal(result.values, np.zeros(shape))
++            else:
++                # Every value in a channel shares its dropout decision.
++                assert np.all(result.values == result.values[..., :1])
++                assert set(np.unique(result.values)) == {0.0, 2.0}
 +
 +
 +def test_dropout1d_rejects_invalid_inputs_and_warns_for_inplace():
@@ -172,7 +179,7 @@ index 0000000000000000000000000000000000000000..cb7cd4bac6f34fa33b9aa89019279dbc
 +        "dropout1d",
 +        {
 +            "paddle": paddle,
-+            "dropout": lambda x, **kwargs: x,
++            "dropout": _controlled_dropout,
 +            "warnings": warnings,
 +        },
 +    )
@@ -180,10 +187,10 @@ index 0000000000000000000000000000000000000000..cb7cd4bac6f34fa33b9aa89019279dbc
 +    with pytest.raises(ValueError, match=r"\[0, 1\]"):
 +        function(_Tensor((2, 3, 4)), p=1.5)
 +
-+    with pytest.raises(RuntimeError, match="2D or 3D"):
++    with pytest.raises((ValueError, RuntimeError)):
 +        function(_Tensor((4,)), p=0.5)
 +
-+    with pytest.raises(RuntimeError, match="2D or 3D"):
++    with pytest.raises((ValueError, RuntimeError)):
 +        function(_Tensor((1, 2, 3, 4)), p=0.5)
 +
 +    with pytest.warns(UserWarning, match="not supported"):

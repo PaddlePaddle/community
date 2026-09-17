@@ -1,9 +1,9 @@
 diff --git a/test/legacy_test/test_stack_extension_api.py b/test/legacy_test/test_stack_extension_api.py
 new file mode 100644
-index 0000000000..b6f42de6c9
+index 0000000000000000000000000000000000000000..9ee377765f44bb750a4ccf039ade94c371b0d006
 --- /dev/null
 +++ b/test/legacy_test/test_stack_extension_api.py
-@@ -0,0 +1,502 @@
+@@ -0,0 +1,504 @@
 +# Copyright (c) 2023 PaddlePaddle Authors. All Rights Reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -416,7 +416,9 @@ index 0000000000..b6f42de6c9
 +
 +class ErrorCases:
 +    def test_mix_dtype(self):
-+        with self.assertRaises(ValueError):
++        # The task requires rejecting mixed dtypes, without prescribing the
++        # dynamic-mode exception class. Static mode already uses TypeError.
++        with self.assertRaises((TypeError, ValueError)):
 +            d0 = generate_data([2], count=1, dtype='float32')
 +            d1 = generate_data([2], count=1, dtype='float64')
 +            self._test_dygraph_api(

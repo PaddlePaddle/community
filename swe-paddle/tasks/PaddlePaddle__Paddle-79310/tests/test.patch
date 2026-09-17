@@ -1,12 +1,13 @@
 diff --git a/test/swe_paddle/test_pr79310_sparse_initializer.py b/test/swe_paddle/test_pr79310_sparse_initializer.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..e6c84f70a42c8fa2114c31cccc5cd9866a010263
+index 0000000000000000000000000000000000000000..94322208a27d5d8d966f7080941ce4719a086e50
 --- /dev/null
 +++ b/test/swe_paddle/test_pr79310_sparse_initializer.py
-@@ -0,0 +1,234 @@
+@@ -0,0 +1,252 @@
 +import ast
 +import copy
 +import math
++import numpy as np
 +import types
 +from contextlib import nullcontext
 +from pathlib import Path
@@ -28,7 +29,22 @@ index 0000000000000000000000000000000000000000..e6c84f70a42c8fa2114c31cccc5cd986
 +    future = ast.ImportFrom(
 +        module="__future__", names=[ast.alias(name="annotations")], level=0
 +    )
-+    module = ast.Module(body=[future, node], type_ignores=[])
++    # Include referenced checkout helpers instead of assuming a single function.
++    functions = {item.name: item for item in tree.body if isinstance(item, ast.FunctionDef)}
++    selected = {node.name: node}
++    pending = [node]
++    while pending:
++        current = pending.pop()
++        for reference in ast.walk(current):
++            if (isinstance(reference, ast.Name) and isinstance(reference.ctx, ast.Load)
++                    and reference.id in functions and reference.id not in selected
++                    and reference.id not in namespace):
++                helper = copy.deepcopy(functions[reference.id])
++                helper.decorator_list = []
++                selected[reference.id] = helper
++                pending.append(helper)
++    future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
++    module = ast.Module(body=[future, *selected.values()], type_ignores=[])
 +    ast.fix_missing_locations(module)
 +    exec(compile(module, str(TARGET), "exec"), namespace)
 +    return namespace[name]
@@ -131,6 +147,8 @@ index 0000000000000000000000000000000000000000..e6c84f70a42c8fa2114c31cccc5cd986
 +            "math": math,
 +            "paddle": paddle,
 +            "normal_": normal_stub,
++            "np": np,
++            "Normal": lambda **kwargs: lambda tensor: normal_stub(tensor, **kwargs),
 +        },
 +    )
 +    return function, paddle, normal_calls
@@ -233,7 +251,7 @@ index 0000000000000000000000000000000000000000..e6c84f70a42c8fa2114c31cccc5cd986
 +def test_sparse_initializer_rejects_non_2d_tensor():
 +    function, paddle, normal_calls = _load_sparse_function()
 +
-+    with pytest.raises(ValueError, match="Only tensors with 2 dimensions"):
++    with pytest.raises(ValueError):
 +        function(_Non2DTensor(), sparsity=0.5)
 +
 +    assert paddle.randperm_calls == []

@@ -1,8 +1,9 @@
 diff --git a/test/swe_paddle/test_pr78570_optimizer_step_closure.py b/test/swe_paddle/test_pr78570_optimizer_step_closure.py
 new file mode 100644
+index 0000000000000000000000000000000000000000..7ae107ad4b4ce4e3780ef20a4bb9a895299292a7
 --- /dev/null
 +++ b/test/swe_paddle/test_pr78570_optimizer_step_closure.py
-@@ -0,0 +1,185 @@
+@@ -0,0 +1,186 @@
 +import ast
 +import copy
 +from collections import defaultdict
@@ -103,6 +104,7 @@ new file mode 100644
 +
 +    in_to_static_mode = lambda: False
 +    paddle = SimpleNamespace(
++        enable_grad=_ImperativeBase.enable_grad,
 +        base=SimpleNamespace(
 +            dygraph=SimpleNamespace(
 +                base=SimpleNamespace(in_to_static_mode=in_to_static_mode)

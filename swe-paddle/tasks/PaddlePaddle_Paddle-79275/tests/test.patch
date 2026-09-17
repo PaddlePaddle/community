@@ -1,12 +1,13 @@
 diff --git a/test/swe_paddle/test_pr79275_flex_attention_masks.py b/test/swe_paddle/test_pr79275_flex_attention_masks.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..67ae99283ffc433008dc49cf06f489db3e3c988d
+index 0000000000000000000000000000000000000000..eac16f70fdf6950675fa854e0fb8af91e0fd6794
 --- /dev/null
 +++ b/test/swe_paddle/test_pr79275_flex_attention_masks.py
-@@ -0,0 +1,139 @@
+@@ -0,0 +1,151 @@
 +import ast
 +import builtins
 +import copy
++import itertools
 +from pathlib import Path
 +import types
 +
@@ -92,8 +93,17 @@ index 0000000000000000000000000000000000000000..67ae99283ffc433008dc49cf06f489db
 +        and node.name in {"or_masks", "and_masks"}
 +    }
 +    assert set(nodes) == {"or_masks", "and_masks"}
-+    namespace = {"MaskModSignature": object, "Tensor": object}
-+    module = ast.Module(body=[nodes["or_masks"], nodes["and_masks"]], type_ignores=[])
++    paddle_double = types.SimpleNamespace(
++        Tensor=_BoolTensor,
++        full=lambda shape, value, dtype: _BoolTensor(value),
++        zeros=lambda shape, dtype: _BoolTensor(False),
++        ones=lambda shape, dtype: _BoolTensor(True),
++        logical_or=lambda left, right: left | right,
++        logical_and=lambda left, right: left & right,
++    )
++    namespace = {"MaskModSignature": object, "Tensor": _BoolTensor, "paddle": paddle_double}
++    future = ast.ImportFrom(module="__future__", names=[ast.alias(name="annotations")], level=0)
++    module = ast.Module(body=[future, nodes["or_masks"], nodes["and_masks"]], type_ignores=[])
 +    ast.fix_missing_locations(module)
 +    exec(compile(module, str(FLEX_ATTENTION), "exec"), namespace)
 +    return namespace["or_masks"], namespace["and_masks"]
@@ -118,8 +128,10 @@ index 0000000000000000000000000000000000000000..67ae99283ffc433008dc49cf06f489db
 +    assert or_masks(*or_parts)(*args).value is True
 +    assert and_masks(*and_parts)(*args).value is False
 +    assert all(mask.calls == [args] for mask in or_parts + and_parts)
-+    assert ("zeros", (), "bool") in b.creation_calls
-+    assert ("ones", (), "bool") in b.creation_calls
++    for count in (1, 2, 3):
++        for values in itertools.product((False, True), repeat=count):
++            assert or_masks(*[_Mask(value) for value in values])(*args).value is any(values)
++            assert and_masks(*[_Mask(value) for value in values])(*args).value is all(values)
 +
 +
 +def test_single_and_empty_mask_combinations_have_identity_behavior():

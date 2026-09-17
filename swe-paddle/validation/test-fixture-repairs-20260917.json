@@ -1,0 +1,988 @@
+{
+  "kind": "swe-paddle-test-repair-validation-v1",
+  "community_base_commit": "359339f1b2ccb374d683c3b5bcd1cb4f0294834e",
+  "scope": "14 revised task test patches; qualification and saved-candidate replay, not an 86-task leaderboard rerun",
+  "isolation": {
+    "network": "none",
+    "read_only_subject": true,
+    "host_mounts": false,
+    "candidate_and_reference_separate": true,
+    "skip_missing_or_collection_errors_are_not_passes": true
+  },
+  "totals": {
+    "tasks": 14,
+    "tests": 216,
+    "base_failed": 122,
+    "base_passed": 94,
+    "reference_passed": 216,
+    "candidate_passed": 216
+  },
+  "tasks": [
+    {
+      "task_id": 50086,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-50086",
+      "base_commit": "fe811625db37300f74064a52e80c130d7ae347ed",
+      "base_tree": "c7847bcddebadee468b37c83517f3a45ad2306cc",
+      "change": "补齐 Scope.HasKid；允许重复执行时保留仍有效的子 Scope，继续拒绝失效对象。",
+      "test_patch_sha256": "6c16ad8e7c636f450ecbfef41b92e7c21a345b13e36e4e3c02b67d434a6e7a2c",
+      "original_test_patch_sha256": "410b0798f5a8366611e878b65ab3839f0601c2b3c8df93576fb85fd631ac8ef7",
+      "f2p": [
+        "test/legacy_test/test_conditional_block_scope_lifecycle.py::test_stale_cached_scope_is_not_reused"
+      ],
+      "p2p": [
+        "test/legacy_test/test_conditional_block_scope_lifecycle.py::test_first_run_and_legacy_executor_behavior_remain_valid",
+        "test/legacy_test/test_conditional_block_scope_lifecycle.py::test_new_executor_repeated_run_keeps_valid_child_scope"
+      ],
+      "reclassified_as_p2p": [
+        "test/legacy_test/test_conditional_block_scope_lifecycle.py::test_new_executor_repeated_run_keeps_valid_child_scope"
+      ],
+      "base": {
+        "failed": 1,
+        "passed": 2
+      },
+      "reference": {
+        "passed": 3,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 3,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "6c16ad8e7c636f450ecbfef41b92e7c21a345b13e36e4e3c02b67d434a6e7a2c",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "5f7b51ab8c0072c5da0535a3c0b45e5b30361917dae45396edbfc39f66a52d15",
+          "source_bindings_sha256": "a63fe0ee88630fb1946ca5414139c8a553c6188dd06157d280007507caa4c675",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "6c16ad8e7c636f450ecbfef41b92e7c21a345b13e36e4e3c02b67d434a6e7a2c",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "8939772b6f93072a941ab3d1ec5eb377a1091c4e0086d87e5c7a6c0df1829423",
+          "source_bindings_sha256": "fdf60e17f039d9da07d1dd0e34381eff470182410b864345f904fdc4309eb18a",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "6c16ad8e7c636f450ecbfef41b92e7c21a345b13e36e4e3c02b67d434a6e7a2c",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "8939772b6f93072a941ab3d1ec5eb377a1091c4e0086d87e5c7a6c0df1829423",
+          "source_bindings_sha256": "507dbddd2653e729486a347879154012056336cc78f8318069c1f84e53372ec2",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 53534,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-53534",
+      "base_commit": "f74237cd73c35b8a63d7981a190a302d0ebcd03f",
+      "base_tree": "b7a343cf268ff5e2f5be607a84f87ea89264b227",
+      "change": "加载函数引用的同文件辅助函数并提供 core；按题面检查非法字典的明确拒绝。",
+      "test_patch_sha256": "066ae19935abe870f0c4ce97fb2b55a0e806e3742956b11e70d6ab7c3a6fabf1",
+      "original_test_patch_sha256": "55f945d11259ef9377dfbe496a93f7db533bb6788da3cb039891755978c49147",
+      "f2p": [
+        "test/legacy_test/test_to_tensor_numpy124_contract.py::test_nested_variable_sequence_uses_recursive_conversion"
+      ],
+      "p2p": [
+        "test/legacy_test/test_to_tensor_numpy124_contract.py::test_numeric_sequence_behavior_remains_valid",
+        "test/legacy_test/test_to_tensor_numpy124_contract.py::test_unsupported_mapping_has_clear_error",
+        "test/legacy_test/test_to_tensor_numpy124_contract.py::test_variable_passthrough_and_explicit_cast_remain_valid"
+      ],
+      "reclassified_as_p2p": [
+        "test/legacy_test/test_to_tensor_numpy124_contract.py::test_unsupported_mapping_has_clear_error"
+      ],
+      "base": {
+        "failed": 1,
+        "passed": 3
+      },
+      "reference": {
+        "passed": 4,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 4,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "066ae19935abe870f0c4ce97fb2b55a0e806e3742956b11e70d6ab7c3a6fabf1",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "a0d44400e8d0df11ffb078ebeee0877f1593d633acd422393c830d49a51abe5e",
+          "source_bindings_sha256": "3a8d96b10c5ad35156add0fed3bfc821e39cb3b07c1df4c635cb04203631a5da",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "066ae19935abe870f0c4ce97fb2b55a0e806e3742956b11e70d6ab7c3a6fabf1",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "5d2d99dbcc5fecf746f377e812821a2111dec4bcf8570764d78aceb18307d982",
+          "source_bindings_sha256": "eaa5b6f1ec43ba10d2f816fe7006148f6ba9d422e212ac7f05116c153314c4f7",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "066ae19935abe870f0c4ce97fb2b55a0e806e3742956b11e70d6ab7c3a6fabf1",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "5d2d99dbcc5fecf746f377e812821a2111dec4bcf8570764d78aceb18307d982",
+          "source_bindings_sha256": "635b1f433f4d07dbdbedbfe9ecce380e3fa11dc50581db34e584ffec8af19628",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 59127,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-59127",
+      "base_commit": "cb5ff84d214b86b2409b3aa83ef7cd4ccd06374b",
+      "base_tree": "ca93f1f282e000cbdd3fe04d1f0eacc81634a956",
+      "change": "动态模式的混合 dtype 输入允许 TypeError 或 ValueError；其他计算、形状及异常检查不变。",
+      "test_patch_sha256": "4d4d8654fb2be1d5c6cf181ff70140fe3c5f963e18ddd112c716bcb02a2bf208",
+      "original_test_patch_sha256": "e2c0fd4360b4ba290c5a516a9bc74d96799b33c76ef47a652ae8c6d3b9e6b86e",
+      "f2p": [
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_0d",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_0d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_1d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_2d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_3d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_4d",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_4d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestColumnStack::test_mix_ndim",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_0d",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_0d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_1d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_2d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_3d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_4d",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_4d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestDStack::test_mix_ndim",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorColumnStack::test_1d_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorColumnStack::test_1d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorColumnStack::test_2d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorColumnStack::test_mix_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorColumnStack::test_vstack_0d_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorDStack::test_1d_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorDStack::test_1d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorDStack::test_2d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorDStack::test_mix_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorDStack::test_vstack_0d_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorHStack::test_1d_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorHStack::test_1d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorHStack::test_2d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorHStack::test_mix_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorRowStack::test_1d_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorRowStack::test_1d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorRowStack::test_2d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorRowStack::test_mix_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorRowStack::test_vstack_0d_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorVStack::test_1d_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorVStack::test_1d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorVStack::test_2d_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorVStack::test_mix_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestErrorVStack::test_vstack_0d_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_0d",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_0d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_1d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_2d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_3d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_4d",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_4d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestHStack::test_mix_ndim",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_0d",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_0d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_1d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_2d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_3d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_4d",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_4d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestRowStack::test_mix_ndim",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_0d",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_0d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_1d",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_1d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_2d",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_2d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_3d",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_3d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_4d",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_4d_more",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_dtype",
+        "test/legacy_test/test_stack_extension_api.py::TestVStack::test_mix_ndim"
+      ],
+      "p2p": [
+        "test/legacy_test/test_stack_op.py::API_DygraphTest::test_out",
+        "test/legacy_test/test_stack_op.py::API_DygraphTest::test_single_tensor_error",
+        "test/legacy_test/test_stack_op.py::API_test::test_out",
+        "test/legacy_test/test_stack_op.py::API_test::test_pir_single_tensor_error",
+        "test/legacy_test/test_stack_op.py::API_test::test_single_tensor_error",
+        "test/legacy_test/test_stack_op.py::TestStackAPIWithLoDTensorArray::test_case",
+        "test/legacy_test/test_stack_op.py::TestStackAPI_ZeroDim::test_dygraph",
+        "test/legacy_test/test_stack_op.py::TestStackBF16Op::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackBF16Op::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op1::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op1::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op2::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op2::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op3::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op3::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op4::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op4::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op5::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op5::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op6::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op6::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackFP16Op::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackListOfSingleTensor::test_list_single_tensor",
+        "test/legacy_test/test_stack_op.py::TestStackOp1::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOp1::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackOp2::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOp2::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackOp3::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOp3::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackOp4::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOp4::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackOp5::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOp5::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackOp6::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOp6::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackOpBase::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOpBase::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestStackOpWithNegativeShape::test_out",
+        "test/legacy_test/test_stack_op.py::TestStackOp_ZeroDim::test_check_grad",
+        "test/legacy_test/test_stack_op.py::TestStackOp_ZeroDim::test_check_output",
+        "test/legacy_test/test_stack_op.py::TestTensorStackAPIWithLoDTensorArray::test_case"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 84,
+        "passed": 42
+      },
+      "reference": {
+        "passed": 126,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 126,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "4d4d8654fb2be1d5c6cf181ff70140fe3c5f963e18ddd112c716bcb02a2bf208",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "f6c604ed1bee54b884c81d7a88af4e3841150453ee4982b100e2255f4bcdafa9",
+          "source_bindings_sha256": "700dac4e0cf28af63ffe745f94abafb5a1f5687ba3d56e440680caaa516cc1ba",
+          "runner_sha256": "48185f8d2cf7da04ed2a14f9678660587f67540f20d35aba1fca2ea6cd090b98",
+          "image_digest": "sha256:37f4d0735144296bfaa6faf161d40a8f7ac3b952b50f6ef3a9694825778d4a3b",
+          "libpaddle_sha256": "4df1ebc37ca1bf911bd9abcfe1fc5daffc64d085834ccef22c6dcaea35868f63"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "4d4d8654fb2be1d5c6cf181ff70140fe3c5f963e18ddd112c716bcb02a2bf208",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "4209c9836ca0ee78b764b591e67b0d81a784a77ec264baf4ed68bb2a693a7955",
+          "source_bindings_sha256": "5032fe0213dbce29b9b7e4d7103b176dc98a427da8ca0603a81c1d633991d690",
+          "runner_sha256": "48185f8d2cf7da04ed2a14f9678660587f67540f20d35aba1fca2ea6cd090b98",
+          "image_digest": "sha256:37f4d0735144296bfaa6faf161d40a8f7ac3b952b50f6ef3a9694825778d4a3b",
+          "libpaddle_sha256": "4df1ebc37ca1bf911bd9abcfe1fc5daffc64d085834ccef22c6dcaea35868f63"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "4d4d8654fb2be1d5c6cf181ff70140fe3c5f963e18ddd112c716bcb02a2bf208",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "4209c9836ca0ee78b764b591e67b0d81a784a77ec264baf4ed68bb2a693a7955",
+          "source_bindings_sha256": "7db0e32cd266e975059fe67ccbb840aefa4be3c9b45d8b0c50b2114dab441bd4",
+          "runner_sha256": "48185f8d2cf7da04ed2a14f9678660587f67540f20d35aba1fca2ea6cd090b98",
+          "image_digest": "sha256:37f4d0735144296bfaa6faf161d40a8f7ac3b952b50f6ef3a9694825778d4a3b",
+          "libpaddle_sha256": "4df1ebc37ca1bf911bd9abcfe1fc5daffc64d085834ccef22c6dcaea35868f63"
+        }
+      }
+    },
+    {
+      "task_id": 70469,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-70469",
+      "base_commit": "052874d0c95fe9bcae0c3e0ac60d857b238e6d70",
+      "base_tree": "1dcff0132086e791fd12b2b2f289807b307f9d3f",
+      "change": "保留模块级常量状态及 dropout 导入；检查精度警告的含义和只出现一次。",
+      "test_patch_sha256": "86b798d5daf2b2ea8613621699e44205952ae8cdf1a3bd81223e5c2c9a03f50b",
+      "original_test_patch_sha256": "c70ef671e4b6face45ea55a9d5a0bcb0ac8fcf445371454dc25006953899c148",
+      "f2p": [
+        "test/legacy_test/test_fused_dropout_add_fallback.py::test_inference_fallback_warns_once_and_preserves_arguments",
+        "test/legacy_test/test_fused_dropout_add_fallback.py::test_training_uses_reference_dropout_add_semantics"
+      ],
+      "p2p": [
+        "test/legacy_test/test_fused_dropout_add_fallback.py::test_zero_probability_result_remains_valid"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 2,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 3,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 3,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "86b798d5daf2b2ea8613621699e44205952ae8cdf1a3bd81223e5c2c9a03f50b",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "d5197c75043bda1271251af2de8bf3e53e8e9cc79465cf57a1f6f0a50fd7cd0e",
+          "source_bindings_sha256": "7e57aba048c90d6779d4266956b215c5f8a732c04f95f943768efa8278acd74a",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "86b798d5daf2b2ea8613621699e44205952ae8cdf1a3bd81223e5c2c9a03f50b",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "63c5112ace630745145e93dddedbaa64658700830ed67f80bfd5a1395aec5a95",
+          "source_bindings_sha256": "cf08cd222bd9e856173df48e9bab5d744abdf4638a5cd6013f24053ebade0db9",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "86b798d5daf2b2ea8613621699e44205952ae8cdf1a3bd81223e5c2c9a03f50b",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "63c5112ace630745145e93dddedbaa64658700830ed67f80bfd5a1395aec5a95",
+          "source_bindings_sha256": "3dfa7dff8abea9369993cb745c9e6d8b2fede2b6fc686d85f62f86100960e091",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 74444,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-74444",
+      "base_commit": "607dd38aead3118af96495d50b9829c78b2ecfab",
+      "base_tree": "0017736a5e2ea7ab8c6ce6107d9e8b3bb834819c",
+      "change": "补齐 dropout 模拟接口及概率校验；通过二维/三维输出检查按通道丢弃，不绑定内部升维步骤。",
+      "test_patch_sha256": "a382f170600cc1a2efb4c4a643f8d604f8108cc728a5828ec49148653bda723b",
+      "original_test_patch_sha256": "bdc8b26da2371563438b4b071203cddae405aab189580e8d188aac51932e75cc",
+      "f2p": [
+        "test/swe_paddle/test_pr74444_dropout1d.py::test_dropout1d_is_public_and_preserves_2d_3d_channel_semantics",
+        "test/swe_paddle/test_pr74444_dropout1d.py::test_dropout1d_rejects_invalid_inputs_and_warns_for_inplace"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr74444_dropout1d.py::test_existing_dropout2d_channel_axis_behavior_remains_compatible"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 2,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 3,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 3,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "a382f170600cc1a2efb4c4a643f8d604f8108cc728a5828ec49148653bda723b",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "a433b7cc360d572880b1bf979fbf964daeee3b5165cb84849145e35ae6229081",
+          "source_bindings_sha256": "91941925824e14909698c5ed9a9438fb40f7ec283a2d3e84d1e5e2e2e280e1ef",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "a382f170600cc1a2efb4c4a643f8d604f8108cc728a5828ec49148653bda723b",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "c79abf2af21bcd5ce1df7ecc48af3073fdc7dd3dd7b0c26a5130ba39f59da5c4",
+          "source_bindings_sha256": "70afb0545b0d67f81efb90ed2c3164409bc2f703f9873905b93547b49fcd09e4",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "a382f170600cc1a2efb4c4a643f8d604f8108cc728a5828ec49148653bda723b",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "c79abf2af21bcd5ce1df7ecc48af3073fdc7dd3dd7b0c26a5130ba39f59da5c4",
+          "source_bindings_sha256": "93e6e0a03b9c090c3119e553e4cd75957130a2d42fb079b36aa16e4f95590563",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 74586,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-74586",
+      "base_commit": "e5c11eb4ab20851a6ab76bd0a85c8650b20b0692",
+      "base_tree": "7e81e1c69a609475cce9a4664193f0590d4aa6fd",
+      "change": "加载被测函数引用的同文件辅助函数，保留已有数值、重复索引和导出检查。",
+      "test_patch_sha256": "ecf263832f5aabff03b9ffd85650a39a0f748c0b497f0fc79d13eac937460e6d",
+      "original_test_patch_sha256": "a38a3f3d6ead530d935ffb39a59ae3a09583fc5479954d5a7d3f1bcd56e25969",
+      "f2p": [
+        "test/swe_paddle/test_pr74586_scatter_add.py::test_scatter_add_accumulates_repeated_indices_along_requested_dim",
+        "test/swe_paddle/test_pr74586_scatter_add.py::test_scatter_add_is_reexported_from_public_namespaces"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr74586_scatter_add.py::test_existing_index_add_dynamic_path_remains_compatible"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 2,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 3,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 3,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "ecf263832f5aabff03b9ffd85650a39a0f748c0b497f0fc79d13eac937460e6d",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "db01f2d9a4ce85db69b96e30fd258f059b806a4042d1bbefbf5b0c7c95fd65ba",
+          "source_bindings_sha256": "23f81f46e5a3cb108d30ad47136a54e60255a3a2551d2d316dbaa854c35f1ed4",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "ecf263832f5aabff03b9ffd85650a39a0f748c0b497f0fc79d13eac937460e6d",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "f0d2d8e147e49dfafa1d1544d57fe285f3032dbe0c54fd739aa0d6d1c9bed9f9",
+          "source_bindings_sha256": "a7a7106b2e6ca08d0cbbd8e34d3350a053e2e59660243e3fb894d7b4a0272ce6",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "ecf263832f5aabff03b9ffd85650a39a0f748c0b497f0fc79d13eac937460e6d",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "f0d2d8e147e49dfafa1d1544d57fe285f3032dbe0c54fd739aa0d6d1c9bed9f9",
+          "source_bindings_sha256": "c411ca3c064b669d32227fdbbe4ae1913cf9161ed5b88c8f526e2f7454c2b89c",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 74594,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-74594",
+      "base_commit": "20e50fb447d8e34bafb337c180ca28d77dfb82ca",
+      "base_tree": "697b086fce08db3ff5377da1a238a778f6ad81dd",
+      "change": "提供源码实际依赖的 core 广播接口，保留全部原断言。",
+      "test_patch_sha256": "df6b36a7ab707c2af0c6b46bb86a2f8a3b5900c8a22ad7505814e9ae88a7c4f6",
+      "original_test_patch_sha256": "a5eb68750472c5f61031176c65490b74e4ebdcf90cb60dfef7e66ca526e8af82",
+      "f2p": [
+        "test/swe_paddle/test_pr74594_broadcast_shapes.py::test_broadcast_shapes_combines_multiple_shapes_and_rejects_mismatch",
+        "test/swe_paddle/test_pr74594_broadcast_shapes.py::test_broadcast_shapes_supports_empty_and_single_shape_inputs"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr74594_broadcast_shapes.py::test_existing_broadcast_shape_delegation_remains_compatible"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 2,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 3,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 3,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "df6b36a7ab707c2af0c6b46bb86a2f8a3b5900c8a22ad7505814e9ae88a7c4f6",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "977f1071773e960cdc1912acd79ba31e1ea1f79e0a468cd490c9b18b15f0b428",
+          "source_bindings_sha256": "7d433fa315c5ec1a0ed711941490d7e583dfa9161e9e2b0985456e68640a0ff7",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "df6b36a7ab707c2af0c6b46bb86a2f8a3b5900c8a22ad7505814e9ae88a7c4f6",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "03e7f71cf247380e6c1376f54b0680ff0a1bd8f60bc2be6ebe524f4857fdea33",
+          "source_bindings_sha256": "9baec189718ebdf80d42a2653c3b068d425b76695737e9470a58357da6b66401",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "df6b36a7ab707c2af0c6b46bb86a2f8a3b5900c8a22ad7505814e9ae88a7c4f6",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "03e7f71cf247380e6c1376f54b0680ff0a1bd8f60bc2be6ebe524f4857fdea33",
+          "source_bindings_sha256": "f3347912441eed3e2158231fcec706d65b1ec630e7db72602ec7fea9f34277e6",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 78452,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-78452",
+      "base_commit": "0156c9d3a222adaca16a394826654a9f449d11aa",
+      "base_tree": "9fde60f61ca3a1dcae8b072b4c1df71d520c3c64",
+      "change": "通过 RestrictedUnpickler.find_class 验证安全/危险对象，取消对私有辅助函数名字的依赖。",
+      "test_patch_sha256": "bcab20101b38816ad66901cf09a50683b924f2a01ca23ec64452c783532d2cc4",
+      "original_test_patch_sha256": "2f28b04d45b22a3641573443c5e277c08a633c74bf2f637e7788d6fb25c6469c",
+      "f2p": [
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_safe_class_with_nested_attributes",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_safe_class_with_regular_methods",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_safe_dataclass",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_safe_user_defined_class",
+        "test/legacy_test/test_restricted_unpickler.py::TestSafeUserDefinedClassLoading::test_config_class_like_arguments",
+        "test/legacy_test/test_restricted_unpickler.py::TestSafeUserDefinedClassLoading::test_load_dict_with_safe_classes",
+        "test/legacy_test/test_restricted_unpickler.py::TestSafeUserDefinedClassLoading::test_load_safe_dataclass",
+        "test/legacy_test/test_restricted_unpickler.py::TestSafeUserDefinedClassLoading::test_load_safe_user_defined_class"
+      ],
+      "p2p": [
+        "test/legacy_test/test_restricted_unpickler.py::TestDataclassInParseEveryObject::test_dataclass_in_list",
+        "test/legacy_test/test_restricted_unpickler.py::TestDataclassInParseEveryObject::test_dataclass_in_ordered_dict",
+        "test/legacy_test/test_restricted_unpickler.py::TestDataclassInParseEveryObject::test_dataclass_in_tuple",
+        "test/legacy_test/test_restricted_unpickler.py::TestDataclassInParseEveryObject::test_dataclass_passthrough",
+        "test/legacy_test/test_restricted_unpickler.py::TestDataclassInParseEveryObject::test_nested_dataclass_in_dict",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_builtin_function",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_builtin_method",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_getstate",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_reduce",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_reduce_ex",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_setstate",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_module_type",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_non_class",
+        "test/legacy_test/test_restricted_unpickler.py::TestPickleLoadsMac::test_pickle_loads_mac_basic",
+        "test/legacy_test/test_restricted_unpickler.py::TestPickleLoadsMac::test_pickle_loads_mac_state_dict",
+        "test/legacy_test/test_restricted_unpickler.py::TestReconstructDenseTensorData::test_reconstruct_returns_data_unchanged",
+        "test/legacy_test/test_restricted_unpickler.py::TestReconstructDenseTensorData::test_reconstruct_with_multidim_array",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerAllowedTypes::test_dict_with_numpy",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerAllowedTypes::test_list_of_arrays",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerAllowedTypes::test_nested_dict",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerAllowedTypes::test_numpy_float64",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerAllowedTypes::test_numpy_ndarray",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerAllowedTypes::test_ordered_dict",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerAllowedTypes::test_safe_loads_pickle",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerBlocked::test_block_arbitrary_module",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerBlocked::test_block_eval",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerBlocked::test_block_exec",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerBlocked::test_block_open",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerBlocked::test_block_os_popen",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerBlocked::test_block_os_system",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerBlocked::test_block_subprocess",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerWithFile::test_malicious_model_file",
+        "test/legacy_test/test_restricted_unpickler.py::TestRestrictedUnpicklerWithFile::test_safe_model_file",
+        "test/legacy_test/test_restricted_unpickler.py::TestSafeUserDefinedClassLoading::test_reject_class_with_reduce_ex",
+        "test/legacy_test/test_restricted_unpickler.py::TestSafeUserDefinedClassLoading::test_reject_mixed_safe_and_unsafe_classes"
+      ],
+      "reclassified_as_p2p": [
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_builtin_function",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_builtin_method",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_getstate",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_reduce",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_reduce_ex",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_class_with_setstate",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_module_type",
+        "test/legacy_test/test_restricted_unpickler.py::TestIsSafeClass::test_reject_non_class"
+      ],
+      "base": {
+        "failed": 8,
+        "passed": 35
+      },
+      "reference": {
+        "passed": 43,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 43,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "8818070af6bf48ec2e3447642b4a6659bba6ded84daab4e2c91201b65334dad9",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "3659d8860c4aae124d506329e9143c97c45b961187273d5e9743fc87088fe99d",
+          "source_bindings_sha256": "39de15598b1072587b715be6b63e5581ce8186f1ae5544917012b1bf9c052ae6",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:5f6a89e6ba95000c8a47aa0bae821254949675526bf78476b880730e465b0ff7",
+          "libpaddle_sha256": "3d172497dd5578ea9526a303105b2c8d7c14422fa3661a216740e9eebe8776f9"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "8818070af6bf48ec2e3447642b4a6659bba6ded84daab4e2c91201b65334dad9",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "57db2977f148ac2369a94e4c719ce789410d553aa7049c8f0433a1bf9ea63de1",
+          "source_bindings_sha256": "f4e85110d2b28e45a1166ca3b99c6dcdc281d265bdc76bcefd41c5a0ccbf0fed",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:5f6a89e6ba95000c8a47aa0bae821254949675526bf78476b880730e465b0ff7",
+          "libpaddle_sha256": "3d172497dd5578ea9526a303105b2c8d7c14422fa3661a216740e9eebe8776f9"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "8818070af6bf48ec2e3447642b4a6659bba6ded84daab4e2c91201b65334dad9",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "57db2977f148ac2369a94e4c719ce789410d553aa7049c8f0433a1bf9ea63de1",
+          "source_bindings_sha256": "b7ed2cccbd577b0433f4cfff3ee2f06d1f7dd46bb4aa4886db31b451d7d78c93",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:5f6a89e6ba95000c8a47aa0bae821254949675526bf78476b880730e465b0ff7",
+          "libpaddle_sha256": "3d172497dd5578ea9526a303105b2c8d7c14422fa3661a216740e9eebe8776f9"
+        }
+      }
+    },
+    {
+      "task_id": 78522,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-78522",
+      "base_commit": "3493dbf5fdf1da8e59b8de87ec268ab386b9eefb",
+      "base_tree": "852e2d2c302d341352e2fc5940c04b8d6bcf3a9e",
+      "change": "执行实际 auto-tuner 清理代码并模拟系统进程操作；检查 PID 过滤、禁止 shell 清理和异常后继续处理。",
+      "test_patch_sha256": "4255cc74c951c6b3047d131087caec8d5819c2bdf371a757fdcca8e3eaf44098",
+      "original_test_patch_sha256": "5ba3516980e6b47d460748c55dba960e4da776545b25188d0f01b1783355dbc5",
+      "f2p": [
+        "test/legacy_test/test_launch_main_kill.py::TestLaunchMainProcessCleanup::test_filter_pids",
+        "test/legacy_test/test_launch_main_kill.py::TestLaunchMainProcessCleanup::test_terminate_processes_permission_error",
+        "test/legacy_test/test_launch_main_kill.py::TestLaunchMainProcessCleanup::test_terminate_processes_process_lookup"
+      ],
+      "p2p": [
+        "test/legacy_test/test_launch_coverage.py::TestCoverage::test_find_free_ports"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 3,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 4,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 4,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "4255cc74c951c6b3047d131087caec8d5819c2bdf371a757fdcca8e3eaf44098",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "92cfd0da32aa9b341ca916c352d60efb1af972a433e30186f3a4fee7549bda1c",
+          "source_bindings_sha256": "4b35718e43ef95100e37e29901722348dd1d7b7d713104013396a07f9a1b2587",
+          "runner_sha256": "24e28ac975bf2a0d4e47d0f88d9d6c08f3c552a48dbb6c8ae4362e81b68dd59a",
+          "image_digest": "sha256:5f6a89e6ba95000c8a47aa0bae821254949675526bf78476b880730e465b0ff7",
+          "libpaddle_sha256": "3d172497dd5578ea9526a303105b2c8d7c14422fa3661a216740e9eebe8776f9"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "4255cc74c951c6b3047d131087caec8d5819c2bdf371a757fdcca8e3eaf44098",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "df567580acbb2e73c29cc722cfd5f35bb37f90297e158e5ecb042917a72ee981",
+          "source_bindings_sha256": "1d828af9c344dee9d773009c7b552f91791d6c76fe3ceeedf41c7054b8b8451a",
+          "runner_sha256": "24e28ac975bf2a0d4e47d0f88d9d6c08f3c552a48dbb6c8ae4362e81b68dd59a",
+          "image_digest": "sha256:5f6a89e6ba95000c8a47aa0bae821254949675526bf78476b880730e465b0ff7",
+          "libpaddle_sha256": "3d172497dd5578ea9526a303105b2c8d7c14422fa3661a216740e9eebe8776f9"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "4255cc74c951c6b3047d131087caec8d5819c2bdf371a757fdcca8e3eaf44098",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "df567580acbb2e73c29cc722cfd5f35bb37f90297e158e5ecb042917a72ee981",
+          "source_bindings_sha256": "a831257f96d43515d28262430d8ca0eafcbaee8094f493c7c2d46b18808fd176",
+          "runner_sha256": "24e28ac975bf2a0d4e47d0f88d9d6c08f3c552a48dbb6c8ae4362e81b68dd59a",
+          "image_digest": "sha256:5f6a89e6ba95000c8a47aa0bae821254949675526bf78476b880730e465b0ff7",
+          "libpaddle_sha256": "3d172497dd5578ea9526a303105b2c8d7c14422fa3661a216740e9eebe8776f9"
+        }
+      }
+    },
+    {
+      "task_id": 78570,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-78570",
+      "base_commit": "d8f60c6d12d57d653c97a6c9298f0c11b2db9b2a",
+      "base_tree": "4069a44ef88cb41b9a0d2a6c4e9444e07fc1703b",
+      "change": "为测试模拟的 Paddle 补齐 enable_grad，保留回调、梯度状态和更新路径检查。",
+      "test_patch_sha256": "7e70bc8031cd2b33db27eb9a6e1ab21c031016d7dcdcf0b0b894fec7703b36a4",
+      "original_test_patch_sha256": "e3201f2d452879140d9cf1ff7358e34319e5eca54818da8757d31e65413909a2",
+      "f2p": [
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_f2p_closure_runs_with_grad_enabled_and_supplies_update_grad[Adam-path1]",
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_f2p_closure_runs_with_grad_enabled_and_supplies_update_grad[AdamW-path2]",
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_f2p_closure_runs_with_grad_enabled_and_supplies_update_grad[Optimizer-path0]",
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_f2p_optimizer_steps_accept_closure_and_return_loss[Adam-path1]",
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_f2p_optimizer_steps_accept_closure_and_return_loss[AdamW-path2]",
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_f2p_optimizer_steps_accept_closure_and_return_loss[Optimizer-path0]"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_p2p_step_without_closure_keeps_existing_update_path[Adam-path1]",
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_p2p_step_without_closure_keeps_existing_update_path[AdamW-path2]",
+        "test/swe_paddle/test_pr78570_optimizer_step_closure.py::test_p2p_step_without_closure_keeps_existing_update_path[Optimizer-path0]"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 6,
+        "passed": 3
+      },
+      "reference": {
+        "passed": 9,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 9,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "7e70bc8031cd2b33db27eb9a6e1ab21c031016d7dcdcf0b0b894fec7703b36a4",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "b0d4305dec6db5b9d19b57fca304df1c6440fb18bb25b52d462789e443a1c39a",
+          "source_bindings_sha256": "eaaf8f25a8bbee29d630f98be0fc32abb8d87c235c4047ea9dc82a2d33d9415f",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "7e70bc8031cd2b33db27eb9a6e1ab21c031016d7dcdcf0b0b894fec7703b36a4",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "575834ba711ec45c2e0327b6f6f5aaf2911bce011085d12caa864493f7bec645",
+          "source_bindings_sha256": "228afda4bf10145a2d2c69d9759ebdaf64f563507e25bf72229ac5e41fdee69b",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "7e70bc8031cd2b33db27eb9a6e1ab21c031016d7dcdcf0b0b894fec7703b36a4",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "575834ba711ec45c2e0327b6f6f5aaf2911bce011085d12caa864493f7bec645",
+          "source_bindings_sha256": "5b2f5f3f44aee9f9d22f44e076a3b7a8f5decdb8495998662a8b68c2d149a62c",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 79161,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-79161",
+      "base_commit": "8dd02b271734f7aae3669fe6dbcbea57d9cc9add",
+      "base_tree": "26935bc164300838ecc82e27780d5463a7831cc3",
+      "change": "保留冲突参数的 ValueError 检查，移除题面未规定的英文原文限制。",
+      "test_patch_sha256": "bbd871360f646cfeb84c0b9ad905567e1d1b0041f00b757a833d63074a6e4d40",
+      "original_test_patch_sha256": "0516198af73f8bc74227bd4fa0164113280f5af9c3ee3810d6ae2f0d78b09446",
+      "f2p": [
+        "test/swe_paddle/test_pr79161_set_rng_state_alias.py::test_new_state_alias_sets_the_same_generator_state",
+        "test/swe_paddle/test_pr79161_set_rng_state_alias.py::test_state_list_and_new_state_conflict_is_rejected"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr79161_set_rng_state_alias.py::test_existing_state_list_calls_remain_valid"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 2,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 3,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 3,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "bbd871360f646cfeb84c0b9ad905567e1d1b0041f00b757a833d63074a6e4d40",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "28ff11c06cc931bda37d28883fe17eab3a34c1c3778201da1a5341dbab343589",
+          "source_bindings_sha256": "d8114c78cfee338f25028dfff4277da2bb4c6da87705ae9d32533c0457fd7014",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "bbd871360f646cfeb84c0b9ad905567e1d1b0041f00b757a833d63074a6e4d40",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "dfa8ca532c60b2610648c9122568383b28fb0aebb446bf80fba7d161398dd7ea",
+          "source_bindings_sha256": "7cf47b9aa0fed75e9c0a1cf2c3c5227eff0aab35668604012b7d1de02a2d5c9f",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "bbd871360f646cfeb84c0b9ad905567e1d1b0041f00b757a833d63074a6e4d40",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "dfa8ca532c60b2610648c9122568383b28fb0aebb446bf80fba7d161398dd7ea",
+          "source_bindings_sha256": "715024758ea14fe2f46eb1f62991a13ea296dfa1aca6f9626b6ac473aa289304",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 79167,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-79167",
+      "base_commit": "c34031973911346f8cd98717583577f61adcf0b1",
+      "base_tree": "06bc43afacc817f44adbca26221a130ae3445561",
+      "change": "保留源码中的 initial_seed 别名赋值及 random 模块上下文。",
+      "test_patch_sha256": "5a37ffdff9ea134738000869e9b079f272b913fc28cb9d9721f9365a4b388bd7",
+      "original_test_patch_sha256": "711bb5b636eaba900c53a2bec2acc0df09406d0e4e105f47a4e3ff46de6b78f6",
+      "f2p": [
+        "test/swe_paddle/test_pr79167_initial_seed_alias.py::test_initial_seed_is_exported_at_top_level",
+        "test/swe_paddle/test_pr79167_initial_seed_alias.py::test_initial_seed_is_in_public_all"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr79167_initial_seed_alias.py::test_existing_seed_exports_remain_unchanged"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 2,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 3,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 3,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "5a37ffdff9ea134738000869e9b079f272b913fc28cb9d9721f9365a4b388bd7",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "18adce581dce9e16c86726c25d17233a5d167b8f24913e2ef573cd6605ffdc4e",
+          "source_bindings_sha256": "18d91c8b7fffe4176e272b953dc8a1012063e797b7f545756d1512e5d4781a9f",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "5a37ffdff9ea134738000869e9b079f272b913fc28cb9d9721f9365a4b388bd7",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "7bf51f225945a4b8b7a71031fe30cd002bff5dc5642673691f4a519a4ee2f9cd",
+          "source_bindings_sha256": "0373acc32efaeb14ba9e50e69b62149788ce64035ee4248eb51469fa1a43eba7",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "5a37ffdff9ea134738000869e9b079f272b913fc28cb9d9721f9365a4b388bd7",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "7bf51f225945a4b8b7a71031fe30cd002bff5dc5642673691f4a519a4ee2f9cd",
+          "source_bindings_sha256": "1dfa4d26d1bb904c95bfc3f046c106dc555642444e7fec43b79efae4589144c3",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 79275,
+      "source_path": "swe-paddle/tasks/PaddlePaddle_Paddle-79275",
+      "base_commit": "1d14ac949cd00747df9c828537f5fbff51b1f85f",
+      "base_tree": "a77c5665526768aacb67626abd2d451e5b0708c0",
+      "change": "保留类型标注处理和 Paddle 运算上下文；移除内部建张量调用次数限制，补全布尔真值组合检查。",
+      "test_patch_sha256": "9dbf7e4de6717789c54e6bdc8e4086c6b694bcf2fc346083f99a80bd6273c604",
+      "original_test_patch_sha256": "bf50f62f42c12fc970c379aeb71464ab05e84cbdecb40d5c19c9de5abc8207d3",
+      "f2p": [
+        "test/swe_paddle/test_pr79275_flex_attention_masks.py::test_non_callable_mask_inputs_are_rejected",
+        "test/swe_paddle/test_pr79275_flex_attention_masks.py::test_or_and_masks_combine_results_and_forward_arguments",
+        "test/swe_paddle/test_pr79275_flex_attention_masks.py::test_single_and_empty_mask_combinations_have_identity_behavior"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr79275_flex_attention_masks.py::test_existing_attention_exports_remain_available"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 3,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 4,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 4,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "9dbf7e4de6717789c54e6bdc8e4086c6b694bcf2fc346083f99a80bd6273c604",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "028253e1d758043a6a83df4244eae9034ec1fdbaaab2a5760f0701161e219ab2",
+          "source_bindings_sha256": "0cff38562845f5000071ed53c3c20eff54b5c28be40a50d80c2cc5335dc2d4ce",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "9dbf7e4de6717789c54e6bdc8e4086c6b694bcf2fc346083f99a80bd6273c604",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "0fb06e45ec0f4053131915754d8fc95c05c624faf6f36bc630223ec51da6d07b",
+          "source_bindings_sha256": "48fdcd053fc8fc2eefa9bcdd5996e1d99c2901f43a48f26598f844a58ca33a9a",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "9dbf7e4de6717789c54e6bdc8e4086c6b694bcf2fc346083f99a80bd6273c604",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "0fb06e45ec0f4053131915754d8fc95c05c624faf6f36bc630223ec51da6d07b",
+          "source_bindings_sha256": "83ccb399ea1571553a1aa411f5a764a64416ce207c4a9ae565a390f115b79a80",
+          "runner_sha256": "b0964c25be1f4bd230c4bd4a17f1cc580a4da2525c2292a489af12a5189d449c",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    },
+    {
+      "task_id": 79310,
+      "source_path": "swe-paddle/tasks/PaddlePaddle__Paddle-79310",
+      "base_commit": "14f2f9df49bd9bd7fd94eb9cdef850c581243784",
+      "base_tree": "07e7c4e3cad278f9969791676c98d0052338f3d6",
+      "change": "加载同文件辅助函数及初始化依赖；保留非法维度的 ValueError 检查，取消固定英文措辞。",
+      "test_patch_sha256": "813180f9659e3307e89d10e2d866b8e6e4b553a7c21c0890e8a8bad64e9e8b26",
+      "original_test_patch_sha256": "53562cc0d0d4b0a3d7586e5e838f00cd7babc5354fe2f2c4a4ddcbf5da3257e8",
+      "f2p": [
+        "test/swe_paddle/test_pr79310_sparse_initializer.py::test_dygraph_inplace_initializer_helpers_return_input_tensor",
+        "test/swe_paddle/test_pr79310_sparse_initializer.py::test_eye_dygraph_returns_input_tensor_after_inplace_share",
+        "test/swe_paddle/test_pr79310_sparse_initializer.py::test_sparse_initializer_rejects_non_2d_tensor",
+        "test/swe_paddle/test_pr79310_sparse_initializer.py::test_sparse_initializer_zeros_ceil_fraction_in_every_column"
+      ],
+      "p2p": [
+        "test/swe_paddle/test_pr79310_sparse_initializer.py::test_existing_normal_non_dygraph_path_keeps_initializer_return_value"
+      ],
+      "reclassified_as_p2p": [],
+      "base": {
+        "failed": 4,
+        "passed": 1
+      },
+      "reference": {
+        "passed": 5,
+        "failed": 0
+      },
+      "captured_candidate": {
+        "passed": 5,
+        "failed": 0
+      },
+      "evidence": {
+        "base": {
+          "executed_test_patch_sha256": "813180f9659e3307e89d10e2d866b8e6e4b553a7c21c0890e8a8bad64e9e8b26",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "79abb0b85f786defa144a7c0a593dd0196271c518165722ac10f0bf842604672",
+          "source_bindings_sha256": "ee7f5287f4e516c913112a90cc229ca0beea6c0e8ffca1ace4caa41389269d11",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "oracle": {
+          "executed_test_patch_sha256": "813180f9659e3307e89d10e2d866b8e6e4b553a7c21c0890e8a8bad64e9e8b26",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "5cd1644489511829bffd2be79fee0d6a438ae7cf62fd0e277e6e185fd08d1a94",
+          "source_bindings_sha256": "abd952957f1a1dc084c8b3757c0a76ff7119b691e887a3c2610e0f1f9640fa0e",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        },
+        "candidate": {
+          "executed_test_patch_sha256": "813180f9659e3307e89d10e2d866b8e6e4b553a7c21c0890e8a8bad64e9e8b26",
+          "applied_test_files_match_published_patch": true,
+          "observer_results_sha256": "5cd1644489511829bffd2be79fee0d6a438ae7cf62fd0e277e6e185fd08d1a94",
+          "source_bindings_sha256": "b9b5429c82411fc0fb31af26c7996ee419029fcb3c1b6c425dcae5664aba31c9",
+          "runner_sha256": "96bcc8c430a081757cff8f8b1c04ef51b7b2eb3343509543f0eb18ac7d062c9d",
+          "image_digest": "sha256:3fc89205d8e727ba01b0ffc033394d27711d48e851379d08c963e6b6225cc1c5"
+        }
+      }
+    }
+  ]
+}
