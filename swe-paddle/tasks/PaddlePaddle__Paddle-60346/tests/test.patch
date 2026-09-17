@@ -1,0 +1,227 @@
+diff --git a/test/swe_paddle/test_pr60346_lookahead_pir.py b/test/swe_paddle/test_pr60346_lookahead_pir.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..2c16b734b200746e0df46ecb6c72abbbd23a0b94
+--- /dev/null
++++ b/test/swe_paddle/test_pr60346_lookahead_pir.py
+@@ -0,0 +1,221 @@
++import ast
++import copy
++from pathlib import Path
++
++LOOKAHEAD_TARGET = Path("python/paddle/incubate/optimizer/lookahead.py")
++SGD_TARGET = Path("python/paddle/optimizer/sgd.py")
++
++
++def _extract_method(path, class_name, method_name, namespace):
++    source = path.read_text(encoding="utf-8")
++    tree = ast.parse(source, filename=str(path))
++    method = None
++    for node in tree.body:
++        if isinstance(node, ast.ClassDef) and node.name == class_name:
++            for item in node.body:
++                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and item.name == method_name:
++                    method = copy.deepcopy(item)
++                    break
++            break
++    if method is None:
++        raise AssertionError(f"checkout does not define {class_name}.{method_name}")
++    method.decorator_list = []
++    module = ast.Module(body=[method], type_ignores=[])
++    ast.fix_missing_locations(module)
++    exec(compile(module, str(path), "exec"), namespace)
++    return namespace[method_name]
++
++
++class _LegacyBlock:
++    pass
++
++
++class _PirBlock:
++    pass
++
++
++class _LegacyVariable:
++    pass
++
++
++class _PirValue:
++    pass
++
++
++class _Tensor:
++    def __init__(self, name, value=None):
++        self.name = name
++        self.value = value
++
++
++class _Initializer:
++    def __init__(self, **kwargs):
++        self.kwargs = kwargs
++
++
++class _StaticNamespace:
++    def __init__(self, paddle):
++        self._paddle = paddle
++
++    def create_global_var(self, **kwargs):
++        if self._paddle.pir_mode:
++            raise RuntimeError("legacy create_global_var is unavailable in PIR mode")
++        self._paddle.legacy_global_vars.append(kwargs)
++        return _Tensor(kwargs["name"], kwargs.get("value"))
++
++
++class _Paddle:
++    def __init__(self, *, pir_mode):
++        self.pir_mode = pir_mode
++        self.legacy_global_vars = []
++        self.created_parameters = []
++        self.increment_calls = []
++        self.static = _StaticNamespace(self)
++        self.pir = type("PirNamespace", (), {"Block": _PirBlock, "Value": _PirValue})()
++        constant = type("ConstantInitializer", (_Initializer,), {})
++        self.nn = type(
++            "NNNamespace",
++            (),
++            {"initializer": type("InitializerNamespace", (), {"ConstantInitializer": constant})()},
++        )()
++
++    def increment(self, tensor, value):
++        self.increment_calls.append((tensor, value))
++        return _Tensor(tensor.name + "_inc", value)
++
++
++class _UniqueName:
++    def __init__(self):
++        self.index = 0
++
++    def generate(self, prefix):
++        self.index += 1
++        return f"{prefix}_{self.index}"
++
++
++class _Helper:
++    def __init__(self, *, pir_mode):
++        self.pir_mode = pir_mode
++        self.ops = []
++
++    def append_op(self, **kwargs):
++        if self.pir_mode:
++            raise RuntimeError("legacy helper.append_op is unavailable in PIR mode")
++        self.ops.append(kwargs)
++
++
++class _LookAheadSelf:
++    def __init__(self, *, pir_mode):
++        self._global_step_var = None
++        self.helper = _Helper(pir_mode=pir_mode)
++        self.incremented = 0
++        self.applied = 0
++        self.inner_optimizer = None
++
++    def _increment_global_var(self):
++        self.incremented += 1
++
++    def _apply_optimize(self, *args, **kwargs):
++        self.applied += 1
++        return []
++
++
++class _InnerOptimizer:
++    def __init__(self):
++        self.calls = []
++
++    def minimize(self, *args, **kwargs):
++        self.calls.append((args, kwargs))
++        return ["inner_op"], []
++
++
++def _load_increment(*, pir_mode):
++    fake_paddle = _Paddle(pir_mode=pir_mode)
++    unique_name = _UniqueName()
++
++    def create_parameter(**kwargs):
++        fake_paddle.created_parameters.append(kwargs)
++        return _Tensor(kwargs["name"], kwargs.get("initializer"))
++
++    namespace = {
++        "paddle": fake_paddle,
++        "unique_name": unique_name,
++        "in_pir_mode": lambda: fake_paddle.pir_mode,
++        "create_parameter": create_parameter,
++    }
++    method = _extract_method(LOOKAHEAD_TARGET, "LookAhead", "_increment_global_var", namespace)
++    return method, fake_paddle
++
++
++def test_legacy_increment_path_is_preserved():
++    method, fake_paddle = _load_increment(pir_mode=False)
++    holder = type("Holder", (), {})()
++    holder._global_step_var = None
++    holder.helper = _Helper(pir_mode=False)
++
++    method(holder)
++
++    assert len(fake_paddle.legacy_global_vars) == 1
++    assert fake_paddle.created_parameters == []
++    assert fake_paddle.increment_calls == []
++    assert len(holder.helper.ops) == 1
++    assert holder.helper.ops[0]["type"] == "increment"
++    assert holder.helper.ops[0]["attrs"] == {"step": 1.0}
++
++
++def test_pir_increment_uses_parameter_and_pir_increment():
++    method, fake_paddle = _load_increment(pir_mode=True)
++    holder = type("Holder", (), {})()
++    holder._global_step_var = None
++    holder.helper = _Helper(pir_mode=True)
++
++    method(holder)
++
++    assert fake_paddle.legacy_global_vars == []
++    assert len(fake_paddle.created_parameters) == 1
++    created = fake_paddle.created_parameters[0]
++    assert created["dtype"] == "int32"
++    assert created["shape"] == [1]
++    assert created["trainable"] is False
++    assert created["initializer"].kwargs == {"value": 0.0, "force_cpu": False}
++    assert len(fake_paddle.increment_calls) == 1
++    assert fake_paddle.increment_calls[0][1] == 1.0
++    assert holder.helper.ops == []
++
++
++def test_sgd_accepts_pir_block_for_accumulator_creation():
++    framework = type("FrameworkNamespace", (), {"Block": _LegacyBlock})()
++    pir = type("PirNamespace", (), {"Block": _PirBlock})()
++    namespace = {"framework": framework, "pir": pir}
++    method = _extract_method(SGD_TARGET, "SGD", "_create_accumulators", namespace)
++
++    holder = type("Holder", (), {})()
++    holder._already_create_accumulator = set()
++    holder._multi_precision = False
++    holder._update_param_group = lambda params: params
++    holder._add_accumulator = lambda *args, **kwargs: None
++
++    try:
++        method(holder, _PirBlock(), [])
++    except AssertionError as exc:
++        raise AssertionError("SGD rejects a PIR block when creating accumulators") from exc
++
++
++def test_lookahead_minimize_accepts_pir_value():
++    paddle = type("PaddleNamespace", (), {"pir": type("PirNamespace", (), {"Value": _PirValue})()})()
++    namespace = {"paddle": paddle, "Variable": _LegacyVariable}
++    method = _extract_method(LOOKAHEAD_TARGET, "LookAhead", "minimize", namespace)
++
++    holder = _LookAheadSelf(pir_mode=True)
++    holder.inner_optimizer = _InnerOptimizer()
++
++    try:
++        optimize_ops, params_grads = method(holder, _PirValue())
++    except AssertionError as exc:
++        raise AssertionError("LookAhead minimize rejects a PIR Value loss") from exc
++
++    assert optimize_ops == ["inner_op"]
++    assert params_grads == []
++    assert len(holder.inner_optimizer.calls) == 1
++    assert holder.incremented == 1
++    assert holder.applied == 1
