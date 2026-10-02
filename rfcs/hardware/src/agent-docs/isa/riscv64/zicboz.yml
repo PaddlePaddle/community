@@ -1,0 +1,11 @@
+groups:
+- name: cache_block_zero
+  description: Cache Block Zero Instruction (Zicboz)
+
+instructions:
+- name: CBO_ZERO
+  group: cache_block_zero
+  encoding:
+    match: 000000000100?????010000000001111
+  assembly: cbo.zero ({rs1})
+  format: Cache-mgmt

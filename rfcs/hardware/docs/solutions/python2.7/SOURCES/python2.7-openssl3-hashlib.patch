@@ -1,0 +1,42 @@
+diff --git a/setup.py b/setup.py
+index f764223..19a23e4 100644
+--- a/setup.py
++++ b/setup.py
+@@ -885,6 +885,12 @@ class PyBuildExt(build_ext):
+         openssl_ver = 0
+         openssl_ver_re = re.compile(
+             '^\s*#\s*define\s+OPENSSL_VERSION_NUMBER\s+(0x[0-9a-fA-F]+)' )
++        openssl_ver_major_re = re.compile(
++            '^\s*#\s*define\s+OPENSSL_VERSION_MAJOR\s+(\d+)' )
++        openssl_ver_minor_re = re.compile(
++            '^\s*#\s*define\s+OPENSSL_VERSION_MINOR\s+(\d+)' )
++        openssl_ver_patch_re = re.compile(
++            '^\s*#\s*define\s+OPENSSL_VERSION_PATCH\s+(\d+)' )
+ 
+         # look for the openssl version header on the compiler search path.
+         opensslv_h = find_file('openssl/opensslv.h', [],
+@@ -895,10 +901,24 @@ class PyBuildExt(build_ext):
+                 name = os.path.join(macosx_sdk_root(), name[1:])
+             try:
+                 incfile = open(name, 'r')
++                openssl_major = 0
++                openssl_minor = 0
++                openssl_patch = 0
+                 for line in incfile:
+                     m = openssl_ver_re.match(line)
+                     if m:
+                         openssl_ver = eval(m.group(1))
++                    m = openssl_ver_major_re.match(line)
++                    if m:
++                        openssl_major = int(m.group(1))
++                    m = openssl_ver_minor_re.match(line)
++                    if m:
++                        openssl_minor = int(m.group(1))
++                    m = openssl_ver_patch_re.match(line)
++                    if m:
++                        openssl_patch = int(m.group(1))
++                if openssl_ver == 0 and openssl_major:
++                    openssl_ver = (openssl_major << 28) | (openssl_minor << 20) | (openssl_patch << 4)
+             except IOError, msg:
+                 print "IOError while reading opensshv.h:", msg
+                 pass

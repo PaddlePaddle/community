@@ -1,0 +1,56 @@
+groups:
+- name: zba
+  description: 地址生成位操作指令
+instructions:
+- name: SH1ADD
+  group: zba
+  encoding:
+    match: 0010000 ????? ????? 010 ????? 0110011
+  assembly: sh1add {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SH2ADD
+  group: zba
+  encoding:
+    match: 0010000 ????? ????? 100 ????? 0110011
+  assembly: sh2add {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SH3ADD
+  group: zba
+  encoding:
+    match: 0010000 ????? ????? 110 ????? 0110011
+  assembly: sh3add {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SH1ADD.UW
+  group: zba
+  encoding:
+    match: 0010000 ????? ????? 010 ????? 0111011
+  assembly: sh1add.uw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SH2ADD.UW
+  group: zba
+  encoding:
+    match: 0010000 ????? ????? 100 ????? 0111011
+  assembly: sh2add.uw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SH3ADD.UW
+  group: zba
+  encoding:
+    match: 0010000 ????? ????? 110 ????? 0111011
+  assembly: sh3add.uw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: ADD.UW
+  group: zba
+  encoding:
+    match: 0000100 ????? ????? 000 ????? 0111011
+  assembly: add.uw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SLLI.UW
+  group: zba
+  encoding:
+    match: 0000100 ????? ????? 001 ????? 0011011
+    variables:
+      shamt:
+      - 24
+      - 20
+  assembly: slli.uw {rd}, {rs1}, {shamt}
+  format: R-type-unary

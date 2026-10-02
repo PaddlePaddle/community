@@ -1,0 +1,11 @@
+semantics:
+  cbo_zero:
+    description: cbo.zero hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false

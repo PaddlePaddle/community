@@ -1,0 +1,90 @@
+# RISC-V Zbs Extension Semantics
+
+semantics:
+  bclr:
+    description: "bclr rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Bclr
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  bclri:
+    description: "bclri rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Bclr
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $shamt:6
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  bext:
+    description: "bext rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Bext
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  bexti:
+    description: "bexti rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Bext
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $shamt:6
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  binv:
+    description: "binv rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Binv
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  binvi:
+    description: "binvi rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Binv
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $shamt:6
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  bset:
+    description: "bset rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Bset
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  bseti:
+    description: "bseti rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Bset
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $shamt:6
+    implicit_pc_read: false
+    implicit_pc_write: false

@@ -1,0 +1,162 @@
+groups:
+- name: zbb
+  description: 基础位操作指令
+instructions:
+- name: ANDN
+  group: zbb
+  encoding:
+    match: 0100000 ????? ????? 111 ????? 0110011
+  assembly: andn {rd}, {rs1}, {rs2}
+  format: R-type
+- name: ORN
+  group: zbb
+  encoding:
+    match: 0100000 ????? ????? 110 ????? 0110011
+  assembly: orn {rd}, {rs1}, {rs2}
+  format: R-type
+- name: XNOR
+  group: zbb
+  encoding:
+    match: 0100000 ????? ????? 100 ????? 0110011
+  assembly: xnor {rd}, {rs1}, {rs2}
+  format: R-type
+- name: CLZ
+  group: zbb
+  encoding:
+    match: 0110000 00000 ????? 001 ????? 0010011
+  assembly: clz {rd}, {rs1}
+  format: R-type-unary
+- name: CLZW
+  group: zbb
+  encoding:
+    match: 0110000 00000 ????? 001 ????? 0011011
+  assembly: clzw {rd}, {rs1}
+  format: R-type-unary
+- name: CTZ
+  group: zbb
+  encoding:
+    match: 0110000 00001 ????? 001 ????? 0010011
+  assembly: ctz {rd}, {rs1}
+  format: R-type-unary
+- name: CTZW
+  group: zbb
+  encoding:
+    match: 0110000 00001 ????? 001 ????? 0011011
+  assembly: ctzw {rd}, {rs1}
+  format: R-type-unary
+- name: CPOP
+  group: zbb
+  encoding:
+    match: 0110000 00010 ????? 001 ????? 0010011
+  assembly: cpop {rd}, {rs1}
+  format: R-type-unary
+- name: CPOPW
+  group: zbb
+  encoding:
+    match: 0110000 00010 ????? 001 ????? 0011011
+  assembly: cpopw {rd}, {rs1}
+  format: R-type-unary
+- name: MAX
+  group: zbb
+  encoding:
+    match: 0000101 ????? ????? 110 ????? 0110011
+  assembly: max {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MAXU
+  group: zbb
+  encoding:
+    match: 0000101 ????? ????? 111 ????? 0110011
+  assembly: maxu {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MIN
+  group: zbb
+  encoding:
+    match: 0000101 ????? ????? 100 ????? 0110011
+  assembly: min {rd}, {rs1}, {rs2}
+  format: R-type
+- name: MINU
+  group: zbb
+  encoding:
+    match: 0000101 ????? ????? 101 ????? 0110011
+  assembly: minu {rd}, {rs1}, {rs2}
+  format: R-type
+- name: ORC_B
+  group: zbb
+  encoding:
+    match: 0010100 00111 ????? 101 ????? 0010011
+  assembly: orc.b {rd}, {rs1}
+  format: R-type-unary
+- name: REV8
+  group: zbb
+  encoding:
+    match: 0110101 11000 ????? 101 ????? 0010011
+  assembly: rev8 {rd}, {rs1}
+  format: R-type-unary
+- name: ROL
+  group: zbb
+  encoding:
+    match: 0110000 ????? ????? 001 ????? 0110011
+  assembly: rol {rd}, {rs1}, {rs2}
+  format: R-type
+- name: ROLW
+  group: zbb
+  encoding:
+    match: 0110000 ????? ????? 001 ????? 0111011
+  assembly: rolw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: ROR
+  group: zbb
+  encoding:
+    match: 0110000 ????? ????? 101 ????? 0110011
+  assembly: ror {rd}, {rs1}, {rs2}
+  format: R-type
+- name: RORI
+  group: zbb
+  encoding:
+    match: 0110000 ????? ????? 101 ????? 0010011
+    variables:
+      shamt:
+      - 24
+      - 20
+  assembly: rori {rd}, {rs1}, {shamt}
+  format: R-type-unary
+- name: RORIW
+  group: zbb
+  encoding:
+    match: 0110000 ????? ????? 101 ????? 0011011
+    variables:
+      shamt:
+      - 24
+      - 20
+  assembly: roriw {rd}, {rs1}, {shamt}
+  format: R-type-unary
+- name: RORW
+  group: zbb
+  encoding:
+    match: 0110000 ????? ????? 101 ????? 0111011
+  assembly: rorw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SEXT_B
+  group: zbb
+  encoding:
+    match: 0110000 00100 ????? 001 ????? 0010011
+  assembly: sext.b {rd}, {rs1}
+  format: R-type-unary
+- name: SEXT_H
+  group: zbb
+  encoding:
+    match: 0110000 00101 ????? 001 ????? 0010011
+  assembly: sext.h {rd}, {rs1}
+  format: R-type-unary
+- name: ZEXT_H
+  group: zbb
+  encoding:
+    match: 0000100 00000 ????? 100 ????? 0111011
+  assembly: zext.h {rd}, {rs1}
+  format: R-type-unary
+- name: PACK
+  group: zbb
+  encoding:
+    match: 0000100 ????? ????? 100 ????? 0110011
+  assembly: pack {rd}, {rs1}, {rs2}
+  format: R-type

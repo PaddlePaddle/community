@@ -1,0 +1,144 @@
+semantics:
+  bceqz:
+    description: "bceqz cj, offset"
+    operations:
+    - type: compare
+      op: Eq
+      dest: $temp:0
+      src1: $fcc.c
+      src2: 0
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:12:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+  bcnez:
+    description: "bcnez cj, offset"
+    operations:
+    - type: compare
+      op: Ne
+      dest: $temp:0
+      src1: $fcc.c
+      src2: 0
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $imm:12:signed
+      src2: 2
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $pc
+      src2: $temp:1
+    - type: branch
+      condition: $temp:0
+      target: $temp:2
+      is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+  lu32i_d:
+    description: "lu32i.d rd, imm"
+    operations:
+    - type: cast
+      op:
+        SignExtend:
+          from: 20
+          to: 64
+      dest: $temp:0
+      src: $imm:20:signed
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $temp:0
+      src2: 32
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $r.d
+    - type: alu
+      op: Or
+      dest: $r.d
+      src1: $temp:0
+      src2: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  lu52i_d:
+    description: "lu52i.d rd, rj, imm"
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:12:signed
+      src2: 52
+    - type: cast
+      op:
+        Truncate:
+          to: 52
+      dest: $temp:1
+      src: $r.j
+    - type: alu
+      op: Or
+      dest: $r.d
+      src1: $temp:0
+      src2: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  alsl_w:
+    description: "alsl.w rd, rj, rk, sa"
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $imm:2
+      src2: 1
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $temp:1
+      src2: $r.k
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:3
+      src: $temp:2
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:3
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  movcf2gr:
+    description: "movcf2gr rd, cj"
+    operations:
+    - type: move
+      dest: $r.d
+      src: $fcc.j
+    implicit_pc_read: false
+    implicit_pc_write: false

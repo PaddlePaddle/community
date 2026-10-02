@@ -1,0 +1,7840 @@
+semantics:
+  vadd.b:
+    description: vadd.b vd, vj, vk (vector add byte)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadd.h:
+    description: vadd.h vd, vj, vk (vector add halfword)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadd.w:
+    description: vadd.w vd, vj, vk (vector add word)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadd.d:
+    description: vadd.d vd, vj, vk (vector add doubleword)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub.b:
+    description: vsub.b vd, vj, vk (vector subtract byte)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub.h:
+    description: vsub.h vd, vj, vk (vector subtract halfword)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub.w:
+    description: vsub.w vd, vj, vk (vector subtract word)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub.d:
+    description: vsub.d vd, vj, vk (vector subtract doubleword)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vand.v:
+    description: vand.v vd, vj, vk (vector and)
+    operations:
+    - type: vector_alu
+      op: And
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vor.v:
+    description: vor.v vd, vj, vk (vector or)
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vxor.v:
+    description: vxor.v vd, vj, vk (vector xor)
+    operations:
+    - type: vector_alu
+      op: Xor
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vnor.v:
+    description: vnor.v vd, vj, vk (vector nor)
+    operations:
+    - type: vector_alu
+      op: Nor
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vreplgr2vr.b:
+    description: vreplgr2vr.b vd, rj (replicate gpr to vector byte)
+    operations:
+    - type: vector_broadcast
+      elem_width: B
+      dest: "$v.d"
+      src: "$r.j"
+
+  vreplgr2vr.h:
+    description: vreplgr2vr.h vd, rj (replicate gpr to vector halfword)
+    operations:
+    - type: vector_broadcast
+      elem_width: H
+      dest: "$v.d"
+      src: "$r.j"
+
+  vreplgr2vr.w:
+    description: vreplgr2vr.w vd, rj (replicate gpr to vector word)
+    operations:
+    - type: vector_broadcast
+      elem_width: W
+      dest: "$v.d"
+      src: "$r.j"
+
+  vreplgr2vr.d:
+    description: vreplgr2vr.d vd, rj (replicate gpr to vector doubleword)
+    operations:
+    - type: vector_broadcast
+      elem_width: D
+      dest: "$v.d"
+      src: "$r.j"
+
+  vld:
+    description: vld vd, rj, imm (vector load 128-bit)
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$imm:12:signed"
+    - type: vector_load
+      elem_width: B
+      dest: "$v.d"
+      addr: "$temp:0"
+      count: 16
+
+  vst:
+    description: vst vd, rj, imm (vector store 128-bit)
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$imm:12:signed"
+    - type: vector_store
+      elem_width: B
+      src: "$v.d"
+      addr: "$temp:0"
+      count: 16
+
+  vseq.b:
+    description: vseq.b vd, vj, vk (vector set if equal byte)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vseq.h:
+    description: vseq.h vd, vj, vk (vector set if equal halfword)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vseq.w:
+    description: vseq.w vd, vj, vk (vector set if equal word)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vseq.d:
+    description: vseq.d vd, vj, vk (vector set if equal doubleword)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vneg.b:
+    description: vneg.b vd, vj (vector negate byte)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vneg.h:
+    description: vneg.h vd, vj (vector negate halfword)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vneg.w:
+    description: vneg.w vd, vj (vector negate word)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vneg.d:
+    description: vneg.d vd, vj (vector negate doubleword)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vmax.b:
+    description: vmax.b vd, vj, vk (vector max signed byte)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmax.h:
+    description: vmax.h vd, vj, vk (vector max signed halfword)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmax.w:
+    description: vmax.w vd, vj, vk (vector max signed word)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmax.d:
+    description: vmax.d vd, vj, vk (vector max signed doubleword)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin.b:
+    description: vmin.b vd, vj, vk (vector min signed byte)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin.h:
+    description: vmin.h vd, vj, vk (vector min signed halfword)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin.w:
+    description: vmin.w vd, vj, vk (vector min signed word)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin.d:
+    description: vmin.d vd, vj, vk (vector min signed doubleword)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsll.b:
+    description: vsll.b vd, vj, vk (vector shift left logical byte)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsll.h:
+    description: vsll.h vd, vj, vk (vector shift left logical halfword)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsll.w:
+    description: vsll.w vd, vj, vk (vector shift left logical word)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsll.d:
+    description: vsll.d vd, vj, vk (vector shift left logical doubleword)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrl.b:
+    description: vsrl.b vd, vj, vk (vector shift right logical byte)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrl.h:
+    description: vsrl.h vd, vj, vk (vector shift right logical halfword)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrl.w:
+    description: vsrl.w vd, vj, vk (vector shift right logical word)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrl.d:
+    description: vsrl.d vd, vj, vk (vector shift right logical doubleword)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsra.b:
+    description: vsra.b vd, vj, vk (vector shift right arithmetic byte)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsra.h:
+    description: vsra.h vd, vj, vk (vector shift right arithmetic halfword)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsra.w:
+    description: vsra.w vd, vj, vk (vector shift right arithmetic word)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsra.d:
+    description: vsra.d vd, vj, vk (vector shift right arithmetic doubleword)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vclo_b:
+    description: vclo_b (vclo_b $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clo
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vclo_d:
+    description: vclo_d (vclo_d $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clo
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vclo_h:
+    description: vclo_h (vclo_h $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clo
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vclo_w:
+    description: vclo_w (vclo_w $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clo
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vclz_b:
+    description: vclz_b (vclz_b $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clz
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vclz_d:
+    description: vclz_d (vclz_d $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clz
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vclz_h:
+    description: vclz_h (vclz_h $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clz
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vclz_w:
+    description: vclz_w (vclz_w $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Clz
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vpcnt_b:
+    description: vpcnt_b (vpcnt_b $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Pcnt
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vpcnt_d:
+    description: vpcnt_d (vpcnt_d $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Pcnt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vpcnt_h:
+    description: vpcnt_h (vpcnt_h $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Pcnt
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vpcnt_w:
+    description: vpcnt_w (vpcnt_w $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Pcnt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: null
+
+  vabsd_b:
+    description: vabsd_b (vabsd_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absd
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vabsd_bu:
+    description: vabsd_bu (vabsd_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absdu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vabsd_d:
+    description: vabsd_d (vabsd_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absd
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vabsd_du:
+    description: vabsd_du (vabsd_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absdu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vabsd_h:
+    description: vabsd_h (vabsd_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absd
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vabsd_hu:
+    description: vabsd_hu (vabsd_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absdu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vabsd_w:
+    description: vabsd_w (vabsd_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absd
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vabsd_wu:
+    description: vabsd_wu (vabsd_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Absdu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadda_b:
+    description: vadda_b (vadda_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Adda
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadda_d:
+    description: vadda_d (vadda_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Adda
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadda_h:
+    description: vadda_h (vadda_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Adda
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadda_w:
+    description: vadda_w (vadda_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Adda
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadd_b:
+    description: vadd_b (vadd_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadd_d:
+    description: vadd_d (vadd_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadd_h:
+    description: vadd_h (vadd_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vadd_w:
+    description: vadd_w (vadd_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vandn_v:
+    description: vandn_v (vandn_v $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Andn
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vand_v:
+    description: vand_v (vand_v $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: And
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_b:
+    description: vavgr_b (vavgr_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgr
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_bu:
+    description: vavgr_bu (vavgr_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgru
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_d:
+    description: vavgr_d (vavgr_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgr
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_du:
+    description: vavgr_du (vavgr_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgru
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_h:
+    description: vavgr_h (vavgr_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgr
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_hu:
+    description: vavgr_hu (vavgr_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgru
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_w:
+    description: vavgr_w (vavgr_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgr
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavgr_wu:
+    description: vavgr_wu (vavgr_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgru
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_b:
+    description: vavg_b (vavg_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avg
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_bu:
+    description: vavg_bu (vavg_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_d:
+    description: vavg_d (vavg_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avg
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_du:
+    description: vavg_du (vavg_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_h:
+    description: vavg_h (vavg_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avg
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_hu:
+    description: vavg_hu (vavg_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_w:
+    description: vavg_w (vavg_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avg
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vavg_wu:
+    description: vavg_wu (vavg_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Avgu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_b:
+    description: vdiv_b (vdiv_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Div
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_bu:
+    description: vdiv_bu (vdiv_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Divu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_d:
+    description: vdiv_d (vdiv_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Div
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_du:
+    description: vdiv_du (vdiv_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Divu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_h:
+    description: vdiv_h (vdiv_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Div
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_hu:
+    description: vdiv_hu (vdiv_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Divu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_w:
+    description: vdiv_w (vdiv_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Div
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vdiv_wu:
+    description: vdiv_wu (vdiv_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Divu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmax_bu:
+    description: vmax_bu (vmax_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Maxu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmax_du:
+    description: vmax_du (vmax_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Maxu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmax_hu:
+    description: vmax_hu (vmax_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Maxu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmax_wu:
+    description: vmax_wu (vmax_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Maxu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin_bu:
+    description: vmin_bu (vmin_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Minu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin_du:
+    description: vmin_du (vmin_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Minu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin_hu:
+    description: vmin_hu (vmin_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Minu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmin_wu:
+    description: vmin_wu (vmin_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Minu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_b:
+    description: vmod_b (vmod_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Rem
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_bu:
+    description: vmod_bu (vmod_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Remu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_d:
+    description: vmod_d (vmod_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Rem
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_du:
+    description: vmod_du (vmod_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Remu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_h:
+    description: vmod_h (vmod_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Rem
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_hu:
+    description: vmod_hu (vmod_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Remu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_w:
+    description: vmod_w (vmod_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Rem
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmod_wu:
+    description: vmod_wu (vmod_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Remu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_b:
+    description: vmuh_b (vmuh_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muh
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_bu:
+    description: vmuh_bu (vmuh_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muhu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_d:
+    description: vmuh_d (vmuh_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muh
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_du:
+    description: vmuh_du (vmuh_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muhu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_h:
+    description: vmuh_h (vmuh_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muh
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_hu:
+    description: vmuh_hu (vmuh_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muhu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_w:
+    description: vmuh_w (vmuh_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muh
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmuh_wu:
+    description: vmuh_wu (vmuh_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Muhu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmul_b:
+    description: vmul_b (vmul_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Mul
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmul_d:
+    description: vmul_d (vmul_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Mul
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmul_h:
+    description: vmul_h (vmul_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Mul
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vmul_w:
+    description: vmul_w (vmul_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Mul
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vnor_v:
+    description: vnor_v (vnor_v $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Nor
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vorn_v:
+    description: vorn_v (vorn_v $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Orn
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vor_v:
+    description: vor_v (vor_v $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vrotr_b:
+    description: vrotr_b (vrotr_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vrotr_d:
+    description: vrotr_d (vrotr_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vrotr_h:
+    description: vrotr_h (vrotr_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vrotr_w:
+    description: vrotr_w (vrotr_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_b:
+    description: vsadd_b (vsadd_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sadd
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_bu:
+    description: vsadd_bu (vsadd_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Saddu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_d:
+    description: vsadd_d (vsadd_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sadd
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_du:
+    description: vsadd_du (vsadd_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Saddu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_h:
+    description: vsadd_h (vsadd_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sadd
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_hu:
+    description: vsadd_hu (vsadd_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Saddu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_w:
+    description: vsadd_w (vsadd_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sadd
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsadd_wu:
+    description: vsadd_wu (vsadd_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Saddu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_b:
+    description: vsle_b (vsle_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_bu:
+    description: vsle_bu (vsle_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Leu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_d:
+    description: vsle_d (vsle_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_du:
+    description: vsle_du (vsle_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Leu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_h:
+    description: vsle_h (vsle_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_hu:
+    description: vsle_hu (vsle_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Leu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_w:
+    description: vsle_w (vsle_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsle_wu:
+    description: vsle_wu (vsle_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Leu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_b:
+    description: vslt_b (vslt_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_bu:
+    description: vslt_bu (vslt_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Ltu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_d:
+    description: vslt_d (vslt_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_du:
+    description: vslt_du (vslt_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Ltu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_h:
+    description: vslt_h (vslt_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_hu:
+    description: vslt_hu (vslt_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Ltu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_w:
+    description: vslt_w (vslt_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vslt_wu:
+    description: vslt_wu (vslt_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Ltu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_b:
+    description: vssub_b (vssub_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssub
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_bu:
+    description: vssub_bu (vssub_bu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssubu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_d:
+    description: vssub_d (vssub_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_du:
+    description: vssub_du (vssub_du $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssubu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_h:
+    description: vssub_h (vssub_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssub
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_hu:
+    description: vssub_hu (vssub_hu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssubu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_w:
+    description: vssub_w (vssub_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssub_wu:
+    description: vssub_wu (vssub_wu $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Ssubu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub_b:
+    description: vsub_b (vsub_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub_d:
+    description: vsub_d (vsub_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub_h:
+    description: vsub_h (vsub_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsub_w:
+    description: vsub_w (vsub_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vxor_v:
+    description: vxor_v (vxor_v $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Xor
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vldi:
+    description: vldi vd, imm (vector load immediate with broadcast)
+    operations:
+    - type: vector_load_imm
+      dest: "$v.d"
+      imm: "$imm:13:signed"
+  vldrepl_b:
+    description: vldrepl.b vd, rj, imm
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$imm:12:signed"
+    - type: load
+      dest: "$temp:1"
+      addr: "$temp:0"
+      size: 1
+      signed: false
+    - type: vector_broadcast
+      elem_width: B
+      dest: "$v.d"
+      src: "$temp:1"
+
+  vldrepl_h:
+    description: vldrepl.h vd, rj, imm
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$imm:11:signed"
+    - type: load
+      dest: "$temp:1"
+      addr: "$temp:0"
+      size: 2
+      signed: false
+    - type: vector_broadcast
+      elem_width: H
+      dest: "$v.d"
+      src: "$temp:1"
+
+  vldrepl_w:
+    description: vldrepl.w vd, rj, imm
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$imm:10:signed"
+    - type: load
+      dest: "$temp:1"
+      addr: "$temp:0"
+      size: 4
+      signed: false
+    - type: vector_broadcast
+      elem_width: W
+      dest: "$v.d"
+      src: "$temp:1"
+
+  vldrepl_d:
+    description: vldrepl.d vd, rj, imm
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$imm:9:signed"
+    - type: load
+      dest: "$temp:1"
+      addr: "$temp:0"
+      size: 8
+      signed: false
+    - type: vector_broadcast
+      elem_width: D
+      dest: "$v.d"
+      src: "$temp:1"
+      imm: "$imm:13:signed"
+
+  vaddi_bu:
+    description: vaddi.bu vd, vj, imm (vector add immediate unsigned byte)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+
+  vaddi_hu:
+    description: vaddi.hu vd, vj, imm (vector add immediate unsigned halfword)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+
+  vaddi_wu:
+    description: vaddi.wu vd, vj, imm (vector add immediate unsigned word)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+
+  vaddi_du:
+    description: vaddi.du vd, vj, imm (vector add immediate unsigned doubleword)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vseq_b:
+    description: vseq_b (vseq_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vseq_h:
+    description: vseq_h (vseq_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vseq_w:
+    description: vseq_w (vseq_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vseq_d:
+    description: vseq_d (vseq_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vneg_b:
+    description: vneg_b (vneg_b $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+  vneg_h:
+    description: vneg_h (vneg_h $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+  vneg_w:
+    description: vneg_w (vneg_w $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vneg_d:
+    description: vneg_d (vneg_d $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: Neg
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vmax_b:
+    description: vmax_b (vmax_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vmax_h:
+    description: vmax_h (vmax_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vmax_w:
+    description: vmax_w (vmax_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vmax_d:
+    description: vmax_d (vmax_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Max
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vmin_b:
+    description: vmin_b (vmin_b $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vmin_h:
+    description: vmin_h (vmin_h $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vmin_w:
+    description: vmin_w (vmin_w $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vmin_d:
+    description: vmin_d (vmin_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: Min
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfsqrt_d:
+    description: vfsqrt_d (vfsqrt_d $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: FSqrt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfsqrt_s:
+    description: vfsqrt_s (vfsqrt_s $v.d, $v.j)
+    operations:
+    - type: vector_alu
+      op: FSqrt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfadd_d:
+    description: vfadd_d (vfadd_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FAdd
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfadd_s:
+    description: vfadd_s (vfadd_s $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FAdd
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfdiv_d:
+    description: vfdiv_d (vfdiv_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FDiv
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfdiv_s:
+    description: vfdiv_s (vfdiv_s $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FDiv
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmax_d:
+    description: vfmax_d (vfmax_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FMax
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmax_s:
+    description: vfmax_s (vfmax_s $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FMax
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmin_d:
+    description: vfmin_d (vfmin_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FMin
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmin_s:
+    description: vfmin_s (vfmin_s $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FMin
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmul_d:
+    description: vfmul_d (vfmul_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FMul
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmul_s:
+    description: vfmul_s (vfmul_s $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FMul
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfsub_d:
+    description: vfsub_d (vfsub_d $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FSub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfsub_s:
+    description: vfsub_s (vfsub_s $v.d, $v.j, $v.k)
+    operations:
+    - type: vector_alu
+      op: FSub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vseqi_b:
+    description: vseqi_b (vseqi_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vseqi_d:
+    description: vseqi_d (vseqi_d $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vseqi_h:
+    description: vseqi_h (vseqi_h $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vseqi_w:
+    description: vseqi_w (vseqi_w $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslei_b:
+    description: vslei_b (vslei_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslei_d:
+    description: vslei_d (vslei_d $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslei_h:
+    description: vslei_h (vslei_h $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslei_w:
+    description: vslei_w (vslei_w $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslti_b:
+    description: vslti_b (vslti_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslti_d:
+    description: vslti_d (vslti_d $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslti_h:
+    description: vslti_h (vslti_h $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vslti_w:
+    description: vslti_w (vslti_w $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:signed"
+  vrotri_b:
+    description: vrotri_b (vrotri_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+  vslli_b:
+    description: vslli_b (vslli_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+  vsrai_b:
+    description: vsrai_b (vsrai_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+  vsrli_b:
+    description: vsrli_b (vsrli_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+  vrotri_h:
+    description: vrotri_h (vrotri_h $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+  vslli_h:
+    description: vslli_h (vslli_h $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+  vsrai_h:
+    description: vsrai_h (vsrai_h $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+  vsrli_h:
+    description: vsrli_h (vsrli_h $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+  vrotri_w:
+    description: vrotri_w (vrotri_w $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslei_bu:
+    description: vslei_bu (vslei_bu $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslei_du:
+    description: vslei_du (vslei_du $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslei_hu:
+    description: vslei_hu (vslei_hu $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslei_wu:
+    description: vslei_wu (vslei_wu $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslli_w:
+    description: vslli_w (vslli_w $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslti_bu:
+    description: vslti_bu (vslti_bu $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslti_du:
+    description: vslti_du (vslti_du $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslti_hu:
+    description: vslti_hu (vslti_hu $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vslti_wu:
+    description: vslti_wu (vslti_wu $v.d, $v.j, imm)
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vsrai_w:
+    description: vsrai_w (vsrai_w $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vsrli_w:
+    description: vsrli_w (vsrli_w $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vrotri_d:
+    description: vrotri_d (vrotri_d $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Ror
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+  vslli_d:
+    description: vslli_d (vslli_d $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+  vsrai_d:
+    description: vsrai_d (vsrai_d $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+  vsrli_d:
+    description: vsrli_d (vsrli_d $v.d, $v.j, imm)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+  vandi_b:
+    description: vandi_b (vandi_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_alu
+      op: And
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:8:unsigned"
+  vnori_b:
+    description: vnori_b (vnori_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_alu
+      op: Nor
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:8:unsigned"
+  vori_b:
+    description: vori_b (vori_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_alu
+      op: Or
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:8:unsigned"
+  vxori_b:
+    description: vxori_b (vxori_b $v.d, $v.j, imm)
+    operations:
+    - type: vector_alu
+      op: Xor
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:8:unsigned"
+
+  vbitclr_b:
+    description: vbitclr.b vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitclr_h:
+    description: vbitclr.h vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitclr_w:
+    description: vbitclr.w vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitclr_d:
+    description: vbitclr.d vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitclri_b:
+    description: vbitclri.b vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+
+  vbitclri_h:
+    description: vbitclri.h vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+
+  vbitclri_w:
+    description: vbitclri.w vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+
+  vbitclri_d:
+    description: vbitclri.d vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bclr
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+
+  vbitset_b:
+    description: vbitset.b vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitset_h:
+    description: vbitset.h vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitset_w:
+    description: vbitset.w vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitset_d:
+    description: vbitset.d vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitseti_b:
+    description: vbitseti.b vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+
+  vbitseti_h:
+    description: vbitseti.h vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+
+  vbitseti_w:
+    description: vbitseti.w vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+
+  vbitseti_d:
+    description: vbitseti.d vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Bset
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+
+  vbitrev_b:
+    description: vbitrev.b vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitrev_h:
+    description: vbitrev.h vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitrev_w:
+    description: vbitrev.w vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitrev_d:
+    description: vbitrev.d vd, vj, vk
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vbitrevi_b:
+    description: vbitrevi.b vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+
+  vbitrevi_h:
+    description: vbitrevi.h vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+
+  vbitrevi_w:
+    description: vbitrevi.w vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+
+  vbitrevi_d:
+    description: vbitrevi.d vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: Brev
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+
+
+  vbitsel_v:
+    description: vbitsel.v vd, vj, vk, va
+    operations:
+    - type: vector_alu
+      op: BitSelMask
+      elem_width: Dynamic
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+
+  vbitseli_b:
+    description: vbitseli.b vd, vj, imm
+    operations:
+    - type: vector_alu
+      op: BitSelSrc
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.d"
+      src2: "$v.j"
+      src3: "$imm:8:unsigned"
+
+  vilvl_b:
+    description: vilvl.b vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: false
+
+  vilvl_h:
+    description: vilvl.h vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: false
+
+  vilvl_w:
+    description: vilvl.w vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: false
+
+  vilvl_d:
+    description: vilvl.d vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: false
+
+  vilvh_b:
+    description: vilvh.b vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: true
+
+  vilvh_h:
+    description: vilvh.h vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: true
+
+  vilvh_w:
+    description: vilvh.w vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: true
+
+  vilvh_d:
+    description: vilvh.d vd, vj, vk
+    operations:
+    - type: vector_interleave
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      high: true
+
+  vpickev_b:
+    description: vpickev.b vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+
+  vpickev_h:
+    description: vpickev.h vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+
+  vpickev_w:
+    description: vpickev.w vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+
+  vpickev_d:
+    description: vpickev.d vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+
+  vpickod_b:
+    description: vpickod.b vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+
+  vpickod_h:
+    description: vpickod.h vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+
+  vpickod_w:
+    description: vpickod.w vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+
+  vpickod_d:
+    description: vpickod.d vd, vj, vk
+    operations:
+    - type: vector_pick
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+
+  vshuf4i_b:
+    description: vshuf4i.b vd, vj, imm
+    operations:
+    - type: vector_shuffle_imm
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+
+  vshuf4i_h:
+    description: vshuf4i.h vd, vj, imm
+    operations:
+    - type: vector_shuffle_imm
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+
+  vshuf4i_w:
+    description: vshuf4i.w vd, vj, imm
+    operations:
+    - type: vector_shuffle_imm
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+
+  vshuf4i_d:
+    description: vshuf4i.d vd, vj, imm
+    operations:
+    - type: vector_shuffle_imm
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+
+  vsetanyeqz_b:
+    description: vsetanyeqz.b cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AnyEqz
+      elem_width: B
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetanyeqz_h:
+    description: vsetanyeqz.h cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AnyEqz
+      elem_width: H
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetanyeqz_w:
+    description: vsetanyeqz.w cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AnyEqz
+      elem_width: W
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetanyeqz_d:
+    description: vsetanyeqz.d cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AnyEqz
+      elem_width: D
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetallnez_b:
+    description: vsetallnez.b cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AllNez
+      elem_width: B
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetallnez_h:
+    description: vsetallnez.h cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AllNez
+      elem_width: H
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetallnez_w:
+    description: vsetallnez.w cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AllNez
+      elem_width: W
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetallnez_d:
+    description: vsetallnez.d cd, vj
+    operations:
+    - type: vector_cond_set
+      op: AllNez
+      elem_width: D
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vseteqz_v:
+    description: vseteqz.v cd, vj
+    operations:
+    - type: vector_cond_set
+      op: Eqz
+      elem_width: B
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vsetnez_v:
+    description: vsetnez.v cd, vj
+    operations:
+    - type: vector_cond_set
+      op: Nez
+      elem_width: B
+      dest: "$fcc.d"
+      src: "$v.j"
+
+  vexth_h_b:
+    description: vexth.h.b vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      signed: true
+
+  vexth_hu_bu:
+    description: vexth.hu.bu vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      signed: false
+
+  vexth_w_h:
+    description: vexth.w.h vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      signed: true
+
+  vexth_wu_hu:
+    description: vexth.wu.hu vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      signed: false
+
+  vexth_d_w:
+    description: vexth.d.w vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      signed: true
+
+  vexth_du_wu:
+    description: vexth.du.wu vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      signed: false
+
+  vaddwev_w_h:
+    description: vaddwev.w.h vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+
+  vaddwev_d_w:
+    description: vaddwev.d.w vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+
+  vaddwod_w_h:
+    description: vaddwod.w.h vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+
+  vaddwod_d_w:
+    description: vaddwod.d.w vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+
+  vbsrl_v:
+    description: vbsrl.v vd, vj, imm
+    operations:
+    - type: vector_byte_shift
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:5:unsigned"
+      left: false
+
+  vbsll_v:
+    description: vbsll.v vd, vj, imm
+    operations:
+    - type: vector_byte_shift
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:5:unsigned"
+      left: true
+
+  vpickve2gr_w:
+    description: vpickve2gr.w rd, vj, imm
+    operations:
+    - type: vector_extract
+      elem_width: W
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:2:unsigned"
+
+  vpickve2gr_wu:
+    description: vpickve2gr.wu rd, vj, imm
+    operations:
+    - type: vector_extract
+      elem_width: W
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:2:unsigned"
+
+  vpickve2gr_d:
+    description: vpickve2gr.d rd, vj, imm
+    operations:
+    - type: vector_extract
+      elem_width: D
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:1:unsigned"
+
+  vpickve2gr_du:
+    description: vpickve2gr.du rd, vj, imm
+    operations:
+    - type: vector_extract
+      elem_width: D
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:1:unsigned"
+
+  vldx:
+    description: vldx vd, rj, rk
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$r.k"
+    - type: vector_load
+      elem_width: B
+      dest: "$v.d"
+      addr: "$temp:0"
+
+  vstx:
+    description: vstx vd, rj, rk
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$r.k"
+    - type: vector_store
+      elem_width: B
+      src: "$v.d"
+      addr: "$temp:0"
+  vfcmp_caf_s:
+    description: "vfcmp.caf.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: 'False'
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_caf_d:
+    description: "vfcmp.caf.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: 'False'
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_saf_s:
+    description: "vfcmp.saf.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: 'False'
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_saf_d:
+    description: "vfcmp.saf.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: 'False'
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_clt_s:
+    description: "vfcmp.clt.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_clt_d:
+    description: "vfcmp.clt.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_slt_s:
+    description: "vfcmp.slt.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_slt_d:
+    description: "vfcmp.slt.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Lt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_ceq_s:
+    description: "vfcmp.ceq.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_ceq_d:
+    description: "vfcmp.ceq.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_seq_s:
+    description: "vfcmp.seq.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_seq_d:
+    description: "vfcmp.seq.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Eq
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cle_s:
+    description: "vfcmp.cle.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cle_d:
+    description: "vfcmp.cle.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sle_s:
+    description: "vfcmp.sle.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sle_d:
+    description: "vfcmp.sle.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Le
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cun_s:
+    description: "vfcmp.cun.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Un
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cun_d:
+    description: "vfcmp.cun.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Un
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sun_s:
+    description: "vfcmp.sun.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Un
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sun_d:
+    description: "vfcmp.sun.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Un
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cult_s:
+    description: "vfcmp.cult.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ult
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cult_d:
+    description: "vfcmp.cult.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ult
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sult_s:
+    description: "vfcmp.sult.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ult
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sult_d:
+    description: "vfcmp.sult.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ult
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cueq_s:
+    description: "vfcmp.cueq.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ueq
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cueq_d:
+    description: "vfcmp.cueq.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ueq
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sueq_s:
+    description: "vfcmp.sueq.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ueq
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sueq_d:
+    description: "vfcmp.sueq.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ueq
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cule_s:
+    description: "vfcmp.cule.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ule
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cule_d:
+    description: "vfcmp.cule.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ule
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sule_s:
+    description: "vfcmp.sule.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ule
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sule_d:
+    description: "vfcmp.sule.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ule
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cne_s:
+    description: "vfcmp.cne.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cne_d:
+    description: "vfcmp.cne.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sne_s:
+    description: "vfcmp.sne.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sne_d:
+    description: "vfcmp.sne.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Ne
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cor_s:
+    description: "vfcmp.cor.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Or
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cor_d:
+    description: "vfcmp.cor.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Or
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sor_s:
+    description: "vfcmp.sor.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Or
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sor_d:
+    description: "vfcmp.sor.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Or
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+  vfcmp_cune_s:
+    description: "vfcmp.cune.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Une
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: false
+
+  vfcmp_cune_d:
+    description: "vfcmp.cune.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Une
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: false
+
+  vfcmp_sune_s:
+    description: "vfcmp.sune.s vd, vj, vk (32-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Une
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Single
+      signaling: true
+
+  vfcmp_sune_d:
+    description: "vfcmp.sune.d vd, vj, vk (64-bit floating point compare)"
+    operations:
+    - type: vector_compare
+      op: Une
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      precision: Double
+      signaling: true
+
+
+  vsll_b:
+    description: vsll_b vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsll_d:
+    description: vsll_d vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsll_h:
+    description: vsll_h vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsll_w:
+    description: vsll_w vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shl
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsra_b:
+    description: vsra_b vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsra_d:
+    description: vsra_d vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsra_h:
+    description: vsra_h vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsra_w:
+    description: vsra_w vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Sar
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrl_b:
+    description: vsrl_b vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrl_d:
+    description: vsrl_d vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrl_h:
+    description: vsrl_h vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrl_w:
+    description: vsrl_w vd, vj, vk (vector variable shift)
+    operations:
+    - type: vector_shift
+      op: Shr
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vaddwev_d_wu:
+    description: vaddwev_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Add
+  vaddwev_h_b:
+    description: vaddwev_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      op: Add
+  vaddwev_h_bu:
+    description: vaddwev_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Add
+  vaddwev_w_hu:
+    description: vaddwev_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Add
+  vaddwod_d_wu:
+    description: vaddwod_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Add
+  vaddwod_h_b:
+    description: vaddwod_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      op: Add
+  vaddwod_h_bu:
+    description: vaddwod_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Add
+  vaddwod_w_hu:
+    description: vaddwod_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Add
+  vsubwev_d_w:
+    description: vsubwev_d_w vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      op: Sub
+  vsubwev_d_wu:
+    description: vsubwev_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Sub
+  vsubwev_h_b:
+    description: vsubwev_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      op: Sub
+  vsubwev_h_bu:
+    description: vsubwev_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Sub
+  vsubwev_w_h:
+    description: vsubwev_w_h vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      op: Sub
+  vsubwev_w_hu:
+    description: vsubwev_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Sub
+  vsubwod_d_w:
+    description: vsubwod_d_w vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      op: Sub
+  vsubwod_d_wu:
+    description: vsubwod_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Sub
+  vsubwod_h_b:
+    description: vsubwod_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      op: Sub
+  vsubwod_h_bu:
+    description: vsubwod_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Sub
+  vsubwod_w_h:
+    description: vsubwod_w_h vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      op: Sub
+  vsubwod_w_hu:
+    description: vsubwod_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Sub
+  vmulwev_d_w:
+    description: vmulwev_d_w vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      op: Mul
+  vmulwev_d_wu:
+    description: vmulwev_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Mul
+  vmulwev_h_b:
+    description: vmulwev_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      op: Mul
+  vmulwev_h_bu:
+    description: vmulwev_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Mul
+  vmulwev_w_h:
+    description: vmulwev_w_h vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      op: Mul
+  vmulwev_w_hu:
+    description: vmulwev_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: true
+      op: Mul
+  vmulwod_d_w:
+    description: vmulwod_d_w vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      op: Mul
+  vmulwod_d_wu:
+    description: vmulwod_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Mul
+  vmulwod_h_b:
+    description: vmulwod_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      op: Mul
+  vmulwod_h_bu:
+    description: vmulwod_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Mul
+  vmulwod_w_h:
+    description: vmulwod_w_h vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      op: Mul
+  vmulwod_w_hu:
+    description: vmulwod_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: true
+      op: Mul
+  vmaddwev_d_w:
+    description: vmaddwev_d_w vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: false
+      op: Madd
+  vmaddwev_d_wu:
+    description: vmaddwev_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: true
+      op: Madd
+  vmaddwev_h_b:
+    description: vmaddwev_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: false
+      op: Madd
+  vmaddwev_h_bu:
+    description: vmaddwev_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: true
+      op: Madd
+  vmaddwev_w_h:
+    description: vmaddwev_w_h vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: false
+      op: Madd
+  vmaddwev_w_hu:
+    description: vmaddwev_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: true
+      op: Madd
+  vmaddwod_d_w:
+    description: vmaddwod_d_w vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: false
+      op: Madd
+  vmaddwod_d_wu:
+    description: vmaddwod_d_wu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: true
+      op: Madd
+  vmaddwod_h_b:
+    description: vmaddwod_h_b vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: false
+      op: Madd
+  vmaddwod_h_bu:
+    description: vmaddwod_h_bu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: true
+      op: Madd
+  vmaddwod_w_h:
+    description: vmaddwod_w_h vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: false
+      op: Madd
+  vmaddwod_w_hu:
+    description: vmaddwod_w_hu vd, vj, vk (vector widen operation)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: true
+      op: Madd
+  vmaxi_b:
+    description: vmaxi_b vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Max
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmaxi_bu:
+    description: vmaxi_bu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Maxu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vmaxi_d:
+    description: vmaxi_d vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Max
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmaxi_du:
+    description: vmaxi_du vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Maxu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vmaxi_h:
+    description: vmaxi_h vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Max
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmaxi_hu:
+    description: vmaxi_hu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Maxu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vmaxi_w:
+    description: vmaxi_w vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Max
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmaxi_wu:
+    description: vmaxi_wu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Maxu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vmini_b:
+    description: vmini_b vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Min
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmini_bu:
+    description: vmini_bu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Minu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vmini_d:
+    description: vmini_d vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Min
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmini_du:
+    description: vmini_du vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Minu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vmini_h:
+    description: vmini_h vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Min
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmini_hu:
+    description: vmini_hu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Minu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vmini_w:
+    description: vmini_w vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Min
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:signed"
+  vmini_wu:
+    description: vmini_wu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Minu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vsubi_bu:
+    description: vsubi_bu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sub
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vsubi_du:
+    description: vsubi_du vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vsubi_hu:
+    description: vsubi_hu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sub
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vsubi_wu:
+    description: vsubi_wu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vsat_b:
+    description: vsat_b vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sat
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:3:unsigned"
+  vsat_bu:
+    description: vsat_bu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Satu
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:3:unsigned"
+  vsat_d:
+    description: vsat_d vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sat
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:6:unsigned"
+  vsat_du:
+    description: vsat_du vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Satu
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:6:unsigned"
+  vsat_h:
+    description: vsat_h vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sat
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:4:unsigned"
+  vsat_hu:
+    description: vsat_hu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Satu
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:4:unsigned"
+  vsat_w:
+    description: vsat_w vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Sat
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vsat_wu:
+    description: vsat_wu vd, vj, imm (vector immediate ALU)
+    operations:
+    - type: vector_alu_imm
+      op: Satu
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      imm: "$imm:5:unsigned"
+  vreplve_b:
+    description: vreplve_b vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$r.k"
+  vreplve_d:
+    description: vreplve_d vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$r.k"
+  vreplve_h:
+    description: vreplve_h vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$r.k"
+  vreplve_w:
+    description: vreplve_w vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$r.k"
+  vreplvei_b:
+    description: vreplvei_b vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$imm:4:unsigned"
+  vreplvei_d:
+    description: vreplvei_d vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$imm:1:unsigned"
+  vreplvei_h:
+    description: vreplvei_h vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$imm:3:unsigned"
+  vreplvei_w:
+    description: vreplvei_w vd, vj, idx (vector replicate element)
+    operations:
+    - type: vector_replve
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      index: "$imm:2:unsigned"
+  vmadd_b:
+    description: vmadd_b vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vmadd_d:
+    description: vmadd_d vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vmadd_h:
+    description: vmadd_h vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vmadd_w:
+    description: vmadd_w vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Madd
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vmsub_b:
+    description: vmsub_b vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Msub
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vmsub_d:
+    description: vmsub_d vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Msub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vmsub_h:
+    description: vmsub_h vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Msub
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vmsub_w:
+    description: vmsub_w vd, vj, vk (vector ALU)
+    operations:
+    - type: vector_alu
+      op: Msub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vsrar_b:
+    description: vsrar_b vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrar_d:
+    description: vsrar_d vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrar_h:
+    description: vsrar_h vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrar_w:
+    description: vsrar_w vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrlr_b:
+    description: vsrlr_b vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrlr_d:
+    description: vsrlr_d vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrlr_h:
+    description: vsrlr_h vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrlr_w:
+    description: vsrlr_w vd, vj, $v.k (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsrari_b:
+    description: vsrari_b vd, vj, $imm:3:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+  vsrari_d:
+    description: vsrari_d vd, vj, $imm:6:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+  vsrari_h:
+    description: vsrari_h vd, vj, $imm:4:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+  vsrari_w:
+    description: vsrari_w vd, vj, $imm:5:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: SarR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vsrlri_b:
+    description: vsrlri_b vd, vj, $imm:3:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:3:unsigned"
+  vsrlri_d:
+    description: vsrlri_d vd, vj, $imm:6:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:6:unsigned"
+  vsrlri_h:
+    description: vsrlri_h vd, vj, $imm:4:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:4:unsigned"
+  vsrlri_w:
+    description: vsrlri_w vd, vj, $imm:5:unsigned (vector shift rounding)
+    operations:
+    - type: vector_shift
+      op: ShrR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$imm:5:unsigned"
+  vinsgr2vr_b:
+    description: vinsgr2vr_b vd, rj, idx (vector insert from gpr)
+    operations:
+    - type: vector_insert
+      elem_width: B
+      dest: "$v.d"
+      src: "$r.j"
+      index: "$imm:4:unsigned"
+  vinsgr2vr_d:
+    description: vinsgr2vr_d vd, rj, idx (vector insert from gpr)
+    operations:
+    - type: vector_insert
+      elem_width: D
+      dest: "$v.d"
+      src: "$r.j"
+      index: "$imm:1:unsigned"
+  vinsgr2vr_h:
+    description: vinsgr2vr_h vd, rj, idx (vector insert from gpr)
+    operations:
+    - type: vector_insert
+      elem_width: H
+      dest: "$v.d"
+      src: "$r.j"
+      index: "$imm:3:unsigned"
+  vinsgr2vr_w:
+    description: vinsgr2vr_w vd, rj, idx (vector insert from gpr)
+    operations:
+    - type: vector_insert
+      elem_width: W
+      dest: "$v.d"
+      src: "$r.j"
+      index: "$imm:2:unsigned"
+  vpickve2gr_b:
+    description: vpickve2gr_b rd, vj, idx (vector extract to gpr)
+    operations:
+    - type: vector_extract
+      elem_width: B
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:4:unsigned"
+      signed: true
+  vpickve2gr_bu:
+    description: vpickve2gr_bu rd, vj, idx (vector extract to gpr)
+    operations:
+    - type: vector_extract
+      elem_width: B
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:4:unsigned"
+      signed: false
+  vpickve2gr_h:
+    description: vpickve2gr_h rd, vj, idx (vector extract to gpr)
+    operations:
+    - type: vector_extract
+      elem_width: H
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:3:unsigned"
+      signed: true
+  vpickve2gr_hu:
+    description: vpickve2gr_hu rd, vj, idx (vector extract to gpr)
+    operations:
+    - type: vector_extract
+      elem_width: H
+      dest: "$r.d"
+      src: "$v.j"
+      index: "$imm:3:unsigned"
+      signed: false
+  vreplgr2vr_b:
+    description: vreplgr2vr.b vd, rj (replicate gpr to vector byte)
+    operations:
+    - type: vector_broadcast
+      elem_width: B
+      dest: "$v.d"
+      src: "$r.j"
+
+  vreplgr2vr_d:
+    description: vreplgr2vr.d vd, rj (replicate gpr to vector doubleword)
+    operations:
+    - type: vector_broadcast
+      elem_width: D
+      dest: "$v.d"
+      src: "$r.j"
+
+  vreplgr2vr_h:
+    description: vreplgr2vr.h vd, rj (replicate gpr to vector halfword)
+    operations:
+    - type: vector_broadcast
+      elem_width: H
+      dest: "$v.d"
+      src: "$r.j"
+
+  vreplgr2vr_w:
+    description: vreplgr2vr.w vd, rj (replicate gpr to vector word)
+    operations:
+    - type: vector_broadcast
+      elem_width: W
+      dest: "$v.d"
+      src: "$r.j"
+
+  vmskgez_b:
+    description: vmskgez.b vd, vj (vector mask greater equal zero)
+    operations:
+    - type: vector_mask
+      op: Mskgez
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+  vmskltz_b:
+    description: vmskltz.b vd, vj (vector mask less than zero)
+    operations:
+    - type: vector_mask
+      op: Mskltz
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+  vmsknz_b:
+    description: vmsknz.b vd, vj (vector mask non-zero)
+    operations:
+    - type: vector_mask
+      op: Msknz
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+  vsigncov_b:
+    description: vsigncov_b vd, vj, vk (vector sign cover)
+    operations:
+    - type: vector_alu
+      op: Signcov
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsigncov_d:
+    description: vsigncov_d vd, vj, vk (vector sign cover)
+    operations:
+    - type: vector_alu
+      op: Signcov
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsigncov_h:
+    description: vsigncov_h vd, vj, vk (vector sign cover)
+    operations:
+    - type: vector_alu
+      op: Signcov
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsigncov_w:
+    description: vsigncov_w vd, vj, vk (vector sign cover)
+    operations:
+    - type: vector_alu
+      op: Signcov
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vext2xv_d_b:
+    description: vext2xv_d_b vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: false
+  vext2xv_d_h:
+    description: vext2xv_d_h vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: false
+  vext2xv_d_w:
+    description: vext2xv_d_w vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: false
+  vext2xv_h_b:
+    description: vext2xv_h_b vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: false
+  vext2xv_w_b:
+    description: vext2xv_w_b vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: false
+  vext2xv_w_h:
+    description: vext2xv_w_h vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: false
+  vsllwil_d_w:
+    description: vsllwil_d_w vd, vj, imm (vector shift left logical and widen)
+    operations:
+    - type: vector_shift_widen
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:5:unsigned"
+      unsigned: false
+  vsllwil_h_b:
+    description: vsllwil_h_b vd, vj, imm (vector shift left logical and widen)
+    operations:
+    - type: vector_shift_widen
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:3:unsigned"
+      unsigned: false
+  vsllwil_w_h:
+    description: vsllwil_w_h vd, vj, imm (vector shift left logical and widen)
+    operations:
+    - type: vector_shift_widen
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:4:unsigned"
+      unsigned: false
+  vsllwil_du_wu:
+    description: vsllwil_du_wu vd, vj, imm (vector shift left logical and widen)
+    operations:
+    - type: vector_shift_widen
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:5:unsigned"
+      unsigned: true
+  vsllwil_hu_bu:
+    description: vsllwil_hu_bu vd, vj, imm (vector shift left logical and widen)
+    operations:
+    - type: vector_shift_widen
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:3:unsigned"
+      unsigned: true
+  vsllwil_wu_hu:
+    description: vsllwil_wu_hu vd, vj, imm (vector shift left logical and widen)
+    operations:
+    - type: vector_shift_widen
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:4:unsigned"
+      unsigned: true
+  vext2xv_du_bu:
+    description: vext2xv_du_bu vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: true
+      src_elem_width: B
+  vext2xv_du_hu:
+    description: vext2xv_du_hu vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: true
+      src_elem_width: H
+  vext2xv_du_wu:
+    description: vext2xv_du_wu vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: true
+      src_elem_width: W
+  vext2xv_hu_bu:
+    description: vext2xv_hu_bu vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: true
+      src_elem_width: B
+  vext2xv_wu_bu:
+    description: vext2xv_wu_bu vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: true
+      src_elem_width: B
+  vext2xv_wu_hu:
+    description: vext2xv_wu_hu vd, vj (vector sign/zero extend)
+    operations:
+    - type: vector_sign_extend
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      unsigned: true
+      src_elem_width: H
+  vpackev_b:
+    description: vpackev_b vd, vj, vk (vector pack even)
+    operations:
+    - type: vector_pack
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+  vpackev_d:
+    description: vpackev_d vd, vj, vk (vector pack even)
+    operations:
+    - type: vector_pack
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+  vpackev_h:
+    description: vpackev_h vd, vj, vk (vector pack even)
+    operations:
+    - type: vector_pack
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+  vpackev_w:
+    description: vpackev_w vd, vj, vk (vector pack even)
+    operations:
+    - type: vector_pack
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+  vpackod_b:
+    description: vpackod_b vd, vj, vk (vector pack odd)
+    operations:
+    - type: vector_pack
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+  vpackod_d:
+    description: vpackod_d vd, vj, vk (vector pack odd)
+    operations:
+    - type: vector_pack
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+  vpackod_h:
+    description: vpackod_h vd, vj, vk (vector pack odd)
+    operations:
+    - type: vector_pack
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+  vpackod_w:
+    description: vpackod_w vd, vj, vk (vector pack odd)
+    operations:
+    - type: vector_pack
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+  vshuf_b:
+    description: vshuf_b vd, vj, vk (vector shuffle)
+    operations:
+    - type: vector_shuffle
+      elem_width: B
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      mask: "$v.a"
+  vshuf_d:
+    description: vshuf_d vd, vj, vk (vector shuffle)
+    operations:
+    - type: vector_shuffle
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      mask: "$v.d"
+  vshuf_h:
+    description: vshuf_h vd, vj, vk (vector shuffle)
+    operations:
+    - type: vector_shuffle
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      mask: "$v.d"
+  vshuf_w:
+    description: vshuf_w vd, vj, vk (vector shuffle)
+    operations:
+    - type: vector_shuffle
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      mask: "$v.d"
+  vextrins_b:
+    description: vextrins_b vd, vj, imm (vector extract insert)
+    operations:
+    - type: vector_extrins
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+  vextrins_d:
+    description: vextrins_d vd, vj, imm (vector extract insert)
+    operations:
+    - type: vector_extrins
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+  vextrins_h:
+    description: vextrins_h vd, vj, imm (vector extract insert)
+    operations:
+    - type: vector_extrins
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+  vextrins_w:
+    description: vextrins_w vd, vj, imm (vector extract insert)
+    operations:
+    - type: vector_extrins
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:8:unsigned"
+  vpermi_w:
+    description: vpermi.w vd, vj, {imm} (vector permute word with immediate)
+    operations:
+    - type: vector_shuffle_imm
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:8:unsigned"
+  vmskltz_d:
+    description: vmskltz_d vd, vj (vector mask less than zero)
+    operations:
+    - type: vector_mask
+      op: Mskltz
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+  vmskltz_h:
+    description: vmskltz_h vd, vj (vector mask less than zero)
+    operations:
+    - type: vector_mask
+      op: Mskltz
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+  vmskltz_w:
+    description: vmskltz_w vd, vj (vector mask less than zero)
+    operations:
+    - type: vector_mask
+      op: Mskltz
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+  vfmaxa_d:
+    description: vfmaxa_d vd, vj, vk (vector float max/min abs)
+    operations:
+    - type: vector_alu
+      op: FMaxa
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmaxa_s:
+    description: vfmaxa_s vd, vj, vk (vector float max/min abs)
+    operations:
+    - type: vector_alu
+      op: FMaxa
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmina_d:
+    description: vfmina_d vd, vj, vk (vector float max/min abs)
+    operations:
+    - type: vector_alu
+      op: FMina
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfmina_s:
+    description: vfmina_s vd, vj, vk (vector float max/min abs)
+    operations:
+    - type: vector_alu
+      op: FMina
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vfrecip_d:
+    description: vfrecip_d vd, vj (vector float reciprocal/sqrt)
+    operations:
+    - type: vector_alu
+      op: FRecip
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrecip_s:
+    description: vfrecip_s vd, vj (vector float reciprocal/sqrt)
+    operations:
+    - type: vector_alu
+      op: FRecip
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrsqrt_d:
+    description: vfrsqrt_d vd, vj (vector float reciprocal/sqrt)
+    operations:
+    - type: vector_alu
+      op: FRSqrt
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrsqrt_s:
+    description: vfrsqrt_s vd, vj (vector float reciprocal/sqrt)
+    operations:
+    - type: vector_alu
+      op: FRSqrt
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrint_d:
+    description: vfrint_d vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRint
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrint_s:
+    description: vfrint_s vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRint
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrm_d:
+    description: vfrintrm_d vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrm
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrm_s:
+    description: vfrintrm_s vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrm
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrne_d:
+    description: vfrintrne_d vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrne
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrne_s:
+    description: vfrintrne_s vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrne
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrp_d:
+    description: vfrintrp_d vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrp
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrp_s:
+    description: vfrintrp_s vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrp
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrz_d:
+    description: vfrintrz_d vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrz
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrintrz_s:
+    description: vfrintrz_s vd, vj (vector float round)
+    operations:
+    - type: vector_alu
+      op: FRintrz
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrecipe_d:
+    description: vfrecipe_d vd, vj (vector float reciprocal/sqrt estimate)
+    operations:
+    - type: vector_alu
+      op: FRecipE
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrecipe_s:
+    description: vfrecipe_s vd, vj (vector float reciprocal/sqrt estimate)
+    operations:
+    - type: vector_alu
+      op: FRecipE
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrsqrte_d:
+    description: vfrsqrte_d vd, vj (vector float reciprocal/sqrt estimate)
+    operations:
+    - type: vector_alu
+      op: FRSqrtE
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfrsqrte_s:
+    description: vfrsqrte_s vd, vj (vector float reciprocal/sqrt estimate)
+    operations:
+    - type: vector_alu
+      op: FRSqrtE
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vfmadd_d:
+    description: vfmadd_d vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FMadd
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+  vfmadd_s:
+    description: vfmadd_s vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FMadd
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+  vfmsub_d:
+    description: vfmsub_d vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FMsub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+  vfmsub_s:
+    description: vfmsub_s vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FMsub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+  vfnmadd_d:
+    description: vfnmadd_d vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FNmadd
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+  vfnmadd_s:
+    description: vfnmadd_s vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FNmadd
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+  vfnmsub_d:
+    description: vfnmsub_d vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FNmsub
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.a"
+  vfnmsub_s:
+    description: vfnmsub_s vd, vj, vk (vector float multiply-add)
+    operations:
+    - type: vector_alu
+      op: FNmsub
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+  vfclass_d:
+    description: vfclass_d vd, vj (vector float class)
+    operations:
+    - type: vector_alu
+      op: FClass
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vfclass_s:
+    description: vfclass_s vd, vj (vector float class)
+    operations:
+    - type: vector_alu
+      op: FClass
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vflogb_d:
+    description: vflogb_d vd, vj (vector float logb)
+    operations:
+    - type: vector_alu
+      op: FLogb
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+  vflogb_s:
+    description: vflogb_s vd, vj (vector float logb)
+    operations:
+    - type: vector_alu
+      op: FLogb
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+  vaddwev_d_wu_w:
+    description: vaddwev_d_wu_w vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vaddwev_h_bu_b:
+    description: vaddwev_h_bu_b vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vaddwev_w_hu_h:
+    description: vaddwev_w_hu_h vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vaddwod_d_wu_w:
+    description: vaddwod_d_wu_w vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vaddwod_h_bu_b:
+    description: vaddwod_h_bu_b vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vaddwod_w_hu_h:
+    description: vaddwod_w_hu_h vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vmaddwev_d_wu_w:
+    description: vmaddwev_d_wu_w vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmaddwev_h_bu_b:
+    description: vmaddwev_h_bu_b vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmaddwev_w_hu_h:
+    description: vmaddwev_w_hu_h vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmaddwod_d_wu_w:
+    description: vmaddwod_d_wu_w vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmaddwod_h_bu_b:
+    description: vmaddwod_h_bu_b vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmaddwod_w_hu_h:
+    description: vmaddwod_w_hu_h vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      src3: "$v.d"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmulwev_d_wu_w:
+    description: vmulwev_d_wu_w vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+  vmulwev_h_bu_b:
+    description: vmulwev_h_bu_b vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+  vmulwev_w_hu_h:
+    description: vmulwev_w_hu_h vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+  vmulwod_d_wu_w:
+    description: vmulwod_d_wu_w vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+  vmulwod_h_bu_b:
+    description: vmulwod_h_bu_b vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+  vmulwod_w_hu_h:
+    description: vmulwod_w_hu_h vd, vj, vk (vector widen mixed sign)
+    operations:
+    - type: vector_widen_add
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+
+  vadd_q:
+    description: vadd.q vd, vj, vk (vector add quadword)
+    operations:
+    - type: vector_alu
+      op: Add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vsub_q:
+    description: vsub.q vd, vj, vk (vector subtract quadword)
+    operations:
+    - type: vector_alu
+      op: Sub
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+  vaddwev_q_d:
+    description: vaddwev.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Add
+  vaddwod_q_d:
+    description: vaddwod.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Add
+  vaddwev_q_du:
+    description: vaddwev.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Add
+  vaddwod_q_du:
+    description: vaddwod.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Add
+  vaddwev_q_du_d:
+    description: vaddwev.q.du.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vaddwod_q_du_d:
+    description: vaddwod.q.du.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Add
+  vsubwev_q_d:
+    description: vsubwev.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Sub
+  vsubwod_q_d:
+    description: vsubwod.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Sub
+  vsubwev_q_du:
+    description: vsubwev.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Sub
+  vsubwod_q_du:
+    description: vsubwod.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Sub
+  vmaddwev_q_d:
+    description: vmaddwev.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Madd
+  vmaddwod_q_d:
+    description: vmaddwod.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Madd
+  vmaddwev_q_du:
+    description: vmaddwev.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Madd
+  vmaddwod_q_du:
+    description: vmaddwod.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Madd
+  vmaddwev_q_du_d:
+    description: vmaddwev.q.du.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmaddwod_q_du_d:
+    description: vmaddwod.q.du.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Madd
+  vmulwev_q_d:
+    description: vmulwev.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Mul
+  vmulwod_q_d:
+    description: vmulwod.q.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: false
+      unsigned2: false
+      op: Mul
+  vmulwev_q_du:
+    description: vmulwev.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Mul
+  vmulwod_q_du:
+    description: vmulwod.q.du vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: true
+      op: Mul
+  vmulwev_q_du_d:
+    description: vmulwev.q.du.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: false
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+  vmulwod_q_du_d:
+    description: vmulwod.q.du.d vd, vj, vk
+    operations:
+    - type: vector_widen_add
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      odd: true
+      unsigned: false
+      unsigned1: true
+      unsigned2: false
+      op: Mul
+  vexth_q_d:
+    description: vexth.q.d vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: Q
+      dest: "$v.d"
+      src: "$v.j"
+      signed: true
+  vexth_qu_du:
+    description: vexth.qu.du vd, vj
+    operations:
+    - type: vector_extract_high
+      elem_width: Q
+      dest: "$v.d"
+      src: "$v.j"
+      signed: false
+  vextl_q_d:
+    description: vextl.q.d vd, vj
+    operations:
+    - type: vector_extract_low
+      elem_width: Q
+      dest: "$v.d"
+      src: "$v.j"
+      signed: true
+  vextl_qu_du:
+    description: vextl.qu.du vd, vj
+    operations:
+    - type: vector_extract_low
+      elem_width: Q
+      dest: "$v.d"
+      src: "$v.j"
+      signed: false
+  vhaddw_h_b:
+    description: vhaddw.h.b vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Add
+  vhaddw_hu_bu:
+    description: vhaddw.hu.bu vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Add
+  vhaddw_w_h:
+    description: vhaddw.w.h vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Add
+  vhaddw_wu_hu:
+    description: vhaddw.wu.hu vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Add
+  vhaddw_d_w:
+    description: vhaddw.d.w vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Add
+  vhaddw_du_wu:
+    description: vhaddw.du.wu vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Add
+  vhaddw_q_d:
+    description: vhaddw.q.d vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Add
+  vhaddw_qu_du:
+    description: vhaddw.qu.du vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Add
+  vhsubw_h_b:
+    description: vhsubw.h.b vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Sub
+  vhsubw_hu_bu:
+    description: vhsubw.hu.bu vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Sub
+  vhsubw_w_h:
+    description: vhsubw.w.h vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Sub
+  vhsubw_wu_hu:
+    description: vhsubw.wu.hu vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Sub
+  vhsubw_d_w:
+    description: vhsubw.d.w vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Sub
+  vhsubw_du_wu:
+    description: vhsubw.du.wu vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Sub
+  vhsubw_q_d:
+    description: vhsubw.q.d vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: false
+      unsigned2: false
+      op: Sub
+  vhsubw_qu_du:
+    description: vhsubw.qu.du vd, vj, vk
+    operations:
+    - type: vector_h_add_w
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+      unsigned1: true
+      unsigned2: true
+      op: Sub
+
+  # === FP Conversion Instructions ===
+  # Simple 1:1 int->float
+  vffint_s_w:
+    description: vffint.s.w vd, vj
+    operations:
+    - type: vector_cast
+      op: I32ToF32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+  vffint_d_l:
+    description: vffint.d.l vd, vj
+    operations:
+    - type: vector_cast
+      op: I64ToF64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+  vffint_s_wu:
+    description: vffint.s.wu vd, vj
+    operations:
+    - type: vector_cast
+      op: U32ToF32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+  vffint_d_lu:
+    description: vffint.d.lu vd, vj
+    operations:
+    - type: vector_cast
+      op: U64ToF64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+  # Simple 1:1 float->int, round to nearest even
+  vftint_w_s:
+    description: vftint.w.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rne
+  vftintrz_w_s:
+    description: vftintrz.w.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rz
+  vftint_l_d:
+    description: vftint.l.d vd, vj
+    operations:
+    - type: vector_cast
+      op: F64ToI64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rne
+  vftintrz_l_d:
+    description: vftintrz.l.d vd, vj
+    operations:
+    - type: vector_cast
+      op: F64ToI64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rz
+  vftint_wu_s:
+    description: vftint.wu.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToU32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rne
+  vftintrz_wu_s:
+    description: vftintrz.wu.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToU32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rz
+  vftint_lu_d:
+    description: vftint.lu.d vd, vj
+    operations:
+    - type: vector_cast
+      op: F64ToU64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rne
+  vftintrz_lu_d:
+    description: vftintrz.lu.d vd, vj
+    operations:
+    - type: vector_cast
+      op: F64ToU64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rz
+  # Simple 1:1 float->int with rounding modes
+  vftintrm_w_s:
+    description: vftintrm.w.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rm
+  vftintrm_l_d:
+    description: vftintrm.l.d vd, vj
+    operations:
+    - type: vector_cast
+      op: F64ToI64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rm
+  vftintrp_w_s:
+    description: vftintrp.w.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rp
+  vftintrp_l_d:
+    description: vftintrp.l.d vd, vj
+    operations:
+    - type: vector_cast
+      op: F64ToI64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rp
+  vftintrne_w_s:
+    description: vftintrne.w.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI32
+      elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rne
+  vftintrne_l_d:
+    description: vftintrne.l.d vd, vj
+    operations:
+    - type: vector_cast
+      op: F64ToI64
+      elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      rounding_mode: rne
+  # Half-element float->float widen
+  vfcvtl_s_h:
+    description: vfcvtl.s.h vd, vj
+    operations:
+    - type: vector_cast
+      op: F16ToF32
+      elem_width: W
+      src_elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+  vfcvth_s_h:
+    description: vfcvth.s.h vd, vj
+    operations:
+    - type: vector_cast
+      op: F16ToF32
+      elem_width: W
+      src_elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+  vfcvtl_d_s:
+    description: vfcvtl.d.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToF64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+  vfcvth_d_s:
+    description: vfcvth.d.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToF64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+  # Half-element int->float widen
+  vffintl_d_w:
+    description: vffintl.d.w vd, vj
+    operations:
+    - type: vector_cast
+      op: I32ToF64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+  vffinth_d_w:
+    description: vffinth.d.w vd, vj
+    operations:
+    - type: vector_cast
+      op: I32ToF64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+  # Half-element float->int widen, round to nearest even
+  vftintl_l_s:
+    description: vftintl.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+      rounding_mode: rne
+  vftintrzl_l_s:
+    description: vftintrzl.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+      rounding_mode: rz
+  vftinth_l_s:
+    description: vftinth.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+      rounding_mode: rne
+  vftintrzh_l_s:
+    description: vftintrzh.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+      rounding_mode: rz
+  # Half-element float->int widen, round to -inf
+  vftintrml_l_s:
+    description: vftintrml.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+      rounding_mode: rm
+  vftintrmh_l_s:
+    description: vftintrmh.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+      rounding_mode: rm
+  # Half-element float->int widen, round to +inf
+  vftintrpl_l_s:
+    description: vftintrpl.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+      rounding_mode: rp
+  vftintrph_l_s:
+    description: vftintrph.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+      rounding_mode: rp
+  # Half-element float->int widen, round to nearest even
+  vftintrnel_l_s:
+    description: vftintrnel.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: false
+      rounding_mode: rne
+  vftintrneh_l_s:
+    description: vftintrneh.l.s vd, vj
+    operations:
+    - type: vector_cast
+      op: F32ToI64
+      elem_width: D
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      high: true
+      rounding_mode: rne
+  # 3-operand interleaved narrow
+  vfcvt_h_s:
+    description: vfcvt.h.s vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: F32ToF16
+      elem_width: H
+      src_elem_width: W
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+  vfcvt_s_d:
+    description: vfcvt.s.d vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: F64ToF32
+      elem_width: W
+      src_elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+  vffint_s_l:
+    description: vffint.s.l vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: I64ToF32
+      elem_width: W
+      src_elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+  vftint_w_d:
+    description: vftint.w.d vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: F64ToI32
+      elem_width: W
+      src_elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+      rounding_mode: rne
+  vftintrz_w_d:
+    description: vftintrz.w.d vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: F64ToI32
+      elem_width: W
+      src_elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+      rounding_mode: rz
+  vftintrm_w_d:
+    description: vftintrm.w.d vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: F64ToI32
+      elem_width: W
+      src_elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+      rounding_mode: rm
+  vftintrp_w_d:
+    description: vftintrp.w.d vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: F64ToI32
+      elem_width: W
+      src_elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+      rounding_mode: rp
+  vftintrne_w_d:
+    description: vftintrne.w.d vd, vj, vk
+    operations:
+    - type: vector_cast
+      op: F64ToI32
+      elem_width: W
+      src_elem_width: D
+      dest: "$v.d"
+      src: "$v.j"
+      src2: "$v.k"
+      rounding_mode: rne
+  vsrln_b_h:
+    description: vsrln.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrln_h_w:
+    description: vsrln.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrln_w_d:
+    description: vsrln.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsran_b_h:
+    description: vsran.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Sra
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsran_h_w:
+    description: vsran.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Sra
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsran_w_d:
+    description: vsran.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Sra
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrlrn_b_h:
+    description: vsrlrn.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SrlR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrlrn_h_w:
+    description: vsrlrn.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SrlR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrlrn_w_d:
+    description: vsrlrn.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SrlR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrarn_b_h:
+    description: vsrarn.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SraR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrarn_h_w:
+    description: vsrarn.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SraR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrarn_w_d:
+    description: vsrarn.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SraR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrln_b_h:
+    description: vssrln.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Ssrl
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrln_h_w:
+    description: vssrln.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Ssrl
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrln_w_d:
+    description: vssrln.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Ssrl
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssran_b_h:
+    description: vssran.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Ssra
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssran_h_w:
+    description: vssran.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Ssra
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssran_w_d:
+    description: vssran.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: Ssra
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrln_bu_h:
+    description: vssrln.bu.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrln_hu_w:
+    description: vssrln.hu.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrln_wu_d:
+    description: vssrln.wu.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssran_bu_h:
+    description: vssran.bu.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssran_hu_w:
+    description: vssran.hu.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssran_wu_d:
+    description: vssran.wu.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrlrn_b_h:
+    description: vssrlrn.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrlrn_h_w:
+    description: vssrlrn.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrlrn_w_d:
+    description: vssrlrn.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrarn_b_h:
+    description: vssrarn.b.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrarn_h_w:
+    description: vssrarn.h.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrarn_w_d:
+    description: vssrarn.w.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrlrn_bu_h:
+    description: vssrlrn.bu.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlRU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrlrn_hu_w:
+    description: vssrlrn.hu.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlRU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrlrn_wu_d:
+    description: vssrlrn.wu.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlRU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrarn_bu_h:
+    description: vssrarn.bu.h vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrarn_hu_w:
+    description: vssrarn.hu.w vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vssrarn_wu_d:
+    description: vssrarn.wu.d vd, vj, vk
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.k"
+
+  vsrlni_b_h:
+    description: vsrlni.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vsrlni_h_w:
+    description: vsrlni.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vsrlni_w_d:
+    description: vsrlni.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vsrani_b_h:
+    description: vsrani.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Sra
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vsrani_h_w:
+    description: vsrani.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Sra
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vsrani_w_d:
+    description: vsrani.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Sra
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vsrlrni_b_h:
+    description: vsrlrni.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SrlR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vsrlrni_h_w:
+    description: vsrlrni.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SrlR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vsrlrni_w_d:
+    description: vsrlrni.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SrlR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vsrarni_b_h:
+    description: vsrarni.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SraR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vsrarni_h_w:
+    description: vsrarni.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SraR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vsrarni_w_d:
+    description: vsrarni.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SraR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrlni_b_h:
+    description: vssrlni.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssrl
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrlni_h_w:
+    description: vssrlni.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssrl
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrlni_w_d:
+    description: vssrlni.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssrl
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrani_b_h:
+    description: vssrani.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssra
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrani_h_w:
+    description: vssrani.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssra
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrani_w_d:
+    description: vssrani.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssra
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrlni_bu_h:
+    description: vssrlni.bu.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrlni_hu_w:
+    description: vssrlni.hu.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrlni_wu_d:
+    description: vssrlni.wu.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrani_bu_h:
+    description: vssrani.bu.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrani_hu_w:
+    description: vssrani.hu.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrani_wu_d:
+    description: vssrani.wu.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrlrni_b_h:
+    description: vssrlrni.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrlrni_h_w:
+    description: vssrlrni.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrlrni_w_d:
+    description: vssrlrni.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrarni_b_h:
+    description: vssrarni.b.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrarni_h_w:
+    description: vssrarni.h.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrarni_w_d:
+    description: vssrarni.w.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrlrni_bu_h:
+    description: vssrlrni.bu.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlRU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrlrni_hu_w:
+    description: vssrlrni.hu.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlRU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrlrni_wu_d:
+    description: vssrlrni.wu.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlRU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vssrarni_bu_h:
+    description: vssrarni.bu.h vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: H
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:4:unsigned"
+
+  vssrarni_hu_w:
+    description: vssrarni.hu.w vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: W
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:5:unsigned"
+
+  vssrarni_wu_d:
+    description: vssrarni.wu.d vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: D
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:6:unsigned"
+
+  vsrlni_d_q:
+    description: vsrlni.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Srl
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vsrani_d_q:
+    description: vsrani.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Sra
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vsrlrni_d_q:
+    description: vsrlrni.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SrlR
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vsrarni_d_q:
+    description: vsrarni.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SraR
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrlni_d_q:
+    description: vssrlni.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssrl
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrani_d_q:
+    description: vssrani.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: Ssra
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrlrni_d_q:
+    description: vssrlrni.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlR
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrarni_d_q:
+    description: vssrarni.d.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraR
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrlni_du_q:
+    description: vssrlni.du.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlU
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrlrni_du_q:
+    description: vssrlrni.du.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsrlRU
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrani_du_q:
+    description: vssrani.du.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraU
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+
+  vssrarni_du_q:
+    description: vssrarni.du.q vd, vj, imm
+    operations:
+    - type: vector_shift_narrow
+      op: SsraRU
+      elem_width: Q
+      dest: "$v.d"
+      src1: "$v.j"
+      src2: "$v.d"
+      imm: "$imm:7:unsigned"
+  # === Remaining LSX Instructions ===
+  # Vector find first negative element
+  vfrstp_b:
+    description: vfrstp.b vd, vj, vk
+    operations:
+    - type: vector_find_first
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+      index_src: "$v.k"
+
+  vfrstp_h:
+    description: vfrstp.h vd, vj, vk
+    operations:
+    - type: vector_find_first
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      index_src: "$v.k"
+
+  vfrstpi_b:
+    description: vfrstpi.b vd, vj, imm
+    operations:
+    - type: vector_find_first
+      elem_width: B
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:5:unsigned"
+
+  vfrstpi_h:
+    description: vfrstpi.h vd, vj, imm
+    operations:
+    - type: vector_find_first
+      elem_width: H
+      dest: "$v.d"
+      src: "$v.j"
+      imm: "$imm:5:unsigned"
+
+  # Vector store element
+  vstelm_b:
+    description: vstelm.b vd, rj, k, imm
+    operations:
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$imm:8:unsigned"
+    - type: vector_extract
+      elem_width: B
+      dest: "$temp:1"
+      src: "$v.d"
+      index: "$k:4:unsigned"
+    - type: store
+      addr: "$temp:0"
+      src: "$temp:1"
+      size: 1
+
+  vstelm_h:
+    description: vstelm.h vd, rj, k, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: "$temp:2"
+      src1: "$imm:8:unsigned"
+      src2: 1
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$temp:2"
+    - type: vector_extract
+      elem_width: H
+      dest: "$temp:1"
+      src: "$v.d"
+      index: "$k:3:unsigned"
+    - type: store
+      addr: "$temp:0"
+      src: "$temp:1"
+      size: 2
+
+  vstelm_w:
+    description: vstelm.w vd, rj, k, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: "$temp:2"
+      src1: "$imm:8:unsigned"
+      src2: 2
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$temp:2"
+    - type: vector_extract
+      elem_width: W
+      dest: "$temp:1"
+      src: "$v.d"
+      index: "$k:2:unsigned"
+    - type: store
+      addr: "$temp:0"
+      src: "$temp:1"
+      size: 4
+
+  vstelm_d:
+    description: vstelm.d vd, rj, k, imm
+    operations:
+    - type: alu
+      op: Shl
+      dest: "$temp:2"
+      src1: "$imm:8:unsigned"
+      src2: 3
+    - type: alu
+      op: Add
+      dest: "$temp:0"
+      src1: "$r.j"
+      src2: "$temp:2"
+    - type: vector_extract
+      elem_width: D
+      dest: "$temp:1"
+      src: "$v.d"
+      index: "$k:1:unsigned"
+    - type: store
+      addr: "$temp:0"
+      src: "$temp:1"
+      size: 8
+
+  vmepatmsk_v:
+    description: vmepatmsk.v vd, imm
+    operations:
+    - type: vector_pattern_mask
+      dest: "$v.d"
+      imm: "$imm:10:unsigned"

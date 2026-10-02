@@ -1,0 +1,400 @@
+groups:
+- name: v_float
+  description: RISC-V Vector Float Instructions
+instructions:
+- name: VFADD_VV
+  group: v_float
+  encoding:
+    match: 000000???????????001?????1010111
+  assembly: vfadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFSUB_VV
+  group: v_float
+  encoding:
+    match: 000010???????????001?????1010111
+  assembly: vfsub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFMUL_VV
+  group: v_float
+  encoding:
+    match: 100100???????????001?????1010111
+  assembly: vfmul.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFDIV_VV
+  group: v_float
+  encoding:
+    match: 100000???????????001?????1010111
+  assembly: vfdiv.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFMIN_VV
+  group: v_float
+  encoding:
+    match: 000100???????????001?????1010111
+  assembly: vfmin.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFMAX_VV
+  group: v_float
+  encoding:
+    match: 000110???????????001?????1010111
+  assembly: vfmax.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFADD_VF
+  group: v_float
+  encoding:
+    match: 000000???????????101?????1010111
+  assembly: vfadd.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFSUB_VF
+  group: v_float
+  encoding:
+    match: 000010???????????101?????1010111
+  assembly: vfsub.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFMUL_VF
+  group: v_float
+  encoding:
+    match: 100100???????????101?????1010111
+  assembly: vfmul.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFDIV_VF
+  group: v_float
+  encoding:
+    match: 100000???????????101?????1010111
+  assembly: vfdiv.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFMIN_VF
+  group: v_float
+  encoding:
+    match: 000100???????????101?????1010111
+  assembly: vfmin.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFMAX_VF
+  group: v_float
+  encoding:
+    match: 000110???????????101?????1010111
+  assembly: vfmax.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFMADD_VV
+  group: v_float
+  encoding:
+    match: 101000???????????001?????1010111
+  assembly: vfmadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFMSUB_VV
+  group: v_float
+  encoding:
+    match: 101010???????????001?????1010111
+  assembly: vfmsub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFNMADD_VV
+  group: v_float
+  encoding:
+    match: 101001???????????001?????1010111
+  assembly: vfnmadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFNMSUB_VV
+  group: v_float
+  encoding:
+    match: 101011???????????001?????1010111
+  assembly: vfnmsub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFMACC_VV
+  group: v_float
+  encoding:
+    match: 1011001??????????001?????1010111
+  assembly: vfmacc.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFMADD_VF
+  group: v_float
+  encoding:
+    match: 101000???????????101?????1010111
+  assembly: vfmadd.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFMSUB_VF
+  group: v_float
+  encoding:
+    match: 101010???????????101?????1010111
+  assembly: vfmsub.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFNMADD_VF
+  group: v_float
+  encoding:
+    match: 101001???????????101?????1010111
+  assembly: vfnmadd.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFNMSUB_VF
+  group: v_float
+  encoding:
+    match: 101011???????????101?????1010111
+  assembly: vfnmsub.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMFEQ_VV
+  group: v_float
+  encoding:
+    match: 011000???????????001?????1010111
+  assembly: vmfeq.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMFLT_VV
+  group: v_float
+  encoding:
+    match: 011011???????????001?????1010111
+  assembly: vmflt.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMFLE_VV
+  group: v_float
+  encoding:
+    match: 011001???????????001?????1010111
+  assembly: vmfle.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMFEQ_VF
+  group: v_float
+  encoding:
+    match: 011000???????????101?????1010111
+  assembly: vmfeq.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMFLT_VF
+  group: v_float
+  encoding:
+    match: 011011???????????101?????1010111
+  assembly: vmflt.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMFLE_VF
+  group: v_float
+  encoding:
+    match: 011001???????????101?????1010111
+  assembly: vmfle.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFREDUSUM_VS
+  group: v_float
+  encoding:
+    match: 000001???????????001?????1010111
+  assembly: vfredusum.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFREDMAX_VS
+  group: v_float
+  encoding:
+    match: 000111???????????001?????1010111
+  assembly: vfredmax.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFMV_V_F
+  group: v_float
+  encoding:
+    match: 010111100000?????101?????1010111
+  assembly: vfmv.v.f {vd}, {rs1}
+  format: V-type-mem
+- name: VMV_V_V
+  group: v_float
+  encoding:
+    match: 010111100000?????000?????1010111
+  assembly: vmv.v.v {vd}, {vs1}
+  format: V-type-mv-v
+- name: VFSGNJ_VV
+  group: v_float
+  encoding:
+    match: 001000???????????001?????1010111
+  assembly: vfsgnj.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFSGNJ_VF
+  group: v_float
+  encoding:
+    match: 001000???????????101?????1010111
+  assembly: vfsgnj.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFSGNJN_VV
+  group: v_float
+  encoding:
+    match: 001001???????????001?????1010111
+  assembly: vfsgnjn.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFSGNJN_VF
+  group: v_float
+  encoding:
+    match: 001001???????????101?????1010111
+  assembly: vfsgnjn.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFSGNJX_VV
+  group: v_float
+  encoding:
+    match: 001010???????????001?????1010111
+  assembly: vfsgnjx.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFSGNJX_VF
+  group: v_float
+  encoding:
+    match: 001010???????????101?????1010111
+  assembly: vfsgnjx.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMFNE_VV
+  group: v_float
+  encoding:
+    match: 011100???????????001?????1010111
+  assembly: vmfne.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMFNE_VF
+  group: v_float
+  encoding:
+    match: 011100???????????101?????1010111
+  assembly: vmfne.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMFGT_VF
+  group: v_float
+  encoding:
+    match: 011101???????????101?????1010111
+  assembly: vmfgt.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMFGE_VF
+  group: v_float
+  encoding:
+    match: 011111???????????101?????1010111
+  assembly: vmfge.vf {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VFREDOSUM_VS
+  group: v_float
+  encoding:
+    match: 000011???????????001?????1010111
+  assembly: vfredosum.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFREDMIN_VS
+  group: v_float
+  encoding:
+    match: 000101???????????001?????1010111
+  assembly: vfredmin.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VFCLASS_V
+  group: v_float
+  encoding:
+    match: 0100111?????10000001?????1010111
+  assembly: vfclass.v {vd}, {vs2}
+  format: V-type-v
+- name: VFSQRT_V
+  group: v_float
+  encoding:
+    match: 0100111?????00000001?????1010111
+  assembly: vfsqrt.v {vd}, {vs2}
+  format: V-type-v
+- name: VFCVT_XU_F_V
+  group: v_float
+  encoding:
+    match: 010010??????00000001?????1010111
+  assembly: vfcvt.xu.f.v {vd}, {vs2}
+  format: V-type-v
+- name: VFCVT_X_F_V
+  group: v_float
+  encoding:
+    match: 010010??????00001001?????1010111
+  assembly: vfcvt.x.f.v {vd}, {vs2}
+  format: V-type-v
+- name: VFCVT_F_XU_V
+  group: v_float
+  encoding:
+    match: 010010??????00010001?????1010111
+  assembly: vfcvt.f.xu.v {vd}, {vs2}
+  format: V-type-v
+- name: VFCVT_F_X_V
+  group: v_float
+  encoding:
+    match: 010010??????00011001?????1010111
+  assembly: vfcvt.f.x.v {vd}, {vs2}
+  format: V-type-v
+- name: VFCVT_RTZ_XU_F_V
+  group: v_float
+  encoding:
+    match: 010010??????00110001?????1010111
+  assembly: vfcvt.rtz.xu.f.v {vd}, {vs2}
+  format: V-type-v
+- name: VFCVT_RTZ_X_F_V
+  group: v_float
+  encoding:
+    match: 010010??????00111001?????1010111
+  assembly: vfcvt.rtz.x.f.v {vd}, {vs2}
+  format: V-type-v
+- name: VFWCVT_XU_F_V
+  group: v_float
+  encoding:
+    match: 010010??????01000001?????1010111
+  assembly: vfwcvt.xu.f.v {vd}, {vs2}
+  format: V-type-v
+- name: VFWCVT_X_F_V
+  group: v_float
+  encoding:
+    match: 010010??????01001001?????1010111
+  assembly: vfwcvt.x.f.v {vd}, {vs2}
+  format: V-type-v
+- name: VFWCVT_F_XU_V
+  group: v_float
+  encoding:
+    match: 010010??????01010001?????1010111
+  assembly: vfwcvt.f.xu.v {vd}, {vs2}
+  format: V-type-v
+- name: VFWCVT_F_X_V
+  group: v_float
+  encoding:
+    match: 010010??????01011001?????1010111
+  assembly: vfwcvt.f.x.v {vd}, {vs2}
+  format: V-type-v
+- name: VFWCVT_F_F_V
+  group: v_float
+  encoding:
+    match: 010010??????01100001?????1010111
+  assembly: vfwcvt.f.f.v {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_XU_F_W
+  group: v_float
+  encoding:
+    match: 010010??????10000001?????1010111
+  assembly: vfncvt.xu.f.w {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_X_F_W
+  group: v_float
+  encoding:
+    match: 010010??????10001001?????1010111
+  assembly: vfncvt.x.f.w {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_F_XU_W
+  group: v_float
+  encoding:
+    match: 010010??????10010001?????1010111
+  assembly: vfncvt.f.xu.w {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_F_X_W
+  group: v_float
+  encoding:
+    match: 010010??????10011001?????1010111
+  assembly: vfncvt.f.x.w {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_F_F_W
+  group: v_float
+  encoding:
+    match: 010010??????10100001?????1010111
+  assembly: vfncvt.f.f.w {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_ROD_F_F_W
+  group: v_float
+  encoding:
+    match: 010010??????10101001?????1010111
+  assembly: vfncvt.rod.f.f.w {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_RTZ_XU_F_W
+  group: v_float
+  encoding:
+    match: 010010??????10110001?????1010111
+  assembly: vfncvt.rtz.xu.f.w {vd}, {vs2}
+  format: V-type-v
+- name: VFNCVT_RTZ_X_F_W
+  group: v_float
+  encoding:
+    match: 010010??????10111001?????1010111
+  assembly: vfncvt.rtz.x.f.w {vd}, {vs2}
+  format: V-type-v
+- name: VFREC7_V
+  group: v_float
+  encoding:
+    match: 010011??????00101001?????1010111
+  assembly: vfrec7.v {vd}, {vs2}
+  format: V-type-v
+- name: VFRSQRT7_V
+  group: v_float
+  encoding:
+    match: 010011??????00100001?????1010111
+  assembly: vfrsqrt7.v {vd}, {vs2}
+  format: V-type-v
