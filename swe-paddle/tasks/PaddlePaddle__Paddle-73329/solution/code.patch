@@ -1,0 +1,495 @@
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/function_graph.py b/python/paddle/jit/sot/opcode_translator/executor/function_graph.py
+index bbeee3367c2925b3f87fd9d9acea58881aed8c83..0b2df7c142f36e636ba2cc1fb0b9625d41f72cfb 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/function_graph.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/function_graph.py
+@@ -912,9 +912,13 @@ class FunctionGraph:
+         current_executor = OpcodeExecutorBase.call_stack[-1]
+         current_line = current_executor._current_line
+         filename = current_executor.vframe.code.co_filename
+-        source_lines, start_line = inspect.getsourcelines(
+-            current_executor.vframe.code
+-        )
++        try:
++            source_lines, start_line = inspect.getsourcelines(
++                current_executor.vframe.code
++            )
++        except OSError:
++            # Skip if the function has not source code
++            return []
+         # TODO(SigureMo): In 3.11, lineno maybe changed after multiple breakgraph,
+         # We need to find a way to fix this.
+         line_idx = max(min(current_line - start_line, len(source_lines) - 1), 0)
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/side_effects.py b/python/paddle/jit/sot/opcode_translator/executor/side_effects.py
+index 119344184d209fef5fc5d76de5ee13fd730202d7..8ddb2a99ee55628d41a71be3756bd2c64c5b0977 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/side_effects.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/side_effects.py
+@@ -17,10 +17,15 @@ from __future__ import annotations
+ from typing import TYPE_CHECKING, Any, NamedTuple, TypeVar
+ 
+ if TYPE_CHECKING:
++    from collections.abc import Callable
++
++    from typing_extensions import TypeAlias
++
+     from .mutable_data import DataGetter, MutableData
+     from .pycode_generator import PyCodeGen
+     from .variables import VariableBase
+ 
++    IdGetter: TypeAlias = Callable[[Any], int]
+     MutableDataT = TypeVar("MutableDataT", bound=MutableData)
+ 
+ 
+@@ -51,8 +56,9 @@ class SideEffects:
+         proxy_type: type[MutableDataT],
+         data: Any,
+         getter: DataGetter,
++        id_getter: IdGetter = id,
+     ) -> MutableDataT:
+-        data_id = id(data)
++        data_id = id_getter(data)
+         if data_id not in self.data_id_to_proxy:
+             self.data_id_to_proxy[data_id] = proxy_type(data, getter)
+         return self.data_id_to_proxy[data_id]  # type: ignore
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py b/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
+index a8b1da5e63313c547a118a147f64f4a2effaa2eb..77ecf3a4daef81b5e8bd503b4418a466adbe820f 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
+@@ -18,6 +18,7 @@ import builtins
+ import inspect
+ import math
+ import operator
++from dataclasses import fields
+ from functools import partial, reduce
+ from typing import TYPE_CHECKING
+ 
+@@ -67,6 +68,7 @@ from .variables import (
+     CallableVariable,
+     ConstantVariable,
+     ContainerVariable,
++    DataClassInstanceVariable,
+     DictVariable,
+     EnumerateVariable,
+     EnumVariable,
+@@ -1556,6 +1558,36 @@ Dispatcher.register(
+     lambda left, right: exception_variable_equal(left, right),
+ )
+ 
++
++@Dispatcher.register_decorator(operator.eq)
++def dataclass_instance_eq(
++    lhs: DataClassInstanceVariable, rhs: DataClassInstanceVariable
++):
++    if lhs.get_py_type() != rhs.get_py_type():
++        return ConstantVariable(False, lhs.graph, DummyTracker([lhs, rhs]))
++
++    call_eq = BuiltinVariable(operator.eq, lhs.graph, DanglingTracker())
++    call_bool = BuiltinVariable(bool, lhs.graph, DanglingTracker())
++
++    return ConstantVariable(
++        all(
++            bool(
++                call_bool(
++                    call_eq(lhs.getattr(field.name), rhs.getattr(field.name))
++                )
++            )
++            for field in fields(lhs.get_py_type())
++        ),
++        lhs.graph,
++        DummyTracker([lhs, rhs]),
++    )
++
++
++@Dispatcher.register_decorator(operator.ne)
++def dataclass_instance_ne(lhs: TupleVariable, rhs: TupleVariable):
++    return Dispatcher.call(operator.eq, lhs, rhs).bool_not()
++
++
+ Dispatcher.register(
+     operator.eq,
+     ("EnumVariable", "EnumVariable"),
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py b/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py
+index 1620b3c70d12799aed4dad189b4b85b497cde9b4..083db57cb9eee20475313a97afbf30cad72aaeb7 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py
+@@ -21,6 +21,7 @@ from .base import (  # noqa: F401
+ from .basic import (  # noqa: F401
+     CellVariable,
+     ConstantVariable,
++    DataClassInstanceVariable,
+     DataVariable,
+     DygraphTracerVariable,
+     EnumVariable,
+@@ -45,6 +46,7 @@ from .callable import (  # noqa: F401
+     CallableVariable,
+     ClassVariable,
+     ContainerLayerVariable,
++    DataClassVariable,
+     FunctionVariable,
+     LayerVariable,
+     MethodVariable,
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/base.py b/python/paddle/jit/sot/opcode_translator/executor/variables/base.py
+index 02cd51758a3fd9a21c1452098d9cf4ff7db6178a..cfd504db73aa0b55dee5c358e56c70c382b0001e 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/base.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/base.py
+@@ -17,6 +17,7 @@ from __future__ import annotations
+ import inspect
+ import operator
+ from contextlib import contextmanager
++from dataclasses import fields
+ from functools import cached_property
+ from queue import Queue
+ from typing import TYPE_CHECKING, Any, Callable, Optional
+@@ -120,7 +121,7 @@ def map_variables(
+     Returns:
+         tuple: The result of applying the map_func to the variables.
+     """
+-    from .basic import SliceVariable
++    from .basic import DataClassInstanceVariable, SliceVariable
+     from .container import ContainerVariable
+ 
+     def _map_container_variable(variable: VariableBase | object):
+@@ -153,9 +154,33 @@ def map_variables(
+             DummyTracker([new_slice.start, new_slice.stop, new_slice.step]),
+         )
+ 
++    def _map_dataclass_variable(variable: VariableBase | object):
++        if not isinstance(variable, DataClassInstanceVariable):
++            return variable
++        new_dataclass = DataClassInstanceVariable._dataclass_from_dict(
++            variable.get_py_type(),
++            {
++                fd.name: map_func(variable.getattr(fd.name))
++                for fd in fields(variable.get_py_type())
++            },
++        )
++        if not restore_variable:
++            return new_dataclass
++        return VariableFactory.from_value(
++            new_dataclass,
++            variable.graph,
++            DummyTracker(
++                [
++                    variable.getattr(fd.name)
++                    for fd in fields(variable.get_py_type())
++                ]
++            ),
++        )
++
+     def _map_variable(variable: VariableBase | object):
+         variable = _map_container_variable(variable)
+         variable = _map_slice_variable(variable)
++        variable = _map_dataclass_variable(variable)
+         return map_func(variable)
+ 
+     return paddle.utils.map_structure(_map_variable, variables)
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py b/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py
+index 640c7beaf2ffe5bbc67f6018a87a2a0a6e0150ee..9547c4d4b1f9f098aec818269ca88f1b37069753 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py
+@@ -14,9 +14,11 @@
+ 
+ from __future__ import annotations
+ 
++import dataclasses
+ import operator
+ import sys
+ import types
++from dataclasses import asdict, is_dataclass
+ from enum import Enum
+ from functools import cached_property, reduce
+ from typing import TYPE_CHECKING, Any
+@@ -26,6 +28,7 @@ import numpy as np
+ import paddle
+ from paddle._typing import unreached
+ from paddle.framework import core
++from paddle.jit.sot.opcode_translator.executor.pycode_generator import PyCodeGen
+ from paddle.pir.core import _PADDLE_PIR_DTYPE_2_NUMPY_DTYPE
+ 
+ from ....infer_meta import (
+@@ -128,7 +131,12 @@ if TYPE_CHECKING:
+ 
+     from ..function_graph import FunctionGraph
+     from ..pycode_generator import PyCodeGen
+-    from .callable import BuiltinVariable, ClassVariable, FunctionVariable
++    from .callable import (
++        BuiltinVariable,
++        ClassVariable,
++        DataClassVariable,
++        FunctionVariable,
++    )
+     from .container import TupleVariable
+ 
+     SymbolicConstraint: TypeAlias = tuple[
+@@ -2396,3 +2404,178 @@ class EnumVariable(VariableBase):
+             id = len(same_name_enums)
+             same_name_enums.append(enum_class)
+         return id
++
++
++class DataClassInstanceVariable(VariableBase):
++    known_dataclasses = {}
++
++    def __init__(
++        self,
++        data_dict: dict[str, Any],
++        class_var: DataClassVariable,
++        data_id: int | None,
++        graph: FunctionGraph,
++        tracker: Tracker,
++    ):
++        super().__init__(graph=graph, tracker=tracker)
++        self.class_var = class_var
++        self.proxy = self.graph.side_effects.get_proxy(
++            MutableDictLikeData,
++            data_dict,
++            self.proxy_getter,
++            id_getter=lambda _: data_id or id(data_dict),
++        )
++
++    @staticmethod
++    def _dataclass_from_dict(dataclass_type: type[Any], data: dict[str, Any]):
++        # NOTE(SigureMo): Create dataclass without __post_init__,
++        # because __post_init__ has been run in simulation
++        instance = dataclass_type.__new__(dataclass_type, **data)
++        for fd in dataclasses.fields(dataclass_type):
++            setattr(instance, fd.name, data[fd.name])
++        return instance
++
++    def _reconstruct(self, codegen: PyCodeGen) -> None:
++        codegen.gen_load_object(
++            DataClassInstanceVariable._dataclass_from_dict,
++            "___dataclass_from_dict",
++        )
++        self.getattr("__class__").reconstruct(codegen)
++        data = self.proxy.get_all().keys()
++        for key in data:
++            if not isinstance(key, ConstTypes):
++                raise InnerError(
++                    f"[{self.__class__.__name__}] received {key} as key."
++                )
++            key_var = ConstantVariable.wrap_literal(key, self.graph)
++            value_var = self.getattr(key)
++            key_var.reconstruct(codegen)
++            value_var.reconstruct(codegen)
++        codegen.gen_build_map(len(data))
++        codegen.gen_call_function(2)
++
++    @cached_property
++    def attr_proxy(self):
++        return self.proxy
++
++    def getattr(self, name: str, default=None):
++        if name == "__class__":
++            return self.class_var
++        return self.proxy.get(name)
++
++    def setattr(self, key: str, value):
++        self.proxy.set(key, value)
++        self.graph.side_effects.record_proxy_variable(self)
++        return ConstantVariable.wrap_literal(None, self.graph)
++
++    def proxy_getter(self, proxy: MutableDictLikeData, key: Any):
++        if key not in proxy.original_data:
++            return MutableDictLikeData.Empty()
++        return VariableFactory.from_value(
++            proxy.original_data[key],
++            self.graph,
++            tracker=GetAttrTracker(self, key, changed=proxy.has_changed),
++        )
++
++    def get_py_type(self):
++        return self.class_var.get_py_value()
++
++    def get_py_value(self, allow_tensor=False):
++        return DataClassInstanceVariable._dataclass_from_dict(
++            self.get_py_type(),
++            {
++                key: value.get_py_value(allow_tensor)
++                for key, value in self.proxy.get_all().items()
++            },
++        )
++
++    @check_faster_guard
++    def make_faster_guard(self) -> list[paddle.framework.core.GuardNodeBase]:
++        expr_node = self.tracker.guard_tree_expr_node()
++        type_guard = paddle.framework.core.GuardNode(
++            paddle.framework.core.TypeMatchGuard(self.get_py_type()),
++            [expr_node],
++        )
++        guard_variables = filter(
++            lambda var: not isinstance(var, MutableDictLikeData.Empty),
++            self.proxy.reproduce(0).values(),
++        )
++        return reduce(
++            operator.add,
++            [[type_guard]]
++            + [
++                item.make_faster_guard()
++                for item in guard_variables
++                if item.tracker.need_guard()
++            ],
++        )
++
++    @check_guard
++    def make_stringified_guard(self) -> list[StringifiedExpression]:
++        data_class = self.get_py_type()
++        class_name = data_class.__name__
++        data_class_id = DataClassInstanceVariable.get_class_id(data_class)
++        extern_var_name = f"__{class_name}_{data_class_id}"
++        frame_value_tracer = self.tracker.trace_value_from_frame()
++        type_guard = FasterStringifiedExpression(
++            f"isinstance({{}}, {extern_var_name})",
++            paddle.framework.core.InstanceCheckGuard(self.get_py_type()),
++            [frame_value_tracer],
++            union_free_vars(
++                frame_value_tracer.free_vars,
++                {f"{extern_var_name}": self.get_py_type()},
++            ),
++        )
++        guard_variables = filter(
++            lambda var: not isinstance(var, MutableDictLikeData.Empty),
++            self.proxy.reproduce(0).values(),
++        )
++        return reduce(
++            operator.add,
++            [[type_guard]]
++            + [
++                item.make_stringified_guard()
++                for item in guard_variables
++                if item.tracker.need_guard()
++            ],
++        )
++
++    @classmethod
++    def get_class_id(cls, data_class: type[Any]):
++        class_name = data_class.__name__
++        DataClassInstanceVariable.known_dataclasses.setdefault(class_name, [])
++        same_name_dataclasses = DataClassInstanceVariable.known_dataclasses[
++            class_name
++        ]
++        id = 0
++        for i, cls in enumerate(same_name_dataclasses):
++            if data_class == cls:
++                id = i
++                break
++        else:
++            id = len(same_name_dataclasses)
++            same_name_dataclasses.append(data_class)
++        return id
++
++    def flatten_inner_vars(self) -> list[VariableBase]:
++        return [
++            self.getattr(fd.name)
++            for fd in dataclasses.fields(self.get_py_type())
++        ]
++
++    @VariableFactory.register_from_value()
++    def from_value(value: object, graph: FunctionGraph, tracker: Tracker):
++        if is_dataclass(value) and not isinstance(value, type):
++            class_var = VariableFactory.from_value(
++                type(value), graph, DanglingTracker()
++            )
++            var = DataClassInstanceVariable(
++                asdict(value),
++                class_var,
++                id(value),
++                graph=graph,
++                tracker=tracker,
++            )
++            class_var.tracker = GetAttrTracker(var, "__class__")
++            return var
++        return None
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py b/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py
+index b3424010e5f3ebaa514bc6434c48c740ca373e6e..7eca1b666e3da5e8a9492ebc77c85b1050e72b63 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py
+@@ -14,6 +14,7 @@
+ 
+ from __future__ import annotations
+ 
++import dataclasses
+ import dis
+ import functools
+ import inspect
+@@ -22,6 +23,7 @@ import operator
+ import random
+ import sys
+ import types
++from dataclasses import fields, is_dataclass
+ from functools import partial, reduce
+ from typing import (
+     TYPE_CHECKING,
+@@ -107,6 +109,7 @@ from .base import (
+ )
+ from .basic import (
+     ConstantVariable,
++    DataClassInstanceVariable,
+     NumPyNumberVariable,
+     ObjectVariable,
+     PrintStmtVariable,
+@@ -1250,6 +1253,65 @@ class PureClassVariable(ClassVariable):
+         return None
+ 
+ 
++class DataClassVariable(ClassVariable):
++    def __init__(
++        self, class_: type[Any], graph: FunctionGraph, tracker: Tracker
++    ):
++        super().__init__(class_, graph, tracker)
++
++    def call_function(self, /, *args, **kwargs):
++        signature = DataClassVariable.create_dataclass_init_signature(
++            self.value
++        )
++        bound_args = signature.bind(*args, **kwargs)
++        bound_args.apply_defaults()
++
++        instance = DataClassInstanceVariable(
++            bound_args.arguments,
++            self,
++            None,
++            self.graph,
++            DummyTracker([*args, *kwargs.values()]),
++        )
++        if hasattr(self.value, "__post_init__"):
++            post_init = VariableFactory.from_value(
++                self.value.__post_init__,
++                self.graph,
++                GetAttrTracker(self, "__post_init__"),
++            ).bind(instance, "__post_init__")
++            post_init()
++        return instance
++
++    @staticmethod
++    def create_dataclass_init_signature(
++        data_class: type[Any],
++    ) -> inspect.Signature:
++        parameters = []
++        for fd in fields(data_class):
++            if not isinstance(fd.default, dataclasses._MISSING_TYPE):
++                default = fd.default
++            elif not isinstance(fd.default_factory, dataclasses._MISSING_TYPE):
++                default = fd.default_factory()
++            else:
++                default = inspect.Parameter.empty
++            parameters.append(
++                inspect.Parameter(
++                    fd.name,
++                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
++                    default=default,
++                    annotation=fd.type,
++                )
++            )
++        return inspect.Signature(parameters=parameters, return_annotation=None)
++
++    @VariableFactory.register_from_value(successor="ClassVariable")
++    def from_value(value: object, graph: FunctionGraph, tracker: Tracker):
++        if is_dataclass(value) and isinstance(value, type):
++            var = DataClassVariable(value, graph=graph, tracker=tracker)
++            return var
++        return None
++
++
+ class NamedTupleClassVariable(ClassVariable):
+     def __init__(
+         self, class_: type[Any], graph: FunctionGraph, tracker: Tracker
