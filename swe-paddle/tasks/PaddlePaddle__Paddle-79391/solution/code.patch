@@ -1,0 +1,583 @@
+diff --git a/python/paddle/compat/api_dispatch.py b/python/paddle/compat/api_dispatch.py
+new file mode 100644
+index 0000000000..848506dadb
+--- /dev/null
++++ b/python/paddle/compat/api_dispatch.py
+@@ -0,0 +1,189 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""``enable_compat(level=2)`` API dispatch: route ``paddle.*`` (and
++``paddle.Tensor`` methods) to the torch-aligned ``paddle.compat.*`` for
++external callers while paddle-internal callers keep native semantics.
++
++The enable/disable/level lifecycle lives in ``paddle.compat.proxy``; this
++module only installs/removes the dispatchers and holds the dispatch state.
++"""
++
++from __future__ import annotations
++
++import importlib
++import inspect
++import pkgutil
++import sys
++from functools import wraps
++from typing import TYPE_CHECKING, Any
++
++if TYPE_CHECKING:
++    import types
++    from collections.abc import Generator
++
++
++# (live module, attr name) -> original value for every patched ``paddle.*``
++# symbol, so ``disable_compat()`` can restore the paddle namespace.
++_PADDLE_NAMESPACE_SAVED: dict[tuple[types.ModuleType, str], Any] = {}
++
++
++def _caller_is_paddle_internal() -> bool:
++    """True when the caller of the dispatched ``paddle.*`` API is a ``paddle``
++    module. Paddle's own internals call these APIs with native kwargs/defaults, so
++    they (and the compat impls) get native; only external callers see compat."""
++    # _getframe(1) = our caller (the dispatch site); its f_back = who called paddle.X.
++    frame = sys._getframe(1).f_back
++    if frame is None:
++        return False
++    name = frame.f_globals.get("__name__") or ""
++    return name == "paddle" or name.startswith("paddle.")
++
++
++def dispatch_function(compat_fn: Any) -> Any:
++    """Wrap a native ``paddle`` callable to route external callers to
++    ``compat_fn`` while compat is enabled; paddle-internal callers and the
++    disabled state get the native callable. Installed only under
++    ``enable_compat(level=2)``; ``disable_compat`` restores the originals,
++    so the default hot path is untouched."""
++
++    def decorator(native_fn: Any) -> Any:
++        @wraps(native_fn)
++        def dispatcher(*args: Any, **kwargs: Any) -> Any:
++            if (
++                len(_PADDLE_NAMESPACE_SAVED) > 0
++                and not _caller_is_paddle_internal()
++            ):
++                return compat_fn(*args, **kwargs)
++            return native_fn(*args, **kwargs)
++
++        dispatcher.__compat_fn__ = compat_fn
++        dispatcher.__native_fn__ = native_fn
++        dispatcher.__signature__ = inspect.signature(compat_fn)
++        return dispatcher
++
++    return decorator
++
++
++def _iter_compat_modules() -> Generator[types.ModuleType, None, None]:
++    """Yield ``paddle.compat`` modules that declare ``__all__``.
++
++    ``pkgutil.walk_packages`` skips the starting package, so the root
++    ``paddle.compat`` (holding the top-level functions) is yielded explicitly.
++    """
++    import paddle.compat
++
++    if hasattr(paddle.compat, "__all__"):
++        yield paddle.compat
++    for module_info in pkgutil.walk_packages(
++        paddle.compat.__path__,
++        paddle.compat.__name__ + ".",
++    ):
++        compat_module = importlib.import_module(module_info.name)
++        if not hasattr(compat_module, "__all__"):
++            continue
++        yield compat_module
++
++
++def dispatch_class(native_cls: type, compat_cls: type) -> type:
++    """Create a class proxy that selects compat only for external callers."""
++
++    class _CompatAwareMeta(type(compat_cls)):
++        def __call__(cls, *args: Any, **kwargs: Any) -> Any:
++            if cls is proxy:
++                if (
++                    len(_PADDLE_NAMESPACE_SAVED) > 0
++                    and not _caller_is_paddle_internal()
++                ):
++                    return compat_cls(*args, **kwargs)
++                return native_cls(*args, **kwargs)
++            return super().__call__(*args, **kwargs)
++
++    proxy = _CompatAwareMeta(
++        native_cls.__name__,
++        (compat_cls,),
++        {
++            "__module__": native_cls.__module__,
++            "__compat_cls__": compat_cls,
++            "__native_cls__": native_cls,
++        },
++    )
++    proxy.__signature__ = inspect.signature(compat_cls)
++    return proxy
++
++
++def _patch_tensor_methods() -> None:
++    """Route ``paddle.Tensor.<m>`` to the compat function for the root compat APIs
++    that torch also exposes as Tensor methods (max/min/sort/split/unique/...), so
++    ``x.max(dim=1)`` works torch-style for external callers (native for internal).
++    The dispatcher is patched directly like any paddle Tensor method: the
++    descriptor protocol forwards the tensor as the first positional argument,
++    which is exactly the compat function's ``input`` parameter.
++    """
++    import paddle
++    import paddle.compat as compat_root
++
++    for attr_name in getattr(compat_root, "__all__", ()):
++        native_method = getattr(paddle.Tensor, attr_name, None)
++        if native_method is None:
++            continue
++        compat_fn = getattr(compat_root, attr_name)
++        _PADDLE_NAMESPACE_SAVED[(paddle.Tensor, attr_name)] = native_method
++        setattr(
++            paddle.Tensor,
++            attr_name,
++            dispatch_function(compat_fn)(native_method),
++        )
++
++
++def _apply_paddle_namespace_aliases() -> None:
++    """Install caller-aware dispatchers/proxies for every public ``paddle.compat.*``
++    symbol that has a ``paddle.*`` counterpart, plus the Tensor methods."""
++    if _PADDLE_NAMESPACE_SAVED:
++        return
++
++    for compat_module in _iter_compat_modules():
++        target_name = compat_module.__name__.replace(
++            "paddle.compat", "paddle", 1
++        )
++        try:
++            target_module = importlib.import_module(target_name)
++        except ModuleNotFoundError:
++            continue
++        for attr_name in compat_module.__all__:
++            compat_attr = getattr(compat_module, attr_name)
++            current = getattr(target_module, attr_name, None)
++            if current is None or current is compat_attr:
++                continue
++            _PADDLE_NAMESPACE_SAVED[(target_module, attr_name)] = current
++            if isinstance(compat_attr, type):
++                setattr(
++                    target_module,
++                    attr_name,
++                    dispatch_class(current, compat_attr),
++                )
++            else:
++                setattr(
++                    target_module,
++                    attr_name,
++                    dispatch_function(compat_attr)(current),
++                )
++    _patch_tensor_methods()
++
++
++def _restore_paddle_namespace_aliases() -> None:
++    """Undo :func:`_apply_paddle_namespace_aliases`, restoring the paddle namespace."""
++    for (target_module, attr_name), original in _PADDLE_NAMESPACE_SAVED.items():
++        setattr(target_module, attr_name, original)
++    _PADDLE_NAMESPACE_SAVED.clear()
+diff --git a/python/paddle/compat/distributions/categorical.py b/python/paddle/compat/distributions/categorical.py
+index 7836595d13..910aba15f3 100644
+--- a/python/paddle/compat/distributions/categorical.py
++++ b/python/paddle/compat/distributions/categorical.py
+@@ -20,8 +20,10 @@ import paddle
+ from paddle.distribution import constraint, distribution
+ from paddle.tensor import multinomial
+ 
++from ..utils import _CompatClassMeta
+ 
+-class Categorical(distribution.Distribution):
++
++class Categorical(distribution.Distribution, metaclass=_CompatClassMeta):
+     arg_constraints = {
+         "probs": constraint.simplex,
+         "logits": constraint.real_vector,
+@@ -61,7 +63,9 @@ class Categorical(distribution.Distribution):
+         batch_shape = (
+             tuple(self._param.shape[:-1]) if self._param.dim() > 1 else ()
+         )
+-        super().__init__(batch_shape, validate_args=validate_args)
++        distribution.Distribution.__init__(
++            self, batch_shape, validate_args=validate_args
++        )
+ 
+     def expand(self, batch_shape, _instance=None):
+         new = (
+@@ -81,7 +85,9 @@ class Categorical(distribution.Distribution):
+         )
+         new._param = new._logits if new._logits is not None else new._probs
+         new._num_events = self._num_events
+-        super(Categorical, new).__init__(batch_shape, validate_args=False)
++        distribution.Distribution.__init__(
++            new, batch_shape, validate_args=False
++        )
+         new._validate_args_enabled = self._validate_args_enabled
+         return new
+ 
+diff --git a/python/paddle/compat/nn/__init__.py b/python/paddle/compat/nn/__init__.py
+index 2b8e797e6d..e401845d96 100644
+--- a/python/paddle/compat/nn/__init__.py
++++ b/python/paddle/compat/nn/__init__.py
+@@ -23,6 +23,7 @@ from paddle import nn
+ from paddle.nn.modules.utils import _single
+ from paddle.utils.decorator_utils import ForbidKeywordsDecorator
+ 
++from ..utils import _CompatClassMeta
+ from . import functional
+ from .transformer import MultiheadAttention
+ 
+@@ -58,7 +59,7 @@ __all__ = [
+ ]
+ 
+ 
+-class BatchNorm1D(nn.BatchNorm1D):
++class BatchNorm1D(nn.BatchNorm1D, metaclass=_CompatClassMeta):
+     def __init__(
+         self,
+         num_features: int,
+@@ -85,7 +86,7 @@ class BatchNorm1D(nn.BatchNorm1D):
+         self.momentum = momentum
+ 
+ 
+-class BatchNorm2D(nn.BatchNorm2D):
++class BatchNorm2D(nn.BatchNorm2D, metaclass=_CompatClassMeta):
+     def __init__(
+         self,
+         num_features: int,
+@@ -112,7 +113,7 @@ class BatchNorm2D(nn.BatchNorm2D):
+         self.momentum = momentum
+ 
+ 
+-class BatchNorm3D(nn.BatchNorm3D):
++class BatchNorm3D(nn.BatchNorm3D, metaclass=_CompatClassMeta):
+     def __init__(
+         self,
+         num_features: int,
+@@ -144,7 +145,7 @@ BatchNorm2d = BatchNorm2D
+ BatchNorm3d = BatchNorm3D
+ 
+ 
+-class AvgPool1D(nn.Layer):
++class AvgPool1D(nn.Layer, metaclass=_CompatClassMeta):
+     r"""
+     This operation applies a 1D average pooling over an input signal composed
+     of several input planes, based on the input, output_size, return_mask parameters.
+@@ -227,7 +228,7 @@ class AvgPool1D(nn.Layer):
+         ceil_mode: bool = False,
+         count_include_pad: bool = True,
+     ) -> None:
+-        super().__init__()
++        nn.Layer.__init__(self)
+         self.kernel_size = _single(kernel_size)
+         self.stride = _single(stride if stride is not None else kernel_size)
+         self.padding = _single(padding)
+@@ -248,7 +249,7 @@ class AvgPool1D(nn.Layer):
+         return f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}"
+ 
+ 
+-class AvgPool2D(nn.Layer):
++class AvgPool2D(nn.Layer, metaclass=_CompatClassMeta):
+     r"""
+     This operation applies 2D average pooling over input features based on the input,
+     and kernel_size, stride, padding parameters. Input(X) and Output(Out) are
+@@ -345,7 +346,7 @@ class AvgPool2D(nn.Layer):
+         count_include_pad: bool = True,
+         divisor_override: int | None = None,
+     ):
+-        super().__init__()
++        nn.Layer.__init__(self)
+         self.kernel_size = kernel_size
+         self.stride = stride if (stride is not None) else kernel_size
+         self.padding = padding
+@@ -368,7 +369,7 @@ class AvgPool2D(nn.Layer):
+         return f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}"
+ 
+ 
+-class AvgPool3D(nn.Layer):
++class AvgPool3D(nn.Layer, metaclass=_CompatClassMeta):
+     """
+ 
+     This operation applies 3D max pooling over input features based on the input,
+@@ -452,7 +453,7 @@ class AvgPool3D(nn.Layer):
+         count_include_pad: bool = True,
+         divisor_override: int | None = None,
+     ) -> None:
+-        super().__init__()
++        nn.Layer.__init__(self)
+         self.kernel_size = kernel_size
+         self.stride = stride if (stride is not None) else kernel_size
+         self.padding = padding
+@@ -481,7 +482,7 @@ class AvgPool3D(nn.Layer):
+         self.__dict__.setdefault("count_include_pad", True)
+ 
+ 
+-class Unfold(nn.Unfold):
++class Unfold(nn.Unfold, metaclass=_CompatClassMeta):
+     """
+     A compatible version of paddle.nn.Unfold:
+ 
+@@ -547,7 +548,7 @@ class Unfold(nn.Unfold):
+         )
+ 
+ 
+-class Linear(nn.Layer):
++class Linear(nn.Layer, metaclass=_CompatClassMeta):
+     r"""
+ 
+     Python compatible fully-connected linear transformation layer. For each input :math:`X` ,
+@@ -639,7 +640,7 @@ class Linear(nn.Layer):
+         device: PlaceLike | None = None,
+         dtype: DTypeLike | None = None,
+     ) -> None:
+-        super().__init__()
++        nn.Layer.__init__(self)
+         self._dtype = (
+             self._helper.get_default_dtype() if dtype is None else dtype
+         )
+@@ -687,7 +688,7 @@ class Linear(nn.Layer):
+             nn.init.uniform_(self.bias, -bound, bound)
+ 
+ 
+-class Softmax(nn.Layer):
++class Softmax(nn.Layer, metaclass=_CompatClassMeta):
+     r"""
+     Softmax Activation.
+ 
+@@ -814,7 +815,7 @@ class Softmax(nn.Layer):
+         correct_name="paddle.nn.Softmax",
+     )
+     def __init__(self, dim: int | None = None) -> None:
+-        super().__init__()
++        nn.Layer.__init__(self)
+         self._dim = dim
+         self._dtype = None
+ 
+@@ -825,7 +826,7 @@ class Softmax(nn.Layer):
+         return f"dim={self._dim}"
+ 
+ 
+-class SmoothL1Loss(nn.Layer):
++class SmoothL1Loss(nn.Layer, metaclass=_CompatClassMeta):
+     r"""
+ 
+     PyTorch compatible version of :ref:`api_paddle_nn_SmoothL1Loss`, aligned with
+@@ -890,7 +891,7 @@ class SmoothL1Loss(nn.Layer):
+         reduction: str = 'mean',
+         beta: float = 1.0,
+     ) -> None:
+-        super().__init__()
++        nn.Layer.__init__(self)
+         if size_average is not None or reduce is not None:
+             reduction = (
+                 'none'
+diff --git a/python/paddle/compat/nn/transformer.py b/python/paddle/compat/nn/transformer.py
+index 222a954e76..61576dc06f 100644
+--- a/python/paddle/compat/nn/transformer.py
++++ b/python/paddle/compat/nn/transformer.py
+@@ -21,12 +21,18 @@ import paddle.nn.functional as F
+ from paddle import nn
+ from paddle.nn.initializer import XavierNormal, XavierUniform
+ 
++from ..utils import _CompatClassMeta
++
+ if TYPE_CHECKING:
+     from paddle import Tensor
+     from paddle._typing import DTypeLike, PlaceLike
+ 
+ 
+-class MultiheadAttention(nn.Layer):
++class MultiheadAttention(
++    nn.Layer,
++    metaclass=_CompatClassMeta,
++    native_cls=nn.MultiHeadAttention,
++):
+     r"""
+     Allows the model to jointly attend to information from different representation subspaces.
+ 
+@@ -100,9 +106,9 @@ class MultiheadAttention(nn.Layer):
+         dtype: DTypeLike | None = None,
+     ) -> None:
+         if dtype:
+-            super().__init__(dtype=dtype)
++            nn.Layer.__init__(self, dtype=dtype)
+         else:
+-            super().__init__()
++            nn.Layer.__init__(self)
+         self.embed_dim = embed_dim
+         self.kdim = kdim if kdim is not None else embed_dim
+         self.vdim = vdim if vdim is not None else embed_dim
+diff --git a/python/paddle/compat/proxy.py b/python/paddle/compat/proxy.py
+index c9f7f5488b..22b54cc51c 100644
+--- a/python/paddle/compat/proxy.py
++++ b/python/paddle/compat/proxy.py
+@@ -18,7 +18,6 @@ import importlib
+ import importlib.abc
+ import importlib.util
+ import inspect
+-import pkgutil
+ import sys
+ import types
+ import warnings
+@@ -26,6 +25,12 @@ from contextlib import contextmanager
+ from functools import cache
+ from typing import TYPE_CHECKING, Any, Literal
+ 
++from .api_dispatch import (
++    _apply_paddle_namespace_aliases,
++    _iter_compat_modules,
++    _restore_paddle_namespace_aliases,
++)
++
+ if TYPE_CHECKING:
+     from collections.abc import Generator, Iterable
+     from typing import TypeAlias
+@@ -147,31 +152,17 @@ def _extend_torch_proxy_overrides(
+ 
+ @cache
+ def _register_compat_override():
+-    import paddle.compat
+-
+-    PADDLE_PREFIX = "paddle.compat"
+-    TORCH_PREFIX = "torch"
+-    PUBLIC_ATTR_DECLARATION = "__all__"
+-
+     compat_overrides = {}
+-    for module_info in pkgutil.walk_packages(
+-        paddle.compat.__path__,
+-        paddle.compat.__name__ + ".",
+-    ):
+-        module = importlib.import_module(module_info.name)
+-        if hasattr(module, PUBLIC_ATTR_DECLARATION):
+-            public_attrs = getattr(module, PUBLIC_ATTR_DECLARATION)
+-            torch_module_name = module_info.name.replace(
+-                PADDLE_PREFIX, TORCH_PREFIX, 1
++    for module in _iter_compat_modules():
++        torch_module_name = module.__name__.replace("paddle.compat", "torch", 1)
++        for attr_name in module.__all__:
++            if attr_name.startswith("_"):
++                continue
++            paddle_attr = getattr(module, attr_name)
++            torch_attr_name = f"{torch_module_name}.{attr_name}"
++            compat_overrides[torch_attr_name] = RawOverriddenAttribute(
++                paddle_attr
+             )
+-            for attr_name in public_attrs:
+-                if attr_name.startswith("_"):
+-                    continue
+-                paddle_attr = getattr(module, attr_name)
+-                torch_attr_name = f"{torch_module_name}.{attr_name}"
+-                compat_overrides[torch_attr_name] = RawOverriddenAttribute(
+-                    paddle_attr
+-                )
+     _extend_torch_proxy_overrides(compat_overrides)
+ 
+ 
+@@ -479,6 +470,7 @@ def enable_compat(
+     blocked_modules: _ScopeType = None,
+     backend: Literal["torch"] = "torch",
+     silent: bool = False,
++    level: int = 1,
+ ) -> None:
+     """
+     Enable the PyTorch compat by adding the TorchProxyMetaFinder to sys.meta_path.
+@@ -493,6 +485,9 @@ def enable_compat(
+             "torch" is supported. Defaults to "torch".
+         silent (bool, optional): If True, suppresses warnings about scope changes.
+             Defaults to False.
++        level (int, optional): The compatibility level. ``1`` (default) preserves the
++            original ``torch -> paddle`` proxy behavior. ``2`` aliases the torch-aligned
++            ``paddle.compat.*`` APIs onto ``paddle.*`` and ``paddle.Tensor```. Defaults to 1.
+ 
+     Example:
+         .. code-block:: pycon
+@@ -517,6 +512,10 @@ def enable_compat(
+             >>> paddle.disable_compat()  # Disable torch compat
+     """
+     assert backend == "torch", f"Unsupported backend: {backend}"
++
++    if level not in {1, 2}:
++        raise ValueError(f"Unsupported level: {level}. It should be 1 or 2.")
++
+     blocked_modules = _parse_scope(blocked_modules)
+     if blocked_modules is not None:
+         extend_torch_proxy_blocked_modules(blocked_modules)
+@@ -526,6 +525,9 @@ def enable_compat(
+     _modify_scope_of_torch_proxy(scope, silent=silent)
+     sys.meta_path.insert(0, TORCH_PROXY_FINDER)
+ 
++    if level == 2:
++        _apply_paddle_namespace_aliases()
++
+ 
+ def disable_compat() -> None:
+     """
+@@ -547,6 +549,7 @@ def disable_compat() -> None:
+     """
+     if TORCH_PROXY_FINDER in sys.meta_path:
+         sys.meta_path.remove(TORCH_PROXY_FINDER)
++        _restore_paddle_namespace_aliases()
+         _clear_torch_proxy_modules()
+         _copy_torch_modules_from_cache()
+         return
+diff --git a/python/paddle/compat/utils.py b/python/paddle/compat/utils.py
+index e909473a9e..2b68aeb789 100644
+--- a/python/paddle/compat/utils.py
++++ b/python/paddle/compat/utils.py
+@@ -21,6 +21,40 @@ from paddle.framework import (
+ )
+ 
+ 
++class _CompatClassMeta(type):
++    """Keep compat classes recognizable as native classes across dispatch."""
++
++    def __new__(mcls, name, bases, namespace, *, native_cls=None, **kwargs):
++        if native_cls is None:
++            module_parts = namespace.get('__module__', '').split('.')
++            if (
++                module_parts[:2] == ['paddle', 'compat']
++                and len(module_parts) > 2
++            ):
++                native_module = getattr(paddle, module_parts[2], None)
++                native_cls = getattr(native_module, name, None)
++        if isinstance(native_cls, type) and not any(
++            issubclass(base, native_cls) for base in bases
++        ):
++            bases = tuple(
++                native_cls if issubclass(native_cls, base) else base
++                for base in bases
++            )
++        return super().__new__(mcls, name, bases, namespace, **kwargs)
++
++    def __instancecheck__(cls, instance: object) -> bool:
++        native_cls = cls.__dict__.get('__native_cls__')
++        if native_cls is not None:
++            return isinstance(instance, native_cls)
++        return super().__instancecheck__(instance)
++
++    def __subclasscheck__(cls, subclass: type) -> bool:
++        native_cls = cls.__dict__.get('__native_cls__')
++        if native_cls is not None:
++            return issubclass(subclass, native_cls)
++        return super().__subclasscheck__(subclass)
++
++
+ def _check_out_status(
+     out: Tensor | tuple[Tensor, Tensor] | list[Tensor],
+     expect_multiple: bool = False,
