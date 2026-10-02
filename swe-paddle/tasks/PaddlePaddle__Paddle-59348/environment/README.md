@@ -30,3 +30,6 @@ bash tests/test.sh
 
 - GPU kernel changes need CUDA to fully exercise; CPU-only environments should run the CPU PIR coverage path.
 - Dy2static utils 白名单调整可能扩大相邻用例面，主验收以 `sequence_mask` PIR 覆盖为准。
+- 上游 CTest 通过 `tools/test_runner.py` 执行本测试，并因 `static_mode_white_list` 先调用 `paddle.enable_static()`；测试文件自身的 `__main__` 不开启静态图。`tests/test.sh` 在启动 pytest 前显式调用 `paddle.enable_static()`，否则 `TestSequenceMaskOpError::test_errors` 会在动态图下误报失败。
+- `op_test` / `white_list` 需要 `test/legacy_test` 与 `test` 在 `PYTHONPATH` 中，`tests/test.sh` 已设置。
+- 预期 Gold 结果：15 项全部通过（13 项 PIR `sequence_mask` 目标用例 + `TestSequenceMaskOpError`、`TestSequenceMaskWithEmptyTensor` 2 项原有行为）；skip 不计为通过。
