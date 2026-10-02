@@ -1,0 +1,78 @@
+diff --git a/test/legacy_test/test_compat_minmax.py b/test/legacy_test/test_compat_minmax.py
+index e371bbf..347fbc3 100644
+--- a/test/legacy_test/test_compat_minmax.py
++++ b/test/legacy_test/test_compat_minmax.py
+@@ -555,5 +555,73 @@ class TestCompatMax(TestCompatMinMaxBase):
+         )
+ 
+ 
++class TestCompatMinMaxCUDAGrad(unittest.TestCase):
++    """CUDA-only backward gradient indexing tests for paddle.compat.min/max.
++
++    Verifies that upstream gradients are correctly routed to input positions
++    when keepdim=False and the reduction axis is not trailing.  Uses unique
++    float64 values and nonuniform upstream gradients so that every element
++    is distinguishable.
++    """
++
++    def setUp(self):
++        self._prev_device = paddle.get_device()
++        paddle.set_device('gpu:0')
++
++    def tearDown(self):
++        paddle.set_device(self._prev_device)
++
++    def _run_backward(self, op_name, dim, keepdim):
++        """Run backward gradient check for a single (op, dim, keepdim) combo."""
++        shape = [2, 3, 4]
++        numel = int(np.prod(shape))
++        x_np = ((np.arange(numel) * 7) % numel).astype('float64').reshape(shape)
++        test_op = paddle.compat.min if op_name == 'min' else paddle.compat.max
++        reduce_index = np.argmin if op_name == 'min' else np.argmax
++
++        axis = dim % len(shape)
++        if keepdim:
++            out_shape = list(shape)
++            out_shape[axis] = 1
++        else:
++            out_shape = [s for i, s in enumerate(shape) if i != axis]
++
++        np_out_numel = int(np.prod(out_shape))
++        dy_np = (np.arange(1, np_out_numel + 1) * 0.5).astype('float64').reshape(
++            out_shape
++        )
++
++        expected_grad = np.zeros(shape, dtype='float64')
++        np.put_along_axis(
++            expected_grad,
++            np.expand_dims(reduce_index(x_np, axis=axis), axis=axis),
++            dy_np if keepdim else np.expand_dims(dy_np, axis=axis),
++            axis=axis,
++        )
++
++        data = paddle.to_tensor(x_np, stop_gradient=False)
++        result = test_op(data, dim=dim, keepdim=keepdim)
++        self.assertEqual(list(result.values.shape), out_shape)
++        result.values.backward(paddle.to_tensor(dy_np))
++        np.testing.assert_allclose(
++            data.grad.numpy(),
++            expected_grad,
++            atol=1e-6,
++            err_msg=f"{op_name} backward mismatch at dim={dim}, keepdim={keepdim}",
++        )
++
++    def test_p2p_grad(self):
++        """P2P: keepdim=True non-trailing and keepdim=False trailing for min/max."""
++        for op in ('min', 'max'):
++            self._run_backward(op, dim=0, keepdim=True)
++            self._run_backward(op, dim=-1, keepdim=False)
++
++    def test_f2p_grad(self):
++        """F2P: keepdim=False dims 0,1,-2 for min/max."""
++        for op in ('min', 'max'):
++            for dim in (0, 1, -2):
++                self._run_backward(op, dim=dim, keepdim=False)
++
++
+ if __name__ == '__main__':
+     unittest.main()
