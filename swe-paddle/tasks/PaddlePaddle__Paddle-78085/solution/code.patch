@@ -1,0 +1,462 @@
+diff --git a/python/paddle/distributed/auto_parallel/static/auto_align_tool.py b/python/paddle/distributed/auto_parallel/static/auto_align_tool.py
+index 84ba2ea510eff30aa5f143fce2882d5d9e2c60c3..08c5c972bf27551951b23513589a56954b6b94fc 100644
+--- a/python/paddle/distributed/auto_parallel/static/auto_align_tool.py
++++ b/python/paddle/distributed/auto_parallel/static/auto_align_tool.py
+@@ -320,7 +320,11 @@ class AutoAlignTool:
+             if "vars" in filename:
+                 assert filename.endswith("pkl")
+                 with open(filepath, "rb") as f:
+-                    vars_list.append(pickle.load(f))
++                    from paddle.framework.restricted_unpickler import (
++                        safe_load_pickle,
++                    )
++
++                    vars_list.append(safe_load_pickle(f))
+             elif "program" in filename:
+                 assert filename.endswith("pdmodel")
+                 with open(filepath, "rb") as f:
+@@ -329,7 +333,11 @@ class AutoAlignTool:
+             elif "dist_attr" in filename:
+                 assert filename.endswith("pkl")
+                 with open(filepath, "rb") as f:
+-                    dist_attr_list.append(pickle.load(f))
++                    from paddle.framework.restricted_unpickler import (
++                        safe_load_pickle,
++                    )
++
++                    dist_attr_list.append(safe_load_pickle(f))
+ 
+         dist_attr_map = {}
+         for dist_attrs in dist_attr_list:
+diff --git a/python/paddle/distributed/auto_parallel/static/dist_saver.py b/python/paddle/distributed/auto_parallel/static/dist_saver.py
+index 5affea39d6b269176e327ee23d7db6afc7559917..85538b63639681295895509dc0d413115606496d 100644
+--- a/python/paddle/distributed/auto_parallel/static/dist_saver.py
++++ b/python/paddle/distributed/auto_parallel/static/dist_saver.py
+@@ -113,7 +113,11 @@ class DistributedSaver:
+             state_dict = {}
+             for file in file_list:
+                 with open(file, 'rb') as f:
+-                    state_dict_info = pickle.load(f, encoding='latin1')
++                    from paddle.framework.restricted_unpickler import (
++                        safe_load_pickle,
++                    )
++
++                    state_dict_info = safe_load_pickle(f, encoding='latin1')
+                 for name, value in state_dict_info.items():
+                     if name in state_dict:
+                         state_dict[name].append(np.array(value))
+@@ -144,7 +148,11 @@ class DistributedSaver:
+         dist_attr = {}
+         for dist_attr_file in dist_attr_file_list:
+             with open(dist_attr_file, 'rb') as f:
+-                dist_attr_info = pickle.load(f, encoding='latin1')
++                from paddle.framework.restricted_unpickler import (
++                    safe_load_pickle,
++                )
++
++                dist_attr_info = safe_load_pickle(f, encoding='latin1')
+             for name, attr in dist_attr_info.items():
+                 if name not in dist_attr:
+                     dist_attr[name] = attr
+diff --git a/python/paddle/distributed/auto_parallel/static/parallelizer.py b/python/paddle/distributed/auto_parallel/static/parallelizer.py
+index 27177fae849cea88a69bb250895988ab77cf65aa..03f269c27b5629391089403d809f7a31563c410a 100644
+--- a/python/paddle/distributed/auto_parallel/static/parallelizer.py
++++ b/python/paddle/distributed/auto_parallel/static/parallelizer.py
+@@ -433,7 +433,11 @@ class AutoParallelizer:
+                 with open(
+                     searched_dist_context_path, "rb"
+                 ) as dist_context_file:
+-                    saved_dist_context = pickle.load(dist_context_file)
++                    from paddle.framework.restricted_unpickler import (
++                        safe_load_pickle,
++                    )
++
++                    saved_dist_context = safe_load_pickle(dist_context_file)
+                     dist_context = DistributedContext()
+                     for op in self._main_program.global_block().ops:
+                         dist_attr = saved_dist_context["ops_dist_attr"][
+diff --git a/python/paddle/distributed/auto_parallel/static/planner_v2.py b/python/paddle/distributed/auto_parallel/static/planner_v2.py
+index 9c33d0f260aee8f2a61018e240ba7d737bc4f0b6..caaff9a9ef592406dd8965e239a9187359c60fa3 100755
+--- a/python/paddle/distributed/auto_parallel/static/planner_v2.py
++++ b/python/paddle/distributed/auto_parallel/static/planner_v2.py
+@@ -14,7 +14,6 @@
+ 
+ import logging
+ import os
+-import pickle
+ import sys
+ 
+ import numpy as np
+@@ -83,7 +82,11 @@ class Planner:
+         if path and os.path.exists(path):
+             try:
+                 with open(path, "rb") as f:
+-                    dist_attrs = pickle.load(f)
++                    from paddle.framework.restricted_unpickler import (
++                        safe_load_pickle,
++                    )
++
++                    dist_attrs = safe_load_pickle(f)
+                 tensor_dist_attrs = dist_attrs["tensor"]
+                 op_dist_attrs = dist_attrs["op"]
+                 process_meshes = dist_attrs["process_meshes"]
+diff --git a/python/paddle/distributed/auto_parallel/static/tuner/profiler.py b/python/paddle/distributed/auto_parallel/static/tuner/profiler.py
+index 45bd5905faa967a2d4f99a38500f8a302d53b40d..845584446c42061ce7c02c6f52c8e3a261146b8a 100644
+--- a/python/paddle/distributed/auto_parallel/static/tuner/profiler.py
++++ b/python/paddle/distributed/auto_parallel/static/tuner/profiler.py
+@@ -15,7 +15,6 @@
+ import argparse
+ import json
+ import os
+-import pickle
+ import sys
+ import time
+ import traceback
+@@ -214,7 +213,9 @@ def profiler(args):
+             f"There is no profile context named {args.ctx_filename}."
+         )
+     with open(args.ctx_filename, 'rb') as f:
+-        profile_ctx = pickle.load(f, encoding='latin1')
++        from paddle.framework.restricted_unpickler import safe_load_pickle
++
++        profile_ctx = safe_load_pickle(f, encoding='latin1')
+ 
+     init_comm(profile_ctx)
+ 
+diff --git a/python/paddle/framework/io.py b/python/paddle/framework/io.py
+index bdbdac0d5bddcdbd9a029bd994e6974290d6fbc3..0083631db62cbc513e8d2d5fb662d22c288c1687 100644
+--- a/python/paddle/framework/io.py
++++ b/python/paddle/framework/io.py
+@@ -50,8 +50,10 @@ from .io_utils import (
+     _open_file_buffer,
+     _pack_loaded_dict,
+     _pickle_loads_mac,
++    _reconstruct_dense_tensor_data,
+     _unpack_saved_dict,
+ )
++from .restricted_unpickler import safe_load_pickle
+ 
+ if TYPE_CHECKING:
+     from io import BytesIO
+@@ -229,7 +231,7 @@ def _load_state_dict_from_save_inference_model(model_path, config):
+         var_info_path = os.path.join(model_path, var_info_filename)
+         if os.path.exists(var_info_path):
+             with open(var_info_path, 'rb') as f:
+-                extra_var_info = pickle.load(f)
++                extra_var_info = safe_load_pickle(f)
+             structured_para_dict = {}
+             for var_name in load_param_dict:
+                 structured_name = extra_var_info[var_name].get(
+@@ -450,7 +452,7 @@ def _pickle_save(obj, f, protocol):
+         else:
+             data = np.array(self._copy(p))
+ 
+-        return (eval, ('data', {'data': data}))
++        return (_reconstruct_dense_tensor_data, (data,))
+ 
+     def reduce_Layer(self):
+         raise ValueError(
+@@ -1266,7 +1268,7 @@ def load(path: str | BytesIO, **configs: Unpack[_LoadOptions]) -> Any:
+                 ):
+                     load_result = _pickle_loads_mac(path, f)
+                 else:
+-                    load_result = pickle.load(f, encoding='latin1')
++                    load_result = safe_load_pickle(f, encoding='latin1')
+ 
+                 # TODO(weixin):If `obj` is any object, the judgment condition should be more precise.
+                 if isinstance(load_result, dict):
+@@ -1383,7 +1385,7 @@ def _legacy_load(path, **configs):
+             load_result = load_file(path)
+         else:
+             with _open_file_buffer(path, 'rb') as f:
+-                load_result = pickle.load(f, encoding='latin1')
++                load_result = safe_load_pickle(f, encoding='latin1')
+         load_result = _pack_loaded_dict(load_result)
+         if (
+             not config.keep_name_table
+diff --git a/python/paddle/framework/io_utils.py b/python/paddle/framework/io_utils.py
+index 09b6a407afda76fc29132baa6959d9f44145b999..6e85fb61e08946a14eced74c656c277d7663fbf2 100644
+--- a/python/paddle/framework/io_utils.py
++++ b/python/paddle/framework/io_utils.py
+@@ -207,13 +207,30 @@ def _legacy_static_save(param_dict, model_path, protocol=2):
+             pickle.dump(param_dict, f, protocol=protocol)
+ 
+ 
++def _reconstruct_dense_tensor_data(data):
++    """Safe reconstruction function for DenseTensor data during unpickling.
++
++    This replaces the previous use of eval() in reduce_DenseTensor,
++    which was a security concern (CWE-502).
++
++    Args:
++        data: numpy array containing the tensor data.
++
++    Returns:
++        The data unchanged (identity function for pickle reconstruction).
++    """
++    return data
++
++
+ def _pickle_loads_mac(path, f):
+     pickle_bytes = bytearray(0)
+     file_size = os.path.getsize(path)
+     max_bytes = 2**30
+     for _ in range(0, file_size, max_bytes):
+         pickle_bytes += f.read(max_bytes)
+-    load_result = pickle.loads(pickle_bytes, encoding='latin1')
++    from .restricted_unpickler import safe_loads_pickle
++
++    load_result = safe_loads_pickle(pickle_bytes, encoding='latin1')
+     return load_result
+ 
+ 
+diff --git a/python/paddle/framework/restricted_unpickler.py b/python/paddle/framework/restricted_unpickler.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..7ad0616b17cd936f37c56845d4a1f80408a6a57e
+--- /dev/null
++++ b/python/paddle/framework/restricted_unpickler.py
+@@ -0,0 +1,181 @@
++# Copyright (c) 2026 PaddlePaddle Authors. All Rights Reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""
++Restricted Unpickler for secure deserialization of model files.
++
++This module provides a RestrictedUnpickler that only allows a whitelist
++of safe classes to be deserialized, preventing arbitrary code execution
++via malicious pickle payloads (CWE-502).
++"""
++
++from __future__ import annotations
++
++import pickle
++
++# Whitelist of allowed modules and their allowed classes.
++# Only these classes can be instantiated during deserialization.
++_ALLOWED_CLASSES: dict[str, set[str]] = {
++    # NumPy types (required for model parameters)
++    'numpy': {
++        'ndarray',
++        'dtype',
++        'float32',
++        'float64',
++        'float16',
++        'int32',
++        'int64',
++        'int16',
++        'int8',
++        'uint8',
++        'bool_',
++        'complex64',
++        'complex128',
++        'bfloat16',
++    },
++    'numpy.core.multiarray': {
++        '_reconstruct',
++        'scalar',
++    },
++    'numpy.core.numeric': {
++        '*',
++    },
++    'numpy._core.multiarray': {
++        '_reconstruct',
++        'scalar',
++    },
++    'numpy._core.numeric': {
++        '*',
++    },
++    # Collections (required for state_dict structures)
++    'collections': {
++        'OrderedDict',
++        'defaultdict',
++    },
++    # Python builtins (required for basic data types in state dicts)
++    'builtins': {
++        'dict',
++        'list',
++        'tuple',
++        'set',
++        'frozenset',
++        'bytes',
++        'bytearray',
++        'str',
++        'int',
++        'float',
++        'bool',
++        'complex',
++        'slice',
++        'range',
++        'type',
++    },
++    # copyreg (used by pickle protocol for reconstructing objects)
++    'copyreg': {
++        '_reconstructor',
++    },
++    # _codecs (used for encoding in pickle)
++    '_codecs': {
++        'encode',
++    },
++    # Paddle internal: safe DenseTensor reconstruction function
++    'paddle.framework.io_utils': {
++        '_reconstruct_dense_tensor_data',
++    },
++    # Paddle internal: generator state for RNG serialization
++    'paddle.base.libpaddle': {
++        'GeneratorState',
++    },
++    # Paddle internal: distributed flex checkpoint metadata classes
++    # These dataclasses are serialized via paddle.save() during checkpoint
++    # operations and must be allowed for paddle.load() to restore them.
++    'paddle.distributed.flex_checkpoint.dcp.metadata': {
++        'Metadata',
++        'LocalTensorMetadata',
++        'LocalTensorIndex',
++    },
++}
++
++
++class RestrictedUnpickler(pickle.Unpickler):
++    """A restricted unpickler that only allows whitelisted classes.
++
++    This prevents arbitrary code execution during deserialization by
++    blocking dangerous modules such as os, subprocess, builtins.eval,
++    builtins.exec, etc.
++
++    Usage:
++        with open('model.pdparams', 'rb') as f:
++            data = RestrictedUnpickler(f).load()
++    """
++
++    def find_class(self, module: str, name: str) -> type:
++        """Override find_class to restrict which classes can be loaded.
++
++        Args:
++            module: The module name containing the class.
++            name: The class name to load.
++
++        Returns:
++            The class object if it is in the whitelist.
++
++        Raises:
++            pickle.UnpicklingError: If the class is not in the whitelist.
++        """
++        allowed_names = _ALLOWED_CLASSES.get(module)
++        if allowed_names is not None:
++            if '*' in allowed_names or name in allowed_names:
++                return super().find_class(module, name)
++
++        raise pickle.UnpicklingError(
++            f"Forbidden class: {module}.{name}. "
++            f"For security, only whitelisted classes are allowed during "
++            f"deserialization of model files. If you believe this class "
++            f"should be allowed, please report an issue at "
++            f"https://github.com/PaddlePaddle/Paddle/issues"
++        )
++
++
++def safe_load_pickle(f, encoding='latin1'):
++    """Safely load a pickle file using RestrictedUnpickler.
++
++    Args:
++        f: A file-like object (opened in binary mode) to read from.
++        encoding: The encoding to use for unpickling (default: 'latin1').
++
++    Returns:
++        The deserialized Python object.
++
++    Raises:
++        pickle.UnpicklingError: If the pickle data contains forbidden classes.
++    """
++    return RestrictedUnpickler(f, encoding=encoding).load()
++
++
++def safe_loads_pickle(data, encoding='latin1'):
++    """Safely load pickle data from bytes using RestrictedUnpickler.
++
++    Args:
++        data: Bytes or bytearray containing pickled data.
++        encoding: The encoding to use for unpickling (default: 'latin1').
++
++    Returns:
++        The deserialized Python object.
++
++    Raises:
++        pickle.UnpicklingError: If the pickle data contains forbidden classes.
++    """
++    import io
++
++    return RestrictedUnpickler(io.BytesIO(data), encoding=encoding).load()
+diff --git a/python/paddle/hapi/model.py b/python/paddle/hapi/model.py
+index fdab4c97daab609e742e09bca2b0212d5d23bcae..0d26128104693bcf2c1ef922dbae8f09e0acd228 100644
+--- a/python/paddle/hapi/model.py
++++ b/python/paddle/hapi/model.py
+@@ -1958,8 +1958,12 @@ class Model:
+         def _load_state_from_path(path):
+             if not os.path.exists(path):
+                 return
++            from paddle.framework.restricted_unpickler import (
++                safe_load_pickle,
++            )
++
+             with open(path, 'rb') as f:
+-                return pickle.load(f, encoding='latin1')
++                return safe_load_pickle(f, encoding='latin1')
+ 
+         def _check_match(key, param):
+             state = param_state.get(key, None)
+diff --git a/python/paddle/jit/translated_layer.py b/python/paddle/jit/translated_layer.py
+index 8f98f276f5ccd7a759383064976c3468ef2af820..d7d5b4e9ed7b192baae83d275feda3d77a3c3a80 100644
+--- a/python/paddle/jit/translated_layer.py
++++ b/python/paddle/jit/translated_layer.py
+@@ -13,7 +13,6 @@
+ # limitations under the License.
+ 
+ import os
+-import pickle
+ 
+ import numpy as np
+ 
+@@ -724,8 +723,10 @@ def _load_persistable_vars(
+     model_path, var_info_path, program_holder, params_filename
+ ):
+     # 1. load extra var info
++    from paddle.framework.restricted_unpickler import safe_load_pickle
++
+     with open(var_info_path, 'rb') as f:
+-        extra_var_info = pickle.load(f)
++        extra_var_info = safe_load_pickle(f)
+ 
+     # 2. construct var dict
+     load_var_dict = {}
+diff --git a/python/paddle/static/io_utils.py b/python/paddle/static/io_utils.py
+index 132e796204177b057773317a403fa24409aa240e..e4c7445688b62c83454b8dd57524b6c9a35e37e3 100644
+--- a/python/paddle/static/io_utils.py
++++ b/python/paddle/static/io_utils.py
+@@ -13,7 +13,6 @@
+ # limitations under the License.
+ 
+ import os
+-import pickle
+ import warnings
+ 
+ import paddle
+@@ -83,5 +82,7 @@ def _get_valid_program(program=None):
+ 
+ 
+ def _safe_load_pickle(file, encoding="ASCII"):
+-    load_dict = pickle.Unpickler(file, encoding=encoding).load()
++    from paddle.framework.restricted_unpickler import RestrictedUnpickler
++
++    load_dict = RestrictedUnpickler(file, encoding=encoding).load()
+     return load_dict
