@@ -1,0 +1,327 @@
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py b/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
+index f2932e66b736a23fd30cfa63765e936cd7f869fd..6aef764595be8f333eecc80bed139823b696bb3b 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
+@@ -30,6 +30,7 @@ from ...utils import (
+     FallbackError,
+     UnsupportedIteratorBreak,
+     UnsupportedOperationBreak,
++    do_until_stop_iteration,
+     get_numpy_ufuncs,
+ )
+ from ...utils.exceptions import InnerError
+@@ -1274,7 +1275,7 @@ Dispatcher.register(
+ 
+ 
+ @Dispatcher.register_decorator(sum)
+-def dispatch_sum(
++def dispatch_sum_container_and_tensor(
+     var: ContainerVariable | TensorVariable,
+     start: VariableBase = None,  # type: ignore
+ ):
+@@ -1292,6 +1293,23 @@ def dispatch_sum(
+     return result
+ 
+ 
++@Dispatcher.register_decorator(sum)
++def dispatch_sum_iterable(
++    var: IterVariable,
++    start: VariableBase = None,  # type: ignore
++):
++    if start is None:
++        start = ConstantVariable.wrap_literal(0, var.graph)
++    call_next = BuiltinVariable(next, var.graph, DanglingTracker())
++    elements = do_until_stop_iteration(lambda: call_next(var))
++    result = reduce(
++        BuiltinVariable(operator.add, var.graph, DanglingTracker()),
++        elements,
++        start,
++    )
++    return result
++
++
+ @Dispatcher.register_decorator(reduce)
+ def dispatch_reduce(
+     func: CallableVariable,
+@@ -1308,25 +1326,55 @@ def dispatch_reduce(
+         except StopIteration:
+             raise InnerError("reduce() of empty iterable with no initial value")
+     result = initializer
+-    while True:
+-        try:
+-            result = func(result, iterator.next())
+-        except StopIteration:
+-            break
++
++    def update_result():
++        nonlocal result
++        result = func(result, iterator.next())
++
++    do_until_stop_iteration(update_result)
+     return result
+ 
+ 
+-Dispatcher.register(
+-    max,
+-    ("ListVariable",),
+-    lambda var: var.max(),
+-)
++@Dispatcher.register_decorator(max)
++def dispatch_max_iterable(var: ContainerVariable | IterVariable):
++    it = var.get_iter()
++    call_next = BuiltinVariable(next, var.graph, DanglingTracker())
++    try:
++        res = call_next(it)
++    except StopIteration:
++        raise InnerError("max() arg is an empty sequence")
++    call_gt = BuiltinVariable(operator.gt, var.graph, DanglingTracker())
++
++    def compare_max():
++        nonlocal res
++        item = call_next(it)
++        gt = call_gt(item, res)
++        if gt.get_py_value() is True:
++            res = item
+ 
+-Dispatcher.register(
+-    min,
+-    ("ListVariable",),
+-    lambda var: var.min(),
+-)
++    do_until_stop_iteration(compare_max)
++    return res
++
++
++@Dispatcher.register_decorator(min)
++def dispatch_min_iterable(var: ContainerVariable | IterVariable):
++    it = var.get_iter()
++    call_next = BuiltinVariable(next, var.graph, DanglingTracker())
++    try:
++        res = call_next(it)
++    except StopIteration:
++        raise InnerError("min() arg is an empty sequence")
++    call_lt = BuiltinVariable(operator.lt, var.graph, DanglingTracker())
++
++    def compare_min():
++        nonlocal res
++        item = call_next(it)
++        lt = call_lt(item, res)
++        if lt.get_py_value() is True:
++            res = item
++
++    do_until_stop_iteration(compare_min)
++    return res
+ 
+ 
+ @Dispatcher.register_decorator(max)
+@@ -1450,9 +1498,9 @@ Dispatcher.register(
+ )
+ 
+ 
+-# any for list
++# any
+ @Dispatcher.register_decorator(any)
+-def dispatch_list_any(var: ContainerVariable | IterVariable):
++def dispatch_any(var: ContainerVariable | IterVariable):
+     graph = var.graph
+     to_bool = BuiltinVariable(bool, graph, DanglingTracker())
+     it = var.get_iter()
+@@ -1468,9 +1516,9 @@ def dispatch_list_any(var: ContainerVariable | IterVariable):
+     return ConstantVariable(False, graph, DummyTracker([var]))
+ 
+ 
+-# all for list
++# all
+ @Dispatcher.register_decorator(all)
+-def dispatch_list_all(var: ContainerVariable | IterVariable):
++def dispatch_all(var: ContainerVariable | IterVariable):
+     graph = var.graph
+     to_bool = BuiltinVariable(bool, graph, DanglingTracker())
+     it = var.get_iter()
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py b/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py
+index 4115d49a8de13201268e7f7ec5c096945a8fb26b..544fa5f2fadb579f0b8cb4a2fd901c2fd8001a6f 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/basic.py
+@@ -837,7 +837,7 @@ class SymbolicVariable(VariableBase):
+         self.need_guard_value = True
+         log(
+             3,
+-            f"get_py_value from SymbolicVariable {self} caused value need guard",
++            f"get_py_value from SymbolicVariable {self} caused value need guard\n",
+         )
+         if isinstance(self.value, SymbolicValue):
+             assert isinstance(
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/container.py b/python/paddle/jit/sot/opcode_translator/executor/variables/container.py
+index b52d7d4289f8edd44186560a12faa8932c334fb1..383171565f764c9cffbb3d7009edf8b58a2bf8a6 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/container.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/container.py
+@@ -412,38 +412,6 @@ class ListVariable(ContainerVariable):
+ 
+         return ConstantVariable(-1, self.graph, DummyTracker([self, value]))
+ 
+-    def max(self):
+-        if len(self) == 0:
+-            raise ValueError("max() arg is an empty sequence")
+-        res = self[0]
+-        getitem = BuiltinVariable(
+-            operator.getitem, self.graph, DanglingTracker()
+-        )
+-        for index in range(len(self)):
+-            index_value = getitem(self, index)
+-            gt = BuiltinVariable(operator.gt, self.graph, DanglingTracker())(
+-                index_value, res
+-            )
+-            if gt.get_py_value() is True:
+-                res = index_value
+-        return res
+-
+-    def min(self):
+-        if len(self) == 0:
+-            raise ValueError("min() arg is an empty sequence")
+-        res = self[0]
+-        getitem = BuiltinVariable(
+-            operator.getitem, self.graph, DanglingTracker()
+-        )
+-        for index in range(len(self)):
+-            index_value = getitem(self, index)
+-            lt = BuiltinVariable(operator.lt, self.graph, DanglingTracker())(
+-                index_value, res
+-            )
+-            if lt.get_py_value() is True:
+-                res = index_value
+-        return res
+-
+     def getattr(self, name: str, default=None):
+         from .callable import BuiltinVariable
+ 
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/iter.py b/python/paddle/jit/sot/opcode_translator/executor/variables/iter.py
+index 6f7ded2ebaf701b7622de337ab593e0925994106..bdeccff44dbefd411503c989e8107429a9c694a8 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/iter.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/iter.py
+@@ -24,12 +24,15 @@ from paddle.jit.sot.opcode_translator.executor.variables.base import (
+ )
+ 
+ from ....profiler import EventGuard
+-from ....utils import BreakGraphError, FallbackError, UnsupportedOperationBreak
++from ....utils import do_until_stop_iteration
+ from ....utils.exceptions import (
++    BreakGraphError,
+     BreakGraphInlineCallBreak,
++    FallbackError,
+     FallbackInlineCallBreak,
+     OtherInlineCallBreak,
+     SotErrorBase,
++    UnsupportedOperationBreak,
+ )
+ from ..tracker import ConstTracker, DummyTracker, GetAttrTracker
+ from .base import VariableFactory
+@@ -57,6 +60,11 @@ class IterVariable(VariableBase):
+     def next(self):
+         raise NotImplementedError(f"Can not simulate `next` for {type(self)}")
+ 
++    def to_list(self):
++        raise NotImplementedError(
++            f"Can not simulate `to_list` for {type(self)}"
++        )
++
+     def send(self, value: VariableBase):
+         return self.next()
+ 
+@@ -182,10 +190,10 @@ class EnumerateVariable(SequenceIterVariable):
+     @staticmethod
+     def from_iterator(value, graph: FunctionGraph | None, tracker: Tracker):
+         iter_variable = value.get_iter()
+-        if isinstance(iter_variable, SequenceIterVariable):
+-            return EnumerateVariable(iter_variable, graph, tracker)
+-        else:
++        if isinstance(iter_variable, UserDefinedIterVariable):
+             return UserDefinedIterVariable(value, graph, tracker)
++        else:
++            return EnumerateVariable(iter_variable, graph, tracker)
+ 
+ 
+ class ZipVariable(SequenceIterVariable):
+@@ -247,7 +255,7 @@ class ZipVariable(SequenceIterVariable):
+ 
+         for variable in value:
+             iter_variable = variable.get_iter()
+-            if not isinstance(iter_variable, SequenceIterVariable):
++            if isinstance(iter_variable, UserDefinedIterVariable):
+                 return UserDefinedIterVariable(value, graph, tracker)
+             zip_targets.append(iter_variable)
+ 
+@@ -300,7 +308,7 @@ class MapVariable(SequenceIterVariable):
+ 
+         for variable in value:
+             iter_variable = variable.get_iter()
+-            if not isinstance(iter_variable, SequenceIterVariable):
++            if isinstance(iter_variable, UserDefinedIterVariable):
+                 return UserDefinedIterVariable(value, graph, tracker)
+             map_targets.append(iter_variable)
+ 
+@@ -391,6 +399,9 @@ class GeneratorVariable(IterVariable):
+     def next(self):
+         return self.send(ConstantVariable.wrap_literal(None, self.graph))
+ 
++    def to_list(self):
++        return do_until_stop_iteration(lambda: self.next())
++
+     @property
+     def main_info(self) -> dict[str, Any]:
+         return {
+@@ -417,6 +428,13 @@ class UserDefinedIterVariable(IterVariable):
+         self.holds = holded
+         super().__init__(graph, tracker)
+ 
++    def to_list(self):
++        raise BreakGraphError(
++            UnsupportedOperationBreak(
++                reason_str="Break graph when iterating user defined iterator"
++            )
++        )
++
+     def next(self):
+         raise BreakGraphError(
+             UnsupportedOperationBreak(
+diff --git a/python/paddle/jit/sot/utils/__init__.py b/python/paddle/jit/sot/utils/__init__.py
+index aaff68e1b7488431d1e0ac3e7cb9a78222a4e233..a2946213656539d07f9ebfa9823f98821f4d63a2 100644
+--- a/python/paddle/jit/sot/utils/__init__.py
++++ b/python/paddle/jit/sot/utils/__init__.py
+@@ -78,6 +78,7 @@ from .utils import (  # noqa: F401
+     StepInfoManager,
+     count_if,
+     current_symbol_registry,
++    do_until_stop_iteration,
+     execute_time,
+     flatten,
+     flatten_extend,
+diff --git a/python/paddle/jit/sot/utils/utils.py b/python/paddle/jit/sot/utils/utils.py
+index de797b621df7af6b28ebf3b1e1df33ca86f4e2de..e7354e729b55b4b2c1b133bb5e9445e2b0dea0c8 100644
+--- a/python/paddle/jit/sot/utils/utils.py
++++ b/python/paddle/jit/sot/utils/utils.py
+@@ -41,6 +41,8 @@ from .paddle_api_config import (
+ )
+ 
+ if TYPE_CHECKING:
++    from collections.abc import Callable
++
+     from paddle._typing import NestedStructure
+ 
+ T = TypeVar("T")
+@@ -418,6 +420,16 @@ def get_numpy_ufuncs():
+     return list(unary_ufuncs), list(binary_ufuncs)
+ 
+ 
++def do_until_stop_iteration(fn: Callable[[], T]) -> list[T]:
++    res = []
++    while True:
++        try:
++            res.append(fn())
++        except StopIteration:
++            break
++    return res
++
++
+ def get_obj_stable_repr(obj) -> str:
+     if hasattr(obj, '__qualname__'):
+         return obj.__qualname__
