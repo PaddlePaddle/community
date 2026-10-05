@@ -1,0 +1,267 @@
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py b/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
+index e846b1a972fe2e2c797be5f321aaa9f2d355d6c8..558e4ccfe8fd84f96a0b72e0b3ac23b86e7e8543 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variable_dispatch.py
+@@ -80,6 +80,7 @@ from .variables import (
+     NumPyArrayVariable,
+     NumPyVariable,
+     RangeVariable,
++    SizeVariable,
+     SliceVariable,
+     SuperVariable,
+     SymbolicVariable,
+@@ -263,6 +264,78 @@ Dispatcher.register(
+     ),
+ )
+ 
++# Size
++Dispatcher.register(
++    paddle.Size,
++    ("IterVariable",),
++    lambda var: SizeVariable(
++        var.to_list(),
++        graph=var.graph,
++        tracker=DummyTracker([var]),
++    ),
++)
++
++Dispatcher.register(
++    paddle.Size,
++    ("ContainerVariable",),
++    lambda var: SizeVariable(
++        list(var.get_wrapped_items()),
++        graph=var.graph,
++        tracker=DummyTracker([var]),
++    ),
++)
++
++Dispatcher.register(
++    operator.add,
++    ("SizeVariable", "ListVariable | TupleVariable | SizeVariable"),
++    lambda var, other: var.concat(other),
++)
++
++Dispatcher.register(
++    operator.add,
++    ("ListVariable | TupleVariable | SizeVariable", "SizeVariable"),
++    lambda var, other: SizeVariable.from_sequence_var(var).concat(other),
++)
++
++
++@Dispatcher.register_decorator(operator.eq)
++def dispatch_size_sequence_eq(
++    lhs: SizeVariable, rhs: TupleVariable | ListVariable | SizeVariable
++):
++    if len(lhs) != len(rhs):
++        return ConstantVariable(False, lhs.graph, DummyTracker([lhs, rhs]))
++    size = len(lhs)
++    return ConstantVariable(
++        all(
++            Dispatcher.call(operator.eq, lhs[i], rhs[i]).get_py_value()
++            for i in range(size)
++        ),
++        lhs.graph,
++        DummyTracker([lhs, rhs]),
++    )
++
++
++@Dispatcher.register_decorator(operator.eq)
++def dispatch_sequence_size_eq(
++    lhs: TupleVariable | ListVariable | SizeVariable, rhs: SizeVariable
++):
++    return Dispatcher.call(operator.eq, rhs, lhs)
++
++
++@Dispatcher.register_decorator(operator.ne)
++def dispatch_size_sequence_ne(
++    lhs: SizeVariable, rhs: TupleVariable | ListVariable | SizeVariable
++):
++    return Dispatcher.call(operator.eq, lhs, rhs).bool_not()
++
++
++@Dispatcher.register_decorator(operator.ne)
++def dispatch_sequence_size_ne(
++    lhs: TupleVariable | ListVariable | SizeVariable, rhs: SizeVariable
++):
++    return Dispatcher.call(operator.eq, lhs, rhs).bool_not()
++
++
+ # dict
+ Dispatcher.register(
+     dict,
+@@ -547,6 +620,12 @@ Dispatcher.register(
+     lambda var, other: var.repeat(other),
+ )
+ 
++Dispatcher.register(
++    operator.mul,
++    ("ConstantVariable", "ListVariable | TupleVariable"),
++    lambda var, other: other.repeat(var),
++)
++
+ 
+ @Dispatcher.register_decorator(operator.eq)
+ def dispatch_list_eq(lhs: ListVariable, rhs: ListVariable):
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py b/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py
+index 083db57cb9eee20475313a97afbf30cad72aaeb7..4fc984c8c85f82cdaf7522a37831de743d2c75f1 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/__init__.py
+@@ -64,6 +64,7 @@ from .container import (  # noqa: F401
+     DictVariable,
+     ListVariable,
+     RangeVariable,
++    SizeVariable,
+     TupleVariable,
+ )
+ from .iter import (  # noqa: F401
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py b/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py
+index 5b5c37ff8a123f86029d2a183d2390901a85b82b..19d1907640bef871afd15314f462e7d554b1ba8f 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/callable.py
+@@ -1316,6 +1316,32 @@ class PureClassVariable(ClassVariable):
+         return None
+ 
+ 
++class PaddleSizeClassVariable(ClassVariable):
++    def __init__(self, class_: type, graph: FunctionGraph, tracker: Tracker):
++        super().__init__(class_, graph, tracker)
++
++    def call_function(self, /, *args, **kwargs):
++        from .container import ListVariable, SizeVariable, TupleVariable
++
++        assert len(args) == 1 and len(kwargs) == 0, (
++            f"Size constructor takes one argument, got {len(args)} "
++            f"arguments and {len(kwargs)} keyword arguments."
++        )
++        arg0 = args[0]
++        assert isinstance(arg0, (ListVariable, TupleVariable))
++        return SizeVariable(
++            arg0.get_wrapped_items(),
++            self.graph,
++            tracker=CreateLayerTracker(self, args, kwargs),
++        )
++
++    @VariableFactory.register_from_value(successor="ClassVariable")
++    def from_value(value: Any, graph: FunctionGraph, tracker: Tracker):
++        if value is paddle.Size:
++            return PaddleSizeClassVariable(value, graph, tracker)
++        return None
++
++
+ class DataClassVariable(ClassVariable):
+     def __init__(
+         self, class_: type[Any], graph: FunctionGraph, tracker: Tracker
+diff --git a/python/paddle/jit/sot/opcode_translator/executor/variables/container.py b/python/paddle/jit/sot/opcode_translator/executor/variables/container.py
+index 25ce0d3661706cdb4933d41d1fc15c2abccd9d21..a847de270d176ae7cff7b014dc12823e3905abc1 100644
+--- a/python/paddle/jit/sot/opcode_translator/executor/variables/container.py
++++ b/python/paddle/jit/sot/opcode_translator/executor/variables/container.py
+@@ -204,7 +204,9 @@ class ListVariable(ContainerVariable):
+ 
+     def get_py_value(self, allow_tensor=False):
+         items = self.proxy.get_all()
+-        return [item.get_py_value(allow_tensor) for item in items]
++        return self.get_py_type()(
++            [item.get_py_value(allow_tensor) for item in items]
++        )
+ 
+     def get_py_type(self):
+         return list
+@@ -245,7 +247,8 @@ class ListVariable(ContainerVariable):
+             return res
+         elif isinstance(key, slice):
+             items = self.proxy.get_all()
+-            return VariableFactory.from_value(
++            assert self.__class__ in {ListVariable, SizeVariable}
++            return self.__class__(
+                 items[key],
+                 self.graph,
+                 tracker=GetItemTracker(
+@@ -334,7 +337,8 @@ class ListVariable(ContainerVariable):
+ 
+     def repeat(self, length):
+         assert isinstance(length, ConstantVariable)
+-        return ListVariable(
++        assert self.__class__ in {ListVariable, SizeVariable}
++        return self.__class__(
+             self.proxy.get_all() * length.value,
+             self.graph,
+             DummyTracker([self, length]),
+@@ -349,7 +353,8 @@ class ListVariable(ContainerVariable):
+         return res
+ 
+     def copy(self):
+-        return ListVariable(
++        assert self.__class__ in {ListVariable, SizeVariable}
++        return self.__class__(
+             self.proxy.get_all(),
+             self.graph,
+             DummyTracker([self]),
+@@ -1123,29 +1128,46 @@ class SizeVariable(ListVariable):
+     def get_py_type(self):
+         return paddle.Size
+ 
+-    def getitem(self, key):
+-        self.graph.add_global_guarded_variable(key)
+-        key_val = key.get_py_value()
++    def getattr(self, name: str, default=None):
++        if name == "numel":
++            return UserDefinedFunctionVariable(
++                SizeVariable._numel_impl, self.graph, DanglingTracker()
++            ).bind_dangling_fn(self, name)
+ 
+-        if isinstance(key_val, int):
+-            res = self.proxy.get(key_val)
+-            if self.proxy.is_empty(res):
+-                raise InnerError(f"Size {self} out of range (index={key_val})")
+-            return res
++        return super().getattr(name, default)
+ 
+-        elif isinstance(key_val, slice):
+-            items = self.proxy.get_all()
+-            sliced_items = items[key_val]
++    def _numel_impl(self):
++        res = 1
++        for i in range(len(self)):
++            res = res * self[i]
+ 
+-            return SizeVariable(
+-                sliced_items,
+-                self.graph,
+-                tracker=GetItemTracker(
+-                    self, key_val, changed=self.proxy.check_changed(key_val)
+-                ),
+-            )
++        return res
+ 
+-        else:
+-            raise InnerError(
+-                f"Unsupported key type {key.__class__.__name__} for SizeVariable"
+-            )
++    def concat(self, other):
++        assert isinstance(other, (ListVariable, TupleVariable))
++        data = other.proxy.get_all()
++
++        return SizeVariable(
++            self.proxy.get_all() + data,
++            self.graph,
++            DummyTracker([self, other]),
++        )
++
++    def _reconstruct(self, codegen: PyCodeGen):
++        codegen.gen_load_global("paddle", push_null=False)
++        codegen.gen_load_method("Size")
++        super()._reconstruct(codegen)
++        codegen.gen_call_method(1)
++
++    @classmethod
++    def from_sequence_var(cls, data: ListVariable | TupleVariable):
++        assert isinstance(data, (ListVariable, TupleVariable))
++        return SizeVariable(
++            data.get_wrapped_items(), data.graph, DummyTracker([data])
++        )
++
++    @VariableFactory.register_from_value(successor="ListVariable")
++    def from_value(value: Any, graph: FunctionGraph, tracker: Tracker):
++        if type(value) is paddle.Size:
++            return SizeVariable(value, graph=graph, tracker=tracker)
++        return None
