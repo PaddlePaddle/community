@@ -1,0 +1,58 @@
+groups:
+- name: rv64i_specific
+  description: RV64I 特有32位操作指令
+instructions:
+- name: ADDIW
+  group: rv64i_specific
+  encoding:
+    match: ??????? ????? ????? 000 ????? 0011011
+  assembly: addiw {rd}, {rs1}, {imm}
+  format: I-type
+- name: SLLIW
+  group: rv64i_specific
+  encoding:
+    match: 000000? ????? ????? 001 ????? 0011011
+  assembly: slliw {rd}, {rs1}, {imm}
+  format: I-type
+- name: SRLIW
+  group: rv64i_specific
+  encoding:
+    match: 000000? ????? ????? 101 ????? 0011011
+  assembly: srliw {rd}, {rs1}, {imm}
+  format: I-type
+- name: SRAIW
+  group: rv64i_specific
+  encoding:
+    match: 010000? ????? ????? 101 ????? 0011011
+  assembly: sraiw {rd}, {rs1}, {imm}
+  format: I-type
+- name: ADDW
+  group: rv64i_specific
+  encoding:
+    match: 0000000 ????? ????? 000 ????? 0111011
+  assembly: addw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SUBW
+  group: rv64i_specific
+  encoding:
+    match: 0100000 ????? ????? 000 ????? 0111011
+  assembly: subw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SLLW
+  group: rv64i_specific
+  encoding:
+    match: 0000000 ????? ????? 001 ????? 0111011
+  assembly: sllw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SRLW
+  group: rv64i_specific
+  encoding:
+    match: 0000000 ????? ????? 101 ????? 0111011
+  assembly: srlw {rd}, {rs1}, {rs2}
+  format: R-type
+- name: SRAW
+  group: rv64i_specific
+  encoding:
+    match: 0100000 ????? ????? 101 ????? 0111011
+  assembly: sraw {rd}, {rs1}, {rs2}
+  format: R-type

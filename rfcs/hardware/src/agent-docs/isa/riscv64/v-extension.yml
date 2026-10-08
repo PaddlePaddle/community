@@ -1,0 +1,1483 @@
+groups:
+- name: v
+  description: RISC-V Vector (V) Extension
+instructions:
+- name: VSETVLI
+  group: v
+  encoding:
+    match: 0????????????????111?????1010111
+    variables:
+      zimm:
+      - 29
+      - 20
+  assembly: vsetvli {rd}, {rs1}, {zimm}
+  format: R-type-unary
+- name: VSETVL
+  group: v
+  encoding:
+    match: 1000000??????????111?????1010111
+  assembly: vsetvl {rd}, {rs1}, {rs2}
+  format: R-type
+- name: VADD_VV
+  group: v
+  encoding:
+    match: 000000???????????000?????1010111
+  assembly: vadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSUB_VV
+  group: v
+  encoding:
+    match: 000010???????????000?????1010111
+  assembly: vsub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VAND_VV
+  group: v
+  encoding:
+    match: 001001???????????000?????1010111
+  assembly: vand.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VOR_VV
+  group: v
+  encoding:
+    match: 001010???????????000?????1010111
+  assembly: vor.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VXOR_VV
+  group: v
+  encoding:
+    match: 001011???????????000?????1010111
+  assembly: vxor.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VADD_VX
+  group: v
+  encoding:
+    match: 000000???????????100?????1010111
+  assembly: vadd.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSUB_VX
+  group: v
+  encoding:
+    match: 000010???????????100?????1010111
+  assembly: vsub.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VAND_VX
+  group: v
+  encoding:
+    match: 001001???????????100?????1010111
+  assembly: vand.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VOR_VX
+  group: v
+  encoding:
+    match: 001010???????????100?????1010111
+  assembly: vor.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VXOR_VX
+  group: v
+  encoding:
+    match: 001011???????????100?????1010111
+  assembly: vxor.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VLE8_V
+  group: v
+  encoding:
+    match: 000000100000?????000?????0000111
+  assembly: vle8.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLE16_V
+  group: v
+  encoding:
+    match: 000000100000?????101?????0000111
+  assembly: vle16.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLE32_V
+  group: v
+  encoding:
+    match: 000000100000?????110?????0000111
+  assembly: vle32.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLE64_V
+  group: v
+  encoding:
+    match: 000000100000?????111?????0000111
+  assembly: vle64.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VSE8_V
+  group: v
+  encoding:
+    match: 000000100000?????000?????0100111
+  assembly: vse8.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VS1R_V
+  group: v
+  encoding:
+    match: 001001100000?????000?????0100111
+  assembly: vs1r.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VSM_V
+  group: v
+  encoding:
+    match: 0000001??????????000?????0100111
+  assembly: vsm.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VL1R_V
+  group: v
+  encoding:
+    match: 0000001??????????????????0000111
+  assembly: vl1r.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLSEG2E8_V
+  group: v
+  encoding:
+    match: 001000100000?????000?????0000111
+  assembly: vlseg2e8.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLSEG2E16_V
+  group: v
+  encoding:
+    match: 001000100000?????101?????0000111
+  assembly: vlseg2e16.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLSEG2E32_V
+  group: v
+  encoding:
+    match: 001000100000?????110?????0000111
+  assembly: vlseg2e32.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLSEG2E64_V
+  group: v
+  encoding:
+    match: 001000100000?????111?????0000111
+  assembly: vlseg2e64.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VL2R_V
+  group: v
+  encoding:
+    match: 0010001??????????????????0000111
+  assembly: vl2r.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VL4R_V
+  group: v
+  encoding:
+    match: 0110001??????????????????0000111
+  assembly: vl4r.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VS2R_V
+  group: v
+  encoding:
+    match: 0010001??????????000?????0100111
+  assembly: vs2r.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VS4R_V
+  group: v
+  encoding:
+    match: 0110001??????????000?????0100111
+  assembly: vs4r.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VANDN_VV
+  group: v
+  encoding:
+    match: 0000011??????????000?????1010111
+  assembly: vandn.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VADC_VVM
+  group: v
+  encoding:
+    match: 0100000??????????000?????1010111
+  assembly: vadc.vvm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VADC_VXM
+  group: v
+  encoding:
+    match: 0100000??????????100?????1010111
+  assembly: vadc.vxm {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMADC_VVM
+  group: v
+  encoding:
+    match: 0100010??????????000?????1010111
+  assembly: vmadc.vvm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMADC_VXM
+  group: v
+  encoding:
+    match: 0100010??????????100?????1010111
+  assembly: vmadc.vxm {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSBC_VVM
+  group: v
+  encoding:
+    match: 0100100??????????000?????1010111
+  assembly: vsbc.vvm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSBC_VXM
+  group: v
+  encoding:
+    match: 0100100??????????100?????1010111
+  assembly: vsbc.vxm {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VANDN_VX
+  group: v
+  encoding:
+    match: 0000011??????????100?????1010111
+  assembly: vandn.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSE16_V
+  group: v
+  encoding:
+    match: 000000100000?????101?????0100111
+  assembly: vse16.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VSE32_V
+  group: v
+  encoding:
+    match: 000000100000?????110?????0100111
+  assembly: vse32.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VSE64_V
+  group: v
+  encoding:
+    match: 000000100000?????111?????0100111
+  assembly: vse64.v {vd}, ({rs1})
+  format: V-type-mem
+- name: VLSE8_V
+  group: v
+  encoding:
+    match: 0000101??????????000?????0000111
+  assembly: vlse8.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VLSE16_V
+  group: v
+  encoding:
+    match: 0000101??????????101?????0000111
+  assembly: vlse16.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VLSE32_V
+  group: v
+  encoding:
+    match: 0000101??????????110?????0000111
+  assembly: vlse32.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VLSE64_V
+  group: v
+  encoding:
+    match: 0000101??????????111?????0000111
+  assembly: vlse64.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VSSE8_V
+  group: v
+  encoding:
+    match: 0000101??????????000?????0100111
+  assembly: vsse8.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VSSE16_V
+  group: v
+  encoding:
+    match: 0000101??????????101?????0100111
+  assembly: vsse16.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VSSE32_V
+  group: v
+  encoding:
+    match: 0000101??????????110?????0100111
+  assembly: vsse32.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VSSE64_V
+  group: v
+  encoding:
+    match: 0000101??????????111?????0100111
+  assembly: vsse64.v {vd}, ({rs1}), {rs2}
+  format: V-type-vx
+- name: VLUXEI8_V
+  group: v
+  encoding:
+    match: 0000011??????????000?????0000111
+  assembly: vluxei8.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VLUXEI16_V
+  group: v
+  encoding:
+    match: 0000011??????????101?????0000111
+  assembly: vluxei16.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VLUXEI32_V
+  group: v
+  encoding:
+    match: 0000011??????????110?????0000111
+  assembly: vluxei32.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VLUXEI64_V
+  group: v
+  encoding:
+    match: 0000011??????????111?????0000111
+  assembly: vluxei64.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSUXEI8_V
+  group: v
+  encoding:
+    match: 0000011??????????000?????0100111
+  assembly: vsuxei8.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSUXEI16_V
+  group: v
+  encoding:
+    match: 0000011??????????101?????0100111
+  assembly: vsuxei16.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSUXEI32_V
+  group: v
+  encoding:
+    match: 0000011??????????110?????0100111
+  assembly: vsuxei32.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSUXEI64_V
+  group: v
+  encoding:
+    match: 0000011??????????111?????0100111
+  assembly: vsuxei64.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VLOXEI8_V
+  group: v
+  encoding:
+    match: 0000111??????????000?????0000111
+  assembly: vloxei8.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VLOXEI16_V
+  group: v
+  encoding:
+    match: 0000111??????????101?????0000111
+  assembly: vloxei16.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VLOXEI32_V
+  group: v
+  encoding:
+    match: 0000111??????????110?????0000111
+  assembly: vloxei32.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VLOXEI64_V
+  group: v
+  encoding:
+    match: 0000111??????????111?????0000111
+  assembly: vloxei64.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSOXEI8_V
+  group: v
+  encoding:
+    match: 0000111??????????000?????0100111
+  assembly: vsoxei8.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSOXEI16_V
+  group: v
+  encoding:
+    match: 0000111??????????101?????0100111
+  assembly: vsoxei16.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSOXEI32_V
+  group: v
+  encoding:
+    match: 0000111??????????110?????0100111
+  assembly: vsoxei32.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VSOXEI64_V
+  group: v
+  encoding:
+    match: 0000111??????????111?????0100111
+  assembly: vsoxei64.v {vd}, ({rs1}), {vs2}
+  format: V-type-vx
+- name: VMINU_VV
+  group: v
+  encoding:
+    match: 000100???????????000?????1010111
+  assembly: vminu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMIN_VV
+  group: v
+  encoding:
+    match: 000101???????????000?????1010111
+  assembly: vmin.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMAXU_VV
+  group: v
+  encoding:
+    match: 000110???????????000?????1010111
+  assembly: vmaxu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMAX_VV
+  group: v
+  encoding:
+    match: 000111???????????000?????1010111
+  assembly: vmax.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSLL_VV
+  group: v
+  encoding:
+    match: 100101???????????000?????1010111
+  assembly: vsll.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSRL_VV
+  group: v
+  encoding:
+    match: 101000???????????000?????1010111
+  assembly: vsrl.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSRA_VV
+  group: v
+  encoding:
+    match: 101001???????????000?????1010111
+  assembly: vsra.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMINU_VX
+  group: v
+  encoding:
+    match: 000100???????????100?????1010111
+  assembly: vminu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMIN_VX
+  group: v
+  encoding:
+    match: 000101???????????100?????1010111
+  assembly: vmin.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMAXU_VX
+  group: v
+  encoding:
+    match: 000110???????????100?????1010111
+  assembly: vmaxu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMAX_VX
+  group: v
+  encoding:
+    match: 000111???????????100?????1010111
+  assembly: vmax.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSLL_VX
+  group: v
+  encoding:
+    match: 100101???????????100?????1010111
+  assembly: vsll.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSRL_VX
+  group: v
+  encoding:
+    match: 101000???????????100?????1010111
+  assembly: vsrl.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSRA_VX
+  group: v
+  encoding:
+    match: 101001???????????100?????1010111
+  assembly: vsra.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VADD_VI
+  group: v
+  encoding:
+    match: 000000???????????011?????1010111
+  assembly: vadd.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VMSNE_VI
+  group: v
+  encoding:
+    match: 0110011??????????011?????1010111
+  assembly: vmsne.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VMSEQ_VI
+  group: v
+  encoding:
+    match: 0110001??????????011?????1010111
+  assembly: vmseq.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VRSUB_VI
+  group: v
+  encoding:
+    match: 000011???????????011?????1010111
+  assembly: vrsub.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VRSUB_VX
+  group: v
+  encoding:
+    match: 0000111??????????100?????1010111
+  assembly: vrsub.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VNSRL_WI
+  group: v
+  encoding:
+    match: 1011001??????????011?????1010111
+  assembly: vnsrl.wi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VAND_VI
+  group: v
+  encoding:
+    match: 001001???????????011?????1010111
+  assembly: vand.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VOR_VI
+  group: v
+  encoding:
+    match: 001010???????????011?????1010111
+  assembly: vor.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VXOR_VI
+  group: v
+  encoding:
+    match: 001011???????????011?????1010111
+  assembly: vxor.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VSLL_VI
+  group: v
+  encoding:
+    match: 100101???????????011?????1010111
+  assembly: vsll.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VSRL_VI
+  group: v
+  encoding:
+    match: 101000???????????011?????1010111
+  assembly: vsrl.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VSRA_VI
+  group: v
+  encoding:
+    match: 101001???????????011?????1010111
+  assembly: vsra.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VMUL_VV
+  group: v
+  encoding:
+    match: 100101???????????010?????1010111
+  assembly: vmul.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMULHU_VV
+  group: v
+  encoding:
+    match: 100100???????????010?????1010111
+  assembly: vmulhu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMULHSU_VV
+  group: v
+  encoding:
+    match: 100110???????????010?????1010111
+  assembly: vmulhsu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMULH_VV
+  group: v
+  encoding:
+    match: 100111???????????010?????1010111
+  assembly: vmulh.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VDIVU_VV
+  group: v
+  encoding:
+    match: 100000???????????010?????1010111
+  assembly: vdivu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VDIV_VV
+  group: v
+  encoding:
+    match: 100001???????????010?????1010111
+  assembly: vdiv.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREMU_VV
+  group: v
+  encoding:
+    match: 100010???????????010?????1010111
+  assembly: vremu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREM_VV
+  group: v
+  encoding:
+    match: 100011???????????010?????1010111
+  assembly: vrem.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMUL_VX
+  group: v
+  encoding:
+    match: 100101???????????110?????1010111
+  assembly: vmul.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMULHU_VX
+  group: v
+  encoding:
+    match: 100100???????????110?????1010111
+  assembly: vmulhu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMULHSU_VX
+  group: v
+  encoding:
+    match: 100110???????????110?????1010111
+  assembly: vmulhsu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMULH_VX
+  group: v
+  encoding:
+    match: 100111???????????110?????1010111
+  assembly: vmulh.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VDIVU_VX
+  group: v
+  encoding:
+    match: 100000???????????110?????1010111
+  assembly: vdivu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VDIV_VX
+  group: v
+  encoding:
+    match: 100001???????????110?????1010111
+  assembly: vdiv.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VREMU_VX
+  group: v
+  encoding:
+    match: 100010???????????110?????1010111
+  assembly: vremu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VREM_VX
+  group: v
+  encoding:
+    match: 100011???????????110?????1010111
+  assembly: vrem.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMV_V_X
+  group: v
+  encoding:
+    match: 010111100000?????100?????1010111
+  assembly: vmv.v.x {vd}, {rs1}
+  format: V-type-mem
+- name: VMV_S_X
+  group: v
+  encoding:
+    match: 01000010?????????110?????1010111
+  assembly: vmv.s.x {vd}, {rs1}
+  format: V-type-mv-f
+- name: VFMV_F_S
+  group: v
+  encoding:
+    match: 01000010?????????001?????1010111
+    variables:
+      vs2:
+      - 24
+      - 20
+  assembly: vfmv.f.s {rd}, {vs2}
+  format: V-type-id
+- name: VMV_X_S
+  group: v
+  encoding:
+    match: 0100001?????00000010?????1010111
+    variables:
+      vs2:
+      - 24
+      - 20
+  assembly: vmv.x.s {rd}, {vs2}
+  format: V-type-rd-vs2
+- name: VCPOP_M
+  group: v
+  encoding:
+    match: 0100001?????10000010?????1010111
+    variables:
+      vs2:
+      - 24
+      - 20
+  assembly: vcpop.m {rd}, {vs2}
+  format: V-type-rd-vs2
+- name: VFIRST_M
+  group: v
+  encoding:
+    match: 0100001?????10001010?????1010111
+    variables:
+      vs2:
+      - 24
+      - 20
+  assembly: vfirst.m {rd}, {vs2}
+  format: V-type-rd-vs2
+- name: VSETIVLI
+  group: v
+  encoding:
+    match: 11???????????????111?????1010111
+    variables:
+      zimm:
+      - 29
+      - 20
+      imm:
+      - 19
+      - 15
+      rd:
+      - 11
+      - 7
+  assembly: vsetivli {rd}, {imm}, {zimm}
+- name: VMV_V_I
+  group: v
+  encoding:
+    match: 010111100000?????011?????1010111
+  assembly: vmv.v.i {vd}, {imm}
+  format: V-type-mv-i
+- name: VID_V
+  group: v
+  encoding:
+    match: 01010010000010001010?????1010111
+  assembly: vid.v {vd}
+  format: V-type-id
+- name: VMSBF_M
+  group: v
+  encoding:
+    match: 01010010000000001010?????1010111
+  assembly: vmsbf.m {vd}, {vs2}
+  format: V-type-v
+- name: VMSOF_M
+  group: v
+  encoding:
+    match: 01010010000000010010?????1010111
+  assembly: vmsof.m {vd}, {vs2}
+  format: V-type-v
+- name: VMSIF_M
+  group: v
+  encoding:
+    match: 01010010000000011010?????1010111
+  assembly: vmsif.m {vd}, {vs2}
+  format: V-type-v
+- name: VIOTA_M
+  group: v
+  encoding:
+    match: 0101001?????10000010?????1010111
+  assembly: viota.m {vd}, {vs2}
+  format: V-type-v
+- name: VMSEQ_VV
+  group: v
+  encoding:
+    match: 011000???????????000?????1010111
+  assembly: vmseq.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMSNE_VV
+  group: v
+  encoding:
+    match: 011001???????????000?????1010111
+  assembly: vmsne.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMSLT_VV
+  group: v
+  encoding:
+    match: 011011???????????000?????1010111
+  assembly: vmslt.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMSLTU_VV
+  group: v
+  encoding:
+    match: 011010???????????000?????1010111
+  assembly: vmsltu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMSEQ_VX
+  group: v
+  encoding:
+    match: 011000???????????100?????1010111
+  assembly: vmseq.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMSNE_VX
+  group: v
+  encoding:
+    match: 011001???????????100?????1010111
+  assembly: vmsne.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMSGT_VX
+  group: v
+  encoding:
+    match: 011111???????????100?????1010111
+  assembly: vmsgt.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMSGTU_VX
+  group: v
+  encoding:
+    match: 011110???????????100?????1010111
+  assembly: vmsgtu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMSGT_VI
+  group: v
+  encoding:
+    match: 011111???????????011?????1010111
+  assembly: vmsgt.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VMSGTU_VI
+  group: v
+  encoding:
+    match: 011110???????????011?????1010111
+  assembly: vmsgtu.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VREDSUM_VS
+  group: v
+  encoding:
+    match: 000000???????????010?????1010111
+  assembly: vredsum.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREDMAXU_VS
+  group: v
+  encoding:
+    match: 000110???????????010?????1010111
+  assembly: vredmaxu.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREDMINU_VS
+  group: v
+  encoding:
+    match: 000100???????????010?????1010111
+  assembly: vredminu.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREDMAX_VS
+  group: v
+  encoding:
+    match: 000111???????????010?????1010111
+  assembly: vredmax.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREDMIN_VS
+  group: v
+  encoding:
+    match: 000101???????????010?????1010111
+  assembly: vredmin.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREDAND_VS
+  group: v
+  encoding:
+    match: 000001???????????010?????1010111
+  assembly: vredand.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREDOR_VS
+  group: v
+  encoding:
+    match: 000010???????????010?????1010111
+  assembly: vredor.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VREDXOR_VS
+  group: v
+  encoding:
+    match: 000011???????????010?????1010111
+  assembly: vredxor.vs {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSLIDEUP_VX
+  group: v
+  encoding:
+    match: 001110???????????100?????1010111
+  assembly: vslideup.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSLIDEUP_VI
+  group: v
+  encoding:
+    match: 001110???????????011?????1010111
+  assembly: vslideup.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VSLIDEDOWN_VX
+  group: v
+  encoding:
+    match: 001111???????????100?????1010111
+  assembly: vslidedown.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSLIDEDOWN_VI
+  group: v
+  encoding:
+    match: 001111???????????011?????1010111
+  assembly: vslidedown.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VMACC_VV
+  group: v
+  encoding:
+    match: 101101???????????010?????1010111
+  assembly: vmacc.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMACC_VX
+  group: v
+  encoding:
+    match: 101101???????????110?????1010111
+  assembly: vmacc.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VNMSAC_VV
+  group: v
+  encoding:
+    match: 101111???????????010?????1010111
+  assembly: vnmsac.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VNMSAC_VX
+  group: v
+  encoding:
+    match: 101111???????????110?????1010111
+  assembly: vnmsac.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMADD_VV
+  group: v
+  encoding:
+    match: 101001???????????010?????1010111
+  assembly: vmadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMADD_VX
+  group: v
+  encoding:
+    match: 101001???????????110?????1010111
+  assembly: vmadd.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VNMSUB_VV
+  group: v
+  encoding:
+    match: 101011???????????010?????1010111
+  assembly: vnmsub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VNMSUB_VX
+  group: v
+  encoding:
+    match: 101011???????????110?????1010111
+  assembly: vnmsub.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWADDU_VV
+  group: v
+  encoding:
+    match: 110000???????????010?????1010111
+  assembly: vwaddu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWADDU_VX
+  group: v
+  encoding:
+    match: 110000???????????110?????1010111
+  assembly: vwaddu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWADD_VV
+  group: v
+  encoding:
+    match: 110001???????????010?????1010111
+  assembly: vwadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWADD_VX
+  group: v
+  encoding:
+    match: 110001???????????110?????1010111
+  assembly: vwadd.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWSUBU_VV
+  group: v
+  encoding:
+    match: 110010???????????010?????1010111
+  assembly: vwsubu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWSUBU_VX
+  group: v
+  encoding:
+    match: 110010???????????110?????1010111
+  assembly: vwsubu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWSUB_VV
+  group: v
+  encoding:
+    match: 110011???????????010?????1010111
+  assembly: vwsub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWSUB_VX
+  group: v
+  encoding:
+    match: 110011???????????110?????1010111
+  assembly: vwsub.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWADDU_WV
+  group: v
+  encoding:
+    match: 110100???????????010?????1010111
+  assembly: vwaddu.wv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWADDU_WX
+  group: v
+  encoding:
+    match: 110100???????????110?????1010111
+  assembly: vwaddu.wx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWADD_WV
+  group: v
+  encoding:
+    match: 110101???????????010?????1010111
+  assembly: vwadd.wv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWADD_WX
+  group: v
+  encoding:
+    match: 110101???????????110?????1010111
+  assembly: vwadd.wx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWSUBU_WV
+  group: v
+  encoding:
+    match: 110110???????????010?????1010111
+  assembly: vwsubu.wv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWSUBU_WX
+  group: v
+  encoding:
+    match: 110110???????????110?????1010111
+  assembly: vwsubu.wx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWSUB_WV
+  group: v
+  encoding:
+    match: 110111???????????010?????1010111
+  assembly: vwsub.wv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWSUB_WX
+  group: v
+  encoding:
+    match: 110111???????????110?????1010111
+  assembly: vwsub.wx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWMUL_VV
+  group: v
+  encoding:
+    match: 111011???????????010?????1010111
+  assembly: vwmul.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWMUL_VX
+  group: v
+  encoding:
+    match: 111011???????????110?????1010111
+  assembly: vwmul.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWMULU_VV
+  group: v
+  encoding:
+    match: 111000???????????010?????1010111
+  assembly: vwmulu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWMULU_VX
+  group: v
+  encoding:
+    match: 111000???????????110?????1010111
+  assembly: vwmulu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWMULSU_VV
+  group: v
+  encoding:
+    match: 111010???????????010?????1010111
+  assembly: vwmulsu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWMULSU_VX
+  group: v
+  encoding:
+    match: 111010???????????110?????1010111
+  assembly: vwmulsu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWMACCU_VV
+  group: v
+  encoding:
+    match: 111100???????????010?????1010111
+  assembly: vwmaccu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWMACCU_VX
+  group: v
+  encoding:
+    match: 111100???????????110?????1010111
+  assembly: vwmaccu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWMACC_VV
+  group: v
+  encoding:
+    match: 111101???????????010?????1010111
+  assembly: vwmacc.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWMACC_VX
+  group: v
+  encoding:
+    match: 111101???????????110?????1010111
+  assembly: vwmacc.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWMACCSU_VV
+  group: v
+  encoding:
+    match: 111111???????????010?????1010111
+  assembly: vwmaccsu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VWMACCSU_VX
+  group: v
+  encoding:
+    match: 111111???????????110?????1010111
+  assembly: vwmaccsu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VWMACCUS_VX
+  group: v
+  encoding:
+    match: 111110???????????110?????1010111
+  assembly: vwmaccus.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VZEXT_VF2
+  group: v
+  encoding:
+    match: 0100101?????00110010?????1010111
+  assembly: vzext.vf2 {vd}, {vs2}
+  format: V-type-v
+- name: VZEXT_VF4
+  group: v
+  encoding:
+    match: 0100101?????00100010?????1010111
+  assembly: vzext.vf4 {vd}, {vs2}
+  format: V-type-v
+- name: VZEXT_VF8
+  group: v
+  encoding:
+    match: 0100101?????00010010?????1010111
+  assembly: vzext.vf8 {vd}, {vs2}
+  format: V-type-v
+- name: VSEXT_VF2
+  group: v
+  encoding:
+    match: 0100101?????00111010?????1010111
+  assembly: vsext.vf2 {vd}, {vs2}
+  format: V-type-v
+- name: VSEXT_VF4
+  group: v
+  encoding:
+    match: 0100101?????00101010?????1010111
+  assembly: vsext.vf4 {vd}, {vs2}
+  format: V-type-v
+- name: VSEXT_VF8
+  group: v
+  encoding:
+    match: 0100101?????00011010?????1010111
+  assembly: vsext.vf8 {vd}, {vs2}
+  format: V-type-v
+- name: VMERGE_VVM
+  group: v
+  encoding:
+    match: 0101110??????????000?????1010111
+  assembly: vmerge.vvm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMERGE_VXM
+  group: v
+  encoding:
+    match: 0101110??????????100?????1010111
+  assembly: vmerge.vxm {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VMERGE_VIM
+  group: v
+  encoding:
+    match: 0101110??????????011?????1010111
+  assembly: vmerge.vim {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VMAND_MM
+  group: v
+  encoding:
+    match: 011001???????????010?????1010111
+  assembly: vmand.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMNAND_MM
+  group: v
+  encoding:
+    match: 011101???????????010?????1010111
+  assembly: vmnand.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMANDN_MM
+  group: v
+  encoding:
+    match: 011000???????????010?????1010111
+  assembly: vmandn.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMXOR_MM
+  group: v
+  encoding:
+    match: 011011???????????010?????1010111
+  assembly: vmxor.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMOR_MM
+  group: v
+  encoding:
+    match: 011010???????????010?????1010111
+  assembly: vmor.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMNOR_MM
+  group: v
+  encoding:
+    match: 011110???????????010?????1010111
+  assembly: vmnor.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMORN_MM
+  group: v
+  encoding:
+    match: 011100???????????010?????1010111
+  assembly: vmorn.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMXNOR_MM
+  group: v
+  encoding:
+    match: 011111???????????010?????1010111
+  assembly: vmxnor.mm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSADDU_VV
+  group: v
+  encoding:
+    match: 100000???????????000?????1010111
+  assembly: vsaddu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSADDU_VX
+  group: v
+  encoding:
+    match: 100000???????????100?????1010111
+  assembly: vsaddu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSADDU_VI
+  group: v
+  encoding:
+    match: 100000???????????011?????1010111
+  assembly: vsaddu.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VSADD_VV
+  group: v
+  encoding:
+    match: 100001???????????000?????1010111
+  assembly: vsadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSADD_VX
+  group: v
+  encoding:
+    match: 100001???????????100?????1010111
+  assembly: vsadd.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSADD_VI
+  group: v
+  encoding:
+    match: 100001???????????011?????1010111
+  assembly: vsadd.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VSSUBU_VV
+  group: v
+  encoding:
+    match: 100010???????????000?????1010111
+  assembly: vssubu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSSUBU_VX
+  group: v
+  encoding:
+    match: 100010???????????100?????1010111
+  assembly: vssubu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSSUBU_VI
+  group: v
+  encoding:
+    match: 100010???????????011?????1010111
+  assembly: vssubu.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VSSUB_VV
+  group: v
+  encoding:
+    match: 100011???????????000?????1010111
+  assembly: vssub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSSUB_VX
+  group: v
+  encoding:
+    match: 100011???????????100?????1010111
+  assembly: vssub.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSSUB_VI
+  group: v
+  encoding:
+    match: 100011???????????011?????1010111
+  assembly: vssub.vi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VAADDU_VV
+  group: v
+  encoding:
+    match: 001000???????????010?????1010111
+  assembly: vaaddu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VAADDU_VX
+  group: v
+  encoding:
+    match: 001000???????????110?????1010111
+  assembly: vaaddu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VAADD_VV
+  group: v
+  encoding:
+    match: 001001???????????010?????1010111
+  assembly: vaadd.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VAADD_VX
+  group: v
+  encoding:
+    match: 001001???????????110?????1010111
+  assembly: vaadd.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VASUBU_VV
+  group: v
+  encoding:
+    match: 001010???????????010?????1010111
+  assembly: vasubu.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VASUBU_VX
+  group: v
+  encoding:
+    match: 001010???????????110?????1010111
+  assembly: vasubu.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VASUB_VV
+  group: v
+  encoding:
+    match: 001011???????????010?????1010111
+  assembly: vasub.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VASUB_VX
+  group: v
+  encoding:
+    match: 001011???????????110?????1010111
+  assembly: vasub.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VSMUL_VV
+  group: v
+  encoding:
+    match: 100111???????????000?????1010111
+  assembly: vsmul.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSMUL_VX
+  group: v
+  encoding:
+    match: 100111???????????100?????1010111
+  assembly: vsmul.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VNCLIPU_VV
+  group: v
+  encoding:
+    match: 101110???????????000?????1010111
+  assembly: vnclipu.wv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VNCLIPU_VX
+  group: v
+  encoding:
+    match: 101110???????????100?????1010111
+  assembly: vnclipu.wx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VNCLIPU_VI
+  group: v
+  encoding:
+    match: 101110???????????011?????1010111
+  assembly: vnclipu.wi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VNCLIP_VV
+  group: v
+  encoding:
+    match: 101111???????????000?????1010111
+  assembly: vnclip.wv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VNCLIP_VX
+  group: v
+  encoding:
+    match: 101111???????????100?????1010111
+  assembly: vnclip.wx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VNCLIP_VI
+  group: v
+  encoding:
+    match: 101111???????????011?????1010111
+  assembly: vnclip.wi {vd}, {vs2}, {imm}
+  format: V-type-vi
+- name: VRGATHER_VV
+  group: v
+  encoding:
+    match: 0011001??????????000?????1010111
+  assembly: vrgather.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VRGATHEREI16_VV
+  group: v
+  encoding:
+    match: 0011101??????????000?????1010111
+  assembly: vrgatherei16.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VBREV_V
+  group: v
+  encoding:
+    match: 0100101?????01010010?????1010111
+  assembly: vbrev.v {vd}, {vs2}
+  format: V-type
+- name: VCLZ_V
+  group: v
+  encoding:
+    match: 0100101?????01100010?????1010111
+  assembly: vclz.v {vd}, {vs2}
+  format: V-type
+- name: VCTZ_V
+  group: v
+  encoding:
+    match: 0100101?????01101010?????1010111
+  assembly: vctz.v {vd}, {vs2}
+  format: V-type
+- name: VCPOP_V
+  group: v
+  encoding:
+    match: 0100101?????01110010?????1010111
+  assembly: vcpop.v {vd}, {vs2}
+  format: V-type
+- name: VWSLL_VV
+  group: v
+  encoding:
+    match: 1101011??????????000?????1010111
+  assembly: vwsll.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VSLIDE1UP_VX
+  group: v
+  encoding:
+    match: 0011101??????????110?????1010111
+  assembly: vslide1up.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VCOMPRESS_VM
+  group: v
+  encoding:
+    match: 0101111??????????010?????1010111
+  assembly: vcompress.vm {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VROR_VX
+  group: v
+  encoding:
+    match: 0101001??????????100?????1010111
+  assembly: vror.vx {vd}, {vs2}, {rs1}
+  format: V-type-vx
+- name: VROR_VV
+  group: v
+  encoding:
+    match: 0101001??????????000?????1010111
+  assembly: vror.vv {vd}, {vs2}, {vs1}
+  format: V-type
+- name: VMV1R_V
+  group: v
+  encoding:
+    match: 100111100000?????011?????1010111
+    variables:
+      vd:
+      - 19
+      - 15
+      vs2:
+      - 11
+      - 7
+  assembly: vmv1r.v {vd}, {vs2}
+  format: V-type-id
+- name: VMV2R_V
+  group: v
+  encoding:
+    match: 100111100001?????011?????1010111
+    variables:
+      vd:
+      - 19
+      - 15
+      vs2:
+      - 11
+      - 7
+  assembly: vmv2r.v {vd}, {vs2}
+  format: V-type-id
+- name: VMV4R_V
+  group: v
+  encoding:
+    match: 100111100011?????011?????1010111
+    variables:
+      vd:
+      - 19
+      - 15
+      vs2:
+      - 11
+      - 7
+  assembly: vmv4r.v {vd}, {vs2}
+  format: V-type-id
+- name: VMV8R_V
+  group: v
+  encoding:
+    match: 100111100111?????011?????1010111
+    variables:
+      vd:
+      - 19
+      - 15
+      vs2:
+      - 11
+      - 7
+  assembly: vmv8r.v {vd}, {vs2}
+  format: V-type-id

@@ -1,0 +1,321 @@
+# RISC-V64 semantics - generated from hardcoded definitions
+semantics:
+  div:
+    description: "\"div\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Div
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  divu:
+    description: "\"divu\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: DivU
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  mul:
+    description: "\"mul\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Mul
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  mulh:
+    description: "\"mulh\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: MulHi
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  mulhsu:
+    description: "\"mulhsu\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: MulHiSU
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  mulhu:
+    description: "\"mulhu\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: MulHiU
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  rem:
+    description: "\"rem\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Rem
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  remu:
+    description: "\"remu\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: RemU
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  # RV64M W-type semantics
+  mulw:
+    description: "\"mulw\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Mul
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  divw:
+    description: "\"divw\" rd, rs1, rs2"
+    operations:
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $x.rs2
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $temp:3
+        src: $temp:2
+      - type: alu
+        op: Div
+        dest: $temp:4
+        src1: $temp:1
+        src2: $temp:3
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:5
+        src: $temp:4
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  divuw:
+    description: "\"divuw\" rd, rs1, rs2"
+    operations:
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 32
+            to: 64
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $x.rs2
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 32
+            to: 64
+        dest: $temp:3
+        src: $temp:2
+      - type: alu
+        op: DivU
+        dest: $temp:4
+        src1: $temp:1
+        src2: $temp:3
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:5
+        src: $temp:4
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  remw:
+    description: "\"remw\" rd, rs1, rs2"
+    operations:
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $x.rs2
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $temp:3
+        src: $temp:2
+      - type: alu
+        op: Rem
+        dest: $temp:4
+        src1: $temp:1
+        src2: $temp:3
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:5
+        src: $temp:4
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  remuw:
+    description: "\"remuw\" rd, rs1, rs2"
+    operations:
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 32
+            to: 64
+        dest: $temp:1
+        src: $temp:0
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $x.rs2
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 32
+            to: 64
+        dest: $temp:3
+        src: $temp:2
+      - type: alu
+        op: RemU
+        dest: $temp:4
+        src1: $temp:1
+        src2: $temp:3
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:5
+        src: $temp:4
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $x.rd
+        src: $temp:5
+    implicit_pc_read: false
+    implicit_pc_write: false
