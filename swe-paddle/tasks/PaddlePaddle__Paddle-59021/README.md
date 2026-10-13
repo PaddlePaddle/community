@@ -40,3 +40,5 @@ This directory converts Paddle PR #59021 into a SWE-Paddle community task candid
 ```bash
 bash tests/test.sh
 ```
+
+Expected: 3 F2P cases (`TestLenWithSelectedRows` under the PIR executor) fail before the fix and pass after it; 9 P2P cases (the fusion pass module and the `TestLen` / `TestLenWithTensorArray` cases) pass in both runs. See `environment/README.md` for the run settings of each block.
