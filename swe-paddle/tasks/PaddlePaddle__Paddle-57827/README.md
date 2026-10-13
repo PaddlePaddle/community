@@ -40,3 +40,5 @@ This directory converts Paddle PR #57827 into a SWE-Paddle community task candid
 ```bash
 bash tests/test.sh
 ```
+
+Expected: 2 F2P nodes (`test_resnet__ast_pir_exe`, `test_in_static_mode_mkldnn__ast_pir_exe`) abort before the fix and pass after it; 3 P2P nodes (`test_resnet__ast_legacy_ir` and both `TestError` cases) pass in both runs. See `environment/README.md` for the node list and excluded nodes.
