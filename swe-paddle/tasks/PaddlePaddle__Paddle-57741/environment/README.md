@@ -26,6 +26,10 @@ SWE-Paddle task candidate for PaddlePaddle/Paddle PR #57741.
 bash tests/test.sh
 ```
 
+`tests/test.sh` exports `FLAGS_enable_new_ir_in_executor=1` before invoking pytest, so every selected node runs with the PIR executor enabled. Run it from the root of the Paddle source checkout; do not replace it with a bare `pytest` call that drops this setting.
+
+Expected results on a CPU-only build: 2 passed / 0 failed / 0 errors / 3 skipped (the three CUDA dy2static nodes are skipped via `@unittest.skipIf`; skips are not counted as passes).
+
 ## Known Risks
 
 - Historical PIR stack requires era-matched source build; newer trees may not apply patches cleanly.

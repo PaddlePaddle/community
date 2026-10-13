@@ -7,6 +7,10 @@ set -euo pipefail
 # P2P: existing CPU dy2static `.cpu()` path (no-op when already on CPU; old IR).
 # F2P: static-graph PIR memcpy translation on CPU, plus CUDA dy2static
 #      cases (skipped via @unittest.skipIf when CUDA is unavailable).
+#
+# The target cases run with the PIR executor enabled; without it the pytest
+# entry misses the run mode these tests are validated under.
+export FLAGS_enable_new_ir_in_executor=1
 
 # P2P tests (pass-to-pass)
 python -m pytest \

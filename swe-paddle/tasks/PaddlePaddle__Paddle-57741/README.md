@@ -42,5 +42,7 @@ This directory converts Paddle PR #57741 into a SWE-Paddle community task candid
 bash tests/test.sh
 ```
 
+`tests/test.sh` runs the target nodes with `FLAGS_enable_new_ir_in_executor=1`.
+
 Expected: with `tests/test.patch` on `base_commit`, PIR memcpy related cases fail/error.
 After `solution/code.patch` and rebuild, target cases pass.
