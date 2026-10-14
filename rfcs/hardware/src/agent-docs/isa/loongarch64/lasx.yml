@@ -1,0 +1,4445 @@
+groups:
+- name: lasx
+  description: LoongArch LASX (256-bit SIMD) Instructions
+
+instructions:
+- name: XVFMADD_S
+  group: lasx
+  encoding:
+    match: 000010100001????????????????????
+  assembly: xvfmadd.s $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFMADD_D
+  group: lasx
+  encoding:
+    match: 000010100010????????????????????
+  assembly: xvfmadd.d $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFMSUB_S
+  group: lasx
+  encoding:
+    match: 000010100101????????????????????
+  assembly: xvfmsub.s $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFMSUB_D
+  group: lasx
+  encoding:
+    match: 000010100110????????????????????
+  assembly: xvfmsub.d $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFNMADD_S
+  group: lasx
+  encoding:
+    match: 000010101001????????????????????
+  assembly: xvfnmadd.s $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFNMADD_D
+  group: lasx
+  encoding:
+    match: 000010101010????????????????????
+  assembly: xvfnmadd.d $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFNMSUB_S
+  group: lasx
+  encoding:
+    match: 000010101101????????????????????
+  assembly: xvfnmsub.s $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFNMSUB_D
+  group: lasx
+  encoding:
+    match: 000010101110????????????????????
+  assembly: xvfnmsub.d $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVFCMP_CAF_S
+  group: lasx
+  encoding:
+    match: 00001100100100000???????????????
+  assembly: xvfcmp.caf.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SAF_S
+  group: lasx
+  encoding:
+    match: 00001100100100001???????????????
+  assembly: xvfcmp.saf.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CLT_S
+  group: lasx
+  encoding:
+    match: 00001100100100010???????????????
+  assembly: xvfcmp.clt.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SLT_S
+  group: lasx
+  encoding:
+    match: 00001100100100011???????????????
+  assembly: xvfcmp.slt.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CEQ_S
+  group: lasx
+  encoding:
+    match: 00001100100100100???????????????
+  assembly: xvfcmp.ceq.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SEQ_S
+  group: lasx
+  encoding:
+    match: 00001100100100101???????????????
+  assembly: xvfcmp.seq.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CLE_S
+  group: lasx
+  encoding:
+    match: 00001100100100110???????????????
+  assembly: xvfcmp.cle.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SLE_S
+  group: lasx
+  encoding:
+    match: 00001100100100111???????????????
+  assembly: xvfcmp.sle.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CUN_S
+  group: lasx
+  encoding:
+    match: 00001100100101000???????????????
+  assembly: xvfcmp.cun.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SUN_S
+  group: lasx
+  encoding:
+    match: 00001100100101001???????????????
+  assembly: xvfcmp.sun.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CULT_S
+  group: lasx
+  encoding:
+    match: 00001100100101010???????????????
+  assembly: xvfcmp.cult.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SULT_S
+  group: lasx
+  encoding:
+    match: 00001100100101011???????????????
+  assembly: xvfcmp.sult.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CUEQ_S
+  group: lasx
+  encoding:
+    match: 00001100100101100???????????????
+  assembly: xvfcmp.cueq.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SUEQ_S
+  group: lasx
+  encoding:
+    match: 00001100100101101???????????????
+  assembly: xvfcmp.sueq.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CULE_S
+  group: lasx
+  encoding:
+    match: 00001100100101110???????????????
+  assembly: xvfcmp.cule.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SULE_S
+  group: lasx
+  encoding:
+    match: 00001100100101111???????????????
+  assembly: xvfcmp.sule.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CNE_S
+  group: lasx
+  encoding:
+    match: 00001100100110000???????????????
+  assembly: xvfcmp.cne.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SNE_S
+  group: lasx
+  encoding:
+    match: 00001100100110001???????????????
+  assembly: xvfcmp.sne.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_COR_S
+  group: lasx
+  encoding:
+    match: 00001100100110100???????????????
+  assembly: xvfcmp.cor.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SOR_S
+  group: lasx
+  encoding:
+    match: 00001100100110101???????????????
+  assembly: xvfcmp.sor.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CUNE_S
+  group: lasx
+  encoding:
+    match: 00001100100111000???????????????
+  assembly: xvfcmp.cune.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SUNE_S
+  group: lasx
+  encoding:
+    match: 00001100100111001???????????????
+  assembly: xvfcmp.sune.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CAF_D
+  group: lasx
+  encoding:
+    match: 00001100101000000???????????????
+  assembly: xvfcmp.caf.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SAF_D
+  group: lasx
+  encoding:
+    match: 00001100101000001???????????????
+  assembly: xvfcmp.saf.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CLT_D
+  group: lasx
+  encoding:
+    match: 00001100101000010???????????????
+  assembly: xvfcmp.clt.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SLT_D
+  group: lasx
+  encoding:
+    match: 00001100101000011???????????????
+  assembly: xvfcmp.slt.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CEQ_D
+  group: lasx
+  encoding:
+    match: 00001100101000100???????????????
+  assembly: xvfcmp.ceq.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SEQ_D
+  group: lasx
+  encoding:
+    match: 00001100101000101???????????????
+  assembly: xvfcmp.seq.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CLE_D
+  group: lasx
+  encoding:
+    match: 00001100101000110???????????????
+  assembly: xvfcmp.cle.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SLE_D
+  group: lasx
+  encoding:
+    match: 00001100101000111???????????????
+  assembly: xvfcmp.sle.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CUN_D
+  group: lasx
+  encoding:
+    match: 00001100101001000???????????????
+  assembly: xvfcmp.cun.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SUN_D
+  group: lasx
+  encoding:
+    match: 00001100101001001???????????????
+  assembly: xvfcmp.sun.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CULT_D
+  group: lasx
+  encoding:
+    match: 00001100101001010???????????????
+  assembly: xvfcmp.cult.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SULT_D
+  group: lasx
+  encoding:
+    match: 00001100101001011???????????????
+  assembly: xvfcmp.sult.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CUEQ_D
+  group: lasx
+  encoding:
+    match: 00001100101001100???????????????
+  assembly: xvfcmp.cueq.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SUEQ_D
+  group: lasx
+  encoding:
+    match: 00001100101001101???????????????
+  assembly: xvfcmp.sueq.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CULE_D
+  group: lasx
+  encoding:
+    match: 00001100101001110???????????????
+  assembly: xvfcmp.cule.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SULE_D
+  group: lasx
+  encoding:
+    match: 00001100101001111???????????????
+  assembly: xvfcmp.sule.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CNE_D
+  group: lasx
+  encoding:
+    match: 00001100101010000???????????????
+  assembly: xvfcmp.cne.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SNE_D
+  group: lasx
+  encoding:
+    match: 00001100101010001???????????????
+  assembly: xvfcmp.sne.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_COR_D
+  group: lasx
+  encoding:
+    match: 00001100101010100???????????????
+  assembly: xvfcmp.cor.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SOR_D
+  group: lasx
+  encoding:
+    match: 00001100101010101???????????????
+  assembly: xvfcmp.sor.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_CUNE_D
+  group: lasx
+  encoding:
+    match: 00001100101011000???????????????
+  assembly: xvfcmp.cune.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCMP_SUNE_D
+  group: lasx
+  encoding:
+    match: 00001100101011001???????????????
+  assembly: xvfcmp.sune.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITSEL_V
+  group: lasx
+  encoding:
+    match: 000011010010????????????????????
+  assembly: xvbitsel.v $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVSHUF_B
+  group: lasx
+  encoding:
+    match: 000011010110????????????????????
+  assembly: xvshuf.b $x.d, $x.j, $x.k, $x.a
+  format: DJKA
+- name: XVLD
+  group: lasx
+  encoding:
+    match: 0010110010??????????????????????
+  assembly: xvld $x.d, $r.j, $imm
+  format: DJI12
+- name: XVST
+  group: lasx
+  encoding:
+    match: 0010110011??????????????????????
+  assembly: xvst $x.d, $r.j, $imm
+  format: DJI12
+- name: XVLDREPL_D
+  group: lasx
+  encoding:
+    match: 0011001000010???????????????????
+    variables:
+      imm:
+      - 18
+      - 10
+  assembly: xvldrepl.d $x.d, $r.j, {imm}
+  format: DJ
+- name: XVLDREPL_W
+  group: lasx
+  encoding:
+    match: 001100100010????????????????????
+    variables:
+      imm:
+      - 19
+      - 10
+  assembly: xvldrepl.w $x.d, $r.j, {imm}
+  format: DJ
+- name: XVLDREPL_H
+  group: lasx
+  encoding:
+    match: 00110010010?????????????????????
+    variables:
+      imm:
+      - 20
+      - 10
+  assembly: xvldrepl.h $x.d, $r.j, {imm}
+  format: DJ
+- name: XVLDREPL_B
+  group: lasx
+  encoding:
+    match: 0011001010??????????????????????
+  assembly: xvldrepl.b $x.d, $r.j, {imm}
+  format: DJI12
+- name: XVSTELM_D
+  group: lasx
+  encoding:
+    match: 001100110001????????????????????
+    variables:
+      imm1:
+      - 19
+      - 18
+  assembly: xvstelm.d $x.d, $r.j, {imm}, {imm}
+  format: DJI8
+- name: XVSTELM_W
+  group: lasx
+  encoding:
+    match: 00110011001?????????????????????
+    variables:
+      imm1:
+      - 20
+      - 18
+  assembly: xvstelm.w $x.d, $r.j, {imm}, {imm}
+  format: DJI8
+- name: XVSTELM_H
+  group: lasx
+  encoding:
+    match: 0011001101??????????????????????
+    variables:
+      imm1:
+      - 21
+      - 18
+  assembly: xvstelm.h $x.d, $r.j, {imm}, {imm}
+  format: DJI8
+- name: XVSTELM_B
+  group: lasx
+  encoding:
+    match: 001100111???????????????????????
+    variables:
+      imm1:
+      - 22
+      - 18
+  assembly: xvstelm.b $x.d, $r.j, {imm}, {imm}
+  format: DJI8
+- name: XVLDX
+  group: lasx
+  encoding:
+    match: 00111000010010000???????????????
+  assembly: xvldx $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSTX
+  group: lasx
+  encoding:
+    match: 00111000010011000???????????????
+  assembly: xvstx $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSEQ_B
+  group: lasx
+  encoding:
+    match: 01110100000000000???????????????
+  assembly: xvseq.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSEQ_H
+  group: lasx
+  encoding:
+    match: 01110100000000001???????????????
+  assembly: xvseq.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSEQ_W
+  group: lasx
+  encoding:
+    match: 01110100000000010???????????????
+  assembly: xvseq.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSEQ_D
+  group: lasx
+  encoding:
+    match: 01110100000000011???????????????
+  assembly: xvseq.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_B
+  group: lasx
+  encoding:
+    match: 01110100000000100???????????????
+  assembly: xvsle.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_H
+  group: lasx
+  encoding:
+    match: 01110100000000101???????????????
+  assembly: xvsle.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_W
+  group: lasx
+  encoding:
+    match: 01110100000000110???????????????
+  assembly: xvsle.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_D
+  group: lasx
+  encoding:
+    match: 01110100000000111???????????????
+  assembly: xvsle.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_BU
+  group: lasx
+  encoding:
+    match: 01110100000001000???????????????
+  assembly: xvsle.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_HU
+  group: lasx
+  encoding:
+    match: 01110100000001001???????????????
+  assembly: xvsle.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_WU
+  group: lasx
+  encoding:
+    match: 01110100000001010???????????????
+  assembly: xvsle.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLE_DU
+  group: lasx
+  encoding:
+    match: 01110100000001011???????????????
+  assembly: xvsle.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_B
+  group: lasx
+  encoding:
+    match: 01110100000001100???????????????
+  assembly: xvslt.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_H
+  group: lasx
+  encoding:
+    match: 01110100000001101???????????????
+  assembly: xvslt.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_W
+  group: lasx
+  encoding:
+    match: 01110100000001110???????????????
+  assembly: xvslt.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_D
+  group: lasx
+  encoding:
+    match: 01110100000001111???????????????
+  assembly: xvslt.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_BU
+  group: lasx
+  encoding:
+    match: 01110100000010000???????????????
+  assembly: xvslt.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_HU
+  group: lasx
+  encoding:
+    match: 01110100000010001???????????????
+  assembly: xvslt.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_WU
+  group: lasx
+  encoding:
+    match: 01110100000010010???????????????
+  assembly: xvslt.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLT_DU
+  group: lasx
+  encoding:
+    match: 01110100000010011???????????????
+  assembly: xvslt.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADD_B
+  group: lasx
+  encoding:
+    match: 01110100000010100???????????????
+  assembly: xvadd.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADD_H
+  group: lasx
+  encoding:
+    match: 01110100000010101???????????????
+  assembly: xvadd.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADD_W
+  group: lasx
+  encoding:
+    match: 01110100000010110???????????????
+  assembly: xvadd.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADD_D
+  group: lasx
+  encoding:
+    match: 01110100000010111???????????????
+  assembly: xvadd.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUB_B
+  group: lasx
+  encoding:
+    match: 01110100000011000???????????????
+  assembly: xvsub.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUB_H
+  group: lasx
+  encoding:
+    match: 01110100000011001???????????????
+  assembly: xvsub.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUB_W
+  group: lasx
+  encoding:
+    match: 01110100000011010???????????????
+  assembly: xvsub.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUB_D
+  group: lasx
+  encoding:
+    match: 01110100000011011???????????????
+  assembly: xvsub.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_H_B
+  group: lasx
+  encoding:
+    match: 01110100000111100???????????????
+  assembly: xvaddwev.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_W_H
+  group: lasx
+  encoding:
+    match: 01110100000111101???????????????
+  assembly: xvaddwev.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_D_W
+  group: lasx
+  encoding:
+    match: 01110100000111110???????????????
+  assembly: xvaddwev.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_Q_D
+  group: lasx
+  encoding:
+    match: 01110100000111111???????????????
+  assembly: xvaddwev.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_H_B
+  group: lasx
+  encoding:
+    match: 01110100001000000???????????????
+  assembly: xvsubwev.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_W_H
+  group: lasx
+  encoding:
+    match: 01110100001000001???????????????
+  assembly: xvsubwev.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_D_W
+  group: lasx
+  encoding:
+    match: 01110100001000010???????????????
+  assembly: xvsubwev.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_Q_D
+  group: lasx
+  encoding:
+    match: 01110100001000011???????????????
+  assembly: xvsubwev.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_H_B
+  group: lasx
+  encoding:
+    match: 01110100001000100???????????????
+  assembly: xvaddwod.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_W_H
+  group: lasx
+  encoding:
+    match: 01110100001000101???????????????
+  assembly: xvaddwod.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_D_W
+  group: lasx
+  encoding:
+    match: 01110100001000110???????????????
+  assembly: xvaddwod.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_Q_D
+  group: lasx
+  encoding:
+    match: 01110100001000111???????????????
+  assembly: xvaddwod.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_H_B
+  group: lasx
+  encoding:
+    match: 01110100001001000???????????????
+  assembly: xvsubwod.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_W_H
+  group: lasx
+  encoding:
+    match: 01110100001001001???????????????
+  assembly: xvsubwod.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_D_W
+  group: lasx
+  encoding:
+    match: 01110100001001010???????????????
+  assembly: xvsubwod.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_Q_D
+  group: lasx
+  encoding:
+    match: 01110100001001011???????????????
+  assembly: xvsubwod.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_H_BU
+  group: lasx
+  encoding:
+    match: 01110100001011100???????????????
+  assembly: xvaddwev.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_W_HU
+  group: lasx
+  encoding:
+    match: 01110100001011101???????????????
+  assembly: xvaddwev.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_D_WU
+  group: lasx
+  encoding:
+    match: 01110100001011110???????????????
+  assembly: xvaddwev.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100001011111???????????????
+  assembly: xvaddwev.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_H_BU
+  group: lasx
+  encoding:
+    match: 01110100001100000???????????????
+  assembly: xvsubwev.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_W_HU
+  group: lasx
+  encoding:
+    match: 01110100001100001???????????????
+  assembly: xvsubwev.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_D_WU
+  group: lasx
+  encoding:
+    match: 01110100001100010???????????????
+  assembly: xvsubwev.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWEV_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100001100011???????????????
+  assembly: xvsubwev.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_H_BU
+  group: lasx
+  encoding:
+    match: 01110100001100100???????????????
+  assembly: xvaddwod.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_W_HU
+  group: lasx
+  encoding:
+    match: 01110100001100101???????????????
+  assembly: xvaddwod.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_D_WU
+  group: lasx
+  encoding:
+    match: 01110100001100110???????????????
+  assembly: xvaddwod.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100001100111???????????????
+  assembly: xvaddwod.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_H_BU
+  group: lasx
+  encoding:
+    match: 01110100001101000???????????????
+  assembly: xvsubwod.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_W_HU
+  group: lasx
+  encoding:
+    match: 01110100001101001???????????????
+  assembly: xvsubwod.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_D_WU
+  group: lasx
+  encoding:
+    match: 01110100001101010???????????????
+  assembly: xvsubwod.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUBWOD_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100001101011???????????????
+  assembly: xvsubwod.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_H_BU_B
+  group: lasx
+  encoding:
+    match: 01110100001111100???????????????
+  assembly: xvaddwev.h.bu.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_W_HU_H
+  group: lasx
+  encoding:
+    match: 01110100001111101???????????????
+  assembly: xvaddwev.w.hu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_D_WU_W
+  group: lasx
+  encoding:
+    match: 01110100001111110???????????????
+  assembly: xvaddwev.d.wu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWEV_Q_DU_D
+  group: lasx
+  encoding:
+    match: 01110100001111111???????????????
+  assembly: xvaddwev.q.du.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_H_BU_B
+  group: lasx
+  encoding:
+    match: 01110100010000000???????????????
+  assembly: xvaddwod.h.bu.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_W_HU_H
+  group: lasx
+  encoding:
+    match: 01110100010000001???????????????
+  assembly: xvaddwod.w.hu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_D_WU_W
+  group: lasx
+  encoding:
+    match: 01110100010000010???????????????
+  assembly: xvaddwod.d.wu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDWOD_Q_DU_D
+  group: lasx
+  encoding:
+    match: 01110100010000011???????????????
+  assembly: xvaddwod.q.du.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_B
+  group: lasx
+  encoding:
+    match: 01110100010001100???????????????
+  assembly: xvsadd.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_H
+  group: lasx
+  encoding:
+    match: 01110100010001101???????????????
+  assembly: xvsadd.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_W
+  group: lasx
+  encoding:
+    match: 01110100010001110???????????????
+  assembly: xvsadd.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_D
+  group: lasx
+  encoding:
+    match: 01110100010001111???????????????
+  assembly: xvsadd.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_B
+  group: lasx
+  encoding:
+    match: 01110100010010000???????????????
+  assembly: xvssub.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_H
+  group: lasx
+  encoding:
+    match: 01110100010010001???????????????
+  assembly: xvssub.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_W
+  group: lasx
+  encoding:
+    match: 01110100010010010???????????????
+  assembly: xvssub.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_D
+  group: lasx
+  encoding:
+    match: 01110100010010011???????????????
+  assembly: xvssub.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_BU
+  group: lasx
+  encoding:
+    match: 01110100010010100???????????????
+  assembly: xvsadd.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_HU
+  group: lasx
+  encoding:
+    match: 01110100010010101???????????????
+  assembly: xvsadd.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_WU
+  group: lasx
+  encoding:
+    match: 01110100010010110???????????????
+  assembly: xvsadd.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSADD_DU
+  group: lasx
+  encoding:
+    match: 01110100010010111???????????????
+  assembly: xvsadd.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_BU
+  group: lasx
+  encoding:
+    match: 01110100010011000???????????????
+  assembly: xvssub.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_HU
+  group: lasx
+  encoding:
+    match: 01110100010011001???????????????
+  assembly: xvssub.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_WU
+  group: lasx
+  encoding:
+    match: 01110100010011010???????????????
+  assembly: xvssub.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSUB_DU
+  group: lasx
+  encoding:
+    match: 01110100010011011???????????????
+  assembly: xvssub.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_H_B
+  group: lasx
+  encoding:
+    match: 01110100010101000???????????????
+  assembly: xvhaddw.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_W_H
+  group: lasx
+  encoding:
+    match: 01110100010101001???????????????
+  assembly: xvhaddw.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_D_W
+  group: lasx
+  encoding:
+    match: 01110100010101010???????????????
+  assembly: xvhaddw.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_Q_D
+  group: lasx
+  encoding:
+    match: 01110100010101011???????????????
+  assembly: xvhaddw.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_H_B
+  group: lasx
+  encoding:
+    match: 01110100010101100???????????????
+  assembly: xvhsubw.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_W_H
+  group: lasx
+  encoding:
+    match: 01110100010101101???????????????
+  assembly: xvhsubw.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_D_W
+  group: lasx
+  encoding:
+    match: 01110100010101110???????????????
+  assembly: xvhsubw.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_Q_D
+  group: lasx
+  encoding:
+    match: 01110100010101111???????????????
+  assembly: xvhsubw.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_HU_BU
+  group: lasx
+  encoding:
+    match: 01110100010110000???????????????
+  assembly: xvhaddw.hu.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_WU_HU
+  group: lasx
+  encoding:
+    match: 01110100010110001???????????????
+  assembly: xvhaddw.wu.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_DU_WU
+  group: lasx
+  encoding:
+    match: 01110100010110010???????????????
+  assembly: xvhaddw.du.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHADDW_QU_DU
+  group: lasx
+  encoding:
+    match: 01110100010110011???????????????
+  assembly: xvhaddw.qu.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_HU_BU
+  group: lasx
+  encoding:
+    match: 01110100010110100???????????????
+  assembly: xvhsubw.hu.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_WU_HU
+  group: lasx
+  encoding:
+    match: 01110100010110101???????????????
+  assembly: xvhsubw.wu.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_DU_WU
+  group: lasx
+  encoding:
+    match: 01110100010110110???????????????
+  assembly: xvhsubw.du.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVHSUBW_QU_DU
+  group: lasx
+  encoding:
+    match: 01110100010110111???????????????
+  assembly: xvhsubw.qu.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDA_B
+  group: lasx
+  encoding:
+    match: 01110100010111000???????????????
+  assembly: xvadda.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDA_H
+  group: lasx
+  encoding:
+    match: 01110100010111001???????????????
+  assembly: xvadda.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDA_W
+  group: lasx
+  encoding:
+    match: 01110100010111010???????????????
+  assembly: xvadda.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADDA_D
+  group: lasx
+  encoding:
+    match: 01110100010111011???????????????
+  assembly: xvadda.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_B
+  group: lasx
+  encoding:
+    match: 01110100011000000???????????????
+  assembly: xvabsd.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_H
+  group: lasx
+  encoding:
+    match: 01110100011000001???????????????
+  assembly: xvabsd.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_W
+  group: lasx
+  encoding:
+    match: 01110100011000010???????????????
+  assembly: xvabsd.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_D
+  group: lasx
+  encoding:
+    match: 01110100011000011???????????????
+  assembly: xvabsd.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_BU
+  group: lasx
+  encoding:
+    match: 01110100011000100???????????????
+  assembly: xvabsd.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_HU
+  group: lasx
+  encoding:
+    match: 01110100011000101???????????????
+  assembly: xvabsd.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_WU
+  group: lasx
+  encoding:
+    match: 01110100011000110???????????????
+  assembly: xvabsd.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVABSD_DU
+  group: lasx
+  encoding:
+    match: 01110100011000111???????????????
+  assembly: xvabsd.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_B
+  group: lasx
+  encoding:
+    match: 01110100011001000???????????????
+  assembly: xvavg.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_H
+  group: lasx
+  encoding:
+    match: 01110100011001001???????????????
+  assembly: xvavg.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_W
+  group: lasx
+  encoding:
+    match: 01110100011001010???????????????
+  assembly: xvavg.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_D
+  group: lasx
+  encoding:
+    match: 01110100011001011???????????????
+  assembly: xvavg.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_BU
+  group: lasx
+  encoding:
+    match: 01110100011001100???????????????
+  assembly: xvavg.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_HU
+  group: lasx
+  encoding:
+    match: 01110100011001101???????????????
+  assembly: xvavg.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_WU
+  group: lasx
+  encoding:
+    match: 01110100011001110???????????????
+  assembly: xvavg.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVG_DU
+  group: lasx
+  encoding:
+    match: 01110100011001111???????????????
+  assembly: xvavg.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_B
+  group: lasx
+  encoding:
+    match: 01110100011010000???????????????
+  assembly: xvavgr.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_H
+  group: lasx
+  encoding:
+    match: 01110100011010001???????????????
+  assembly: xvavgr.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_W
+  group: lasx
+  encoding:
+    match: 01110100011010010???????????????
+  assembly: xvavgr.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_D
+  group: lasx
+  encoding:
+    match: 01110100011010011???????????????
+  assembly: xvavgr.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_BU
+  group: lasx
+  encoding:
+    match: 01110100011010100???????????????
+  assembly: xvavgr.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_HU
+  group: lasx
+  encoding:
+    match: 01110100011010101???????????????
+  assembly: xvavgr.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_WU
+  group: lasx
+  encoding:
+    match: 01110100011010110???????????????
+  assembly: xvavgr.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVAVGR_DU
+  group: lasx
+  encoding:
+    match: 01110100011010111???????????????
+  assembly: xvavgr.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_B
+  group: lasx
+  encoding:
+    match: 01110100011100000???????????????
+  assembly: xvmax.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_H
+  group: lasx
+  encoding:
+    match: 01110100011100001???????????????
+  assembly: xvmax.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_W
+  group: lasx
+  encoding:
+    match: 01110100011100010???????????????
+  assembly: xvmax.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_D
+  group: lasx
+  encoding:
+    match: 01110100011100011???????????????
+  assembly: xvmax.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_B
+  group: lasx
+  encoding:
+    match: 01110100011100100???????????????
+  assembly: xvmin.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_H
+  group: lasx
+  encoding:
+    match: 01110100011100101???????????????
+  assembly: xvmin.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_W
+  group: lasx
+  encoding:
+    match: 01110100011100110???????????????
+  assembly: xvmin.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_D
+  group: lasx
+  encoding:
+    match: 01110100011100111???????????????
+  assembly: xvmin.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_BU
+  group: lasx
+  encoding:
+    match: 01110100011101000???????????????
+  assembly: xvmax.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_HU
+  group: lasx
+  encoding:
+    match: 01110100011101001???????????????
+  assembly: xvmax.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_WU
+  group: lasx
+  encoding:
+    match: 01110100011101010???????????????
+  assembly: xvmax.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMAX_DU
+  group: lasx
+  encoding:
+    match: 01110100011101011???????????????
+  assembly: xvmax.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_BU
+  group: lasx
+  encoding:
+    match: 01110100011101100???????????????
+  assembly: xvmin.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_HU
+  group: lasx
+  encoding:
+    match: 01110100011101101???????????????
+  assembly: xvmin.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_WU
+  group: lasx
+  encoding:
+    match: 01110100011101110???????????????
+  assembly: xvmin.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMIN_DU
+  group: lasx
+  encoding:
+    match: 01110100011101111???????????????
+  assembly: xvmin.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUL_B
+  group: lasx
+  encoding:
+    match: 01110100100001000???????????????
+  assembly: xvmul.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUL_H
+  group: lasx
+  encoding:
+    match: 01110100100001001???????????????
+  assembly: xvmul.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUL_W
+  group: lasx
+  encoding:
+    match: 01110100100001010???????????????
+  assembly: xvmul.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUL_D
+  group: lasx
+  encoding:
+    match: 01110100100001011???????????????
+  assembly: xvmul.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_B
+  group: lasx
+  encoding:
+    match: 01110100100001100???????????????
+  assembly: xvmuh.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_H
+  group: lasx
+  encoding:
+    match: 01110100100001101???????????????
+  assembly: xvmuh.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_W
+  group: lasx
+  encoding:
+    match: 01110100100001110???????????????
+  assembly: xvmuh.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_D
+  group: lasx
+  encoding:
+    match: 01110100100001111???????????????
+  assembly: xvmuh.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_BU
+  group: lasx
+  encoding:
+    match: 01110100100010000???????????????
+  assembly: xvmuh.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_HU
+  group: lasx
+  encoding:
+    match: 01110100100010001???????????????
+  assembly: xvmuh.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_WU
+  group: lasx
+  encoding:
+    match: 01110100100010010???????????????
+  assembly: xvmuh.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMUH_DU
+  group: lasx
+  encoding:
+    match: 01110100100010011???????????????
+  assembly: xvmuh.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_H_B
+  group: lasx
+  encoding:
+    match: 01110100100100000???????????????
+  assembly: xvmulwev.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_W_H
+  group: lasx
+  encoding:
+    match: 01110100100100001???????????????
+  assembly: xvmulwev.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_D_W
+  group: lasx
+  encoding:
+    match: 01110100100100010???????????????
+  assembly: xvmulwev.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_Q_D
+  group: lasx
+  encoding:
+    match: 01110100100100011???????????????
+  assembly: xvmulwev.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_H_B
+  group: lasx
+  encoding:
+    match: 01110100100100100???????????????
+  assembly: xvmulwod.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_W_H
+  group: lasx
+  encoding:
+    match: 01110100100100101???????????????
+  assembly: xvmulwod.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_D_W
+  group: lasx
+  encoding:
+    match: 01110100100100110???????????????
+  assembly: xvmulwod.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_Q_D
+  group: lasx
+  encoding:
+    match: 01110100100100111???????????????
+  assembly: xvmulwod.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_H_BU
+  group: lasx
+  encoding:
+    match: 01110100100110000???????????????
+  assembly: xvmulwev.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_W_HU
+  group: lasx
+  encoding:
+    match: 01110100100110001???????????????
+  assembly: xvmulwev.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_D_WU
+  group: lasx
+  encoding:
+    match: 01110100100110010???????????????
+  assembly: xvmulwev.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100100110011???????????????
+  assembly: xvmulwev.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_H_BU
+  group: lasx
+  encoding:
+    match: 01110100100110100???????????????
+  assembly: xvmulwod.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_W_HU
+  group: lasx
+  encoding:
+    match: 01110100100110101???????????????
+  assembly: xvmulwod.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_D_WU
+  group: lasx
+  encoding:
+    match: 01110100100110110???????????????
+  assembly: xvmulwod.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100100110111???????????????
+  assembly: xvmulwod.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_H_BU_B
+  group: lasx
+  encoding:
+    match: 01110100101000000???????????????
+  assembly: xvmulwev.h.bu.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_W_HU_H
+  group: lasx
+  encoding:
+    match: 01110100101000001???????????????
+  assembly: xvmulwev.w.hu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_D_WU_W
+  group: lasx
+  encoding:
+    match: 01110100101000010???????????????
+  assembly: xvmulwev.d.wu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWEV_Q_DU_D
+  group: lasx
+  encoding:
+    match: 01110100101000011???????????????
+  assembly: xvmulwev.q.du.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_H_BU_B
+  group: lasx
+  encoding:
+    match: 01110100101000100???????????????
+  assembly: xvmulwod.h.bu.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_W_HU_H
+  group: lasx
+  encoding:
+    match: 01110100101000101???????????????
+  assembly: xvmulwod.w.hu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_D_WU_W
+  group: lasx
+  encoding:
+    match: 01110100101000110???????????????
+  assembly: xvmulwod.d.wu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMULWOD_Q_DU_D
+  group: lasx
+  encoding:
+    match: 01110100101000111???????????????
+  assembly: xvmulwod.q.du.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADD_B
+  group: lasx
+  encoding:
+    match: 01110100101010000???????????????
+  assembly: xvmadd.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADD_H
+  group: lasx
+  encoding:
+    match: 01110100101010001???????????????
+  assembly: xvmadd.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADD_W
+  group: lasx
+  encoding:
+    match: 01110100101010010???????????????
+  assembly: xvmadd.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADD_D
+  group: lasx
+  encoding:
+    match: 01110100101010011???????????????
+  assembly: xvmadd.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMSUB_B
+  group: lasx
+  encoding:
+    match: 01110100101010100???????????????
+  assembly: xvmsub.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMSUB_H
+  group: lasx
+  encoding:
+    match: 01110100101010101???????????????
+  assembly: xvmsub.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMSUB_W
+  group: lasx
+  encoding:
+    match: 01110100101010110???????????????
+  assembly: xvmsub.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMSUB_D
+  group: lasx
+  encoding:
+    match: 01110100101010111???????????????
+  assembly: xvmsub.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_H_B
+  group: lasx
+  encoding:
+    match: 01110100101011000???????????????
+  assembly: xvmaddwev.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_W_H
+  group: lasx
+  encoding:
+    match: 01110100101011001???????????????
+  assembly: xvmaddwev.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_D_W
+  group: lasx
+  encoding:
+    match: 01110100101011010???????????????
+  assembly: xvmaddwev.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_Q_D
+  group: lasx
+  encoding:
+    match: 01110100101011011???????????????
+  assembly: xvmaddwev.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_H_B
+  group: lasx
+  encoding:
+    match: 01110100101011100???????????????
+  assembly: xvmaddwod.h.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_W_H
+  group: lasx
+  encoding:
+    match: 01110100101011101???????????????
+  assembly: xvmaddwod.w.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_D_W
+  group: lasx
+  encoding:
+    match: 01110100101011110???????????????
+  assembly: xvmaddwod.d.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_Q_D
+  group: lasx
+  encoding:
+    match: 01110100101011111???????????????
+  assembly: xvmaddwod.q.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_H_BU
+  group: lasx
+  encoding:
+    match: 01110100101101000???????????????
+  assembly: xvmaddwev.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_W_HU
+  group: lasx
+  encoding:
+    match: 01110100101101001???????????????
+  assembly: xvmaddwev.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_D_WU
+  group: lasx
+  encoding:
+    match: 01110100101101010???????????????
+  assembly: xvmaddwev.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100101101011???????????????
+  assembly: xvmaddwev.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_H_BU
+  group: lasx
+  encoding:
+    match: 01110100101101100???????????????
+  assembly: xvmaddwod.h.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_W_HU
+  group: lasx
+  encoding:
+    match: 01110100101101101???????????????
+  assembly: xvmaddwod.w.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_D_WU
+  group: lasx
+  encoding:
+    match: 01110100101101110???????????????
+  assembly: xvmaddwod.d.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_Q_DU
+  group: lasx
+  encoding:
+    match: 01110100101101111???????????????
+  assembly: xvmaddwod.q.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_H_BU_B
+  group: lasx
+  encoding:
+    match: 01110100101111000???????????????
+  assembly: xvmaddwev.h.bu.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_W_HU_H
+  group: lasx
+  encoding:
+    match: 01110100101111001???????????????
+  assembly: xvmaddwev.w.hu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_D_WU_W
+  group: lasx
+  encoding:
+    match: 01110100101111010???????????????
+  assembly: xvmaddwev.d.wu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWEV_Q_DU_D
+  group: lasx
+  encoding:
+    match: 01110100101111011???????????????
+  assembly: xvmaddwev.q.du.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_H_BU_B
+  group: lasx
+  encoding:
+    match: 01110100101111100???????????????
+  assembly: xvmaddwod.h.bu.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_W_HU_H
+  group: lasx
+  encoding:
+    match: 01110100101111101???????????????
+  assembly: xvmaddwod.w.hu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_D_WU_W
+  group: lasx
+  encoding:
+    match: 01110100101111110???????????????
+  assembly: xvmaddwod.d.wu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMADDWOD_Q_DU_D
+  group: lasx
+  encoding:
+    match: 01110100101111111???????????????
+  assembly: xvmaddwod.q.du.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_B
+  group: lasx
+  encoding:
+    match: 01110100111000000???????????????
+  assembly: xvdiv.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_H
+  group: lasx
+  encoding:
+    match: 01110100111000001???????????????
+  assembly: xvdiv.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_W
+  group: lasx
+  encoding:
+    match: 01110100111000010???????????????
+  assembly: xvdiv.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_D
+  group: lasx
+  encoding:
+    match: 01110100111000011???????????????
+  assembly: xvdiv.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_B
+  group: lasx
+  encoding:
+    match: 01110100111000100???????????????
+  assembly: xvmod.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_H
+  group: lasx
+  encoding:
+    match: 01110100111000101???????????????
+  assembly: xvmod.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_W
+  group: lasx
+  encoding:
+    match: 01110100111000110???????????????
+  assembly: xvmod.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_D
+  group: lasx
+  encoding:
+    match: 01110100111000111???????????????
+  assembly: xvmod.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_BU
+  group: lasx
+  encoding:
+    match: 01110100111001000???????????????
+  assembly: xvdiv.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_HU
+  group: lasx
+  encoding:
+    match: 01110100111001001???????????????
+  assembly: xvdiv.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_WU
+  group: lasx
+  encoding:
+    match: 01110100111001010???????????????
+  assembly: xvdiv.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVDIV_DU
+  group: lasx
+  encoding:
+    match: 01110100111001011???????????????
+  assembly: xvdiv.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_BU
+  group: lasx
+  encoding:
+    match: 01110100111001100???????????????
+  assembly: xvmod.bu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_HU
+  group: lasx
+  encoding:
+    match: 01110100111001101???????????????
+  assembly: xvmod.hu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_WU
+  group: lasx
+  encoding:
+    match: 01110100111001110???????????????
+  assembly: xvmod.wu $x.d, $x.j, $x.k
+  format: DJK
+- name: XVMOD_DU
+  group: lasx
+  encoding:
+    match: 01110100111001111???????????????
+  assembly: xvmod.du $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLL_B
+  group: lasx
+  encoding:
+    match: 01110100111010000???????????????
+  assembly: xvsll.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLL_H
+  group: lasx
+  encoding:
+    match: 01110100111010001???????????????
+  assembly: xvsll.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLL_W
+  group: lasx
+  encoding:
+    match: 01110100111010010???????????????
+  assembly: xvsll.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSLL_D
+  group: lasx
+  encoding:
+    match: 01110100111010011???????????????
+  assembly: xvsll.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRL_B
+  group: lasx
+  encoding:
+    match: 01110100111010100???????????????
+  assembly: xvsrl.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRL_H
+  group: lasx
+  encoding:
+    match: 01110100111010101???????????????
+  assembly: xvsrl.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRL_W
+  group: lasx
+  encoding:
+    match: 01110100111010110???????????????
+  assembly: xvsrl.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRL_D
+  group: lasx
+  encoding:
+    match: 01110100111010111???????????????
+  assembly: xvsrl.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRA_B
+  group: lasx
+  encoding:
+    match: 01110100111011000???????????????
+  assembly: xvsra.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRA_H
+  group: lasx
+  encoding:
+    match: 01110100111011001???????????????
+  assembly: xvsra.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRA_W
+  group: lasx
+  encoding:
+    match: 01110100111011010???????????????
+  assembly: xvsra.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRA_D
+  group: lasx
+  encoding:
+    match: 01110100111011011???????????????
+  assembly: xvsra.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVROTR_B
+  group: lasx
+  encoding:
+    match: 01110100111011100???????????????
+  assembly: xvrotr.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVROTR_H
+  group: lasx
+  encoding:
+    match: 01110100111011101???????????????
+  assembly: xvrotr.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVROTR_W
+  group: lasx
+  encoding:
+    match: 01110100111011110???????????????
+  assembly: xvrotr.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVROTR_D
+  group: lasx
+  encoding:
+    match: 01110100111011111???????????????
+  assembly: xvrotr.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLR_B
+  group: lasx
+  encoding:
+    match: 01110100111100000???????????????
+  assembly: xvsrlr.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLR_H
+  group: lasx
+  encoding:
+    match: 01110100111100001???????????????
+  assembly: xvsrlr.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLR_W
+  group: lasx
+  encoding:
+    match: 01110100111100010???????????????
+  assembly: xvsrlr.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLR_D
+  group: lasx
+  encoding:
+    match: 01110100111100011???????????????
+  assembly: xvsrlr.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRAR_B
+  group: lasx
+  encoding:
+    match: 01110100111100100???????????????
+  assembly: xvsrar.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRAR_H
+  group: lasx
+  encoding:
+    match: 01110100111100101???????????????
+  assembly: xvsrar.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRAR_W
+  group: lasx
+  encoding:
+    match: 01110100111100110???????????????
+  assembly: xvsrar.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRAR_D
+  group: lasx
+  encoding:
+    match: 01110100111100111???????????????
+  assembly: xvsrar.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLN_B_H
+  group: lasx
+  encoding:
+    match: 01110100111101001???????????????
+  assembly: xvsrln.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLN_H_W
+  group: lasx
+  encoding:
+    match: 01110100111101010???????????????
+  assembly: xvsrln.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLN_W_D
+  group: lasx
+  encoding:
+    match: 01110100111101011???????????????
+  assembly: xvsrln.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRAN_B_H
+  group: lasx
+  encoding:
+    match: 01110100111101101???????????????
+  assembly: xvsran.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRAN_H_W
+  group: lasx
+  encoding:
+    match: 01110100111101110???????????????
+  assembly: xvsran.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRAN_W_D
+  group: lasx
+  encoding:
+    match: 01110100111101111???????????????
+  assembly: xvsran.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLRN_B_H
+  group: lasx
+  encoding:
+    match: 01110100111110001???????????????
+  assembly: xvsrlrn.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLRN_H_W
+  group: lasx
+  encoding:
+    match: 01110100111110010???????????????
+  assembly: xvsrlrn.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRLRN_W_D
+  group: lasx
+  encoding:
+    match: 01110100111110011???????????????
+  assembly: xvsrlrn.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRARN_B_H
+  group: lasx
+  encoding:
+    match: 01110100111110101???????????????
+  assembly: xvsrarn.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRARN_H_W
+  group: lasx
+  encoding:
+    match: 01110100111110110???????????????
+  assembly: xvsrarn.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSRARN_W_D
+  group: lasx
+  encoding:
+    match: 01110100111110111???????????????
+  assembly: xvsrarn.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLN_B_H
+  group: lasx
+  encoding:
+    match: 01110100111111001???????????????
+  assembly: xvssrln.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLN_H_W
+  group: lasx
+  encoding:
+    match: 01110100111111010???????????????
+  assembly: xvssrln.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLN_W_D
+  group: lasx
+  encoding:
+    match: 01110100111111011???????????????
+  assembly: xvssrln.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRAN_B_H
+  group: lasx
+  encoding:
+    match: 01110100111111101???????????????
+  assembly: xvssran.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRAN_H_W
+  group: lasx
+  encoding:
+    match: 01110100111111110???????????????
+  assembly: xvssran.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRAN_W_D
+  group: lasx
+  encoding:
+    match: 01110100111111111???????????????
+  assembly: xvssran.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLRN_B_H
+  group: lasx
+  encoding:
+    match: 01110101000000001???????????????
+  assembly: xvssrlrn.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLRN_H_W
+  group: lasx
+  encoding:
+    match: 01110101000000010???????????????
+  assembly: xvssrlrn.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLRN_W_D
+  group: lasx
+  encoding:
+    match: 01110101000000011???????????????
+  assembly: xvssrlrn.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRARN_B_H
+  group: lasx
+  encoding:
+    match: 01110101000000101???????????????
+  assembly: xvssrarn.b.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRARN_H_W
+  group: lasx
+  encoding:
+    match: 01110101000000110???????????????
+  assembly: xvssrarn.h.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRARN_W_D
+  group: lasx
+  encoding:
+    match: 01110101000000111???????????????
+  assembly: xvssrarn.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLN_BU_H
+  group: lasx
+  encoding:
+    match: 01110101000001001???????????????
+  assembly: xvssrln.bu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLN_HU_W
+  group: lasx
+  encoding:
+    match: 01110101000001010???????????????
+  assembly: xvssrln.hu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLN_WU_D
+  group: lasx
+  encoding:
+    match: 01110101000001011???????????????
+  assembly: xvssrln.wu.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRAN_BU_H
+  group: lasx
+  encoding:
+    match: 01110101000001101???????????????
+  assembly: xvssran.bu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRAN_HU_W
+  group: lasx
+  encoding:
+    match: 01110101000001110???????????????
+  assembly: xvssran.hu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRAN_WU_D
+  group: lasx
+  encoding:
+    match: 01110101000001111???????????????
+  assembly: xvssran.wu.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLRN_BU_H
+  group: lasx
+  encoding:
+    match: 01110101000010001???????????????
+  assembly: xvssrlrn.bu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLRN_HU_W
+  group: lasx
+  encoding:
+    match: 01110101000010010???????????????
+  assembly: xvssrlrn.hu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRLRN_WU_D
+  group: lasx
+  encoding:
+    match: 01110101000010011???????????????
+  assembly: xvssrlrn.wu.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRARN_BU_H
+  group: lasx
+  encoding:
+    match: 01110101000010101???????????????
+  assembly: xvssrarn.bu.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRARN_HU_W
+  group: lasx
+  encoding:
+    match: 01110101000010110???????????????
+  assembly: xvssrarn.hu.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSSRARN_WU_D
+  group: lasx
+  encoding:
+    match: 01110101000010111???????????????
+  assembly: xvssrarn.wu.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITCLR_B
+  group: lasx
+  encoding:
+    match: 01110101000011000???????????????
+  assembly: xvbitclr.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITCLR_H
+  group: lasx
+  encoding:
+    match: 01110101000011001???????????????
+  assembly: xvbitclr.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITCLR_W
+  group: lasx
+  encoding:
+    match: 01110101000011010???????????????
+  assembly: xvbitclr.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITCLR_D
+  group: lasx
+  encoding:
+    match: 01110101000011011???????????????
+  assembly: xvbitclr.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITSET_B
+  group: lasx
+  encoding:
+    match: 01110101000011100???????????????
+  assembly: xvbitset.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITSET_H
+  group: lasx
+  encoding:
+    match: 01110101000011101???????????????
+  assembly: xvbitset.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITSET_W
+  group: lasx
+  encoding:
+    match: 01110101000011110???????????????
+  assembly: xvbitset.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITSET_D
+  group: lasx
+  encoding:
+    match: 01110101000011111???????????????
+  assembly: xvbitset.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITREV_B
+  group: lasx
+  encoding:
+    match: 01110101000100000???????????????
+  assembly: xvbitrev.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITREV_H
+  group: lasx
+  encoding:
+    match: 01110101000100001???????????????
+  assembly: xvbitrev.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITREV_W
+  group: lasx
+  encoding:
+    match: 01110101000100010???????????????
+  assembly: xvbitrev.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVBITREV_D
+  group: lasx
+  encoding:
+    match: 01110101000100011???????????????
+  assembly: xvbitrev.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKEV_B
+  group: lasx
+  encoding:
+    match: 01110101000101100???????????????
+  assembly: xvpackev.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKEV_H
+  group: lasx
+  encoding:
+    match: 01110101000101101???????????????
+  assembly: xvpackev.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKEV_W
+  group: lasx
+  encoding:
+    match: 01110101000101110???????????????
+  assembly: xvpackev.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKEV_D
+  group: lasx
+  encoding:
+    match: 01110101000101111???????????????
+  assembly: xvpackev.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKOD_B
+  group: lasx
+  encoding:
+    match: 01110101000110000???????????????
+  assembly: xvpackod.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKOD_H
+  group: lasx
+  encoding:
+    match: 01110101000110001???????????????
+  assembly: xvpackod.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKOD_W
+  group: lasx
+  encoding:
+    match: 01110101000110010???????????????
+  assembly: xvpackod.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPACKOD_D
+  group: lasx
+  encoding:
+    match: 01110101000110011???????????????
+  assembly: xvpackod.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVL_B
+  group: lasx
+  encoding:
+    match: 01110101000110100???????????????
+  assembly: xvilvl.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVL_H
+  group: lasx
+  encoding:
+    match: 01110101000110101???????????????
+  assembly: xvilvl.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVL_W
+  group: lasx
+  encoding:
+    match: 01110101000110110???????????????
+  assembly: xvilvl.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVL_D
+  group: lasx
+  encoding:
+    match: 01110101000110111???????????????
+  assembly: xvilvl.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVH_B
+  group: lasx
+  encoding:
+    match: 01110101000111000???????????????
+  assembly: xvilvh.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVH_H
+  group: lasx
+  encoding:
+    match: 01110101000111001???????????????
+  assembly: xvilvh.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVH_W
+  group: lasx
+  encoding:
+    match: 01110101000111010???????????????
+  assembly: xvilvh.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVILVH_D
+  group: lasx
+  encoding:
+    match: 01110101000111011???????????????
+  assembly: xvilvh.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKEV_B
+  group: lasx
+  encoding:
+    match: 01110101000111100???????????????
+  assembly: xvpickev.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKEV_H
+  group: lasx
+  encoding:
+    match: 01110101000111101???????????????
+  assembly: xvpickev.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKEV_W
+  group: lasx
+  encoding:
+    match: 01110101000111110???????????????
+  assembly: xvpickev.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKEV_D
+  group: lasx
+  encoding:
+    match: 01110101000111111???????????????
+  assembly: xvpickev.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKOD_B
+  group: lasx
+  encoding:
+    match: 01110101001000000???????????????
+  assembly: xvpickod.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKOD_H
+  group: lasx
+  encoding:
+    match: 01110101001000001???????????????
+  assembly: xvpickod.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKOD_W
+  group: lasx
+  encoding:
+    match: 01110101001000010???????????????
+  assembly: xvpickod.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPICKOD_D
+  group: lasx
+  encoding:
+    match: 01110101001000011???????????????
+  assembly: xvpickod.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVREPLVE_B
+  group: lasx
+  encoding:
+    match: 01110101001000100???????????????
+  assembly: xvreplve.b $x.d, $x.j, $r.k
+  format: DJK
+- name: XVREPLVE_H
+  group: lasx
+  encoding:
+    match: 01110101001000101???????????????
+  assembly: xvreplve.h $x.d, $x.j, $r.k
+  format: DJK
+- name: XVREPLVE_W
+  group: lasx
+  encoding:
+    match: 01110101001000110???????????????
+  assembly: xvreplve.w $x.d, $x.j, $r.k
+  format: DJK
+- name: XVREPLVE_D
+  group: lasx
+  encoding:
+    match: 01110101001000111???????????????
+  assembly: xvreplve.d $x.d, $x.j, $r.k
+  format: DJK
+- name: XVAND_V
+  group: lasx
+  encoding:
+    match: 01110101001001100???????????????
+  assembly: xvand.v $x.d, $x.j, $x.k
+  format: DJK
+- name: XVOR_V
+  group: lasx
+  encoding:
+    match: 01110101001001101???????????????
+  assembly: xvor.v $x.d, $x.j, $x.k
+  format: DJK
+- name: XVXOR_V
+  group: lasx
+  encoding:
+    match: 01110101001001110???????????????
+  assembly: xvxor.v $x.d, $x.j, $x.k
+  format: DJK
+- name: XVNOR_V
+  group: lasx
+  encoding:
+    match: 01110101001001111???????????????
+  assembly: xvnor.v $x.d, $x.j, $x.k
+  format: DJK
+- name: XVANDN_V
+  group: lasx
+  encoding:
+    match: 01110101001010000???????????????
+  assembly: xvandn.v $x.d, $x.j, $x.k
+  format: DJK
+- name: XVORN_V
+  group: lasx
+  encoding:
+    match: 01110101001010001???????????????
+  assembly: xvorn.v $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFRSTP_B
+  group: lasx
+  encoding:
+    match: 01110101001010110???????????????
+  assembly: xvfrstp.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFRSTP_H
+  group: lasx
+  encoding:
+    match: 01110101001010111???????????????
+  assembly: xvfrstp.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVADD_Q
+  group: lasx
+  encoding:
+    match: 01110101001011010???????????????
+  assembly: xvadd.q $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSUB_Q
+  group: lasx
+  encoding:
+    match: 01110101001011011???????????????
+  assembly: xvsub.q $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSIGNCOV_B
+  group: lasx
+  encoding:
+    match: 01110101001011100???????????????
+  assembly: xvsigncov.b $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSIGNCOV_H
+  group: lasx
+  encoding:
+    match: 01110101001011101???????????????
+  assembly: xvsigncov.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSIGNCOV_W
+  group: lasx
+  encoding:
+    match: 01110101001011110???????????????
+  assembly: xvsigncov.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSIGNCOV_D
+  group: lasx
+  encoding:
+    match: 01110101001011111???????????????
+  assembly: xvsigncov.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFADD_S
+  group: lasx
+  encoding:
+    match: 01110101001100001???????????????
+  assembly: xvfadd.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFADD_D
+  group: lasx
+  encoding:
+    match: 01110101001100010???????????????
+  assembly: xvfadd.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFSUB_S
+  group: lasx
+  encoding:
+    match: 01110101001100101???????????????
+  assembly: xvfsub.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFSUB_D
+  group: lasx
+  encoding:
+    match: 01110101001100110???????????????
+  assembly: xvfsub.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMUL_S
+  group: lasx
+  encoding:
+    match: 01110101001110001???????????????
+  assembly: xvfmul.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMUL_D
+  group: lasx
+  encoding:
+    match: 01110101001110010???????????????
+  assembly: xvfmul.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFDIV_S
+  group: lasx
+  encoding:
+    match: 01110101001110101???????????????
+  assembly: xvfdiv.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFDIV_D
+  group: lasx
+  encoding:
+    match: 01110101001110110???????????????
+  assembly: xvfdiv.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMAX_S
+  group: lasx
+  encoding:
+    match: 01110101001111001???????????????
+  assembly: xvfmax.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMAX_D
+  group: lasx
+  encoding:
+    match: 01110101001111010???????????????
+  assembly: xvfmax.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMIN_S
+  group: lasx
+  encoding:
+    match: 01110101001111101???????????????
+  assembly: xvfmin.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMIN_D
+  group: lasx
+  encoding:
+    match: 01110101001111110???????????????
+  assembly: xvfmin.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMAXA_S
+  group: lasx
+  encoding:
+    match: 01110101010000001???????????????
+  assembly: xvfmaxa.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMAXA_D
+  group: lasx
+  encoding:
+    match: 01110101010000010???????????????
+  assembly: xvfmaxa.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMINA_S
+  group: lasx
+  encoding:
+    match: 01110101010000101???????????????
+  assembly: xvfmina.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFMINA_D
+  group: lasx
+  encoding:
+    match: 01110101010000110???????????????
+  assembly: xvfmina.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCVT_H_S
+  group: lasx
+  encoding:
+    match: 01110101010001100???????????????
+  assembly: xvfcvt.h.s $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFCVT_S_D
+  group: lasx
+  encoding:
+    match: 01110101010001101???????????????
+  assembly: xvfcvt.s.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFFINT_S_L
+  group: lasx
+  encoding:
+    match: 01110101010010000???????????????
+  assembly: xvffint.s.l $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFTINT_W_D
+  group: lasx
+  encoding:
+    match: 01110101010010011???????????????
+  assembly: xvftint.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFTINTRM_W_D
+  group: lasx
+  encoding:
+    match: 01110101010010100???????????????
+  assembly: xvftintrm.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFTINTRP_W_D
+  group: lasx
+  encoding:
+    match: 01110101010010101???????????????
+  assembly: xvftintrp.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFTINTRZ_W_D
+  group: lasx
+  encoding:
+    match: 01110101010010110???????????????
+  assembly: xvftintrz.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVFTINTRNE_W_D
+  group: lasx
+  encoding:
+    match: 01110101010010111???????????????
+  assembly: xvftintrne.w.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSHUF_H
+  group: lasx
+  encoding:
+    match: 01110101011110101???????????????
+  assembly: xvshuf.h $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSHUF_W
+  group: lasx
+  encoding:
+    match: 01110101011110110???????????????
+  assembly: xvshuf.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSHUF_D
+  group: lasx
+  encoding:
+    match: 01110101011110111???????????????
+  assembly: xvshuf.d $x.d, $x.j, $x.k
+  format: DJK
+- name: XVPERM_W
+  group: lasx
+  encoding:
+    match: 01110101011111010???????????????
+  assembly: xvperm.w $x.d, $x.j, $x.k
+  format: DJK
+- name: XVSEQI_B
+  group: lasx
+  encoding:
+    match: 01110110100000000???????????????
+  assembly: xvseqi.b $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSEQI_H
+  group: lasx
+  encoding:
+    match: 01110110100000001???????????????
+  assembly: xvseqi.h $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSEQI_W
+  group: lasx
+  encoding:
+    match: 01110110100000010???????????????
+  assembly: xvseqi.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSEQI_D
+  group: lasx
+  encoding:
+    match: 01110110100000011???????????????
+  assembly: xvseqi.d $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_B
+  group: lasx
+  encoding:
+    match: 01110110100000100???????????????
+  assembly: xvslei.b $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_H
+  group: lasx
+  encoding:
+    match: 01110110100000101???????????????
+  assembly: xvslei.h $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_W
+  group: lasx
+  encoding:
+    match: 01110110100000110???????????????
+  assembly: xvslei.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_D
+  group: lasx
+  encoding:
+    match: 01110110100000111???????????????
+  assembly: xvslei.d $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_BU
+  group: lasx
+  encoding:
+    match: 01110110100001000???????????????
+  assembly: xvslei.bu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_HU
+  group: lasx
+  encoding:
+    match: 01110110100001001???????????????
+  assembly: xvslei.hu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_WU
+  group: lasx
+  encoding:
+    match: 01110110100001010???????????????
+  assembly: xvslei.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLEI_DU
+  group: lasx
+  encoding:
+    match: 01110110100001011???????????????
+  assembly: xvslei.du $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_B
+  group: lasx
+  encoding:
+    match: 01110110100001100???????????????
+  assembly: xvslti.b $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_H
+  group: lasx
+  encoding:
+    match: 01110110100001101???????????????
+  assembly: xvslti.h $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_W
+  group: lasx
+  encoding:
+    match: 01110110100001110???????????????
+  assembly: xvslti.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_D
+  group: lasx
+  encoding:
+    match: 01110110100001111???????????????
+  assembly: xvslti.d $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_BU
+  group: lasx
+  encoding:
+    match: 01110110100010000???????????????
+  assembly: xvslti.bu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_HU
+  group: lasx
+  encoding:
+    match: 01110110100010001???????????????
+  assembly: xvslti.hu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_WU
+  group: lasx
+  encoding:
+    match: 01110110100010010???????????????
+  assembly: xvslti.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLTI_DU
+  group: lasx
+  encoding:
+    match: 01110110100010011???????????????
+  assembly: xvslti.du $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVADDI_BU
+  group: lasx
+  encoding:
+    match: 01110110100010100???????????????
+  assembly: xvaddi.bu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVADDI_HU
+  group: lasx
+  encoding:
+    match: 01110110100010101???????????????
+  assembly: xvaddi.hu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVADDI_WU
+  group: lasx
+  encoding:
+    match: 01110110100010110???????????????
+  assembly: xvaddi.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVADDI_DU
+  group: lasx
+  encoding:
+    match: 01110110100010111???????????????
+  assembly: xvaddi.du $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSUBI_BU
+  group: lasx
+  encoding:
+    match: 01110110100011000???????????????
+  assembly: xvsubi.bu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSUBI_HU
+  group: lasx
+  encoding:
+    match: 01110110100011001???????????????
+  assembly: xvsubi.hu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSUBI_WU
+  group: lasx
+  encoding:
+    match: 01110110100011010???????????????
+  assembly: xvsubi.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSUBI_DU
+  group: lasx
+  encoding:
+    match: 01110110100011011???????????????
+  assembly: xvsubi.du $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVBSLL_V
+  group: lasx
+  encoding:
+    match: 01110110100011100???????????????
+  assembly: xvbsll.v $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVBSRL_V
+  group: lasx
+  encoding:
+    match: 01110110100011101???????????????
+  assembly: xvbsrl.v $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_B
+  group: lasx
+  encoding:
+    match: 01110110100100000???????????????
+  assembly: xvmaxi.b $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_H
+  group: lasx
+  encoding:
+    match: 01110110100100001???????????????
+  assembly: xvmaxi.h $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_W
+  group: lasx
+  encoding:
+    match: 01110110100100010???????????????
+  assembly: xvmaxi.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_D
+  group: lasx
+  encoding:
+    match: 01110110100100011???????????????
+  assembly: xvmaxi.d $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_B
+  group: lasx
+  encoding:
+    match: 01110110100100100???????????????
+  assembly: xvmini.b $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_H
+  group: lasx
+  encoding:
+    match: 01110110100100101???????????????
+  assembly: xvmini.h $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_W
+  group: lasx
+  encoding:
+    match: 01110110100100110???????????????
+  assembly: xvmini.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_D
+  group: lasx
+  encoding:
+    match: 01110110100100111???????????????
+  assembly: xvmini.d $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_BU
+  group: lasx
+  encoding:
+    match: 01110110100101000???????????????
+  assembly: xvmaxi.bu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_HU
+  group: lasx
+  encoding:
+    match: 01110110100101001???????????????
+  assembly: xvmaxi.hu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_WU
+  group: lasx
+  encoding:
+    match: 01110110100101010???????????????
+  assembly: xvmaxi.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMAXI_DU
+  group: lasx
+  encoding:
+    match: 01110110100101011???????????????
+  assembly: xvmaxi.du $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_BU
+  group: lasx
+  encoding:
+    match: 01110110100101100???????????????
+  assembly: xvmini.bu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_HU
+  group: lasx
+  encoding:
+    match: 01110110100101101???????????????
+  assembly: xvmini.hu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_WU
+  group: lasx
+  encoding:
+    match: 01110110100101110???????????????
+  assembly: xvmini.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVMINI_DU
+  group: lasx
+  encoding:
+    match: 01110110100101111???????????????
+  assembly: xvmini.du $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVFRSTPI_B
+  group: lasx
+  encoding:
+    match: 01110110100110100???????????????
+  assembly: xvfrstpi.b $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVFRSTPI_H
+  group: lasx
+  encoding:
+    match: 01110110100110101???????????????
+  assembly: xvfrstpi.h $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVCLO_B
+  group: lasx
+  encoding:
+    match: 0111011010011100000000??????????
+  assembly: xvclo.b $x.d, $x.j
+  format: DJ
+- name: XVCLO_H
+  group: lasx
+  encoding:
+    match: 0111011010011100000001??????????
+  assembly: xvclo.h $x.d, $x.j
+  format: DJ
+- name: XVCLO_W
+  group: lasx
+  encoding:
+    match: 0111011010011100000010??????????
+  assembly: xvclo.w $x.d, $x.j
+  format: DJ
+- name: XVCLO_D
+  group: lasx
+  encoding:
+    match: 0111011010011100000011??????????
+  assembly: xvclo.d $x.d, $x.j
+  format: DJ
+- name: XVCLZ_B
+  group: lasx
+  encoding:
+    match: 0111011010011100000100??????????
+  assembly: xvclz.b $x.d, $x.j
+  format: DJ
+- name: XVCLZ_H
+  group: lasx
+  encoding:
+    match: 0111011010011100000101??????????
+  assembly: xvclz.h $x.d, $x.j
+  format: DJ
+- name: XVCLZ_W
+  group: lasx
+  encoding:
+    match: 0111011010011100000110??????????
+  assembly: xvclz.w $x.d, $x.j
+  format: DJ
+- name: XVCLZ_D
+  group: lasx
+  encoding:
+    match: 0111011010011100000111??????????
+  assembly: xvclz.d $x.d, $x.j
+  format: DJ
+- name: XVPCNT_B
+  group: lasx
+  encoding:
+    match: 0111011010011100001000??????????
+  assembly: xvpcnt.b $x.d, $x.j
+  format: DJ
+- name: XVPCNT_H
+  group: lasx
+  encoding:
+    match: 0111011010011100001001??????????
+  assembly: xvpcnt.h $x.d, $x.j
+  format: DJ
+- name: XVPCNT_W
+  group: lasx
+  encoding:
+    match: 0111011010011100001010??????????
+  assembly: xvpcnt.w $x.d, $x.j
+  format: DJ
+- name: XVPCNT_D
+  group: lasx
+  encoding:
+    match: 0111011010011100001011??????????
+  assembly: xvpcnt.d $x.d, $x.j
+  format: DJ
+- name: XVNEG_B
+  group: lasx
+  encoding:
+    match: 0111011010011100001100??????????
+  assembly: xvneg.b $x.d, $x.j
+  format: DJ
+- name: XVNEG_H
+  group: lasx
+  encoding:
+    match: 0111011010011100001101??????????
+  assembly: xvneg.h $x.d, $x.j
+  format: DJ
+- name: XVNEG_W
+  group: lasx
+  encoding:
+    match: 0111011010011100001110??????????
+  assembly: xvneg.w $x.d, $x.j
+  format: DJ
+- name: XVNEG_D
+  group: lasx
+  encoding:
+    match: 0111011010011100001111??????????
+  assembly: xvneg.d $x.d, $x.j
+  format: DJ
+- name: XVMSKLTZ_B
+  group: lasx
+  encoding:
+    match: 0111011010011100010000??????????
+  assembly: xvmskltz.b $x.d, $x.j
+  format: DJ
+- name: XVMSKLTZ_H
+  group: lasx
+  encoding:
+    match: 0111011010011100010001??????????
+  assembly: xvmskltz.h $x.d, $x.j
+  format: DJ
+- name: XVMSKLTZ_W
+  group: lasx
+  encoding:
+    match: 0111011010011100010010??????????
+  assembly: xvmskltz.w $x.d, $x.j
+  format: DJ
+- name: XVMSKLTZ_D
+  group: lasx
+  encoding:
+    match: 0111011010011100010011??????????
+  assembly: xvmskltz.d $x.d, $x.j
+  format: DJ
+- name: XVMSKGEZ_B
+  group: lasx
+  encoding:
+    match: 0111011010011100010100??????????
+  assembly: xvmskgez.b $x.d, $x.j
+  format: DJ
+- name: XVMSKNZ_B
+  group: lasx
+  encoding:
+    match: 0111011010011100011000??????????
+  assembly: xvmsknz.b $x.d, $x.j
+  format: DJ
+- name: XVSETEQZ_V
+  group: lasx
+  encoding:
+    match: 0111011010011100100110?????00???
+  assembly: xvseteqz.v $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETNEZ_V
+  group: lasx
+  encoding:
+    match: 0111011010011100100111?????00???
+  assembly: xvsetnez.v $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETANYEQZ_B
+  group: lasx
+  encoding:
+    match: 0111011010011100101000?????00???
+  assembly: xvsetanyeqz.b $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETANYEQZ_H
+  group: lasx
+  encoding:
+    match: 0111011010011100101001?????00???
+  assembly: xvsetanyeqz.h $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETANYEQZ_W
+  group: lasx
+  encoding:
+    match: 0111011010011100101010?????00???
+  assembly: xvsetanyeqz.w $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETANYEQZ_D
+  group: lasx
+  encoding:
+    match: 0111011010011100101011?????00???
+  assembly: xvsetanyeqz.d $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETALLNEZ_B
+  group: lasx
+  encoding:
+    match: 0111011010011100101100?????00???
+  assembly: xvsetallnez.b $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETALLNEZ_H
+  group: lasx
+  encoding:
+    match: 0111011010011100101101?????00???
+  assembly: xvsetallnez.h $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETALLNEZ_W
+  group: lasx
+  encoding:
+    match: 0111011010011100101110?????00???
+  assembly: xvsetallnez.w $fcc.d, $x.j
+  format: DJ-fp
+- name: XVSETALLNEZ_D
+  group: lasx
+  encoding:
+    match: 0111011010011100101111?????00???
+  assembly: xvsetallnez.d $fcc.d, $x.j
+  format: DJ-fp
+- name: XVFLOGB_S
+  group: lasx
+  encoding:
+    match: 0111011010011100110001??????????
+  assembly: xvflogb.s $x.d, $x.j
+  format: DJ
+- name: XVFLOGB_D
+  group: lasx
+  encoding:
+    match: 0111011010011100110010??????????
+  assembly: xvflogb.d $x.d, $x.j
+  format: DJ
+- name: XVFCLASS_S
+  group: lasx
+  encoding:
+    match: 0111011010011100110101??????????
+  assembly: xvfclass.s $x.d, $x.j
+  format: DJ
+- name: XVFCLASS_D
+  group: lasx
+  encoding:
+    match: 0111011010011100110110??????????
+  assembly: xvfclass.d $x.d, $x.j
+  format: DJ
+- name: XVFSQRT_S
+  group: lasx
+  encoding:
+    match: 0111011010011100111001??????????
+  assembly: xvfsqrt.s $x.d, $x.j
+  format: DJ
+- name: XVFSQRT_D
+  group: lasx
+  encoding:
+    match: 0111011010011100111010??????????
+  assembly: xvfsqrt.d $x.d, $x.j
+  format: DJ
+- name: XVFRECIP_S
+  group: lasx
+  encoding:
+    match: 0111011010011100111101??????????
+  assembly: xvfrecip.s $x.d, $x.j
+  format: DJ
+- name: XVFRECIP_D
+  group: lasx
+  encoding:
+    match: 0111011010011100111110??????????
+  assembly: xvfrecip.d $x.d, $x.j
+  format: DJ
+- name: XVFRSQRT_S
+  group: lasx
+  encoding:
+    match: 0111011010011101000001??????????
+  assembly: xvfrsqrt.s $x.d, $x.j
+  format: DJ
+- name: XVFRSQRT_D
+  group: lasx
+  encoding:
+    match: 0111011010011101000010??????????
+  assembly: xvfrsqrt.d $x.d, $x.j
+  format: DJ
+- name: XVFRECIPE_S
+  group: lasx
+  encoding:
+    match: 0111011010011101000101??????????
+  assembly: xvfrecipe.s $x.d, $x.j
+  format: DJ
+- name: XVFRECIPE_D
+  group: lasx
+  encoding:
+    match: 0111011010011101000110??????????
+  assembly: xvfrecipe.d $x.d, $x.j
+  format: DJ
+- name: XVFRSQRTE_S
+  group: lasx
+  encoding:
+    match: 0111011010011101001001??????????
+  assembly: xvfrsqrte.s $x.d, $x.j
+  format: DJ
+- name: XVFRSQRTE_D
+  group: lasx
+  encoding:
+    match: 0111011010011101001010??????????
+  assembly: xvfrsqrte.d $x.d, $x.j
+  format: DJ
+- name: XVFRINT_S
+  group: lasx
+  encoding:
+    match: 0111011010011101001101??????????
+  assembly: xvfrint.s $x.d, $x.j
+  format: DJ
+- name: XVFRINT_D
+  group: lasx
+  encoding:
+    match: 0111011010011101001110??????????
+  assembly: xvfrint.d $x.d, $x.j
+  format: DJ
+- name: XVFRINTRM_S
+  group: lasx
+  encoding:
+    match: 0111011010011101010001??????????
+  assembly: xvfrintrm.s $x.d, $x.j
+  format: DJ
+- name: XVFRINTRM_D
+  group: lasx
+  encoding:
+    match: 0111011010011101010010??????????
+  assembly: xvfrintrm.d $x.d, $x.j
+  format: DJ
+- name: XVFRINTRP_S
+  group: lasx
+  encoding:
+    match: 0111011010011101010101??????????
+  assembly: xvfrintrp.s $x.d, $x.j
+  format: DJ
+- name: XVFRINTRP_D
+  group: lasx
+  encoding:
+    match: 0111011010011101010110??????????
+  assembly: xvfrintrp.d $x.d, $x.j
+  format: DJ
+- name: XVFRINTRZ_S
+  group: lasx
+  encoding:
+    match: 0111011010011101011001??????????
+  assembly: xvfrintrz.s $x.d, $x.j
+  format: DJ
+- name: XVFRINTRZ_D
+  group: lasx
+  encoding:
+    match: 0111011010011101011010??????????
+  assembly: xvfrintrz.d $x.d, $x.j
+  format: DJ
+- name: XVFRINTRNE_S
+  group: lasx
+  encoding:
+    match: 0111011010011101011101??????????
+  assembly: xvfrintrne.s $x.d, $x.j
+  format: DJ
+- name: XVFRINTRNE_D
+  group: lasx
+  encoding:
+    match: 0111011010011101011110??????????
+  assembly: xvfrintrne.d $x.d, $x.j
+  format: DJ
+- name: XVFCVTL_S_H
+  group: lasx
+  encoding:
+    match: 0111011010011101111010??????????
+  assembly: xvfcvtl.s.h $x.d, $x.j
+  format: DJ
+- name: XVFCVTH_S_H
+  group: lasx
+  encoding:
+    match: 0111011010011101111011??????????
+  assembly: xvfcvth.s.h $x.d, $x.j
+  format: DJ
+- name: XVFCVTL_D_S
+  group: lasx
+  encoding:
+    match: 0111011010011101111100??????????
+  assembly: xvfcvtl.d.s $x.d, $x.j
+  format: DJ
+- name: XVFCVTH_D_S
+  group: lasx
+  encoding:
+    match: 0111011010011101111101??????????
+  assembly: xvfcvth.d.s $x.d, $x.j
+  format: DJ
+- name: XVFFINT_S_W
+  group: lasx
+  encoding:
+    match: 0111011010011110000000??????????
+  assembly: xvffint.s.w $x.d, $x.j
+  format: DJ
+- name: XVFFINT_S_WU
+  group: lasx
+  encoding:
+    match: 0111011010011110000001??????????
+  assembly: xvffint.s.wu $x.d, $x.j
+  format: DJ
+- name: XVFFINT_D_L
+  group: lasx
+  encoding:
+    match: 0111011010011110000010??????????
+  assembly: xvffint.d.l $x.d, $x.j
+  format: DJ
+- name: XVFFINT_D_LU
+  group: lasx
+  encoding:
+    match: 0111011010011110000011??????????
+  assembly: xvffint.d.lu $x.d, $x.j
+  format: DJ
+- name: XVFFINTL_D_W
+  group: lasx
+  encoding:
+    match: 0111011010011110000100??????????
+  assembly: xvffintl.d.w $x.d, $x.j
+  format: DJ
+- name: XVFFINTH_D_W
+  group: lasx
+  encoding:
+    match: 0111011010011110000101??????????
+  assembly: xvffinth.d.w $x.d, $x.j
+  format: DJ
+- name: XVFTINT_W_S
+  group: lasx
+  encoding:
+    match: 0111011010011110001100??????????
+  assembly: xvftint.w.s $x.d, $x.j
+  format: DJ
+- name: XVFTINT_L_D
+  group: lasx
+  encoding:
+    match: 0111011010011110001101??????????
+  assembly: xvftint.l.d $x.d, $x.j
+  format: DJ
+- name: XVFTINTRM_W_S
+  group: lasx
+  encoding:
+    match: 0111011010011110001110??????????
+  assembly: xvftintrm.w.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRM_L_D
+  group: lasx
+  encoding:
+    match: 0111011010011110001111??????????
+  assembly: xvftintrm.l.d $x.d, $x.j
+  format: DJ
+- name: XVFTINTRP_W_S
+  group: lasx
+  encoding:
+    match: 0111011010011110010000??????????
+  assembly: xvftintrp.w.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRP_L_D
+  group: lasx
+  encoding:
+    match: 0111011010011110010001??????????
+  assembly: xvftintrp.l.d $x.d, $x.j
+  format: DJ
+- name: XVFTINTRZ_W_S
+  group: lasx
+  encoding:
+    match: 0111011010011110010010??????????
+  assembly: xvftintrz.w.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRZ_L_D
+  group: lasx
+  encoding:
+    match: 0111011010011110010011??????????
+  assembly: xvftintrz.l.d $x.d, $x.j
+  format: DJ
+- name: XVFTINTRNE_W_S
+  group: lasx
+  encoding:
+    match: 0111011010011110010100??????????
+  assembly: xvftintrne.w.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRNE_L_D
+  group: lasx
+  encoding:
+    match: 0111011010011110010101??????????
+  assembly: xvftintrne.l.d $x.d, $x.j
+  format: DJ
+- name: XVFTINT_WU_S
+  group: lasx
+  encoding:
+    match: 0111011010011110010110??????????
+  assembly: xvftint.wu.s $x.d, $x.j
+  format: DJ
+- name: XVFTINT_LU_D
+  group: lasx
+  encoding:
+    match: 0111011010011110010111??????????
+  assembly: xvftint.lu.d $x.d, $x.j
+  format: DJ
+- name: XVFTINTRZ_WU_S
+  group: lasx
+  encoding:
+    match: 0111011010011110011100??????????
+  assembly: xvftintrz.wu.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRZ_LU_D
+  group: lasx
+  encoding:
+    match: 0111011010011110011101??????????
+  assembly: xvftintrz.lu.d $x.d, $x.j
+  format: DJ
+- name: XVFTINTL_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100000??????????
+  assembly: xvftintl.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTH_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100001??????????
+  assembly: xvftinth.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRML_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100010??????????
+  assembly: xvftintrml.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRMH_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100011??????????
+  assembly: xvftintrmh.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRPL_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100100??????????
+  assembly: xvftintrpl.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRPH_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100101??????????
+  assembly: xvftintrph.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRZL_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100110??????????
+  assembly: xvftintrzl.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRZH_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110100111??????????
+  assembly: xvftintrzh.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRNEL_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110101000??????????
+  assembly: xvftintrnel.l.s $x.d, $x.j
+  format: DJ
+- name: XVFTINTRNEH_L_S
+  group: lasx
+  encoding:
+    match: 0111011010011110101001??????????
+  assembly: xvftintrneh.l.s $x.d, $x.j
+  format: DJ
+- name: XVEXTH_H_B
+  group: lasx
+  encoding:
+    match: 0111011010011110111000??????????
+  assembly: xvexth.h.b $x.d, $x.j
+  format: DJ
+- name: XVEXTH_W_H
+  group: lasx
+  encoding:
+    match: 0111011010011110111001??????????
+  assembly: xvexth.w.h $x.d, $x.j
+  format: DJ
+- name: XVEXTH_D_W
+  group: lasx
+  encoding:
+    match: 0111011010011110111010??????????
+  assembly: xvexth.d.w $x.d, $x.j
+  format: DJ
+- name: XVEXTH_Q_D
+  group: lasx
+  encoding:
+    match: 0111011010011110111011??????????
+  assembly: xvexth.q.d $x.d, $x.j
+  format: DJ
+- name: XVEXTH_HU_BU
+  group: lasx
+  encoding:
+    match: 0111011010011110111100??????????
+  assembly: xvexth.hu.bu $x.d, $x.j
+  format: DJ
+- name: XVEXTH_WU_HU
+  group: lasx
+  encoding:
+    match: 0111011010011110111101??????????
+  assembly: xvexth.wu.hu $x.d, $x.j
+  format: DJ
+- name: XVEXTH_DU_WU
+  group: lasx
+  encoding:
+    match: 0111011010011110111110??????????
+  assembly: xvexth.du.wu $x.d, $x.j
+  format: DJ
+- name: XVEXTH_QU_DU
+  group: lasx
+  encoding:
+    match: 0111011010011110111111??????????
+  assembly: xvexth.qu.du $x.d, $x.j
+  format: DJ
+- name: XVREPLGR2VR_B
+  group: lasx
+  encoding:
+    match: 0111011010011111000000??????????
+  assembly: xvreplgr2vr.b $x.d, $r.j
+  format: DJ
+- name: XVREPLGR2VR_H
+  group: lasx
+  encoding:
+    match: 0111011010011111000001??????????
+  assembly: xvreplgr2vr.h $x.d, $r.j
+  format: DJ
+- name: XVREPLGR2VR_W
+  group: lasx
+  encoding:
+    match: 0111011010011111000010??????????
+  assembly: xvreplgr2vr.w $x.d, $r.j
+  format: DJ
+- name: XVREPLGR2VR_D
+  group: lasx
+  encoding:
+    match: 0111011010011111000011??????????
+  assembly: xvreplgr2vr.d $x.d, $r.j
+  format: DJ
+- name: VEXT2XV_H_B
+  group: lasx
+  encoding:
+    match: 0111011010011111000100??????????
+  assembly: vext2xv.h.b $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_W_B
+  group: lasx
+  encoding:
+    match: 0111011010011111000101??????????
+  assembly: vext2xv.w.b $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_D_B
+  group: lasx
+  encoding:
+    match: 0111011010011111000110??????????
+  assembly: vext2xv.d.b $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_W_H
+  group: lasx
+  encoding:
+    match: 0111011010011111000111??????????
+  assembly: vext2xv.w.h $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_D_H
+  group: lasx
+  encoding:
+    match: 0111011010011111001000??????????
+  assembly: vext2xv.d.h $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_D_W
+  group: lasx
+  encoding:
+    match: 0111011010011111001001??????????
+  assembly: vext2xv.d.w $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_HU_BU
+  group: lasx
+  encoding:
+    match: 0111011010011111001010??????????
+  assembly: vext2xv.hu.bu $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_WU_BU
+  group: lasx
+  encoding:
+    match: 0111011010011111001011??????????
+  assembly: vext2xv.wu.bu $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_DU_BU
+  group: lasx
+  encoding:
+    match: 0111011010011111001100??????????
+  assembly: vext2xv.du.bu $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_WU_HU
+  group: lasx
+  encoding:
+    match: 0111011010011111001101??????????
+  assembly: vext2xv.wu.hu $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_DU_HU
+  group: lasx
+  encoding:
+    match: 0111011010011111001110??????????
+  assembly: vext2xv.du.hu $x.d, $x.j
+  format: DJ
+- name: VEXT2XV_DU_WU
+  group: lasx
+  encoding:
+    match: 0111011010011111001111??????????
+  assembly: vext2xv.du.wu $x.d, $x.j
+  format: DJ
+- name: XVROTRI_B
+  group: lasx
+  encoding:
+    match: 0111011010100000001?????????????
+  assembly: xvrotri.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVROTRI_H
+  group: lasx
+  encoding:
+    match: 011101101010000001??????????????
+  assembly: xvrotri.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVROTRI_W
+  group: lasx
+  encoding:
+    match: 01110110101000001???????????????
+  assembly: xvrotri.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVROTRI_D
+  group: lasx
+  encoding:
+    match: 0111011010100001????????????????
+  assembly: xvrotri.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRLRI_B
+  group: lasx
+  encoding:
+    match: 0111011010100100001?????????????
+  assembly: xvsrlri.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSRLRI_H
+  group: lasx
+  encoding:
+    match: 011101101010010001??????????????
+  assembly: xvsrlri.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRLRI_W
+  group: lasx
+  encoding:
+    match: 01110110101001001???????????????
+  assembly: xvsrlri.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRLRI_D
+  group: lasx
+  encoding:
+    match: 0111011010100101????????????????
+  assembly: xvsrlri.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRARI_B
+  group: lasx
+  encoding:
+    match: 0111011010101000001?????????????
+  assembly: xvsrari.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSRARI_H
+  group: lasx
+  encoding:
+    match: 011101101010100001??????????????
+  assembly: xvsrari.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRARI_W
+  group: lasx
+  encoding:
+    match: 01110110101010001???????????????
+  assembly: xvsrari.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRARI_D
+  group: lasx
+  encoding:
+    match: 0111011010101001????????????????
+  assembly: xvsrari.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVINSGR2VR_W
+  group: lasx
+  encoding:
+    match: 0111011011101011110?????????????
+  assembly: xvinsgr2vr.w $x.d, $r.j, {imm}
+  format: DJI3
+- name: XVINSGR2VR_D
+  group: lasx
+  encoding:
+    match: 01110110111010111110????????????
+  assembly: xvinsgr2vr.d $x.d, $r.j, {imm}
+  format: DJI2
+- name: XVPICKVE2GR_W
+  group: lasx
+  encoding:
+    match: 0111011011101111110?????????????
+  assembly: xvpickve2gr.w $r.d, $x.j, {imm}
+  format: DJI3
+- name: XVPICKVE2GR_D
+  group: lasx
+  encoding:
+    match: 01110110111011111110????????????
+  assembly: xvpickve2gr.d $r.d, $x.j, {imm}
+  format: DJI2
+- name: XVPICKVE2GR_WU
+  group: lasx
+  encoding:
+    match: 0111011011110011110?????????????
+  assembly: xvpickve2gr.wu $r.d, $x.j, {imm}
+  format: DJI3
+- name: XVPICKVE2GR_DU
+  group: lasx
+  encoding:
+    match: 01110110111100111110????????????
+  assembly: xvpickve2gr.du $r.d, $x.j, {imm}
+  format: DJI2
+- name: XVREPL128VEI_B
+  group: lasx
+  encoding:
+    match: 011101101111011110??????????????
+  assembly: xvrepl128vei.b $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVREPL128VEI_H
+  group: lasx
+  encoding:
+    match: 0111011011110111110?????????????
+  assembly: xvrepl128vei.h $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVREPL128VEI_W
+  group: lasx
+  encoding:
+    match: 01110110111101111110????????????
+  assembly: xvrepl128vei.w $x.d, $x.j, {imm}
+  format: DJI2
+- name: XVREPL128VEI_D
+  group: lasx
+  encoding:
+    match: 011101101111011111110???????????
+    variables:
+      imm:
+      - 10
+      - 10
+  assembly: xvrepl128vei.d $x.d, $x.j, {imm}
+  format: DJ
+- name: XVINSVE0_W
+  group: lasx
+  encoding:
+    match: 0111011011111111110?????????????
+  assembly: xvinsve0.w $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVINSVE0_D
+  group: lasx
+  encoding:
+    match: 01110110111111111110????????????
+  assembly: xvinsve0.d $x.d, $x.j, {imm}
+  format: DJI2
+- name: XVPICKVE_W
+  group: lasx
+  encoding:
+    match: 0111011100000011110?????????????
+  assembly: xvpickve.w $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVPICKVE_D
+  group: lasx
+  encoding:
+    match: 01110111000000111110????????????
+  assembly: xvpickve.d $x.d, $x.j, {imm}
+  format: DJI2
+- name: XVREPLVE0_B
+  group: lasx
+  encoding:
+    match: 0111011100000111000000??????????
+  assembly: xvreplve0.b $x.d, $x.j
+  format: DJ
+- name: XVREPLVE0_H
+  group: lasx
+  encoding:
+    match: 0111011100000111100000??????????
+  assembly: xvreplve0.h $x.d, $x.j
+  format: DJ
+- name: XVREPLVE0_W
+  group: lasx
+  encoding:
+    match: 0111011100000111110000??????????
+  assembly: xvreplve0.w $x.d, $x.j
+  format: DJ
+- name: XVREPLVE0_D
+  group: lasx
+  encoding:
+    match: 0111011100000111111000??????????
+  assembly: xvreplve0.d $x.d, $x.j
+  format: DJ
+- name: XVREPLVE0_Q
+  group: lasx
+  encoding:
+    match: 0111011100000111111100??????????
+  assembly: xvreplve0.q $x.d, $x.j
+  format: DJ
+- name: XVSLLWIL_H_B
+  group: lasx
+  encoding:
+    match: 0111011100001000001?????????????
+  assembly: xvsllwil.h.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSLLWIL_W_H
+  group: lasx
+  encoding:
+    match: 011101110000100001??????????????
+  assembly: xvsllwil.w.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSLLWIL_D_W
+  group: lasx
+  encoding:
+    match: 01110111000010001???????????????
+  assembly: xvsllwil.d.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVEXTL_Q_D
+  group: lasx
+  encoding:
+    match: 0111011100001001000000??????????
+  assembly: xvextl.q.d $x.d, $x.j
+  format: DJ
+- name: XVSLLWIL_HU_BU
+  group: lasx
+  encoding:
+    match: 0111011100001100001?????????????
+  assembly: xvsllwil.hu.bu $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSLLWIL_WU_HU
+  group: lasx
+  encoding:
+    match: 011101110000110001??????????????
+  assembly: xvsllwil.wu.hu $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSLLWIL_DU_WU
+  group: lasx
+  encoding:
+    match: 01110111000011001???????????????
+  assembly: xvsllwil.du.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVEXTL_QU_DU
+  group: lasx
+  encoding:
+    match: 0111011100001101000000??????????
+  assembly: xvextl.qu.du $x.d, $x.j
+  format: DJ
+- name: XVBITCLRI_B
+  group: lasx
+  encoding:
+    match: 0111011100010000001?????????????
+  assembly: xvbitclri.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVBITCLRI_H
+  group: lasx
+  encoding:
+    match: 011101110001000001??????????????
+  assembly: xvbitclri.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVBITCLRI_W
+  group: lasx
+  encoding:
+    match: 01110111000100001???????????????
+  assembly: xvbitclri.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVBITCLRI_D
+  group: lasx
+  encoding:
+    match: 0111011100010001????????????????
+  assembly: xvbitclri.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVBITSETI_B
+  group: lasx
+  encoding:
+    match: 0111011100010100001?????????????
+  assembly: xvbitseti.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVBITSETI_H
+  group: lasx
+  encoding:
+    match: 011101110001010001??????????????
+  assembly: xvbitseti.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVBITSETI_W
+  group: lasx
+  encoding:
+    match: 01110111000101001???????????????
+  assembly: xvbitseti.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVBITSETI_D
+  group: lasx
+  encoding:
+    match: 0111011100010101????????????????
+  assembly: xvbitseti.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVBITREVI_B
+  group: lasx
+  encoding:
+    match: 0111011100011000001?????????????
+  assembly: xvbitrevi.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVBITREVI_H
+  group: lasx
+  encoding:
+    match: 011101110001100001??????????????
+  assembly: xvbitrevi.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVBITREVI_W
+  group: lasx
+  encoding:
+    match: 01110111000110001???????????????
+  assembly: xvbitrevi.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVBITREVI_D
+  group: lasx
+  encoding:
+    match: 0111011100011001????????????????
+  assembly: xvbitrevi.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSAT_B
+  group: lasx
+  encoding:
+    match: 0111011100100100001?????????????
+  assembly: xvsat.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSAT_H
+  group: lasx
+  encoding:
+    match: 011101110010010001??????????????
+  assembly: xvsat.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSAT_W
+  group: lasx
+  encoding:
+    match: 01110111001001001???????????????
+  assembly: xvsat.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSAT_D
+  group: lasx
+  encoding:
+    match: 0111011100100101????????????????
+  assembly: xvsat.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSAT_BU
+  group: lasx
+  encoding:
+    match: 0111011100101000001?????????????
+  assembly: xvsat.bu $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSAT_HU
+  group: lasx
+  encoding:
+    match: 011101110010100001??????????????
+  assembly: xvsat.hu $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSAT_WU
+  group: lasx
+  encoding:
+    match: 01110111001010001???????????????
+  assembly: xvsat.wu $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSAT_DU
+  group: lasx
+  encoding:
+    match: 0111011100101001????????????????
+  assembly: xvsat.du $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSLLI_B
+  group: lasx
+  encoding:
+    match: 0111011100101100001?????????????
+  assembly: xvslli.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSLLI_H
+  group: lasx
+  encoding:
+    match: 011101110010110001??????????????
+  assembly: xvslli.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSLLI_W
+  group: lasx
+  encoding:
+    match: 01110111001011001???????????????
+  assembly: xvslli.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSLLI_D
+  group: lasx
+  encoding:
+    match: 0111011100101101????????????????
+  assembly: xvslli.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRLI_B
+  group: lasx
+  encoding:
+    match: 0111011100110000001?????????????
+  assembly: xvsrli.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSRLI_H
+  group: lasx
+  encoding:
+    match: 011101110011000001??????????????
+  assembly: xvsrli.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRLI_W
+  group: lasx
+  encoding:
+    match: 01110111001100001???????????????
+  assembly: xvsrli.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRLI_D
+  group: lasx
+  encoding:
+    match: 0111011100110001????????????????
+  assembly: xvsrli.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRAI_B
+  group: lasx
+  encoding:
+    match: 0111011100110100001?????????????
+  assembly: xvsrai.b $x.d, $x.j, {imm}
+  format: DJI3
+- name: XVSRAI_H
+  group: lasx
+  encoding:
+    match: 011101110011010001??????????????
+  assembly: xvsrai.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRAI_W
+  group: lasx
+  encoding:
+    match: 01110111001101001???????????????
+  assembly: xvsrai.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRAI_D
+  group: lasx
+  encoding:
+    match: 0111011100110101????????????????
+  assembly: xvsrai.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRLNI_B_H
+  group: lasx
+  encoding:
+    match: 011101110100000001??????????????
+  assembly: xvsrlni.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRLNI_H_W
+  group: lasx
+  encoding:
+    match: 01110111010000001???????????????
+  assembly: xvsrlni.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRLNI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101000001????????????????
+  assembly: xvsrlni.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRLNI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110100001?????????????????
+  assembly: xvsrlni.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSRLRNI_B_H
+  group: lasx
+  encoding:
+    match: 011101110100010001??????????????
+  assembly: xvsrlrni.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRLRNI_H_W
+  group: lasx
+  encoding:
+    match: 01110111010001001???????????????
+  assembly: xvsrlrni.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRLRNI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101000101????????????????
+  assembly: xvsrlrni.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRLRNI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110100011?????????????????
+  assembly: xvsrlrni.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRLNI_B_H
+  group: lasx
+  encoding:
+    match: 011101110100100001??????????????
+  assembly: xvssrlni.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRLNI_H_W
+  group: lasx
+  encoding:
+    match: 01110111010010001???????????????
+  assembly: xvssrlni.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRLNI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101001001????????????????
+  assembly: xvssrlni.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRLNI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110100101?????????????????
+  assembly: xvssrlni.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRLNI_BU_H
+  group: lasx
+  encoding:
+    match: 011101110100110001??????????????
+  assembly: xvssrlni.bu.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRLNI_HU_W
+  group: lasx
+  encoding:
+    match: 01110111010011001???????????????
+  assembly: xvssrlni.hu.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRLNI_WU_D
+  group: lasx
+  encoding:
+    match: 0111011101001101????????????????
+  assembly: xvssrlni.wu.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRLNI_DU_Q
+  group: lasx
+  encoding:
+    match: 011101110100111?????????????????
+  assembly: xvssrlni.du.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRLRNI_B_H
+  group: lasx
+  encoding:
+    match: 011101110101000001??????????????
+  assembly: xvssrlrni.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRLRNI_H_W
+  group: lasx
+  encoding:
+    match: 01110111010100001???????????????
+  assembly: xvssrlrni.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRLRNI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101010001????????????????
+  assembly: xvssrlrni.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRLRNI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110101001?????????????????
+  assembly: xvssrlrni.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRLRNI_BU_H
+  group: lasx
+  encoding:
+    match: 011101110101010001??????????????
+  assembly: xvssrlrni.bu.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRLRNI_HU_W
+  group: lasx
+  encoding:
+    match: 01110111010101001???????????????
+  assembly: xvssrlrni.hu.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRLRNI_WU_D
+  group: lasx
+  encoding:
+    match: 0111011101010101????????????????
+  assembly: xvssrlrni.wu.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRLRNI_DU_Q
+  group: lasx
+  encoding:
+    match: 011101110101011?????????????????
+  assembly: xvssrlrni.du.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSRANI_B_H
+  group: lasx
+  encoding:
+    match: 011101110101100001??????????????
+  assembly: xvsrani.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRANI_H_W
+  group: lasx
+  encoding:
+    match: 01110111010110001???????????????
+  assembly: xvsrani.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRANI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101011001????????????????
+  assembly: xvsrani.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRANI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110101101?????????????????
+  assembly: xvsrani.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSRARNI_B_H
+  group: lasx
+  encoding:
+    match: 011101110101110001??????????????
+  assembly: xvsrarni.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSRARNI_H_W
+  group: lasx
+  encoding:
+    match: 01110111010111001???????????????
+  assembly: xvsrarni.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSRARNI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101011101????????????????
+  assembly: xvsrarni.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSRARNI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110101111?????????????????
+  assembly: xvsrarni.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRANI_B_H
+  group: lasx
+  encoding:
+    match: 011101110110000001??????????????
+  assembly: xvssrani.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRANI_H_W
+  group: lasx
+  encoding:
+    match: 01110111011000001???????????????
+  assembly: xvssrani.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRANI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101100001????????????????
+  assembly: xvssrani.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRANI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110110001?????????????????
+  assembly: xvssrani.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRANI_BU_H
+  group: lasx
+  encoding:
+    match: 011101110110010001??????????????
+  assembly: xvssrani.bu.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRANI_HU_W
+  group: lasx
+  encoding:
+    match: 01110111011001001???????????????
+  assembly: xvssrani.hu.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRANI_WU_D
+  group: lasx
+  encoding:
+    match: 0111011101100101????????????????
+  assembly: xvssrani.wu.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRANI_DU_Q
+  group: lasx
+  encoding:
+    match: 011101110110011?????????????????
+  assembly: xvssrani.du.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRARNI_B_H
+  group: lasx
+  encoding:
+    match: 011101110110100001??????????????
+  assembly: xvssrarni.b.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRARNI_H_W
+  group: lasx
+  encoding:
+    match: 01110111011010001???????????????
+  assembly: xvssrarni.h.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRARNI_W_D
+  group: lasx
+  encoding:
+    match: 0111011101101001????????????????
+  assembly: xvssrarni.w.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRARNI_D_Q
+  group: lasx
+  encoding:
+    match: 011101110110101?????????????????
+  assembly: xvssrarni.d.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVSSRARNI_BU_H
+  group: lasx
+  encoding:
+    match: 011101110110110001??????????????
+  assembly: xvssrarni.bu.h $x.d, $x.j, {imm}
+  format: DJI4
+- name: XVSSRARNI_HU_W
+  group: lasx
+  encoding:
+    match: 01110111011011001???????????????
+  assembly: xvssrarni.hu.w $x.d, $x.j, {imm}
+  format: DJI5
+- name: XVSSRARNI_WU_D
+  group: lasx
+  encoding:
+    match: 0111011101101101????????????????
+  assembly: xvssrarni.wu.d $x.d, $x.j, {imm}
+  format: DJI6
+- name: XVSSRARNI_DU_Q
+  group: lasx
+  encoding:
+    match: 011101110110111?????????????????
+  assembly: xvssrarni.du.q $x.d, $x.j, {imm}
+  format: DJI7
+- name: XVEXTRINS_D
+  group: lasx
+  encoding:
+    match: 01110111100000??????????????????
+  assembly: xvextrins.d $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVEXTRINS_W
+  group: lasx
+  encoding:
+    match: 01110111100001??????????????????
+  assembly: xvextrins.w $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVEXTRINS_H
+  group: lasx
+  encoding:
+    match: 01110111100010??????????????????
+  assembly: xvextrins.h $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVEXTRINS_B
+  group: lasx
+  encoding:
+    match: 01110111100011??????????????????
+  assembly: xvextrins.b $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVSHUF4I_B
+  group: lasx
+  encoding:
+    match: 01110111100100??????????????????
+  assembly: xvshuf4i.b $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVSHUF4I_H
+  group: lasx
+  encoding:
+    match: 01110111100101??????????????????
+  assembly: xvshuf4i.h $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVSHUF4I_W
+  group: lasx
+  encoding:
+    match: 01110111100110??????????????????
+  assembly: xvshuf4i.w $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVSHUF4I_D
+  group: lasx
+  encoding:
+    match: 01110111100111??????????????????
+  assembly: xvshuf4i.d $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVBITSELI_B
+  group: lasx
+  encoding:
+    match: 01110111110001??????????????????
+  assembly: xvbitseli.b $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVANDI_B
+  group: lasx
+  encoding:
+    match: 01110111110100??????????????????
+  assembly: xvandi.b $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVORI_B
+  group: lasx
+  encoding:
+    match: 01110111110101??????????????????
+  assembly: xvori.b $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVXORI_B
+  group: lasx
+  encoding:
+    match: 01110111110110??????????????????
+  assembly: xvxori.b $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVNORI_B
+  group: lasx
+  encoding:
+    match: 01110111110111??????????????????
+  assembly: xvnori.b $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVLDI
+  group: lasx
+  encoding:
+    match: 01110111111000??????????????????
+    variables:
+      imm:
+      - 17
+      - 5
+  assembly: xvldi $x.d, {imm}
+  format: D
+- name: XVPERMI_W
+  group: lasx
+  encoding:
+    match: 01110111111001??????????????????
+  assembly: xvpermi.w $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVPERMI_D
+  group: lasx
+  encoding:
+    match: 01110111111010??????????????????
+  assembly: xvpermi.d $x.d, $x.j, {imm}
+  format: DJI8
+- name: XVPERMI_Q
+  group: lasx
+  encoding:
+    match: 01110111111011??????????????????
+  assembly: xvpermi.q $x.d, $x.j, {imm}
+  format: DJI8

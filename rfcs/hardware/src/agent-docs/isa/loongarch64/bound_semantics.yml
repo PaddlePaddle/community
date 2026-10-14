@@ -1,0 +1,476 @@
+groups:
+  - name: bound
+    description: LoongArch Boundary Check Instructions Semantics
+
+semantics:
+  asrtle:
+    description: "asrtle rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  asrtgt:
+    description: "asrtgt rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldgt_b:
+    description: "ldgt.b rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 1
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldle_b:
+    description: "ldle.b rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 1
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stgt_b:
+    description: "stgt.b rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stle_b:
+    description: "stle.b rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldgt_h:
+    description: "ldgt.h rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 2
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldle_h:
+    description: "ldle.h rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 2
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stgt_h:
+    description: "stgt.h rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stle_h:
+    description: "stle.h rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldgt_w:
+    description: "ldgt.w rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 4
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldle_w:
+    description: "ldle.w rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 4
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stgt_w:
+    description: "stgt.w rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stle_w:
+    description: "stle.w rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldgt_d:
+    description: "ldgt.d rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 8
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ldle_d:
+    description: "ldle.d rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $r.d
+        addr: $r.j
+        size: 8
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stgt_d:
+    description: "stgt.d rd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  stle_d:
+    description: "stle.d rd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $r.d
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fldgt_s:
+    description: "fldgt.s fd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $f.d
+        addr: $r.j
+        size: 4
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fldle_s:
+    description: "fldle.s fd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $f.d
+        addr: $r.j
+        size: 4
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fstgt_s:
+    description: "fstgt.s fd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $f.d
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fstle_s:
+    description: "fstle.s fd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $f.d
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fldgt_d:
+    description: "fldgt.d fd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $f.d
+        addr: $r.j
+        size: 8
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fldle_d:
+    description: "fldle.d fd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: load
+        dest: $f.d
+        addr: $r.j
+        size: 8
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fstgt_d:
+    description: "fstgt.d fd, rj, rk"
+    operations:
+      - type: compare
+        op: Le
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $f.d
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fstle_d:
+    description: "fstle.d fd, rj, rk"
+    operations:
+      - type: compare
+        op: Gt
+        dest: $temp:0
+        src1: $r.j
+        src2: $r.k
+      - type: conditional_trap
+        cond: $temp:0
+        exception: "BCE"
+      - type: store
+        addr: $r.j
+        src: $f.d
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false

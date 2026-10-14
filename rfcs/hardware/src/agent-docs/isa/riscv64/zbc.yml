@@ -1,0 +1,22 @@
+groups:
+- name: zbc
+  description: RISC-V Carry-less Multiplication
+instructions:
+- name: CLMUL
+  group: zbc
+  encoding:
+    match: 0000101 ????? ????? 001 ????? 0110011
+  assembly: clmul {rd}, {rs1}, {rs2}
+  format: R-type
+- name: CLMULH
+  group: zbc
+  encoding:
+    match: 0000101 ????? ????? 011 ????? 0110011
+  assembly: clmulh {rd}, {rs1}, {rs2}
+  format: R-type
+- name: CLMULR
+  group: zbc
+  encoding:
+    match: 0000101 ????? ????? 010 ????? 0110011
+  assembly: clmulr {rd}, {rs1}, {rs2}
+  format: R-type

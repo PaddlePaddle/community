@@ -1,0 +1,264 @@
+# LoongArch64 指令格式模板
+
+formats:
+  - name: DJK
+    variables:
+      - name: k
+        bits: [14, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJ
+    variables:
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI5
+    variables:
+      - name: imm
+        bits: [14, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI4
+    variables:
+      - name: imm
+        bits: [13, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI6
+    variables:
+      - name: imm
+        bits: [15, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJK-fp
+    variables:
+      - name: k
+        bits: [14, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [2, 0]
+    bit_length: 32
+
+  - name: DJI3
+    variables:
+      - name: imm
+        bits: [12, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI12
+    variables:
+      - name: imm
+        bits: [21, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI8
+    variables:
+      - name: imm
+        bits: [17, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJKA
+    variables:
+      - name: a
+        bits: [19, 15]
+      - name: k
+        bits: [14, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI7
+    variables:
+      - name: imm
+        bits: [16, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJ-fp
+    variables:
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [2, 0]
+    bit_length: 32
+
+  - name: DJI2
+    variables:
+      - name: imm
+        bits: [11, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI14
+    variables:
+      - name: imm
+        bits: [23, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DJI16
+    variables:
+      - name: imm
+        bits: [25, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: DI20
+    variables:
+      - name: imm
+        bits: [24, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: I15
+    variables:
+      - name: imm
+        bits: [14, 0]
+    bit_length: 32
+
+  - name: DJUk6
+    variables:
+      - name: imm
+        bits: [16, 15]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+      - name: k
+        bits: [14, 10]
+    bit_length: 32
+
+  - name: DJI10
+    variables:
+      - name: imm
+        bits: [22, 15]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+      - name: k
+        bits: [14, 10]
+    bit_length: 32
+
+  - name: U15
+    variables:
+      - name: j
+        bits: [4, 0]
+      - name: d
+        bits: [9, 5]
+    bit_length: 32
+
+  - name: JI21
+    variables:
+      - name: j
+        bits: [9, 5]
+      - name: imm_0
+        bits: [4, 0]
+      - name: imm_1
+        bits: [25, 10]
+    bit_length: 32
+
+  - name: I26
+    variables:
+      - name: imm_0
+        bits: [9, 0]
+      - name: imm_1
+        bits: [25, 10]
+    bit_length: 32
+
+  - name: DJKCa
+    variables:
+      - name: ca
+        bits: [17, 15]
+      - name: k
+        bits: [14, 10]
+      - name: j
+        bits: [9, 5]
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: JK
+    variables:
+      - name: k
+        bits: [14, 10]
+      - name: j
+        bits: [9, 5]
+    bit_length: 32
+
+  - name: J
+    variables:
+      - name: j
+        bits: [9, 5]
+    bit_length: 32
+
+  - name: D
+    variables:
+      - name: d
+        bits: [4, 0]
+    bit_length: 32
+
+  - name: CJ
+    variables:
+      - name: imm
+        bits: [21, 10]
+      - name: c
+        bits: [7, 5]
+    bit_length: 32
+
+  - name: DJKImm4
+    variables:
+      - name: k
+        bits: [14, 10]
+      - name: j
+        bits: [9, 5]
+      - name: imm
+        bits: [4, 0]
+    bit_length: 32

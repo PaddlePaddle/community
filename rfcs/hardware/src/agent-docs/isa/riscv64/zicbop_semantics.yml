@@ -1,0 +1,33 @@
+semantics:
+  prefetch_i:
+    description: prefetch.i hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  prefetch_r:
+    description: prefetch.r hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  prefetch_w:
+    description: prefetch.w hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false

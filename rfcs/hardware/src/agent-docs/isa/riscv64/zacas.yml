@@ -1,0 +1,16 @@
+groups:
+- name: zacas
+  description: 原子比较并交换指令
+instructions:
+- name: AMOCAS_W
+  group: zacas
+  encoding:
+    match: 00101?? ????? ????? 010 ????? 0101111
+  assembly: amocas.w {rd}, {rs2}, ({rs1})
+  format: R-type
+- name: AMOCAS_D
+  group: zacas
+  encoding:
+    match: 00101?? ????? ????? 011 ????? 0101111
+  assembly: amocas.d {rd}, {rs2}, ({rs1})
+  format: R-type

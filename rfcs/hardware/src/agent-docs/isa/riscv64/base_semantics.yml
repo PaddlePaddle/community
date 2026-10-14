@@ -1,0 +1,679 @@
+# RISC-V64 semantics - generated from hardcoded definitions
+semantics:
+  add:
+    description: "\"add\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  addi:
+    description: "\"addi\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  and:
+    description: "\"and\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: And
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  andi:
+    description: "\"andi\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: And
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  auipc:
+    description: "auipc rd, imm: rd = PC + sext((imm << 12)[31:0])"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:20
+        src2: '12'
+      - type: alu
+        op: Shl
+        dest: $temp:1
+        src1: $temp:0
+        src2: '32'
+      - type: alu
+        op: Sar
+        dest: $temp:2
+        src1: $temp:1
+        src2: '32'
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $pc
+        src2: $temp:2
+    implicit_pc_read: true
+    implicit_pc_write: false
+
+
+  beq:
+    description: "\"beq\" rs1, rs2, offset"
+    operations:
+      - type: compare
+        op: Eq
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $pc
+        src2: $imm:13:signed
+      - type: branch
+        condition: $temp:0
+        target: $temp:1
+        is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  bge:
+    description: "\"bge\" rs1, rs2, offset"
+    operations:
+      - type: compare
+        op: Ge
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $pc
+        src2: $imm:13:signed
+      - type: branch
+        condition: $temp:0
+        target: $temp:1
+        is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  bgeu:
+    description: "\"bgeu\" rs1, rs2, offset"
+    operations:
+      - type: compare
+        op: Geu
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $pc
+        src2: $imm:13:signed
+      - type: branch
+        condition: $temp:0
+        target: $temp:1
+        is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  blt:
+    description: "\"blt\" rs1, rs2, offset"
+    operations:
+      - type: compare
+        op: Lt
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $pc
+        src2: $imm:13:signed
+      - type: branch
+        condition: $temp:0
+        target: $temp:1
+        is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  bltu:
+    description: "\"bltu\" rs1, rs2, offset"
+    operations:
+      - type: compare
+        op: Ltu
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $pc
+        src2: $imm:13:signed
+      - type: branch
+        condition: $temp:0
+        target: $temp:1
+        is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  bne:
+    description: "\"bne\" rs1, rs2, offset"
+    operations:
+      - type: compare
+        op: Ne
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $pc
+        src2: $imm:13:signed
+      - type: branch
+        condition: $temp:0
+        target: $temp:1
+        is_call: false
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  ebreak:
+    description: "ebreak"
+    operations:
+      - type: trap
+        exception: EBreak
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  ecall:
+    description: "ecall"
+    operations:
+      - type: syscall
+        number: $x.@17
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fence:
+    description: "fence"
+    operations:
+      - type: fence
+        kind: Full
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  fence_i:
+    description: "fence.i"
+    operations:
+      - type: fence
+        kind: Full
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  jal:
+    description: "jal rd, offset"
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $pc
+        src2: '4'
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $pc
+        src2: $imm:21:signed
+      - type: indirect_jump
+        target: $temp:0
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  jalr:
+    description: "jalr rd, rs1, offset"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: alu
+        op: And
+        dest: $temp:1
+        src1: $temp:0
+        src2: '-2'
+      - type: alu
+        op: Add
+        dest: $x.rd
+        src1: $pc
+        src2: '4'
+      - type: indirect_jump
+        target: $temp:1
+    implicit_pc_read: true
+    implicit_pc_write: true
+
+
+  lb:
+    description: "\"lb\" rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 1
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lbu:
+    description: "\"lbu\" rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 1
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  ld:
+    description: "\"ld\" rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 8
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lh:
+    description: "\"lh\" rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 2
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lhu:
+    description: "\"lhu\" rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 2
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lui:
+    description: "lui rd, imm: rd = sext((imm << 12)[31:0])"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $temp:0
+        src1: $imm:20
+        src2: '12'
+      - type: alu
+        op: Shl
+        dest: $temp:1
+        src1: $temp:0
+        src2: '32'
+      - type: alu
+        op: Sar
+        dest: $x.rd
+        src1: $temp:1
+        src2: '32'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lw:
+    description: "\"lw\" rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 4
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lwu:
+    description: "\"lwu\" rd, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $x.rd
+        addr: $temp:0
+        size: 4
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  or:
+    description: "\"or\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Or
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  ori:
+    description: "\"ori\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: Or
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sb:
+    description: "\"sb\" rs2, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: store
+        addr: $temp:0
+        src: $x.rs2
+        size: 1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sd:
+    description: "\"sd\" rs2, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: store
+        addr: $temp:0
+        src: $x.rs2
+        size: 8
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sh:
+    description: "\"sh\" rs2, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: store
+        addr: $temp:0
+        src: $x.rs2
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sll:
+    description: "\"sll\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  slli:
+    description: "\"slli\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: Shl
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:6
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  slt:
+    description: "slt rd, rs1, rs2"
+    operations:
+      - type: compare
+        op: Lt
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  slti:
+    description: "slti rd, rs1, imm"
+    operations:
+      - type: compare
+        op: Lt
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sltiu:
+    description: "sltiu rd, rs1, imm"
+    operations:
+      - type: compare
+        op: Ltu
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sltu:
+    description: "sltu rd, rs1, rs2"
+    operations:
+      - type: compare
+        op: Ltu
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sra:
+    description: "\"sra\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Sar
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  srai:
+    description: "\"srai\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: Sar
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:6
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  srl:
+    description: "\"srl\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Shr
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  srli:
+    description: "\"srli\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: Shr
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:6
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sub:
+    description: "\"sub\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Sub
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sw:
+    description: "\"sw\" rs2, offset(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: store
+        addr: $temp:0
+        src: $x.rs2
+        size: 4
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  xor:
+    description: "\"xor\" rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Xor
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  xori:
+    description: "\"xori\" rd, rs1, imm"
+    operations:
+      - type: alu
+        op: Xor
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $imm:12:signed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+
+
+  pause:
+    description: pause hint
+    operations:
+      - type: alu
+        op: Add
+        dest: $x.0
+        src1: $x.0
+        src2: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false

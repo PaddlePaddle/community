@@ -1,0 +1,361 @@
+groups:
+- name: base
+  description: LoongArch Base Integer Instructions
+instructions:
+- name: MUL.W
+  group: base
+  encoding:
+    match: 00000000000111000???????????????
+  assembly: mul.w $d, $j, $k
+  semantics:
+    description: mul.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Mul
+      dest: $temp:0
+      src1: $r.j
+      src2: $r.k
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $temp:0
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:1
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MULH.W
+  group: base
+  encoding:
+    match: 00000000000111001???????????????
+  assembly: mulh.w $d, $j, $k
+  semantics:
+    description: mulh.w rd, rj, rk
+    operations:
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $temp:0
+      src: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $temp:1
+      src: $r.k
+    - type: alu
+      op: Mul
+      dest: $temp:2
+      src1: $temp:0
+      src2: $temp:1
+    - type: alu
+      op: Sar
+      dest: $r.d
+      src1: $temp:2
+      src2: 32
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MULH.WU
+  group: base
+  encoding:
+    match: 00000000000111010???????????????
+  assembly: mulh.wu $d, $j, $k
+  semantics:
+    description: mulh.wu rd, rj, rk
+    operations:
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:0
+      src: $r.j
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:1
+      src: $r.k
+    - type: alu
+      op: Mul
+      dest: $temp:2
+      src1: $temp:0
+      src2: $temp:1
+    - type: alu
+      op: Shr
+      dest: $r.d
+      src1: $temp:2
+      src2: 32
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: DIV.W
+  group: base
+  encoding:
+    match: 00000000001000000???????????????
+  assembly: div.w $d, $j, $k
+  semantics:
+    description: div.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Divw
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MOD.W
+  group: base
+  encoding:
+    match: 00000000001000001???????????????
+  assembly: mod.w $d, $j, $k
+  semantics:
+    description: mod.w rd, rj, rk
+    operations:
+    - type: alu
+      op: Remw
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: DIV.WU
+  group: base
+  encoding:
+    match: 00000000001000010???????????????
+  assembly: div.wu $d, $j, $k
+  semantics:
+    description: div.wu rd, rj, rk
+    operations:
+    - type: alu
+      op: Divuw
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MOD.WU
+  group: base
+  encoding:
+    match: 00000000001000011???????????????
+  assembly: mod.wu $d, $j, $k
+  semantics:
+    description: mod.wu rd, rj, rk
+    operations:
+    - type: alu
+      op: Remuw
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MUL.D
+  group: base
+  encoding:
+    match: 00000000000111011???????????????
+  assembly: mul.d $d, $j, $k
+  semantics:
+    description: mul.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Mul
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MULH.D
+  group: base
+  encoding:
+    match: 00000000000111100???????????????
+  assembly: mulh.d $d, $j, $k
+  semantics:
+    description: mulh.d rd, rj, rk
+    operations:
+    - type: alu
+      op: MulHi
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MULH.DU
+  group: base
+  encoding:
+    match: 00000000000111101???????????????
+  assembly: mulh.du $d, $j, $k
+  semantics:
+    description: mulh.du rd, rj, rk
+    operations:
+    - type: alu
+      op: MulHiU
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MULW.D.W
+  group: base
+  encoding:
+    match: 00000000000111110???????????????
+  assembly: mulw.d.w $d, $j, $k
+  semantics:
+    description: mulw.d.w rd, rj, rk
+    operations:
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:10
+      src: $r.j
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $temp:11
+      src: $temp:10
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:12
+      src: $r.k
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $temp:13
+      src: $temp:12
+    - type: alu
+      op: Mul
+      dest: $r.d
+      src1: $temp:11
+      src2: $temp:13
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MULW.D.WU
+  group: base
+  encoding:
+    match: 00000000000111111???????????????
+  assembly: mulw.d.wu $d, $j, $k
+  semantics:
+    description: mulw.d.wu rd, rj, rk
+    operations:
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:10
+      src: $r.j
+    - type: cast
+      op:
+        ZeroExtend:
+          from: 32
+          to: 64
+      dest: $temp:11
+      src: $temp:10
+    - type: cast
+      op:
+        Truncate:
+          to: 32
+      dest: $temp:12
+      src: $r.k
+    - type: cast
+      op:
+        ZeroExtend:
+          from: 32
+          to: 64
+      dest: $temp:13
+      src: $temp:12
+    - type: alu
+      op: Mul
+      dest: $r.d
+      src1: $temp:11
+      src2: $temp:13
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: DIV.D
+  group: base
+  encoding:
+    match: 00000000001000100???????????????
+  assembly: div.d $d, $j, $k
+  semantics:
+    description: div.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Div
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MOD.D
+  group: base
+  encoding:
+    match: 00000000001000101???????????????
+  assembly: mod.d $d, $j, $k
+  semantics:
+    description: mod.d rd, rj, rk
+    operations:
+    - type: alu
+      op: Rem
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: DIV.DU
+  group: base
+  encoding:
+    match: 00000000001000110???????????????
+  assembly: div.du $d, $j, $k
+  semantics:
+    description: div.du rd, rj, rk
+    operations:
+    - type: alu
+      op: DivU
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK
+- name: MOD.DU
+  group: base
+  encoding:
+    match: 00000000001000111???????????????
+  assembly: mod.du $d, $j, $k
+  semantics:
+    description: mod.du rd, rj, rk
+    operations:
+    - type: alu
+      op: RemU
+      dest: $r.d
+      src1: $r.j
+      src2: $r.k
+    implicit_pc_read: false
+    implicit_pc_write: false
+  format: DJK

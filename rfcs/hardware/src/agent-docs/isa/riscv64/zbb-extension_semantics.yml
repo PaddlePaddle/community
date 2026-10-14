@@ -1,0 +1,290 @@
+# RISC-V Zbb Extension Semantics
+
+semantics:
+  andn:
+    description: "andn rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Andn
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  orn:
+    description: "orn rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Orn
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  xnor:
+    description: "xnor rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Xnor
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  clz:
+    description: "clz rd, rs1"
+    operations:
+      - type: alu
+        op: Clz
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  clzw:
+    description: "clzw rd, rs1"
+    operations:
+      - type: alu
+        op: Clzw
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ctz:
+    description: "ctz rd, rs1"
+    operations:
+      - type: alu
+        op: Ctz
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ctzw:
+    description: "ctzw rd, rs1"
+    operations:
+      - type: alu
+        op: Ctzw
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  cpop:
+    description: "cpop rd, rs1"
+    operations:
+      - type: alu
+        op: Cpop
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  cpopw:
+    description: "cpopw rd, rs1"
+    operations:
+      - type: alu
+        op: Cpopw
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  max:
+    description: "max rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Max
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  maxu:
+    description: "maxu rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Maxu
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  min:
+    description: "min rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Min
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  minu:
+    description: "minu rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Minu
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  orc.b:
+    description: "orc.b rd, rs1"
+    operations:
+      - type: alu
+        op: OrcB
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rev8:
+    description: "rev8 rd, rs1"
+    operations:
+      - type: alu
+        op: Rev8
+        dest: $x.rd
+        src1: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rol:
+    description: "rol rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Rol
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rolw:
+    description: "rolw rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Rolw
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: cast
+        op: {SignExtend: {from: 32, to: 64}}
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  ror:
+    description: "ror rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Ror
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rori:
+    description: "rori rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Ror
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $shamt:5
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  roriw:
+    description: "roriw rd, rs1, shamt"
+    operations:
+      - type: alu
+        op: Rorw
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $shamt:5
+      - type: cast
+        op: {SignExtend: {from: 32, to: 64}}
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  rorw:
+    description: "rorw rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Rorw
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $x.rs2
+      - type: cast
+        op: {SignExtend: {from: 32, to: 64}}
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sext.b:
+    description: "sext.b rd, rs1"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 8}}
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op: {SignExtend: {from: 8, to: 64}}
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  sext.h:
+    description: "sext.h rd, rs1"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 16}}
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op: {SignExtend: {from: 16, to: 64}}
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  zext.h:
+    description: "zext.h rd, rs1"
+    operations:
+      - type: cast
+        op: {Truncate: {to: 16}}
+        dest: $temp:0
+        src: $x.rs1
+      - type: cast
+        op: {ZeroExtend: {from: 16, to: 64}}
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  pack:
+    description: "pack rd, rs1, rs2"
+    operations:
+      - type: alu
+        op: Pack
+        dest: $x.rd
+        src1: $x.rs1
+        src2: $x.rs2
+    implicit_pc_read: false
+    implicit_pc_write: false

@@ -1,0 +1,530 @@
+# RISC-V64 A-extension semantics
+semantics:
+  # W-type atomic semantics
+  amoswap_w:
+    description: "amoswap.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $x.rs2
+      - type: store
+        addr: $x.rs1
+        src: $temp:1
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoadd_w:
+    description: "amoadd.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $temp:1
+      - type: store
+        addr: $x.rs1
+        src: $temp:2
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoand_w:
+    description: "amoand.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: alu
+        op: And
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $temp:1
+      - type: store
+        addr: $x.rs1
+        src: $temp:2
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoor_w:
+    description: "amoor.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: alu
+        op: Or
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $temp:1
+      - type: store
+        addr: $x.rs1
+        src: $temp:2
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoxor_w:
+    description: "amoxor.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: alu
+        op: Xor
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $temp:1
+      - type: store
+        addr: $x.rs1
+        src: $temp:2
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomax_w:
+    description: "amomax.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $x.rs2
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $temp:2
+        src: $temp:1
+      - type: alu
+        op: Max
+        dest: $temp:3
+        src1: $temp:0
+        src2: $temp:2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:4
+        src: $temp:3
+      - type: store
+        addr: $x.rs1
+        src: $temp:4
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomin_w:
+    description: "amomin.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:1
+        src: $x.rs2
+      - type: cast
+        op:
+          SignExtend:
+            from: 32
+            to: 64
+        dest: $temp:2
+        src: $temp:1
+      - type: alu
+        op: Min
+        dest: $temp:3
+        src1: $temp:0
+        src2: $temp:2
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:4
+        src: $temp:3
+      - type: store
+        addr: $x.rs1
+        src: $temp:4
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomaxu_w:
+    description: "amomaxu.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: load
+        dest: $temp:1
+        addr: $x.rs1
+        size: 4
+        signed: false
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $x.rs2
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 32
+            to: 64
+        dest: $temp:3
+        src: $temp:2
+      - type: alu
+        op: Maxu
+        dest: $temp:4
+        src1: $temp:1
+        src2: $temp:3
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:5
+        src: $temp:4
+      - type: store
+        addr: $x.rs1
+        src: $temp:5
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amominu_w:
+    description: "amominu.w rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 4
+        signed: true
+      - type: load
+        dest: $temp:1
+        addr: $x.rs1
+        size: 4
+        signed: false
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:2
+        src: $x.rs2
+      - type: cast
+        op:
+          ZeroExtend:
+            from: 32
+            to: 64
+        dest: $temp:3
+        src: $temp:2
+      - type: alu
+        op: Minu
+        dest: $temp:4
+        src1: $temp:1
+        src2: $temp:3
+      - type: cast
+        op:
+          Truncate:
+            to: 32
+        dest: $temp:5
+        src: $temp:4
+      - type: store
+        addr: $x.rs1
+        src: $temp:5
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  # D-type atomic semantics (existing)
+  amoadd_d:
+    description: "\"amoadd_d\" rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 8
+        signed: false
+      - type: alu
+        op: Add
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: store
+        addr: $x.rs1
+        src: $temp:1
+        size: 8
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  amoand_d:
+    description: "\"amoand_d\" rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 8
+        signed: false
+      - type: alu
+        op: And
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: store
+        addr: $x.rs1
+        src: $temp:1
+        size: 8
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  amomax_d:
+    description: "amomax.d rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Max
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  amomin_d:
+    description: "amomin.d rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Min
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amomaxu_d:
+    description: "amomaxu.d rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Maxu
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amominu_d:
+    description: "amominu.d rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Minu
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  amoor_d:
+    description: "\"amoor_d\" rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 8
+        signed: false
+      - type: alu
+        op: Or
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: store
+        addr: $x.rs1
+        src: $temp:1
+        size: 8
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  amoswap_d:
+    description: "amoswap.d rd, rs2, (rs1)"
+    operations:
+      - type: atomic
+        op: Swap
+        dest: $x.rd
+        addr: $x.rs1
+        src: $x.rs2
+        ordering: Relaxed
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  amoxor_d:
+    description: "\"amoxor_d\" rd, rs2, (rs1)"
+    operations:
+      - type: load
+        dest: $temp:0
+        addr: $x.rs1
+        size: 8
+        signed: false
+      - type: alu
+        op: Xor
+        dest: $temp:1
+        src1: $temp:0
+        src2: $x.rs2
+      - type: store
+        addr: $x.rs1
+        src: $temp:1
+        size: 8
+      - type: move
+        dest: $x.rd
+        src: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lr_d:
+    description: "lr.d rd, (rs1)"
+    operations:
+      - type: load
+        dest: $x.rd
+        addr: $x.rs1
+        size: 8
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  lr_w:
+    description: "lr.w rd, (rs1)"
+    operations:
+      - type: load
+        dest: $x.rd
+        addr: $x.rs1
+        size: 4
+        signed: true
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sc_d:
+    description: "sc.d rd, rs2, (rs1)"
+    operations:
+      - type: store
+        addr: $x.rs1
+        src: $x.rs2
+        size: 8
+      - type: move
+        dest: $x.rd
+        src: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+
+  sc_w:
+    description: "sc.w rd, rs2, (rs1)"
+    operations:
+      - type: store
+        addr: $x.rs1
+        src: $x.rs2
+        size: 4
+      - type: move
+        dest: $x.rd
+        src: '0'
+    implicit_pc_read: false
+    implicit_pc_write: false
