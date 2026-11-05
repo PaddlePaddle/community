@@ -1,0 +1,38 @@
+groups:
+- name: crypto_sm3
+  description: SM3 密码学指令
+- name: crypto_sm4
+  description: SM4 密码学指令
+instructions:
+- name: SM3P0
+  group: crypto_sm3
+  encoding:
+    match: 0001000 01000 ????? 001 ????? 0010011
+  assembly: sm3p0 {rd}, {rs1}
+  format: R-type-unary
+- name: SM3P1
+  group: crypto_sm3
+  encoding:
+    match: 0001000 01001 ????? 001 ????? 0010011
+  assembly: sm3p1 {rd}, {rs1}
+  format: R-type-unary
+- name: SM4ED
+  group: crypto_sm4
+  encoding:
+    match: ??11000 ????? ????? 000 ????? 0110011
+    variables:
+      imm:
+      - 31
+      - 30
+  assembly: sm4ed {rd}, {rs1}, {rs2}, {imm}
+  format: R-type
+- name: SM4KS
+  group: crypto_sm4
+  encoding:
+    match: ??11010 ????? ????? 000 ????? 0110011
+    variables:
+      imm:
+      - 31
+      - 30
+  assembly: sm4ks {rd}, {rs1}, {rs2}, {imm}
+  format: R-type

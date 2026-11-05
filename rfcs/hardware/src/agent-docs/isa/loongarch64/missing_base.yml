@@ -1,0 +1,113 @@
+groups:
+- name: base
+  description: LoongArch Missing Base Integer Instructions
+instructions:
+- name: BCEQZ
+  group: base
+  encoding:
+    match: 0100100000?????????????0????????
+  assembly: bceqz $c, imm
+  format: CJ
+- name: BCNEZ
+  group: base
+  encoding:
+    match: 0100100000?????????????1????????
+  assembly: bcnez $c, imm
+  format: CJ
+- name: LU32I_D
+  group: base
+  encoding:
+    match: 0001011?????????????????????????
+  assembly: lu32i.d $d, imm
+  format: DI20
+  semantics:
+    description: cu32i.d rd, imm (lu32i.d alias)
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:20:signed
+      src2: 32
+    - type: alu
+      op: And
+      dest: $temp:1
+      src1: $r.d
+      src2: 4294967295
+    - type: alu
+      op: Or
+      dest: $r.d
+      src1: $temp:1
+      src2: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+- name: LU52I_D
+  group: base
+  encoding:
+    match: 0000001100??????????????????????
+  assembly: lu52i.d $d, $j, imm
+  format: DJI12
+  semantics:
+    description: cu52i.d rd, rj, imm (lu52i.d alias)
+    operations:
+    - type: alu
+      op: Shl
+      dest: $temp:0
+      src1: $imm:12:signed
+      src2: 52
+    - type: alu
+      op: And
+      dest: $temp:1
+      src1: $r.j
+      src2: 4503599627370495
+    - type: alu
+      op: Or
+      dest: $r.d
+      src1: $temp:1
+      src2: $temp:0
+    implicit_pc_read: false
+    implicit_pc_write: false
+- name: ALSL_W
+  group: base
+  encoding:
+    match: 000000000000010?????????????????
+  assembly: alsl.w $d, $j, $k, imm
+  format: DJUk6
+  semantics:
+    description: alsl.w rd, rj, rk, sa2 (rd = (rj << (sa2+1)) + rk, 32-bit)
+    operations:
+    - type: alu
+      op: Add
+      dest: $temp:0
+      src1: $imm:2
+      src2: 1
+    - type: alu
+      op: Shl
+      dest: $temp:1
+      src1: $r.j
+      src2: $temp:0
+    - type: alu
+      op: Add
+      dest: $temp:2
+      src1: $temp:1
+      src2: $r.k
+    - type: cast
+      op:
+        SignExtend:
+          from: 32
+          to: 64
+      dest: $r.d
+      src: $temp:2
+    implicit_pc_read: false
+    implicit_pc_write: false
+- name: MOVCF2GR
+  group: base
+  encoding:
+    match: 0000000100010100110111??????????
+  assembly: movcf2gr $d, $j
+  format: DJ
+  semantics:
+    description: movfcc2gr rd, cj
+    operations:
+    - type: move
+      dest: $r.d
+      src: $fcc.j

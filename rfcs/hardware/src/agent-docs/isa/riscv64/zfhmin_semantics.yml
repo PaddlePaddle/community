@@ -1,0 +1,152 @@
+# RISC-V64 Zfhmin Extension Semantics
+semantics:
+  flh:
+    description: "flh rd, imm(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: load
+        dest: $f.rd
+        addr: $temp:0
+        size: 2
+        signed: false
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsh:
+    description: "fsh rs2, imm(rs1)"
+    operations:
+      - type: alu
+        op: Add
+        dest: $temp:0
+        src1: $x.rs1
+        src2: $imm:12:signed
+      - type: store
+        src: $f.rs2
+        addr: $temp:0
+        size: 2
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmv_h_x:
+    description: "fmv.h.x rd, rs1"
+    operations:
+      - type: f_mov
+        dest: $f.rd
+        src: $x.rs1
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmv_x_h:
+    description: "fmv.x.h rd, rs1"
+    operations:
+      - type: f_mov
+        dest: $x.rd
+        src: $f.rs1
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_s_h:
+    description: "fcvt.s.h rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F16ToF32
+        dest: $f.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_h_s:
+    description: "fcvt.h.s rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F32ToF16
+        dest: $f.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_w_h:
+    description: "fcvt.w.h rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F16ToI32
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_wu_h:
+    description: "fcvt.wu.h rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F16ToU32
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_h_w:
+    description: "fcvt.h.w rd, rs1"
+    operations:
+      - type: f_cvt
+        op: I32ToF16
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_h_wu:
+    description: "fcvt.h.wu rd, rs1"
+    operations:
+      - type: f_cvt
+        op: U32ToF16
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_l_h:
+    description: "fcvt.l.h rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F16ToI64
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_lu_h:
+    description: "fcvt.lu.h rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F16ToU64
+        dest: $x.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_h_l:
+    description: "fcvt.h.l rd, rs1"
+    operations:
+      - type: f_cvt
+        op: I64ToF16
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_h_lu:
+    description: "fcvt.h.lu rd, rs1"
+    operations:
+      - type: f_cvt
+        op: U64ToF16
+        dest: $f.rd
+        src: $x.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false

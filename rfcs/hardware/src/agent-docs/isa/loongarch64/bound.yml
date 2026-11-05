@@ -1,0 +1,161 @@
+groups:
+  - name: base
+    description: LoongArch Base Integer Instructions
+
+instructions:
+  - name: ASRTLE
+    group: base
+    encoding:
+      match: 00000000000000010??????????00000
+    assembly: asrtle $j, $k
+    format: JK
+  - name: ASRTGT
+    group: base
+    encoding:
+      match: 00000000000000011??????????00000
+    assembly: asrtgt $j, $k
+    format: JK
+  - name: LDGT.B
+    group: base
+    encoding:
+      match: 00111000011110000???????????????
+    assembly: ldgt.b $d, $j, $k
+    format: DJK
+  - name: LDGT.H
+    group: base
+    encoding:
+      match: 00111000011110001???????????????
+    assembly: ldgt.h $d, $j, $k
+    format: DJK
+  - name: LDGT.W
+    group: base
+    encoding:
+      match: 00111000011110010???????????????
+    assembly: ldgt.w $d, $j, $k
+    format: DJK
+  - name: LDLE.B
+    group: base
+    encoding:
+      match: 00111000011110100???????????????
+    assembly: ldle.b $d, $j, $k
+    format: DJK
+  - name: LDLE.H
+    group: base
+    encoding:
+      match: 00111000011110101???????????????
+    assembly: ldle.h $d, $j, $k
+    format: DJK
+  - name: LDLE.W
+    group: base
+    encoding:
+      match: 00111000011110110???????????????
+    assembly: ldle.w $d, $j, $k
+    format: DJK
+  - name: STGT.B
+    group: base
+    encoding:
+      match: 00111000011111000???????????????
+    assembly: stgt.b $d, $j, $k
+    format: DJK
+  - name: STGT.H
+    group: base
+    encoding:
+      match: 00111000011111001???????????????
+    assembly: stgt.h $d, $j, $k
+    format: DJK
+  - name: STGT.W
+    group: base
+    encoding:
+      match: 00111000011111010???????????????
+    assembly: stgt.w $d, $j, $k
+    format: DJK
+  - name: STLE.B
+    group: base
+    encoding:
+      match: 00111000011111100???????????????
+    assembly: stle.b $d, $j, $k
+    format: DJK
+  - name: STLE.H
+    group: base
+    encoding:
+      match: 00111000011111101???????????????
+    assembly: stle.h $d, $j, $k
+    format: DJK
+  - name: STLE.W
+    group: base
+    encoding:
+      match: 00111000011111110???????????????
+    assembly: stle.w $d, $j, $k
+    format: DJK
+  - name: LDGT.D
+    group: base
+    encoding:
+      match: 00111000011110011???????????????
+    assembly: ldgt.d $d, $j, $k
+    format: DJK
+  - name: LDLE.D
+    group: base
+    encoding:
+      match: 00111000011110111???????????????
+    assembly: ldle.d $d, $j, $k
+    format: DJK
+  - name: STGT.D
+    group: base
+    encoding:
+      match: 00111000011111011???????????????
+    assembly: stgt.d $d, $j, $k
+    format: DJK
+  - name: STLE.D
+    group: base
+    encoding:
+      match: 00111000011111111???????????????
+    assembly: stle.d $d, $j, $k
+    format: DJK
+  - name: FLDGT.S
+    group: base
+    encoding:
+      match: 00111000011101000???????????????
+    assembly: fldgt.s $d, $j, $k
+    format: DJK
+  - name: FLDLE.S
+    group: base
+    encoding:
+      match: 00111000011101010???????????????
+    assembly: fldle.s $d, $j, $k
+    format: DJK
+  - name: FSTGT.S
+    group: base
+    encoding:
+      match: 00111000011101100???????????????
+    assembly: fstgt.s $d, $j, $k
+    format: DJK
+  - name: FSTLE.S
+    group: base
+    encoding:
+      match: 00111000011101110???????????????
+    assembly: fstle.s $d, $j, $k
+    format: DJK
+  - name: FLDGT.D
+    group: base
+    encoding:
+      match: 00111000011101001???????????????
+    assembly: fldgt.d $d, $j, $k
+    format: DJK
+  - name: FLDLE.D
+    group: base
+    encoding:
+      match: 00111000011101011???????????????
+    assembly: fldle.d $d, $j, $k
+    format: DJK
+  - name: FSTGT.D
+    group: base
+    encoding:
+      match: 00111000011101101???????????????
+    assembly: fstgt.d $d, $j, $k
+    format: DJK
+  - name: FSTLE.D
+    group: base
+    encoding:
+      match: 00111000011101111???????????????
+    assembly: fstle.d $d, $j, $k
+    format: DJK

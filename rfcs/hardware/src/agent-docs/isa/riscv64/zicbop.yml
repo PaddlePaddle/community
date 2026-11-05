@@ -1,0 +1,23 @@
+groups:
+- name: cache_prefetch
+  description: Cache Block Prefetch Instructions (Zicbop)
+
+instructions:
+- name: PREFETCH_I
+  group: cache_prefetch
+  encoding:
+    match: 000000000000?????011000000010011
+  assembly: prefetch.i 0({rs1})
+  format: Cache-mgmt
+- name: PREFETCH_R
+  group: cache_prefetch
+  encoding:
+    match: 000000000001?????011000000010011
+  assembly: prefetch.r 0({rs1})
+  format: Cache-mgmt
+- name: PREFETCH_W
+  group: cache_prefetch
+  encoding:
+    match: 000000000011?????011000000010011
+  assembly: prefetch.w 0({rs1})
+  format: Cache-mgmt

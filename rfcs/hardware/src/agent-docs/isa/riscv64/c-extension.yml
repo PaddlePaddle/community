@@ -1,0 +1,446 @@
+groups:
+- name: compressed
+  description: RISC-V compressed instructions
+instructions:
+- name: C_ADDI4SPN
+  group: compressed
+  encoding:
+    match: 000???????????00
+    bit_length: 16
+  assembly: c.addi4spn {rd}, {imm}
+  format: C-addi4spn
+- name: C_FLD
+  group: compressed
+  encoding:
+    match: 001???????????00
+    bit_length: 16
+  assembly: c.fld {rd}, {imm}({rs1})
+  format: C-mem-ld64
+- name: C_LW
+  group: compressed
+  encoding:
+    match: 010???????????00
+    bit_length: 16
+  assembly: c.lw {rd}, {imm}({rs1})
+  format: C-lw
+- name: C_LD
+  group: compressed
+  encoding:
+    match: 011???????????00
+    bit_length: 16
+  assembly: c.ld {rd}, {imm}({rs1})
+  format: C-mem-ld64
+- name: C_FSD
+  group: compressed
+  encoding:
+    match: 101???????????00
+    bit_length: 16
+  assembly: c.fsd {rs2}, {imm}({rs1})
+  format: C-mem-sd64
+- name: C_SW
+  group: compressed
+  encoding:
+    match: 110???????????00
+    bit_length: 16
+  assembly: c.sw {rs2}, {imm}({rs1})
+  format: C-sw
+- name: C_SD
+  group: compressed
+  encoding:
+    match: 111???????????00
+    bit_length: 16
+  assembly: c.sd {rs2}, {imm}({rs1})
+  format: C-mem-sd64
+- name: C_LBU
+  group: compressed
+  encoding:
+    match: 100?00????????00
+    bit_length: 16
+  assembly: c.lbu {rd}, {imm}({rs1})
+  format: C-lbu
+- name: C_LHU
+  group: compressed
+  encoding:
+    match: 100?01???0????00
+    bit_length: 16
+  assembly: c.lhu {rd}, {imm}({rs1})
+  format: C-mem-h
+- name: C_LH
+  group: compressed
+  encoding:
+    match: 100?01???1????00
+    bit_length: 16
+  assembly: c.lh {rd}, {imm}({rs1})
+  format: C-mem-h
+- name: C_SB
+  group: compressed
+  encoding:
+    match: 100?10????????00
+    bit_length: 16
+  assembly: c.sb {rs2}, {imm}({rs1})
+  format: C-sb
+- name: C_SH
+  group: compressed
+  encoding:
+    match: 100?11????????00
+    bit_length: 16
+  assembly: c.sh {rs2}, {imm}({rs1})
+  format: C-sh
+- name: C_ADDI
+  group: compressed
+  encoding:
+    match: 000???????????01
+    bit_length: 16
+  assembly: c.addi {rd}, {imm}
+  format: C-rd-imm6
+- name: C_ADDIW
+  group: compressed
+  encoding:
+    match: 001???????????01
+    bit_length: 16
+  assembly: c.addiw {rd}, {imm}
+  format: C-rd-imm6
+- name: C_LI
+  group: compressed
+  encoding:
+    match: 010???????????01
+    bit_length: 16
+  assembly: c.li {rd}, {imm}
+  format: C-rd-imm6
+- name: C_ADDI16SP
+  group: compressed
+  encoding:
+    match: 011?00010?????01
+    bit_length: 16
+  assembly: c.addi16sp {imm}
+  format: C-addi16sp
+- name: C_MOP
+  group: compressed
+  encoding:
+    match: 0110?????0000001
+    bit_length: 16
+  assembly: c.mop {rd}
+  format: C-rd-only
+- name: C_LUI
+  group: compressed
+  encoding:
+    match: 011???????????01
+    bit_length: 16
+  assembly: c.lui {rd}, {imm}
+  format: C-rd-imm6
+- name: C_SRLI
+  group: compressed
+  encoding:
+    match: 100?00????????01
+    bit_length: 16
+  assembly: c.srli {rd}, {imm}
+  format: C-rd-imm6-compressed
+- name: C_SRAI
+  group: compressed
+  encoding:
+    match: 100?01????????01
+    bit_length: 16
+  assembly: c.srai {rd}, {imm}
+  format: C-rd-imm6-compressed
+- name: C_ANDI
+  group: compressed
+  encoding:
+    match: 100?10????????01
+    bit_length: 16
+  assembly: c.andi {rd}, {imm}
+  format: C-rd-imm6-compressed
+- name: C_SUB
+  group: compressed
+  encoding:
+    match: 100011???00???01
+    bit_length: 16
+  assembly: c.sub {rd}, {rs2}
+  format: C-rd-rs2
+- name: C_XOR
+  group: compressed
+  encoding:
+    match: 100011???01???01
+    bit_length: 16
+  assembly: c.xor {rd}, {rs2}
+  format: C-rd-rs2
+- name: C_OR
+  group: compressed
+  encoding:
+    match: 100011???10???01
+    bit_length: 16
+  assembly: c.or {rd}, {rs2}
+  format: C-rd-rs2
+- name: C_AND
+  group: compressed
+  encoding:
+    match: 100011???11???01
+    bit_length: 16
+  assembly: c.and {rd}, {rs2}
+  format: C-rd-rs2
+- name: C_SUBW
+  group: compressed
+  encoding:
+    match: 100111???00???01
+    bit_length: 16
+  assembly: c.subw {rd}, {rs2}
+  format: C-rd-rs2
+- name: C_ADDW
+  group: compressed
+  encoding:
+    match: 100111???01???01
+    bit_length: 16
+  assembly: c.addw {rd}, {rs2}
+  format: C-rd-rs2
+- name: C_MUL
+  group: compressed
+  encoding:
+    match: 100111???10???01
+    bit_length: 16
+  assembly: c.mul {rd}, {rs2}
+  format: C-rd-rs2
+- name: C_ZEXT_B
+  group: compressed
+  encoding:
+    match: 100111???1100001
+    bit_length: 16
+  assembly: c.zext.b {rd}
+  format: C-rd
+- name: C_SEXT_B
+  group: compressed
+  encoding:
+    match: 100111???1100101
+    bit_length: 16
+  assembly: c.sext.b {rd}
+  format: C-rd
+- name: C_ZEXT_H
+  group: compressed
+  encoding:
+    match: 100111???1101001
+    bit_length: 16
+  assembly: c.zext.h {rd}
+  format: C-rd
+- name: C_SEXT_H
+  group: compressed
+  encoding:
+    match: 100111???1101101
+    bit_length: 16
+  assembly: c.sext.h {rd}
+  format: C-rd
+- name: C_ZEXT_W
+  group: compressed
+  encoding:
+    match: 100111???1110001
+    bit_length: 16
+  assembly: c.zext.w {rd}
+  format: C-rd
+- name: C_NOT
+  group: compressed
+  encoding:
+    match: 100111???1110101
+    bit_length: 16
+  assembly: c.not {rd}
+  format: C-rd
+- name: C_J
+  group: compressed
+  encoding:
+    match: 101???????????01
+    bit_length: 16
+  assembly: c.j {imm}
+  format: C-j
+- name: C_BEQZ
+  group: compressed
+  encoding:
+    match: 110???????????01
+    bit_length: 16
+  assembly: c.beqz {rd}, {imm}
+  format: C-branch
+- name: C_BNEZ
+  group: compressed
+  encoding:
+    match: 111???????????01
+    bit_length: 16
+  assembly: c.bnez {rd}, {imm}
+  format: C-branch
+- name: C_SLLI
+  group: compressed
+  encoding:
+    match: 000???????????10
+    bit_length: 16
+  assembly: c.slli {rd}, {imm}
+  format: C-rd-imm6
+- name: C_FLDSP
+  group: compressed
+  encoding:
+    match: 001???????????10
+    bit_length: 16
+  assembly: c.fldsp {rd}, {imm}
+  format: C-mem-ldsp
+- name: C_LWSP
+  group: compressed
+  encoding:
+    match: 010???????????10
+    bit_length: 16
+  assembly: c.lwsp {rd}, {imm}
+  format: C-lwsp
+- name: C_LDSP
+  group: compressed
+  encoding:
+    match: 011???????????10
+    bit_length: 16
+  assembly: c.ldsp {rd}, {imm}
+  format: C-mem-ldsp
+- name: C_EBREAK
+  group: compressed
+  encoding:
+    match: '1000000000000010'
+    bit_length: 16
+    variables: {}
+  assembly: c.ebreak
+- name: C_JR
+  group: compressed
+  encoding:
+    match: 1000?????0000010
+    bit_length: 16
+  assembly: c.jr {rd}
+  format: C-rd-only
+- name: C_MV
+  group: compressed
+  encoding:
+    match: 1000??????????10
+    bit_length: 16
+  assembly: c.mv {rd}, {rs2}
+  format: C-cr
+- name: C_JALR
+  group: compressed
+  encoding:
+    match: 1001?????0000010
+    bit_length: 16
+  assembly: c.jalr {rd}
+  format: C-rd-only
+- name: C_NTL_P1
+  group: compressed
+  encoding:
+    match: '1001000000001010'
+    bit_length: 16
+  assembly: ntl.p1
+- name: C_NTL_ALL
+  group: compressed
+  encoding:
+    match: '1001000000010110'
+    bit_length: 16
+  assembly: ntl.all
+- name: C_ADD
+  group: compressed
+  encoding:
+    match: 1001??????????10
+    bit_length: 16
+  assembly: c.add {rd}, {rs2}
+  format: C-cr
+# === Zcmp (Code Size Reduction: Push/Pop) ===
+# 16-bit, quadrant 2 (bits[1:0]=10)
+# bits[15:13]=101, bits[12:8] encode opcode variant
+- name: CM_PUSH
+  group: compressed
+  encoding:
+    match: 10111000??????10
+    bit_length: 16
+  assembly: cm.push {rlist}, {stack_adj}
+  format: C-Zcmp-push
+
+- name: CM_POP
+  group: compressed
+  encoding:
+    match: 10111010??????10
+    bit_length: 16
+  assembly: cm.pop {rlist}, {stack_adj}
+  format: C-Zcmp-pop
+
+- name: CM_POPRETZ
+  group: compressed
+  encoding:
+    match: 10111100??????10
+    bit_length: 16
+  assembly: cm.popretz {rlist}, {stack_adj}
+  format: C-Zcmp-popretz
+
+- name: CM_POPRET
+  group: compressed
+  encoding:
+    match: 10111110??????10
+    bit_length: 16
+  assembly: cm.popret {rlist}, {stack_adj}
+  format: C-Zcmp-popret
+
+- name: C_FSDSP
+  group: compressed
+  encoding:
+    match: 101???????????10
+    bit_length: 16
+  assembly: c.fsdsp {rs2}, {imm}
+  format: C-mem-sdsp
+
+# === Zcmp register moves (shadowed by C_FSDSP in RV64 when D ext present) ===
+- name: CM_MVSA01
+  group: compressed
+  encoding:
+    match: 101011???01???10
+    bit_length: 16
+  assembly: cm.mvsa01 {r1s}, {r2s}
+  format: C-Zcmp-mv
+
+- name: CM_MVA01S
+  group: compressed
+  encoding:
+    match: 101011???11???10
+    bit_length: 16
+  assembly: cm.mva01s {r1s}, {r2s}
+  format: C-Zcmp-mv
+
+# === Zcmt (Code Size Reduction: Table Jump) ===
+# cm.jt and cm.jalt share the same encoding pattern
+# distinguished by index range (0-31 = jt, 32-255 = jalt)
+# NOTE: In RV64, C_FSDSP occupies the 101???????????10 encoding space,
+# so Zcmt instructions are shadowed when D extension is present.
+- name: CM_JT
+  group: compressed
+  encoding:
+    match: 10100?????????10
+    bit_length: 16
+  assembly: cm.jt {index}
+  format: C-Zcmt-jt
+
+- name: CM_JALT
+  group: compressed
+  encoding:
+    match: 10101?????????10
+    bit_length: 16
+  assembly: cm.jalt {index}
+  format: C-Zcmt-jalt
+- name: C_SWSP
+  group: compressed
+  encoding:
+    match: 110???????????10
+    bit_length: 16
+  assembly: c.swsp {rs2}, {imm}
+  format: C-swsp
+- name: C_SDSP
+  group: compressed
+  encoding:
+    match: 111???????????10
+    bit_length: 16
+  assembly: c.sdsp {rs2}, {imm}
+  format: C-mem-sdsp
+- name: C_NTL_PALL
+  group: compressed
+  encoding:
+    match: '1001000000001110'
+    bit_length: 16
+  assembly: ntl.pall
+- name: C_NTL_S1
+  group: compressed
+  encoding:
+    match: '1001000000010010'
+    bit_length: 16
+  assembly: ntl.s1
+
+

@@ -1,0 +1,66 @@
+# RISC-V Zicsr Extension (Control and Status Register Instructions)
+
+groups:
+  - name: csr
+    description: CSR 读写指令
+
+instructions:
+  - name: CSRRW
+    group: csr
+    encoding:
+      match: ???????????? ????? 001 ????? 1110011
+      variables:
+        csr:
+        - 31
+        - 20
+    assembly: csrrw {rd}, {csr}, {rs1}
+    format: R-type-unary
+  - name: CSRRS
+    group: csr
+    encoding:
+      match: ???????????? ????? 010 ????? 1110011
+      variables:
+        csr:
+        - 31
+        - 20
+    assembly: csrrs {rd}, {csr}, {rs1}
+    format: R-type-unary
+  - name: CSRRC
+    group: csr
+    encoding:
+      match: ???????????? ????? 011 ????? 1110011
+      variables:
+        csr:
+        - 31
+        - 20
+    assembly: csrrc {rd}, {csr}, {rs1}
+    format: R-type-unary
+  - name: CSRRWI
+    group: csr
+    encoding:
+      match: "???????????? ????? 101 ????? 1110011"
+      variables:
+        csr: [31, 20]
+        uimm: [19, 15]
+        rd:  [11, 7]
+    assembly: "csrrwi {rd}, {csr}, {uimm}"
+
+  - name: CSRRSI
+    group: csr
+    encoding:
+      match: "???????????? ????? 110 ????? 1110011"
+      variables:
+        csr: [31, 20]
+        uimm: [19, 15]
+        rd:  [11, 7]
+    assembly: "csrrsi {rd}, {csr}, {uimm}"
+
+  - name: CSRRCI
+    group: csr
+    encoding:
+      match: "???????????? ????? 111 ????? 1110011"
+      variables:
+        csr: [31, 20]
+        uimm: [19, 15]
+        rd:  [11, 7]
+    assembly: "csrrci {rd}, {csr}, {uimm}"

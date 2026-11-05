@@ -1,0 +1,239 @@
+# RISC-V64 Zfh Extension Semantics (完整扩展)
+semantics:
+  fadd_h:
+    description: "fadd.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Add
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsub_h:
+    description: "fsub.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Sub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmul_h:
+    description: "fmul.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Mul
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fdiv_h:
+    description: "fdiv.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Div
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsqrt_h:
+    description: "fsqrt.h rd, rs1"
+    operations:
+      - type: f_alu
+        op: Sqrt
+        dest: $f.rd
+        src1: $f.rs1
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmadd_h:
+    description: "fmadd.h rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Madd
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmsub_h:
+    description: "fmsub.h rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Msub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fnmsub_h:
+    description: "fnmsub.h rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Nmsub
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fnmadd_h:
+    description: "fnmadd.h rd, rs1, rs2, rs3"
+    operations:
+      - type: f_alu
+        op: Nmadd
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        src3: $f.rs3
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnj_h:
+    description: "fsgnj.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInject
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnjn_h:
+    description: "fsgnjn.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInjectNeg
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fsgnjx_h:
+    description: "fsgnjx.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: SignInjectXor
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmin_h:
+    description: "fmin.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Min
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fmax_h:
+    description: "fmax.h rd, rs1, rs2"
+    operations:
+      - type: f_alu
+        op: Max
+        dest: $f.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  feq_h:
+    description: "feq.h rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Eq
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  flt_h:
+    description: "flt.h rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Lt
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fle_h:
+    description: "fle.h rd, rs1, rs2"
+    operations:
+      - type: f_cmp
+        op: Le
+        dest: $x.rd
+        src1: $f.rs1
+        src2: $f.rs2
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fclass_h:
+    description: "fclass.h rd, rs1"
+    operations:
+      - type: f_alu
+        op: Class
+        dest: $x.rd
+        src1: $f.rs1
+        precision: Half
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_d_h:
+    description: "fcvt.d.h rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F16ToF64
+        dest: $f.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
+
+  fcvt_h_d:
+    description: "fcvt.h.d rd, rs1"
+    operations:
+      - type: f_cvt
+        op: F64ToF16
+        dest: $f.rd
+        src: $f.rs1
+    implicit_pc_read: false
+    implicit_pc_write: false
