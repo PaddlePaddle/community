@@ -1,25 +1,54 @@
 # **项目：在 FastDeploy 中原生支持 MiniCPM4.1-8B**
 
+## **一、背景与目标**
+**背景**: 
+
+MiniCPM4.1-8B 是 decoder-only 文本生成模型，使用 GQA、LongRoPE、muP 缩放和混合推理模式，并以 InfLLM-V2 支持长上下文稀疏注意力。FastDeploy 在基线中没有注册 `MiniCPMForCausalLM`，也没有对应的模型组网、权重加载、LongRoPE、InfLLM-V2 后端或 MiniCPM4.1 端到端测试。
+
 **目标**: 实现一个高性能、功能完整的 MiniCPM4.1-8B 推理后端，支持其 InfLLM-V2 稀疏注意力、混合推理模式等核心特性，并集成 FastDeploy 现有的低bit量化能力。
 
 **核心技术路径**:
 
 1. **复用**: 最大化复用 FastDeploy 现有的 attention backend 和量化组件。
 2. **开发**: 实现 InfLLM-V2 动态稀疏注意力的高性能 CUDA 算子。
-3. **集成**: 在 Python 层构建完整的 MiniCPM4.1-8B 模型结构，并适配 FastDeploy 现有的 WINT2/WINT4/WINT8 量化框架。
+3. **集成**: 在 Python 层构建完整的 MiniCPM4.1-8B 模型结构，并适配 FastDeploy 现有的 WINT4/WINT8 量化框架。(现有的WINT2Config 是全局 WINT2 MoE 语义，不支持 Dense 模型。)
 
-## **核心策略**: 并行推进算子开发与模型集成，以3周时间实现核心功能，通过充分复用现有基础设施快速交付。
+## **核心策略**: 并行推进算子开发与模型集成，以4周时间实现核心功能，通过充分复用现有基础设施快速交付。
 
 ---
 
-### **Phase 1: [快速集成] FastDeploy低bit整数量化支持 (1-2天)**
 
-**目标**: 利用FastDeploy现有的WINT2/WINT4/WINT8量化基础设施，为MiniCPM4.1-8B快速启用低bit整数量化推理能力。
+## **二、总体设计**
+
+```text
+Hugging Face MiniCPM4.1 checkpoint
+        |
+        +-- ModelRegistry: MiniCPMForCausalLM
+        |       |
+        |       +-- MiniCPM41ForCausalLM
+        |               +-- GQA + LongRoPE + paged KV cache
+        |               +-- gated MLP + muP scaling
+        |
+        +-- WINT4/WINT8 converter
+                +-- quant_weight + weight_scale
+                +-- existing weight-only Linear runtime
+
+Attention backend
+        +-- FLASH_ATTN: dense reference/fallback
+        +-- INFLLMV2_ATTN
+                +-- Stage 1: dynamic block selection
+                +-- Stage 2: selected blocks + recent dense window
+```
+## **三、实现方案**
+
+### **Phase 1: [快速集成] FastDeploy低bit整数量化支持**
+
+**目标**: 利用FastDeploy现有的WINT4/WINT8量化基础设施，为MiniCPM4.1-8B快速启用低bit整数量化推理能力。
 
 **现状评估**:
-- ✅ **FastDeploy已完整支持**: WINT2/WINT4/WINT8量化
+- ✅ **FastDeploy已完整支持**: WINT4/WINT8量化
 - ✅ **CUDA算子**: 高性能weight_only_linear实现
-- ✅ **配置系统**: WINT2Config/WINT4Config/WINT8Config
+- ✅ **配置系统**: WINT4Config/WINT8Config
 - ✅ **MiniCPM已有基础**: 已实现QuantizedMiniCPM41MLP和QuantizedMiniCPM41Attention
 
 **任务 1.1: 扩展MiniCPM4.1-8B量化配置支持**
@@ -30,12 +59,11 @@
 ```python
 def parse_minicpm41_quant_config(args, model_config):
     """解析MiniCPM4.1-8B量化配置"""
-    if args.quantization in ["wint2", "wint4", "wint8"]:
+    if args.quantization in ["wint4", "wint8"]:
         # 使用FastDeploy内置INT量化配置
-        from .weight_only import WINT2Config, WINT4Config, WINT8Config
+        from .weight_only import WINT4Config, WINT8Config
 
         config_map = {
-            "wint2": WINT2Config,
             "wint4": WINT4Config,
             "wint8": WINT8Config
         }
@@ -50,15 +78,15 @@ def parse_minicpm41_quant_config(args, model_config):
 
 **任务 1.2: 完善MiniCPM4.1-8B量化层支持**
 
-- **目标**: 完善现有量化实现，确保WINT2/WINT4/WINT8全面支持
+- **目标**: 完善现有量化实现，确保WINT4/WINT8全面支持
 - **修改文件**: `fastdeploy/model_executor/models/minicpm41_quant.py`
 
 ```python
 # 扩展支持的量化类型 (第71行)
-supported_quant_types = ["w4afp8", "w4a8", "wint8", "wint4", "wint2", "fp8"]
+supported_quant_types = ["w4afp8", "w4a8", "wint8", "wint4", "fp8"]
 
 # 扩展量化层自动选择 (第130行和第196行)
-if self.quant_config and self.quant_config.quant_type in ["w4afp8", "w4a8", "wint8", "wint4", "wint2"]:
+if self.quant_config and self.quant_config.quant_type in ["w4afp8", "w4a8", "wint8", "wint4"]:
     # 使用量化线性层
     linear_class = QuantizedRowParallelLinear  # 复用FastDeploy现有实现
 ```
@@ -73,19 +101,19 @@ if self.quant_config and self.quant_config.quant_type in ["w4afp8", "w4a8", "win
 ModelRegistry.register_model(
     model_name="MiniCPM4.1-8B",
     model_class=MiniCPM41ForCausalLM,
-    supported_quantizations=["wint2", "wint4", "wint8", "w4afp8", "w4a8", "fp8"]
+    supported_quantizations=["wint4", "wint8", "w4afp8", "w4a8", "fp8"]
 )
 ```
 
 **任务 1.4: 测试用例和验证**
 
-- **目标**: 验证WINT2/WINT4/WINT8量化在MiniCPM4.1-8B上的正确性
+- **目标**: 验证WINT4/WINT8量化在MiniCPM4.1-8B上的正确性
 - **创建文件**: `tests/models/test_minicpm41_int_quant.py`
 
 ```python
 def test_minicpm41_wint_quantization():
     """测试MiniCPM4.1-8B INT量化功能"""
-    for quant_type in ["wint2", "wint4", "wint8"]:
+    for quant_type in ["wint4", "wint8"]:
         config = FDConfig(
             model="openbmb/MiniCPM4.1-8B",
             quantization=quant_type
@@ -103,7 +131,6 @@ def test_minicpm41_wint_quantization():
 **预期成果**:
 - ✅ **WINT8**: 50%压缩率，<1%精度损失，1.5x推理加速
 - ✅ **WINT4**: 75%压缩率，<2-3%精度损失，2x推理加速
-- ✅ **WINT2**: 87.5%压缩率，<5%精度损失，2.5x推理加速
 
 **工作量**: 仅需1-2天的配置和测试工作，基于FastDeploy成熟的INT量化基础设施。
 
@@ -257,6 +284,10 @@ def test_minicpm41_wint_quantization():
           # 处理thinking tokens的特殊逻辑
           # 支持推理过程的多轮思考
   ```
+- MiniCPM4.1 的分词器可能会将 `<think>`、`</think>` 以及强制结束文本分别编码为多个 token，因此不能使用**硬编码 token ID**。
+- 实现分为通用层和模型层：
+  - 通用层提供一个可由不同模型实现的钩子函数，用于通过当前模型的 tokenizer，将思考起始标记、结束标记和强制结束文本转换为 token ID 序列，并校验三类序列是否合法。
+  - 模型层：提供 MiniCPM4.1 tokenizer 的具体标记序列
 
 ---
 
@@ -274,7 +305,7 @@ def test_minicpm41_wint_quantization():
 - **核心逻辑**:
   - 复用现有 ModelForCausalLM 架构
   - 自动检测并应用 InfLLM-V2 后端 (通过 `FD_ATTENTION_BACKEND=INFLLMV2_ATTN`)
-  - 集成 FastDeploy WINT2/WINT4/WINT8 量化支持
+  - 集成 `FastDeploy` WINT4/WINT8 量化支持
   - 支持混合推理模式
 
 ```python
@@ -296,7 +327,7 @@ class MiniCPM41ForCausalLM(ModelForCausalLM):
 ```python
 # 复用FastDeploy现有量化框架，全面支持WINT量化
 def quantize_model(self, quant_config):
-    if quant_config.quant_type in ["wint2", "wint4", "wint8"]:
+    if quant_config.quant_type in ["wint4", "wint8"]:
         # 直接使用FastDeploy内置的WINT量化实现
         self.quant_config = quant_config
     else:
@@ -312,7 +343,7 @@ def quantize_model(self, quant_config):
 
 - 基础模型加载和推理测试
 - InfLLM-V2 稀疏注意力功能验证
-- FastDeploy WINT2/WINT4/WINT8 量化功能验证
+- FastDeploy WINT4/WINT8 量化功能验证
 
 **任务 5.2: 性能优化 (0.5 周)**
 
@@ -343,7 +374,7 @@ def test_infllmv2_core_features():
 
 def test_wint_quantization():
     """FastDeploy WINT量化基础测试"""
-    for quant_type in ["wint2", "wint4", "wint8"]:
+    for quant_type in ["wint4", "wint8"]:
         config = FDConfig(model="openbmb/MiniCPM4.1-8B", quantization=quant_type)
         model = MiniCPM41ForCausalLM(config)
         # 验证量化功能正确性
@@ -368,7 +399,7 @@ def test_wint_quantization():
 # 启用 InfLLM-V2 稀疏注意力
 export FD_ATTENTION_BACKEND=INFLLMV2_ATTN
 
-# 启用 WINT 量化 (可选: wint2, wint4, wint8)
+# 启用 WINT 量化 (可选: wint4, wint8)
 export FD_QUANT_TYPE=WINT4
 ```
 
@@ -393,13 +424,32 @@ config_wint8 = FDConfig(
 
 model_wint8 = MiniCPM41ForCausalLM(config_wint8)
 
-# WINT2 极致压缩示例
-config_wint2 = FDConfig(
-    model="openbmb/MiniCPM4.1-8B",
-    quantization="wint2"
-)
+```
 
-model_wint2 = MiniCPM41ForCausalLM(config_wint2)
+新增 `scripts/convert_minicpm41_wint.py`，将原始 BF16 safetensors 转为 FastDeploy 可加载的预量化 checkpoint：
+
+- 使用 `paddle.nn.quant.weight_quantize` 的 `weight_only_int4`/`weight_only_int8`，输出 `.quant_weight` 和 `.weight_scale`。
+- 保留 tokenizer、配置和非目标 tensors，并重建 safetensors index。
+- 在 `config.json` 写入与 `--quantization wint4|wint8` 一致的配置。
+- 校验输入模型 architecture、目标 tensor 集合、shape/alignment、输出目录和转换前后字节数。
+- 原始模型与 tokenizer 的 pad token 配置不一致时，在输出 checkpoint 中显式对齐并记录；不得静默生成不可启动的模型。
+
+运行时复用 FastDeploy 的 `WINT4Config`、`WINT8Config` 和 weight-only Linear。MiniCPM4.1 的 fused QKV 在 WINT4 下存在输出维 2:1 packing，需在模型目录实现只针对该参数的 packed shard loader；其他参数继续使用通用 loader。TP1 和 TP2 都必须验证 Q/K/V shard offset、KV head replication 和真实权重加载。
+
+启动方式为：
+
+```bash
+python scripts/convert_minicpm41_wint.py \
+  --input-dir /path/to/MiniCPM4.1-8B \
+  --output-dir /path/to/MiniCPM4.1-8B-WINT4 \
+  --quantization wint4 \
+  --device gpu:0
+
+FD_ATTENTION_BACKEND=FLASH_ATTN \
+python -m fastdeploy.entrypoints.openai.api_server \
+  --model /path/to/MiniCPM4.1-8B-WINT4 \
+  --quantization wint4 \
+  --tensor-parallel-size 1
 ```
 
 ## **四、交付内容清单**
@@ -410,6 +460,7 @@ model_wint2 = MiniCPM41ForCausalLM(config_wint2)
    ```
    fastdeploy/model_executor/models/minicpm41/
    ├── __init__.py
+   ├── hybrid_reasoning.py
    ├── minicpm41.py
    └── config_minicpm41.py
    ```
@@ -439,7 +490,7 @@ model_wint2 = MiniCPM41ForCausalLM(config_wint2)
 
 - 在 `fastdeploy/model_executor/layers/attention/attention_selecter.py` 中注册 `INFLLMV2_ATTN` 枚举
 - 更新各平台 `get_attention_backend_cls()` 方法支持 InfLLM-V2 后端
-- 模型注册到FastDeploy模型库，支持 ["wint2", "wint4", "wint8", "w4afp8", "w4a8", "fp8"]
+- 模型注册到FastDeploy模型库，支持 ["wint4", "wint8", "w4afp8", "w4a8", "fp8"]
 - 更新`supported_models.md`
 - 添加默认配置模板
 
@@ -460,16 +511,24 @@ benchmarks/minicpm41_performance.py
 - 最佳实践指南
 - 性能基准报告
 
-### **5.2 量化效果**
-- **WINT2压缩**: 87.5%参数压缩，精度损失<5%，推理速度提升2.5x
+### **5.1 量化效果**
 - **WINT4压缩**: 75%参数压缩，精度损失<2-3%，推理速度提升2x
 - **WINT8压缩**: 50%参数压缩，精度损失<1%，推理速度提升1.5x
 - **W4A8量化**: 75%内存节省，推理速度提升2x
-- **FP8量化**: 87.5%内存节省，推理速度提升3x
+- **FP8量化**: 87.5%内存节省，推理速度提升2x
 
-### **5.3 混合推理**
+### **5.2 混合推理**
 - **推理速度**: 3x解码加速
 - **复杂任务**: 提升复杂推理任务的准确率
+
+### **6.1 必要的公共文件修改**
+
+- `fastdeploy/model_executor/layers/rotary_embedding.py`：在已有 architecture 分派中增加 LongRoPE。
+- `fastdeploy/platforms/base.py`、`fastdeploy/platforms/cuda.py` 和 attention package：注册 InfLLM-V2。
+- `custom_ops/setup_ops.py`、`custom_ops/gpu_ops/cpp_extensions.cc`：构建并暴露 InfLLM-V2 op。
+- `fastdeploy/config.py`、engine/worker 的通用接口和 `thinking_budget.py`：增加模型无关的多 token marker 与 logits processor hook。
+- quantization 配置入口：仅在通用解析无法表达 WINT4/WINT8 checkpoint 契约时增加最小映射，并限制到 `MiniCPMForCausalLM`。
+- `docs/supported_models.md`、`docs/zh/supported_models.md`：只列出经过验收的 BF16/WINT4/WINT8。
 
 ## **六、风险评估与缓解策略**
 
@@ -478,6 +537,9 @@ benchmarks/minicpm41_performance.py
 **风险1**: 多硬件平台适配问题
 **缓解**: 优先支持NVIDIA GPU，再扩展到其他平台
 
+**风险2**: 公共代码影响面
+**缓解**: 通用 engine、worker、logits processor 的修改需要回归现有推理模型，不能引入 MiniCPM 专属判断或改变单 token 语义。
+
 ### **6.2 时间风险**
 
 **缓解策略**:
@@ -485,28 +547,29 @@ benchmarks/minicpm41_performance.py
 - 充分利用现有FastDeploy基础设施
 - 建立MVP（最小可行产品）版本
 
-## **七、3周精简实施计划**
+## **七、4周精简实施计划**
 
-### **Week 1: 基础搭建与WINT量化集成**
-- **Days 1-1**: FastDeploy WINT2/WINT4/WINT8量化集成配置
-- **Days 2-3**: 项目设置与配置（目录结构、FDConfig更新）
-- **Days 4-5**: InfLLM-V2 稀疏注意力核心算子开发（优先级最高）
-- **Days 6-7**: InfLLM-V2 CUDA算子完善和基础测试
+### **Week 1-2: 基础搭建与WINT量化集成**
+- **Days 1-2**: InfLLM-V2 稀疏注意力核心算子开发（优先级最高）
+- **Days 3-4**: FastDeploy WINT4/WINT8量化集成配置
+- **Days 5-8**: 项目设置与配置（目录结构、FDConfig更新）
+- **Days 9-14**: InfLLM-V2 CUDA算子完善和基础测试
 
-### **Week 2: 模型集成与开发**
+### **Week 3: 模型集成与开发**
 - **Days 1-2**: 混合推理模式支持实现
 - **Days 3-5**: MiniCPM4.1-8B 核心模型实现
 - **Days 6-7**: WINT量化功能集成和测试
 
-### **Week 3: 测试验证与优化**
-- **Days 1-2**: 性能瓶颈分析和优化
-- **Days 3-4**: 端到端集成测试和问题修复
-- **Days 5-7**: 文档编写和部署指南
+### **Week 4: 测试验证与优化**
+- **Days 1-1**: 跑通 serving 和短/长上下文基线。
+- **Days 2-3**: 性能瓶颈分析和优化
+- **Days 4-5**: 端到端集成测试和问题修复
+- **Days 6-7**: 文档编写和部署指南
 
-**总计**: 3周完成核心功能交付，专注于基础推理和量化支持
+**总计**: 4周完成核心功能交付，专注于基础推理和量化支持
 
 ### **加速策略**
-1. **WINT量化复用**: 充分利用FastDeploy现有的WINT2/WINT4/WINT8量化基础设施，仅需1-2天配置工作
+1. **WINT量化复用**: 充分利用FastDeploy现有的WINT4/WINT8量化基础设施，仅需1-2天配置工作
 2. **复用优先**: 最大化复用FastDeploy现有组件，减少开发工作量
 3. **后端架构**: 按照现有attention backend模式实现，确保架构一致性
 4. **MVP策略**: 先实现核心功能，高级特性后续迭代
@@ -522,4 +585,4 @@ benchmarks/minicpm41_performance.py
 4. **测试友好**: 集成到现有的后端测试框架
 5. **扩展性强**: 后续可轻松添加新的注意力变体
 
-此实施方案基于FastDeploy现有架构设计，充分利用FastDeploy成熟的WINT量化基础设施，确保MiniCPM4.1-8B模型能够快速集成到现有框架中。通过1-2天即可完成WINT2/WINT4/WINT8量化支持，为用户提供低bit压缩、高性能的大模型推理解决方案。
+此实施方案基于FastDeploy现有架构设计，充分利用FastDeploy成熟的WINT量化基础设施，确保MiniCPM4.1-8B模型能够快速集成到现有框架中。通过1-2天即可完成WINT4/WINT8量化支持，为用户提供低bit压缩、高性能的大模型推理解决方案。
